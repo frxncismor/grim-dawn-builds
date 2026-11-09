@@ -1,0 +1,90 @@
+# PR verification (T-064, plan §12.8 / §13.4).
+# Free checks only: no deployment, no secrets, read-only token.
+# Runs on pull_request into mvp/1, develop and main. Never pull_request_target.
+# Static rules for this file are enforced by scripts/ci-workflow.test.mts.
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - mvp/1
+      - develop
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify pull request
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      NG_CLI_ANALYTICS: 'false'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # pnpm version comes from the "packageManager" field in package.json.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Check scope
+        run: pnpm run check:scope
+
+      - name: Check monorepo boundaries
+        run: pnpm run check:boundaries
+
+      - name: Domain typecheck
+        run: pnpm --filter @gd/domain typecheck
+
+      - name: Domain lint
+        run: pnpm --filter @gd/domain lint
+
+      - name: Domain tests
+        run: pnpm --filter @gd/domain test
+
+      - name: Web lint
+        run: pnpm run lint
+
+      # Check only: this job never runs markdownlint --fix.
+      - name: Markdown lint
+        run: pnpm run lint:md
+
+      - name: Format check
+        run: pnpm run format:check
+
+      - name: Web unit tests
+        run: pnpm run test
+
+      - name: Script tests
+        run: pnpm run test:scripts
+
+      # Fixture dataset only: content/builds is not populated yet (T-014).
+      # The invalid fixture is covered by the script tests above.
+      - name: Content validation (fixture)
+        run: pnpm run content:validate -- --dir scripts/fixtures/content-valid
+
+      - name: Assets check
+        run: pnpm run assets:check
+
+      - name: Web build (fixture content)
+        run: pnpm run build

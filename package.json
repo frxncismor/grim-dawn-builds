@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
-    "test:scripts": "node --import tsx --test scripts/verify-local.test.mjs scripts/lint-md.test.mjs scripts/validate-content.test.mts scripts/check-scope.test.mts scripts/check-boundaries.test.mts",
+    "test:scripts": "node --import tsx --test scripts/verify-local.test.mjs scripts/lint-md.test.mjs scripts/validate-content.test.mts scripts/check-scope.test.mts scripts/check-boundaries.test.mts scripts/ci-workflow.test.mts",
     "content:validate": "tsx scripts/validate-content.mts",
     "assets:check": "tsx scripts/check-assets.mts",
     "check:scope": "tsx scripts/check-scope.mts",
