@@ -105,6 +105,7 @@ Como colaborador invitado, creo borradores de guías originales con un editor es
 - **FR-43** **Límites y controles de abuso**: límites de tasa por identidad/IP en guardado/envío/reporte, tamaño máximo por guía, tope de borradores y de envíos pendientes, cuarentena de cuentas nuevas, detección de duplicados/spam, bloqueo/suspensión de autores. Sin comentarios públicos.
 - **FR-44** **Auditoría e historial de versiones**: registro append-only de quién/cuándo/qué (creación, edición, envío, decisión de revisión, publicación, retirada, cambios de rol); versiones inmutables con diff; lo publicado es una versión concreta; revertir crea una nueva versión.
 - **FR-45** **Visibilidad pública solo tras revisión**: las vistas `v_public_*` exponen únicamente la versión `publicado` aprobada; borradores, `enviada`, `en_revision`, `cambios_solicitados`, evidencias y datos internos nunca son públicos ni se emiten en el build de release.
+- **FR-46** (rev. 8) **Calidad de Markdown**: todo `*.md` rastreado (README, `.specify/`, `specs/`, futuros `docs/`) se valida con markdownlint; existe un comando de corrección segura (`--fix`) y la validación es parte de `pnpm verify` y del CI de PR. La configuración no debilita reglas semánticas/estructurales (Constitución, Restricciones tecnológicas).
 
 ## 4. Campos migrables de la guía existente
 Derivados de `elementalista-golpe-primigenio.html`; ver mapeo a tablas en `data-model.md`.
@@ -177,6 +178,7 @@ default, hover, `focus-visible`, active, disabled, loading, empty, error. Espec�
 
 - **AC-24** (rev. 7, documental en el MVP) No existe en el repo código de autenticación, cuentas, editor público ni comentarios; `check-scope` falla ante dependencias/rutas de auth, registro o edición pública; FR-34–FR-45 son únicamente diseño (plan §16, T-111–T-122 diferidas salvo las documentales T-111/T-112).
 - **AC-25** (rev. 7, aplicable cuando se active la etapa) Pruebas demuestran: un autor no ve ni edita borradores ajenos; nadie publica sin revisión ni aprueba su propia guía; envío sin atestación o sin términos aceptados rechazado; adaptación sin evidencia de permiso rechazada o degradada a *link-only*; contenido no `publicado` ausente de vistas públicas; límites de tasa activos; cada transición queda en la auditoría.
+- **AC-26** (rev. 8) `pnpm lint:md` termina en 0 sobre todo el Markdown rastreado y en ≠ 0 ante un `.md` de fixture con una infracción (p. ej. salto de nivel de encabezado, MD001); `pnpm lint:md:fix` aplica solo correcciones seguras y deja `pnpm lint:md` en 0 o con infracciones manuales listadas; `pnpm verify` y el CI de PR (T-064) fallan si `lint:md` falla; `node_modules`, `dist` y carpetas generadas/de sesión quedan excluidos.
 
 ## 7. Fuera de alcance (MVP)
 **Rev. 7**: cuentas públicas, registro abierto, editor de guías público/autenticado, envío de guías por la comunidad, moderación y comentarios siguen fuera; solo se documenta la hoja de ruta (plan §16).

@@ -1,5 +1,16 @@
 # Análisis de consistencia — 001-mvp-guias-builds (spec ↔ plan ↔ tasks ↔ constitución)
 
+**Adenda rev. 8 (markdownlint obligatorio)**: Constitución v1.8.0 (Restricciones tecnológicas), spec FR-46/AC-26, plan §12.14 + R-M12 (y mención en la lista de checks de CI de §12.8), tasks §8.10 (T-123; T-064 y T-076 ajustadas). **0 CRITICAL · 0 HIGH · 2 MEDIUM · 2 LOW.** Fases 0–7 y MVP sin cambios.
+
+| ID | Sev. | Hallazgo | Acción |
+| --- | --- | --- | --- |
+| M1 | MEDIUM | Los artefactos actuales (una línea por tarea, tablas compactas `\|---\|`, tablas pegadas al párrafo anterior en `analysis.md`) probablemente infringen MD013/MD058/MD060 y otras | T-123 corrige con `--fix` + manual; MD013 (y MD060 si aplica) únicas relajaciones, con motivo escrito (plan §12.14) |
+| M2 | MEDIUM | Riesgo de debilitar la config para «pasar» el lint | R-M12; criterio (e) de T-123: solo MD013/MD060; revisión en PR |
+| L1 | LOW | Cambio previo no solicitado en `plan.md` (solo espaciado de tablas) | Conservado y validado por T-123; sin impacto semántico |
+| L2 | LOW | Plantillas de Spec Kit en `.specify/` pueden infringir reglas | Corregir plantilla o excepción puntual comentada; nunca desactivación global |
+
+Cobertura: FR-46→T-123, T-064, T-076; AC-26→T-123 (a–i); Constitución (calidad de documentación)→T-123. **Implementable ya**; ninguna dependencia nueva de decisión del usuario. Prettier se mantiene; markdownlint prevalece en `.md`. Pendiente solo de configuración manual: marcar el check `lint:md`/CI como requerido en la protección de ramas.
+
 **Adenda rev. 7 (guías comunitarias, futuro)**: Constitución v1.7.0 (VIII), spec US7, FR-34–FR-45, AC-24/AC-25, plan §16, data-model «Guías comunitarias» (diferido), tasks §8.9 (T-111–T-122). **0 CRITICAL · 0 HIGH · 3 MEDIUM · 1 LOW.** MVP intacto: sin cuentas públicas, editor ni comentarios.
 | ID | Sev. | Hallazgo | Acción |
 |---|---|---|---|
