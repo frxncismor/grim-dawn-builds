@@ -14,7 +14,7 @@
 - **Sin llamadas a API en runtime público**: los datos se incorporan al HTML prerenderizado en build (`TransferState`/resolvers); el cliente no consulta la API en el MVP. En build de release los datos vienen de la API (≤ 6 consultas SQL por petición de la API); en build `fixture` vienen de archivos.
 - **Estructura**:
 
-```
+```text
 src/app/core/{content,seo,i18n,tokens}
 src/app/features/{home,tier-list,build,author,static-pages}
 src/app/shared/{ui,svg/{skill-tree,devotion-map}}
@@ -28,16 +28,17 @@ e2e/ , scripts/verify-local (npm run verify); .github/workflows/ diferido
 
 ## 2. Rutas
 
-| Ruta | Estrategia | Notas |
-| --- | --- | --- |
-| `/` | SSG | Hero, build destacada **si existe una publicada** (si no, CTA al catálogo), CTA tier list, criterios editoriales |
-| `/tier-list` | SSG (+ filtros en cliente) | Catálogo completo por combinación; canonical siempre a `/tier-list` (los `?filtros` llevan `noindex,follow` o canonical base) |
-| `/builds/:slug` | SSG (`getPrerenderParams` desde `listSlugs()` ya filtrado por derechos) | Anclas: `#resumen #prioridades #habilidades #orden #notas #filtro-de-botin #guia-espiritual #devociones #video #fuentes`. Borradores solo con `INCLUDE_DRAFTS` |
-| `/autores/:slug` | SSG | Lista de builds del autor |
-| `/acerca` | SSG | Criterios editoriales, revisión, aviso de no afiliación |
-| `/legal` | SSG | Aviso legal/derechos |
-| `/404` (`**`) | SSG, status 404 | Enlaces a home/tier list |
-| `/sitemap.xml`, `/robots.txt` | generados en build (`scripts/gen-sitemap.ts`, en `public/`) | Solo `publicado` |
+| Ruta                          | Estrategia                                                              | Notas                                                                                                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                           | SSG                                                                     | Hero, build destacada **si existe una publicada** (si no, CTA al catálogo), CTA tier list, criterios editoriales                                               |
+| `/tier-list`                  | SSG (+ filtros en cliente)                                              | Catálogo completo por combinación; canonical siempre a `/tier-list` (los `?filtros` llevan `noindex,follow` o canonical base)                                  |
+| `/builds/:slug`               | SSG (`getPrerenderParams` desde `listSlugs()` ya filtrado por derechos) | Anclas: `#resumen #prioridades #habilidades #orden #notas #filtro-de-botin #guia-espiritual #devociones #video #fuentes`. Borradores solo con `INCLUDE_DRAFTS` |
+| `/autores/:slug`              | SSG                                                                     | Lista de builds del autor                                                                                                                                      |
+| `/acerca`                     | SSG                                                                     | Criterios editoriales, revisión, aviso de no afiliación                                                                                                        |
+| `/legal`                      | SSG                                                                     | Aviso legal/derechos                                                                                                                                           |
+| `/404` (`**`)                 | SSG, status 404                                                         | Enlaces a home/tier list                                                                                                                                       |
+| `/sitemap.xml`, `/robots.txt` | generados en build (`scripts/gen-sitemap.ts`, en `public/`)             | Solo `publicado`                                                                                                                                               |
+
 Redirecciones/rutas futuras reservadas (no implementar): `/cuenta`, `/comunidad`, `/calculadora`.
 
 ## 3. Estrategia SSR/SSG
@@ -66,7 +67,7 @@ Redirecciones/rutas futuras reservadas (no implementar): `/cuenta`, `/comunidad`
 11. Rendimiento: ≤ 120 nodos por SVG, sin filtros SVG costosos (blur) ni animación continua; render ≤ 16 ms por actualización de paso (prueba de humo).
 
 ## 5. Flujo editorial (rev. 4: fixtures hoy, BD como fuente de verdad)
->
+
 > Rev. 4: los pasos 1–2 describen el flujo de **fixtures** (desarrollo/pruebas y material de bootstrap). La titularidad editorial de producción es la BD (§12.5); la vía de escritura tras el cutover es B-7. Los pasos 3, 5–8 (estados, derechos, procedencia, sin scraping) rigen igual y la BD los impone.
 
 1. Editor crea/edita `content/builds/<slug>.json` (+ `authors`, `sources`). Estado inicial `borrador`.
@@ -80,22 +81,23 @@ Redirecciones/rutas futuras reservadas (no implementar): `/cuenta`, `/comunidad`
 
 ## 6. Presupuestos de rendimiento (verificación local bloqueante; CI diferida)
 
-| Métrica | Presupuesto (móvil, 4G lento simulado) |
-| --- | --- |
-| LCP | ≤ 2.0 s (p. objetivo en Lighthouse CI) |
-| CLS | ≤ 0.05 |
-| INP/TBT | INP ≤ 200 ms; TBT ≤ 150 ms |
-| JS inicial (gz) | `/` ≤ 90 kB; `/tier-list` ≤ 110 kB; `/builds/:slug` ≤ 150 kB (árbol/devoción diferidos aparte ≤ 40 kB) |
-| CSS crítico | ≤ 20 kB gz |
-| HTML por página | ≤ 120 kB sin comprimir |
-| Fuentes | Autoalojadas WOFF2 subconjunto latin+latin-ext, máx. 3 familias/5 archivos, `font-display: swap`, `preload` de la principal; **sustituye Google Fonts** |
-| Queries | 0 en runtime público; ≤ 6 por página en build |
-| Lighthouse | Perf ≥ 90, A11y ≥ 95, SEO ≥ 95, Best Practices ≥ 95 |
+| Métrica         | Presupuesto (móvil, 4G lento simulado)                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LCP             | ≤ 2.0 s (p. objetivo en Lighthouse CI)                                                                                                                  |
+| CLS             | ≤ 0.05                                                                                                                                                  |
+| INP/TBT         | INP ≤ 200 ms; TBT ≤ 150 ms                                                                                                                              |
+| JS inicial (gz) | `/` ≤ 90 kB; `/tier-list` ≤ 110 kB; `/builds/:slug` ≤ 150 kB (árbol/devoción diferidos aparte ≤ 40 kB)                                                  |
+| CSS crítico     | ≤ 20 kB gz                                                                                                                                              |
+| HTML por página | ≤ 120 kB sin comprimir                                                                                                                                  |
+| Fuentes         | Autoalojadas WOFF2 subconjunto latin+latin-ext, máx. 3 familias/5 archivos, `font-display: swap`, `preload` de la principal; **sustituye Google Fonts** |
+| Queries         | 0 en runtime público; ≤ 6 por página en build                                                                                                           |
+| Lighthouse      | Perf ≥ 90, A11y ≥ 95, SEO ≥ 95, Best Practices ≥ 95                                                                                                     |
+
 Presupuestos en `angular.json` (`budgets`) + `lighthouserc.json`. Dependencias nuevas permitidas (justificadas): `zod` (validación; alternativa descartada: validación manual por tamaño del esquema y mantenimiento; solo en scripts/build, **no** en el bundle cliente salvo tipos), `@supabase/supabase-js` (solo en build/scripts, no cliente), `@angular/ssr`. Dev: Vitest/Karma según generador, Playwright, `@axe-core/playwright`, Lighthouse CI.
 
 ## 7. Tokens de diseño (mínimo, de la guía)
 
-```
+```text
 --color-soot:#0f1218  --color-panel:#171c25  --color-panel-2:#1e242f
 --color-storm:#79d0f5 --color-storm-dim:#2d4a5c
 --color-ember:#f0873f --color-ember-dim:#5c3a1e
@@ -123,17 +125,17 @@ Verificación de contraste obligatoria: `ash` (#8e8b7e) sobre `panel` ≈ 4.5:1 
 
 ## 9. Riesgos
 
-| Riesgo | Mitigación |
-| --- | --- |
-| Datos de devoción sin verificar | `sin_verificar` visible, aviso, tarea de revisión editorial |
-| Layout esquemático impreciso | Declarado (A6); validación visual |
-| Derechos de arte/guía | Gate `rights_status` + manifiesto de activos con fallback SVG; sin arte oficial hasta `approved`; guía migrada en `pending` |
-| Catálogo percibido como copia/scraping | FR-15: solo ranuras, enlaces con atribución y metadatos factuales; sin texto/tiers ajenos sin permiso |
-| Catálogo vacío de valor (todo placeholder) | Declarado: el MVP entrega el marco; mide cobertura, no guías; insignias claras |
-| Cambio de lista de maestrías del juego | `content/masteries.json` versionado con `game_version`; combinaciones generadas, no escritas a mano |
-| Dependencia de Supabase en build | `FileContentRepository` es el adaptador por defecto; Supabase portable/diferido |
-| Presupuesto JS con Angular + hidratación | `@defer`, rutas lazy, medición temprana en T-012 |
-| Tier seed no verificada | Prohibida: sin fuente → `sin_clasificar` |
+| Riesgo                                     | Mitigación                                                                                                                  |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Datos de devoción sin verificar            | `sin_verificar` visible, aviso, tarea de revisión editorial                                                                 |
+| Layout esquemático impreciso               | Declarado (A6); validación visual                                                                                           |
+| Derechos de arte/guía                      | Gate `rights_status` + manifiesto de activos con fallback SVG; sin arte oficial hasta `approved`; guía migrada en `pending` |
+| Catálogo percibido como copia/scraping     | FR-15: solo ranuras, enlaces con atribución y metadatos factuales; sin texto/tiers ajenos sin permiso                       |
+| Catálogo vacío de valor (todo placeholder) | Declarado: el MVP entrega el marco; mide cobertura, no guías; insignias claras                                              |
+| Cambio de lista de maestrías del juego     | `content/masteries.json` versionado con `game_version`; combinaciones generadas, no escritas a mano                         |
+| Dependencia de Supabase en build           | `FileContentRepository` es el adaptador por defecto; Supabase portable/diferido                                             |
+| Presupuesto JS con Angular + hidratación   | `@defer`, rutas lazy, medición temprana en T-012                                                                            |
+| Tier seed no verificada                    | Prohibida: sin fuente → `sin_clasificar`                                                                                    |
 
 ## 10. Fuera de alcance
 
@@ -154,7 +156,7 @@ Backend = **una** API **Fastify** (Node.js 22 LTS) + **una** PostgreSQL 17 con *
 
 ### 12.2 Layout objetivo
 
-```
+```text
 apps/web/            Angular (hoy en la raíz: src/, angular.json, tsconfig*.json, public/)
 apps/api/            Fastify + Drizzle + Dockerfile
   src/db/schema.ts   esquema Drizzle (pgEnum, tablas, índices)
@@ -180,13 +182,14 @@ Cada paso es un PR independiente, verde con `pnpm verify` antes de fusionar (Git
 
 ### 12.4 Fronteras
 
-| Capa | Responsabilidad | Prohibido |
-| --- | --- | --- |
-| `apps/web` | UI, SSR/SSG, SEO, accesibilidad; consume solo `ContentRepository` | Hablar con BD; conocer columnas SQL; llamar a la API fuera del adaptador `ApiContentRepository` |
-| `apps/api` | HTTP (rutas de solo lectura), validación con `@gd/domain`, acceso a BD con Drizzle, `/health` `/ready` | Reglas de negocio divergentes de `@gd/domain`; escritura pública; servir contenido no publicable; SQL concatenado |
-| `packages/domain` | Esquemas Zod, tipos, reglas puras (publicación, derechos, activos, tier checks, filtros) | Dependencias de Angular, Fastify, Drizzle/drivers de BD, E/S |
-| Persistencia | Esquema Drizzle + migraciones SQL versionadas, CHECK/triggers/vistas/roles; rol de BD de solo lectura para la API | Lógica de negocio en triggers más allá de las puertas de publicación/derechos/activos |
-| `content/` (fixtures) | Datos de pruebas, desarrollo y material de importación | Ser fuente de producción; ser modificado por la API; importarse sobre una BD ya «bootstrapped» |
+| Capa                  | Responsabilidad                                                                                                   | Prohibido                                                                                                         |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `apps/web`            | UI, SSR/SSG, SEO, accesibilidad; consume solo `ContentRepository`                                                 | Hablar con BD; conocer columnas SQL; llamar a la API fuera del adaptador `ApiContentRepository`                   |
+| `apps/api`            | HTTP (rutas de solo lectura), validación con `@gd/domain`, acceso a BD con Drizzle, `/health` `/ready`            | Reglas de negocio divergentes de `@gd/domain`; escritura pública; servir contenido no publicable; SQL concatenado |
+| `packages/domain`     | Esquemas Zod, tipos, reglas puras (publicación, derechos, activos, tier checks, filtros)                          | Dependencias de Angular, Fastify, Drizzle/drivers de BD, E/S                                                      |
+| Persistencia          | Esquema Drizzle + migraciones SQL versionadas, CHECK/triggers/vistas/roles; rol de BD de solo lectura para la API | Lógica de negocio en triggers más allá de las puertas de publicación/derechos/activos                             |
+| `content/` (fixtures) | Datos de pruebas, desarrollo y material de importación                                                            | Ser fuente de producción; ser modificado por la API; importarse sobre una BD ya «bootstrapped»                    |
+
 Dependencias permitidas: web→domain; api→domain; scripts→domain. Nunca web→api (en código; solo vía HTTP en el adaptador) ni api→web. Regla verificable con una comprobación de importaciones (T-052).
 
 ### 12.5 Propiedad de datos y ciclo de vida (rev. 4)
@@ -234,19 +237,20 @@ Fases (cada una un PR): **M0** hoy: solo `fixture`. **M1** BD + API en dev, seed
 - Dependencias: `pnpm audit` y revisión de licencias en CI; cada dependencia nueva con justificación (Constitución IV). Escaneo de imagen (p. ej. Trivy, gratuito) como check de PR.
 - **Política de ramas y puertas de PR (confirmada)**: tras cada spec completada, commit(s) en `mvp/1`; PR `mvp/1` → `develop`; PR de release `develop` → `main` (GitFlow). Puertas obligatorias en todo PR: **pruebas, lint, DAST y revisión de Copilot**, además de los checks de abajo. DAST = escaneo dinámico contra la web/API levantadas localmente en el job (p. ej. OWASP ZAP baseline, gratuito) sin secretos ni objetivos remotos; la herramienta concreta y el umbral se fijan en T-064/T-077. La revisión de Copilot se configura como regla de la rama (manual del usuario). Los agentes de planificación no ejecutan ramas/commits/PR.
 - **CI de verificación (gratuito, GitHub Actions)**, convención del repo, sin despliegue ni secretos: `lint`, `typecheck`, `test` (unit/contrato), `build` web, `content:validate`, `assets:check`, `check-scope`, `drizzle-kit generate` sin diff, validación de `compose config`, build de imagen API (sin push) + escaneo, prueba de integración con PostgreSQL 17 (servicio de contenedor), DAST. Permisos mínimos del workflow (`contents: read`), acciones fijadas por versión/SHA, sin `pull_request_target`. Protección de ramas (`main`/`develop`/`mvp/1`) y revisión obligatoria de Copilot: configuración manual del usuario.
-- **Markdown con markdownlint (rev. 8, obligatorio)**: ver §12.14. El check `lint:md` forma parte de la lista de checks del CI de PR y de `pnpm verify`.
+
+- **Markdown con markdownlint (rev. 8, obligatorio)**: ver §12.14. El check `lint:md` forma parte de la lista de checks del CI de PR y de `pnpm verify`.
 
 ### 12.9 Decisiones (rev. 4)
 
-| ID | Decisión | Estado |
-| --- | --- | --- |
-| B-1 | Framework API | **Cerrada: Fastify** |
-| B-2 | Acceso a datos/migraciones | **Cerrada: Drizzle ORM + drizzle-kit** (SQL personalizado para puertas) |
-| B-3 | Versiones | **Cerrada: Node.js 22 LTS, PostgreSQL 17** (fijar tag/digest exacto al implementar T-054/T-056) |
-| B-4 | BD vs `content/` | **Cerrada: BD = fuente de verdad; `content/` = fixtures/importación** |
-| B-5 | CORS/orígenes | Abierta (bloquea solo T-061): local `http://localhost:4200` |
-| B-6 | Consumo de la API desde la web | **Cerrada por implicación**: el build de release lee la API (T-062/T-074) |
-| B-7 | Vía de escritura editorial tras el cutover (CLI `editor` vs API admin) | **Abierta**; bloquea solo T-072 (bootstrap) y la edición de producción |
+| ID  | Decisión                                                               | Estado                                                                                          |
+| --- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| B-1 | Framework API                                                          | **Cerrada: Fastify**                                                                            |
+| B-2 | Acceso a datos/migraciones                                             | **Cerrada: Drizzle ORM + drizzle-kit** (SQL personalizado para puertas)                         |
+| B-3 | Versiones                                                              | **Cerrada: Node.js 22 LTS, PostgreSQL 17** (fijar tag/digest exacto al implementar T-054/T-056) |
+| B-4 | BD vs `content/`                                                       | **Cerrada: BD = fuente de verdad; `content/` = fixtures/importación**                           |
+| B-5 | CORS/orígenes                                                          | Abierta (bloquea solo T-061): local `http://localhost:4200`                                     |
+| B-6 | Consumo de la API desde la web                                         | **Cerrada por implicación**: el build de release lee la API (T-062/T-074)                       |
+| B-7 | Vía de escritura editorial tras el cutover (CLI `editor` vs API admin) | **Abierta**; bloquea solo T-072 (bootstrap) y la edición de producción                          |
 
 ### 12.10 Integración web ↔ API
 
@@ -267,19 +271,19 @@ Fases (cada una un PR): **M0** hoy: solo `fixture`. **M1** BD + API en dev, seed
 
 ### 12.13 Riesgos (rev. 3)
 
-| ID | Riesgo | Mitigación |
-| --- | --- | --- |
-| R-M1 | Mover la web rompe rutas relativas/CI | Fase C aislada, reversible, con diff de build; puede diferirse |
-| R-M2 | Retraso de valor: la API es ahora necesaria para release | Fases M0–M4 pequeñas; `fixture` sigue permitiendo desarrollar la UI sin Docker |
-| R-M3 | Dos fuentes de producción (fixtures y BD) | FR-22; release solo `api`; bootstrap marcado en BD y seed bloqueado tras él; test de release (AC-16/17) |
-| R-M4 | Fuga de secretos o BD expuesta | §12.8, T-066a/b, `compose config` en CI |
-| R-M5 | Deriva Drizzle ↔ Zod ↔ migraciones | T-058 + check `drizzle-kit generate` sin diff en CI |
-| R-M6 | Windows + Docker (rutas/finales de línea) | `.gitattributes` con `eol=lf` para scripts/SQL/Dockerfile (T-050) |
-| R-M7 | Puertas solo en la UI/dominio y no en BD | CHECK/triggers/vistas/roles en migración personalizada + pruebas AC-15 |
-| R-M8 | `drizzle-kit push` o edición manual de SQL rompe el historial | Prohibido `push` fuera de BD desechable; CI de diff de generate |
-| R-M9 | Secreto commiteado, filtrado en logs/imagen/bundle web o credencial compartida entre roles de BD | §13 (capas, escaneo, roles separados, runbook), T-078–T-090 |
-| R-M10 | Ingesta futura copia contenido sin permiso o lo da por permitido implícitamente | §14: registro de fuentes, puerta de permiso por fuente, `borrador` obligatorio, link-only por defecto, T-091–T-100 diferidas, AC-19 |
-| R-M11 | Cutover sin vía de escritura (B-7) | Bootstrap bloqueado hasta resolver B-7; sin «producción» real antes |
+| ID    | Riesgo                                                                                             | Mitigación                                                                                                                           |
+| ----- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| R-M1  | Mover la web rompe rutas relativas/CI                                                              | Fase C aislada, reversible, con diff de build; puede diferirse                                                                       |
+| R-M2  | Retraso de valor: la API es ahora necesaria para release                                           | Fases M0–M4 pequeñas; `fixture` sigue permitiendo desarrollar la UI sin Docker                                                       |
+| R-M3  | Dos fuentes de producción (fixtures y BD)                                                          | FR-22; release solo `api`; bootstrap marcado en BD y seed bloqueado tras él; test de release (AC-16/17)                              |
+| R-M4  | Fuga de secretos o BD expuesta                                                                     | §12.8, T-066a/b, `compose config` en CI                                                                                              |
+| R-M5  | Deriva Drizzle ↔ Zod ↔ migraciones                                                                 | T-058 + check `drizzle-kit generate` sin diff en CI                                                                                  |
+| R-M6  | Windows + Docker (rutas/finales de línea)                                                          | `.gitattributes` con `eol=lf` para scripts/SQL/Dockerfile (T-050)                                                                    |
+| R-M7  | Puertas solo en la UI/dominio y no en BD                                                           | CHECK/triggers/vistas/roles en migración personalizada + pruebas AC-15                                                               |
+| R-M8  | `drizzle-kit push` o edición manual de SQL rompe el historial                                      | Prohibido `push` fuera de BD desechable; CI de diff de generate                                                                      |
+| R-M9  | Secreto commiteado, filtrado en logs/imagen/bundle web o credencial compartida entre roles de BD   | §13 (capas, escaneo, roles separados, runbook), T-078–T-090                                                                          |
+| R-M10 | Ingesta futura copia contenido sin permiso o lo da por permitido implícitamente                    | §14: registro de fuentes, puerta de permiso por fuente, `borrador` obligatorio, link-only por defecto, T-091–T-100 diferidas, AC-19  |
+| R-M11 | Cutover sin vía de escritura (B-7)                                                                 | Bootstrap bloqueado hasta resolver B-7; sin «producción» real antes                                                                  |
 | R-M12 | La config de markdownlint se relaja hasta no validar nada, o `--fix` altera el contenido semántico | §12.14: solo se desactivan MD013 (y MD060 si procede) con motivo escrito; `--fix` solo con reglas seguras y revisión del diff; T-123 |
 
 ### 12.14 Calidad de Markdown: markdownlint (rev. 8)
@@ -298,13 +302,13 @@ Principio: Constitución XII. Todo lo de esta sección que **no depende de un pr
 
 ### 13.1 Categorías, propietario y ciclo de vida
 
-| Categoría | Ejemplos | Capa | Propietario | Rotación | Revocación |
-| --- | --- | --- | --- | --- | --- |
-| C1 Credenciales de BD por rol | `DB_PASSWORD_MIGRATOR`, `_IMPORTER`, `_EDITOR`, `_API_RO`, `POSTGRES_PASSWORD` (superusuario del contenedor, solo init) | local / prod | Mantenedor (usuario) | Local: al recrear volumen o ante sospecha. Prod: ≤ 90 días o ante incidente, sin downtime (doble credencial/`ALTER ROLE`) | `ALTER ROLE … PASSWORD`/`NOLOGIN`, reiniciar consumidores |
-| C2 Credenciales de CI | secretos de entorno de GitHub Actions (si hiciera falta alguno) | CI | Mantenedor | ≤ 90 días; preferir OIDC (sin secreto) | Borrar secreto en GitHub y revocar en origen |
-| C3 Credenciales de despliegue/nube | tokens de registro, rol de despliegue | prod (diferido) | Mantenedor | OIDC con credenciales efímeras; si no, ≤ 90 días | Revocar rol/token en el proveedor |
-| C4 Secretos de aplicación | claves de firma, tokens de API admin (solo si B-7 los crea) | prod (diferido) | Mantenedor | ≤ 180 días o ante incidente | Rotar y reiniciar |
-| C5 **No secretos** (config pública) | `BASE_URL`, `CONTENT_SOURCE`, `CORS_ORIGINS`, `API_BASE_URL` pública, puertos | cualquiera | — | — | — |
+| Categoría                           | Ejemplos                                                                                                                | Capa            | Propietario          | Rotación                                                                                                                  | Revocación                                                |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| C1 Credenciales de BD por rol       | `DB_PASSWORD_MIGRATOR`, `_IMPORTER`, `_EDITOR`, `_API_RO`, `POSTGRES_PASSWORD` (superusuario del contenedor, solo init) | local / prod    | Mantenedor (usuario) | Local: al recrear volumen o ante sospecha. Prod: ≤ 90 días o ante incidente, sin downtime (doble credencial/`ALTER ROLE`) | `ALTER ROLE … PASSWORD`/`NOLOGIN`, reiniciar consumidores |
+| C2 Credenciales de CI               | secretos de entorno de GitHub Actions (si hiciera falta alguno)                                                         | CI              | Mantenedor           | ≤ 90 días; preferir OIDC (sin secreto)                                                                                    | Borrar secreto en GitHub y revocar en origen              |
+| C3 Credenciales de despliegue/nube  | tokens de registro, rol de despliegue                                                                                   | prod (diferido) | Mantenedor           | OIDC con credenciales efímeras; si no, ≤ 90 días                                                                          | Revocar rol/token en el proveedor                         |
+| C4 Secretos de aplicación           | claves de firma, tokens de API admin (solo si B-7 los crea)                                                             | prod (diferido) | Mantenedor           | ≤ 180 días o ante incidente                                                                                               | Rotar y reiniciar                                         |
+| C5 **No secretos** (config pública) | `BASE_URL`, `CONTENT_SOURCE`, `CORS_ORIGINS`, `API_BASE_URL` pública, puertos                                           | cualquiera      | —                    | —                                                                                                                         | —                                                         |
 
 Regla: el nombre de variable declara la categoría (`*_PASSWORD`, `*_TOKEN`, `*_KEY`, `*_SECRET` ⇒ C1–C4). Todo secreto nuevo se registra en `docs/secrets-inventory.md` (nombre, categoría, consumidor, propietario, rotación; **nunca valores**).
 
@@ -334,7 +338,7 @@ Cuatro credenciales independientes, cada una con `LOGIN` y `GRANT` mínimo (plan
 
 Producción sigue diferida; no se elige proveedor. Se define solo el contrato al que cualquier proveedor debe ajustarse:
 
-- **Abstracción `SecretSource`** (en `apps/api`, solo lectura, sin dependencias nuevas): resuelve `NOMBRE` desde (1) archivo `${NOMBRE}_FILE`/`/run/secrets/<nombre>` (preferido), (2) variable de entorno (solo dev/CI). Devuelve valores a la configuración Zod, que los marca como sensibles (nunca se registran; `toJSON`/log redactan). Un proveedor futuro se integra *fuera del proceso* (agente/sidecar/orquestador que escribe el archivo), no con SDK de proveedor en la API.
+- **Abstracción `SecretSource`** (en `apps/api`, solo lectura, sin dependencias nuevas): resuelve `NOMBRE` desde (1) archivo `${NOMBRE}_FILE`/`/run/secrets/<nombre>` (preferido), (2) variable de entorno (solo dev/CI). Devuelve valores a la configuración Zod, que los marca como sensibles (nunca se registran; `toJSON`/log redactan). Un proveedor futuro se integra _fuera del proceso_ (agente/sidecar/orquestador que escribe el archivo), no con SDK de proveedor en la API.
 - Almacén candidato (sin decidir): GitHub Environments (CI/despliegue) + gestor de secretos de la nube elegida, o Vault/OpenBao; requisitos: cifrado en reposo, versionado, control de acceso por identidad (mínimo privilegio por rol C1/C4), **registro de auditoría de acceso**, rotación programable, revocación inmediata.
 - **Entrega a contenedores**: runtime por archivo/volumen de secretos (`/run/secrets`, `tmpfs`, modo 0400, usuario no-root) o variable inyectada por el orquestador solo si el archivo no es viable. **Prohibido**: `ARG`, `ENV` en Dockerfile, `COPY` de `.env`, secretos en capas o en `docker-compose.yaml` versionado, secretos en la línea de comandos (visibles en `ps`/historial).
 - **Rotación**: procedimiento documentado, sin downtime (crear nueva credencial → desplegar → revocar la anterior); calendario por categoría (§13.1); la rotación es un runbook probado en local (T-082).
@@ -350,7 +354,7 @@ Producción sigue diferida; no se elige proveedor. Se define solo el contrato al
 
 - **Pre-commit**: gitleaks (o equivalente gratuito, p. ej. `secretlint`) vía hook local (`.githooks/pre-commit` con `core.hooksPath`, instalable con `pnpm setup:hooks`; el hook es ayuda, no garantía).
 - **CI** (obligatorio, no omitible): gitleaks sobre el diff del PR y escaneo periódico de todo el historial; `check-secrets` (T-066a); escaneo de imagen (T-066b). Configuración con allowlist mínima y justificada (`.gitleaks.toml`).
-- **GitHub**: activar *secret scanning* y *push protection* (acción manual del usuario; documentada en T-076).
+- **GitHub**: activar _secret scanning_ y _push protection_ (acción manual del usuario; documentada en T-076).
 - Regla de falsos positivos: se corrigen por allowlist con comentario y revisión en PR; nunca desactivando la regla.
 
 ### 13.8 Incidente por exposición accidental (runbook, T-081)
@@ -368,8 +372,8 @@ Producción sigue diferida; no se elige proveedor. Se define solo el contrato al
 
 ### 13.10 Qué se puede hacer ya y qué se difiere
 
-| Ya (sin proveedor) | Diferido (con hosting) |
-|---|---|
+| Ya (sin proveedor)                                                                                                                                                                                                                                                                      | Diferido (con hosting)                                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | T-078 política/inventario, T-079 `setup:env`, T-080 `.env.example` + ignore, T-066a ampliado, T-083 gitleaks pre-commit+CI, T-084 test de no filtración en frontend, T-085 `SecretSource`+config sensible, T-086 DAST/CI sin secretos, T-081 runbook de incidente, T-082 rotación local | T-087 almacén gestionado + break-glass + auditoría, T-088 OIDC de CI a nube, T-089 inyección en orquestador, T-090 calendario de rotación en producción |
 
 ## 14. Hoja de ruta futura: adquisición y normalización de builds existentes (rev. 5; NO MVP, no implementar)
@@ -378,14 +382,15 @@ Cumple Constitución II/VII y FR-26. Este apartado es diseño documental: no hab
 
 ### 14.1 Fuentes: permitidas vs. prohibidas
 
-| Clase | Estado | Condición |
-| --- | --- | --- |
-| A. Envío del autor (el autor entrega su build) | Permitida | Licencia/consentimiento escrito y registrado, atribución acordada |
-| B. Datos con licencia o exportados por el titular (archivo de exportación, dataset con licencia abierta compatible) | Permitida | Licencia verificada y versionada en el registro |
-| C. API documentada o permiso explícito del titular | Permitida | Términos citados, alcance/frecuencia acotados, prueba del permiso archivada |
-| D. Solo enlace (*link-only*): título, autor, URL, fecha, clase/maestrías y datos factuales propios | Permitida sin permiso de contenido | Sin copiar texto, imágenes ni estructura de la guía; atribución visible |
-| E. Scraping automático de sitios de terceros | **Prohibida** | Ni con `robots.txt` permisivo ni por ser público |
-| F. Copia de texto de guías, imágenes, iconos, capturas o arte sin permiso | **Prohibida** | — |
+| Clase                                                                                                               | Estado                             | Condición                                                                   |
+| ------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | --------------------------------------------------------------------------- |
+| A. Envío del autor (el autor entrega su build)                                                                      | Permitida                          | Licencia/consentimiento escrito y registrado, atribución acordada           |
+| B. Datos con licencia o exportados por el titular (archivo de exportación, dataset con licencia abierta compatible) | Permitida                          | Licencia verificada y versionada en el registro                             |
+| C. API documentada o permiso explícito del titular                                                                  | Permitida                          | Términos citados, alcance/frecuencia acotados, prueba del permiso archivada |
+| D. Solo enlace (_link-only_): título, autor, URL, fecha, clase/maestrías y datos factuales propios                  | Permitida sin permiso de contenido | Sin copiar texto, imágenes ni estructura de la guía; atribución visible     |
+| E. Scraping automático de sitios de terceros                                                                        | **Prohibida**                      | Ni con `robots.txt` permisivo ni por ser público                            |
+| F. Copia de texto de guías, imágenes, iconos, capturas o arte sin permiso                                           | **Prohibida**                      | —                                                                           |
+
 Regla: el permiso es explícito, por fuente y por alcance; el silencio, la ausencia de prohibición o un `robots.txt` no son permiso. Ante duda, la fuente degrada a clase D.
 
 ### 14.2 Canalización por etapas (cada etapa falla de forma segura)
@@ -416,10 +421,11 @@ Cumple Constitución I/II/VII (v1.6.0) y FR-27–FR-33. Diseño y artefactos edi
 
 ### 15.1 Dos modos, nunca mezclados
 
-| Modo | Condición | Qué se publica |
-| --- | --- | --- |
-| **Adaptación** (`entry_kind='build_adaptada'`) | `rights_status ∈ {licensed, permission_granted}` + evidencia vigente cuyo alcance cubre adaptación/republicación | Build nativa interactiva + atribución prominente + procedencia |
-| **Solo enlace** (`enlace_externo`, `link_only`) | Derechos `pending`/denegados/limitados/caducados/revocados, o duda | Tarjeta: título, autor, sitio, URL, fecha, maestrías/daño verificados de forma independiente. Sin cuerpo, imágenes, activos ni ranking derivado |
+| Modo                                            | Condición                                                                                                        | Qué se publica                                                                                                                                  |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Adaptación** (`entry_kind='build_adaptada'`)  | `rights_status ∈ {licensed, permission_granted}` + evidencia vigente cuyo alcance cubre adaptación/republicación | Build nativa interactiva + atribución prominente + procedencia                                                                                  |
+| **Solo enlace** (`enlace_externo`, `link_only`) | Derechos `pending`/denegados/limitados/caducados/revocados, o duda                                               | Tarjeta: título, autor, sitio, URL, fecha, maestrías/daño verificados de forma independiente. Sin cuerpo, imágenes, activos ni ranking derivado |
+
 Atribución sin evidencia ⇒ modo solo enlace. Licencias que permiten ver/compartir pero no derivados (p. ej. «no derivatives») ⇒ solo enlace. Términos del sitio y permiso del autor se evalúan por separado y el más restrictivo prevalece.
 
 ### 15.2 Puerta de verificación y publicación (checklist)
@@ -430,7 +436,7 @@ Atribución sin evidencia ⇒ modo solo enlace. Licencias que permiten ver/compa
 4. Metadatos FR-28 completos (data-model `build_adaptations`).
 5. Atribución renderizada (bloque superior + sección Fuentes + JSON-LD) verificada por test.
 6. Revisión de contenido contra el juego (`reviewed_by`).
-7. Cualquier fallo ⇒ `borrador` o *link-only*. La puerta se impone en dominio (Zod/reglas puras) y, con BD, por CHECK/trigger (T-055).
+7. Cualquier fallo ⇒ `borrador` o _link-only_. La puerta se impone en dominio (Zod/reglas puras) y, con BD, por CHECK/trigger (T-055).
 
 ### 15.3 Plantilla de solicitud de permiso (`docs/content/permission-request-template.md`, T-101)
 
@@ -438,7 +444,7 @@ Contenido: identificación del editor y del sitio; build y URL concretas; qué s
 
 ### 15.4 Retirada / takedown (`docs/content/takedown-runbook.md`, T-102)
 
-Canal público de contacto; triaje en 24 h; despublicar primero, evaluar después; cambiar a *link-only* o retirar; registrar `takedown_events`; invalidar caché/sitemap/JSON-LD; purgar capturas; notificar al solicitante; revisar otras adaptaciones de la misma fuente/autor; revocar `permission_granted` marca la evidencia `revocada`, lo que bloquea publicación por la puerta.
+Canal público de contacto; triaje en 24 h; despublicar primero, evaluar después; cambiar a _link-only_ o retirar; registrar `takedown_events`; invalidar caché/sitemap/JSON-LD; purgar capturas; notificar al solicitante; revisar otras adaptaciones de la misma fuente/autor; revocar `permission_granted` marca la evidencia `revocada`, lo que bloquea publicación por la puerta.
 
 ### 15.5 Detección de cambios en la fuente (`docs/content/source-change-review.md`, T-103)
 
@@ -464,24 +470,25 @@ Cumple Constitución VIII (v1.7.0) y FR-34–FR-45. Diseño documental: sin cód
 
 ### 16.1 Decisiones pendientes (bloquean la activación, no el MVP) — [NEEDS CLARIFICATION]
 
-| ID | Decisión | Opciones / nota |
-| --- | --- | --- |
-| D-1 | Proveedor de identidad | OIDC gestionado vs. autoalojado vs. cuentas propias con correo + MFA; implica enmienda de VIII/XI (sin auth externo hoy) y XII (secretos) |
-| D-2 | Términos del colaborador y licencia | Licencia que el autor concede al sitio (no exclusiva, revocable/retirada), licencia pública de las guías (p. ej. CC BY-SA vs. «todos los derechos reservados + licencia al sitio»), política de IA/plagio, edad mínima, privacidad; revisión legal recomendada |
-| D-3 | Equipo de moderación y SLA | Quién modera, cobertura, SLA de revisión (p. ej. 7 d) y de retirada (≤ 72 h), escalado |
-| D-4 | Sanitización/formato del texto | Subconjunto Markdown vs. campos estructurados puros |
-| D-5 | Almacenamiento/retención de evidencias de permiso | Privado, acceso por rol, retención |
-| D-6 | Cuotas y umbrales de abuso | Valores iniciales de tasa/tamaño/cuarentena |
+| ID  | Decisión                                          | Opciones / nota                                                                                                                                                                                                                                                |
+| --- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D-1 | Proveedor de identidad                            | OIDC gestionado vs. autoalojado vs. cuentas propias con correo + MFA; implica enmienda de VIII/XI (sin auth externo hoy) y XII (secretos)                                                                                                                      |
+| D-2 | Términos del colaborador y licencia               | Licencia que el autor concede al sitio (no exclusiva, revocable/retirada), licencia pública de las guías (p. ej. CC BY-SA vs. «todos los derechos reservados + licencia al sitio»), política de IA/plagio, edad mínima, privacidad; revisión legal recomendada |
+| D-3 | Equipo de moderación y SLA                        | Quién modera, cobertura, SLA de revisión (p. ej. 7 d) y de retirada (≤ 72 h), escalado                                                                                                                                                                         |
+| D-4 | Sanitización/formato del texto                    | Subconjunto Markdown vs. campos estructurados puros                                                                                                                                                                                                            |
+| D-5 | Almacenamiento/retención de evidencias de permiso | Privado, acceso por rol, retención                                                                                                                                                                                                                             |
+| D-6 | Cuotas y umbrales de abuso                        | Valores iniciales de tasa/tamaño/cuarentena                                                                                                                                                                                                                    |
 
 ### 16.2 Hoja de ruta por etapas
 
-| Etapa | Alcance | Precondiciones |
-| --- | --- | --- |
-| **E0 (MVP, hoy)** | Contenido editorial interno; documentos de política (T-111/T-112) | — |
-| **E1 — Autores invitados (sin autoservicio)** | El equipo da de alta autores verificados (`authors` + rol); el autor envía su guía por un canal manual (archivo de contenido validado) con atestación firmada; revisión editorial; sin cuentas públicas | D-2, D-3 mínimas; plan §15 operativo |
-| **E2 — Editor estructurado para invitados** | Identidad (D-1) solo para invitados; borradores en BD, editor estructurado, validación, versiones, auditoría, reportes; publicación solo tras revisión | D-1, D-4, D-5; enmienda constitucional + spec propio; Fase 8 completa |
-| **E3 — Registro con verificación y cuarentena** | Altas por solicitud/aprobación; límites, cuarentena de cuentas nuevas, herramientas de moderación | D-6; capacidad de moderación (D-3) demostrada |
-| **E4 — Apertura gradual** | Registro más abierto, reputación/promoción de autores; comentarios solo si se decide aparte | Métricas de abuso y SLA cumplidos; spec propio |
+| Etapa                                           | Alcance                                                                                                                                                                                                 | Precondiciones                                                        |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **E0 (MVP, hoy)**                               | Contenido editorial interno; documentos de política (T-111/T-112)                                                                                                                                       | —                                                                     |
+| **E1 — Autores invitados (sin autoservicio)**   | El equipo da de alta autores verificados (`authors` + rol); el autor envía su guía por un canal manual (archivo de contenido validado) con atestación firmada; revisión editorial; sin cuentas públicas | D-2, D-3 mínimas; plan §15 operativo                                  |
+| **E2 — Editor estructurado para invitados**     | Identidad (D-1) solo para invitados; borradores en BD, editor estructurado, validación, versiones, auditoría, reportes; publicación solo tras revisión                                                  | D-1, D-4, D-5; enmienda constitucional + spec propio; Fase 8 completa |
+| **E3 — Registro con verificación y cuarentena** | Altas por solicitud/aprobación; límites, cuarentena de cuentas nuevas, herramientas de moderación                                                                                                       | D-6; capacidad de moderación (D-3) demostrada                         |
+| **E4 — Apertura gradual**                       | Registro más abierto, reputación/promoción de autores; comentarios solo si se decide aparte                                                                                                             | Métricas de abuso y SLA cumplidos; spec propio                        |
+
 Cada etapa exige su propia enmienda/spec y no se salta la anterior. Nunca hay publicación abierta sin revisión.
 
 ### 16.3 Flujo y permisos
@@ -491,7 +498,7 @@ Estados: `borrador` (solo autor) → `enviada` (congelada como versión N) → `
 ### 16.4 Contribuciones: original vs. adaptación
 
 - **Original**: atestación de autoría y titularidad + aceptación de términos (versión/fecha/huella) + declaración de que no incluye material de terceros ni activos oficiales sin `approved`. `rights_status` ⇒ `own_original` (el titular es el autor; moderador verifica indicios de plagio).
-- **Adaptación**: todo lo anterior más fuente (URL, título, autor, sitio, fecha), evidencia que cubra adaptación (plan §15), alcance de la transformación y atribución prominente. Sin evidencia revisada ⇒ no se puede enviar como adaptación; solo *link-only*.
+- **Adaptación**: todo lo anterior más fuente (URL, título, autor, sitio, fecha), evidencia que cubra adaptación (plan §15), alcance de la transformación y atribución prominente. Sin evidencia revisada ⇒ no se puede enviar como adaptación; solo _link-only_.
 
 ### 16.5 Seguridad y abuso (resumen de diseño)
 

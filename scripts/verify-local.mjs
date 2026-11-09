@@ -22,6 +22,7 @@ export async function runSteps(steps, exec) {
 /** Pasos locales de verificación (T-004). Sin CI ni secretos (hosting=local_first). */
 export const VERIFY_STEPS = [
   { name: 'lint', command: 'npm run lint' },
+  { name: 'lint:md', command: 'npm run lint:md' },
   { name: 'format', command: 'npm run format:check' },
   { name: 'test', command: 'npm test' },
   { name: 'test:scripts', command: 'npm run test:scripts' },

@@ -1,0 +1,30 @@
+{
+  // Configuración de markdownlint para todo el Markdown rastreado (FR-46, AC-26, plan §12.14).
+  // Por defecto todas las reglas están activas. Solo se admiten exclusiones de MD013 y MD060,
+  // cada una con su motivo escrito abajo. Ver .specify/memory/constitution.md (Restricciones).
+  "config": {
+    "default": true,
+    // MD013 (longitud de línea) desactivada: es una regla de presentación. Los artefactos
+    // de Spec Kit usan una línea por tarea/criterio y tablas largas, que se romperían sin
+    // aportar claridad. El resto de reglas semánticas y estructurales permanecen activas.
+    "MD013": false,
+    // MD060 (estilo de columnas alineadas) desactivada: la tabla de «Riesgos/decisiones» de
+    // plan.md tiene filas muy largas; alinear sus tuberías añadiría relleno sin mejorar la
+    // lectura. Las tablas siguen siendo Markdown válido (MD055/MD056 activas).
+    "MD060": false
+  },
+  "globs": [
+    "README.md",
+    "**/*.md"
+  ],
+  "ignores": [
+    "node_modules/**",
+    "dist/**",
+    ".angular/**",
+    "coverage/**",
+    ".copilot/**",
+    "**/session-state/**",
+    "playwright-report/**",
+    "test-results/**"
+  ]
+}
