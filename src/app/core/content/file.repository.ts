@@ -35,6 +35,10 @@ export class FileContentRepository implements ContentRepository {
     return all.find((b) => b.slug === slug && this.visible(b)) ?? null;
   }
 
+  async listSlugs(): Promise<readonly string[]> {
+    return (await this.listBuilds()).map((b) => b.slug);
+  }
+
   private load(): Promise<readonly Build[]> {
     this.loaded ??= this.source.readBuilds().then(parseAll);
     return this.loaded;

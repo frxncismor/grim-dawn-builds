@@ -6,7 +6,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./vocabulary": "./src/vocabulary.ts"
+    "./vocabulary": "./src/vocabulary.ts",
+    "./testing": "./testing/repository-contract.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",

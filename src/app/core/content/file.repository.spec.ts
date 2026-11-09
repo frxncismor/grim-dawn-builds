@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { runContentRepositoryContract } from '@gd/domain/testing';
 import { FileContentRepository, type RawContentSource } from './file.repository';
 
 const draft = (slug: string, overrides: Record<string, unknown> = {}) => ({
@@ -32,40 +33,19 @@ const published = (slug: string) =>
 
 class CountingSource implements RawContentSource {
   reads = 0;
-  constructor(private readonly docs: unknown[]) {}
+  constructor(private readonly docs: readonly unknown[]) {}
   async readBuilds(): Promise<unknown[]> {
     this.reads++;
-    return this.docs;
+    return [...this.docs];
   }
 }
 
-describe('FileContentRepository public visibility', () => {
-  it('lists only publicado builds with approved rights by default', async () => {
-    const repo = new FileContentRepository(
-      new CountingSource([draft('borrador-a'), published('publica-b')]),
-      { includeDrafts: false },
-    );
-    const slugs = (await repo.listBuilds()).map((b) => b.slug);
-    expect(slugs).toEqual(['publica-b']);
-  });
+runContentRepositoryContract(
+  'FileContentRepository',
+  (docs, options) => new FileContentRepository(new CountingSource(docs), options),
+);
 
-  it('never returns a pending build from findBuild in public mode', async () => {
-    const repo = new FileContentRepository(new CountingSource([draft('guia')]), {
-      includeDrafts: false,
-    });
-    expect(await repo.findBuild('guia')).toBeNull();
-  });
-
-  it('returns drafts, including pending rights, when includeDrafts is set', async () => {
-    const repo = new FileContentRepository(new CountingSource([draft('guia')]), {
-      includeDrafts: true,
-    });
-    expect((await repo.findBuild('guia'))?.rights_status).toBe('pending');
-    expect((await repo.listBuilds()).map((b) => b.slug)).toEqual(['guia']);
-  });
-});
-
-describe('FileContentRepository loading', () => {
+describe('FileContentRepository loading (adapter-specific)', () => {
   it('fails fast with the slug when a document is invalid', async () => {
     const repo = new FileContentRepository(
       new CountingSource([draft('roto', { rights_status: 'unknown' })]),
@@ -74,12 +54,12 @@ describe('FileContentRepository loading', () => {
     await expect(repo.listBuilds()).rejects.toThrow(/roto.*rights_status/);
   });
 
-  it('returns builds sorted by slug for deterministic output', async () => {
+  it('rejects a publicado build with pending rights at load time', async () => {
     const repo = new FileContentRepository(
-      new CountingSource([published('zeta'), published('alfa')]),
+      new CountingSource([draft('ilegal', { review_state: 'publicado' })]),
       { includeDrafts: false },
     );
-    expect((await repo.listBuilds()).map((b) => b.slug)).toEqual(['alfa', 'zeta']);
+    await expect(repo.listBuilds()).rejects.toThrow(/ilegal/);
   });
 
   it('reads and validates the source only once across calls', async () => {
