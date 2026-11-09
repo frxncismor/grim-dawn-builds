@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elementalista · Golpe Primigenio · Guía de puntos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Karla:wght@400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --soot:#0f1218;
+    --panel:#171c25;
+    --panel-2:#1e242f;
+    --storm:#79d0f5;
+    --storm-dim:#2d4a5c;
+    --ember:#f0873f;
+    --ember-dim:#5c3a1e;
+    --bone:#e4dfd2;
+    --ash:#8e8b7e;
+    --line:#2a313d;
+    --display:"Oswald","Arial Narrow",sans-serif;
+    --body:"Karla",system-ui,sans-serif;
+    --mono:"Space Mono","SF Mono",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--soot);color:var(--bone);
+    font-family:var(--body);font-size:15px;line-height:1.55;
+    padding:0 0 64px;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:660px;margin:0 auto;padding:0 18px}
+
+  header{
+    padding:44px 18px 32px;border-bottom:1px solid var(--line);
+    background:
+      radial-gradient(120% 90% at 20% 0%, rgba(121,208,245,.10), transparent 60%),
+      radial-gradient(110% 90% at 90% 10%, rgba(240,135,63,.09), transparent 55%);
+  }
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ash)}
+  h1{
+    font-family:var(--display);font-weight:600;
+    font-size:clamp(34px,10vw,54px);line-height:.95;
+    text-transform:uppercase;margin:10px 0 6px;
+  }
+  h1 .split{color:var(--storm)}
+  h1 .split2{color:var(--ember)}
+  .sub{color:var(--ash);font-size:14px;max-width:46ch}
+
+  .slab{margin:26px 0 0;border-left:3px solid var(--ember);background:var(--panel);padding:16px 18px}
+  .slab h3{
+    font-family:var(--display);text-transform:uppercase;letter-spacing:.06em;
+    font-size:15px;font-weight:600;color:var(--ember);margin-bottom:6px;
+  }
+  .slab p{font-size:14px}
+  .slab p + p{margin-top:8px}
+
+  section{margin-top:46px}
+  h2{
+    font-family:var(--display);text-transform:uppercase;font-size:13px;
+    letter-spacing:.2em;font-weight:600;color:var(--ash);
+    padding-bottom:9px;border-bottom:1px solid var(--line);margin-bottom:22px;
+  }
+  h2 span{color:var(--bone)}
+
+  /* legend */
+  .legend{
+    display:flex;gap:16px;flex-wrap:wrap;
+    font-family:var(--mono);font-size:11px;color:var(--ash);
+    margin-bottom:20px;
+  }
+  .legend b{color:var(--bone);font-weight:400}
+
+  /* trees */
+  .tree{background:var(--panel);padding:20px 16px 22px;border-top:2px solid var(--storm)}
+  .tree.demo{border-top-color:var(--ember)}
+  .tree-name{
+    font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;
+    font-size:19px;font-weight:600;color:var(--storm);margin-bottom:3px;
+  }
+  .tree.demo .tree-name{color:var(--ember)}
+  .tree-role{font-size:13px;color:var(--ash);margin-bottom:20px}
+
+  .node{position:relative;padding-left:20px;margin-bottom:4px}
+  .node.child{margin-left:22px}
+  .node.child::before{content:"";position:absolute;left:0;top:0;bottom:0;width:1px;background:var(--storm-dim)}
+  .tree.demo .node.child::before{background:var(--ember-dim)}
+  .node.child::after{content:"";position:absolute;left:0;top:22px;width:12px;height:1px;background:var(--storm-dim)}
+  .tree.demo .node.child::after{background:var(--ember-dim)}
+  .node.last.child::before{bottom:auto;height:22px}
+
+  .card{background:var(--panel-2);padding:9px 12px}
+  .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .nm{font-weight:600;font-size:14.5px}
+  .en{font-family:var(--mono);font-size:10.5px;color:var(--ash)}
+  .bar{
+    font-family:var(--mono);font-size:10px;font-weight:700;
+    color:var(--storm);border:1px solid var(--storm-dim);
+    padding:0 5px;white-space:nowrap;margin-left:auto;
+  }
+  .tree.demo .bar{color:var(--ember);border-color:var(--ember-dim)}
+  .why{font-size:12.5px;color:var(--ash);line-height:1.45;margin-top:5px}
+  .why b{color:var(--bone);font-weight:600}
+  .tag{
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--soot);background:var(--ash);padding:1px 5px;
+  }
+
+  /* spine */
+  .spine{position:relative;padding-left:34px}
+  .spine::before{
+    content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;
+    background:linear-gradient(var(--storm),var(--ember));opacity:.45;
+  }
+  .step{position:relative;margin-bottom:22px}
+  .step::before{
+    content:"";position:absolute;left:-29px;top:7px;width:12px;height:12px;
+    background:var(--soot);border:2px solid var(--storm);border-radius:50%;
+  }
+  .step.d::before{border-color:var(--ember)}
+  .lvl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--storm);text-transform:uppercase}
+  .step.d .lvl{color:var(--ember)}
+  .step h4{font-family:var(--display);font-weight:400;font-size:17px;margin:1px 0 4px}
+  .step p{font-size:13.5px;color:var(--ash)}
+  .step p b{color:var(--bone);font-weight:600}
+
+  .rows{border-top:1px solid var(--line)}
+  .row{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);align-items:baseline}
+  .row .k{
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ash);flex:0 0 84px;
+  }
+  .row .v{font-size:14px;flex:1}
+  .row .v small{display:block;color:var(--ash);font-size:12.5px;margin-top:2px}
+
+  footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ash)}
+  @media (prefers-reduced-motion:no-preference){
+    .step,.tree{animation:rise .5s ease both}
+    @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Grim Dawn · nombres en español</div>
+    <h1><span class="split">Chamán</span> +<br><span class="split2">Demoledor</span></h1>
+    <p class="sub">Golpe Primigenio de rayo, arma a dos manos. Azul = Chamán, naranja = Demoledor.</p>
+
+    <div class="slab">
+      <h3>Lee esto primero</h3>
+      <p>El número en cada habilidad es <b>cuántos puntos necesitas en la barra de maestría</b> para desbloquearla. No es cuántos puntos meterle.</p>
+      <p>Eso cambia todo el plan: <b>Pacto de Clamatormentas pide barra 50</b>, o sea la barra de Chamán completa. Y <b>Escudo Explosivo pide barra 32</b> de Demoledor. Ninguna de las dos es para ahora.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <h2>Qué subir <span>ya mismo</span></h2>
+  <p style="color:var(--ash);font-size:13.5px;margin-bottom:18px">Resumen en orden de prioridad. Los árboles completos con el porqué de cada cosa vienen justo abajo.</p>
+  <div class="rows">
+    <div class="row"><div class="k">1 · Chamán</div><div class="v">Golpe Atronador <small>1 punto. Es el transmutador de Golpe Primigenio: sin él el build se siente lento.</small></div></div>
+    <div class="row"><div class="k">2 · Chamán</div><div class="v">Torrente → máximo <small>Mejor retorno de daño por punto de todo el árbol.</small></div></div>
+    <div class="row"><div class="k">3 · Chamán</div><div class="v">Tempestad Furiosa → máximo <small>Baja resistencias enemigas: multiplica tu daño en vez de sumarlo.</small></div></div>
+    <div class="row"><div class="k">4 · Chamán</div><div class="v">Viento Demoníaco → 1 punto <small>Lo subes después. Es la habilidad donde atas Tempestad de la devoción.</small></div></div>
+    <div class="row"><div class="k">5 · Chamán</div><div class="v">Tótem Wendigo → 1 punto <small>Tu botón de sobrevivir. Súbelo cuando tengas puntos de sobra.</small></div></div>
+    <div class="row"><div class="k">6 · Demoledor</div><div class="v">Tocado por las Llamas → hasta 12 <small>Daño elemental fijo por punto. Si tu equipo ya da +habilidades del Demoledor, resta esos puntos: no los desperdicies.</small></div></div>
+    <div class="row"><div class="k">7 · Demoledor</div><div class="v">Llama Vengativa → 1 ahora, 11 después <small>Pasar de 11 rinde muy poco: cinco puntos más dan solo 3% de velocidad.</small></div></div>
+    <div class="row"><div class="k">8 · Chamán</div><div class="v">Corriente de Tormenta → máximo <small>Cuando la barra de Chamán llegue a 25.</small></div></div>
+    <div class="row"><div class="k">9 · Chamán</div><div class="v">Golpe Primigenio → con lo que sobre <small>Hasta 16, al final: primero el equipo y los modificadores.</small></div></div>
+    <div class="row"><div class="k">Devoción</div><div class="v">Encrucijada morada → Trono Vacío <small>Es tu siguiente paso para abrir Tempestad. Ruta completa en la sección de devoción, más abajo.</small></div></div>
+    <div class="row"><div class="k">Aún no</div><div class="v">Escudo Explosivo · Mina de Termita · Pacto de Clamatormentas <small>Piden barra 32 de Demoledor las dos primeras y barra 50 de Chamán la última. Son metas de nivel 60+.</small></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Qué tocar en <span>cada árbol</span></h2>
+  <div class="legend">
+    <span><b>barra N</b> = puntos requeridos en la maestría</span>
+    <span><b>—</b> el texto pequeño gris es el nombre en inglés</span>
+  </div>
+
+  <div class="tree">
+    <div class="tree-name">Chamán</div>
+    <div class="tree-role">Tu daño. Aquí va la mayoría de los puntos y de la barra.</div>
+
+    <div class="node">
+      <div class="card">
+        <div class="top"><span class="nm">Golpe Primigenio</span><span class="en">Primal Strike</span><span class="bar">barra 5</span></div>
+        <div class="why">1 punto ahora, súbelo poco a poco. Se maxea al final, cuando ya tengas equipo de rayo.</div>
+      </div>
+    </div>
+    <div class="node child">
+      <div class="card">
+        <div class="top"><span class="nm">Golpe Atronador</span><span class="en">Thunderous Strike</span><span class="tag">Transmutador</span><span class="bar">barra 10</span></div>
+        <div class="why">Quita el enfriamiento a cambio de daño. Pasas de un golpe cada dos segundos a poder machacar sin parar. <b>Es tu prioridad número uno.</b> Con 1 punto basta.</div>
+      </div>
+    </div>
+    <div class="node child">
+      <div class="card">
+        <div class="top"><span class="nm">Torrente</span><span class="en">Torrent</span><span class="bar">barra 15</span></div>
+        <div class="why">Daño puro por punto. El mejor retorno del árbol. Máximo.</div>
+      </div>
+    </div>
+    <div class="node child last">
+      <div class="card">
+        <div class="top"><span class="nm">Corriente de Tormenta</span><span class="en">Storm Surge</span><span class="bar">barra 25</span></div>
+        <div class="why">El segundo modificador de daño. Va después de Torrente.</div>
+      </div>
+    </div>
+
+    <div class="node" style="margin-top:14px">
+      <div class="card">
+        <div class="top"><span class="nm">Viento Demoníaco</span><span class="en">Wind Devil</span><span class="bar">barra 10</span></div>
+        <div class="why">Torbellino que sueltas antes de entrar a pegar.</div>
+      </div>
+    </div>
+    <div class="node child last">
+      <div class="card">
+        <div class="top"><span class="nm">Tempestad Furiosa</span><span class="en">Raging Tempest</span><span class="bar">barra 20</span></div>
+        <div class="why">Baja la resistencia elemental de los enemigos. <b>Multiplica</b> tu daño en lugar de sumarlo: vale más que subir Golpe Primigenio.</div>
+      </div>
+    </div>
+
+    <div class="node" style="margin-top:14px">
+      <div class="card">
+        <div class="top"><span class="nm">Tótem Wendigo</span><span class="en">Wendigo Totem</span><span class="bar">barra 20</span></div>
+        <div class="why">Tu botón de no morir. Lo plantas y te cura mientras peleas alrededor.</div>
+      </div>
+    </div>
+
+    <div class="node" style="margin-top:14px">
+      <div class="card">
+        <div class="top"><span class="nm">Pacto de Mogdrogen</span><span class="en">Mogdrogen's Pact</span><span class="bar">barra 5</span></div>
+        <div class="why">Buff permanente. Unos puntos por ahora, es el camino hacia lo de abajo.</div>
+      </div>
+    </div>
+    <div class="node child last">
+      <div class="card">
+        <div class="top"><span class="nm">Pacto de Clamatormentas</span><span class="en">Stormcaller's Pact</span><span class="bar">barra 50</span></div>
+        <div class="why">La habilidad definitiva del build: convierte el pacto en daño de rayo y velocidad de ataque. <b>Requiere la barra de Chamán completa</b>, así que es una meta de nivel 60+, no de ahora.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tree demo" style="margin-top:26px">
+    <div class="tree-name">Demoledor</div>
+    <div class="tree-role">Soporte. Barra baja mientras subes; lo bueno está muy al fondo.</div>
+
+    <div class="node">
+      <div class="card">
+        <div class="top"><span class="nm">Tocado por las Llamas</span><span class="en">Flame Touched</span><span class="bar">barra 5</span></div>
+        <div class="why">+% daño elemental. El rayo es elemental, así que te sube el daño directo. Barato y accesible: <b>es lo mejor que te da Demoledor a corto plazo.</b></div>
+      </div>
+    </div>
+
+    <div class="node" style="margin-top:14px">
+      <div class="card">
+        <div class="top"><span class="nm">Llama Vengativa</span><span class="en">Vindictive Flame</span><span class="bar">barra 10</span></div>
+        <div class="why">Pasivo de velocidad de movimiento y puntería. Se activa solo.</div>
+      </div>
+    </div>
+
+    <div class="node" style="margin-top:14px">
+      <div class="card">
+        <div class="top"><span class="nm">Granada Cegadora</span><span class="en">Flashbang</span><span class="bar">barra 1</span></div>
+        <div class="why">1 punto. Sirve de control y abre el camino a lo de abajo.</div>
+      </div>
+    </div>
+    <div class="node child last">
+      <div class="card">
+        <div class="top"><span class="nm">Escudo Explosivo</span><span class="en">Blast Shield</span><span class="bar">barra 32</span></div>
+        <div class="why">Absorbe daño cuando bajas de vida. Excelente, pero 32 puntos de barra en una clase secundaria es una inversión enorme. Decisión de nivel alto.</div>
+      </div>
+    </div>
+
+    <div class="node" style="margin-top:14px">
+      <div class="card">
+        <div class="top"><span class="nm">Mina de Termita</span><span class="en">Thermite Mine</span><span class="bar">barra 32</span></div>
+        <div class="why">Reduce resistencia elemental de los enemigos: sinergia real con tu rayo. Misma barrera de barra 32 que el escudo — si vas por uno, te llevas los dos.</div>
+      </div>
+    </div>
+
+    <div class="node" style="margin-top:14px">
+      <div class="card" style="opacity:.5">
+        <div class="top"><span class="nm">Templar · Golpe de Fuego · Granada</span><span class="bar">—</span></div>
+        <div class="why">Sáltatelos. Daño físico o de fuego que tu personaje no usa.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Orden <span>real de compra</span></h2>
+  <p style="color:var(--ash);font-size:13.5px;margin-bottom:22px">Guíate por la barra, no por el nivel: los puntos de misión hacen que dos personajes del mismo nivel tengan totales distintos.</p>
+  <div class="spine">
+
+    <div class="step">
+      <div class="lvl">Barra Chamán → 10</div>
+      <h4>Golpe Atronador</h4>
+      <p>Sube la barra de Chamán hasta 10 y mete 1 punto en <b>Golpe Atronador</b>. También 1 en <b>Viento Demoníaco</b>. Aquí el personaje deja de sentirse lento.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">barra Chamán → 15</div>
+      <h4>Torrente al máximo</h4>
+      <p>Todo lo que sobre va a <b>Torrente</b>. Cada punto se nota en pantalla.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">barra Chamán → 20</div>
+      <h4>Resistencias y supervivencia</h4>
+      <p><b>Tempestad Furiosa</b> al máximo y 1 punto en <b>Tótem Wendigo</b>. Con esto ya aguantas jefes.</p>
+    </div>
+
+    <div class="step d">
+      <div class="lvl">barra Demoledor → 10</div>
+      <h4>La parte útil del Demoledor</h4>
+      <p>Ahora sí lo tocas: <b>Tocado por las Llamas</b> hasta 12 y <b>Llama Vengativa</b> en 1 por ahora (súbela a 11 cuando te sobren puntos). Son pasivos, los pones y te olvidas. Antes de gastar, revisa si tu equipo ya te regala niveles en esa habilidad.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">barra Chamán → 25</div>
+      <h4>Corriente de Tormenta</h4>
+      <p>Al máximo. A partir de aquí empieza a subir <b>Golpe Primigenio</b> con lo que sobre.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">Nivel 60+ · la decisión</div>
+      <h4>Barra Chamán a 50, o Demoledor a 32</h4>
+      <p>Chamán 50 te da <b>Pacto de Clamatormentas</b> (daño). Demoledor 32 te da <b>Escudo Explosivo</b> + <b>Mina de Termita</b> (aguante). No alcanza para las dos pronto. Con este build yo iría primero por Chamán.</p>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Devociones <span>y lo demás</span></h2>
+  <div class="rows">
+    <div class="row">
+      <div class="k">Devociones</div>
+      <div class="v">Ruta completa abajo
+        <small>La versión anterior de esta guía saltaba las constelaciones intermedias y por eso Tempestad aparecía bloqueada. Corregido en la sección siguiente.</small>
+      </div>
+    </div>
+    <div class="row">
+      <div class="k">Nombres</div>
+      <div class="v">Usa los ingleses para buscar
+        <small>Las traducciones al español de las constelaciones no las tengo confirmadas; los nombres en inglés sí, y son los que aparecen en todas las guías y en grimtools.</small>
+      </div>
+    </div>
+    <div class="row">
+      <div class="k">Atributos</div>
+      <div class="v">Casi todo a Physique
+        <small>Mete Cunning o Spirit solo cuando un objeto concreto te lo pida. Sí existe forma de reiniciarlos (Tónico de Remodelación / Tonic of Reshaping, de misiones de Ashes of Malmouth), pero son contados: trátalos como si fueran definitivos.</small>
+      </div>
+    </div>
+    <div class="row">
+      <div class="k">Arma</div>
+      <div class="v">Dos manos, siempre
+        <small>Busca el afijo "% del daño físico convertido en rayo". Vale más que cinco niveles.</small>
+      </div>
+    </div>
+    <div class="row">
+      <div class="k">Más adelante</div>
+      <div class="v">Golpe Atronador pierde fuerza hacia el nivel 50-60
+        <small>Contra un solo objetivo y contra jefes se hace lento. Muchos jugadores cambian a Salvajismo + Hambre Salvaje a mitad de Élite. No cambies nada ahora; solo ten claro que si los jefes se eternizan, es el transmutador y no tú.</small>
+      </div>
+    </div>
+    <div class="row">
+      <div class="k">Rotación</div>
+      <div class="v">Torbellino → machacar
+        <small>Sueltas Viento Demoníaco, entras con Golpe Primigenio sin parar, Tótem Wendigo cuando la vida baje.</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Filtro <span>de botín</span></h2>
+  <p style="color:var(--ash);font-size:13.5px;margin-bottom:20px">El botón está en el HUD, a la izquierda de la barra de vida. Son cuatro columnas y funcionan en cadena: las dos primeras deciden <b style="color:var(--bone)">qué objetos se muestran</b>, las dos últimas <b style="color:var(--bone)">los filtran por dentro</b>. Si dejas vacías las dos primeras no verás nada, por muchas casillas que marques en las otras.</p>
+
+  <div class="tree">
+    <div class="tree-name" style="font-size:16px">1ª columna · Calidad</div>
+    <div class="tree-role">Qué rarezas quieres ver</div>
+    <div class="node"><div class="card">
+      <div class="top"><span class="nm">Desmarca: Común</span></div>
+      <div class="why">A nivel 14 es lo único que sobra. Los mágicos (amarillos) todavía te sirven; desmárcalos cuando vayas vestido de raro/épico, más o menos al 40.</div>
+    </div></div>
+    <div class="node" style="margin-top:8px"><div class="card">
+      <div class="top"><span class="nm">Marca: Mostrar siempre únicos</span></div>
+      <div class="why">Déjala siempre encendida. Es lo que evita que el filtro te esconda una legendaria porque no encaja con las casillas de daño que elegiste.</div>
+    </div></div>
+  </div>
+
+  <div class="tree" style="margin-top:20px">
+    <div class="tree-name" style="font-size:16px">2ª columna · Tipo</div>
+    <div class="tree-role">Qué piezas te sirven</div>
+    <div class="node"><div class="card">
+      <div class="top"><span class="nm">Marca</span></div>
+      <div class="why">Armas cuerpo a cuerpo a dos manos · toda la armadura · anillos y amuletos · medallas y reliquias · componentes.</div>
+    </div></div>
+    <div class="node" style="margin-top:8px"><div class="card">
+      <div class="top"><span class="nm">Desmarca</span></div>
+      <div class="why">Armas a una mano · escudos · armas a distancia. Golpe Primigenio quiere un arma a dos manos, y todo lo demás es ruido en el suelo.</div>
+    </div></div>
+  </div>
+
+  <div class="tree" style="margin-top:20px">
+    <div class="tree-name" style="font-size:16px">3ª columna · Daño</div>
+    <div class="tree-role">Aquí es donde se nota que juegas rayo</div>
+    <div class="node"><div class="card">
+      <div class="top"><span class="nm">Marca</span></div>
+      <div class="why"><b>Rayo</b> · <b>Elemental</b> · <b>Electrocución</b> · <b>Físico</b> (por los objetos que convierten físico en rayo) · velocidad de ataque y capacidad ofensiva si aparecen como opción.</div>
+    </div></div>
+    <div class="node" style="margin-top:8px"><div class="card">
+      <div class="top"><span class="nm">Desmarca</span></div>
+      <div class="why">Frío · Ácido y veneno · Vitalidad · Sangrado · Caos · Éter · bonos de mascota. Nada de eso hace daño en tu personaje.</div>
+    </div></div>
+    <div class="node last" style="margin-top:8px"><div class="card" style="border-left:2px solid var(--ember)">
+      <div class="top"><span class="nm">Ojo con la lógica</span></div>
+      <div class="why">El filtro es un <b>O</b>, no un <b>Y</b>: basta con que el objeto cumpla <b>una</b> casilla marcada para que aparezca. Cuantas más marques, menos filtra. Si ves demasiado, quita casillas en vez de añadirlas.</div>
+    </div></div>
+  </div>
+
+  <div class="tree" style="margin-top:20px">
+    <div class="tree-name" style="font-size:16px">4ª columna · Personaje</div>
+    <div class="tree-role">Lo que te ahorra morir en Élite</div>
+    <div class="node"><div class="card">
+      <div class="top"><span class="nm">Marca</span></div>
+      <div class="why"><b>Chamán</b> · <b>Demoledor</b> (los objetos que dan +1 a habilidades de tus maestrías valen oro) y <b>Resistencias</b>. Déjalas encendidas aunque el objeto no tenga rayo: llegar a Élite con resistencias bajas es el motivo número uno por el que la gente abandona un personaje.</div>
+    </div></div>
+  </div>
+
+  <div class="slab" style="border-left-color:var(--storm);margin-top:22px">
+    <h3 style="color:var(--storm)">Aprieta el filtro poco a poco</h3>
+    <p>Pasado el nivel 25 ya puedes activar las columnas de daño de rayo. Si notas que dejas de ver mejoras claras, quita casillas antes de añadir más: el filtro suma opciones, no las exige todas.</p>
+  </div>
+</section>
+
+<section>
+  <h2>El <span>Guía Espiritual</span></h2>
+  <p style="color:var(--ash);font-size:13.5px;margin-bottom:20px">Se reconocen por el <b style="color:var(--bone)">icono de libro</b> flotando sobre la cabeza. Todos ofrecen el mismo servicio: devolverte puntos de habilidad y de devoción.</p>
+
+  <div class="rows">
+    <div class="row">
+      <div class="k">Acto 1</div>
+      <div class="v"><b>Sahdina</b> — Cruce del Diablo
+        <small>El que te toca ahora. Está en el <b>piso superior de la prisión</b>, en la esquina norte. Habla con ella una vez para completar el diálogo inicial y vuelve a interactuar: ahí se abre el menú de reembolso.</small>
+      </div>
+    </div>
+    <div class="row">
+      <div class="k">Después</div>
+      <div class="v"><b>Novi</b> — Refugio del Aquelarre
+        <small>Un poco al norte de Wevala, la ilusionista.</small>
+      </div>
+    </div>
+    <div class="row">
+      <div class="k">Después</div>
+      <div class="v"><b>Rena</b> — Distrito Yelmo de Acero
+        <small>Al oeste del portal de grieta, en el camino circular que da al patio.</small>
+      </div>
+    </div>
+    <div class="row">
+      <div class="k">Después</div>
+      <div class="v"><b>Bagalla</b> — Cónclave de los Tres
+        <small>Planta baja, a la derecha, bajo un toldo.</small>
+      </div>
+    </div>
+    <div class="row">
+      <div class="k">Coste</div>
+      <div class="v">Arranca en 25 fragmentos de hierro
+        <small>Sube conforme reasignas puntos, hasta un tope alto de miles por punto. Por eso experimentar ahora es casi gratis. Las devociones además cuestan <b>cristales de éter</b>, que sacas rompiendo formaciones de cristal por el mapa.</small>
+      </div>
+    </div>
+    <div class="row">
+      <div class="k">Aviso</div>
+      <div class="v">Sahdina no dura toda la partida
+        <small>Muere en un ataque a Cruce del Diablo durante la campaña de Ashes of Malmouth. Si un día no la encuentras, no es un bug: usa a Novi.</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Ruta de <span>devoción</span></h2>
+  <p style="color:var(--ash);font-size:13.5px;margin-bottom:20px">Orden pensado para un Chamán a dos manos de rayo. Cada constelación que completas te da afinidad, y esa afinidad es la que abre la siguiente — por eso el orden importa más que la lista.</p>
+
+  <div class="spine">
+
+    <div class="step">
+      <div class="lvl">Ya lo tienes</div>
+      <h4>Crossroads · Eel</h4>
+      <p>Anguila es Primordial de nivel 1. Con ella cubierta ya tienes medio requisito de Tempestad.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">Paso 1</div>
+      <h4>Empty Throne — Trono Vacío</h4>
+      <p>1 punto en la Encrucijada <b>morada</b> para entrar, luego complétala. Te da Ascendente 5, que es lo que te falta para Tempestad. Se sostiene sola al terminarla.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">Paso 2</div>
+      <h4>Lizard — Lagarto</h4>
+      <p>Barata, regeneración de vida. Es escalón y supervivencia a la vez.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">Paso 3 · primer poder</div>
+      <h4>Tempest — Tempestad</h4>
+      <p>Ata <b>Reckless Tempest</b> a <b>Viento Demoníaco</b>. Se dispara con críticos, así que rinde más según sube tu capacidad ofensiva.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">Paso 4</div>
+      <h4>Scholar's Light — Luz del Erudito</h4>
+      <p>Puro escalón hacia Kraken. No esperes gran cosa de sus bonos.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">Paso 5</div>
+      <h4>Rhowan's Crown — Corona de Rhowan</h4>
+      <p>Ata <b>Elemental Storm</b> al <b>Tótem de Tormenta</b>. Reduce resistencias en área.</p>
+    </div>
+
+    <div class="step d">
+      <div class="lvl">Paso 6 · supervivencia</div>
+      <h4>Ghoul · Behemoth</h4>
+      <p>Ghoul va al <b>Pacto de Mogdrogen</b> y Behemoth al <b>Pacto de Clamatormentas</b>. Ojo: los poderes que se activan al <b>recibir</b> daño solo pueden atarse a habilidades de buff, nunca a las de ataque. Por eso van a los pactos.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">Paso 7</div>
+      <h4>Kraken</h4>
+      <p>Nivel 2, arriba del mapa. <b>Sus bonos exigen arma a dos manos</b> — tu build cumple, pero si algún día cambias a una mano, se apaga entera.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">Paso 8 · el destino</div>
+      <h4>Ultos, Shepherd of Storms</h4>
+      <p>Ata <b>Hand of Ultos</b> a <b>Golpe Primigenio</b>. Nivel 3: pide 22+ de afinidad y no devuelve nada, por eso va al final.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">Antes de gastar</div>
+      <h4>Simula la ruta en grimtools</h4>
+      <p>Las afinidades intermedias (Lagarto, Luz del Erudito, Ghoul, Behemoth) vienen de guías de la comunidad, no de una comprobación mía punto por punto. Pásala por la <b>calculadora de devoción de grimtools</b>: te avisa si en algún paso no llegas a la afinidad, y reasignar cuesta cristales de éter.</p>
+    </div>
+
+    <div class="step">
+      <div class="lvl">Limpieza</div>
+      <h4>Recupera la Encrucijada azul</h4>
+      <p>Cuando las constelaciones se sostengan solas, quita los puntos de la Encrucijada y mételos en <b>Quill</b> o <b>Owl</b>. Cuesta fragmentos de hierro y cristales de éter, así que hazlo de una sola vez al final.</p>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  Nombres de habilidades y requisitos de barra tomados del listado en español del juego. Las cantidades de puntos por habilidad son orientativas: el equipo que te salga manda sobre cualquier plan, y todo lo de habilidades se puede deshacer con el Guía Espiritual.
+</footer>
+
+</div>
+</body>
+</html>

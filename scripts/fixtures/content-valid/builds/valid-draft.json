@@ -1,0 +1,16 @@
+{
+  "slug": "chaman-demoledor-golpe-primigenio",
+  "locale": "es",
+  "title": "Chamán + Demoledor",
+  "author_slug": "por-confirmar",
+  "source_slugs": ["guia-original"],
+  "game_version": "1.2.x",
+  "review_state": "borrador",
+  "rights_status": "pending",
+  "rights_confirmed_by": null,
+  "rights_confirmed_on": null,
+  "content_status": "sin_verificar",
+  "reviewed_by": null,
+  "published_at": null,
+  "skill_nodes": [{ "slug": "golpe-primigenio", "bar_required": 5, "parent_slug": null }]
+}
