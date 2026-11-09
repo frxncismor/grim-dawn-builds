@@ -22,6 +22,7 @@ export async function runSteps(steps, exec) {
 /** Pasos locales de verificación (T-004). Sin CI ni secretos (hosting=local_first). */
 export const VERIFY_STEPS = [
   { name: 'check-scope', command: 'pnpm run check:scope' },
+  { name: 'check-boundaries', command: 'pnpm run check:boundaries' },
   { name: 'domain:typecheck', command: 'pnpm --filter @gd/domain typecheck' },
   { name: 'domain:lint', command: 'pnpm --filter @gd/domain lint' },
   { name: 'domain:test', command: 'pnpm --filter @gd/domain test' },
