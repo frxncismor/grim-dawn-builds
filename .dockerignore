@@ -1,0 +1,26 @@
+# T-054: build context for apps/api/Dockerfile (context = repository root).
+# Docker reads only the .dockerignore at the root of the context, so this file lives here
+# and not in apps/api/. Keeps secrets, VCS data, local dependencies and build output out of
+# the context (plan §12.7, §12.8; constitution XII).
+
+# Local environment files and secrets: never sent to the daemon.
+**/.env*
+**/secrets
+**/secrets/**
+
+# Version control metadata.
+.git
+**/.git
+
+# Local dependencies and build output (rebuilt inside the image).
+**/node_modules
+**/dist
+**/.angular
+**/coverage
+
+# Editorial fixtures are not runtime inputs of the API.
+content
+
+# Logs and editor/OS noise.
+**/*.log
+.vscode
