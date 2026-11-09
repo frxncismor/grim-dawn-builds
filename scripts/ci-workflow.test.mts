@@ -20,6 +20,7 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm run check:scope',
   'pnpm run check:boundaries',
   'pnpm run check:secrets',
+  'pnpm --filter @gd/domain build',
   'pnpm --filter @gd/domain typecheck',
   'pnpm --filter @gd/domain lint',
   'pnpm --filter @gd/domain test',

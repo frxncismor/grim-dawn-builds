@@ -1,9 +1,9 @@
-import { BuildSchema, publicFilter, type Build, type BuildInput } from './index';
+import { BuildSchema, publicFilter, type Build, type BuildInput } from './index.js';
 import {
   runContentRepositoryContract,
   type ContentRepositoryPort,
   type ContractOptions,
-} from '../testing/repository-contract';
+} from '../testing/repository-contract.js';
 
 /**
  * Pure in-memory reference adapter. Runs the shared ContentRepository contract (T-063)

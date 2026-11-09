@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AssetSchema, BuildSchema, TierEntrySchema, findParentCycle } from './schema';
+import { AssetSchema, BuildSchema, TierEntrySchema, findParentCycle } from './schema.js';
 
 // Shapes follow specs/001-mvp-guias-builds/data-model.md (tables builds, tier_entries, assets).
 const draftBuild = () => ({

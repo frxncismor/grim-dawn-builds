@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { CONTENT_STATUSES, TIERS } from './vocabulary';
+import { CONTENT_STATUSES, TIERS } from './vocabulary.js';
 
-export { CONTENT_STATUSES, TIERS } from './vocabulary';
-export type { ContentStatus, Tier } from './vocabulary';
+export { CONTENT_STATUSES, TIERS } from './vocabulary.js';
+export type { ContentStatus, Tier } from './vocabulary.js';
 
 /**
  * Content contract for `content/` JSON files.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkAssetManifest } from './asset';
+import { checkAssetManifest } from './asset.js';
 
 const asset = (overrides: Record<string, unknown> = {}) => ({
   slug: 'icono-rayo',

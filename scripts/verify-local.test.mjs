@@ -31,6 +31,23 @@ test('verify runs the API typecheck, lint and tests (T-053)', () => {
   assert.ok(commands.includes('pnpm --filter @gd/api test'), 'api test missing');
 });
 
+test('verify builds @gd/domain before any consumer (T-071 blocker 2)', () => {
+  const commands = VERIFY_STEPS.map((step) => step.command);
+  const build = commands.indexOf('pnpm --filter @gd/domain build');
+  assert.notEqual(build, -1, 'domain build missing');
+  for (const consumer of [
+    'pnpm --filter @gd/domain typecheck',
+    'pnpm --filter @gd/api typecheck',
+    'pnpm assets:check',
+    'pnpm test',
+    'pnpm build',
+  ]) {
+    const index = commands.indexOf(consumer);
+    assert.notEqual(index, -1, `${consumer} missing`);
+    assert.ok(build < index, `domain build must run before "${consumer}"`);
+  }
+});
+
 test('runs every step in order when all succeed', async () => {
   const calls = [];
   const exec = async (step) => {

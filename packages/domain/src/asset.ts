@@ -1,4 +1,4 @@
-import { AssetSchema, type Asset } from './schema';
+import { AssetSchema, type Asset } from './schema.js';
 
 export interface AssetIssue {
   /** Set when the problem is a manifest entry or a file path. */

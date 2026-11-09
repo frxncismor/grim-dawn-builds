@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import * as domain from './index';
-import * as vocabulary from './vocabulary';
+import * as domain from './index.js';
+import * as vocabulary from './vocabulary.js';
 import pkg from '../package.json' with { type: 'json' };
 
 // Narrow public API of @gd/domain. Adding an export is a deliberate contract change.

@@ -1,4 +1,4 @@
-import { APPROVED_RIGHTS, type Build } from './schema';
+import { APPROVED_RIGHTS, type Build } from './schema.js';
 
 /**
  * Public visibility rule: only publicado builds with approved rights leave the repository.

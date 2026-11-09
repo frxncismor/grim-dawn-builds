@@ -56,6 +56,9 @@ jobs:
       - name: Check tracked secrets
         run: pnpm run check:secrets
 
+      - name: Domain build
+        run: pnpm --filter @gd/domain build
+
       - name: Domain typecheck
         run: pnpm --filter @gd/domain typecheck
 

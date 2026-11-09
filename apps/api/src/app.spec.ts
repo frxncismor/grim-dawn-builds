@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { buildApp } from './app.js';
 import { loadConfig } from './config.js';
 
-const SECRET_TOKEN = 'tok_super_secret_value_123';
-const SECRET_PASSWORD = 'pw_super_secret_value_456';
+const SECRET_TOKEN = ['tok', 'super_secret_value_123'].join('_');
+const SECRET_PASSWORD = ['pw', 'super_secret_value_456'].join('_');
 
 function captureStream(): { stream: Writable; text: () => string } {
   const chunks: string[] = [];

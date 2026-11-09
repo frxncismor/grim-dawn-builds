@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Build, BuildInput } from '../src/schema';
+import type { Build, BuildInput } from '../src/schema.js';
 
 /**
  * Reusable contract suite for `ContentRepository` adapters (T-063, plan §12.10/§12.11).

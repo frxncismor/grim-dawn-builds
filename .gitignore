@@ -3,6 +3,7 @@
 # Compiled output
 /dist
 apps/api/dist/
+packages/domain/dist/
 /tmp
 /out-tsc
 /bazel-out

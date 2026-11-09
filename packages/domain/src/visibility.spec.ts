@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Build } from './schema';
-import { publicFilter } from './visibility';
+import type { Build } from './schema.js';
+import { publicFilter } from './visibility.js';
 
 const build = (overrides: Partial<Pick<Build, 'review_state' | 'rights_status'>>) =>
   ({

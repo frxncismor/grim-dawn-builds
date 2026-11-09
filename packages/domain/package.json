@@ -5,14 +5,25 @@
   "description": "Pure content rules shared by web, api and scripts: Zod schemas, vocabulary, publication and asset rules. No framework, HTTP or I/O.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./vocabulary": "./src/vocabulary.ts",
-    "./testing": "./testing/repository-contract.ts"
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./vocabulary": {
+      "types": "./dist/src/vocabulary.d.ts",
+      "default": "./dist/src/vocabulary.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/repository-contract.d.ts",
+      "default": "./dist/testing/repository-contract.js"
+    }
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true });\"",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint src",
-    "test": "vitest run --coverage"
+    "test": "pnpm run build && vitest run --coverage"
   },
   "dependencies": {
     "zod": "^4.6.7"
