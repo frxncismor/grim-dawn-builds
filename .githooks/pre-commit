@@ -1,0 +1,16 @@
+#!/bin/sh
+# pre-commit (T-083): escanea con gitleaks los cambios en staging antes de cada commit.
+# Activación por clon: `pnpm setup:hooks` (git config core.hooksPath .githooks).
+# Fallo cerrado: sin gitleaks instalado el commit se bloquea con instrucciones.
+# La CI repite el escaneo sobre el rango de commits de cada PR y el historial se escanea
+# periódicamente; este hook no sustituye a esas comprobaciones.
+set -eu
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks no está instalado; no se puede verificar el commit." >&2
+  echo "pre-commit: instala gitleaks 8.30.1 (https://github.com/gitleaks/gitleaks) y reintenta." >&2
+  exit 1
+fi
+
+repo_root=$(git rev-parse --show-toplevel)
+exec gitleaks git --pre-commit --staged --redact --exit-code 1 --config "$repo_root/.gitleaks.toml" "$repo_root"

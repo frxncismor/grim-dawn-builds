@@ -1,0 +1,17 @@
+# gitleaks configuration (T-083, constitución XII, plan §13.4).
+# Used by .githooks/pre-commit (staged changes), by the CI PR commit-range scan
+# (.github/workflows/ci.yml) and by the scheduled full-history scan
+# (.github/workflows/secret-scan.yml).
+#
+# Rules: the gitleaks default ruleset, unmodified (no custom or disabled rules).
+# Allowlist: kept minimal on purpose. Add an entry only with a written reason in
+# this file, scoped to one path or one regex, and never to a whole directory.
+
+title = "grim-dawn-builds secret scan"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Minimal allowlist (T-083). Empty until a verified false positive needs a narrow entry."
+paths = []
