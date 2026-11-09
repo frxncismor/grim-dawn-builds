@@ -1,7 +1,7 @@
 import { after, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -246,6 +246,31 @@ describe('redaction', () => {
     assert.ok(findings.length >= 5);
     const serialized = JSON.stringify(findings);
     for (const value of SYN_VALUES) assert.ok(!serialized.includes(value));
+  });
+});
+
+describe('infra/docker/.env.example (T-080)', () => {
+  const TEMPLATE = join('infra', 'docker', '.env.example');
+  const SECRET_FIELDS = [
+    'POSTGRES_PASSWORD',
+    'DB_PASSWORD_MIGRATOR',
+    'DB_PASSWORD_IMPORTER',
+    'DB_PASSWORD_EDITOR',
+    'DB_PASSWORD_API_RO',
+  ];
+
+  it('passes the scanner and leaves every secret field blank', () => {
+    const text = readFileSync(join(REPO_ROOT, TEMPLATE), 'utf8');
+    assert.deepEqual(scanText({ [TEMPLATE]: text }), []);
+    const entries = new Map<string, string>();
+    for (const line of text.split(/\r?\n/)) {
+      if (line === '' || line.startsWith('#')) continue;
+      const eq = line.indexOf('=');
+      entries.set(line.slice(0, eq), line.slice(eq + 1));
+    }
+    for (const field of SECRET_FIELDS) {
+      assert.equal(entries.get(field), '', `${field} must be blank`);
+    }
   });
 });
 
