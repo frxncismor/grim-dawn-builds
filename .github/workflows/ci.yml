@@ -53,6 +53,9 @@ jobs:
       - name: Check monorepo boundaries
         run: pnpm run check:boundaries
 
+      - name: Check tracked secrets
+        run: pnpm run check:secrets
+
       - name: Domain typecheck
         run: pnpm --filter @gd/domain typecheck
 

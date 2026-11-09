@@ -9,6 +9,14 @@ test('verify runs check-scope before the other steps (T-069)', () => {
   assert.equal(VERIFY_STEPS[0].command, 'pnpm run check:scope');
 });
 
+test('verify runs the secrets guard after boundaries (T-066a)', () => {
+  const names = VERIFY_STEPS.map((step) => step.name);
+  const index = names.indexOf('check-secrets');
+  assert.notEqual(index, -1, 'check-secrets step missing');
+  assert.equal(names.indexOf('check-boundaries') + 1, index);
+  assert.equal(VERIFY_STEPS[index].command, 'pnpm run check:secrets');
+});
+
 test('verify runs the domain typecheck, lint and tests (T-051)', () => {
   const commands = VERIFY_STEPS.map((step) => step.command);
   assert.ok(commands.includes('pnpm --filter @gd/domain typecheck'), 'domain typecheck missing');

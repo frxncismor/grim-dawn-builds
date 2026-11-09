@@ -23,6 +23,7 @@ export async function runSteps(steps, exec) {
 export const VERIFY_STEPS = [
   { name: 'check-scope', command: 'pnpm run check:scope' },
   { name: 'check-boundaries', command: 'pnpm run check:boundaries' },
+  { name: 'check-secrets', command: 'pnpm run check:secrets' },
   { name: 'domain:typecheck', command: 'pnpm --filter @gd/domain typecheck' },
   { name: 'domain:lint', command: 'pnpm --filter @gd/domain lint' },
   { name: 'domain:test', command: 'pnpm --filter @gd/domain test' },
