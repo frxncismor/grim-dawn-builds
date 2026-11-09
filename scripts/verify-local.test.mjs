@@ -1,6 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runSteps } from './verify-local.mjs';
+import { runSteps, VERIFY_STEPS } from './verify-local.mjs';
+
+test('verify runs check-scope before the other steps (T-069)', () => {
+  const names = VERIFY_STEPS.map((step) => step.name);
+  assert.ok(names.includes('check-scope'), 'check-scope step missing');
+  assert.equal(names[0], 'check-scope');
+  assert.equal(VERIFY_STEPS[0].command, 'pnpm run check:scope');
+});
 
 test('runs every step in order when all succeed', async () => {
   const calls = [];

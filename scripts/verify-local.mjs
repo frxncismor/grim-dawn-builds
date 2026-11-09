@@ -21,13 +21,14 @@ export async function runSteps(steps, exec) {
 
 /** Pasos locales de verificación (T-004). Sin CI ni secretos (hosting=local_first). */
 export const VERIFY_STEPS = [
-  { name: 'lint', command: 'npm run lint' },
-  { name: 'lint:md', command: 'npm run lint:md' },
-  { name: 'format', command: 'npm run format:check' },
-  { name: 'test', command: 'npm test' },
-  { name: 'test:scripts', command: 'npm run test:scripts' },
-  { name: 'assets', command: 'npm run assets:check' },
-  { name: 'build', command: 'npm run build' },
+  { name: 'check-scope', command: 'pnpm run check:scope' },
+  { name: 'lint', command: 'pnpm lint' },
+  { name: 'lint:md', command: 'pnpm lint:md' },
+  { name: 'format', command: 'pnpm format:check' },
+  { name: 'test', command: 'pnpm test' },
+  { name: 'test:scripts', command: 'pnpm test:scripts' },
+  { name: 'assets', command: 'pnpm assets:check' },
+  { name: 'build', command: 'pnpm build' },
 ];
 
 /** @param {{ command: string }} step @returns {Promise<number>} */
