@@ -1,0 +1,5 @@
+# Force LF so shell scripts, SQL, Dockerfiles and YAML run unchanged in Linux containers (Windows checkouts).
+*.sh text eol=lf
+*.sql text eol=lf
+Dockerfile* text eol=lf
+*.yaml text eol=lf

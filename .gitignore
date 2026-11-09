@@ -34,8 +34,12 @@ yarn-error.log
 
 # Local secrets and overrides (never commit)
 .env
+.env.*
+!.env.example
 .env.local
 .env.*.local
+infra/docker/.env
+infra/docker/secrets/
 .sass-cache/
 /connect.lock
 /coverage
