@@ -65,6 +65,15 @@ jobs:
       - name: Domain tests
         run: pnpm --filter @gd/domain test
 
+      - name: API typecheck
+        run: pnpm --filter @gd/api typecheck
+
+      - name: API lint
+        run: pnpm --filter @gd/api lint
+
+      - name: API tests
+        run: pnpm --filter @gd/api test
+
       - name: Web lint
         run: pnpm run lint
 

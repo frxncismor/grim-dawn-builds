@@ -24,6 +24,13 @@ test('verify runs the domain typecheck, lint and tests (T-051)', () => {
   assert.ok(commands.includes('pnpm --filter @gd/domain test'), 'domain test missing');
 });
 
+test('verify runs the API typecheck, lint and tests (T-053)', () => {
+  const commands = VERIFY_STEPS.map((step) => step.command);
+  assert.ok(commands.includes('pnpm --filter @gd/api typecheck'), 'api typecheck missing');
+  assert.ok(commands.includes('pnpm --filter @gd/api lint'), 'api lint missing');
+  assert.ok(commands.includes('pnpm --filter @gd/api test'), 'api test missing');
+});
+
 test('runs every step in order when all succeed', async () => {
   const calls = [];
   const exec = async (step) => {
