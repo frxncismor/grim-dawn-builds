@@ -1,4 +1,22 @@
 import { z } from 'zod';
+import { ConfigError } from './config/errors.js';
+
+export { ConfigError, type ConfigIssue } from './config/errors.js';
+export {
+  PROHIBITED_SECRET_VALUES,
+  SecretValueSchema,
+  loadSecrets,
+  type SecretConfig,
+} from './config/secrets.js';
+export {
+  REDACTED,
+  RedactedSecret,
+  SecretResolutionError,
+  resolveSecret,
+  type SecretIO,
+  type SecretSpec,
+  type SecretSourceKind,
+} from './config/secret-source.js';
 
 /** Pino levels accepted by LOG_LEVEL. */
 export const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
@@ -23,22 +41,6 @@ export interface AppConfig {
   readonly host: string;
   readonly port: number;
   readonly logLevel: LogLevel;
-}
-
-/**
- * Raised when configuration is invalid. Carries field names and issue codes
- * only: never the rejected input values, so it is safe to print or log.
- */
-export class ConfigError extends Error {
-  readonly fields: readonly string[];
-  readonly codes: readonly string[];
-
-  constructor(issues: readonly { field: string; code: string }[]) {
-    super(`Invalid configuration: ${issues.map((i) => `${i.field} (${i.code})`).join(', ')}`);
-    this.name = 'ConfigError';
-    this.fields = [...new Set(issues.map((i) => i.field))];
-    this.codes = issues.map((i) => i.code);
-  }
 }
 
 /**
