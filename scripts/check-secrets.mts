@@ -76,7 +76,7 @@ const HIGH_CONFIDENCE_PATTERNS: readonly { label: string; re: RegExp }[] = [
   { label: 'JWT', re: /\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g },
 ];
 
-/** `esquema://usuario:contraseña@`. `${VAR}` y `<runtime>` no coinciden (caracteres excluidos). */
+/** URL con usuario y contraseña literales. `${VAR}` y `<runtime>` no coinciden (caracteres excluidos). */
 const CREDENTIAL_URL = /\b[a-z][a-z0-9+.-]*:\/\/[^\s:/@'"`<>{}()$]+:[^\s/?#@'"`<>{}()$]+@/gi;
 
 /** Asignación `NOMBRE_SECRETO = valor` (mayúsculas), con separador `:` o `=`. */
