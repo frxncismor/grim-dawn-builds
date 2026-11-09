@@ -1,0 +1,9 @@
+# Opt-in debug override (T-056). Publishes PostgreSQL to the host on loopback ONLY.
+# Never used by default. Usage (from the repository root):
+#   docker compose -f infra/docker/compose.yaml -f infra/docker/compose.debug.yaml up -d db
+# Optional host port: POSTGRES_DEBUG_PORT (default 5432). Connect from the host to 127.0.0.1 only.
+
+services:
+  db:
+    ports:
+      - "127.0.0.1:${POSTGRES_DEBUG_PORT:-5432}:5432"

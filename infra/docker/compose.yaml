@@ -1,0 +1,108 @@
+# Local stack for the read-only API (T-056). Run from the repository root:
+#   pnpm setup:env                       # creates infra/docker/.env and secrets/ (git-ignored)
+#   docker compose -f infra/docker/compose.yaml up -d --wait
+#
+# Rules (plan §12.7, §12.8; constitution XII):
+# - db is NOT published to the host. Debug access is opt-in via compose.debug.yaml (loopback only).
+# - api is published only on 127.0.0.1.
+# - Secrets are read from git-ignored files through Compose `secrets:` and *_FILE variables.
+#   No literal secret value appears in this file, and env_file is not used (it would copy every
+#   secret from .env into the container environment).
+# - migrate is the one-shot migration job (T-057). Until T-057 lands, its command does not exist
+#   and `up` stops there; that is intentional (no fake migration).
+# - Per-role database credentials (T-056b) are not wired yet.
+
+name: grim-dawn-builds
+
+x-hardening: &hardening
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  read_only: true
+
+services:
+  db:
+    # PostgreSQL 17.11 (Debian trixie), tag and multi-arch index digest resolved from Docker Hub /
+    # registry-1.docker.io on 2026-11-09. Never `latest`.
+    image: postgres:17.11-trixie@sha256:ff87138949ad9a46f32ff23bd6852b52ce024a13dffe9b4087be98292cdd3b4f
+    <<: *hardening
+    # The official entrypoint starts as root to initialise PGDATA, then drops to the postgres user.
+    # Only the capabilities that step needs are added back after cap_drop ALL.
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gd_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 200
+
+  migrate:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+    image: gd-api:local
+    <<: *hardening
+    # T-057: migrator entrypoint is not implemented yet (apps/api/src/db/migrate.mts). Credentials for
+    # the `migrator` role arrive with T-056b. Do not run migrations any other way.
+    command: ["node", "dist/db/migrate.mjs"]
+    depends_on:
+      db:
+        condition: service_healthy
+    tmpfs:
+      - /tmp
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 100
+
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+    image: gd-api:local
+    <<: *hardening
+    # Host side is loopback only. Inside the container the image sets API_HOST=0.0.0.0 so the
+    # published port can reach the process.
+    ports:
+      - "127.0.0.1:${API_PORT:-3000}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 100
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+
+volumes:
+  pgdata:
+    name: grim-dawn-builds-pgdata
