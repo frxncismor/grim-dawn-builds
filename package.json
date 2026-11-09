@@ -15,12 +15,13 @@
     "lint": "ng lint",
     "lint:md": "markdownlint-cli2",
     "lint:md:fix": "markdownlint-cli2 --fix",
-    "format:check": "prettier --check \"src/**/*.{ts,html,css,json}\" \"*.{js,json,md}\"",
-    "format": "prettier --write \"src/**/*.{ts,html,css,json}\" \"*.{js,json,md}\""
+    "format:check": "prettier --check \"src/**/*.{ts,html,css,json}\" \"packages/**/*.{ts,json}\" \"*.{js,json,md}\"",
+    "format": "prettier --write \"src/**/*.{ts,html,css,json}\" \"packages/**/*.{ts,json}\" \"*.{js,json,md}\""
   },
   "private": true,
   "packageManager": "pnpm@12.18.0",
   "dependencies": {
+    "@gd/domain": "workspace:*",
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",
     "@angular/core": "^21.2.0",
@@ -30,8 +31,7 @@
     "@angular/router": "^21.2.0",
     "@angular/ssr": "^21.2.29",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "zod": "^4.6.7"
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@angular/build": "^21.2.29",

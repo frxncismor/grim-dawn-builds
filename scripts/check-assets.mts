@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { checkAssetManifest } from '../src/app/core/content/asset.ts';
+import { checkAssetManifest } from '@gd/domain';
 
 const OFFICIAL_DIR = 'public/assets';
 const MANIFEST = 'content/assets/manifest.json';

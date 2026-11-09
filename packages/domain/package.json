@@ -1,0 +1,24 @@
+{
+  "name": "@gd/domain",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Pure content rules shared by web, api and scripts: Zod schemas, vocabulary, publication and asset rules. No framework, HTTP or I/O.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./vocabulary": "./src/vocabulary.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint src",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "4.1.12",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  }
+}

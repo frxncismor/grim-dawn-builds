@@ -1,5 +1,5 @@
-import { CONTENT_STATUSES } from '../../core/content/vocabulary';
-import type { ContentStatus, Tier } from '../../core/content/vocabulary';
+import { CONTENT_STATUSES } from '@gd/domain/vocabulary';
+import type { ContentStatus, Tier } from '@gd/domain/vocabulary';
 
 /** One catalog slot or build row, as the tier list needs it. Framework-independent. */
 export interface CatalogItem {

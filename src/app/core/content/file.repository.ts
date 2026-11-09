@@ -1,5 +1,4 @@
-import { publicFilter } from './visibility';
-import { BuildSchema, type Build } from './schema';
+import { BuildSchema, publicFilter, type Build } from '@gd/domain';
 import type { ContentRepository } from './repository';
 
 /** Source of raw (unvalidated) build documents: a file loader, a fixture, or a test double. */

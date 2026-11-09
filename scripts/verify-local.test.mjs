@@ -9,6 +9,13 @@ test('verify runs check-scope before the other steps (T-069)', () => {
   assert.equal(VERIFY_STEPS[0].command, 'pnpm run check:scope');
 });
 
+test('verify runs the domain typecheck, lint and tests (T-051)', () => {
+  const commands = VERIFY_STEPS.map((step) => step.command);
+  assert.ok(commands.includes('pnpm --filter @gd/domain typecheck'), 'domain typecheck missing');
+  assert.ok(commands.includes('pnpm --filter @gd/domain lint'), 'domain lint missing');
+  assert.ok(commands.includes('pnpm --filter @gd/domain test'), 'domain test missing');
+});
+
 test('runs every step in order when all succeed', async () => {
   const calls = [];
   const exec = async (step) => {

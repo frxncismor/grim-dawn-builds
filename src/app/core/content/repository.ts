@@ -1,4 +1,4 @@
-import type { Build } from './schema';
+import type { Build } from '@gd/domain';
 
 /** Port: how the app reads content. Adapters: file (default), Supabase (deferred T-011). */
 export interface ContentRepository {

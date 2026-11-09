@@ -6,8 +6,8 @@
 /out-tsc
 /bazel-out
 
-# Node
-/node_modules
+# Node (unanchored so workspace packages under packages/ are covered too)
+node_modules
 npm-debug.log
 yarn-error.log
 
@@ -42,7 +42,7 @@ infra/docker/.env
 infra/docker/secrets/
 .sass-cache/
 /connect.lock
-/coverage
+coverage
 /libpeerconnection.log
 testem.log
 /typings

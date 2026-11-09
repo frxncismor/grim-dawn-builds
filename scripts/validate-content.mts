@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { BuildSchema } from '../src/app/core/content/schema.ts';
+import { BuildSchema } from '@gd/domain';
 
 export interface ContentFile {
   file: string;
