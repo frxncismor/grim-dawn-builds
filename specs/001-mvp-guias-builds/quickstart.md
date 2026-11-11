@@ -2018,3 +2018,85 @@ Entorno: PATH antepuesto con `$env:TEMP/gd-t057-tools` y
 `NG_BUILD_MAX_WORKERS=2`. Modelo realmente usado para esta corrección:
 `openai/gpt-6.1-sol` (sesión `sdd-ui`). Sin commit/push/PR ni cambios ajenos;
 no se ejecutó Docker ni se acredita release/API. La spec001 sigue abierta.
+
+## T-037: página `/builds/:slug` ensamblada (`BuildPage`) — 2026-11-10
+
+`build.page.spec.ts` se escribió antes que el componente. El primer
+`ng test --watch=false --include='src/app/features/build/build.page.spec.ts'`
+falló con `Could not resolve "./build.page"` (más TS18046 derivado del tipo
+ausente); el rojo está en `$env:TEMP/gd-t037-red.log`. Tras implementar la
+página, el mismo comando da **17/17** en `$env:TEMP/gd-t037-green.log` y las
+nueve suites de `src/app/features/build/**/*.spec.ts` suman **135/135** en
+`$env:TEMP/gd-t037-build-feature-tests.log`.
+
+La página es un componente controlado `OnPush` con
+`content = input.required<BuildPageContent>()`, donde
+`BuildPageContent = PublicBuild & { authorIsPlaceholder: boolean; draft: boolean }`:
+no inyecta repositorio, `HttpClient`, storage ni decide derechos. Ensambla, en el
+orden canónico de plan §2 y de `sections_meta`, `gd-build-sections`
+(`resumen`, `prioridades`, `notas`, `guia-espiritual`), un `gd-skill-tree` por
+maestría con `treeId` estable `<slug>-tree-a|b` y nodos filtrados, un
+`gd-purchase-stepper` cuyos `activeIds` se comparten con ambos árboles, un
+`gd-loot-filter`, un `gd-devotion-section` cuyo `activeStepPosition` es propiedad
+de la página (`linkedSignal` sobre `content().slug`, reinicio a `undefined`), un
+`gd-video-facade` solo con `video_url` no vacío, `gd-build-attribution` con el
+placeholder explícito y `gd-build-toc`. Las diez anclas canónicas existen y el
+`h1` procede de `resumen`, sin duplicarse.
+
+Los SVG pesados se difieren con `@defer (on viewport)`: `#habilidades` y
+`#devociones` se envuelven en esqueletos Cairn y en listas textuales con nombre
+ES/EN, barra, estado y justificación de cada nodo y posición, etiqueta, cuerpo y
+verificación de cada paso de devoción (incluidos los pasos sin constelación). El
+`@loading` reutiliza la misma alternativa y el esqueleto decorativo va
+`aria-hidden`. En el HTML prerenderizado no aparece ningún `gd-skill-tree` y sí
+las dos alternativas, de modo que `#devociones` funciona sin JavaScript.
+`build-page-preview` prerenderiza `/` (guía sintética completa) y `/borrador`
+(banner «Borrador · no público»), ambos con `noindex,nofollow` reaplicado tras el
+SEO de la página; el log es `$env:TEMP/gd-t037-preview-build.log`.
+
+`SeoService.setPage` emite title, description, canonical, OG/Twitter y JSON-LD
+`Article` + `BreadcrumbList` con solo datos públicos. Los borradores usan
+`noindex,follow` y no declaran autor ni fecha de publicación. `isBasedOn` y
+`citation` salen de las fuentes; `license` solo se emite si existe una URL de
+licencia real (la nota textual no se convierte en un enlace inventado). Medido
+sobre el preview: HTML **65057 bytes / 11694 gzip**, CSS **5088 bytes / 1657
+gzip**, `build.page.css` **2918 bytes**, y los fragmentos diferidos
+`devotion-section` (32.8 kB / 9.2 kB gzip) y `skill-tree` (21.6 kB / 6.5 kB
+gzip) suman **15.8 kB gzip**; bundle inicial del preview 101.90 kB de
+transferencia. Log: `$env:TEMP/gd-t037-budgets.log`.
+
+Playwright 1.65 y axe-core 4.14 sobre las dos rutas, a 375/768/1280 px y en modos
+hidratado, bundles bloqueados y sin JavaScript: **18/18 OK**
+(`$env:TEMP/gd-t037-browser.log`). Comprueba `h1` único, las diez anclas, TOC de
+diez enlaces, banner solo en borrador, `noindex` en ambas, alternativa textual y
+seis nodos/cuatro pasos en el placeholder, cero iframes y cero peticiones
+externas, sin overflow (también con texto al 200 %), foco visible, ancla
+`#devociones` no tapada, TOC sin solapar contenido a 1280, árboles y devociones
+hidratados y consola limpia; **cero violaciones axe** en las 12 auditorías con
+JavaScript disponible. Se inspeccionaron las capturas
+`$env:TEMP/gd-t037-{375,768,1280}.png`. El servidor se cerró, el puerto 4332
+quedó libre y `dist/build-page-preview` se eliminó antes de los checks públicos.
+
+Checks finales:
+
+- `pnpm lint`: `All files pass linting` (`$env:TEMP/gd-t037-lint.log`).
+- `prettier --check` de los ocho archivos tocados: OK
+  (`$env:TEMP/gd-t037-format.log`).
+- `pnpm lint:md`: OK (`$env:TEMP/gd-t037-lint-md.log`).
+- `pnpm build`: 4 rutas prerenderizadas, Home 0/90000 y Tier List
+  105259/110000 gzip (`$env:TEMP/gd-t037-build.log`); se mantienen los avisos
+  preexistentes de bundle inicial (292.47 kB/280 kB) y CSS de `skill-tree`
+  (4.94 kB) y `devotion-map` (4.58 kB), sin aviso de `build.page.css`.
+- `pnpm check:initial-js` (`gd-t037-initial-js.log`), `pnpm check:public-build`
+  (175 archivos, `gd-t037-public-build.log`) y `pnpm check:secrets` (415
+  archivos rastreados, `gd-t037-secrets.log`): OK; el preview no aparece en el
+  artefacto público.
+
+**Precisión de orden:** la prosa de plan §17.42 menciona `guia-espiritual` antes
+de `filtro-de-botin`, pero su propia referencia al orden canónico de §2,
+`sections_meta` (`filtro-de-botin` 6, `guia-espiritual` 7) y el TOC de T-036
+sitúan el filtro primero. Se siguió el orden canónico verificado por el TOC.
+`INCLUDE_DRAFTS` pertenece al resolver de T-020; la página consume `draft` y no
+lee variables de entorno. Modelo realmente usado: `deepseek/deepseek-flash`
+(sesión `sdd-ui`). Sin commit, push ni PR; T-020/T-040/T-041/T-126 siguen
+abiertas y la guía pendiente no se publicó.
