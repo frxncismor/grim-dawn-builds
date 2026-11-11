@@ -244,7 +244,7 @@ T-001→T-004; T-005→T-006→T-009/T-010→T-014→T-015; T-006→T-016/T-047�
 
 ### 8.16 Calidad multiagente y orquestación jerárquica
 
-- [ ] **T-150** [LISTA] CI ejecuta `check:locale-parity` como puerta - `.github/workflows/ci.yml, scripts/ci-workflow.test.mts` - consultoría 2026-11-11 (I3).
+- [x] **T-150** [LISTA] CI ejecuta `check:locale-parity` como puerta - `.github/workflows/ci.yml, scripts/ci-workflow.test.mts` - consultoría 2026-11-11 (I3). **Estado 2026-11-11: hecha.** El job `verify` ejecuta `pnpm run check:locale-parity` justo después del paso de catálogo, y `REQUIRED_RUN_COMMANDS` de `scripts/ci-workflow.test.mts` exige el comando exacto (el test se vio en rojo con `missing required check: pnpm run check:locale-parity` antes del cambio). Evidencia: `node --import tsx --test scripts/ci-workflow.test.mts` 32/32 (exit 0), `pnpm run check:locale-parity` 290 unidades en paridad y 0 fallos (exit 0) y `pnpm test:scripts` 447 pruebas, 445 pasan, 0 fallan, 2 omitidas (exit 0). Commit `63917ed`, integrado en `b32014f`.
 
 - [ ] **T-151** [LISTA] `format:check` cubre `scripts/` y `e2e/` - `package.json` (+ archivos reformateados) - consultoría 2026-11-11 (M1).
 
