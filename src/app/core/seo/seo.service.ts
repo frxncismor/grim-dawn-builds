@@ -49,9 +49,7 @@ function assertPublicData(value: unknown): void {
 function serializeJsonLd(records: readonly JsonLdRecord[]): string | null {
   if (!records.length) return null;
   try {
-    const json = JSON.stringify(records.length === 1 ? records[0] : records);
-    const data: unknown = JSON.parse(json);
-    for (const record of Array.isArray(data) ? data : [data]) {
+    for (const record of records) {
       if (
         !record ||
         typeof record !== 'object' ||
@@ -61,8 +59,8 @@ function serializeJsonLd(records: readonly JsonLdRecord[]): string | null {
       )
         throw new Error('Registro inválido.');
     }
-    assertPublicData(data);
-    return json.replace(
+    assertPublicData(records);
+    return JSON.stringify(records.length === 1 ? records[0] : records).replace(
       /[<>&\u2028\u2029]/g,
       (character) =>
         ({
@@ -74,7 +72,7 @@ function serializeJsonLd(records: readonly JsonLdRecord[]): string | null {
         })[character]!,
     );
   } catch {
-    throw new Error('Datos estructurados no válidos o no serializables.');
+    throw new Error('Datos estructurados inválidos.');
   }
 }
 
@@ -100,12 +98,11 @@ export class SeoService {
     const selectedImage = page.image ?? DEFAULT_SOCIAL_IMAGE;
     const image = { ...selectedImage, url: this.canonical(selectedImage.path) };
     if (
-      image &&
-      (!image.alt.trim() ||
-        !Number.isInteger(image.width) ||
-        image.width <= 0 ||
-        !Number.isInteger(image.height) ||
-        image.height <= 0)
+      !image.alt.trim() ||
+      !Number.isInteger(image.width) ||
+      image.width <= 0 ||
+      !Number.isInteger(image.height) ||
+      image.height <= 0
     )
       throw new Error('Imagen social inválida.');
 
@@ -117,19 +114,19 @@ export class SeoService {
     this.setMeta('property', 'og:url', canonical);
     this.setMeta('property', 'og:type', page.type ?? 'website');
     this.setMeta('property', 'og:site_name', SITE_NAME);
-    this.setMeta('name', 'twitter:card', image ? 'summary_large_image' : 'summary');
+    this.setMeta('name', 'twitter:card', 'summary_large_image');
     this.setMeta('name', 'twitter:title', title);
     this.setMeta('name', 'twitter:description', description);
     this.setMeta('name', 'twitter:url', canonical);
     for (const [key, value] of Object.entries({
-      'og:image': image?.url,
-      'og:image:alt': image?.alt,
-      'og:image:width': image?.width.toString(),
-      'og:image:height': image?.height.toString(),
+      'og:image': image.url,
+      'og:image:alt': image.alt,
+      'og:image:width': image.width.toString(),
+      'og:image:height': image.height.toString(),
     }))
       this.optionalMeta('property', key, value);
-    this.optionalMeta('name', 'twitter:image', image?.url);
-    this.optionalMeta('name', 'twitter:image:alt', image?.alt);
+    this.optionalMeta('name', 'twitter:image', image.url);
+    this.optionalMeta('name', 'twitter:image:alt', image.alt);
 
     let link = this.document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!link) {

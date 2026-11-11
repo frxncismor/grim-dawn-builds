@@ -1,9 +1,10 @@
-# Relevo: T-036 completada
+# Relevo: T-020a ejecutada (PARCIAL, presupuesto bloqueado)
 
 Estado al 2026-11-10: T-033, T-135, T-034, T-035, T-036 y T-037 completadas. T-020
-tiene planificación vigente en plan §17.43. La spec001 sigue abierta y la puerta
-de revisión spec002 queda pendiente. Este turno se limitó a T-037 y no hubo
-commit, push ni PR.
+tiene planificación vigente en plan §17.43, quedó **PARCIAL**, y su remediación
+plan §17.47 (`T-020a`) cerró el `404.html` real (B) y el cableado FR-16 (C) pero
+**no** el presupuesto del chunk inicial (A). La spec001 sigue abierta y la puerta
+de revisión spec002 queda pendiente. Sin commit, push ni PR.
 
 ## Interrupción de la sesión y límite de modelos (2026-11-10)
 
@@ -456,10 +457,154 @@ No hubo revisión final global ni autorización para saltarse la puerta.
 
 ## Siguiente tarea, sin autorización implícita
 
-T-020 es la siguiente tarea planificada (§17.43).
-Después siguen T-021/T-025 y el contacto de T-039.
-Completar CI/calidad/performance, contenido y documentación activas del inventario;
-al final, ejecutar spec002. No ejecutar las tareas reemplazadas, opcionales o
-diferidas como si pertenecieran automáticamente a la entrega. No publicar contenido
-pending. El destino final de PR autorizado es develop y solo al terminar toda la
-spec.
+T-020 tiene implementación parcial y **no está cerrada**. `T-020a` cerró el
+`404.html` real y FR-16; queda **A**: el presupuesto del chunk inicial (306.23 kB
+frente a 300 kB). Antes de avanzar a T-021/T-025 hay que planificar (nueva tarea
+SDD, no ampliar umbrales) cómo sacar ≈6.3 kB del bundle inicial: `withEventReplay`
+(10.9 kB) y el runtime de `@defer` de la página de guía son las dos palancas
+medidas, ambas fuera del alcance autorizado de §17.47. Después siguen T-021/T-025
+y el contacto de T-039. Completar CI/calidad/performance, contenido y
+documentación activas del inventario; al final, ejecutar spec002. No ejecutar las
+tareas reemplazadas, opcionales o diferidas como si pertenecieran automáticamente
+a la entrega. No publicar contenido pending. El destino final de PR autorizado es
+develop y solo al terminar toda la spec.
+
+## T-020: implementación parcial y bloqueos (2026-11-10)
+
+Se añadieron la ruta lazy `builds/:slug`, el resolver con `TransferState`, la
+ruta `**` a `NotFoundPage` y `getPrerenderParams` sobre la fuente activa, con
+pruebas primero (RED/GREEN) y suite completa en verde (30 archivos, 280 pruebas).
+También se documentó la evidencia y los límites en `quickstart.md` (sección
+«T-020: rutas, resolver y 404 con estado»). No se marcó `T-020` y no se tocaron
+`BuildPage`, dominio, `apps/api`, dependencias ni umbrales de `angular.json`.
+
+Bloqueos registrados:
+
+1. **Presupuesto:** `pnpm build` falla con 306.11 kB/300 kB (+6.11) y
+   `pnpm check:initial-js` deja `/tier-list` en 110981/110000 bytes gzip
+   (base 105259). Al enrutar `BuildPage`, el chunk inicial comparte más código de
+   `@angular/core`/`common`/`platform-browser`; exige tarea de rendimiento o
+   decisión de plan antes de ajustar nada.
+2. **404 real:** Angular 21.2.29 omite rutas catch-all del prerender, así que no
+   se genera `404.html` en ninguno de los dos builds. La ruta y la página están
+   cableadas y probadas, pero el artefacto no se simula (plan §17.43).
+3. **FR-16:** falta el endpoint de descriptores públicos de activos aprobados y
+   el consumidor server con `resolveIcon`; `apps/api` quedó fuera del alcance de
+   este despacho. Sin ese cableado, FR-16 sigue abierto.
+
+Evidencia local en `$env:TEMP/gd-t020-{red,green,full-test,lint,prettier,lint-md,secrets,public-build,drafts-build,initial-js,public-check}.log`
+(los artefactos temporales de build se eliminaron). Modelo realmente usado:
+`deepseek/deepseek-flash`. Sin commit, push ni PR.
+
+## T-020a: remediación de T-020 — PARCIAL, A bloqueado (2026-11-10)
+
+Se ejecutó la remediación de plan §17.47. **T-020 sigue sin marcar** y esta tarea
+queda **PARCIAL**: B y C están cerrados y probados; A está implementado en lo que
+el alcance autoriza pero **el build sigue rojo**, así que no se acredita.
+
+**B — `404.html` real: cerrado.** Angular 21.2.29 omite el catch-all del
+prerender, así que la misma página estática se prerenderiza en `/404` (ruta lazy
+en `app.routes.ts` + `RenderMode.Prerender` en `app.routes.server.ts`) y
+`scripts/emit-404.mts` copia `browser/404/index.html` a `browser/404.html`. La
+copia valida el contrato antes de escribir: exige `data-not-found`, `h1` de 404,
+`robots=noindex` y `base href="/"`, y rechaza la portada 200 (`gd-static-home`) o
+un artefacto sin esa página. Encadenado en `build` y `build:release`; prueba en
+`scripts/emit-404.test.mts` (5 casos, el de symlink se omite en Windows sin
+privilegios). Evidencia: `404.html` de 34 812 bytes con la página 404 real en un
+artefacto de verificación (`dist/probe404`, configuración de desarrollo con
+optimización, borrado después). Nota para T-021: `/404` es una ruta prerenderizada
+con `noindex` y debe excluirse del sitemap igual que `404.html`, y
+`browser/404/index.html` no se sirve como página de contenido.
+
+**C — FR-16: cerrado.** `GET /api/v1/assets` (solo lectura) devuelve
+descriptores públicos de activos `approved`; `mapAsset/mapAssets` proyectan
+`slug`/`file_path`/`fallback_svg` y nunca `origin_url`, `rights_holder`,
+`license_or_permission` ni `proof_ref` (objeto Zod estricto y ruta pública
+validada). `PostgresContentRepository.listAssets()` lee `v_public_assets` (la
+vista ya filtra `approved`; la tabla `assets` no tiene dimensiones, así que el
+descriptor no las incluye). En la web, `ApiContentRepository.listAssets()` valida
+cada descriptor con un esquema estricto y lo resuelve con
+`resolveIcon`/`resolvePublicAssets`: un `pending`/`rejected` cae siempre al SVG
+propio y un `file_path` hostil falla cerrado. Pruebas: `map-content.spec.ts`,
+`routes/content.spec.ts`, `api.repository.server.test.mts`,
+`resolve-icon.server.test.mts` y caso de integración en `content.int.spec.ts`
+(requiere Docker; declarado, no ejecutado aquí).
+
+**A — presupuesto: bloqueado con medición.** `content.resolvers.ts` ya no
+importa `./repository` ni `@gd/domain` de forma estática: el servidor los carga
+con `await import(...)` y el navegador solo lee `TransferState` (prueba de guarda
+en `content.resolvers.spec.ts`). Ahorro real: **0.64 kB**. `ng build` sigue en
+**306.23 kB / 300 kB** (+6.23). Medición del mismo build con las rutas de HEAD:
+**292.47 kB**; la ruta `builds/:slug` cuesta **13.76 kB** y solo hay 7.53 kB de
+margen. El coste no es el resolver (887 B) sino código de framework que el
+optimizador de chunks arrastra al bundle inicial al compartirse con el chunk lazy
+de `BuildPage`: `@angular/core` `_debug_node-chunk` (+7.2 kB), `_effect-chunk2`
+(+1.7 kB), `@angular/common` (+1.2 kB), `platform-browser` (+1.0 kB) y el runtime
+de `@defer` (≈3.3 kB medido con una página trivial con un solo `@defer`). No se
+tocaron `angular.json` ni los umbrales de plan §6.
+
+Palancas reales, todas fuera de los archivos autorizados de §17.47: (1)
+`withEventReplay()` en `src/app/app.config.ts` arrastra
+`primitives-event-dispatch` (10.9 kB) al chunk inicial; quitarlo exige decisión de
+producto sobre hidratación/event replay (T-133). (2) El runtime de `@defer` y
+`linkedSignal`/`effect` de `build.page.ts`/`build-toc.ts` (T-036/T-037). (3)
+Ampliar el guard raw 280/300 kB, prohibido por §6 y la constitución IV.
+
+Sin marcar T-020: el criterio de cierre exige build verde y `check:initial-js` en
+105 259/110 000, y hoy el presupuesto impide además generar el artefacto público
+(de ahí que `pnpm check:public-build` falle por `build-failed`).
+
+**Artefactos de verificación** (configuración `development` + `--optimization=true`,
+sin presupuesto y sin `static-home`; **no** son artefacto de release): público con
+5 rutas (`/`, `/404`, `/acerca`, `/autores/…`, `/tier-list`), sin
+`builds/chaman-demoledor-golpe-primigenio` ni su slug/JSON-LD y con `404.html`
+(34 869 B); local con `INCLUDE_DRAFTS=true` con 6 rutas, la guía presente
+(140 551 B) con banner «Borrador», `noindex`, JSON-LD `Article` y sin campos
+privados, también con `404.html`. `check:initial-js` sobre ese artefacto da
+`/tier-list` 112 478/110 000 gzip.
+
+Evidencia en
+`$env:TEMP/gd-t020a-{red,green,test,test-scripts,build-after-a,prod-nodfeer,prod-defer}.log`.
+Artefactos temporales (`dist/probe*`, `dist/t020a-*`, `dist/grim-dawn-builds`)
+eliminados. Modelo realmente usado: `deepseek/deepseek-flash`. Sin commit, push ni PR.
+
+## T-020b: presupuesto gzip devuelto, sin holgura para 109 500 (2026-11-10)
+
+`T-020` **sigue sin marcar**: el build ya está en verde, pero `/tier-list` queda en
+**109 990/110 000 gzip**, no en el objetivo de holgura de 109 500.
+
+**Hipótesis de §17.48 refutada.** El resolver estático no era el peso:
+`chunk-ZFVT2EQO.js` (6 468 gzip) es el chunk de la propia página `/tier-list`
+(`tier-components.ts` 10 910 B + `tier-list.page.ts` 4 951 B + `icon`/`registry`),
+sin símbolos del resolver ni de la página 404. El resolver solo aportaba 955 B en
+`main`. El crecimiento real de T-020 está en el chunk de framework compartido con
+el chunk lazy de `BuildPage`: `_debug_node-chunk` +7 163 B, `_effect-chunk2`
++1 701 B y la separación de `platform-browser`/`common` en chunks propios
+(+~5,1 kB gzip en total). Coste medido de la ruta `builds/:slug`: **3 886 gzip**
+; sin esa ruta el build daría 106 166.
+
+**Cambios aplicados** (sin tocar `angular.json` ni los umbrales de §6):
+`src/app/app.routes.ts` carga los resolvers de build y autor con `import()`
+dinámico y restaura el contexto de inyección con `runInInjectionContext`; así
+`content.resolvers.ts` (437 gzip) y `author.state` (489 gzip) salen del grafo
+inicial. `src/app/core/seo/seo.service.ts` elimina ramas muertas (`image` siempre
+existe) y valida el JSON-LD sobre los registros antes de serializar (−27 gzip).
+`app.routes.spec.ts` sustituye la aserción de identidad del resolver por una
+prueba de comportamiento. Ganancia total: **1 006 gzip** (110 996 → 109 990).
+
+**Por qué no se llega a 109 500 dentro de §17.48**: los 3 886 gzip de
+`/builds/:slug` son código de framework compartido, no resolver; recortarlos exige
+tocar `build.page.ts`/`tier-components.ts` o el chunking, fuera de los archivos
+autorizados. Palancas medidas fuera de alcance: quitar `Location` de
+`site-layout.ts` ahorra solo 50 gzip (el router mantiene `platform-location`), y
+`withNoHttpTransferCache()` no ahorra nada porque `platform-browser` importa
+`@angular/common/http` de forma estática.
+
+Verificación: `pnpm build` exit 0 con `check:initial-js OK /tier-list
+(109 990/110 000)`; `pnpm test` 30 archivos/281 pruebas; `pnpm lint`,
+`prettier --check` de los archivos tocados, `pnpm lint:md`,
+`pnpm check:public-build` (204 archivos) y `pnpm check:secrets` (422) en verde.
+Build público sin la guía `pending` y con `404.html`; build `INCLUDE_DRAFTS=true`
+con 6 rutas, la guía de borrador con banner «Borrador» y `noindex`. Evidencia en
+`$env:TEMP/gd-t020b-{build,build-final,drafts,test,lint,prettier,lintmd,public,secrets}.log`.
+Modelo realmente usado: `deepseek/deepseek-flash`. Sin commit, push ni PR.

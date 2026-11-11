@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { resolveIcon } from './resolve-icon.server.ts';
+import { resolveIcon, resolvePublicAssets } from './resolve-icon.server.ts';
 import { ICONS } from './registry.ts';
 const approved = {
   slug: 'rayo-oficial',
@@ -58,6 +58,58 @@ test('approved canonical fixture produces only a public descriptor without its e
     JSON.stringify(resolveIcon('damage-rayo', approved)),
     /proof_ref|PRIVATE-EVIDENCE|license_or_permission|rights_holder/,
   );
+});
+const publicDescriptor = {
+  slug: 'rayo-oficial',
+  file_path: 'public/assets/official/rayo.svg',
+  fallback_svg: 'src/assets/icons/damage-rayo.svg',
+};
+test('FR-16: the public descriptor of an approved asset resolves without private evidence', () => {
+  assert.deepEqual(resolveIcon('damage-rayo', publicDescriptor), {
+    id: 'damage-rayo',
+    src: 'assets/official/rayo.svg',
+    fallbackSrc: 'assets/icons/damage-rayo.svg',
+  });
+  assert.deepEqual(resolvePublicAssets([publicDescriptor]), [
+    { slug: 'rayo-oficial', icon: resolveIcon('damage-rayo', publicDescriptor) },
+  ]);
+  assert.doesNotMatch(
+    JSON.stringify(resolvePublicAssets([publicDescriptor])),
+    /proof_ref|origin_url|rights_holder|license_or_permission|public\//,
+  );
+});
+test('FR-16: pending or rejected descriptors always fall back and never use the official file', () => {
+  for (const status of ['pending', 'rejected']) {
+    const descriptor = { ...publicDescriptor, status, file_path: null };
+    assert.deepEqual(resolveIcon('damage-rayo', descriptor), {
+      id: 'damage-rayo',
+      src: 'assets/icons/damage-rayo.svg',
+      fallbackSrc: 'assets/icons/damage-rayo.svg',
+    });
+    assert.deepEqual(resolvePublicAssets([descriptor]), [
+      { slug: 'rayo-oficial', icon: resolveIcon('damage-rayo') },
+    ]);
+  }
+});
+test('FR-16: descriptors for another icon or with private evidence never become official art', () => {
+  assert.throws(
+    () =>
+      resolveIcon('damage-rayo', {
+        ...publicDescriptor,
+        fallback_svg: 'src/assets/icons/damage-fuego.svg',
+      }),
+    (error: Error) => error.message === 'Icono aprobado inválido.' && error.cause === undefined,
+  );
+  for (const file_path of [
+    'assets/official/rayo.svg',
+    'public/assets/official/../private.svg',
+    'public/assets/official/rayo.svg?key=private',
+    'https://example.test/rayo.svg',
+  ])
+    assert.throws(
+      () => resolveIcon('damage-rayo', { ...publicDescriptor, file_path }),
+      (error: Error) => error.message === 'Icono aprobado inválido.' && error.cause === undefined,
+    );
 });
 test('incomplete approval and hostile paths fail without retaining private details', () => {
   for (const change of [

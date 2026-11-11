@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { PublicAuthorSchema, PublicBuildSchema, PublicSourceSchema } from '@gd/domain';
 import { contractCollections, contractDoc } from '@gd/domain/testing';
-import { mapAuthor, mapBuild, mapSlugs, mapTierList } from './map-content.js';
+import { mapAsset, mapAssets, mapAuthor, mapBuild, mapSlugs, mapTierList } from './map-content.js';
 
 const pick = (keys: string[], source: object) =>
   Object.fromEntries(keys.map((key) => [key, (source as Record<string, unknown>)[key]]));
@@ -95,5 +95,58 @@ describe('public database mappers', () => {
         is_placeholder: false,
       }),
     ).toThrow('invalid_content');
+  });
+  it('FR-16: projects approved assets to public descriptors without private evidence', () => {
+    const approved = {
+      slug: 'rayo-oficial',
+      status: 'approved',
+      file_path: 'public/assets/official/rayo.svg',
+      origin_url: 'https://example.test/fixture',
+      rights_holder: 'PRIVATE-HOLDER',
+      license_or_permission: 'PRIVATE-LICENSE',
+      proof_ref: 'PRIVATE-PROOF',
+      recorded_on: '2026-11-09',
+      fallback_svg: 'src/assets/icons/damage-rayo.svg',
+    };
+    expect(mapAsset(approved)).toEqual({
+      slug: 'rayo-oficial',
+      file_path: 'public/assets/official/rayo.svg',
+      fallback_svg: 'src/assets/icons/damage-rayo.svg',
+    });
+    expect(JSON.stringify(mapAsset(approved))).not.toMatch(
+      /PRIVATE-|origin_url|rights_holder|license_or_permission|proof_ref/,
+    );
+    for (const status of ['pending', 'rejected'])
+      expect(mapAsset({ ...approved, status, file_path: null })).toBeNull();
+    for (const file_path of [
+      'assets/official/rayo.svg',
+      'public/assets/official/../private.svg',
+      'https://example.test/rayo.svg',
+      '',
+    ])
+      expect(() => mapAsset({ ...approved, file_path })).toThrow('invalid_content');
+    expect(() => mapAsset({ ...approved, fallback_svg: '' })).toThrow('invalid_content');
+  });
+  it('FR-16: returns only approved descriptors, deduplicated and sorted by slug', () => {
+    const row = (slug: string, status: string) => ({
+      slug,
+      status,
+      file_path: status === 'approved' ? `public/assets/official/${slug}.svg` : null,
+      fallback_svg: 'src/assets/icons/damage-rayo.svg',
+    });
+    expect(
+      mapAssets([row('zeta', 'approved'), row('alfa', 'approved'), row('oculto', 'pending')]),
+    ).toEqual([
+      {
+        slug: 'alfa',
+        file_path: 'public/assets/official/alfa.svg',
+        fallback_svg: 'src/assets/icons/damage-rayo.svg',
+      },
+      {
+        slug: 'zeta',
+        file_path: 'public/assets/official/zeta.svg',
+        fallback_svg: 'src/assets/icons/damage-rayo.svg',
+      },
+    ]);
   });
 });

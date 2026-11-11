@@ -2,7 +2,14 @@ import pg from 'pg';
 import type { PublicAuthor, PublicBuild, PublicTierList } from '@gd/domain';
 import { PublicBuildSchema } from '@gd/domain';
 import { loadReadinessConfig } from '../db/readiness.mjs';
-import { mapAuthor, mapBuild, mapSlugs, mapTierList } from './map-content.js';
+import {
+  mapAssets,
+  mapAuthor,
+  mapBuild,
+  mapSlugs,
+  mapTierList,
+  type PublicAssetDescriptor,
+} from './map-content.js';
 
 export interface PublicContentRepository {
   listBuilds(): Promise<PublicBuild[]>;
@@ -10,6 +17,8 @@ export interface PublicContentRepository {
   listSlugs(): Promise<string[]>;
   getTierList(slug: string): Promise<PublicTierList | null>;
   getAuthor(slug: string): Promise<PublicAuthor | null>;
+  /** Public descriptors of approved assets; never private provenance (FR-16). */
+  listAssets(): Promise<PublicAssetDescriptor[]>;
 }
 export interface ContentQuery {
   query(sql: string, values?: readonly unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
@@ -107,6 +116,14 @@ export class PostgresContentRepository implements PublicContentRepository {
       ])
     )[0];
     return row ? mapAuthor(row) : null;
+  }
+  /** `v_public_assets` already publishes approved rows only; private columns are never selected. */
+  async listAssets(): Promise<PublicAssetDescriptor[]> {
+    return mapAssets(
+      await this.read(
+        'SELECT slug, file_path, fallback_svg FROM v_public_assets WHERE file_path IS NOT NULL ORDER BY slug COLLATE "C"',
+      ),
+    );
   }
 }
 

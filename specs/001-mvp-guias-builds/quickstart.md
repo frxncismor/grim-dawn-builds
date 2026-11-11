@@ -2100,3 +2100,201 @@ sitúan el filtro primero. Se siguió el orden canónico verificado por el TOC.
 lee variables de entorno. Modelo realmente usado: `deepseek/deepseek-flash`
 (sesión `sdd-ui`). Sin commit, push ni PR; T-020/T-040/T-041/T-126 siguen
 abiertas y la guía pendiente no se publicó.
+
+## T-020: rutas, resolver y 404 con estado (implementación parcial, 2026-11-10)
+
+Se implementó el alcance de rutas descrito en plan §17.43, pero **`T-020` no se
+marca**: el build público no cumple el presupuesto y el artefacto carece de
+`404.html`, además de que FR-16 sigue sin cableado API. No se simuló ningún
+artefacto ni se cambiaron umbrales aprobados.
+
+### Implementado y verificado
+
+- `src/app/app.routes.ts`: ruta lazy `builds/:slug` con
+  `resolve: { content: resolveBuildPage }` y ruta `**` lazy a `NotFoundPage`.
+  Las rutas existentes conservan su orden; `**` queda al final.
+- `src/app/features/build/build-route.page.ts` (archivo añadido fuera de la
+  lista literal de `tasks.md`, justificado): envoltorio lazy mínimo que enlaza
+  el snapshot del resolver con el `BuildPage` controlado y renderiza
+  `NotFoundPage` cuando no hay guía pública. Evita modificar `BuildPage` o
+  habilitar `withComponentInputBinding` en toda la aplicación.
+- `src/app/core/content/content.resolvers.ts`: `BUILD_PAGE_STATE` y
+  `CONTENT_SOURCE_STATE`; en servidor valida el slug con la misma expresión que
+  el dominio, lee `CONTENT_REPOSITORY.findBuild`, aplica la puerta de derechos
+  (`publicFilter` + `link_only`) salvo borradores locales, normaliza con
+  allowlist (sin `rights_notes`, `reviewed_by`, `rights_confirmed_*`,
+  `permission_ref` ni `is_placeholder`) y guarda el snapshot en
+  `TransferState`. En navegador solo lee `TransferState` y exige que el slug
+  coincida; sin repositorio, fetch ni storage. Los esquemas de dominio se
+  importan dinámicamente para no meter Zod en el bundle inicial.
+- `src/app/app.routes.server.ts`: `builds/:slug` en `RenderMode.Prerender` con
+  `PrerenderFallback.None` y `getPrerenderParams` sobre `CONTENT_REPOSITORY.listSlugs()`
+  (la misma fuente inicializada por `provideAppInitializer`). `**` sigue en
+  `RenderMode.Prerender`.
+- `src/app/features/static-pages/not-found.page.ts`: página estática, `h1`
+  localizado, enlaces a `/` y `/tier-list`, `noindex,follow`, sin repositorio ni
+  datos.
+- Pruebas primero: RED en `$env:TEMP/gd-t020-red.log` (módulos ausentes) y
+  GREEN en `$env:TEMP/gd-t020-green.log` (2 archivos, 15 pruebas).
+
+### Verificación ejecutada
+
+- `pnpm test`: 30 archivos, 280 pruebas, todo en verde
+  (`$env:TEMP/gd-t020-full-test.log`).
+- `pnpm lint`: `All files pass linting`; `prettier --check` de los siete
+  archivos tocados: OK; `pnpm lint:md`: 45 archivos, 0 incidencias;
+  `pnpm check:secrets`: 422 archivos rastreados, OK.
+- Build local con `INCLUDE_DRAFTS=true` (presupuesto elevado temporalmente solo
+  para inspeccionar el artefacto; `angular.json` se restauró sin cambios):
+  5 rutas prerenderizadas, incluida
+  `/builds/chaman-demoledor-golpe-primigenio`. Su HTML contiene el banner
+  «Borrador · no público», `noindex,follow` y JSON-LD `Article` sin autor ni
+  fecha; no contiene campos privados (`rights_notes`, `reviewed_by`,
+  `permission_ref`, `is_placeholder`, `rights_confirmed_*`).
+- Build público (mismo procedimiento de inspección): 4 rutas prerenderizadas y
+  **ninguna** carpeta `builds/chaman-demoledor-golpe-primigenio` ni su JSON-LD.
+
+### Bloqueos que impiden marcar T-020
+
+1. **Presupuesto de bundle (§6).** `pnpm build` falla con
+   `bundle initial exceeded maximum budget: 306.11 kB/300 kB` (+6.11 kB). Con el
+   artefacto inspeccionado, `pnpm check:initial-js` da `/tier-list`
+   **110981/110000 bytes gzip**, frente a **105259/110000** del build base
+   (+5722 gzip). La causa es que, al enrutar `BuildPage`, esbuild comparte con el
+   chunk inicial las partes de `@angular/core`, `@angular/common` y
+   `@angular/platform-browser` que usa la página; el guard raw y la puerta gzip
+   de catálogo se superan. No se cambian umbrales aprobados ni `angular.json`:
+   requiere una tarea de rendimiento (T-042/T-126) o una decisión explícita de
+   plan. `pnpm check:public-build` falla como consecuencia (`build-failed`).
+2. **`404.html`.** Angular 21.2.29 omite las rutas catch-all del prerender
+   (`node_modules/@angular/build/src/utils/server-rendering/prerender.js`,
+   comprobación `metadata.route.includes('*')`), así que `**` no emite
+   `404.html` ni en el build público ni en el local. La ruta y `NotFoundPage`
+   están cableadas y probadas, pero el artefacto y el estado HTTP real no se
+   pueden acreditar; plan §17.43 indica bloquear y no simular.
+3. **FR-16.** No existe endpoint de descriptores públicos de activos en
+   `apps/api` y el despacho excluyó `apps/api`; `resolveIcon` solo consume el
+   fixture de T-048. Sin ese cableado, FR-16 sigue abierto y T-020 no se marca.
+
+Modelo realmente usado: `deepseek/deepseek-flash`. Sin commit, push ni PR.
+
+## T-020a: remediación de T-020 — PARCIAL (A bloqueado, 2026-11-10)
+
+Se ejecutó plan §17.47. **`T-020` no se marca**: B y C quedan cerrados y
+probados, A queda implementado en lo autorizado pero el build sigue rojo.
+
+### B — `404.html` real (cerrado)
+
+Angular 21.2.29 omite el catch-all del prerender, así que la página estática se
+prerenderiza en `/404`:
+
+- `src/app/app.routes.ts`: ruta lazy `404` → `NotFoundPage` (además de `**`).
+- `src/app/app.routes.server.ts`: `404` con `RenderMode.Prerender`.
+- `scripts/emit-404.mts`: valida `browser/404/index.html` (`data-not-found`, `h1`
+  de 404, `robots=noindex`, `base href="/"`, sin marcador de portada estática) y
+  copia bytes a `browser/404.html`. Falla cerrado si falta, si es un 200
+  disfrazado o si el artefacto/browser es un symlink.
+- `package.json`: `build` = `ng build && static-home && emit-404 &&
+check-initial-js`; `build:release` = `tsx scripts/build-release.mts &&
+tsx scripts/emit-404.mts`; el test entra en `test:scripts`.
+
+```powershell
+pnpm exec tsx scripts/emit-404.mts --dir dist/<artefacto>
+# emit-404 OK (404.html copiado de la página 404).
+node --import tsx --test scripts/emit-404.test.mts
+# 5 casos: 4 OK, el de symlink se omite en Windows sin privilegios
+```
+
+Evidencia: sobre un artefacto de verificación (`dist/probe404`, configuración de
+desarrollo con `--optimization=true`, sin tocar presupuestos; borrado después),
+`404.html` = 34 812 bytes, contiene `data-not-found`, `noindex` y el `h1`
+«Página no encontrada».
+
+### C — FR-16 (cerrado)
+
+- `apps/api/src/content/map-content.ts`: `PublicAssetDescriptorSchema` estricto
+  (`slug`, `file_path` bajo `public/assets/official/…`, `fallback_svg`;
+  `file_path` valida la misma regla que el registro web porque web→api no puede
+  importarse, plan §12.4) y `mapAsset`/`mapAssets`: `pending`/`rejected` → `null`,
+  proyección explícita (nunca `origin_url`, `rights_holder`,
+  `license_or_permission`, `proof_ref`), orden y deduplicado deterministas.
+- `apps/api/src/content/repository.ts`: `PublicContentRepository.listAssets()` y
+  `SELECT slug, file_path, fallback_svg FROM v_public_assets WHERE file_path IS
+NOT NULL` (la vista solo publica `approved`; `assets` no tiene dimensiones, así
+  que el descriptor no las lleva).
+- `apps/api/src/routes/content.ts`: `GET /api/v1/assets` (solo lectura, 503 si no
+  hay readiness o el DTO no valida).
+- `src/app/core/content/api.repository.ts`: `listAssets()` valida cada descriptor
+  con un esquema estricto (claves desconocidas → fallo cerrado) y lo pasa por
+  `resolvePublicAssets`.
+- `src/app/shared/ui/icon/resolve-icon.server.ts`: acepta el descriptor público
+  (sin evidencia) además de la entrada de manifiesto; `status` distinto de
+  `approved` → SVG propio; `file_path` hostil o `fallback_svg` de otro icono →
+  `Icono aprobado inválido.` sin causa; `resolvePublicAssets` ordena por slug.
+
+```powershell
+node --import tsx --test src/app/shared/ui/icon/resolve-icon.server.test.mts \
+  src/app/core/content/api.repository.server.test.mts scripts/emit-404.test.mts
+# 17 pruebas: 16 OK, 1 omitida (symlink)
+pnpm --filter @gd/api exec vitest run src/content/map-content.spec.ts \
+  src/routes/content.spec.ts
+# 14 pruebas OK
+```
+
+Caso de integración real en `apps/api/test/content.int.spec.ts` (activo `pending`
+y `rejected` fuera, `approved` con descriptor público, sin evidencia): requiere
+Docker (`RUN_DB_TESTS=1`); en este entorno no está disponible y **no se fingió**.
+
+### A — presupuesto del chunk inicial (bloqueado)
+
+Implementado: `content.resolvers.ts` no importa `./repository` ni `@gd/domain`
+estáticamente (servidor con `await import(...)`, inyector capturado antes del
+`await`); el navegador solo lee `TransferState`. Guarda en
+`content.resolvers.spec.ts` (falla si vuelve un import estático).
+
+Medición (mismo `ng build`, rutas de HEAD comparadas con las actuales):
+
+| Build                       | `bundle initial` |
+| --------------------------- | ---------------- |
+| HEAD (sin `builds/:slug`)   | 292.47 kB        |
+| T-020 + fix A               | **306.23 kB**    |
+| Umbral (`angular.json`, §6) | 300.00 kB        |
+
+El resolver aporta 0.64 kB; los 13.76 kB de la ruta son código de framework que
+el optimizador arrastra al bundle inicial al compartirse con el chunk lazy de
+`BuildPage` (medido con `stats.json`: `@angular/core` +9.1 kB, `@angular/common`
++1.2 kB, `platform-browser` +0.9 kB; el runtime de `@defer` ≈3.3 kB con una
+página trivial que solo tiene un `@defer`). No se tocaron `angular.json` ni los
+umbrales de §6.
+
+Consecuencia: `pnpm build` sale 1 y el artefacto se descarta, de modo que no se
+puede comprobar el build público/local ni `pnpm check:public-build`
+(`build-failed`). Palancas medidas para la tarea de seguimiento: `withEventReplay()`
+(`app.config.ts`, `primitives-event-dispatch` 10.9 kB en el chunk inicial) y el
+runtime de `@defer`/`linkedSignal` de T-036/T-037; ambas fuera de los archivos
+autorizados de §17.47.
+
+### Artefactos de verificación (B y C)
+
+Como el build de producción no emite artefacto mientras falla el presupuesto, la
+inspección se hizo con la configuración `development` más `--optimization=true`
+(mismo prerender y mismos componentes; sin presupuesto y sin `static-home`). Se
+marcan como artefactos de verificación, **no** como artefacto de release:
+
+- Público (`INCLUDE_DRAFTS=false`): 5 rutas prerenderizadas (`/`, `/404`,
+  `/acerca`, `/autores/grim-dawn-builds`, `/tier-list`), **sin** carpeta
+  `builds/chaman-demoledor-golpe-primigenio` y sin su slug ni JSON-LD en ningún
+  HTML/JS; `404.html` presente (34 869 bytes, página 404 real).
+- Local (`INCLUDE_DRAFTS=true`): 6 rutas, incluida
+  `/builds/chaman-demoledor-golpe-primigenio`; su HTML (140 551 bytes) contiene el
+  banner «Borrador», `noindex`, JSON-LD `Article` y ningún campo privado; también
+  `404.html`.
+- `check:initial-js` sobre ese artefacto: `/tier-list` **112 478/110 000 gzip**
+  (el mismo medidor da 105 259 en el artefacto de producción base y 110 981 con
+  T-020; la cifra de producción actual no es medible mientras el build falle).
+
+Evidencia: `$env:TEMP/gd-t020a-red.log` (RED),
+`$env:TEMP/gd-t020a-green.log`, `$env:TEMP/gd-t020a-build-after-a.log`,
+`$env:TEMP/gd-t020a-prod-{nodfeer,defer}.log`. Artefactos temporales (`dist/probe*`,
+`dist/grim-dawn-builds`) eliminados. Modelo realmente usado:
+`deepseek/deepseek-flash`. Sin commit, push ni PR.
