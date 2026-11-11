@@ -57,7 +57,16 @@ twice because both runners invoke the same script through different commands.
 
 ## Document language policy
 
-- Public docs (README, docs/content, docs/quality-gates.md): English primary with a Spanish counterpart
-  (`*.es.md`), checked by `pnpm check:locale-parity` where it applies.
-- Internal SDD artifacts (specs/*, handoff, plan, tasks): Spanish only, as the constitution allows; no parity.
-- New public docs must ship both languages in the same commit.
+- **Rule.** Public docs are English primary, with a Spanish counterpart named
+  `*.es.md`.
+- **Current coverage.** Only `README.md` has a counterpart (`README.es.md`); the
+  pre-existing public docs under `docs/content/` are still Spanish and have no
+  English version, and `docs/quality-gates.md` itself ships English only.
+- **Internal SDD artifacts** (`specs/**`, `handoff.md`, `plan.md`, `tasks.md`):
+  Spanish only, as the constitution allows; no parity required.
+- **What the automation checks.** `pnpm check:locale-parity` compares the Angular
+  i18n catalogs (`src/locale/messages.en.xlf` and `messages.es.xlf`). It does not
+  check Markdown, so the `*.es.md` rule is not enforced by any gate today.
+- **Translation debt.** Bringing the stable public docs to both languages is
+  tracked in T-158 (no date). Until then, a new public doc either ships both
+  languages or records the debt in its task.
