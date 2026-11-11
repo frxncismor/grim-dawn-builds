@@ -6,9 +6,11 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  OUT_OF_SCOPE_ROUTE_RULES,
   checkComposeFiles,
   checkManifestText,
   checkSourceText,
+  outOfScopeRouteFor,
   parseComposeServices,
   scanRepository,
 } from './check-scope.mts';
@@ -111,6 +113,23 @@ describe('manifests (package.json)', () => {
       ['firebase-admin', 'external-auth'],
       ['@azure/msal-browser', 'external-auth'],
       ['@supabase/supabase-js', 'external-auth'],
+      // T-113: auth/sesión/credenciales propias de una cuenta (spec AC-24).
+      ['express-session', 'external-auth'],
+      ['cookie-session', 'external-auth'],
+      ['iron-session', 'external-auth'],
+      ['lucia', 'external-auth'],
+      ['better-auth', 'external-auth'],
+      ['bcrypt', 'external-auth'],
+      ['bcryptjs', 'external-auth'],
+      ['argon2', 'external-auth'],
+      ['@node-rs/argon2', 'external-auth'],
+      ['oauth', 'external-auth'],
+      ['simple-oauth2', 'external-auth'],
+      ['openid-client', 'external-auth'],
+      ['grant', 'external-auth'],
+      ['csurf', 'external-auth'],
+      ['remix-auth', 'external-auth'],
+      ['@hono/auth-js', 'external-auth'],
       ['@aws-sdk/client-s3', 'object-storage'],
       ['minio', 'object-storage'],
       ['@google-cloud/storage', 'object-storage'],
@@ -137,6 +156,47 @@ describe('manifests (package.json)', () => {
         `package ${pkg}`,
       );
     }
+  });
+
+  it('fails a manifest that adds passport, express-session or bcrypt (T-113)', () => {
+    const text = JSON.stringify({
+      dependencies: {
+        passport: '^0.7.0',
+        'express-session': '^1.18.0',
+        bcrypt: '^6.0.0',
+      },
+    });
+    const issues = checkManifestText('package.json', text);
+    assert.deepEqual(
+      issues.map((i) => i.rule),
+      ['external-auth', 'external-auth', 'external-auth'],
+    );
+    assert.deepEqual(
+      issues.map((i) => i.line),
+      ['"passport"', '"express-session"', '"bcrypt"'].map(
+        (key) => text.split('\n').findIndex((l) => l.includes(key)) + 1,
+      ),
+    );
+    for (const issue of issues) assert.match(issue.message, /principio VIII/);
+  });
+
+  it('keeps test tooling and utility packages out of the auth rule (T-113)', () => {
+    // Motivo: `playwright`, `@playwright/test` y `jsdom` son el banco de
+    // pruebas; `lighthouse` y `chrome-launcher` miden rendimiento/accesibilidad;
+    // `jsonwebtoken` y `p-queue` son utilidades que el test declara legítimas.
+    // Ninguna implementa una cuenta de usuario y marcarlas rompería el MVP.
+    const legit = {
+      devDependencies: {
+        playwright: '^1.65.0',
+        '@playwright/test': '^1.65.0',
+        jsdom: '^28.0.0',
+        lighthouse: '13.6.0',
+        'chrome-launcher': '1.2.3',
+        jsonwebtoken: '^9.0.0',
+        'p-queue': '^8.0.0',
+      },
+    };
+    assert.deepEqual(checkManifestText('package.json', JSON.stringify(legit)), []);
   });
 
   it('does not flag legitimate tooling, app and test dependencies', () => {
@@ -200,6 +260,24 @@ describe('source and configuration', () => {
     const issues = checkSourceText('scripts/jobs.mts', code, 'code');
     assert.equal(issues.length, 1);
     assert.equal(issues[0].line, 4);
+  });
+
+  it('flags auth, session and credential imports in runtime code (T-113)', () => {
+    const cases: [string, string][] = [
+      ["import session from 'express-session';", 'external-auth'],
+      ["import cookieSession from 'cookie-session';", 'external-auth'],
+      ["import { betterAuth } from 'better-auth';", 'external-auth'],
+      ["const bcrypt = require('bcrypt');", 'external-auth'],
+      ["import argon2 from '@node-rs/argon2';", 'external-auth'],
+      ["export * from 'openid-client';", 'external-auth'],
+    ];
+    for (const [code, rule] of cases) {
+      assert.deepEqual(
+        checkSourceText('apps/api/src/x.ts', code, 'code').map((i) => i.rule),
+        [rule],
+        code,
+      );
+    }
   });
 
   it('does not flag comments, relative paths, builtins or legitimate packages', () => {
@@ -307,6 +385,89 @@ describe('source and configuration', () => {
       checkSourceText('infra/x.yaml', '# example: redis://localhost\n', 'config'),
       [],
     );
+  });
+});
+
+describe('out-of-scope routes (T-113)', () => {
+  it('flags auth, registration, account and public-editing routes', () => {
+    const cases: [string, SourceKind, RegExp][] = [
+      ["const routes = [{ path: 'login', component: Login }];", 'code', /autenticación/],
+      ["const routes = [{ path: '/login', component: Login }];", 'code', /autenticación/],
+      ["const routes = [{ path: 'registro', component: Registro }];", 'code', /registro/],
+      ['<a routerLink="/cuenta">Mi cuenta</a>', 'config', /cuenta, administración/],
+      [`<a [routerLink]="['/registro']">Crear cuenta</a>`, 'config', /registro/],
+      ['<a href="/login">Entrar</a>', 'config', /autenticación/],
+      ["app.post('/register', handler);", 'code', /registro/],
+      ["fastify.get('/session', handler);", 'code', /autenticación/],
+      ["const routes = [{ path: 'editar/:slug', component: Editar }];", 'code', /edición pública/],
+      ["const route = { method: 'GET', url: '/admin' };", 'code', /edición pública/],
+    ];
+    for (const [text, kind, label] of cases) {
+      const file = kind === 'config' ? 'src/app/x.html' : 'src/app/x.ts';
+      const issues = checkSourceText(file, text, kind);
+      assert.equal(issues.length, 1, text);
+      assert.equal(issues[0].rule, 'out-of-scope-route', text);
+      assert.match(issues[0].message, label, text);
+    }
+  });
+
+  it('does not flag legitimate routes, roles, secret names, style URLs or prose', () => {
+    const code = [
+      "{ path: 'autores/:slug', component: AuthorPage }",
+      "{ path: 'builds/:slug', component: BuildPage }",
+      "{ path: 'tier-list', component: TierList }",
+      "{ path: '', component: Home }",
+      "{ path: '**', component: NotFound }",
+      "{ path: 'placeholder', component: Preview }",
+      "{ path: 'borrador', component: Draft }",
+      '<a href="/tier-list">Catálogo</a>',
+      `<a [routerLink]="['/builds', guide.slug]">Guía</a>`,
+      "app.get('/health', async () => ({ status: 'ok' }));",
+      "app.get('/ready', async () => true);",
+      "app.get('/api/v1/builds', handler);",
+      "const usuario = { user: 'editor' };",
+      "const cfg = { secretName: 'db_password_editor', styleUrl: './editorial.css', origin: 'editor' };",
+      "const aviso = 'El sitio no tiene cuentas, comentarios ni analítica de terceros.';",
+    ].join('\n');
+    assert.deepEqual(checkSourceText('src/app/app.routes.ts', code, 'code'), []);
+    assert.deepEqual(checkSourceText('src/app/app.routes.server.ts', code, 'code'), []);
+  });
+
+  it('reports the line of a multi-line auth route definition', () => {
+    const code = "export const routes = [\n  {\n    path: 'editar/:slug',\n  },\n];\n";
+    const issues = checkSourceText('src/app/app.routes.ts', code, 'code');
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].rule, 'out-of-scope-route');
+    assert.equal(issues[0].line, 3);
+  });
+
+  it('exposes the families and compares whole route segments only', () => {
+    assert.deepEqual(
+      OUT_OF_SCOPE_ROUTE_RULES.map((f) => f.id),
+      ['auth', 'registro', 'cuenta-y-edicion-publica'],
+    );
+    for (const family of OUT_OF_SCOPE_ROUTE_RULES) {
+      assert.ok(family.segments.length > 0, family.id);
+      assert.ok(family.label.length > 0, family.id);
+    }
+    for (const allowed of [
+      '/autores/:slug',
+      '/builds/:slug',
+      '/tier-list',
+      '/legal',
+      '/acerca',
+      '/404',
+      '/**',
+      '/',
+      '/api/v1/builds',
+      '/health',
+      '/og/site.png',
+    ]) {
+      assert.equal(outOfScopeRouteFor(allowed), undefined, allowed);
+    }
+    assert.equal(outOfScopeRouteFor('/login?next=/tier-list')?.id, 'auth');
+    assert.equal(outOfScopeRouteFor('/editar/:slug')?.id, 'cuenta-y-edicion-publica');
+    assert.equal(outOfScopeRouteFor('/mi-cuenta')?.id, 'cuenta-y-edicion-publica');
   });
 });
 
@@ -461,5 +622,25 @@ describe('check:scope CLI', () => {
     const result = run(root);
     assert.equal(result.status, 1, result.stderr || result.stdout);
     assert.match(result.stdout + result.stderr, /package\.json.*\[redis\]/);
+  });
+
+  it('exits 1 and names the file and rule for a fixture that adds passport (T-113)', () => {
+    const manifest = JSON.parse(REAL_MANIFEST);
+    manifest.dependencies.passport = '^0.7.0';
+    const root = makeFixture({ 'package.json': JSON.stringify(manifest, null, 2) });
+    const result = run(root);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stdout + result.stderr, /package\.json.*\[external-auth\]/);
+  });
+
+  it('exits 1 and names the rule and route for a fixture with a login route (T-113)', () => {
+    const root = makeFixture({
+      'package.json': JSON.stringify({ dependencies: {} }),
+      'src/app/routes.ts': "export const routes = [{ path: 'login', component: Login }];\n",
+    });
+    const result = run(root);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stdout + result.stderr, /\[out-of-scope-route\]/);
+    assert.match(result.stdout + result.stderr, /login/);
   });
 });

@@ -1,11 +1,12 @@
 /**
- * check-scope (T-069): guardia de alcance sin framework.
+ * check-scope (T-069, T-113): guardia de alcance sin framework.
  *
  * Falla si el repositorio introduce piezas prohibidas por la constitución
  * (principio VIII) y el plan §12.7: Redis, colas/workers, proveedores de
  * autenticación externos, almacenamiento de objetos, scraping o automatización
  * de navegador, más de un servicio de aplicación / una base de datos en Compose,
- * y pantallas de comentarios y calculadora (fuera de alcance, spec AC-08).
+ * pantallas de comentarios y calculadora (fuera de alcance, spec AC-08) y
+ * dependencias o rutas de auth, registro, cuenta y edición pública (spec AC-24).
  *
  * Diseño:
  * - Las reglas son datos (FORBIDDEN_CAPABILITIES). Añadir un paquete, imagen,
@@ -117,6 +118,35 @@ export const FORBIDDEN_CAPABILITIES: readonly CapabilityRule[] = [
       '@auth/*',
       '@okta/*',
       '@kinde-oss/*',
+      // T-113: piezas propias de una cuenta de usuario (registro, sesión,
+      // credenciales y edición pública), prohibidas por la constitución
+      // (principio VIII) y la spec AC-24.
+      //
+      // Exclusiones deliberadas y probadas en `check-scope.test.mts`:
+      // - `playwright`, `@playwright/test`, `jsdom`, `lighthouse` y
+      //   `chrome-launcher` son herramientas de prueba/rendimiento legítimas
+      //   (spec AC-08); marcarlas rompería el test que las declara válidas.
+      // - `jsonwebtoken` y `p-queue` están declarados como dependencias
+      //   legítimas en el test (firma de artefactos y concurrencia de scripts);
+      //   por sí solos no implementan una cuenta.
+      // - `puppeteer` y `cheerio` pertenecen a `scraping` (T-069b), no aquí.
+      'express-session',
+      'cookie-session',
+      'iron-session',
+      'lucia',
+      'better-auth',
+      'bcrypt',
+      'bcryptjs',
+      'argon2',
+      '@node-rs/argon2',
+      'oauth',
+      'oauth2',
+      'simple-oauth2',
+      'openid-client',
+      'grant',
+      'csurf',
+      'remix-auth',
+      '@hono/auth-js',
     ],
     images: ['keycloak', 'kratos', 'hydra', 'authentik', 'dex', 'zitadel'],
     serviceNames: ['keycloak', 'kratos', 'hydra', 'authentik', 'dex', 'zitadel'],
@@ -181,6 +211,96 @@ export const OUT_OF_SCOPE_ROUTES: readonly string[] = [
   'calculadora',
   'calculator',
 ];
+
+/**
+ * Rutas de autenticación, registro, cuenta y edición pública (T-113, spec
+ * AC-24). Son datos: añadir un segmento prohibido es una línea aquí.
+ *
+ * La comparación es por SEGMENTO EXACTO de ruta, nunca por subcadena:
+ * `autores/:slug` (segmento `autores`) no coincide con `auth`, y `tier-list`,
+ * `legal`, `acerca`, `404`, `**`, `placeholder` o `borrador` pasan. A cambio,
+ * `editar/:slug` falla por su primer segmento (`editar`).
+ */
+export interface OutOfScopeRouteFamily {
+  readonly id: 'auth' | 'registro' | 'cuenta-y-edicion-publica';
+  readonly label: string;
+  readonly segments: readonly string[];
+}
+
+export const OUT_OF_SCOPE_ROUTE_RULES: readonly OutOfScopeRouteFamily[] = [
+  {
+    id: 'auth',
+    label: 'autenticación o sesión de cuenta',
+    segments: [
+      'login',
+      'log-in',
+      'signin',
+      'sign-in',
+      'logout',
+      'log-out',
+      'signout',
+      'auth',
+      'oauth',
+      'oidc',
+      'sso',
+      'session',
+      'sesion',
+      'password',
+      'contrasena',
+      '2fa',
+      'mfa',
+    ],
+  },
+  {
+    id: 'registro',
+    label: 'registro de cuenta',
+    segments: ['register', 'registro', 'signup', 'sign-up', 'crear-cuenta', 'nueva-cuenta'],
+  },
+  {
+    id: 'cuenta-y-edicion-publica',
+    label: 'cuenta, administración o edición pública',
+    segments: [
+      'cuenta',
+      'account',
+      'mi-cuenta',
+      'dashboard',
+      'admin',
+      'administracion',
+      'moderacion',
+      'moderator',
+      'moderar',
+      'editor',
+      'editar',
+      'edicion',
+      'edit',
+      'nueva-guia',
+      'crear-guia',
+      'publicar-guia',
+      'submit-guide',
+    ],
+  },
+];
+
+/**
+ * Segmentos normalizados de una ruta: descarta `?consulta` y `#ancla`, el `/`
+ * inicial, los vacíos y los `:` de los parámetros (`:slug` -> `slug`).
+ * `'/editar/:slug?x=1'` -> `['editar', 'slug']`.
+ */
+export function outOfScopeRouteSegments(path: string): string[] {
+  return path
+    .split(/[?#]/)[0]
+    .split('/')
+    .map((segment) => segment.replace(/:/g, '').trim().toLowerCase())
+    .filter((segment) => segment !== '');
+}
+
+/** Familia fuera de alcance a la que pertenece una ruta, si la hay. */
+export function outOfScopeRouteFor(path: string): OutOfScopeRouteFamily | undefined {
+  const segments = outOfScopeRouteSegments(path);
+  return OUT_OF_SCOPE_ROUTE_RULES.find((family) =>
+    family.segments.some((forbidden) => segments.includes(forbidden)),
+  );
+}
 
 /** Imágenes de base de datos: el máximo permitido es una (plan §12.7). */
 export const DB_IMAGES: readonly string[] = [
@@ -253,6 +373,27 @@ const ROUTE_PATTERN = new RegExp(
   `(?:\\bpath\\s*:\\s*['"]\\/?|['"]\\/)(${ROUTE_ALTERNATION})(?=['"/?#]|$)`,
   'gi',
 );
+
+/**
+ * Contextos que declaran una ruta de la aplicación (T-113). Cada patrón captura
+ * SOLO el texto de la ruta, y todos exigen un contexto sintáctico, nunca una
+ * palabra suelta, para no marcar prosa, roles de BD (`user: 'editor'`),
+ * nombres de secreto (`db_password_editor`) ni hojas de estilo
+ * (`styleUrl: './editorial.css'`):
+ * a) `path: 'editar/:slug'` (rutas Angular, con o sin `/` inicial);
+ * b) `href="/login"`, `routerLink="/cuenta"`, `[routerLink]="['/registro']"`;
+ * c) `app|router|server|fastify .get|post|put|patch|delete('/register', …)`;
+ * d) `url: '/admin'` (opciones de ruta de Fastify y objetos equivalentes).
+ * En b, c y d se exige `/` inicial para no confundir enlaces externos
+ * (`href="https://…"`) con rutas propias.
+ */
+const DECLARED_ROUTE_PATTERNS: readonly RegExp[] = [
+  /\b["']?path["']?\s*:\s*['"]([^'"\n]*)['"]/g,
+  /\b["']?url["']?\s*:\s*['"](\/[^'"\n]*)['"]/g,
+  /\b(?:href|routerLink)\s*=\s*['"](\/[^'"\n]*)['"]/g,
+  /\[routerLink\]\s*=\s*['"]\s*\[?\s*['"](\/[^'"\n]*)['"]/g,
+  /\b(?:app|router|server|fastify)\s*\.\s*(?:get|post|put|patch|delete)\s*\(\s*['"](\/[^'"\n]*)['"]/g,
+];
 
 /** Coincide un valor con un patrón exacto o de prefijo (`algo*`). */
 function matchesPattern(value: string, pattern: string): boolean {
@@ -384,6 +525,30 @@ export function checkSourceText(file: string, text: string, kind: SourceKind): I
       message: `ruta "${segment}" (pantalla de comentarios o calculadora, fuera de alcance) prohibida por la constitución, principio VIII`,
     });
   }
+
+  // Rutas declaradas de auth, registro, cuenta o edición pública (T-113).
+  const declaredRoutes: Issue[] = [];
+  const seen = new Set<string>();
+  for (const pattern of DECLARED_ROUTE_PATTERNS) {
+    for (const match of source.matchAll(pattern)) {
+      const path = match[1];
+      const family = outOfScopeRouteFor(path);
+      if (!family) continue;
+      const index = (match.index ?? 0) + match[0].indexOf(path);
+      const key = `${index}:${family.id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      declaredRoutes.push({
+        file,
+        line: lineAt(source, index),
+        rule: 'out-of-scope-route',
+        message: `ruta "${path}" (${family.label}, fuera de alcance) prohibida por la constitución, principio VIII`,
+      });
+    }
+  }
+  declaredRoutes.sort((a, b) => a.line - b.line);
+  issues.push(...declaredRoutes);
+
   return issues;
 }
 
