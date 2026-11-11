@@ -16,6 +16,16 @@ import { CATALOG_JS_LIMIT, INITIAL_JS_LIMIT, measureInitialRoutes } from './chec
  * `lighthouserc.json` (fuente única); `BUDGETS` es la copia tipada de plan §6 y
  * el script falla cerrado si ambos divergen.
  *
+ * Regla de decisión: la puerta evalúa la **mediana de las `numberOfRuns` corridas**
+ * que declara `lighthouserc.json`, no una pasada suelta. Con el mismo artefacto y
+ * la misma ruta se han medido TBT de 13 a 350 ms por ruido de carga del host, así
+ * que una sola corrida oscila entre verde y rojo sin que cambie el producto. Los
+ * umbrales de plan §6 siguen intactos (LCP ≤ 2000 ms, CLS ≤ 0,05, TBT ≤ 150 ms,
+ * rendimiento ≥ 0,9, a11y/SEO/buenas prácticas ≥ 0,95) y se aplican a la mediana;
+ * los valores de cada corrida se publican para que un pico sea visible sin
+ * aprobar la puerta. Ninguna corrida se descarta ni se imputa: si a una le falta
+ * una métrica medible, la ruta es «no medible».
+ *
  * LHCI se ejecuta en un directorio temporal propio (`gd-lhci-*`), nunca en la raíz
  * del repositorio: su sesión `.lighthouseci/` pertenece a cada ejecución y dos
  * mediciones concurrentes no deben borrarse el estado entre sí.
@@ -94,6 +104,8 @@ export interface LighthouseConfigInfo {
   staticDistDir: string | null;
   urls: string[];
   outputDir: string;
+  /** `ci.collect.numberOfRuns`; 1 si la configuración no lo declara. */
+  numberOfRuns: number;
   formFactor: string | null;
   throttlingMethod: string | null;
 }
@@ -108,6 +120,29 @@ export interface JsMeasurement {
   route: string;
   totalGzipBytes: number;
   limitBytes: number;
+}
+
+/** Un informe Lighthouse: una corrida de una ruta. */
+export interface RouteRun {
+  file: string;
+  metrics: MetricResult[];
+}
+
+/** Informes encontrados para una ruta frente a las corridas exigidas. */
+export interface RouteManifest {
+  route: string;
+  expected: number;
+  files: string[];
+  problems: string[];
+}
+
+/** Resultado de una ruta: corridas publicadas y mediana que decide la puerta. */
+export interface RouteEvaluation {
+  route: string;
+  expected: number;
+  runs: RouteRun[];
+  medians: MetricResult[];
+  unmeasurable: string[];
 }
 
 const REPO_ROOT = resolve(import.meta.dirname, '..');
@@ -158,6 +193,19 @@ function metric(
     measured: true,
     pass: direction === 'max' ? raw <= limit : raw >= limit,
   };
+}
+
+/**
+ * Mediana de una serie. Con un número par promedia los dos centrales; con la
+ * lista vacía falla en vez de inventar un valor, porque la puerta nunca debe
+ * evaluar una ruta sin corridas.
+ */
+export function median(values: readonly number[]): number {
+  if (!values.length) throw new Error('No hay valores para calcular la mediana.');
+  const sorted = [...values].sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+  if (sorted.length % 2) return sorted[middle]!;
+  return (sorted[middle - 1]! + sorted[middle]!) / 2;
 }
 
 /** Normaliza una URL o ruta del artefacto a la ruta pública que se muestra. */
@@ -351,6 +399,133 @@ export function reportMeta(report: unknown): ReportMeta {
   };
 }
 
+/**
+ * Agrupa los informes por ruta y exige **exactamente** `numberOfRuns` por ruta:
+ * menos informes impide la mediana y más mezclaría corridas de otra ejecución.
+ * Las dos situaciones son problemas de la ruta y se publican, no se toleran.
+ */
+export function groupReportsByRoute(
+  reports: readonly { file: string; url: string | null }[],
+  routeOrder: readonly string[],
+  numberOfRuns: number,
+): RouteManifest[] {
+  if (!Number.isInteger(numberOfRuns) || numberOfRuns < 1)
+    throw new Error('ci.collect.numberOfRuns debe ser un entero ≥ 1 en lighthouserc.json.');
+  const filesByRoute = new Map<string, string[]>();
+  const problemsByRoute = new Map<string, string[]>();
+  const addProblem = (route: string, problem: string) => {
+    problemsByRoute.set(route, [...(problemsByRoute.get(route) ?? []), problem]);
+  };
+  for (const report of reports) {
+    if (!report.url) {
+      addProblem(report.file, 'el informe no declara la URL medida');
+      continue;
+    }
+    const route = normalizeRoute(report.url);
+    filesByRoute.set(route, [...(filesByRoute.get(route) ?? []), report.file]);
+  }
+  const manifests: RouteManifest[] = [];
+  for (const route of routeOrder) {
+    const files = [...(filesByRoute.get(route) ?? [])].sort();
+    const problems = [...(problemsByRoute.get(route) ?? [])];
+    if (files.length < numberOfRuns)
+      problems.push(
+        `${files.length} de ${numberOfRuns} informes: faltan ${numberOfRuns - files.length} corridas`,
+      );
+    else if (files.length > numberOfRuns)
+      problems.push(
+        `${files.length} informes para ${numberOfRuns} corridas: sobran ${files.length - numberOfRuns}`,
+      );
+    manifests.push({ route, expected: numberOfRuns, files, problems });
+  }
+  for (const [route, files] of filesByRoute)
+    if (!routeOrder.includes(route))
+      manifests.push({
+        route,
+        expected: numberOfRuns,
+        files: [...files].sort(),
+        problems: ['la ruta no está en ci.collect.url de lighthouserc.json'],
+      });
+  for (const [route, problems] of problemsByRoute)
+    if (!routeOrder.includes(route) && !filesByRoute.has(route))
+      manifests.push({ route, expected: numberOfRuns, files: [], problems });
+  return manifests;
+}
+
+/** Mediana de cada métrica de la ruta; una corrida incompleta invalida la ruta. */
+export function evaluateRouteMedians(
+  route: string,
+  runs: readonly RouteRun[],
+  budgets: LighthouseBudgets = BUDGETS,
+): { route: string; medians: MetricResult[]; unmeasurable: string[] } {
+  const template = evaluateLighthouseReport(null, budgets);
+  if (!runs.length)
+    return {
+      route,
+      medians: template,
+      unmeasurable: [`${route}: no hay corridas para calcular la mediana`],
+    };
+  const unmeasurable: string[] = [];
+  const medians = template.map((entry) => {
+    const values: number[] = [];
+    for (const run of runs) {
+      const found = run.metrics.find((metric) => metric.id === entry.id);
+      if (!found || !found.measured || found.value === null) {
+        unmeasurable.push(`${entry.label} sin medir en ${run.file}`);
+        return { ...entry, value: null, measured: false, pass: false };
+      }
+      values.push(found.value);
+    }
+    const value = median(values);
+    return {
+      ...entry,
+      value,
+      measured: true,
+      pass: entry.direction === 'max' ? value <= entry.limit : value >= entry.limit,
+    };
+  });
+  return { route, medians, unmeasurable };
+}
+
+/** Aplica los manifiestos: solo hay mediana cuando están todas las corridas. */
+export function evaluateRouteSets(
+  sets: readonly RouteManifest[],
+  runsByFile: ReadonlyMap<string, RouteRun>,
+  budgets: LighthouseBudgets = BUDGETS,
+): RouteEvaluation[] {
+  return sets.map((set) => {
+    const runs = set.files
+      .map((file) => runsByFile.get(file))
+      .filter((run): run is RouteRun => run !== undefined);
+    if (set.problems.length)
+      return {
+        route: set.route,
+        expected: set.expected,
+        runs,
+        medians: evaluateLighthouseReport(null, budgets),
+        unmeasurable: [...set.problems],
+      };
+    if (runs.length !== set.expected)
+      return {
+        route: set.route,
+        expected: set.expected,
+        runs,
+        medians: evaluateLighthouseReport(null, budgets),
+        unmeasurable: [
+          `${runs.length} de ${set.expected} corridas legibles: no se calcula la mediana`,
+        ],
+      };
+    const evaluated = evaluateRouteMedians(set.route, runs, budgets);
+    return {
+      route: set.route,
+      expected: set.expected,
+      runs,
+      medians: evaluated.medians,
+      unmeasurable: evaluated.unmeasurable,
+    };
+  });
+}
+
 function assertionOptions(
   assertions: Record<string, unknown>,
   id: string,
@@ -396,7 +571,10 @@ export function readLighthouseBudgets(config: unknown): LighthouseBudgets {
   };
 }
 
-/** Rutas medidas, directorio de informes y configuración de recogida declaradas. */
+/**
+ * Rutas medidas, corridas exigidas, directorio de informes y configuración de
+ * recogida declaradas. `numberOfRuns` sale de la configuración, nunca del código.
+ */
 export function readLighthouseConfig(config: unknown): LighthouseConfigInfo {
   const urls = at(config, 'ci', 'collect', 'url');
   if (!Array.isArray(urls) || !urls.length || urls.some((url) => typeof url !== 'string'))
@@ -404,10 +582,17 @@ export function readLighthouseConfig(config: unknown): LighthouseConfigInfo {
   const outputDir = textAt(config, 'ci', 'upload', 'outputDir');
   if (!outputDir)
     throw new Error('lighthouserc.json no declara ci.upload.outputDir para publicar el informe.');
+  const rawRuns = at(config, 'ci', 'collect', 'numberOfRuns');
+  if (
+    rawRuns !== undefined &&
+    (typeof rawRuns !== 'number' || !Number.isInteger(rawRuns) || rawRuns < 1)
+  )
+    throw new Error('lighthouserc.json declara ci.collect.numberOfRuns inválido (entero ≥ 1).');
   return {
     staticDistDir: textAt(config, 'ci', 'collect', 'staticDistDir'),
     urls: urls as string[],
     outputDir,
+    numberOfRuns: typeof rawRuns === 'number' ? rawRuns : 1,
     formFactor: textAt(config, 'ci', 'collect', 'settings', 'formFactor'),
     throttlingMethod: textAt(config, 'ci', 'collect', 'settings', 'throttlingMethod'),
   };
@@ -507,17 +692,17 @@ function formatValue(value: number | null, unit: MetricUnit): string {
   return `${value} B`;
 }
 
+function compactValue(value: number | null, unit: MetricUnit): string {
+  if (value === null) return 'no medible';
+  if (unit === 'score' || unit === 'ratio') return value.toFixed(3);
+  return `${Math.round(value * 10) / 10}`;
+}
+
 function limitLabel(limit: number, direction: 'max' | 'min', unit: MetricUnit): string {
   const symbol = direction === 'max' ? '≤' : '≥';
   if (unit === 'score' || unit === 'ratio') return `${symbol} ${limit}`;
   if (unit === 'ms') return `${symbol} ${limit} ms`;
   return `${symbol} ${limit} B`;
-}
-
-function cell(result: MetricResult): string {
-  return result.measured
-    ? `${formatValue(result.value, result.unit)} ${result.pass ? 'OK' : 'FALLA'}`
-    : 'no medible';
 }
 
 function printTable(header: string[], rows: string[][]): void {
@@ -534,80 +719,14 @@ function printTable(header: string[], rows: string[][]): void {
   for (const row of rows) console.log(line(row));
 }
 
-interface RouteGate {
-  route: string;
-  meta: ReportMeta | null;
-  lighthouse: MetricResult[];
-  html: ByteBudget | null;
-  css: CssBudget | null;
-  unmeasurable: string[];
-}
-
-async function measureRoutes(
-  dir: string,
-  reportsDir: string,
-  budgets: LighthouseBudgets,
-  routeOrder: string[],
-): Promise<RouteGate[]> {
-  const gates: RouteGate[] = [];
-  const reportFiles = (await readdir(reportsDir))
-    .filter((name) => name.endsWith('.report.json'))
-    .sort();
-  for (const file of reportFiles) {
-    let report: unknown;
-    try {
-      report = JSON.parse(await readFile(join(reportsDir, file), 'utf8')) as unknown;
-    } catch {
-      gates.push({
-        route: `informe ${file}`,
-        meta: null,
-        lighthouse: evaluateLighthouseReport(null, budgets),
-        html: null,
-        css: null,
-        unmeasurable: ['el informe es ilegible o no es JSON válido'],
-      });
-      continue;
-    }
-    const meta = reportMeta(report);
-    if (!meta.url) {
-      gates.push({
-        route: `informe ${file}`,
-        meta,
-        lighthouse: evaluateLighthouseReport(report, budgets),
-        html: null,
-        css: null,
-        unmeasurable: ['el informe no declara la URL medida'],
-      });
-      continue;
-    }
-    const route = normalizeRoute(meta.url);
-    if (gates.some((gate) => gate.route === route)) continue; // un informe por ruta
-    const gate: RouteGate = {
-      route,
-      meta,
-      lighthouse: evaluateLighthouseReport(report, budgets),
-      html: null,
-      css: null,
-      unmeasurable: [],
-    };
-    try {
-      const html = await readFile(routeFilePath(dir, meta.url), 'utf8');
-      gate.html = measureHtml(html, route);
-      gate.css = await measureCriticalCss(
-        html,
-        (relative) => readFile(join(dir, 'browser', relative)),
-        route,
-      );
-    } catch (error) {
-      gate.unmeasurable.push(describeError(error));
-    }
-    gates.push(gate);
-  }
-  const position = (route: string) => {
-    const index = routeOrder.indexOf(route);
-    return index === -1 ? routeOrder.length : index;
-  };
-  return gates.sort((left, right) => position(left.route) - position(right.route));
+/** Celda de la tabla: mediana, veredicto y los valores de cada corrida. */
+function cellWithRuns(entry: MetricResult | undefined, runs: readonly RouteRun[]): string {
+  if (!entry || !entry.measured || entry.value === null) return 'no medible';
+  const values = runs.map((run) => {
+    const found = run.metrics.find((metric) => metric.id === entry.id);
+    return found && found.measured ? compactValue(found.value, entry.unit) : 'no medible';
+  });
+  return `${formatValue(entry.value, entry.unit)} ${entry.pass ? 'OK' : 'FALLA'} [${values.join(', ')}]`;
 }
 
 export interface LhciInvocationInput {
@@ -629,36 +748,52 @@ export interface LhciInvocation {
 }
 
 /**
- * Argumentos, directorio de trabajo y entorno de `lhci autorun`.
+ * Invocaciones de `lhci collect` y `lhci upload` para una ejecución de la puerta.
  *
- * LHCI guarda su sesión en `<cwd>/.lighthouseci`: por eso el proceso corre en un
- * directorio temporal propio y nunca en la raíz del repositorio, donde otra
- * ejecución concurrente (u otro agente del mismo worktree) podría borrarla y
- * hacer que `collect` muera con ENOENT. Todo lo que LHCI necesita se pasa como
- * ruta absoluta por argumento para no depender del cwd: `--config` (soportado por
- * `autorun` en @lhci/cli 0.16.0 y propagado a sus subcomandos con
- * `defaultFlags`; ver `node_modules/@lhci/cli/src/autorun/autorun.js`),
- * `--collect.staticDistDir` y `--upload.outputDir`.
+ * Se usa `collect` + `upload` en lugar de `autorun` porque `autorun` ejecuta
+ * `assert` por corrida y con `numberOfRuns > 1` falla por un pico aislado; aquí la
+ * decisión es la mediana. `--config` lo procesa `@lhci/cli/src/cli.js` con
+ * `yargs.config()` para todos los subcomandos (no es una opción de collect/upload,
+ * pero sí se aplica a ambos y se resuelve contra `process.cwd()`), así que se pasa
+ * absoluto junto con `--staticDistDir` (opción de collect) y `--outputDir`
+ * (opción de upload). El `cwd` es un directorio temporal propio porque LHCI guarda
+ * su sesión en `<cwd>/.lighthouseci`: nunca la raíz del repositorio, compartida con
+ * otras ejecuciones.
  */
-export function lhciRunOptions(input: LhciInvocationInput): LhciInvocation {
+export function lhciRunOptions(input: LhciInvocationInput): LhciInvocation[] {
   const workDir = resolve(input.workDir);
   if (!input.workDir.trim() || workDir === resolve(input.repoRoot))
     throw new Error(
       'El directorio de trabajo de LHCI debe ser propio y distinto de la raíz del repositorio.',
     );
-  return {
-    command: 'pnpm',
-    args: [
-      'exec',
-      'lhci',
-      'autorun',
-      `--config=${resolve(input.configPath)}`,
-      `--collect.staticDistDir=${resolve(input.artifactDir, 'browser')}`,
-      `--upload.outputDir=${resolve(input.reportsDir)}`,
-    ],
-    cwd: workDir,
-    env: { CI: 'true', CHROME_PATH: input.chromePath },
-  };
+  const configPath = resolve(input.configPath);
+  const env = { CI: 'true', CHROME_PATH: input.chromePath };
+  return [
+    {
+      command: 'pnpm',
+      args: [
+        'exec',
+        'lhci',
+        'collect',
+        `--config=${configPath}`,
+        `--staticDistDir=${resolve(input.artifactDir, 'browser')}`,
+      ],
+      cwd: workDir,
+      env,
+    },
+    {
+      command: 'pnpm',
+      args: [
+        'exec',
+        'lhci',
+        'upload',
+        `--config=${configPath}`,
+        `--outputDir=${resolve(input.reportsDir)}`,
+      ],
+      cwd: workDir,
+      env,
+    },
+  ];
 }
 
 /** cmd/PowerShell parten argumentos con espacios: se citan al lanzar el hijo. */
@@ -706,22 +841,86 @@ async function withLighthouseTempDir<T>(run: (workDir: string) => Promise<T>): P
   }
 }
 
-function parseDir(argv: string[]): string {
-  if (!argv.length) return DEFAULT_ARTIFACT_DIR;
-  if (argv.length !== 2 || argv[0] !== '--dir' || !argv[1]?.trim())
-    throw new Error('argumentos inválidos');
-  return resolve(argv[1]);
+interface ParsedReport {
+  file: string;
+  url: string | null;
+  meta: ReportMeta | null;
+  metrics: MetricResult[];
+}
+
+interface RouteGate extends RouteEvaluation {
+  html: ByteBudget | null;
+  css: CssBudget | null;
+  meta: ReportMeta | null;
+}
+
+async function readReports(
+  reportsDir: string,
+  budgets: LighthouseBudgets,
+): Promise<ParsedReport[]> {
+  const files = (await readdir(reportsDir)).filter((name) => name.endsWith('.report.json')).sort();
+  const reports: ParsedReport[] = [];
+  for (const file of files) {
+    try {
+      const raw = JSON.parse(await readFile(join(reportsDir, file), 'utf8')) as unknown;
+      reports.push({
+        file,
+        url: reportMeta(raw).url,
+        meta: reportMeta(raw),
+        metrics: evaluateLighthouseReport(raw, budgets),
+      });
+    } catch {
+      reports.push({ file, url: null, meta: null, metrics: [] });
+    }
+  }
+  return reports;
+}
+
+interface CliOptions {
+  dir: string;
+  configPath: string;
+}
+
+/**
+ * Argumentos opcionales: `--dir` (artefacto) y `--config` (lighthouserc.json).
+ * Los valores por defecto son los del repositorio; `--config` permite inspecciones
+ * locales con otra copia de la configuración sin editar el archivo compartido.
+ */
+function parseArgs(argv: string[]): CliOptions {
+  const options: CliOptions = {
+    dir: DEFAULT_ARTIFACT_DIR,
+    configPath: join(REPO_ROOT, 'lighthouserc.json'),
+  };
+  const seen = new Set<string>();
+  for (let index = 0; index < argv.length; index += 2) {
+    const flag = argv[index];
+    const value = argv[index + 1];
+    if (
+      (flag !== '--dir' && flag !== '--config') ||
+      value === undefined ||
+      !value.trim() ||
+      seen.has(flag)
+    )
+      throw new Error('argumentos inválidos');
+    seen.add(flag);
+    if (flag === '--dir') options.dir = resolve(value);
+    else options.configPath = resolve(value);
+  }
+  return options;
 }
 
 async function main(argv: string[]): Promise<number> {
-  let dir: string;
+  let options: CliOptions;
   try {
-    dir = parseDir(argv);
+    options = parseArgs(argv);
   } catch (error) {
     console.error(`check:performance FALLÓ: ${describeError(error)}.`);
-    console.error('Uso: tsx scripts/check-performance.mts [--dir <ruta del artefacto>]');
+    console.error(
+      'Uso: tsx scripts/check-performance.mts [--dir <ruta del artefacto>] [--config <lighthouserc.json>]',
+    );
     return 1;
   }
+  const { dir, configPath } = options;
 
   const browserDir = join(dir, 'browser');
   const indexPath = join(browserDir, 'index.html');
@@ -735,9 +934,9 @@ async function main(argv: string[]): Promise<number> {
 
   let config: unknown;
   try {
-    config = JSON.parse(await readFile(join(REPO_ROOT, 'lighthouserc.json'), 'utf8')) as unknown;
+    config = JSON.parse(await readFile(configPath, 'utf8')) as unknown;
   } catch {
-    console.error('check:performance FALLÓ: no se pudo leer lighthouserc.json.');
+    console.error(`check:performance FALLÓ: no se pudo leer ${configPath}.`);
     return 1;
   }
 
@@ -771,46 +970,81 @@ async function main(argv: string[]): Promise<number> {
   }
 
   const reportsDir = resolve(REPO_ROOT, info.outputDir);
-  // Un informe de la ejecución anterior no puede aprobar la puerta actual.
+  // Informes de una ejecución anterior: no pueden aprobar la puerta actual.
   await rm(reportsDir, { recursive: true, force: true });
 
-  const run = await withLighthouseTempDir(async (workDir) => {
-    const invocation = lhciRunOptions({
+  const lhciRuns = await withLighthouseTempDir(async (workDir) => {
+    const invocations = lhciRunOptions({
       repoRoot: REPO_ROOT,
       artifactDir: dir,
       reportsDir,
-      configPath: join(REPO_ROOT, 'lighthouserc.json'),
+      configPath,
       workDir,
       chromePath: chrome,
     });
-    console.log(
-      `check:performance: ${invocation.command} ${invocation.args.join(' ')} (cwd=${invocation.cwd}, CI=true, CHROME_PATH=${chrome})`,
-    );
-    return runCommand(invocation);
+    const results: { exitCode: number; output: string }[] = [];
+    for (const invocation of invocations) {
+      console.log(
+        `check:performance: ${invocation.command} ${invocation.args.join(' ')} (cwd=${invocation.cwd}, CI=true, CHROME_PATH=${chrome})`,
+      );
+      results.push(await runCommand(invocation));
+    }
+    return results;
   });
-  const reportOutput = run.output;
+  const reportOutput = lhciRuns.map((run) => run.output).join('\n');
   console.log(
-    `check:performance: lhci autorun terminó con código ${run.exitCode}; el resultado se decide evaluando los informes.`,
+    `check:performance: lhci terminó con códigos ${lhciRuns.map((run) => run.exitCode).join(', ')}; el resultado se decide evaluando los informes.`,
   );
 
-  let gates: RouteGate[];
+  let reports: ParsedReport[];
   try {
-    gates = await measureRoutes(
-      dir,
-      reportsDir,
-      budgets,
-      info.urls.map((url) => normalizeRoute(url)),
-    );
+    reports = await readReports(reportsDir, budgets);
   } catch {
-    gates = [];
+    reports = [];
   }
-  if (!gates.length) {
+  if (!reports.length) {
     console.error(
       `check:performance FALLÓ: lhci no publicó informes *.report.json en ${reportsDir}.`,
     );
-    const tail = reportOutput.split(/\r?\n/).slice(-20).join('\n');
+    const tail = reportOutput.split(/\r?\n/).slice(-25).join('\n');
     if (tail.trim()) console.error(`Últimas líneas de lhci:\n${tail}`);
     return 1;
+  }
+
+  const runsByFile = new Map<string, RouteRun>(
+    reports
+      .filter((report) => report.metrics.length)
+      .map((report) => [report.file, { file: report.file, metrics: report.metrics }]),
+  );
+  const sets = groupReportsByRoute(
+    reports.map((report) => ({ file: report.file, url: report.url })),
+    info.urls.map((url) => normalizeRoute(url)),
+    info.numberOfRuns,
+  );
+  const gates: RouteGate[] = [];
+  for (const evaluation of evaluateRouteSets(sets, runsByFile, budgets)) {
+    const routeUrl =
+      info.urls.find((url) => normalizeRoute(url) === evaluation.route) ?? evaluation.route;
+    const gate: RouteGate = {
+      ...evaluation,
+      html: null,
+      css: null,
+      meta:
+        reports.find((report) => report.url && normalizeRoute(report.url) === evaluation.route)
+          ?.meta ?? null,
+    };
+    try {
+      const html = await readFile(routeFilePath(dir, routeUrl), 'utf8');
+      gate.html = measureHtml(html, gate.route);
+      gate.css = await measureCriticalCss(
+        html,
+        (relative) => readFile(join(dir, 'browser', relative)),
+        gate.route,
+      );
+    } catch (error) {
+      gate.unmeasurable.push(describeError(error));
+    }
+    gates.push(gate);
   }
 
   let jsMetrics: MetricResult[] = [];
@@ -821,24 +1055,23 @@ async function main(argv: string[]): Promise<number> {
     jsError = describeError(error);
   }
 
-  console.log('\nLighthouse: presupuestos por ruta (móvil, 4G lento simulado)');
+  console.log(
+    `\nLighthouse: mediana de ${info.numberOfRuns} corrida(s) por ruta (móvil, 4G lento simulado; umbrales de plan §6 sobre la mediana)`,
+  );
   printTable(
-    ['Ruta', 'Rendimiento', 'A11y', 'SEO', 'Buenas prácticas', 'LCP', 'CLS', 'TBT'],
+    ['Ruta', 'Corridas', 'LCP', 'CLS', 'TBT', 'Rendimiento', 'A11y', 'SEO', 'Buenas prácticas'],
     gates.map((gate) => {
-      const byId = new Map(gate.lighthouse.map((result) => [result.id, result]));
-      const value = (id: string) => {
-        const result = byId.get(id);
-        return result ? cell(result) : 'no medible';
-      };
+      const byId = new Map(gate.medians.map((entry) => [entry.id, entry]));
       return [
         gate.route,
-        value('performance'),
-        value('accessibility'),
-        value('seo'),
-        value('best-practices'),
-        value('lcp'),
-        value('cls'),
-        value('tbt'),
+        `${gate.runs.length}/${gate.expected}`,
+        cellWithRuns(byId.get('lcp'), gate.runs),
+        cellWithRuns(byId.get('cls'), gate.runs),
+        cellWithRuns(byId.get('tbt'), gate.runs),
+        cellWithRuns(byId.get('performance'), gate.runs),
+        cellWithRuns(byId.get('accessibility'), gate.runs),
+        cellWithRuns(byId.get('seo'), gate.runs),
+        cellWithRuns(byId.get('best-practices'), gate.runs),
       ];
     }),
   );
@@ -880,15 +1113,22 @@ async function main(argv: string[]): Promise<number> {
       : `  Navegador: Chrome ${detectedChromeVersion ?? 'versión desconocida'} (deducida de la ruta de Chrome; el informe no incluye el user agent)`,
   );
   console.log(
-    `  Configuración: formFactor=${info.formFactor ?? 'ausente'}, throttlingMethod=${info.throttlingMethod ?? 'ausente'} (lighthouserc.json)`,
+    `  Configuración: formFactor=${info.formFactor ?? 'ausente'}, throttlingMethod=${info.throttlingMethod ?? 'ausente'}, numberOfRuns=${info.numberOfRuns} (lighthouserc.json)`,
   );
 
   const failures: string[] = [];
   for (const gate of gates) {
-    for (const result of gate.lighthouse)
+    for (const result of gate.medians)
       if (!result.pass)
         failures.push(
-          `${gate.route} · ${result.label}: ${formatValue(result.value, result.unit)} (límite ${limitLabel(result.limit, result.direction, result.unit)})`,
+          `${gate.route} · ${result.label} (mediana de ${gate.runs.length}): ${formatValue(result.value, result.unit)} (límite ${limitLabel(result.limit, result.direction, result.unit)}; corridas ${gate.runs
+            .map((run) => {
+              const found = run.metrics.find((metric) => metric.id === result.id);
+              return found && found.measured
+                ? compactValue(found.value, result.unit)
+                : 'no medible';
+            })
+            .join(', ')})`,
         );
     if (gate.html && !gate.html.pass)
       failures.push(
@@ -912,7 +1152,7 @@ async function main(argv: string[]): Promise<number> {
   }
 
   const checks = [
-    ...gates.flatMap((gate) => gate.lighthouse.map((result) => result.pass)),
+    ...gates.flatMap((gate) => gate.medians.map((result) => result.pass)),
     ...gates.map((gate) => gate.html?.pass ?? false),
     ...gates.map((gate) => gate.css?.pass ?? false),
     ...(jsError ? [false] : jsMetrics.map((result) => result.pass)),

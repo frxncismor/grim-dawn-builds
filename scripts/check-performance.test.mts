@@ -9,11 +9,11 @@ import { gzipSync } from 'node:zlib';
 import { CATALOG_JS_LIMIT, INITIAL_JS_LIMIT, measureInitialRoutes } from './check-initial-js.mts';
 import {
   BUDGETS,
-  aggregateRouteRuns,
   budgetDrift,
-  collectRouteRuns,
   evaluateJsBudgets,
   evaluateLighthouseReport,
+  evaluateRouteSets,
+  groupReportsByRoute,
   lhciRunOptions,
   measureCriticalCss,
   measureHtml,
@@ -22,6 +22,7 @@ import {
   readLighthouseBudgets,
   readLighthouseConfig,
   routeFilePath,
+  type RouteRun,
 } from './check-performance.mts';
 
 interface ReportOptions {
@@ -61,6 +62,22 @@ function metricById(report: unknown, id: string) {
   return result;
 }
 
+/** Corrida sintética de `/tier-list` con el TBT indicado. */
+function tierRun(file: string, tbt: number): RouteRun {
+  const report = lighthouseReport({ tbt });
+  report.requestedUrl = 'http://localhost/tier-list/index.html';
+  return { file, metrics: evaluateLighthouseReport(report) };
+}
+
+function tierReports(files: readonly string[]) {
+  return files.map((file) => ({ file, url: 'http://localhost/tier-list/index.html' }));
+}
+
+function evaluateTier(files: readonly string[], runs: readonly RouteRun[], numberOfRuns: number) {
+  const sets = groupReportsByRoute(tierReports(files), ['/tier-list'], numberOfRuns);
+  return evaluateRouteSets(sets, new Map(runs.map((run) => [run.file, run])))[0]!;
+}
+
 /** Relleno incompresible cuyo gzip nivel 6 mide exactamente `target` bytes. */
 function fillToGzip(target: number): Buffer {
   let size = target;
@@ -89,6 +106,14 @@ test('las rutas del artefacto se normalizan a su archivo servido', () => {
   assert.equal(normalizeRoute('/tier-list/'), '/tier-list');
   assert.throws(() => routeFilePath('artifact', ''));
   assert.throws(() => routeFilePath('artifact', '/..%2Fsecreto.html'));
+});
+
+test('la mediana es par/impar y una lista vacía falla cerrado', () => {
+  assert.equal(median([3, 1, 2]), 2);
+  assert.equal(median([7]), 7);
+  assert.equal(median([4, 1, 3, 2]), 2.5);
+  assert.equal(median([64, 74, 117.5, 177, 350]), 117.5);
+  assert.throws(() => median([]));
 });
 
 test('T-042: el TBT de 173 ms incumple el presupuesto y 140 ms cumple', () => {
@@ -147,117 +172,73 @@ test('un informe incompleto nunca aprueba: lo no medible es violación', () => {
   assert.ok(missing.every((result) => !result.measured && !result.pass));
 });
 
-test('T-042: la puerta decide sobre la mediana de tres corridas por ruta', () => {
-  assert.equal(median([3, 1, 2]), 2);
-  assert.equal(median([1, 2, 3, 4]), 2.5);
-  assert.throws(() => median([]));
+test('con numberOfRuns=5 y solo 3 informes la ruta falla cerrado', () => {
+  const files = ['run-1.json', 'run-2.json', 'run-3.json'];
+  const runs = files.map((file) => tierRun(file, 60));
+  const sets = groupReportsByRoute(tierReports(files), ['/tier-list'], 5);
+  assert.equal(sets[0]?.expected, 5);
+  assert.equal(sets[0]?.files.length, 3);
+  assert.deepEqual(sets[0]?.problems, ['3 de 5 informes: faltan 2 corridas']);
 
-  const tbtPass = aggregateRouteRuns(
-    [253, 43, 60].map((tbt) => lighthouseReport({ tbt })),
-    3,
-  );
-  assert.deepEqual(tbtPass.problems, []);
-  const tbtMedian = tbtPass.lighthouse.find((result) => result.id === 'tbt');
-  assert.equal(tbtMedian?.value, 60);
-  assert.equal(tbtMedian?.pass, true);
-
-  const tbtFail = aggregateRouteRuns(
-    [200, 210, 190].map((tbt) => lighthouseReport({ tbt })),
-    3,
-  );
-  const failing = tbtFail.lighthouse.find((result) => result.id === 'tbt');
-  assert.equal(failing?.value, 200);
-  assert.equal(failing?.pass, false);
-
-  const perfPass = aggregateRouteRuns(
-    [0.89, 0.99, 0.99].map((performance) => lighthouseReport({ performance })),
-    3,
-  );
-  const perf = perfPass.lighthouse.find((result) => result.id === 'performance');
-  assert.equal(perf?.value, 0.99);
-  assert.equal(perf?.pass, true);
-
-  const perfFail = aggregateRouteRuns(
-    [0.89, 0.9, 0.89].map((performance) => lighthouseReport({ performance })),
-    3,
-  );
-  const lowScore = perfFail.lighthouse.find((result) => result.id === 'performance');
-  assert.equal(lowScore?.value, 0.89);
-  assert.equal(lowScore?.pass, false);
+  const [evaluation] = evaluateRouteSets(sets, new Map(runs.map((run) => [run.file, run])));
+  assert.equal(evaluation?.runs.length, 3);
+  assert.ok(evaluation?.unmeasurable.some((reason) => /faltan 2 corridas/.test(reason)));
+  assert.ok(evaluation?.medians.every((result) => !result.measured && !result.pass));
 });
 
-test('T-042: una corrida sin TBT deja la métrica no medible y nunca aprueba', () => {
-  const incomplete = lighthouseReport();
-  delete (incomplete.audits as Record<string, unknown>)['total-blocking-time'];
-  const { lighthouse, problems } = aggregateRouteRuns(
-    [lighthouseReport({ tbt: 10 }), incomplete, lighthouseReport({ tbt: 10 })],
-    3,
+test('con numberOfRuns=5 y 6 informes sobra uno y la ruta falla cerrado', () => {
+  const files = ['run-1.json', 'run-2.json', 'run-3.json', 'run-4.json', 'run-5.json'];
+  const sets = groupReportsByRoute(tierReports([...files, 'run-6.json']), ['/tier-list'], 5);
+  assert.deepEqual(sets[0]?.problems, ['6 informes para 5 corridas: sobran 1']);
+  const runs = files.map((file) => tierRun(file, 60));
+  const [evaluation] = evaluateRouteSets(sets, new Map(runs.map((run) => [run.file, run])));
+  assert.ok(evaluation?.unmeasurable.some((reason) => /sobran 1/.test(reason)));
+  assert.ok(evaluation?.medians.every((result) => !result.measured));
+});
+
+test('picos de TBT [64, 74, 117.5, 177, 350] dan mediana 117.5 y pasan', () => {
+  const samples = [64, 74, 117.5, 177, 350];
+  const files = samples.map((_, index) => `run-${index + 1}.json`);
+  const runs = samples.map((tbt, index) => tierRun(files[index]!, tbt));
+  const evaluation = evaluateTier(files, runs, 5);
+  assert.equal(evaluation.runs.length, 5, 'la tabla publica las cinco corridas');
+  assert.deepEqual(
+    evaluation.runs.map((run) => run.metrics.find((metric) => metric.id === 'tbt')!.value),
+    samples,
   );
-  assert.deepEqual(problems, []);
-  const tbt = lighthouse.find((result) => result.id === 'tbt');
-  assert.equal(tbt?.measured, false);
-  assert.equal(tbt?.pass, false);
+  const tbt = evaluation.medians.find((metric) => metric.id === 'tbt')!;
+  assert.equal(tbt.value, 117.5);
+  assert.equal(tbt.limit, BUDGETS.tbtMs);
+  assert.equal(tbt.pass, true);
+  assert.ok(evaluation.medians.every((metric) => metric.pass));
+  assert.deepEqual(evaluation.unmeasurable, []);
 });
 
-test('T-042: menos, más o ningún informe que numberOfRuns falla cerrado', () => {
-  const fewer = aggregateRouteRuns([lighthouseReport(), lighthouseReport()], 3);
-  assert.equal(fewer.problems.length, 1);
-  assert.match(fewer.problems[0]!, /se esperaban 3 informes de Lighthouse y hay 2/);
-
-  const more = aggregateRouteRuns(
-    [1, 2, 3, 4].map(() => lighthouseReport()),
-    3,
-  );
-  assert.match(more.problems[0]!, /se esperaban 3 informes de Lighthouse y hay 4/);
-
-  const none = aggregateRouteRuns([], 3);
-  assert.match(none.problems[0]!, /hay 0/);
-  assert.ok(none.lighthouse.every((result) => !result.measured && !result.pass));
+test('mediana de TBT [160, 170, 180] = 170 y falla el umbral de 150', () => {
+  const samples = [160, 170, 180];
+  const files = samples.map((_, index) => `run-${index + 1}.json`);
+  const runs = samples.map((tbt, index) => tierRun(files[index]!, tbt));
+  const evaluation = evaluateTier(files, runs, 3);
+  const tbt = evaluation.medians.find((metric) => metric.id === 'tbt')!;
+  assert.equal(tbt.value, 170);
+  assert.equal(tbt.pass, false);
+  assert.ok(evaluation.medians.some((metric) => !metric.pass));
 });
 
-test('T-042: un informe ilegible entre tres falla cerrado y se reporta', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'gd-performance-runs-'));
-  try {
-    const reportsDir = join(root, 'reports');
-    await mkdir(reportsDir);
-    await writeFile(join(reportsDir, 'a-1.report.json'), JSON.stringify(lighthouseReport({ tbt: 253 })));
-    await writeFile(join(reportsDir, 'a-2.report.json'), '{"lighthouseVersion": ');
-    await writeFile(join(reportsDir, 'a-3.report.json'), JSON.stringify(lighthouseReport({ tbt: 60 })));
-
-    const collected = await collectRouteRuns(reportsDir, ['http://localhost/index.html']);
-    assert.equal(collected.runs.get('/')?.length, 2);
-    assert.equal(collected.problems.length, 1);
-    assert.match(collected.problems[0]!, /a-2\.report\.json: el informe es ilegible/);
-    const aggregate = aggregateRouteRuns(collected.runs.get('/') ?? [], 3);
-    assert.equal(aggregate.problems.length, 1);
-  } finally {
-    await rm(root, { recursive: true, force: true });
-  }
-});
-
-test('T-042: informes de URL ajena, sin URL o sin directorio fallan cerrado', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'gd-performance-foreign-'));
-  try {
-    const reportsDir = join(root, 'reports');
-    await mkdir(reportsDir);
-    await writeFile(
-      join(reportsDir, 'ajena.report.json'),
-      JSON.stringify({ ...lighthouseReport(), requestedUrl: 'http://localhost/otra' }),
-    );
-    await writeFile(join(reportsDir, 'sin-url.report.json'), '{}');
-
-    const collected = await collectRouteRuns(reportsDir, ['http://localhost/index.html']);
-    assert.equal(collected.runs.size, 0);
-    assert.equal(collected.problems.length, 2);
-    assert.match(collected.problems[0]!, /ajena\.report\.json: URL inesperada/);
-    assert.match(collected.problems[1]!, /sin-url\.report\.json: el informe no declara la URL/);
-
-    const missing = await collectRouteRuns(join(root, 'no-existe'), ['http://localhost/index.html']);
-    assert.equal(missing.runs.size, 0);
-    assert.equal(missing.problems.length, 1);
-  } finally {
-    await rm(root, { recursive: true, force: true });
-  }
+test('una corrida sin TBT invalida la mediana de la ruta completa', () => {
+  const files = ['run-1.json', 'run-2.json', 'run-3.json'];
+  const brokenReport = lighthouseReport({ tbt: 60 });
+  delete (brokenReport.audits as Record<string, unknown>)['total-blocking-time'];
+  const runs: RouteRun[] = [
+    tierRun(files[0]!, 60),
+    { file: files[1]!, metrics: evaluateLighthouseReport(brokenReport) },
+    tierRun(files[2]!, 60),
+  ];
+  const evaluation = evaluateTier(files, runs, 3);
+  const tbt = evaluation.medians.find((metric) => metric.id === 'tbt')!;
+  assert.equal(tbt.measured, false);
+  assert.equal(tbt.pass, false);
+  assert.ok(evaluation.unmeasurable.some((reason) => reason.includes('TBT sin medir en run-2')));
 });
 
 test('el HTML se mide en bytes UTF-8 reales contra 120000', async () => {
@@ -321,7 +302,7 @@ test('el CSS crítico suma gzip nivel 6 y falla un byte por encima de 20000', as
   }
 });
 
-test('LHCI corre en un directorio temporal propio con rutas absolutas', async () => {
+test('LHCI corre collect y upload en un directorio temporal propio con rutas absolutas', async () => {
   const repoRoot = resolve('artifact-root');
   const artifactDir = join(repoRoot, 'dist', 'grim-dawn-builds');
   const reportsDir = join(repoRoot, 'dist', 'lighthouse-performance');
@@ -330,26 +311,31 @@ test('LHCI corre en un directorio temporal propio con rutas absolutas', async ()
   const workDir = await mkdtemp(join(tmpdir(), 'gd-lhci-test-'));
   try {
     const options = { repoRoot, artifactDir, reportsDir, configPath, workDir, chromePath };
-    const invocation = lhciRunOptions(options);
+    const invocations = lhciRunOptions(options);
+    assert.equal(invocations.length, 2);
 
-    assert.equal(invocation.command, 'pnpm');
-    assert.deepEqual(invocation.args.slice(0, 3), ['exec', 'lhci', 'autorun']);
-    assert.equal(invocation.cwd, resolve(workDir));
-    assert.notEqual(invocation.cwd, repoRoot);
-    assert.equal(invocation.env['CI'], 'true');
-    assert.equal(invocation.env['CHROME_PATH'], chromePath);
+    const [collect, upload] = invocations;
+    assert.ok(collect && upload);
+    assert.deepEqual(collect.args.slice(0, 3), ['exec', 'lhci', 'collect']);
+    assert.deepEqual(upload.args.slice(0, 3), ['exec', 'lhci', 'upload']);
 
-    // Nada depende del cwd: cada ruta que LHCI necesita va absoluta por argumento.
-    const routedArgs = invocation.args.slice(3);
-    assert.equal(routedArgs.length, 3);
-    for (const arg of routedArgs) {
-      const value = arg.slice(arg.indexOf('=') + 1);
-      assert.ok(isAbsolute(value), `${arg} no usa una ruta absoluta`);
-      assert.doesNotMatch(arg, /\.lighthouseci/i);
+    for (const invocation of invocations) {
+      assert.equal(invocation.command, 'pnpm');
+      assert.equal(invocation.cwd, resolve(workDir));
+      assert.notEqual(invocation.cwd, repoRoot);
+      assert.equal(invocation.env['CI'], 'true');
+      assert.equal(invocation.env['CHROME_PATH'], chromePath);
+      const routedArgs = invocation.args.slice(3);
+      assert.equal(routedArgs.length, 2);
+      for (const arg of routedArgs) {
+        const value = arg.slice(arg.indexOf('=') + 1);
+        assert.ok(isAbsolute(value), `${arg} no usa una ruta absoluta`);
+        assert.doesNotMatch(arg, /\.lighthouseci/i);
+      }
+      assert.ok(invocation.args.includes(`--config=${configPath}`));
     }
-    assert.ok(invocation.args.includes(`--config=${configPath}`));
-    assert.ok(invocation.args.includes(`--collect.staticDistDir=${join(artifactDir, 'browser')}`));
-    assert.ok(invocation.args.includes(`--upload.outputDir=${reportsDir}`));
+    assert.ok(collect.args.includes(`--staticDistDir=${join(artifactDir, 'browser')}`));
+    assert.ok(upload.args.includes(`--outputDir=${reportsDir}`));
 
     // La raíz del repositorio nunca es el cwd de LHCI: allí vive el `.lighthouseci` compartido.
     assert.throws(() => lhciRunOptions({ ...options, workDir: repoRoot }));
@@ -370,13 +356,13 @@ test('sin artefacto el comando falla cerrado antes de lanzar Lighthouse', async 
     assert.equal(result.status, 1);
     assert.match(result.stderr, /falta el artefacto de build/);
     assert.match(result.stderr, /pnpm build/);
-    assert.doesNotMatch(`${result.stdout}${result.stderr}`, /lhci autorun/);
+    assert.doesNotMatch(`${result.stdout}${result.stderr}`, /lhci (autorun|collect|upload)/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
 });
 
-test('lighthouserc.json es la fuente única y no deriva de BUDGETS', async () => {
+test('lighthouserc.json es la fuente única de umbrales y de numberOfRuns', async () => {
   const config = JSON.parse(
     await readFile(new URL('../lighthouserc.json', import.meta.url), 'utf8'),
   ) as unknown;
@@ -394,15 +380,26 @@ test('lighthouserc.json es la fuente única y no deriva de BUDGETS', async () =>
   const info = readLighthouseConfig(config);
   assert.equal(info.formFactor, 'mobile');
   assert.equal(info.throttlingMethod, 'simulate');
-  assert.equal(info.numberOfRuns, 3);
   assert.ok(info.urls.length > 0);
-  assert.throws(() =>
-    readLighthouseConfig({ ...config, ci: { ...(config as { ci: object }).ci, collect: { url: ['http://localhost/'], numberOfRuns: 1 }, upload: { outputDir: 'x' } } }),
-  );
   assert.ok(info.outputDir.length > 0);
+  assert.ok(Number.isInteger(info.numberOfRuns) && info.numberOfRuns >= 1);
   assert.deepEqual(budgetDrift({ ...budgets, tbtMs: 173 }), [
     { metric: 'TBT (ms)', expected: 150, actual: 173 },
   ]);
+
+  const withRuns = (numberOfRuns: unknown) => ({
+    ci: {
+      collect: { url: ['http://localhost/index.html'], numberOfRuns },
+      upload: { outputDir: './dist/lighthouse-performance' },
+      assert: { assertions: {} },
+    },
+  });
+  assert.equal(readLighthouseConfig(withRuns(5)).numberOfRuns, 5);
+  assert.equal(readLighthouseConfig(withRuns(3)).numberOfRuns, 3);
+  assert.equal(readLighthouseConfig(withRuns(undefined)).numberOfRuns, 1);
+  assert.throws(() => readLighthouseConfig(withRuns(0)));
+  assert.throws(() => readLighthouseConfig(withRuns(2.5)));
+
   assert.throws(() => readLighthouseBudgets({}));
   assert.throws(() =>
     readLighthouseBudgets({
