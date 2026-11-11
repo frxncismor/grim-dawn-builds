@@ -2871,3 +2871,44 @@ la causa registrada.
 
 **Cierre**: marcar `T-136` solo con la revisión registrada. No sustituye a
 `T-013`/`T-014` de spec002 ni a `T-040`–`T-043`, `T-126` o `T-128`.
+
+### 17.45 T-138: inglés primario y español como configuración regional completa
+
+**Origen**: enmienda 1.9.0 del principio X y petición del usuario (2026-11-10): el
+proyecto es open source, así que el inglés es el idioma primario del sitio y el
+español una opción completa, no un añadido.
+
+**Alcance**: configuración regional en Angular. El sitio hoy usa `$localize` y
+declara `<html lang="es-419">` sin catálogos: hay una sola configuración regional
+implícita. Esta tarea la convierte en dos reales.
+
+**Archivos**: `angular.json` (configuraciones `en` y `es` con `localize` e
+`i18nMissingTranslation: error`), `src/index.html`, `src/locale/messages.en.xlf`,
+`src/locale/messages.es.xlf`, un conmutador de idioma accesible en el layout,
+`scripts/check-locale-parity.mts` y su prueba, `package.json`,
+`scripts/verify-local.mjs`, `specs/001-mvp-guias-builds/quickstart.md`.
+
+**Contrato**: `en` es la configuración regional por defecto y la que se sirve en la
+raíz; `es` se sirve bajo `/es` (o subdominio decidido en el plan de hosting, que
+sigue diferido). El conmutador es un enlace real navegable sin JavaScript que
+conserva ruta y query, nunca un botón con handler. Cada configuración regional
+prerenderiza las mismas rutas. `hreflang` recíproco y `canonical` propio por
+configuración regional. Los enlaces internos se generan con la configuración
+regional activa, sin perder `baseHref`.
+
+**Puerta de paridad**: `check:locale-parity.mts` compara los dos catálogos XLF y
+falla si una cadena existe en uno y no en el otro, o si alguna traducción está
+vacía. Con `i18nMissingTranslation: error`, una cadena sin traducir rompe el build
+en vez de publicarse en silencio. Las pruebas comprueban que ambas configuraciones
+renderizan el mismo conjunto de secciones y los mismos `id` de anclaje.
+
+**Contenido**: los textos editoriales llevan `locale`; el contenido sin traducción
+se muestra en su idioma original con `lang` explícito, nunca traducido por
+invención. Los nombres de juego ya se guardan en `es` y `en` (principio VI).
+
+**Límite**: no migra `spec.md`, `plan.md`, `tasks.md` ni la documentación
+operativa, que siguen en español hasta su propia tarea. No cambia el idioma de los
+mensajes de commit históricos.
+
+**Cierre**: marcar `T-138` solo con ambas configuraciones construidas, paridad en
+verde, axe sin violaciones en las dos y presupuestos de `plan.md` §6 conservados.
