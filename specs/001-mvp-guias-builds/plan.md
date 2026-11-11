@@ -3275,3 +3275,31 @@ acredita la puerta. Los tres integran en CI mediante `T-126`.
 **Aceptación**: los tres comandos existen, fallan con un fixture que viola el
 umbral y pasan con el artefacto actual; las cifras quedan registradas en
 `quickstart.md` con fecha y entorno.
+
+### 17.53 T-145: el TBT de las páginas estáticas y el gate de rendimiento
+
+`T-042` construyó el gate de Lighthouse y lo ejecutó sobre el artefacto real. Las
+cifras (Chrome 157.0.8103.39, Lighthouse 13.6.0, móvil, 1 pasada) dejan la puerta en
+rojo por tres rutas:
+
+| Ruta         | TBT        | Límite   | Resto                                                      |
+| ------------ | ---------- | -------- | ---------------------------------------------------------- |
+| `/`          | 12,9 ms    | ≤ 150 ms | LCP 906 ms, CLS 0,000, puntuaciones 1,000, JS 0 B          |
+| `/tier-list` | 15,5 ms    | ≤ 150 ms | JS 110 011/110 500, CSS 8 111/20 000, HTML 111 665/120 000 |
+| `/acerca`    | **260 ms** | ≤ 150 ms | LCP 790 ms, CLS 0,000, rendimiento 0,950                   |
+| `/autores`   | **230 ms** | ≤ 150 ms | LCP 787 ms                                                 |
+| `/legal`     | **171 ms** | ≤ 150 ms | —                                                          |
+
+La portada ya demuestra la solución: se emite sin bootstrap cliente y su JS inicial
+es 0 B. Las tres rutas lentas también son contenido estático y hoy hidratan el
+bundle completo, así que el TBT viene de la hidratación, no del contenido.
+
+**Decisión**: el límite **no se amplía**. Hasta que `T-145` corrija las páginas, el
+paso `performance` queda **fuera** de `scripts/verify-local.mjs` para que un fallo
+conocido no oculte regresiones nuevas; `pnpm check:performance` sigue disponible y
+es el comando que mide. Una prueba en `scripts/verify-local.test.mjs` afirma que el
+paso no está en `verify`, de modo que devolverlo exige borrar esa prueba a
+propósito.
+
+**Cierre de T-145**: las tres rutas bajo 150 ms de TBT, el paso `performance`
+devuelto a `verify-local.mjs` y la prueba de ausencia eliminada en el mismo cambio.

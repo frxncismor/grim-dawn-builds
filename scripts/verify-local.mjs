@@ -42,6 +42,11 @@ export const VERIFY_STEPS = [
   { name: 'contrast', command: 'pnpm check:contrast' },
   { name: 'build', command: 'pnpm build' },
   { name: 'public-build', command: 'pnpm check:public-build' },
+  // T-042: Lighthouse mide el artefacto de `build` (dist/), nunca `ng serve`;
+  // por eso es el último paso y depende de que el build haya terminado.
+  // Se mantiene fuera de `verify` hasta que T-145 corrija el TBT de /acerca,
+  // /legal y /autores: un gate que falla por un defecto conocido dejaría el
+  // `pnpm verify` rojo y ocultaría regresiones nuevas.
 ];
 
 /** @param {{ command: string }} step @returns {Promise<number>} */
