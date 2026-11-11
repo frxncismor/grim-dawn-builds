@@ -2363,49 +2363,49 @@ GitHub Actions ni cierra la spec.
 
 ### Artefactos
 
-| Ruta                                    | Cambio                                                                                                                                                  |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scripts/check-ci-secrets.mts`          | Nuevo. Validador estático de `.github/workflows/*.yml`, sin dependencias. Reutiliza `isSecretName` de `scripts/check-secrets.mts`.                      |
-| `scripts/check-ci-secrets.test.mts`     | Nuevo. 36 pruebas.                                                                                                                                      |
-| `.github/workflows/ci.yml`              | Paso `Check CI workflows for secrets` (`run: pnpm exec tsx scripts/check-ci-secrets.mts`) justo después de `Check tracked secrets`. Diff solo de líneas añadidas. |
-| `scripts/ci-workflow.test.mts`          | Endurecido: `/\bsecrets\./` pasa a `/\$\{\{[^}]*\bsecrets\./`, para no confundir un nombre de archivo con una referencia a secreto. Caso nuevo que fija esa intención; 18 pruebas. |
-| `scripts/secret-scan.test.mts`          | Mismo endurecimiento del patrón.                                                                                                                        |
+| Ruta                                | Cambio                                                                                                                                                                             |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/check-ci-secrets.mts`      | Nuevo. Validador estático de `.github/workflows/*.yml`, sin dependencias. Reutiliza `isSecretName` de `scripts/check-secrets.mts`.                                                 |
+| `scripts/check-ci-secrets.test.mts` | Nuevo. 36 pruebas.                                                                                                                                                                 |
+| `.github/workflows/ci.yml`          | Paso `Check CI workflows for secrets` (`run: pnpm exec tsx scripts/check-ci-secrets.mts`) justo después de `Check tracked secrets`. Diff solo de líneas añadidas.                  |
+| `scripts/ci-workflow.test.mts`      | Endurecido: `/\bsecrets\./` pasa a `/\$\{\{[^}]*\bsecrets\./`, para no confundir un nombre de archivo con una referencia a secreto. Caso nuevo que fija esa intención; 18 pruebas. |
+| `scripts/secret-scan.test.mts`      | Mismo endurecimiento del patrón.                                                                                                                                                   |
 
 ### Reglas del validador
 
-| Regla                    | Qué rechaza                                                                                                   |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `pull-request-target`    | Disparador `pull_request_target`, que ejecuta con secretos desde forks.                                      |
-| `secret-in-job`          | Referencia `${{ secrets.… }}` en un workflow con `pull_request`.                                              |
-| `secret-echo`            | Bloque `run` que imprime un secreto (`echo`, `printf`, `cat`, `set -x`).                                      |
-| `literal-credential`     | Variable de nombre secreto con valor literal; debe generarse de forma efímera.                                |
-| `unmasked-credential`    | Credencial efímera sin `::add-mask::` en el job. Exige algún `::add-mask::`; no comprueba que cite la variable concreta. |
-| `set-x`                  | `set -x` en un bloque `run`, que puede volcar valores.                                                        |
-| `compose-config-values`  | `docker compose config` sin `--quiet`.                                                                        |
-| `artifact-env`           | Artefactos que incluyen `.env` o `secrets/`.                                                                  |
-| `env-dump`               | Volcado de entorno o de `.env` en un `run` (`printenv`, `env`, `cat .env`).                                   |
-| `remote-dast-target`     | Objetivo DAST distinto de `localhost`, `127.0.0.1` o `[::1]`.                                                 |
+| Regla                   | Qué rechaza                                                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `pull-request-target`   | Disparador `pull_request_target`, que ejecuta con secretos desde forks.                                                  |
+| `secret-in-job`         | Referencia `${{ secrets.… }}` en un workflow con `pull_request`.                                                         |
+| `secret-echo`           | Bloque `run` que imprime un secreto (`echo`, `printf`, `cat`, `set -x`).                                                 |
+| `literal-credential`    | Variable de nombre secreto con valor literal; debe generarse de forma efímera.                                           |
+| `unmasked-credential`   | Credencial efímera sin `::add-mask::` en el job. Exige algún `::add-mask::`; no comprueba que cite la variable concreta. |
+| `set-x`                 | `set -x` en un bloque `run`, que puede volcar valores.                                                                   |
+| `compose-config-values` | `docker compose config` sin `--quiet`.                                                                                   |
+| `artifact-env`          | Artefactos que incluyen `.env` o `secrets/`.                                                                             |
+| `env-dump`              | Volcado de entorno o de `.env` en un `run` (`printenv`, `env`, `cat .env`).                                              |
+| `remote-dast-target`    | Objetivo DAST distinto de `localhost`, `127.0.0.1` o `[::1]`.                                                            |
 
 CLI: `pnpm exec tsx scripts/check-ci-secrets.mts [--dir <carpeta>]`. Códigos de
 salida: 0 correcto, 1 incidencias, 2 error de uso o lectura (fallo cerrado).
 
 ### Evidencia ejecutada
 
-| Comprobación                                                      | Comando                                                                                  | Resultado                                                                                   |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Workflows del repo                                                | `pnpm exec tsx scripts/check-ci-secrets.mts`                                             | `check-ci-secrets OK (2 workflow(s) revisados)`, exit 0                                     |
-| Validador                                                         | `node --import tsx --test scripts/check-ci-secrets.test.mts`                             | 36 tests, 36 pass, 0 fail                                                                   |
-| Guarda de workflows                                               | `node --import tsx --test scripts/ci-workflow.test.mts`                                  | 18 tests, 18 pass                                                                           |
-| Escáner de secretos y compose                                     | `node --import tsx --test scripts/secret-scan.test.mts scripts/compose.test.mts`         | 43 tests, 43 pass                                                                           |
+| Comprobación                  | Comando                                                                          | Resultado                                               |
+| ----------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Workflows del repo            | `pnpm exec tsx scripts/check-ci-secrets.mts`                                     | `check-ci-secrets OK (2 workflow(s) revisados)`, exit 0 |
+| Validador                     | `node --import tsx --test scripts/check-ci-secrets.test.mts`                     | 36 tests, 36 pass, 0 fail                               |
+| Guarda de workflows           | `node --import tsx --test scripts/ci-workflow.test.mts`                          | 18 tests, 18 pass                                       |
+| Escáner de secretos y compose | `node --import tsx --test scripts/secret-scan.test.mts scripts/compose.test.mts` | 43 tests, 43 pass                                       |
 
 Fixtures de rechazo (carpetas temporales creadas para la prueba, fuera del repo):
 
-| Fixture                                                                 | Salida literal                                                                                                                                  | Exit |
-| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| Disparador `pull_request_target`                                        | `bad.yml:3 [pull-request-target] trigger pull_request_target: ejecuta con secretos desde forks; use pull_request`                               | 1    |
-| DAST remoto `-t https://scan.example.invalid`                           | `bad.yml:9 [remote-dast-target] objetivo DAST fuera del runner (se exige localhost, 127.0.0.1 o [::1])`                                         | 1    |
-| `echo "${{ secrets.API_TOKEN }}"` en `run`                              | `bad.yml:8 [secret-echo] un bloque run imprime un secreto (echo/printf/cat/set -x); no lo imprima` (2 incidencias, incluye `secret-in-job`)     | 1    |
-| Limpio: DAST a `http://127.0.0.1:4200` y credencial efímera enmascarada | `check-ci-secrets OK (1 workflow(s) revisados)`                                                                                                 | 0    |
+| Fixture                                                                 | Salida literal                                                                                                                              | Exit |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| Disparador `pull_request_target`                                        | `bad.yml:3 [pull-request-target] trigger pull_request_target: ejecuta con secretos desde forks; use pull_request`                           | 1    |
+| DAST remoto `-t https://scan.example.invalid`                           | `bad.yml:9 [remote-dast-target] objetivo DAST fuera del runner (se exige localhost, 127.0.0.1 o [::1])`                                     | 1    |
+| `echo "${{ secrets.API_TOKEN }}"` en `run`                              | `bad.yml:8 [secret-echo] un bloque run imprime un secreto (echo/printf/cat/set -x); no lo imprima` (2 incidencias, incluye `secret-in-job`) | 1    |
+| Limpio: DAST a `http://127.0.0.1:4200` y credencial efímera enmascarada | `check-ci-secrets OK (1 workflow(s) revisados)`                                                                                             | 0    |
 
 El nombre `API_TOKEN` y el dominio `scan.example.invalid` son marcadores de prueba;
 no son credenciales ni destinos reales.
@@ -2430,12 +2430,12 @@ Lighthouse (T-042), ni la publicación de la guía (T-044).
 
 ### Archivos de T-040
 
-| Ruta                                         | Cambio                                                                                                                                                                                                     |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `e2e/journeys.spec.ts`                       | Nuevo. Seis recorridos con títulos `@journeys`: navegación real, enlaces del pie, filtros por URL con recarga e historial, ancla `#devociones`, recorrido y ancla sin JavaScript, y 404 del build público. |
-| `playwright.config.ts`                       | `testMatch` pasa a `['a11y.spec.ts', 'journeys.spec.ts']`; segundo `webServer` opcional para el artefacto de borradores; `E2E_ARTIFACT_DIR`, `E2E_PORT`, `E2E_DRAFTS_ARTIFACT_DIR` y `E2E_DRAFTS_PORT`.          |
-| `e2e/a11y.spec.ts`                           | Solo etiquetas `@a11y` en los títulos de los dos `describe`; ninguna aserción cambia.                                                                                                                     |
-| `package.json`                               | `e2e:a11y` con `--grep "@a11y"` y `e2e:journeys` con `--grep "@journeys"`.                                                                                                                                 |
+| Ruta                   | Cambio                                                                                                                                                                                                     |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `e2e/journeys.spec.ts` | Nuevo. Seis recorridos con títulos `@journeys`: navegación real, enlaces del pie, filtros por URL con recarga e historial, ancla `#devociones`, recorrido y ancla sin JavaScript, y 404 del build público. |
+| `playwright.config.ts` | `testMatch` pasa a `['a11y.spec.ts', 'journeys.spec.ts']`; segundo `webServer` opcional para el artefacto de borradores; `E2E_ARTIFACT_DIR`, `E2E_PORT`, `E2E_DRAFTS_ARTIFACT_DIR` y `E2E_DRAFTS_PORT`.    |
+| `e2e/a11y.spec.ts`     | Solo etiquetas `@a11y` en los títulos de los dos `describe`; ninguna aserción cambia.                                                                                                                      |
+| `package.json`         | `e2e:a11y` con `--grep "@a11y"` y `e2e:journeys` con `--grep "@journeys"`.                                                                                                                                 |
 
 Sin cambios en `src/**`, `angular.json`, `playwright.svg.config.ts`,
 `e2e/svg-responsive.spec.ts` ni dependencias.
@@ -2462,13 +2462,13 @@ guía fallan indicando el comando exacto; no se saltan.
 
 ### Comprobaciones de T-040
 
-| Comprobación                  | Comando                                                                             | Resultado                                                                                                    |
-| ----------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Recorridos E2E                | `pnpm e2e:journeys`                                                                 | **18/18** en 27,3 s (6 casos × 375/768/1280), salida 0                                                        |
-| Puerta axe (regresión)        | `pnpm e2e:a11y`                                                                     | **27/27**, salida 0; 0 violaciones y 14-23 reglas WCAG en verde por ruta                                      |
-| Build y presupuesto           | `pnpm build`                                                                        | Salida 0; `/` 0/90 000 y `/tier-list` **110 011/110 500** gzip                                                |
-| Prueba negativa de la puerta  | `pnpm e2e:journeys` con `E2E_ARTIFACT_DIR=dist/e2e-drafts/browser`                   | 3 fallos `GET /builds/… · Expected 404 · Received 200`; salida 1                                              |
-| Lint / formato / Markdown     | `pnpm lint`, `prettier --check`, `pnpm lint:md`                                      | Los tres limpios                                                                                              |
+| Comprobación                 | Comando                                                            | Resultado                                                                |
+| ---------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| Recorridos E2E               | `pnpm e2e:journeys`                                                | **18/18** en 27,3 s (6 casos × 375/768/1280), salida 0                   |
+| Puerta axe (regresión)       | `pnpm e2e:a11y`                                                    | **27/27**, salida 0; 0 violaciones y 14-23 reglas WCAG en verde por ruta |
+| Build y presupuesto          | `pnpm build`                                                       | Salida 0; `/` 0/90 000 y `/tier-list` **110 011/110 500** gzip           |
+| Prueba negativa de la puerta | `pnpm e2e:journeys` con `E2E_ARTIFACT_DIR=dist/e2e-drafts/browser` | 3 fallos `GET /builds/… · Expected 404 · Received 200`; salida 1         |
+| Lint / formato / Markdown    | `pnpm lint`, `prettier --check`, `pnpm lint:md`                    | Los tres limpios                                                         |
 
 Logs: `$env:TEMP/gd-t040-journeys.log`, `$env:TEMP/gd-t040-a11y.log`,
 `$env:TEMP/gd-t040-negative.log`, `$env:TEMP/gd-t040-build.log`,
@@ -2501,3 +2501,34 @@ Chromium en `$env:TEMP/gd-ui-browser-binaries`, `NG_BUILD_MAX_WORKERS=2`.
   `cross-env` no está en dependencias. T-126 puede encadenarlo en CI.
 - El servidor estático sigue sin soportar `Range`/`ETag`: suficiente para lo que
   se mide aquí y para la puerta axe.
+
+## Cierre del andamiaje T-001 a T-004 y T-012 (2026-11-11)
+
+Tareas cerradas con evidencia observada, no con supuestos. El andamiaje existía
+desde el inicio del repositorio; esta entrada regulariza su cierre.
+
+- **T-001** — `tsconfig.json` con `"strict": true`; `angular.json` con
+  `outputMode: static`, `server: src/main.server.ts` y polyfill
+  `@angular/localize/init`; `dist/grim-dawn-builds/browser/index.html` existe y el
+  build prerenderiza `404`, `acerca`, `legal`, `tier-list` y `autores`.
+- **T-002** — `.editorconfig`, `.prettierrc`, `eslint.config.js` y `.gitignore`
+  presentes; `pnpm lint` pasa dentro de `pnpm verify`; los scripts existen en
+  `package.json`. Nota de alcance: `content:import` se sustituyó por `db:seed`/
+  `db:bootstrap` (plan rev. 4) y `lhci` por `check:performance` (T-042).
+- **T-003** — budgets `initial` `300kB` aviso / `320kB` error (excepción expresa del
+  usuario, plan §17.51) y `anyComponentStyle` `4kB`/`8kB`. El límite hace fallar de
+  verdad: con `306,23 kB` el build falló con `bundle initial exceeded maximum
+budget` (log `gd-t020-verify-build.log`). La puerta gzip de §6 se mide aparte con
+  `check:initial-js`.
+- **T-004** — `scripts/verify-local.mjs` encadena `check:scope`,
+  `check:boundaries`, `check:secrets`, `check:ci-secrets`, dominio, API, `lint`,
+  `lint:md`, `format`, `test`, `test:scripts`, `assets`, `contrast`, `build` y
+  `public-build`. `.github/workflows/` solo tiene `ci.yml` y `secret-scan.yml`: no
+  existe workflow de despliegue.
+- **T-012** — `lighthouserc.json` y `scripts/check-performance.mts` miden el
+  artefacto real con Lighthouse móvil. Cifras: `/` con **0 B** de JS inicial y TBT
+  12,9 ms; `/tier-list` 110 011/110 500 B gzip y TBT 15,5 ms. El presupuesto es
+  alcanzable; las rutas estáticas con TBT alto quedan en T-145.
+
+Evidencia de la puerta local: `pnpm verify` termina en `verify OK (local)` con
+`exit 0` sobre el árbol del commit de cierre.
