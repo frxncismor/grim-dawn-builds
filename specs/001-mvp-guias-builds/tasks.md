@@ -62,7 +62,7 @@ Formato: `ID [P] [UI] Descripción — archivos — Aceptación`. `[P]` = parale
 
 ## Fase 6 — US3/US4 Home, autor, estáticas
 
-- [x] **T-038** [UI] Home mínima (hero, build destacada solo si hay una publicada; si no, CTA al catálogo; criterios) — `src/app/features/home/*, public/og/site.png, public/og/site.svg, src/app/core/seo/seo.service.ts, src/app/core/seo/seo.service.spec.ts, specs/001-mvp-guias-builds/quickstart.md` — plan §17.29, snapshot público existente sin API browser, enlaces nativos y ausencia honesta de guías; axe3anchos; cinco muestras LCP slow4G/CPU4x;  LCP dentro de presupuesto. Crear imagen social propia a partir del SVG original, sin arte del juego, y conectar la imagen por defecto con SeoService para metadatos completos; T-018 implementa soporte de imagen, no inventa una URL de archivo ausente.
+- [x] **T-038** [UI] Home mínima (hero, build destacada solo si hay una publicada; si no, CTA al catálogo; criterios) — `src/app/features/home/*, public/og/site.png, public/og/site.svg, src/app/core/seo/seo.service.ts, src/app/core/seo/seo.service.spec.ts, specs/001-mvp-guias-builds/quickstart.md` — plan §17.29, snapshot público existente sin API browser, enlaces nativos y ausencia honesta de guías; axe3anchos; cinco muestras LCP slow4G/CPU4x; LCP dentro de presupuesto. Crear imagen social propia a partir del SVG original, sin arte del juego, y conectar la imagen por defecto con SeoService para metadatos completos; T-018 implementa soporte de imagen, no inventa una URL de archivo ausente.
 - [ ] **T-039** [UI] `/autores/:slug`, `/acerca`, `/legal` — `src/app/features/{author,static-pages}/*, src/app/app.routes.ts, src/app/app.routes.server.ts, src/app/app.config.server.ts, src/app/core/content/catalog.server.ts, src/app/core/content/author-pages.server.ts, src/app/core/content/author-pages.server.test.mts, package.json, specs/001-mvp-guias-builds/quickstart.md` — plan §17.30; fuente pública/snapshot sin API browser, perfiles sin placeholders ni privados, parámetros públicos y SEO; legal espera canal real solicitado al usuario; prerenderizadas; enlaces desde pie y guía.
 
 ## Fase 7 — Calidad y cierre
@@ -113,7 +113,7 @@ Leyenda: **[LISTA]** implementable según dependencias; **[OPCIONAL]** no gatea.
 - [x] **T-060** Rutas públicas GET `/api/v1/builds`, `/api/v1/builds/:slug`, `/api/v1/tier-lists/:slug`, `/api/v1/authors/:slug`, `/api/v1/slugs`, más `/health`/`/ready`; consultas `api_ro`, salida validada con `@gd/domain`, filtro en consulta y dominio — `apps/api/src/routes/content.ts, apps/api/src/routes/content.spec.ts, apps/api/src/content/repository.ts, apps/api/src/content/map-content.ts, apps/api/src/content/map-content.spec.ts, apps/api/src/app.ts, apps/api/src/app.spec.ts, apps/api/src/server.ts, apps/api/test/content.int.spec.ts` — PostgreSQL real: builds completos, fuentes/autor/tier list preservados, borrador/pending ausentes/404, sin campos internos; ≤ 6 consultas por petición; errores sin trazas; contrato T-063 público pasa. Depende de T-053/T-057/T-059/T-127; readiness conserva evidencia T-057.
 - [x] **T-061** [B-5 cerrada] Endurecimiento HTTP: CORS permite exclusivamente `http://localhost:4200` en configuración local aprobada, lista explícita por variable sin wildcard; solo GET/HEAD/OPTIONS, cabeceras de seguridad, tamaño máximo y rate-limit básico — `apps/api/src/security/http.ts, apps/api/src/security/http.spec.ts, apps/api/src/config.ts, apps/api/src/config.spec.ts, apps/api/src/config/secrets.spec.ts, apps/api/src/app.ts, infra/docker/.env.example, infra/docker/compose.yaml` — origen aprobado permitido, `http://127.0.0.1:4200`/otros rechazados, POST/PUT/DELETE → 405/404; límites documentados/verificados. Depende de T-060.
 - [ ] **T-066b** [LISTA] Pruebas contenedor/Compose en CI: no-root, sin `.env`/secretos en imagen, `db` sin `ports` por defecto, Trivy con **bloqueo desde severidad MEDIA** (MEDIA/ALTA/CRÍTICA), decisión del usuario 2026-11-09; sin ignorar hallazgos no corregidos silenciosamente — `scripts/check-container.mts, scripts/check-container.test.mts, .github/workflows/ci.yml` — falla con Dockerfile root/copia `.env` y con informe fixture MEDIA; pasa con imagen sin hallazgos al umbral. Depende de T-054/T-056/T-064. (AC-14)
-- [ ] **T-065** [LISTA] Jobs de CI del backend: tests de integración con PostgreSQL (servicio de contenedor), `docker compose config`, build de imagen sin push — `.github/workflows/ci.yml` — verde en PR. Depende de T-060, T-066b.
+- [x] **T-065** [LISTA] Jobs de CI del backend: tests de integración con PostgreSQL (servicio de contenedor), `docker compose config`, build de imagen sin push — `.github/workflows/ci.yml` — verde en PR. Depende de T-060, T-066b. **Verificado (2026-11-10)**: el job descarga el digest exacto de PostgreSQL desde `infra/docker/compose.yaml` (falla si no está fijado por digest) antes de `pnpm --filter @gd/api test`, así las 47 pruebas de integración dejan de omitirse; añade `docker compose config --quiet` con `.env.example`, `docker build` de `apps/api/Dockerfile` sin push y comprobación de usuario no-root. Evidencia: `Verify pull request` en verde en el PR #4 (2 m 12 s), build local `gd-api:ci-check` con `id -u` = 10001, `compose config` salida 0, `scripts/ci-workflow.test.mts` 17/17. T-066b (Trivy) sigue pendiente y no se acredita aquí.
 
 ### 8.4 Integración con la web (B-6 cerrada: el release lee la API)
 
@@ -160,7 +160,7 @@ Sin elegir proveedor. **[SIN PROVEEDOR]** = implementable ya; **[DIFERIDA-HOSTIN
 - [ ] **T-098** [DIFERIDA] Fallo seguro: errores ⇒ cuarentena; degradación a solo enlace con atribución en la UI — prueba e2e.
 - [ ] **T-099** [DIFERIDA] Adaptadores por fuente de clase A/B/C, uno por spec y decisión del usuario (primero un envío de autor manual) — spec propio.
 - [ ] **T-100** [DIFERIDA] Operación y revisión de revocación/caducidad de permisos; credenciales de API de fuente bajo §13.
-  Preguntas abiertas: plan §14.4 (no bloquean el MVP).
+      Preguntas abiertas: plan §14.4 (no bloquean el MVP).
 
 ### 8.8 Builds adaptadas: derechos, atribución, retirada (rev. 6; plan §15, FR-27–FR-33)
 
@@ -194,7 +194,7 @@ Ninguna tarea habilita fuentes reales ni scraping. Orden: T-101/T-102/T-103 → 
 - [ ] **T-120** [DIFERIDA, E2] Reportes y retirada (reutiliza T-102/FR-32) con despublicación cautelar.
 - [ ] **T-121** [DIFERIDA, E3] Límites de tasa, cuarentena, antispam, suspensión (D-6).
 - [ ] **T-122** [DIFERIDA, E2] Vistas públicas solo de la versión publicada + pruebas de no filtración de borradores (FR-45).
-  Orden: T-111/T-112 → T-113 → [decisiones D-1–D-3 + enmienda] → T-114 → T-115 (E1) → T-116 → T-117/T-118 → T-119/T-120/T-122 → T-121 (E3).
+      Orden: T-111/T-112 → T-113 → [decisiones D-1–D-3 + enmienda] → T-114 → T-115 (E1) → T-116 → T-117/T-118 → T-119/T-120/T-122 → T-121 (E3).
 
 ### 8.10 Calidad de Markdown (rev. 8)
 
