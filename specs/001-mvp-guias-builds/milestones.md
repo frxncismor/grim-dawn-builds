@@ -84,12 +84,12 @@ No se abre hasta que las tareas de cierre estén verdes.
 
 ## Estado de publicación
 
-| Entrega                            | Rama                             | PR                                                          | Estado                                     |
-| ---------------------------------- | -------------------------------- | ----------------------------------------------------------- | ------------------------------------------ |
-| Base                               | `mvp/1`                          | —                                                           | publicado (rama de integración)            |
-| Aplicación completa (hitos 1–3)    | `feature/hito-3-web-experiencia` | [#3](https://github.com/frxncismor/grim-dawn-builds/pull/3) | publicado, **CI en verde**                 |
-| Idioma (inglés primario + español) | `feature/i18n-bilingual-docs`    | [#4](https://github.com/frxncismor/grim-dawn-builds/pull/4) | publicado, **CI en verde**                 |
-| Cierre de calidad (hito 4)         | —                                | —                                                           | pendiente de implementación                |
+| Entrega                            | Rama                             | PR                                                          | Estado                          |
+| ---------------------------------- | -------------------------------- | ----------------------------------------------------------- | ------------------------------- |
+| Base                               | `mvp/1`                          | —                                                           | publicado (rama de integración) |
+| Aplicación completa (hitos 1–3)    | `feature/hito-3-web-experiencia` | [#3](https://github.com/frxncismor/grim-dawn-builds/pull/3) | publicado, **CI en verde**      |
+| Idioma (inglés primario + español) | `feature/i18n-bilingual-docs`    | [#4](https://github.com/frxncismor/grim-dawn-builds/pull/4) | publicado, **CI en verde**      |
+| Cierre de calidad (hito 4)         | —                                | —                                                           | pendiente de implementación     |
 
 ### Por qué no se pudo entregar en tres capas
 
@@ -111,16 +111,15 @@ PR de aplicación completa (#3), más el PR de idioma (#4) apilado encima.
 
 ### Orden de fusión
 
-#3 → #4. Cada rama contiene a la anterior; al fusionar #3, el diff de #4 se reduce
-a su propio contenido (idioma y reglas).
+Fusión en orden: #3 → #4. Cada rama contiene a la anterior; al fusionar #3, el diff
+de #4 se reduce a su propio contenido (idioma y reglas).
 
 ### Verificación por entrega
 
-| Entrega             | Puertas en verde                                                                                                                                                                                                                                                                                                   | Puertas pendientes                       |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| Aplicación completa | `pnpm verify` en verde local (exit 0); dominio 97,33 %; 253 pruebas de API; 247 pruebas de web; `build`; `check:initial-js` (portada 0 bytes, catálogo 105 259/110 000 gzip); `check:public-build`; `check:secrets`; `lint:md`; `check:contrast` (mínimo 5,811:1); axe 375/768/1280                                   | e2e global, Lighthouse, puerta de revisión |
-| Idioma              | `lint:md` 45 archivos, `check:contrast`, constitución 1.9.0 y README bilingüe                                                                                                                                                                                                                                    | `T-138` (configuraciones regionales)      |
-
+| Entrega             | Puertas en verde                                                                                                                                                                                                                                                                    | Puertas pendientes                         |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Aplicación completa | `pnpm verify` en verde local (exit 0); dominio 97,33 %; 253 pruebas de API; 247 pruebas de web; `build`; `check:initial-js` (portada 0 bytes, catálogo 105 259/110 000 gzip); `check:public-build`; `check:secrets`; `lint:md`; `check:contrast` (mínimo 5,811:1); axe 375/768/1280 | e2e global, Lighthouse, puerta de revisión |
+| Idioma              | `lint:md` 45 archivos, `check:contrast`, constitución 1.9.0 y README bilingüe                                                                                                                                                                                                       | `T-138` (configuraciones regionales)       |
 
 ## Condiciones para publicar
 
