@@ -2616,3 +2616,72 @@ las demás rutas antes del cierre integral.
   rutas comparten una sola hoja de 1 657 B gzip.
 - `dist/lighthouse-performance` es evidencia local, no se publica ni se versiona.
 - Sin verificación en GitHub Actions: la integración en CI es T-126.
+
+## T-021: sitemap y robots derivados del artefacto — 2026-11-11
+
+### Contrato
+
+- Fuente: `dist/grim-dawn-builds/prerendered-routes.json` y el HTML real de
+  `browser/`. `/` lee `browser/index.html`; `/x` lee `browser/x/index.html`.
+  No hay lista paralela de rutas.
+- Falla si falta o es inválido `prerendered-routes.json`, si no queda ninguna ruta
+  publicable o si una ruta listada no tiene HTML.
+- Excluye `/404`, cualquier segmento `*-preview` y cualquier `<meta name="robots">`
+  con `noindex` (borrador, `en_revision`, autor placeholder). Las rutas de derechos
+  pendientes, denegados o revocados y de `link_only` sin cuerpo no se prerenderizan,
+  así que no entran.
+- `BASE_URL` (por defecto `http://localhost:4200/`) se valida con la misma regla que
+  `normalizeSiteUrl`. El validador está duplicado en el script por el límite
+  `scripts → src`; ver desviaciones.
+- `public/robots.txt` es plantilla con `User-agent: *`, `Allow: /` y una única línea
+  `Sitemap: __BASE_URL__/sitemap.xml`, sin `Disallow`. Se sustituye el token y se
+  falla si aparece cero o más de una vez.
+- Sitemap 0.9: orden ascendente, sin `lastmod`, saltos `\n`, `loc` escapado y
+  prefijo de path de `BASE_URL` respetado. Dos ejecuciones dan bytes idénticos.
+- Encadenado en `build` después de `emit-404` y antes de `check-initial-js`.
+
+### Verificación
+
+| Comprobación        | Comando                                                 | Resultado                                                                                                                |
+| ------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Pruebas propias     | `node --import tsx --test scripts/gen-sitemap.test.mts` | 19 tests, 19 pass, 0 fail, exit 0 · `$env:TEMP/gd-t021-green-exclusions.log`                                             |
+| Suites de scripts   | `pnpm test:scripts`                                     | 362 tests, 360 pass, 2 omitidas por plataforma, 0 fail, exit 0 · `$env:TEMP/gd-t021-test-scripts-orchestrator.log`       |
+| Build público       | `pnpm build` (sin `BASE_URL`)                           | exit 0 · `$env:TEMP/gd-t021-build-orchestrator.log`; `check:initial-js OK /tier-list (110011/110500 bytes gzip nivel 6)` |
+| Frontera de scripts | `pnpm check:boundaries`                                 | OK, 238 archivos, exit 0                                                                                                 |
+| Artefacto público   | `pnpm check:public-build`                               | OK, 211 archivos, exit 0 · `$env:TEMP/gd-t021-public-build.log` (evidencia del artefacto, no de T-021)                   |
+| Determinismo        | `pnpm sitemap:generate` tras el build                   | segunda ejecución con los mismos hashes (ver abajo)                                                                      |
+
+### Artefacto generado
+
+Entradas del sitemap con `BASE_URL` por defecto:
+
+1. `http://localhost:4200/`
+2. `http://localhost:4200/acerca`
+3. `http://localhost:4200/autores/grim-dawn-builds`
+4. `http://localhost:4200/legal`
+5. `http://localhost:4200/tier-list`
+
+`/404` queda fuera y no hay entradas `/builds/`, porque la guía sigue sin publicar.
+
+| Archivo               | Bytes | SHA-256                                                            |
+| --------------------- | ----- | ------------------------------------------------------------------ |
+| `browser/sitemap.xml` | 389   | `B03391D9E3E74F09B000FDE04CC5FA52961D3D6D36533DBC17056E0534430F20` |
+| `browser/robots.txt`  | 67    | `D65FF8F7F54E8544F91391AA8FF72FFA70E419073779DE5BBC168AFB35622555` |
+
+`robots.txt` contiene `User-agent: *`, `Allow: /` y
+`Sitemap: http://localhost:4200/sitemap.xml`.
+
+### Desviaciones y límites
+
+- **Validador de `BASE_URL` duplicado** en `scripts/gen-sitemap.mts`, porque
+  `pnpm check:boundaries` prohíbe `scripts → src` y `src/**` está fuera de alcance.
+  Las pruebas cubren la equivalencia con `normalizeSiteUrl`.
+- **`build:release` no encadena el generador.** Su `contentHash` se calcula dentro de
+  `scripts/build-release.mts` antes de la finalización, y ese script está fuera de
+  los archivos autorizados. Un release deja `robots.txt` con `__BASE_URL__` sin
+  sustituir y sin `sitemap.xml`. No se declara release verificado; lo resuelve una
+  tarea con acceso a `build-release.mts`.
+- `scripts/verify-local.mjs` no se tocó: `build` ya ejecuta el generador.
+- `pnpm test:scripts` incluye trabajo en curso de otro dominio en
+  `scripts/check-performance.*`; no se atribuye a T-021.
+- No ejecutados: `build:release` y `check:release` (requieren PostgreSQL/API Docker).

@@ -787,3 +787,43 @@ runner.
 
 Modelo realmente usado: `opencode-go/deepseek-v4.1-flash`. Sin commit, push ni
 PR. `T-042`, `T-126` y el registro del To-do de Over9k siguen pendientes.
+
+## T-021: sitemap y robots desde el artefacto (2026-11-11)
+
+**Estado**: cerrada en el alcance autorizado (`scripts/gen-sitemap.mts`,
+`scripts/gen-sitemap.test.mts`, `public/robots.txt` y `package.json`). **Release no
+verificado**: `build:release` no encadena el generador, así que un release deja
+`robots.txt` con `__BASE_URL__` sin sustituir y sin `sitemap.xml` hasta que una
+tarea con acceso a `scripts/build-release.mts` mueva la generación antes del
+fingerprint.
+
+**Evidencia** (detalle en `quickstart.md`, sección T-021):
+
+- `node --import tsx --test scripts/gen-sitemap.test.mts`: 19/19, exit 0 ·
+  `$env:TEMP/gd-t021-green-exclusions.log`.
+- `pnpm test:scripts`: exit 0, 362 tests, 360 pass, 2 omitidas, 0 fail ·
+  `$env:TEMP/gd-t021-test-scripts-orchestrator.log`.
+- `pnpm build`: exit 0 · `$env:TEMP/gd-t021-build-orchestrator.log`; `/tier-list`
+  110011/110500 bytes gzip.
+- `sitemap.xml`: 5 entradas, 389 B,
+  SHA-256 `B03391D9E3E74F09B000FDE04CC5FA52961D3D6D36533DBC17056E0534430F20`.
+- `robots.txt`: 67 B,
+  SHA-256 `D65FF8F7F54E8544F91391AA8FF72FFA70E419073779DE5BBC168AFB35622555`.
+- Segunda ejecución de `pnpm sitemap:generate`: mismos hashes.
+- `pnpm check:boundaries` OK (238 archivos); `pnpm check:public-build` OK (211
+  archivos, no acredita T-021).
+
+**Desviación registrada**: el validador de `BASE_URL` está duplicado en el script
+porque `pnpm check:boundaries` prohíbe `scripts → src`. Las pruebas comprueban la
+equivalencia con `normalizeSiteUrl`.
+
+**Archivos no tocados**: `scripts/verify-local.mjs` (intacto; `build` ya ejecuta el
+generador), `scripts/build-release.mts`, `.gitignore` y el resto de archivos
+prohibidos.
+
+Modelo realmente usado: implementación `opencode-go/claude-haiku-5-5#medium`;
+orquestación y verificación `opencode-go/deepseek-v4.1-flash`. Este flujo no
+ejecutó commit, push ni PR. **Desviación externa detectada**: durante la sesión
+apareció el commit `77faa52` con los archivos de T-021, ya presente en
+`origin/feature/i18n-bilingual-docs`; no lo creó ni lo publicó este orquestador y
+no se reescribió la historia. Sin PR.
