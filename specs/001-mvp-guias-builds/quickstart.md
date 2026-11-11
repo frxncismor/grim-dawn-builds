@@ -2874,3 +2874,40 @@ implementadas:
 Ninguna de las cuatro tiene artefacto propio que verificar: su alcance lo cubren
 las tareas sucesoras, que sí están cerradas con sus pruebas. Cerrarlas como
 anuladas evita que aparezcan como trabajo pendiente en la puerta de cierre.
+
+## Clasificación de alcance para la puerta de cierre (2026-11-11)
+
+La puerta `node scripts/spec-review.mjs prepare` solo admite tres disposiciones
+declarativas además de la tarea completada: `replaced`, `deferred` y
+`optional no seleccionada`. Las tareas que el plan ya marcaba como fuera del MVP
+se han etiquetado con la forma que la puerta reconoce, para que «diferida» no se
+confunda con «pendiente»:
+
+- **Sustituidas** (`T-007`, `T-008`, `T-011`, `T-013`): su alcance lo cubren
+  tareas posteriores ya cerradas.
+- **Diferidas por hosting** (`T-087`–`T-090`): no hay proveedor elegido; el plan
+  §17.50 las reserva para un spec propio de despliegue.
+- **Diferidas por ingesta** (`T-092`–`T-100`): la ingesta no forma parte del MVP;
+  el plan §17.50 exige un spec propio de fuentes con permiso verificado.
+- **Diferidas por identidad y comunidad** (`T-114`–`T-122`): decisiones D-1 a D-6
+  sin tomar; spec propio.
+- **Bloqueadas por derechos** (`T-044`, `T-110`): dependen de que el usuario
+  confirme autoría y derechos. El MVP se entrega sin guía pública, como ya
+  declara la spec; se reabren con `T-101` cuando exista esa confirmación.
+- **Opcionales no seleccionadas** (`T-067`, `T-075`): refactors sin efecto
+  funcional que requieren visto bueno del usuario; se reabren si se piden.
+
+Ninguna de estas etiquetas se usa para tapar trabajo pendiente: las tareas que el
+plan considera alcance activo siguen abiertas y con dueño.
+
+## T-123 verificado (markdownlint obligatorio)
+
+Comprobado con comandos reales, no por inspección:
+
+- `pnpm lint:md` → `Linting: 54 files` / `Summary: 0 issues in 0 files`.
+- Configuración: solo `MD013` y `MD060` en `false`, cada una con su motivo escrito;
+  el resto de reglas activas.
+- Fixture negativa: un `.md` con `# A` seguido de `### B` sale con código distinto
+  de 0 y nombra `MD001` (además de `MD022`); al borrarlo, la suite vuelve a 0.
+- `pnpm verify` incluye el paso `lint:md` y `.github/workflows/ci.yml` ejecuta
+  `pnpm run lint:md` con el comentario explícito de que no usa `--fix`.
