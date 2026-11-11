@@ -22,11 +22,14 @@ jobs:
   verify:
     name: Verify pull request
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # T-126: the e2e, axe and Lighthouse gates add minutes; 30 is not enough.
+    timeout-minutes: 45
     permissions:
       contents: read
     env:
       NG_CLI_ANALYTICS: 'false'
+      CONTENT_SOURCE: fixture
+      INCLUDE_DRAFTS: 'false'
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -154,8 +157,55 @@ jobs:
       - name: Content validation (fixture)
         run: pnpm run content:validate -- --dir scripts/fixtures/content-valid
 
+      # `content/` is the repository's real fixture content (content/builds is
+      # still empty until T-014). `catalog:check` fails if the generated catalog
+      # drifts from the content it is generated from.
+      - name: Content validation (real fixture content)
+        run: pnpm run content:validate -- --dir content
+
+      - name: Catalog check (generated catalog is current)
+        run: pnpm run catalog:check
+
       - name: Assets check
         run: pnpm run assets:check
 
       - name: Web build (fixture content)
         run: pnpm run build
+
+      # The local drafts artifact is built into its own directory
+      # (dist/e2e-drafts) and never overwrites the public dist/grim-dawn-builds;
+      # playwright.config.ts serves both on different ports (4321 and 4322).
+      - name: Build drafts artifact (isolated directory, no overwrite)
+        env:
+          INCLUDE_DRAFTS: 'true'
+        run: pnpm exec ng build --output-path dist/e2e-drafts
+
+      - name: Install Playwright Chromium (pinned by package.json)
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E journeys (public and drafts artifacts, 3 viewports)
+        run: pnpm run e2e:journeys
+
+      - name: Accessibility gate (axe, 3 routes x 3 viewports, negative fixture)
+        run: pnpm run e2e:a11y
+
+      # dist/build-info.json is exclusive to `build:release` (T-074): a PR build
+      # must not claim a release source. Otherwise report the effective content
+      # source only (no secrets, no environment dump).
+      - name: Artifact source report (fixture build, no release report)
+        run: |
+          set -euo pipefail
+          if [ -f dist/build-info.json ]; then
+            echo "PR build must not produce dist/build-info.json (release-only, T-074)"
+            exit 1
+          fi
+          echo "Effective content source: CONTENT_SOURCE=${CONTENT_SOURCE:-fixture}"
+          echo "No release report is produced by a PR build (fixture artifact)."
+
+      # Decides on the median of the configured numberOfRuns in lighthouserc.json,
+      # measures the real `pnpm build` artifact (never `ng serve`), and Chrome is
+      # preinstalled on the ubuntu-24.04 image.
+      - name: Performance budgets (Lighthouse median + byte budgets)
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: pnpm run check:performance

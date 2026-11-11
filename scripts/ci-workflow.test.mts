@@ -35,6 +35,14 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm run content:validate -- --dir scripts/fixtures/content-valid',
   'pnpm run assets:check',
   'pnpm run build',
+  // T-126: real fixture content, catalog freshness and the quality gates.
+  'pnpm run content:validate -- --dir content',
+  'pnpm run catalog:check',
+  'pnpm exec ng build --output-path dist/e2e-drafts',
+  'pnpm exec playwright install --with-deps chromium',
+  'pnpm run e2e:journeys',
+  'pnpm run e2e:a11y',
+  'pnpm run check:performance',
 ];
 
 const indentOf = (line: string): number => line.length - line.trimStart().length;
@@ -71,6 +79,8 @@ export function validateCiWorkflow(source: string): string[] {
   }
   if (/:\s*write\b/.test(text)) problems.push('requests write permission');
   if (/id-token/.test(text)) problems.push('requests id-token (no OIDC in PR verification)');
+  // T-126: YAML indentation must be spaces; a tab breaks parsing invisibly.
+  if (/\t/.test(source)) problems.push('uses tab characters (YAML indentation must be spaces)');
 
   // Triggers: only pull_request, targeting exactly the three integration branches.
   const onIdx = lines.findIndex((l) => /^on:\s*$/.test(l));
@@ -160,7 +170,7 @@ export function validateCiWorkflow(source: string): string[] {
     if (!runs.includes(command)) problems.push(`missing required check: ${command}`);
   }
   for (const run of runs) {
-    if (/--fix\b|--write\b|:fix\b/.test(run) || /^pnpm (run )?format$/.test(run)) {
+    if (/--fix\b|--write\b|:fix\b|--update-snapshots\b/.test(run) || /^pnpm (run )?format$/.test(run)) {
       problems.push(`check must not modify the tree: ${run}`);
     }
     if (/\bdeploy\b|\bpublish\b|docker push/i.test(run)) {
@@ -169,6 +179,80 @@ export function validateCiWorkflow(source: string): string[] {
     if (/^(printenv|env)$/.test(run)) problems.push('dumps environment (may leak values)');
     if (/^pnpm (install|i)\b/.test(run) && !run.includes('--frozen-lockfile')) {
       problems.push(`pnpm install must use --frozen-lockfile: ${run}`);
+    }
+    // T-126: the drafts artifact needs its own directory, never the public one.
+    if (/\bng build\b/.test(run) && !run.includes('--output-path dist/e2e-drafts')) {
+      problems.push(`ng build must target the isolated drafts directory: ${run}`);
+    }
+    if (run.includes('--output-path dist/grim-dawn-builds')) {
+      problems.push(`build must not overwrite the public artifact: ${run}`);
+    }
+  }
+
+  // T-126: quality gates measure the built artifact, not the dev server.
+  if (/\bng serve\b/.test(text)) problems.push('runs the dev server instead of the built artifact');
+
+  // T-126: the drafts build and the Lighthouse step need their explicit env.
+  if (!lines.some((l) => /^\s*INCLUDE_DRAFTS:\s*'true'\s*$/.test(l))) {
+    problems.push("drafts build must set INCLUDE_DRAFTS: 'true'");
+  }
+  if (!lines.some((l) => /^\s*CHROME_PATH:\s*\/usr\/bin\/google-chrome\s*$/.test(l))) {
+    problems.push('Lighthouse step must set CHROME_PATH on the runner');
+  }
+
+  // T-126: e2e + axe + Lighthouse do not fit in the old 30 minute budget.
+  const timeoutIdx = lines.findIndex((l) => /^\s*timeout-minutes:\s*\d+\s*$/.test(l));
+  if (timeoutIdx < 0) {
+    problems.push('missing timeout-minutes (needed by the quality gates)');
+  } else if (Number(lines[timeoutIdx].match(/(\d+)/)?.[1] ?? 0) < 40) {
+    problems.push(`timeout-minutes must be at least 40 (line ${timeoutIdx + 1})`);
+  }
+
+  // Minimal structural validation without a YAML parser: even indentation,
+  // `steps:` entries starting with name/uses/run, and every job with `runs-on:`.
+  // Line numbers refer to the comment-filtered text, as in the rules above.
+  lines.forEach((line, index) => {
+    if (line.trim() !== '' && indentOf(line) % 2 !== 0) {
+      problems.push(`indentation must be a multiple of 2 (line ${index + 1})`);
+    }
+  });
+
+  const jobsIdx = lines.findIndex((l) => /^jobs:\s*$/.test(l));
+  if (jobsIdx < 0) {
+    problems.push('missing jobs: block');
+  } else {
+    const jobHeaders = blockAfter(lines, jobsIdx)
+      .map((line, k) => ({ line, index: jobsIdx + 1 + k }))
+      .filter(
+        ({ line }) => line.trim() !== '' && indentOf(line) === 2 && line.trim().endsWith(':'),
+      );
+    if (jobHeaders.length === 0) problems.push('jobs: block declares no job');
+    for (const job of jobHeaders) {
+      if (!blockAfter(lines, job.index).some((line) => /^\s*runs-on:/.test(line))) {
+        problems.push(`job must declare runs-on: (line ${job.index + 1})`);
+      }
+    }
+  }
+
+  const stepsIdx = lines.findIndex((l) => /^\s*steps:\s*$/.test(l));
+  if (stepsIdx < 0) {
+    problems.push('missing steps: block');
+  } else {
+    const items = blockAfter(lines, stepsIdx)
+      .map((line, k) => ({ line, index: stepsIdx + 1 + k }))
+      .filter(({ line }) => line.trim() !== '');
+    const itemIndent = items.length > 0 ? indentOf(items[0].line) : 0;
+    for (const item of items) {
+      const trimmed = item.line.trim();
+      if (indentOf(item.line) !== itemIndent) continue;
+      if (!trimmed.startsWith('- ')) {
+        problems.push(`steps entry must start with "- " (line ${item.index + 1})`);
+        continue;
+      }
+      const key = trimmed.match(/^-\s+([A-Za-z_][\w-]*):/)?.[1];
+      if (key !== 'name' && key !== 'uses' && key !== 'run') {
+        problems.push(`steps entry must start with name, uses or run (line ${item.index + 1})`);
+      }
     }
   }
 
@@ -189,6 +273,35 @@ describe('PR verification workflow (T-064)', () => {
       '$1\n      - name: Check CI workflows for secrets\n        run: pnpm exec tsx scripts/check-ci-secrets.mts\n',
     );
     assert.deepEqual(validateCiWorkflow(withValidator), []);
+  });
+
+  it('runs content, drafts build, e2e/axe and performance in order, with performance last (T-126)', () => {
+    const lines = real.split('\n');
+    const runLine = (command: string): number => lines.indexOf(`        run: ${command}`);
+    const indexOf = (command: string): number => {
+      const index = runLine(command);
+      assert.notEqual(index, -1, `missing run: ${command}`);
+      return index;
+    };
+
+    const fixtureContent = indexOf('pnpm run content:validate -- --dir scripts/fixtures/content-valid');
+    const realContent = indexOf('pnpm run content:validate -- --dir content');
+    const catalog = indexOf('pnpm run catalog:check');
+    const draftsBuild = indexOf('pnpm exec ng build --output-path dist/e2e-drafts');
+    const journeys = indexOf('pnpm run e2e:journeys');
+    const a11y = indexOf('pnpm run e2e:a11y');
+    const performance = indexOf('pnpm run check:performance');
+
+    assert.ok(fixtureContent < realContent, 'real content validation goes after the fixture one');
+    assert.ok(realContent < catalog, 'catalog:check goes after the content validation');
+    assert.ok(catalog < draftsBuild, 'the drafts build needs the validated content');
+    assert.ok(draftsBuild < journeys, 'journeys need the drafts artifact');
+    assert.ok(draftsBuild < a11y, 'axe runs on the built artifact');
+    assert.ok(journeys < performance, 'performance measures the built artifact and runs last');
+    assert.ok(a11y < performance, 'performance measures the built artifact and runs last');
+
+    const lastRun = lines.filter((l) => /^\s*(?:-\s+)?run:\s*\S/.test(l)).at(-1);
+    assert.equal(lastRun?.trim(), 'run: pnpm run check:performance');
   });
 
   /** Applies one textual mutation and asserts it changed the workflow. */
@@ -215,6 +328,81 @@ describe('PR verification workflow (T-064)', () => {
     ['secret reference', () => mutate('pnpm run build', 'pnpm run build\n        env:\n          X: ${{ secrets.X }}')],
     ['deploy step', () => mutate('pnpm run build', 'pnpm run build\n      - run: deploy-now')],
     ['checkout keeps credentials', () => mutate('persist-credentials: false', 'persist-credentials: true')],
+    // T-126: each quality gate and content check must stay in the PR workflow.
+    [
+      'journeys gate removed',
+      () =>
+        mutate(
+          /\n {6}- name: E2E journeys[^\n]*\n {8}run: pnpm run e2e:journeys\n/,
+          '\n',
+        ),
+    ],
+    [
+      'axe gate removed',
+      () =>
+        mutate(
+          /\n {6}- name: Accessibility gate[^\n]*\n {8}run: pnpm run e2e:a11y\n/,
+          '\n',
+        ),
+    ],
+    [
+      'performance gate removed',
+      () =>
+        mutate(
+          /\n {6}- name: Performance budgets[^\n]*\n {8}env:\n {10}CHROME_PATH: \/usr\/bin\/google-chrome\n {8}run: pnpm run check:performance\n/,
+          '\n',
+        ),
+    ],
+    [
+      'catalog check removed',
+      () =>
+        mutate(
+          /\n {6}- name: Catalog check[^\n]*\n {8}run: pnpm run catalog:check\n/,
+          '\n',
+        ),
+    ],
+    [
+      'playwright install removed',
+      () =>
+        mutate(
+          /\n {6}- name: Install Playwright[^\n]*\n {8}run: pnpm exec playwright install --with-deps chromium\n/,
+          '\n',
+        ),
+    ],
+    [
+      'real content validation removed',
+      () =>
+        mutate(
+          /\n {6}- name: Content validation \(real fixture content\)\n {8}run: pnpm run content:validate -- --dir content\n/,
+          '\n',
+        ),
+    ],
+    [
+      'drafts build overwrites the public artifact',
+      () => mutate('--output-path dist/e2e-drafts', '--output-path dist/grim-dawn-builds'),
+    ],
+    [
+      'drafts build without INCLUDE_DRAFTS',
+      () => mutate("INCLUDE_DRAFTS: 'true'", "INCLUDE_DRAFTS: 'false'"),
+    ],
+    [
+      'Lighthouse without CHROME_PATH',
+      () => mutate('CHROME_PATH: /usr/bin/google-chrome', 'CHROME_PATH:'),
+    ],
+    [
+      'dev server step',
+      () =>
+        mutate(
+          /\n {6}- name: Install Playwright/,
+          '\n      - name: Dev server\n        run: ng serve\n\n      - name: Install Playwright',
+        ),
+    ],
+    ['short timeout', () => mutate('timeout-minutes: 45', 'timeout-minutes: 30')],
+    ['tab indentation', () => mutate(/\n {8}run: pnpm run check:scope/, '\n\t        run: pnpm run check:scope')],
+    [
+      'e2e snapshots rewritten in CI',
+      () => mutate('run: pnpm run e2e:journeys', 'run: pnpm run e2e:journeys --update-snapshots'),
+    ],
   ];
 
   for (const [name, build] of regressions) {

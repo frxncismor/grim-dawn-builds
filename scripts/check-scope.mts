@@ -1,5 +1,5 @@
 /**
- * check-scope (T-069, T-113): guardia de alcance sin framework.
+ * check-scope (T-069, T-113, T-109): guardia de alcance sin framework.
  *
  * Falla si el repositorio introduce piezas prohibidas por la constitución
  * (principio VIII) y el plan §12.7: Redis, colas/workers, proveedores de
@@ -8,6 +8,27 @@
  * pantallas de comentarios y calculadora (fuera de alcance, spec AC-08) y
  * dependencias o rutas de auth, registro, cuenta y edición pública (spec AC-24).
  *
+ * T-109 añade dos reglas estructurales de derechos y fuentes (spec AC-19/AC-23):
+ * - `external-source-access`: en el código de la app y de la ingesta (`src/`,
+ *   `apps/` y los scripts cuyo basename empieza por ingest|import|source|
+ *   scrape|crawl|fetch) una llamada HTTP automatizada cuyo primer argumento
+ *   contiene un literal `http(s)://host/...` con host ajeno al proyecto falla.
+ *   No hay lista de dominios: cualquier host externo es acceso a terceros.
+ *   Hosts propios: localhost, 127.0.0.1, ::1, [::1], 0.0.0.0 y PROJECT_HOSTS.
+ *   Un literal construido desde variables (`fetch(`${BASE_URL}/...`)`) no lleva
+ *   host literal y no se marca; tampoco una URL suelta en prosa o comentario.
+ * - `source-rights-gate`: un registro JSON de `content/sources/` (o de
+ *   cualquier carpeta `sources/`) en estado `habilitada` o `limitada` exige
+ *   evidencia completa (tipo, referencia, alcance, fecha) y un `rights_status`
+ *   publicable. Sin `status` el registro es `pending` y no se marca.
+ *
+ * Excepción de `external-source-access` (también documentada en
+ * docs/content/source-policy.md): un comentario en la MISMA línea de la llamada
+ * o en la inmediatamente anterior con `check-scope:external-http-ok` seguido de
+ * un motivo de al menos 10 caracteres exime esa llamada. Ejemplo:
+ *   // check-scope:external-http-ok descarga del binario fijado (T-083)
+ * Un marcador sin motivo, con motivo más corto o en otra línea no exime.
+ *
  * Diseño:
  * - Las reglas son datos (FORBIDDEN_CAPABILITIES). Añadir un paquete, imagen,
  *   nombre de servicio o esquema de URL es una línea en la tabla.
@@ -15,12 +36,18 @@
  *   entiende (p. ej. `services: { ... }` en línea) falla de forma cerrada.
  * - Sin red, sin dependencias nuevas. Uso: `pnpm check:scope [--root <dir>]`.
  */
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export type RuleId = 'redis' | 'queue-worker' | 'external-auth' | 'object-storage' | 'scraping';
-export type IssueRule = RuleId | 'compose-topology' | 'out-of-scope-route' | 'invalid-input';
+export type IssueRule =
+  | RuleId
+  | 'compose-topology'
+  | 'out-of-scope-route'
+  | 'external-source-access'
+  | 'source-rights-gate'
+  | 'invalid-input';
 export type SourceKind = 'code' | 'config';
 
 export interface Issue {
@@ -395,6 +422,279 @@ const DECLARED_ROUTE_PATTERNS: readonly RegExp[] = [
   /\b(?:app|router|server|fastify)\s*\.\s*(?:get|post|put|patch|delete)\s*\(\s*['"](\/[^'"\n]*)['"]/g,
 ];
 
+/**
+ * Hosts propios del proyecto (T-109). La lista está VACÍA a propósito: el sitio
+ * se configura por entorno (`ORIGIN`, dominio de despliegue) y el repositorio no
+ * debe fijar un dominio real. Añadir aquí solo un host que el proyecto controle
+ * de verdad; cualquier otro host es un tercero.
+ */
+export const PROJECT_HOSTS: readonly string[] = [];
+
+/**
+ * Hosts considerados propios: loopback y los declarados en PROJECT_HOSTS.
+ * `[::1]` se mantiene con corchetes porque es la forma que devuelve el parser
+ * de URL para IPv6.
+ */
+const OWN_HOSTS: ReadonlySet<string> = new Set([
+  'localhost',
+  '127.0.0.1',
+  '::1',
+  '[::1]',
+  '0.0.0.0',
+  ...PROJECT_HOSTS.map((host) => host.toLowerCase()),
+]);
+
+/**
+ * Clientes HTTP cuyo primer argumento puede ser una URL (T-109):
+ * `fetch(`, `axios(` y `axios.<verbo>(`, `got(` y `got.<verbo>(`,
+ * `undici.request(`, `undici.fetch(`, `http|https.get|request(`,
+ * `page.goto(` y `cheerio.load(`.
+ */
+const SOURCE_ACCESS_CLIENT =
+  /\b(?:fetch|axios|got|axios\s*\.\s*\w+|got\s*\.\s*\w+|undici\.request|undici\.fetch|http\.get|http\.request|https\.get|https\.request|page\.goto|cheerio\.load)\s*\(/g;
+
+/** Marcador de excepción y longitud mínima del motivo (T-109). */
+const EXTERNAL_OK_MARKER = 'check-scope:external-http-ok';
+const MIN_EXTERNAL_OK_REASON = 10;
+/** Ventana máxima del primer argumento que se inspecciona (caracteres). */
+const MAX_ARGUMENT_WINDOW = 2000;
+
+/**
+ * Ámbitos donde el acceso HTTP automatizado es ingesta de terceros (T-109):
+ * código de `src/` y `apps/` a cualquier profundidad, y scripts cuyo basename
+ * empieza por ingest|import|source|scrape|crawl|fetch. El tooling de build
+ * (`scripts/setup-gitleaks.mts`, `scripts/check-contrast.mts`, etc.) queda fuera.
+ * Los archivos de prueba se excluyen aparte con `TEST_FILE`.
+ */
+export function isSourceAccessScope(file: string): boolean {
+  const rel = file.replace(/\\/g, '/').replace(/^\.\//, '');
+  if (/^(?:src|apps)\//.test(rel)) return true;
+  if (!rel.startsWith('scripts/')) return false;
+  const name = rel.slice('scripts/'.length).split('/').pop()?.toLowerCase() ?? '';
+  return /^(?:ingest|import|source|scrape|crawl|fetch)/.test(name);
+}
+
+/**
+ * Primer argumento de una llamada: desde el paréntesis de apertura hasta el
+ * paréntesis equilibrado, respetando literales de cadena y plantilla. Si no se
+ * cierra dentro de `MAX_ARGUMENT_WINDOW`, devuelve la ventana truncada.
+ */
+function callArgument(source: string, openParenIndex: number): string {
+  let depth = 0;
+  let quote: string | undefined;
+  const limit = Math.min(source.length, openParenIndex + MAX_ARGUMENT_WINDOW + 1);
+  for (let i = openParenIndex; i < limit; i++) {
+    const char = source[i];
+    if (quote !== undefined) {
+      if (char === '\\') i++;
+      else if (char === quote) quote = undefined;
+      continue;
+    }
+    if (char === "'" || char === '"' || char === '`') {
+      quote = char;
+      continue;
+    }
+    if (char === '(') {
+      depth++;
+      continue;
+    }
+    if (char === ')') {
+      depth--;
+      if (depth === 0) return source.slice(openParenIndex + 1, i);
+    }
+  }
+  return source.slice(openParenIndex + 1, limit);
+}
+
+/** Host normalizado (sin credenciales ni puerto) de un literal URL. */
+function hostOf(url: string): string | undefined {
+  const authority = /^https?:\/\/([^/?#]*)/i.exec(url)?.[1];
+  if (authority === undefined) return undefined;
+  const at = authority.lastIndexOf('@');
+  const hostPort = at === -1 ? authority : authority.slice(at + 1);
+  if (hostPort.startsWith('[')) {
+    const end = hostPort.indexOf(']');
+    return (end === -1 ? hostPort : hostPort.slice(0, end + 1)).toLowerCase();
+  }
+  return hostPort.split(':')[0].toLowerCase() || undefined;
+}
+
+/** Motivo escrito tras el marcador en una línea, si lo hay. */
+function markerReason(line: string | undefined): string | undefined {
+  if (line === undefined) return undefined;
+  const index = line.indexOf(EXTERNAL_OK_MARKER);
+  if (index === -1) return undefined;
+  return line
+    .slice(index + EXTERNAL_OK_MARKER.length)
+    .replace(/\*\/\s*$/, '')
+    .trim();
+}
+
+/** El marcador solo exime en la misma línea o en la inmediatamente anterior. */
+function hasExternalOkMarker(lines: readonly string[], line: number): boolean {
+  if (line < 1 || line > lines.length) return false;
+  return [lines[line - 1], lines[line - 2]].some((candidate) => {
+    const reason = markerReason(candidate);
+    return reason !== undefined && reason.length >= MIN_EXTERNAL_OK_REASON;
+  });
+}
+
+/**
+ * Acceso HTTP automatizado a hosts de terceros (T-109, AC-23). Solo mira el
+ * primer argumento de cada llamada y solo literales absolutos; una URL montada
+ * desde variables no lleva host y no se puede atribuir aquí.
+ */
+function checkExternalSourceAccess(file: string, original: string, source: string): Issue[] {
+  if (!isSourceAccessScope(file)) return [];
+  const issues: Issue[] = [];
+  const lines = original.split('\n');
+  for (const match of source.matchAll(SOURCE_ACCESS_CLIENT)) {
+    const open = (match.index ?? 0) + match[0].lastIndexOf('(');
+    const argument = callArgument(source, open);
+    const literal = /(['"`])(https?:\/\/[^'"`\s]+)\1/i.exec(argument);
+    if (!literal) continue;
+    const host = hostOf(literal[2]);
+    if (host === undefined || OWN_HOSTS.has(host)) continue;
+    const line = lineAt(source, match.index ?? 0);
+    if (hasExternalOkMarker(lines, line)) continue;
+    issues.push({
+      file,
+      line,
+      rule: 'external-source-access',
+      message: `acceso HTTP automatizado a host externo "${host}" (fuente de terceros); requiere permiso verificado y lectura humana (AC-23)`,
+    });
+  }
+  return issues;
+}
+
+/** Vocabulario de estados de `docs/content/source-policy.md` (T-109). */
+export const SOURCE_STATUSES = [
+  'pending',
+  'evaluando',
+  'habilitada',
+  'limitada',
+  'revocada',
+  'prohibida',
+] as const;
+export type SourceStatus = (typeof SOURCE_STATUSES)[number];
+
+/** Tipos de evidencia de derechos admitidos por la política de fuentes. */
+export const SOURCE_EVIDENCE_TYPES = ['licencia_explicita', 'permiso_escrito'] as const;
+
+/** Estados de derechos que permiten publicar contenido derivado (FR-27). */
+const PUBLISHABLE_RIGHTS = ['licensed', 'permission_granted'] as const;
+
+function nonEmptyString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined;
+}
+
+/** Un registro de fuente declara al menos dos de `slug`, `kind` y `title`. */
+function isSourceRecord(value: unknown): value is Record<string, unknown> {
+  if (!isRecord(value)) return false;
+  return (
+    ['slug', 'kind', 'title'].filter((key) => nonEmptyString(value[key]) !== undefined).length >= 2
+  );
+}
+
+/** Registros de un JSON: array raíz u objeto único. */
+function sourceRecords(parsed: unknown): Record<string, unknown>[] {
+  if (Array.isArray(parsed)) return parsed.filter(isSourceRecord);
+  return isSourceRecord(parsed) ? [parsed] : [];
+}
+
+/** Evidencia anidada en `rights_evidence` o `evidence`; si no, campos del registro. */
+function registryEvidence(record: Record<string, unknown>): Record<string, unknown> {
+  for (const key of ['rights_evidence', 'evidence']) {
+    const candidate = record[key];
+    if (isRecord(candidate)) return candidate;
+  }
+  return record;
+}
+
+/** Primer valor no vacío de `names` en la evidencia y, si falta, en el registro. */
+function registryField(
+  evidence: Record<string, unknown>,
+  record: Record<string, unknown>,
+  names: readonly string[],
+): string | undefined {
+  for (const name of names) {
+    const value = nonEmptyString(evidence[name]) ?? nonEmptyString(record[name]);
+    if (value !== undefined) return value;
+  }
+  return undefined;
+}
+
+/**
+ * Puerta de derechos de un registro de fuente (T-109, AC-23): `habilitada` y
+ * `limitada` exigen evidencia completa. `pending`, `evaluando`, `revocada` y
+ * `prohibida` no producen incidencia; un registro sin `status` es `pending`.
+ */
+export function checkSourceRegistryText(file: string, text: string): Issue[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    return [{ file, line: 1, rule: 'invalid-input', message: `JSON no válido: ${reason}` }];
+  }
+
+  const lines = text.split('\n');
+  const issues: Issue[] = [];
+  sourceRecords(parsed).forEach((record, index) => {
+    const name =
+      nonEmptyString(record.slug) ?? nonEmptyString(record.title) ?? `registro ${index + 1}`;
+    const lineOfName = lines.findIndex((line) => line.includes(name));
+    const line = lineOfName === -1 ? 1 : lineOfName + 1;
+    const status = nonEmptyString(record.status);
+    if (status === undefined) return;
+    if (!(SOURCE_STATUSES as readonly string[]).includes(status)) {
+      issues.push({
+        file,
+        line,
+        rule: 'invalid-input',
+        message: `fuente "${name}": estado "${status}" fuera del vocabulario (${SOURCE_STATUSES.join('|')})`,
+      });
+      return;
+    }
+    if (status !== 'habilitada' && status !== 'limitada') return;
+
+    const evidence = registryEvidence(record);
+    const missing: string[] = [];
+    const evidenceType = registryField(evidence, record, ['evidence_type']);
+    if (
+      evidenceType === undefined ||
+      !(SOURCE_EVIDENCE_TYPES as readonly string[]).includes(evidenceType)
+    )
+      missing.push(`evidence_type (${SOURCE_EVIDENCE_TYPES.join('|')})`);
+    if (registryField(evidence, record, ['evidence_ref', 'permission_ref']) === undefined)
+      missing.push('evidence_ref o permission_ref');
+    if (registryField(evidence, record, ['scope', 'scope_notes']) === undefined)
+      missing.push('scope o scope_notes');
+    if (registryField(evidence, record, ['recorded_on', 'verified_on']) === undefined)
+      missing.push('recorded_on o verified_on');
+    const rightsStatus = registryField(evidence, record, ['rights_status']);
+    if (
+      rightsStatus !== undefined &&
+      !(PUBLISHABLE_RIGHTS as readonly string[]).includes(rightsStatus)
+    )
+      missing.push(`rights_status ${PUBLISHABLE_RIGHTS.join(' o ')}`);
+    if (
+      status === 'limitada' &&
+      registryField(evidence, record, ['condition', 'scope_notes']) === undefined
+    )
+      missing.push('condición escrita (condition o scope_notes)');
+
+    if (missing.length === 0) return;
+    issues.push({
+      file,
+      line,
+      rule: 'source-rights-gate',
+      message: `fuente "${name}" en estado "${status}" sin evidencia verificada: falta ${missing.join('; ')} (AC-23)`,
+    });
+  });
+  return issues;
+}
+
 /** Coincide un valor con un patrón exacto o de prefijo (`algo*`). */
 function matchesPattern(value: string, pattern: string): boolean {
   return pattern.endsWith('*') ? value.startsWith(pattern.slice(0, -1)) : value === pattern;
@@ -548,6 +848,9 @@ export function checkSourceText(file: string, text: string, kind: SourceKind): I
   }
   declaredRoutes.sort((a, b) => a.line - b.line);
   issues.push(...declaredRoutes);
+
+  // Acceso HTTP automatizado a hosts de terceros (T-109, AC-23).
+  if (kind === 'code') issues.push(...checkExternalSourceAccess(file, text, source));
 
   return issues;
 }
@@ -752,6 +1055,55 @@ function walk(root: string, dirRel = '', out: string[] = []): string[] {
   return out;
 }
 
+/** Todos los `*.json` bajo un directorio, usado por los registros de fuentes. */
+function listJsonFiles(root: string, dirRel: string, out: string[] = []): string[] {
+  const absolute = join(root, dirRel);
+  if (!existsSync(absolute)) return out;
+  const entries = readdirSync(absolute, { withFileTypes: true }).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+  for (const entry of entries) {
+    const rel = `${dirRel}/${entry.name}`;
+    if (entry.isDirectory()) {
+      if (IGNORED_DIRS_ANY.has(entry.name)) continue;
+      listJsonFiles(root, rel, out);
+    } else if (entry.isFile() && entry.name.endsWith('.json')) {
+      out.push(rel);
+    }
+  }
+  return out;
+}
+
+/**
+ * Registros de fuentes (T-109): los JSON de `content/sources/` y cualquier `*.json`
+ * bajo un directorio llamado `sources`. `content` está ignorado por el walker
+ * general (son datos, no código), por eso se recogen aparte y no cuentan en
+ * `scannedFiles`.
+ */
+export function collectSourceRegistryFiles(root: string): string[] {
+  const found = new Set<string>(listJsonFiles(root, 'content/sources'));
+  const visit = (dirRel: string): void => {
+    const absolute = join(root, dirRel);
+    if (!existsSync(absolute)) return;
+    const entries = readdirSync(absolute, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      if (IGNORED_DIRS_ANY.has(entry.name)) continue;
+      const rel = dirRel === '' ? entry.name : `${dirRel}/${entry.name}`;
+      if (entry.name === 'sources') {
+        for (const file of listJsonFiles(root, rel)) found.add(file);
+        continue;
+      }
+      if (dirRel === '' && IGNORED_DIRS_ROOT.has(entry.name)) continue;
+      visit(rel);
+    }
+  };
+  visit('');
+  return [...found].sort();
+}
+
 export interface ScanResult {
   issues: Issue[];
   scannedFiles: number;
@@ -773,6 +1125,12 @@ export function scanRepository(root: string): ScanResult {
   }
 
   issues.push(...checkComposeFiles(composeFiles));
+
+  // Puerta de derechos de los registros de fuentes (T-109, AC-23).
+  for (const rel of collectSourceRegistryFiles(root)) {
+    issues.push(...checkSourceRegistryText(rel, readFileSync(join(root, rel), 'utf8')));
+  }
+
   return { issues, scannedFiles: files.length };
 }
 

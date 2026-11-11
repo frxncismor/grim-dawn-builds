@@ -8,6 +8,25 @@ test('verify requires the offline public build secret guard after the normal bui
   assert.equal(VERIFY_STEPS[names.indexOf('public-build')].command, 'pnpm check:public-build');
 });
 
+test('verify validates the real fixture content and the generated catalog before the web build (T-126)', () => {
+  const names = VERIFY_STEPS.map((step) => step.name);
+  const commands = VERIFY_STEPS.map((step) => step.command);
+  const contentIndex = names.indexOf('content:validate');
+  const catalogIndex = names.indexOf('catalog:check');
+  assert.notEqual(contentIndex, -1, 'content:validate step missing');
+  assert.notEqual(catalogIndex, -1, 'catalog:check step missing');
+  assert.equal(commands[contentIndex], 'pnpm run content:validate -- --dir content');
+  assert.equal(commands[catalogIndex], 'pnpm run catalog:check');
+  const domainBuild = commands.indexOf('pnpm --filter @gd/domain build');
+  const webBuild = commands.indexOf('pnpm build');
+  assert.notEqual(domainBuild, -1, 'domain build missing');
+  assert.notEqual(webBuild, -1, 'web build missing');
+  assert.ok(domainBuild < contentIndex, 'content:validate must run after the domain build');
+  assert.ok(domainBuild < catalogIndex, 'catalog:check must run after the domain build');
+  assert.ok(catalogIndex < webBuild, 'catalog:check must run before the web build');
+  assert.equal(names.at(-1), 'performance', 'performance must remain the last step');
+});
+
 test('verify runs the performance gate last, after build and public-build (T-145)', () => {
   const names = VERIFY_STEPS.map((step) => step.name);
   const index = names.indexOf('performance');

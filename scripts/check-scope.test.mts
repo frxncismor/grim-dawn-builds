@@ -7,9 +7,12 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   OUT_OF_SCOPE_ROUTE_RULES,
+  SOURCE_STATUSES,
   checkComposeFiles,
   checkManifestText,
+  checkSourceRegistryText,
   checkSourceText,
+  isSourceAccessScope,
   outOfScopeRouteFor,
   parseComposeServices,
   scanRepository,
@@ -471,6 +474,210 @@ describe('out-of-scope routes (T-113)', () => {
   });
 });
 
+describe('external source access (T-109)', () => {
+  const FORO = 'https://foro.example.test/thread/1';
+
+  it('flags every HTTP client with a third-party host literal', () => {
+    const cases: [string, number][] = [
+      [`const data = await fetch('${FORO}');`, 1],
+      [`const data = await axios.get('${FORO}');`, 1],
+      [`const data = await got('${FORO}');`, 1],
+      [`await got.post('${FORO}', { json: {} });`, 1],
+      [`await undici.request('${FORO}');`, 1],
+      [`await undici.fetch('${FORO}');`, 1],
+      [`https.get('${FORO}', (res) => res.resume());`, 1],
+      [`const response = await http.request('${FORO}');`, 1],
+      [`const response = await https.request('${FORO}');`, 1],
+      [`await page.goto('${FORO}');`, 1],
+      [`const $ = cheerio.load('${FORO}');`, 1],
+      [`const response = await fetch(\n  '${FORO}',\n);\n`, 1],
+      [`const id = 7;\nawait fetch(\`https://foro.example.test/thread/\${id}\`);\n`, 2],
+    ];
+    for (const [code, line] of cases) {
+      const issues = checkSourceText('src/app/x.ts', code, 'code');
+      assert.deepEqual(
+        issues.map((i) => i.rule),
+        ['external-source-access'],
+        code,
+      );
+      assert.equal(issues[0].line, line, code);
+      assert.match(issues[0].message, /foro\.example\.test/, code);
+    }
+  });
+
+  it('reports one issue per call', () => {
+    const code = `await fetch('${FORO}');\nconst x = 1;\nawait axios('${FORO}');\n`;
+    const issues = checkSourceText('apps/api/src/ingest.ts', code, 'code');
+    assert.deepEqual(
+      issues.map((i) => i.rule),
+      ['external-source-access', 'external-source-access'],
+    );
+    assert.deepEqual(
+      issues.map((i) => i.line),
+      [1, 3],
+    );
+  });
+
+  it('does not flag own hosts, variable-built URLs, prose or out-of-scope code', () => {
+    const allowed = [
+      "fetch('http://127.0.0.1:3000/health')",
+      "fetch('http://localhost:4200/x')",
+      "fetch('http://[::1]:3000/x')",
+      'fetch(`${BASE_URL}/api/v1/builds`)',
+      "const link = 'https://foro.example.test/thread/1';",
+      "const nota = 'El foro de Grim Dawn se lee a mano; sin scraping.';",
+    ];
+    for (const code of allowed) {
+      assert.deepEqual(checkSourceText('src/app/x.ts', code, 'code'), [], code);
+    }
+    const tooling = `const bin = await fetch(
+  'https://github.com/gitleaks/gitleaks/releases/download/v8/gitleaks.tgz',
+);`;
+    assert.deepEqual(checkSourceText('scripts/setup-gitleaks.mts', tooling, 'code'), []);
+    assert.deepEqual(
+      checkSourceText('scripts/check-contrast.mts', `fetch('https://third.test/x')`, 'code'),
+      [],
+    );
+  });
+
+  it('honours the marker only on the same or previous line and with a reason', () => {
+    const url = `'${FORO}'`;
+    const reason = 'check-scope:external-http-ok descarga del binario fijado (T-083)';
+    const sameLine = `const r = await fetch(${url}); // ${reason}`;
+    assert.deepEqual(checkSourceText('scripts/fetch-tool.mts', sameLine, 'code'), []);
+    const previousLine = `// ${reason}\nconst r = await fetch(${url});`;
+    assert.deepEqual(checkSourceText('scripts/fetch-tool.mts', previousLine, 'code'), []);
+    const noReason = `const r = await fetch(${url}); // check-scope:external-http-ok`;
+    assert.deepEqual(
+      checkSourceText('scripts/fetch-tool.mts', noReason, 'code').map((i) => i.rule),
+      ['external-source-access'],
+    );
+    const shortReason = `// check-scope:external-http-ok corto\nconst r = await fetch(${url});`;
+    assert.equal(checkSourceText('scripts/fetch-tool.mts', shortReason, 'code').length, 1);
+    const farLine = `// ${reason}\n\nconst r = await fetch(${url});`;
+    assert.equal(checkSourceText('scripts/fetch-tool.mts', farLine, 'code').length, 1);
+  });
+
+  it('scopes automated access to app and ingestion code only', () => {
+    for (const file of [
+      'src/app/x.ts',
+      'src/locale/i18n.ts',
+      'apps/api/src/x.ts',
+      'scripts/ingest-source.mts',
+      'scripts/source-registry.mts',
+    ]) {
+      assert.equal(isSourceAccessScope(file), true, file);
+    }
+    for (const file of [
+      'scripts/setup-gitleaks.mts',
+      'scripts/rotate-secret.mts',
+      'scripts/check-contrast.mts',
+      'docs/example.ts',
+      'e2e/flow.ts',
+      'package.json',
+    ]) {
+      assert.equal(isSourceAccessScope(file), false, file);
+    }
+  });
+});
+
+describe('source rights gate (T-109)', () => {
+  const file = 'content/sources/foro.json';
+  const base = { slug: 'foro-grim-dawn', kind: 'comunidad', title: 'Foro de Grim Dawn' };
+  const fullEvidence = {
+    status: 'habilitada',
+    evidence_type: 'permiso_escrito',
+    evidence_ref: 'correo-2026-11-10-autor.md',
+    scope: 'adaptacion y traduccion',
+    recorded_on: '2026-11-10',
+    rights_status: 'permission_granted',
+  };
+  const check = (record: Record<string, unknown>) =>
+    checkSourceRegistryText(file, JSON.stringify({ ...base, ...record }, null, 2));
+
+  it('fails an enabled source without evidence', () => {
+    const issues = check({ status: 'habilitada' });
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].rule, 'source-rights-gate');
+    assert.match(issues[0].message, /foro-grim-dawn/);
+    assert.match(issues[0].message, /evidence_type/);
+    assert.equal(issues[0].line, 2);
+  });
+
+  it('passes an enabled source with complete evidence', () => {
+    assert.deepEqual(check(fullEvidence), []);
+  });
+
+  it('accepts evidence nested under rights_evidence', () => {
+    const nested = {
+      status: 'habilitada',
+      rights_evidence: {
+        evidence_type: 'permiso_escrito',
+        evidence_ref: 'correo-2026-11-10-autor.md',
+        scope: 'adaptacion',
+        recorded_on: '2026-11-10',
+        rights_status: 'permission_granted',
+      },
+    };
+    assert.deepEqual(check(nested), []);
+  });
+
+  it('does not flag pending, evaluating, revoked or prohibited sources', () => {
+    for (const status of ['pending', 'evaluando', 'revocada', 'prohibida']) {
+      assert.deepEqual(check({ status }), [], status);
+    }
+  });
+
+  it('requires a written condition for limited sources', () => {
+    const limited = { ...fullEvidence, status: 'limitada' };
+    const issues = check(limited);
+    assert.equal(issues.length, 1);
+    assert.match(issues[0].message, /condición escrita/);
+    assert.deepEqual(check({ ...limited, condition: 'solo adaptación, sin imágenes' }), []);
+  });
+
+  it('rejects an enabled source whose rights_status is not publishable', () => {
+    const issues = check({ ...fullEvidence, rights_status: 'pending' });
+    assert.equal(issues.length, 1);
+    assert.match(issues[0].message, /rights_status/);
+  });
+
+  it('treats a registry record without status as pending', () => {
+    assert.deepEqual(check({}), []);
+  });
+
+  it('fails closed on invalid JSON and on states outside the vocabulary', () => {
+    const invalid = checkSourceRegistryText(file, '{ "slug": ');
+    assert.deepEqual(
+      invalid.map((i) => i.rule),
+      ['invalid-input'],
+    );
+    const unknown = check({ status: 'enabled' });
+    assert.deepEqual(
+      unknown.map((i) => i.rule),
+      ['invalid-input'],
+    );
+  });
+
+  it('checks every record of a registry array', () => {
+    const good = { ...base, ...fullEvidence };
+    const bad = { slug: 'otra', kind: 'comunidad', title: 'Otra', status: 'habilitada' };
+    const issues = checkSourceRegistryText(file, JSON.stringify([good, bad], null, 2));
+    assert.deepEqual(
+      issues.map((i) => i.rule),
+      ['source-rights-gate'],
+    );
+    assert.match(issues[0].message, /otra/);
+  });
+
+  it('exposes the source policy vocabulary', () => {
+    assert.deepEqual(
+      [...SOURCE_STATUSES],
+      ['pending', 'evaluando', 'habilitada', 'limitada', 'revocada', 'prohibida'],
+    );
+  });
+});
+
 describe('compose', () => {
   it('parses service names and images from a block-style compose file', () => {
     const services = parseComposeServices(CLEAN_COMPOSE, 'infra/docker/compose.yaml');
@@ -598,6 +805,39 @@ describe('scanRepository', () => {
       result.issues.some((i) => i.file === 'infra/docker/compose.yaml' && i.rule === 'redis'),
     );
   });
+
+  it('reads content/sources registries without counting them as scanned source files (T-109)', () => {
+    const root = makeFixture({
+      'package.json': JSON.stringify({ dependencies: {} }),
+      'content/sources/foro.json': JSON.stringify({
+        slug: 'foro',
+        kind: 'comunidad',
+        title: 'Foro de Grim Dawn',
+        status: 'habilitada',
+      }),
+    });
+    const result = scanRepository(root);
+    assert.equal(result.scannedFiles, 1);
+    assert.deepEqual(
+      result.issues.map((i) => `${i.file}:${i.rule}`),
+      ['content/sources/foro.json:source-rights-gate'],
+    );
+  });
+
+  it('reads JSON under any directory named sources (T-109)', () => {
+    const root = makeFixture({
+      'data/sources/registry.json': JSON.stringify([
+        { slug: 'x', kind: 'comunidad', title: 'X', status: 'habilitada' },
+      ]),
+    });
+    const result = scanRepository(root);
+    assert.ok(
+      result.issues.some(
+        (i) => i.file === 'data/sources/registry.json' && i.rule === 'source-rights-gate',
+      ),
+      JSON.stringify(result.issues),
+    );
+  });
 });
 
 describe('check:scope CLI', () => {
@@ -642,5 +882,30 @@ describe('check:scope CLI', () => {
     assert.equal(result.status, 1, result.stderr || result.stdout);
     assert.match(result.stdout + result.stderr, /\[out-of-scope-route\]/);
     assert.match(result.stdout + result.stderr, /login/);
+  });
+
+  it('exits 1 and names [external-source-access] for automated third-party access (T-109)', () => {
+    const root = makeFixture({
+      'src/app/x.ts': "export const load = () => fetch('https://foro.example.test/thread/1');\n",
+    });
+    const result = run(root);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stdout + result.stderr, /\[external-source-access\]/);
+    assert.match(result.stdout + result.stderr, /foro\.example\.test/);
+  });
+
+  it('exits 1 and names [source-rights-gate] for an enabled source without evidence (T-109)', () => {
+    const root = makeFixture({
+      'content/sources/foro.json': JSON.stringify({
+        slug: 'foro',
+        kind: 'comunidad',
+        title: 'Foro de Grim Dawn',
+        status: 'habilitada',
+      }),
+    });
+    const result = run(root);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stdout + result.stderr, /\[source-rights-gate\]/);
+    assert.match(result.stdout + result.stderr, /foro/);
   });
 });
