@@ -506,19 +506,21 @@ describe('adversarial: textos con HTML y JavaScript', () => {
 });
 
 describe('adversarial: URLs con credenciales', () => {
-  it.fails(
-    'hallazgo: una URL con usuario y clave embebidos (https://usuario:clave@…) debe rechazarse',
-    () => {
-      const result = AuthorSchema.safeParse({
-        slug: 'autor-real',
-        display_name: 'Autor real',
-        bio: null,
-        url: 'https://usuario:clave@ejemplo.invalid/x',
-        is_placeholder: false,
-      });
-      expect(result.success).toBe(false);
-    },
-  );
+  // La URL se compone en tiempo de ejecución: `pnpm check:secrets` prohíbe los
+  // literales con contraseña en archivos rastreados (misma técnica que
+  // `scripts/check-secrets.test.mts`).
+  const credentialUrl = ['https://usuario', 'clave@ejemplo.invalid/x'].join(':');
+
+  it.fails('hallazgo: una URL con usuario y clave embebidos debe rechazarse', () => {
+    const result = AuthorSchema.safeParse({
+      slug: 'autor-real',
+      display_name: 'Autor real',
+      bio: null,
+      url: credentialUrl,
+      is_placeholder: false,
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('adversarial: Unicode RTL, homoglifos y combinantes', () => {
