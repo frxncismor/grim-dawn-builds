@@ -366,9 +366,9 @@ Recuento mecánico de las líneas de tareas de tasks.md vigente, con todos los
 cuenta como no cerrado; puede haber implementación parcial que requiere
 verificación, no rehacerla a ciegas. Los checkboxes históricos tampoco sustituyen
 la auditoría final de requisitos.
-Total: **157** tareas; **117** marcadas completas (`[x]`); **40** sin cerrar (`[ ]`).
+Total: **159** tareas; **119** marcadas completas (`[x]`); **40** sin cerrar (`[ ]`).
 
-> Inventario regenerado el 2026-11-11 (T-154) con los comandos de S02; tasks.md es la fuente única. No editar a mano.
+> Inventario regenerado el 2026-11-11 (T-154 y T-155; pasada final con los conteos del archivo) con los comandos de S02; tasks.md es la fuente única. No editar a mano.
 
 | Categoría   | Cantidad |
 | ----------- | -------: |
