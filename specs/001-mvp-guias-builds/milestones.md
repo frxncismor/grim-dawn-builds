@@ -86,11 +86,22 @@ No se abre hasta que las tareas de cierre estén verdes.
 
 | Hito | Rama | PR | Estado |
 | --- | --- | --- | --- |
-| Base | `mvp/1` | — | sin publicar: el remoto está vacío |
-| 1 | `feature/hito-1-fundacion-dominio` | pendiente | preparado, no publicado |
-| 2 | `feature/hito-2-backend-contenido` | pendiente | en árbol de trabajo |
-| 3 | `feature/hito-3-web-experiencia` | pendiente | en árbol de trabajo |
+| Base | `mvp/1` | — | publicado (rama de integración) |
+| 1 | `feature/hito-1-fundacion-dominio` | [#1](https://github.com/frxncismor/grim-dawn-builds/pull/1) | **publicado**, 81 archivos, pendiente de revisión |
+| 2 | `feature/hito-2-backend-contenido` | [#2](https://github.com/frxncismor/grim-dawn-builds/pull/2) | **publicado**, 76 archivos, apilado sobre el hito 1 |
+| 3 | `feature/hito-3-web-experiencia` | [#3](https://github.com/frxncismor/grim-dawn-builds/pull/3) | **publicado**, 183 archivos, apilado sobre el hito 2 |
 | 4 | — | — | pendiente de implementación |
+
+Orden de fusión obligatorio: #1 → #2 → #3. GitHub reapunta el PR siguiente a
+`mvp/1` cuando se fusiona su base.
+
+### Verificación por hito
+
+| Hito | Puertas en verde | Puertas pendientes |
+| --- | --- | --- |
+| 1 | dominio (97,33 % statements), `content:validate`, `check:scope`, `check:boundaries`, `check:secrets`, `lint:md` | `pnpm test` y `pnpm verify` completos, que dependen de la web |
+| 2 | `typecheck` de API, 253 pruebas de API, `check:*`, `check:secrets` | 47 pruebas de integración que exigen PostgreSQL real |
+| 3 | 247 pruebas de web, `build`, `check:initial-js`, `check:public-build`, `check:secrets`, `lint:md`, `check:contrast`, axe 375/768/1280 | `pnpm verify` completo, e2e global y Lighthouse |
 
 ## Condiciones para publicar
 
@@ -99,3 +110,10 @@ No se abre hasta que las tareas de cierre estén verdes.
 3. Sin commits de trabajo en curso de otro agente (por ejemplo, una tarea con
    pruebas en rojo).
 4. Autorización explícita del usuario para commit, push y PR.
+
+## Exclusiones explícitas
+
+- `T-036` (atribución, fuentes y TOC) **no** se publicó: tiene 6 fallos reales de
+  accesibilidad (ancla tapada por el TOC sticky sin JavaScript) y su bloque
+  `build-meta-preview` no está en `angular.json` de este hito.
+- La guía migrada no se publica: `borrador` con `rights_status: pending`.
