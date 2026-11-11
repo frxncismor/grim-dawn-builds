@@ -75,3 +75,7 @@ Thumbs.db
 
 # Lighthouse CI run artifacts (T-042); reports are evidence, not source.
 /.lighthouseci/
+
+# Stryker mutation artifacts (T-142); generated locally, not source.
+packages/domain/reports/
+packages/domain/.stryker-tmp/
