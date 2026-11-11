@@ -122,6 +122,46 @@ por nombre genérico (`node`, `python`): el servidor de OpenCode también es `no
   relanzarlo.
 - La cuota del modelo es independiente de herdr: un agente puede estar `working`
   mientras su proveedor devuelve 503 o 429.
+- **La app hereda el entorno del proceso que la lanza, no el del registro.** Si un
+  mod ejecuta programas del sistema (`ls`, `sh`, `git`, `python`), esos binarios
+  tienen que estar en el PATH **del proceso de la app**. Lanzarla con
+  `Start-Process` desde una terminal con PATH antiguo deja los mods ciegos aunque
+  el PATH del usuario ya esté corregido.
+
+## Mods que ejecutan programas
+
+Un mod de terceros puede depender de binarios POSIX. Over9k, por ejemplo, lista su
+carpeta de listas con `exec("ls", ["-1", …])` y lee listas remotas con `sh -c`.
+En Windows esto falla en silencio: el panel muestra «0 open» y no da error.
+
+Síntoma y comprobación:
+
+```powershell
+# El core sí puede; la app puede que no.
+& hc exec ls -1 "$env:USERPROFILE\.local\share\over9k\todos"
+```
+
+Si el core lo resuelve y el mod no, es el PATH del proceso de la app.
+
+Corrección (una vez, y después relanzar la app con el PATH fresco):
+
+```powershell
+$gitUsr = 'C:\Program Files\Git\usr\bin'
+$p = [Environment]::GetEnvironmentVariable('Path','User')
+if ($p -notlike "*$gitUsr*") {
+  [Environment]::SetEnvironmentVariable('Path', ($p.TrimEnd(';') + ';' + $gitUsr), 'User')
+}
+$env:PATH = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' +
+            [Environment]::GetEnvironmentVariable('Path','User')
+Stop-Process -Name herdr-app -Force
+Start-Process 'C:\Users\paco_\AppData\Local\Programs\herdr-app\herdr-app.exe'
+```
+
+Regla: **al relanzar la app desde un agente o script, refresca primero `$env:PATH`
+desde el registro.** `Start-Process` no lee el registro.
+
+Verificación: `herdr-app shot <png>` y abrir la imagen. Un panel que debía tener
+datos y muestra vacío es un fallo del entorno, no del mod.
 
 ## Dos programas, no uno
 
