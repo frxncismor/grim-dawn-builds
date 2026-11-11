@@ -2532,3 +2532,87 @@ budget` (log `gd-t020-verify-build.log`). La puerta gzip de §6 se mide aparte c
 
 Evidencia de la puerta local: `pnpm verify` termina en `verify OK (local)` con
 `exit 0` sobre el árbol del commit de cierre.
+
+## T-042: Lighthouse móvil y presupuestos del artefacto (2026-11-11)
+
+`pnpm check:performance` mide el artefacto de `pnpm build`
+(`dist/grim-dawn-builds/browser`) con Lighthouse CI, nunca `ng serve`. La
+configuración es `lighthouserc.json`: móvil 412×823, DPR 1,75, 4G lento simulado
+(`throttlingMethod: simulate`), 3 pasadas por URL y mediana. Los umbrales se leen
+de ese archivo y el script falla si derivan de plan §6 (`BUDGETS`): LCP ≤ 2000 ms,
+CLS ≤ 0,05, TBT ≤ 150 ms y puntuaciones ≥ 90/95/95/95. Un umbral ausente o una
+métrica que no llega en el informe cuenta como fallo, no se omite.
+
+Además de Lighthouse mide los bytes que Lighthouse no cubre: JS inicial gzip
+nivel 6 (reutiliza `measureInitialRoutes` de `check-initial-js.mts`, así que `/`
+conserva su 0 B por el contrato estático), CSS crítico enlazado gzip 6 y HTML sin
+comprimir. LHCI corre con un cwd temporal (`gd-lhci-*`): no deja `.lighthouseci/`
+en el repositorio. Los informes quedan en `dist/lighthouse-performance` (ignorado
+por git): tres JSON y tres HTML por ruta, más `manifest.json`.
+
+```powershell
+pnpm build
+pnpm check:performance
+```
+
+Medición limpia del 2026-11-11, sin otra instancia de Chrome compitiendo por CPU
+(`$env:TEMP/gd-t042-gate-2.log`):
+
+| Ruta                        | LCP    | CLS   | TBT    | Perf  | A11y  | SEO   | BP    | JS gzip           | HTML (≤120 000 B) | CSS gzip (≤20 000 B) |
+| --------------------------- | ------ | ----- | ------ | ----- | ----- | ----- | ----- | ----------------- | ----------------- | -------------------- |
+| `/`                         | 763 ms | 0,000 | 0 ms   | 1,000 | 1,000 | 1,000 | 1,000 | 0/90 000 B        | 15 413 B          | 1 657 B              |
+| `/tier-list`                | 660 ms | 0,000 | 83 ms  | 1,000 | 1,000 | 1,000 | 1,000 | 110 011/110 500 B | 111 674 B         | 1 657 B              |
+| `/acerca`                   | 642 ms | 0,000 | 6 ms   | 1,000 | 1,000 | 1,000 | 1,000 | sin presupuesto   | 36 391 B          | 1 657 B              |
+| `/legal`                    | 609 ms | 0,000 | 41 ms  | 1,000 | 1,000 | 1,000 | 1,000 | sin presupuesto   | 37 362 B          | 1 657 B              |
+| `/autores/grim-dawn-builds` | 634 ms | 0,000 | 113 ms | 0,990 | 1,000 | 1,000 | 1,000 | sin presupuesto   | 35 607 B          | 1 657 B              |
+
+`/acerca`, `/legal` y `/autores` no tienen presupuesto de JS en plan §6: solo se
+les exige HTML, CSS y Lighthouse. El JS de una guía (`/builds/:slug`) tiene
+presupuesto de 150 000 B en plan §6, pero la única guía sigue en borrador
+(`rights_status=pending`, T-044) y el artefacto público no la contiene, así que
+hoy no hay página de guía que medir; la puerta la medirá cuando se publique.
+
+### Medición y comprobaciones
+
+| Comprobación           | Comando                                                       | Resultado                                                                                                         |
+| ---------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Pruebas de la puerta   | `node --import tsx --test scripts/check-performance.test.mts` | **10/10**, exit 0 · `$env:TEMP/gd-t042-performance-unit.log`                                                      |
+| Suites de scripts      | `pnpm test:scripts`                                           | 337 tests, **335 pass**, 0 fail, 2 omitidas por plataforma, exit 0                                                |
+| Gate real, pasada 1    | `pnpm check:performance`                                      | **47/47**, exit 0 (TBT 0/32,5/5/21/2 ms) · `gd-t042-orquestador-gate.log`                                         |
+| Gate real, pasada 2    | `pnpm check:performance`                                      | **47/47**, exit 0 (tabla de arriba) · `gd-t042-gate-2.log`                                                        |
+| Fixture que viola HTML | `pnpm exec tsx scripts/check-performance.mts --dir <copia>`   | exit 1: `/tier-list · HTML: 123 674 B sin comprimir (límite ≤ 120 000 B)`; 46/47 · `gd-t042-negative-fixture.log` |
+
+El fixture negativo es una copia del artefacto en `$env:TEMP` con 12 000 bytes
+añadidos al HTML de `/tier-list`; no se toca `dist/` ni ningún umbral.
+
+Entorno de la medición: Windows 11, Node 22.12.0, pnpm 12.18.0, Lighthouse
+13.6.0, LHCI 0.16.0, Chrome 157.0.8103.39
+(`HeadlessChrome/157.0.0.0` en el user agent del informe),
+`C:\Program Files\Google\Chrome\Application\chrome.exe`. Los informes citados
+son de dos artefactos consecutivos del mismo árbol: el build se regeneró entre
+las dos pasadas y por eso `/tier-list` y `/autores` cambian 9 y 11 B de HTML; las
+dos versiones están bajo el límite.
+
+### Hallazgo de TBT y remisión a T-145
+
+Una pasada previa con una sola medición y varias instancias de Lighthouse
+concurrentes en la máquina midió TBT de **260 ms** en `/acerca`, **230 ms** en
+`/autores` y **171 ms** en `/legal` (plan §17.53). Las dos pasadas aisladas de
+esta entrada, con tres mediciones por ruta y mediana, dieron 6-113 ms en esas
+mismas rutas. El TBT de Lighthouse es sensible a la contención de CPU, así que la
+diferencia es de entorno, no de umbral: el límite **no** se amplía y la puerta no
+acepta la pasada en rojo. Mientras T-145 reduce el trabajo de hidratación de esas
+páginas, el paso `performance` queda fuera de `scripts/verify-local.mjs` —con una
+prueba que impide que la omisión sea permanente— y `pnpm check:performance` sigue
+siendo el comando que mide. La aceptación de T-145 debe medirse aislada, sin otra
+instancia de Chrome en la máquina, y con la misma mediana de tres pasadas.
+
+### Límites de esta puerta
+
+`404.html` ni páginas fuera de esa lista. T-126/T-003 conservan la ampliación a
+las demás rutas antes del cierre integral.
+
+- El CSS se mide como suma gzip 6 de las hojas enlazadas por página; hoy las cinco
+  rutas comparten una sola hoja de 1 657 B gzip.
+- `dist/lighthouse-performance` es evidencia local, no se publica ni se versiona.
+- Sin verificación en GitHub Actions: la integración en CI es T-126.
