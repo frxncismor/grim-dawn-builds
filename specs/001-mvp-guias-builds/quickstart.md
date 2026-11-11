@@ -2326,3 +2326,32 @@ patrón de `scripts/static-home.mts`.
 
 Evidencia: `$env:TEMP/gd-t039-{red,green,suites2,build3,lint,a11y,public-build}.log`
 y capturas `$env:TEMP/gd-t039-{375,768,1280}.png`.
+
+## T-041: puerta axe del artefacto (`pnpm e2e:a11y`) - 2026-11-11
+
+`pnpm e2e:a11y` audita `/`, `/tier-list`, `/acerca` y `/legal` a 375, 768 y 1280
+píxeles, primero con la app activa y después con el mismo HTML sin `<script>`.
+Sirve el artefacto de `pnpm build` (`dist/grim-dawn-builds/browser`) con un Node
+estático local; no arranca `ng serve`. Criterio: **0 violaciones** de impacto
+`critical` o `serious` con las etiquetas `wcag2a`, `wcag2aa`, `wcag21a`,
+`wcag21aa` y `wcag22aa`; las `moderate`/`minor` se imprimen con id, impacto y
+selector sin romper la puerta.
+
+```powershell
+pnpm build
+pnpm e2e:a11y                          # 27 pruebas: 4 rutas x 3 viewports x 2 pases + 3 negativas
+pnpm e2e:a11y --project=chromium-375   # solo un viewport
+```
+
+La spec incluye una prueba negativa permanente: un fixture con `<img>` sin `alt`
+debe reportar `image-alt` y hacer fallar `expectGate`. Además, si una ruta no
+existe en el artefacto la prueba falla con `HTTP 404` y el recordatorio de
+`pnpm build`; no se salta en silencio.
+
+Última medición (2026-11-11; Windows 11, Node 22.12.0, Chromium de Playwright
+1.65.0, axe-core 4.14.0, artefacto de `pnpm build`): **27/27 en verde**, 0
+violaciones de cualquier impacto, 14-16 reglas WCAG en verde por ruta y
+`color-contrast` incompleta (la cubre `pnpm check:contrast`, 12 pares con mínimo
+5,811:1). La portada se publica sin JavaScript por el contrato de 0 B de
+`check:initial-js`, así que ese pase audita el HTML estático. Logs:
+`$env:TEMP/gd-t041-a11y.log` y caso negativo `$env:TEMP/gd-t041-negative.log`.

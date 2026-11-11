@@ -36,6 +36,7 @@
     "check:public-build": "tsx scripts/check-public-build.mts",
     "setup:gitleaks": "tsx scripts/setup-gitleaks.mts",
     "e2e:svg": "tsx scripts/run-svg-e2e.mts",
+    "e2e:a11y": "playwright test --config playwright.config.ts",
     "typecheck:e2e": "tsc -p tsconfig.e2e.json"
   },
   "private": true,

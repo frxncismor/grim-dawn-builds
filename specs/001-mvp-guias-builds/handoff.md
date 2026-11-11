@@ -692,3 +692,59 @@ visualmente.
    hidratación.
 
 Modelo realmente usado: `opencode-go/deepseek-v4.1-flash`. Sin commit, push ni PR.
+
+## T-041: puerta axe en 4 rutas x 3 viewports (2026-11-11)
+
+**Alcance**: `playwright.config.ts` y `e2e/a11y.spec.ts` nuevos, y el script
+`e2e:a11y` en `package.json`. Sin cambios en `src/**`, `angular.json`,
+`playwright.svg.config.ts`, `e2e/svg-responsive.spec.ts` ni dependencias
+(`@playwright/test` 1.65.0 y `axe-core` 4.14.0 ya estaban fijadas).
+
+**Servidor del artefacto**: `webServer` sirve `dist/grim-dawn-builds/browser` con
+un Node estático mínimo, nunca `ng serve`. El script vive en
+`%TEMP%\gd-t041-serve-artifact.mjs` (lo escribe el propio `playwright.config.ts`)
+porque el alcance autorizado no incluye un `scripts/*.mts` nuevo. Devuelve 404
+real con el cuerpo de `404.html` del artefacto, de modo que una ruta ausente rompe
+la prueba en lugar de saltarse.
+
+**Puerta**: `/`, `/tier-list`, `/acerca` y `/legal` x 375/768/1280 x 2 pases
+(`JavaScript activo` y `HTML sin JavaScript`) = **24 auditorías**, más la prueba
+negativa del fixture en los 3 viewports (27 pruebas). Criterio: 0 violaciones de
+impacto `critical`/`serious`; `moderate`/`minor` se imprimen sin fallar.
+
+**Medición** (2026-11-11, Windows 11, Node 22.12.0, Chromium de Playwright
+1.65.0, axe-core 4.14.0, artefacto de `pnpm build`): **27/27 en verde**, 0
+violaciones de cualquier impacto, 14-16 reglas WCAG 2.1/2.2 A/AA en verde por
+ruta y 1 incompleta (`color-contrast`, cubierta por `pnpm check:contrast`: 12
+pares, mínimo 5,811:1). La portada se publica sin JS (contrato de 0 B de
+`check:initial-js`), así que su pase "JavaScript activo" audita el HTML estático y
+el log lo dice.
+
+**La puerta no es vacía** (`$env:TEMP/gd-t041-negative.log`):
+
+- fixture con `<img>` sin `alt` en las 4 rutas: 4 fallos con
+  `image-alt (critical) en img`, salida 1.
+- artefacto sin `/legal`: fallo con `HTTP 404` y la ruta marcada como ausente
+  ("La ruta /legal NO existe en el artefacto servido en el puerto de prueba"),
+  salida 1.
+
+**Desviaciones registradas**:
+
+1. `plan.md` §17.52 y la línea de `tasks.md` mencionan también `/autores/:slug` y
+   `/builds/:slug` con borradores. El encargo acotó la puerta a las 4 rutas
+   públicas y el artefacto público no contiene la guía `pending`, así que la guía
+   borrador sigue sin auditar aquí (T-037/T-040 tienen su preview propio).
+2. axe **no puede ejecutarse** con `javaScriptEnabled: false`: sus temporizadores
+   quedan bloqueados y `run()` nunca resuelve (verificado). El pase sin JS abre la
+   ruta en un contexto con JS desactivado y audita ese mismo HTML sin `<script>`
+   en un contexto aparte con JS activo, con guardas de CSS cargado (>0 hojas) y de
+   bundles sin fallos HTTP.
+
+**Puertas**: `pnpm build` salida 0 (`/tier-list` 110 011/110 500 gzip, sin
+cambio), `pnpm e2e:a11y` 27/27, `pnpm lint` limpio, `pnpm typecheck:e2e` limpio,
+`pnpm lint:md` limpio (49 archivos) y `prettier --check` limpio en
+`playwright.config.ts`, `e2e/a11y.spec.ts`, `package.json` y `tasks.md`/`handoff.md`
+(`quickstart.md` mantiene el fallo preexistente de finales de línea del checkout,
+igual que `spec.md`; el gate `format:check` del repositorio no cubre `specs/*.md`).
+
+Modelo realmente usado: `opencode-go/deepseek-v4.1-flash`. Sin commit, push ni PR.
