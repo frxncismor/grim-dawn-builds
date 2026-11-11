@@ -366,13 +366,13 @@ Recuento mecánico de las líneas de tareas de tasks.md vigente, con todos los
 cuenta como no cerrado; puede haber implementación parcial que requiere
 verificación, no rehacerla a ciegas. Los checkboxes históricos tampoco sustituyen
 la auditoría final de requisitos.
-Total: **159** tareas; **120** marcadas completas (`[x]`); **39** sin cerrar (`[ ]`).
+Total: **160** tareas; **120** marcadas completas (`[x]`); **40** sin cerrar (`[ ]`).
 
-> Inventario regenerado el 2026-11-11 (T-154 y T-155; pasada final con los conteos del archivo tras cerrar T-142) con los comandos de S02; tasks.md es la fuente única. No editar a mano.
+> Inventario regenerado el 2026-11-11 (T-154, T-155 y T-157; pasada final con los conteos del archivo) con los comandos de S02; tasks.md es la fuente única. No editar a mano.
 
 | Categoría   | Cantidad |
 | ----------- | -------: |
-| activa      |       12 |
+| activa      |       13 |
 | externa     |        3 |
 | opcional    |        2 |
 | diferida    |       22 |
@@ -394,6 +394,7 @@ Total: **159** tareas; **120** marcadas completas (`[x]`); **39** sin cerrar (`[
 | T-126  | Completar CI de calidad de toda la spec                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | T-128  | Verificar presupuestos backend medibles                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | T-141 | [LISTA] Tests adversariales de contenido, UI y API |
+| T-157 | [LISTA, seguimiento] Reducir por grupo los mutantes supervivientes de T-142 en el dominio |
 
 ### Categoría: externa
 
