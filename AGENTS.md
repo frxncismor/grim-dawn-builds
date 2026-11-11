@@ -100,15 +100,15 @@ Los proveedores de pago se agotan. Cuando `opencode-go` devuelve
 `OpenCode Go usage limit reached` o `opencode` devuelve `Insufficient balance`,
 se usa esta capa **sin degradar la verificación**:
 
-| Agente               | Modelo de continuidad recomendado | Coste / notas |
-| -------------------- | --------------------------------- | ------------- |
-| **Orquestador**      | `deepseek/deepseek-flash#high`     | $0,15/$0,60 por M tokens; verificado en 2,4 M tokens por ~$0,05 |
-| `sdd-plan`           | `deepseek/deepseek-flash#high`     | mismo modelo; buena retención de contexto largo |
-| `sdd-implement`      | `deepseek/deepseek-flash#high`     | ejecución de una tarea por vez |
-| `sdd-ui`             | `deepseek/deepseek-flash#high`     | revisar axe y capturas con más rigor por ser modelo flash |
-| `sdd-escalation`     | `deepseek/deepseek-v4-pro#high`    | $0,66/$1,98; solo para desbloqueos difíciles |
-| `sdd-second-opinion` | `deepseek/deepseek-v4-pro#high`    | familia distinta a `deepseek-flash` no aplica: usar `gemini-4-argon` o `grok-4.7` cuando vuelvan |
-| **Revisión final de spec** | el modelo **más potente disponible** | requisito explícito del usuario; ver `T-136` |
+| Agente                     | Modelo de continuidad recomendado    | Coste / notas                                                                                    |
+| -------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| **Orquestador**            | `deepseek/deepseek-flash#high`       | $0,15/$0,60 por M tokens; verificado en 2,4 M tokens por ~$0,05                                  |
+| `sdd-plan`                 | `deepseek/deepseek-flash#high`       | mismo modelo; buena retención de contexto largo                                                  |
+| `sdd-implement`            | `deepseek/deepseek-flash#high`       | ejecución de una tarea por vez                                                                   |
+| `sdd-ui`                   | `deepseek/deepseek-flash#high`       | revisar axe y capturas con más rigor por ser modelo flash                                        |
+| `sdd-escalation`           | `deepseek/deepseek-v4-pro#high`      | $0,66/$1,98; solo para desbloqueos difíciles                                                     |
+| `sdd-second-opinion`       | `deepseek/deepseek-v4-pro#high`      | familia distinta a `deepseek-flash` no aplica: usar `gemini-4-argon` o `grok-4.7` cuando vuelvan |
+| **Revisión final de spec** | el modelo **más potente disponible** | requisito explícito del usuario; ver `T-136`                                                     |
 
 Alternativa sin coste: `opencode/deepseek-v4.1-flash-free#high` es el mismo
 modelo de DeepSeek por la ruta gratuita. Se prefiere el proveedor `deepseek`
