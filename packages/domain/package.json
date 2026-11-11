@@ -24,12 +24,15 @@
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint src",
     "test": "pnpm run build && vitest run --coverage",
-    "test:properties": "vitest run property --reporter=verbose"
+    "test:properties": "vitest run property --reporter=verbose",
+    "test:mutation": "stryker run"
   },
   "dependencies": {
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "10.1.1",
+    "@stryker-mutator/vitest-runner": "10.1.1",
     "@vitest/coverage-v8": "4.1.12",
     "fast-check": "4.10.2",
     "typescript": "~5.9.2",
