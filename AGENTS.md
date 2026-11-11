@@ -78,23 +78,41 @@ La metodología de orquestador y agentes por rol está en
 - Si un proveedor agota su cuota, se elige un modelo disponible, se reduce la
   unidad de trabajo y **se consigna en el relevo el modelo realmente usado**.
 
-## Correspondencia de modelos por proveedor y orden de prioridad
+## Correspondencia de modelos y cadena de fallback
 
-Al usar los agentes SDD configurados previamente para Copilot, conservar sus
-responsabilidades, instrucciones y límites, y elegir el modelo disponible según
-este **orden de prioridad por disponibilidad** (decisión del usuario,
-2026-11-10):
+Política vigente (decisión del usuario, 2026-11-10 noche). Sustituye a la cadena
+anterior de cuatro escalones.
 
 ```text
-1. GitHub Copilot   (github-copilot/*)
-2. Codex            (openai/*)
-3. OpenCode Go      (opencode-go/*)
-4. DeepSeek         (deepseek/*)
+Primario    → deepseek/deepseek-flash
+Fallback 1  → GLM Flash gratuito  (opencode/glm-5.3-flash-free)
+Fallback 2  → claude-haiku-5-5    (opencode-go/claude-haiku-5-5)
 ```
 
-Se usa el primero de la lista **cuyo modelo responda**. Si el primero agota su
-cuota, se baja un escalón sin degradar la verificación y se registra el modelo
-realmente usado.
+Los proveedores `zai/*` y `anthropic/*` **no están configurados** en esta máquina:
+`opencode/glm-5.3-flash-free` es el equivalente real del GLM gratuito y
+`opencode-go/claude-haiku-5-5` el del Haiku. No inventar IDs de proveedor.
+
+### Manejo de errores del proveedor (obligatorio)
+
+| Situación                       | Acción                                                                                                                                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **503 / servicio sobrecargado** | Reintentar con backoff exponencial 5 s → 15 s → 45 s. Al cuarto intento, cambiar a Fallback 1. Quinto intento fallido con Fallback 1: pasar a Fallback 2. **Nunca detener la tarea por un 503.** |
+| **429 / límite de tasa**        | Respetar `retry-after`. Sin cabecera: esperar 10 s. Máximo 3 reintentos y luego cambiar de fallback.                                                                                             |
+| **401 / 403 / auth**            | **No reintentar.** Reportar al usuario que la credencial es inválida.                                                                                                                            |
+| **Timeout**                     | Reintentar una vez con el timeout duplicado. Si vuelve a fallar, cambiar de fallback.                                                                                                            |
+
+Reglas de orquestación asociadas:
+
+- Máximo **5 intentos totales** por sub-tarea y **3 iteraciones** antes de escalar
+  al usuario.
+- Si una sub-tarea falla dos veces con el mismo modelo, se cambia de modelo y se
+  reintenta.
+- Si el subagente entrega código que no compila, se le devuelve **con el error
+  concreto**; no se re-ejecuta a ciegas.
+- Cada sub-tarea se despacha **auto-contenida**: el subagente no depende de otro.
+- No se cambia el modelo del **orquestador**; solo el de los subagentes. Si el GLM
+  disponible no fuese el 5.3, se usa el GLM 5.x más cercano disponible.
 
 | Agente                     | GitHub Copilot (`github-copilot/`) | Codex (`openai/`)    | OpenCode Go (`opencode-go/`) | DeepSeek (`deepseek/`) | Razonamiento |
 | -------------------------- | ---------------------------------- | -------------------- | ---------------------------- | ---------------------- | ------------ |
@@ -105,6 +123,10 @@ realmente usado.
 | `sdd-escalation`           | `claude-sonnet-5.5#high`           | `gpt-6.1-sol#high`   | `gemini-4-argon#high`        | `deepseek-v4-pro#high` | `high`       |
 | `sdd-second-opinion`       | `gpt-5.6-terra#high`               | `gpt-6.1-terra#high` | `grok-4.7#high`              | `deepseek-v4-pro#high` | `high`       |
 | **Revisión final de spec** | el modelo más potente disponible   | —                    | —                            | —                      | ver `T-136`  |
+
+La tabla **no** es la cadena de fallback: fija el modelo preferido por rol cuando
+ese proveedor está sano. La cadena de fallback de arriba es la que se aplica
+cuando el primario falla.
 
 ### Estado observado de cada escalón (2026-11-10, tarde)
 
