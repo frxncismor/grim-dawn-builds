@@ -99,6 +99,20 @@ jobs:
       - name: API lint
         run: pnpm --filter @gd/api lint
 
+      # The integration suite never pulls images on its own: it fails closed when
+      # the pinned PostgreSQL digest is missing. CI pulls the exact digest from
+      # Compose so the test image and the local one can never drift.
+      - name: Pull pinned PostgreSQL fixture image
+        run: |
+          image="$(sed -nE 's/^[[:space:]]+image:[[:space:]]+(postgres:[^[:space:]]+)$/\1/p' infra/docker/compose.yaml | head -n1)"
+          test -n "$image" || { echo "No pinned postgres image found in compose.yaml"; exit 1; }
+          case "$image" in
+            *@sha256:*) ;;
+            *) echo "PostgreSQL image is not pinned by digest: $image"; exit 1 ;;
+          esac
+          echo "Pulling $image"
+          docker pull "$image"
+
       - name: API tests
         run: pnpm --filter @gd/api test
 
