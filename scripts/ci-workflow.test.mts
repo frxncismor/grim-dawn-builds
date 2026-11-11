@@ -38,6 +38,8 @@ export const REQUIRED_RUN_COMMANDS = [
   // T-126: real fixture content, catalog freshness and the quality gates.
   'pnpm run content:validate -- --dir content',
   'pnpm run catalog:check',
+  // T-150: the en/es catalogs must match in PR verification too.
+  'pnpm run check:locale-parity',
   'pnpm exec ng build --output-path dist/e2e-drafts',
   'pnpm exec playwright install --with-deps chromium',
   'pnpm run e2e:journeys',
