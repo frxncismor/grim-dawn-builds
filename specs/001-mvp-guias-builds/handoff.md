@@ -827,3 +827,58 @@ ejecutó commit, push ni PR. **Desviación externa detectada**: durante la sesi�
 apareció el commit `77faa52` con los archivos de T-021, ya presente en
 `origin/feature/i18n-bilingual-docs`; no lo creó ni lo publicó este orquestador y
 no se reescribió la historia. Sin PR.
+
+## T-045 y T-046: vista previa local, variables y fuera de alcance (2026-11-11)
+
+**Estado**: ambas cerradas. `T-045` cierra únicamente la parte local (vista previa
+del artefacto estático, README del flujo editorial y plantilla de variables):
+hosting, proveedor, secretos y `deploy.yml` siguen diferidos. `T-046` cierra con
+un hueco declarado: las rutas de auth, registro y edición pública quedan en
+`T-113` y el arte oficial se sigue comprobando con `pnpm assets:check`.
+
+**Archivos**: `README.md`, `README.es.md`, `.env.example` (nuevo, en la raíz),
+`scripts/check-scope.mts` y `scripts/check-scope.test.mts`.
+
+**Evidencia T-045**:
+
+| Comprobación                                        | Salida literal                                    |
+| --------------------------------------------------- | ------------------------------------------------- |
+| servidor estático documentado, `GET /`              | HTTP 200, 15 413 B                                |
+| `GET /no-existe`                                    | HTTP 404 con cuerpo idéntico a `404.html`         |
+| `pnpm lint:md`                                      | 54 archivos, 0 incidencias                        |
+| `pnpm exec prettier --check README.md README.es.md` | OK                                                |
+| `pnpm check:secrets`                                | OK (451 archivos)                                 |
+| `.env.example` nuevo en fixture rastreado temporal  | OK, exit 0; contraprueba con placeholder `exit 1` |
+| `pnpm check:scope`                                  | OK (245 archivos)                                 |
+
+**Evidencia T-046**:
+
+| Comando                                                                  | Salida literal                                    |
+| ------------------------------------------------------------------------ | ------------------------------------------------- |
+| `node --import tsx --test scripts/check-scope.test.mts`                  | 30/30 (rojo previo 26/30)                         |
+| `pnpm check:scope`                                                       | exit 0, `check:scope OK (245 archivos revisados)` |
+| `pnpm assets:check`                                                      | OK (0 entradas)                                   |
+| `scripts/compose.test.mts`                                               | 20/20                                             |
+| `pnpm check:boundaries`                                                  | OK (238)                                          |
+| `pnpm check:secrets`                                                     | OK (451)                                          |
+| `pnpm check:ci-secrets`                                                  | OK (2 workflows)                                  |
+| fixture fuera del repo con `cheerio` y rutas `comentarios`/`calculadora` | 3 incidencias, exit 1                             |
+
+Detalle y salidas literales completas en `quickstart.md` (§ T-046).
+
+**Desviaciones registradas**:
+
+- `README.es.md` se reordenó para paridad de secciones: «Idioma» pasa antes de
+  «Licencia», con las 12 secciones `##` en el mismo orden que `README.md`.
+- `.env.example` de la raíz es una plantilla de referencia: Angular no carga
+  `.env`, así que documenta las variables pero no sustituye la configuración real
+  del build.
+- La ampliación de `check:scope` se hizo con los dos archivos limpios en ese
+  momento, en un árbol compartido por otros agentes.
+
+**Límites**: las rutas de auth, registro y edición pública son `T-113`;
+`check:scope` no sustituye una auditoría manual ni DAST; no existe workflow de
+deploy y el despliegue sigue fuera de alcance.
+
+Modelo realmente usado: implementación `opencode-go/deepseek-v4.1-flash`;
+orquestación `opencode-go/deepseek-v4.1-flash`. Sin commit, push ni PR.

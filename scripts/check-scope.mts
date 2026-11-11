@@ -3,8 +3,9 @@
  *
  * Falla si el repositorio introduce piezas prohibidas por la constitución
  * (principio VIII) y el plan §12.7: Redis, colas/workers, proveedores de
- * autenticación externos, almacenamiento de objetos, o más de un servicio de
- * aplicación / una base de datos en Compose.
+ * autenticación externos, almacenamiento de objetos, scraping o automatización
+ * de navegador, más de un servicio de aplicación / una base de datos en Compose,
+ * y pantallas de comentarios y calculadora (fuera de alcance, spec AC-08).
  *
  * Diseño:
  * - Las reglas son datos (FORBIDDEN_CAPABILITIES). Añadir un paquete, imagen,
@@ -17,8 +18,8 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export type RuleId = 'redis' | 'queue-worker' | 'external-auth' | 'object-storage';
-export type IssueRule = RuleId | 'compose-topology' | 'invalid-input';
+export type RuleId = 'redis' | 'queue-worker' | 'external-auth' | 'object-storage' | 'scraping';
+export type IssueRule = RuleId | 'compose-topology' | 'out-of-scope-route' | 'invalid-input';
 export type SourceKind = 'code' | 'config';
 
 export interface Issue {
@@ -46,7 +47,14 @@ export const FORBIDDEN_CAPABILITIES: readonly CapabilityRule[] = [
   {
     id: 'redis',
     label: 'Redis',
-    packages: ['redis', 'redis-*', 'ioredis*', '@redis/*', '@upstash/redis', '@testcontainers/redis'],
+    packages: [
+      'redis',
+      'redis-*',
+      'ioredis*',
+      '@redis/*',
+      '@upstash/redis',
+      '@testcontainers/redis',
+    ],
     images: ['redis', 'valkey', 'keydb', 'dragonfly'],
     serviceNames: ['redis', 'valkey', 'keydb', 'dragonfly'],
     urlSchemes: ['redis', 'rediss'],
@@ -76,7 +84,18 @@ export const FORBIDDEN_CAPABILITIES: readonly CapabilityRule[] = [
       'workerpool',
     ],
     images: ['rabbitmq', 'kafka', 'redpanda', 'nats', 'zookeeper', 'activemq'],
-    serviceNames: ['worker', 'workers', 'queue', 'queues', 'rabbitmq', 'kafka', 'redpanda', 'nats', 'zookeeper', 'activemq'],
+    serviceNames: [
+      'worker',
+      'workers',
+      'queue',
+      'queues',
+      'rabbitmq',
+      'kafka',
+      'redpanda',
+      'nats',
+      'zookeeper',
+      'activemq',
+    ],
     urlSchemes: ['amqp', 'amqps', 'nats'],
   },
   {
@@ -120,16 +139,70 @@ export const FORBIDDEN_CAPABILITIES: readonly CapabilityRule[] = [
     serviceNames: ['minio', 'localstack', 'seaweedfs'],
     urlSchemes: ['s3'],
   },
+  {
+    id: 'scraping',
+    label: 'scraping o automatización de navegador',
+    // `playwright`/`@playwright/test`, `lighthouse`, `chrome-launcher` y `jsdom`
+    // son herramientas de prueba legítimas: no entran en la tabla (spec AC-08).
+    packages: [
+      'cheerio',
+      'cheerio-*',
+      'crawlee',
+      '@crawlee/*',
+      'puppeteer',
+      'puppeteer-core',
+      'puppeteer-extra',
+      'puppeteer-extra-plugin-*',
+      'scrape-it',
+      'node-crawler',
+      'simplecrawler',
+      'website-scraper',
+      'x-ray',
+      'selenium-webdriver',
+      'webdriverio',
+      '@wdio/*',
+      'nightmare',
+      'phantomjs-prebuilt',
+    ],
+    images: ['browserless', 'standalone-chrome', 'standalone-firefox', 'standalone-edge'],
+    serviceNames: ['browserless', 'scraper', 'scraping'],
+    urlSchemes: [],
+  },
+];
+
+/**
+ * Pantallas fuera de alcance del MVP (spec §7, AC-08): comentarios y calculadora.
+ * Se detectan como valor de `path:` o como enlace absoluto (`/comentarios`), no
+ * como palabra suelta, para no marcar prosa que las menciona.
+ */
+export const OUT_OF_SCOPE_ROUTES: readonly string[] = [
+  'comentarios',
+  'comments',
+  'calculadora',
+  'calculator',
 ];
 
 /** Imágenes de base de datos: el máximo permitido es una (plan §12.7). */
-export const DB_IMAGES: readonly string[] = ['postgres', 'postgis', 'mysql', 'mariadb', 'mongo', 'mssql', 'cockroachdb'];
+export const DB_IMAGES: readonly string[] = [
+  'postgres',
+  'postgis',
+  'mysql',
+  'mariadb',
+  'mongo',
+  'mssql',
+  'cockroachdb',
+];
 /** Servicios de un solo uso exentos del conteo de aplicación (plan §12.7: `migrate`). */
 export const ONE_SHOT_SERVICES: readonly string[] = ['migrate'];
 export const MAX_APP_SERVICES = 1;
 export const MAX_DB_SERVICES = 1;
 
-const MANIFEST_SECTIONS = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'] as const;
+const MANIFEST_SECTIONS = [
+  'dependencies',
+  'devDependencies',
+  'optionalDependencies',
+  'peerDependencies',
+] as const;
 
 /** Directorios ignorados en cualquier nivel. */
 const IGNORED_DIRS_ANY = new Set([
@@ -169,6 +242,18 @@ const IMPORT_PATTERNS: readonly RegExp[] = [
 const URL_SCHEMES = FORBIDDEN_CAPABILITIES.flatMap((r) => r.urlSchemes);
 const URL_PATTERN = new RegExp(`\\b(${URL_SCHEMES.join('|')}):\\/\\/`, 'gi');
 
+/**
+ * Rutas fuera de alcance: `path: 'comentarios'` (o con `/` inicial) y enlaces
+ * absolutos `'/comentarios'`. Ambas formas exigen límites de ruta, así que
+ * prosa como «sin comentarios» no produce incidencia. Una sola expresión evita
+ * contar dos veces `path: '/comentarios'`.
+ */
+const ROUTE_ALTERNATION = OUT_OF_SCOPE_ROUTES.join('|');
+const ROUTE_PATTERN = new RegExp(
+  `(?:\\bpath\\s*:\\s*['"]\\/?|['"]\\/)(${ROUTE_ALTERNATION})(?=['"/?#]|$)`,
+  'gi',
+);
+
 /** Coincide un valor con un patrón exacto o de prefijo (`algo*`). */
 function matchesPattern(value: string, pattern: string): boolean {
   return pattern.endsWith('*') ? value.startsWith(pattern.slice(0, -1)) : value === pattern;
@@ -184,7 +269,8 @@ function ruleForScheme(scheme: string): CapabilityRule | undefined {
 
 /** Nombre de paquete de un especificador de import; undefined si es relativo o builtin. */
 export function packageName(specifier: string): string | undefined {
-  if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.startsWith('node:')) return undefined;
+  if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.startsWith('node:'))
+    return undefined;
   const parts = specifier.split('/');
   if (specifier.startsWith('@')) return parts.length < 2 ? undefined : parts.slice(0, 2).join('/');
   return parts[0];
@@ -213,7 +299,8 @@ function stripComments(text: string, kind: SourceKind): string {
     .map((line) => {
       const t = line.trim();
       const isComment =
-        t.startsWith('#') || (kind === 'code' && (t.startsWith('//') || t.startsWith('/*') || t.startsWith('*')));
+        t.startsWith('#') ||
+        (kind === 'code' && (t.startsWith('//') || t.startsWith('/*') || t.startsWith('*')));
       return isComment ? '' : line;
     })
     .join('\n');
@@ -287,6 +374,16 @@ export function checkSourceText(file: string, text: string, kind: SourceKind): I
       message: `URL ${scheme}:// (${rule.label}) prohibida por la constitución, principio VIII`,
     });
   }
+
+  for (const match of source.matchAll(ROUTE_PATTERN)) {
+    const segment = match[1].toLowerCase();
+    issues.push({
+      file,
+      line: lineAt(source, match.index ?? 0),
+      rule: 'out-of-scope-route',
+      message: `ruta "${segment}" (pantalla de comentarios o calculadora, fuera de alcance) prohibida por la constitución, principio VIII`,
+    });
+  }
   return issues;
 }
 
@@ -346,12 +443,22 @@ function parseCompose(text: string, file: string): ParsedCompose {
     if (indent === serviceIndent) {
       const key = /^["']?([A-Za-z0-9_.-]+)["']?:\s*(.*)$/.exec(trimmed);
       if (!key) {
-        issues.push({ file, line: i + 1, rule: 'invalid-input', message: 'entrada de servicio no reconocida' });
+        issues.push({
+          file,
+          line: i + 1,
+          rule: 'invalid-input',
+          message: 'entrada de servicio no reconocida',
+        });
         current = undefined;
         continue;
       }
       if (key[2].startsWith('{')) {
-        issues.push({ file, line: i + 1, rule: 'invalid-input', message: `servicio "${key[1]}" en línea no soportado` });
+        issues.push({
+          file,
+          line: i + 1,
+          rule: 'invalid-input',
+          message: `servicio "${key[1]}" en línea no soportado`,
+        });
         current = undefined;
         continue;
       }
@@ -362,7 +469,10 @@ function parseCompose(text: string, file: string): ParsedCompose {
       if (childIndent === -1) childIndent = indent;
       const image = indent === childIndent ? /^image:\s*(.+)$/.exec(trimmed) : null;
       if (image && current.image === undefined) {
-        const value = image[1].replace(/\s+#.*$/, '').trim().replace(/^["']|["']$/g, '');
+        const value = image[1]
+          .replace(/\s+#.*$/, '')
+          .trim()
+          .replace(/^["']|["']$/g, '');
         if (value) current.image = value;
       }
     }
@@ -445,7 +555,12 @@ const COMPOSE_FILE = /^(?:docker-)?compose(?:[.-][\w.-]+)?\.ya?ml$/;
 function classify(name: string): SourceKind | undefined {
   if (LOCKFILES.has(name) || TEST_FILE.test(name)) return undefined;
   if (CODE_EXT.test(name)) return 'code';
-  if (CONFIG_EXT.test(name) || name.startsWith('.env') || name === 'Dockerfile' || name.startsWith('Dockerfile.')) {
+  if (
+    CONFIG_EXT.test(name) ||
+    name.startsWith('.env') ||
+    name === 'Dockerfile' ||
+    name.startsWith('Dockerfile.')
+  ) {
     return 'config';
   }
   return undefined;
@@ -509,7 +624,9 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     for (const issue of result.issues) {
       console.error(`${issue.file}:${issue.line} [${issue.rule}] ${issue.message}`);
     }
-    console.error(`\ncheck:scope FALLÓ (${result.issues.length} incidencia(s), ${result.scannedFiles} archivos revisados)`);
+    console.error(
+      `\ncheck:scope FALLÓ (${result.issues.length} incidencia(s), ${result.scannedFiles} archivos revisados)`,
+    );
     process.exit(1);
   }
   console.log(`check:scope OK (${result.scannedFiles} archivos revisados)`);

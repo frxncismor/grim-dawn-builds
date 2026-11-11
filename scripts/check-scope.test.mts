@@ -68,11 +68,21 @@ describe('manifests (package.json)', () => {
     assert.equal(issues.length, 1);
     assert.equal(issues[0].rule, 'redis');
     assert.equal(issues[0].file, 'package.json');
-    assert.equal(issues[0].line, JSON.stringify(manifest, null, 2).split('\n').findIndex((l) => l.includes('"redis"')) + 1);
+    assert.equal(
+      issues[0].line,
+      JSON.stringify(manifest, null, 2)
+        .split('\n')
+        .findIndex((l) => l.includes('"redis"')) + 1,
+    );
   });
 
   it('flags forbidden packages in every dependency section', () => {
-    for (const section of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
+    for (const section of [
+      'dependencies',
+      'devDependencies',
+      'optionalDependencies',
+      'peerDependencies',
+    ]) {
       const text = JSON.stringify({ [section]: { bullmq: '^5.0.0' } });
       const issues = checkManifestText('package.json', text);
       assert.deepEqual(
@@ -105,9 +115,22 @@ describe('manifests (package.json)', () => {
       ['minio', 'object-storage'],
       ['@google-cloud/storage', 'object-storage'],
       ['@azure/storage-blob', 'object-storage'],
+      ['cheerio', 'scraping'],
+      ['crawlee', 'scraping'],
+      ['@crawlee/cheerio', 'scraping'],
+      ['puppeteer', 'scraping'],
+      ['puppeteer-core', 'scraping'],
+      ['puppeteer-extra', 'scraping'],
+      ['scrape-it', 'scraping'],
+      ['node-crawler', 'scraping'],
+      ['selenium-webdriver', 'scraping'],
+      ['webdriverio', 'scraping'],
     ];
     for (const [pkg, rule] of cases) {
-      const issues = checkManifestText('package.json', JSON.stringify({ devDependencies: { [pkg]: '1.0.0' } }));
+      const issues = checkManifestText(
+        'package.json',
+        JSON.stringify({ devDependencies: { [pkg]: '1.0.0' } }),
+      );
       assert.deepEqual(
         issues.map((i) => i.rule),
         [rule],
@@ -118,7 +141,13 @@ describe('manifests (package.json)', () => {
 
   it('does not flag legitimate tooling, app and test dependencies', () => {
     const legit = {
-      dependencies: { fastify: '^5.0.0', 'drizzle-orm': '^0.44.0', pg: '^8.16.0', zod: '^4.6.7', '@angular/core': '^21.2.0' },
+      dependencies: {
+        fastify: '^5.0.0',
+        'drizzle-orm': '^0.44.0',
+        pg: '^8.16.0',
+        zod: '^4.6.7',
+        '@angular/core': '^21.2.0',
+      },
       devDependencies: {
         vitest: '^4.0.8',
         jsdom: '^28.0.0',
@@ -127,6 +156,10 @@ describe('manifests (package.json)', () => {
         eslint: '^10.3.0',
         'markdownlint-cli2': '0.24.0',
         '@playwright/test': '^1.50.0',
+        playwright: '^1.65.0',
+        'chrome-launcher': '1.2.3',
+        lighthouse: '13.6.0',
+        jsdom: '^28.0.0',
         testcontainers: '^10.0.0',
         'p-queue': '^8.0.0',
         jsonwebtoken: '^9.0.0',
@@ -184,21 +217,96 @@ describe('source and configuration', () => {
 
   it('flags Redis and AMQP connection URLs in code and configuration', () => {
     assert.deepEqual(
-      checkSourceText('src/app/x.ts', "const url = 'redis://localhost:6379';", 'code').map((i) => i.rule),
+      checkSourceText('src/app/x.ts', "const url = 'redis://localhost:6379';", 'code').map(
+        (i) => i.rule,
+      ),
       ['redis'],
     );
     assert.deepEqual(
-      checkSourceText('.env.example', 'REDIS_URL=rediss://cache:6380\n', 'config').map((i) => i.rule),
+      checkSourceText('.env.example', 'REDIS_URL=rediss://cache:6380\n', 'config').map(
+        (i) => i.rule,
+      ),
       ['redis'],
     );
     assert.deepEqual(
-      checkSourceText('infra/config.json', '{ "broker": "amqp://guest@broker" }', 'config').map((i) => i.rule),
+      checkSourceText('infra/config.json', '{ "broker": "amqp://guest@broker" }', 'config').map(
+        (i) => i.rule,
+      ),
       ['queue-worker'],
     );
   });
 
+  it('flags scraping packages imported in runtime code', () => {
+    const cases: [string, string][] = [
+      ["import * as cheerio from 'cheerio';", 'scraping'],
+      ["const { PuppeteerCrawler } = require('crawlee');", 'scraping'],
+      ["export { default as P } from 'puppeteer-core';", 'scraping'],
+      ["const scraper = await import('scrape-it');", 'scraping'],
+    ];
+    for (const [code, rule] of cases) {
+      const issues = checkSourceText('src/app/x.ts', code, 'code');
+      assert.deepEqual(
+        issues.map((i) => i.rule),
+        [rule],
+        code,
+      );
+    }
+  });
+
+  it('flags comment and calculator screens as routes or absolute links', () => {
+    const cases: [string, SourceKind][] = [
+      ["const routes = [{ path: 'comentarios', component: Comentarios }];", 'code'],
+      ["const routes = [{ path: 'calculadora', component: Calculadora }];", 'code'],
+      ["const routes = [{ path: '/comments', component: Comentarios }];", 'code'],
+      ["const routes = [{ path: 'calculator', component: Calculadora }];", 'code'],
+      ['<a href="/comentarios">Comentarios</a>', 'config'],
+      ['<a [routerLink]="[\'/calculadora\']">Calculadora</a>', 'config'],
+    ];
+    for (const [text, kind] of cases) {
+      assert.deepEqual(
+        checkSourceText('src/app/x.ts', text, kind).map((i) => i.rule),
+        ['out-of-scope-route'],
+        text,
+      );
+    }
+  });
+
+  it('reports the line of a multi-line route definition', () => {
+    const code = "export const routes = [\n  {\n    path: 'calculadora',\n  },\n];\n";
+    const issues = checkSourceText('src/app/app.routes.ts', code, 'code');
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].rule, 'out-of-scope-route');
+    assert.equal(issues[0].line, 3);
+  });
+
+  it('does not flag legitimate routes, prose or test tooling', () => {
+    const code = [
+      "{ path: 'tier-list', component: TierList }",
+      "{ path: 'builds/:slug', component: BuildPage }",
+      "{ path: 'autores/:slug', component: AuthorPage }",
+      "{ path: '**', component: NotFound }",
+      "const aviso = 'El sitio no tiene cuentas, comentarios ni analítica de terceros.';",
+      "const nota = 'Pásala por la calculadora de devoción de grimtools.';",
+      "import { chromium } from 'playwright';",
+      "import { test, expect } from '@playwright/test';",
+      "import { JSDOM } from 'jsdom';",
+    ].join('\n');
+    assert.deepEqual(checkSourceText('src/app/x.ts', code, 'code'), []);
+    assert.deepEqual(
+      checkSourceText(
+        'src/app/legal.page.html',
+        '<p>Sin cuentas, comentarios ni calculadora.</p>',
+        'config',
+      ),
+      [],
+    );
+  });
+
   it('ignores URL-like text inside comment lines of configuration', () => {
-    assert.deepEqual(checkSourceText('infra/x.yaml', '# example: redis://localhost\n', 'config'), []);
+    assert.deepEqual(
+      checkSourceText('infra/x.yaml', '# example: redis://localhost\n', 'config'),
+      [],
+    );
   });
 });
 
@@ -216,14 +324,23 @@ describe('compose', () => {
   });
 
   it('passes one application service, one database and the migrate job', () => {
-    assert.deepEqual(checkComposeFiles([{ file: 'infra/docker/compose.yaml', text: CLEAN_COMPOSE }]), []);
+    assert.deepEqual(
+      checkComposeFiles([{ file: 'infra/docker/compose.yaml', text: CLEAN_COMPOSE }]),
+      [],
+    );
   });
 
   it('fails a controlled fixture that adds a redis service', () => {
     const text = `${CLEAN_COMPOSE}  redis:\n    image: redis:7.4-alpine\n`;
     const issues = checkComposeFiles([{ file: 'infra/docker/compose.yaml', text }]);
-    assert.ok(issues.some((i) => i.rule === 'redis'), JSON.stringify(issues));
-    assert.equal(issues.find((i) => i.rule === 'redis')?.line, text.split('\n').findIndex((l) => l === '  redis:') + 1);
+    assert.ok(
+      issues.some((i) => i.rule === 'redis'),
+      JSON.stringify(issues),
+    );
+    assert.equal(
+      issues.find((i) => i.rule === 'redis')?.line,
+      text.split('\n').findIndex((l) => l === '  redis:') + 1,
+    );
   });
 
   it('fails a worker or queue service even without a known image', () => {
@@ -235,14 +352,20 @@ describe('compose', () => {
   it('fails when a second application service is added', () => {
     const text = `${CLEAN_COMPOSE}  web:\n    build: ../../\n`;
     const issues = checkComposeFiles([{ file: 'infra/docker/compose.yaml', text }]);
-    assert.deepEqual(issues.map((i) => i.rule), ['compose-topology']);
+    assert.deepEqual(
+      issues.map((i) => i.rule),
+      ['compose-topology'],
+    );
     assert.match(issues[0].message, /web/);
   });
 
   it('fails when a second database service is added', () => {
     const text = `${CLEAN_COMPOSE}  reports-db:\n    image: mysql:8.4\n`;
     const issues = checkComposeFiles([{ file: 'infra/docker/compose.yaml', text }]);
-    assert.deepEqual(issues.map((i) => i.rule), ['compose-topology']);
+    assert.deepEqual(
+      issues.map((i) => i.rule),
+      ['compose-topology'],
+    );
   });
 
   it('classifies database images with registry and digest correctly', () => {
@@ -310,7 +433,9 @@ describe('scanRepository', () => {
       'infra/docker/compose.yaml': `${CLEAN_COMPOSE}  redis:\n    image: redis:7\n`,
     });
     const result = scanRepository(root);
-    assert.ok(result.issues.some((i) => i.file === 'infra/docker/compose.yaml' && i.rule === 'redis'));
+    assert.ok(
+      result.issues.some((i) => i.file === 'infra/docker/compose.yaml' && i.rule === 'redis'),
+    );
   });
 });
 

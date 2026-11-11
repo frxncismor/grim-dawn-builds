@@ -114,6 +114,71 @@ pnpm build:release
 pnpm check:release
 ```
 
+## Static artifact preview and editorial flow
+
+`pnpm build` writes the deployable static artifact to
+`dist/grim-dawn-builds/browser/`. The same run also writes
+`dist/grim-dawn-builds/stats.json`, which stays **outside** `browser/`: it is
+measurement evidence and must never be published or served with the site.
+
+To preview the artifact as published, serve `browser/` with a minimal Node 22
+static server: no `ng serve`, no extra dependency and no file added to the
+repository. It answers a missing path with the artifact's real `404.html`. Run
+`pnpm build` first when `browser/` does not exist:
+
+```powershell
+node -e "const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),root=path.resolve('dist/grim-dawn-builds/browser'),types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.svg':'image/svg+xml','.txt':'text/plain; charset=utf-8','.xml':'application/xml','.ico':'image/x-icon','.woff2':'font/woff2'};http.createServer((req,res)=>{const url=decodeURIComponent((req.url||'/').split('?')[0]);if(url.includes('..')){res.writeHead(403,{'Content-Type':'text/plain; charset=utf-8'}).end('forbidden');return;}let file=path.join(root,url);try{if(fs.statSync(file).isDirectory())file=path.join(file,'index.html');const body=fs.readFileSync(file);res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream','X-Content-Type-Options':'nosniff'});res.end(body);}catch{res.writeHead(404,{'Content-Type':'text/html; charset=utf-8'});res.end(fs.existsSync(path.join(root,'404.html'))?fs.readFileSync(path.join(root,'404.html')):'not_found');}}).listen(4321,'127.0.0.1',()=>console.log('preview: http://127.0.0.1:4321/ -> '+root));"
+```
+
+Open `http://127.0.0.1:4321/` and stop the server with Ctrl+C. Files are read
+from disk on every request, so a new `pnpm build` only needs a reload.
+
+### Build variables
+
+These are shell environment variables read by the build and the preview. Angular
+does not load `.env` files automatically, so export them in the shell before the
+command. [`.env.example`](.env.example) lists the public names and safe defaults
+as a reference; real secrets live in git-ignored files only, as documented in
+[secret management](docs/security/secrets.md).
+
+| Variable         | Accepted values                                               | Effect on the build and the preview                                                                                              |
+| ---------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `BASE_URL`       | absolute `http(s)` URL without credentials, query or fragment | Fixes the absolute canonical and Open Graph URLs, `sitemap.xml` and `robots.txt`. Defaults to `http://localhost:4200/`.          |
+| `INCLUDE_DRAFTS` | `true` or `false`                                             | Adds the local `borrador` guide when `true`. Public and release builds force it to `false`.                                      |
+| `CONTENT_SOURCE` | `fixture` or `api`                                            | Selects fixtures (development, tests, CI without Docker) or the public API (release). `api` never degrades silently to fixtures. |
+
+An invalid `BASE_URL` fails the sitemap and robots generation with a fixed
+message that does not echo credentials. `INCLUDE_DRAFTS` only accepts `true` or
+`false`: any other value fails with `INCLUDE_DRAFTS debe ser true o false.`, and
+`CONTENT_SOURCE=api` rejects it with `La API pública no admite INCLUDE_DRAFTS.`.
+Exporting `INCLUDE_DRAFTS=true` before `pnpm build` renders the `borrador` guide
+with the "Borrador · no público" banner and `noindex`, so the route stays out of
+the sitemap and is never part of a public or release build.
+
+### Editorial flow
+
+`content/` holds development fixtures and import material. The editorial CLI
+edits canonical documents through the PostgreSQL `editor` role, with no accounts
+or write endpoints:
+
+```bash
+pnpm db:edit --kind build --slug <slug> --file <local-json>
+```
+
+The [editorial CLI](docs/content/editorial-cli.md) documents the envelope, the
+required role and the fixed failure codes. `pnpm db:seed` loads development
+fixtures, `pnpm db:bootstrap` performs the single initial load into an empty
+migrated database ([bootstrap](docs/content/bootstrap.md)), and
+`pnpm content:validate -- --dir <folder>` checks any content folder against the
+domain schema.
+
+### Deployment
+
+Hosting is still deferred and out of scope. There is no deployment provider, no
+target domain, no contact data and no deploy workflow: `.github/workflows` only
+runs verification and secret scanning, and deployment credentials stay
+unconfigured until the maintainer makes an explicit decision.
+
 ## Layout
 
 ```text

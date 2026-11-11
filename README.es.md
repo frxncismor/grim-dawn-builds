@@ -116,6 +116,74 @@ pnpm build:release
 pnpm check:release
 ```
 
+## Vista previa del artefacto estático y flujo editorial
+
+`pnpm build` escribe el artefacto estático publicable en
+`dist/grim-dawn-builds/browser/`. La misma ejecución escribe además
+`dist/grim-dawn-builds/stats.json`, que queda **fuera** de `browser/`: es
+evidencia de medición y nunca debe publicarse ni servirse con el sitio.
+
+Para previsualizar el artefacto tal como se publica, sirve `browser/` con un
+servidor estático mínimo de Node 22: sin `ng serve`, sin dependencias nuevas y
+sin añadir archivos al repositorio. Responde a una ruta ausente con el
+`404.html` real del artefacto. Ejecuta `pnpm build` antes si `browser/` no
+existe:
+
+```powershell
+node -e "const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),root=path.resolve('dist/grim-dawn-builds/browser'),types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.svg':'image/svg+xml','.txt':'text/plain; charset=utf-8','.xml':'application/xml','.ico':'image/x-icon','.woff2':'font/woff2'};http.createServer((req,res)=>{const url=decodeURIComponent((req.url||'/').split('?')[0]);if(url.includes('..')){res.writeHead(403,{'Content-Type':'text/plain; charset=utf-8'}).end('forbidden');return;}let file=path.join(root,url);try{if(fs.statSync(file).isDirectory())file=path.join(file,'index.html');const body=fs.readFileSync(file);res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream','X-Content-Type-Options':'nosniff'});res.end(body);}catch{res.writeHead(404,{'Content-Type':'text/html; charset=utf-8'});res.end(fs.existsSync(path.join(root,'404.html'))?fs.readFileSync(path.join(root,'404.html')):'not_found');}}).listen(4321,'127.0.0.1',()=>console.log('preview: http://127.0.0.1:4321/ -> '+root));"
+```
+
+Abre `http://127.0.0.1:4321/` y detén el servidor con Ctrl+C. Los archivos se leen
+del disco en cada petición, así que un `pnpm build` nuevo solo requiere recargar.
+
+### Variables de build
+
+Son variables de entorno del shell que leen el build y la vista previa. Angular
+no carga archivos `.env` automáticamente, así que expórtalas en el shell antes
+del comando. [`.env.example`](.env.example) reúne los nombres públicos y sus
+valores por defecto seguros como referencia; los secretos reales viven solo en
+archivos ignorados por git, según
+[la gestión de secretos](docs/security/secrets.md).
+
+| Variable         | Valores aceptados                                           | Efecto en el build y la vista previa                                                                                        |
+| ---------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `BASE_URL`       | URL absoluta `http(s)` sin credenciales, query ni fragmento | Fija las URLs absolutas de canonical y Open Graph, `sitemap.xml` y `robots.txt`. Por defecto `http://localhost:4200/`.      |
+| `INCLUDE_DRAFTS` | `true` o `false`                                            | Añade la guía local `borrador` cuando vale `true`. Los builds público y de release lo fuerzan a `false`.                    |
+| `CONTENT_SOURCE` | `fixture` o `api`                                           | Elige fixtures (desarrollo, pruebas, CI sin Docker) o la API pública (release). `api` nunca degrada en silencio a fixtures. |
+
+Un `BASE_URL` inválido hace fallar la generación del sitemap y de robots con un
+mensaje fijo que no repite credenciales. `INCLUDE_DRAFTS` solo acepta `true` o
+`false`: cualquier otro valor falla con `INCLUDE_DRAFTS debe ser true o false.`,
+y `CONTENT_SOURCE=api` lo rechaza con `La API pública no admite INCLUDE_DRAFTS.`.
+Exportar `INCLUDE_DRAFTS=true` antes de `pnpm build` renderiza la guía
+`borrador` con el banner «Borrador · no público» y `noindex`, así que la ruta
+queda fuera del sitemap y nunca forma parte de un build público ni de release.
+
+### Flujo editorial
+
+`content/` contiene los fixtures de desarrollo y el material de importación. La
+CLI editorial edita documentos canónicos con el rol PostgreSQL `editor`, sin
+cuentas ni endpoints de escritura:
+
+```bash
+pnpm db:edit --kind build --slug <slug> --file <json-local>
+```
+
+La [CLI editorial](docs/content/editorial-cli.md) documenta la envolvente, el rol
+necesario y los códigos de fallo fijos. `pnpm db:seed` carga los fixtures de
+desarrollo, `pnpm db:bootstrap` hace la única carga inicial en una base migrada
+vacía ([bootstrap](docs/content/bootstrap.md)) y
+`pnpm content:validate -- --dir <carpeta>` comprueba cualquier carpeta de
+contenido contra el esquema del dominio.
+
+### Despliegue
+
+El hosting sigue diferido y fuera de alcance. No hay proveedor de despliegue,
+dominio objetivo, datos de contacto ni workflow de deploy: `.github/workflows`
+solo ejecuta la verificación y el escaneo de secretos, y las credenciales de
+despliegue quedan sin configurar hasta que el mantenedor tome una decisión
+explícita.
+
 ## Estructura
 
 ```text
@@ -172,12 +240,6 @@ correspondencia entre hitos, tareas y PRs, está en
 - [Revisiones de cierre de spec](specs/002-spec-completion-reviews/).
 - [Cómo contribuir](CONTRIBUTING.md).
 
-## Licencia
-
-El código se distribuye sin licencia declarada por ahora: todos los derechos
-reservados hasta que el mantenedor elija una. El contenido editorial de terceros
-se rige por sus propias licencias y permisos registrados en `content/sources/`.
-
 ## Idioma
 
 El inglés es el idioma principal del repositorio: README, pull requests, commits y
@@ -185,3 +247,9 @@ la configuración regional por defecto del sitio. El español es una opción de
 primera clase, no un añadido: consulta [`README.md`](README.md) y la configuración
 regional `es` del sitio web. Las cadenas de interfaz pasan por el sistema i18n de
 Angular para que ambas configuraciones permanezcan completas.
+
+## Licencia
+
+El código se distribuye sin licencia declarada por ahora: todos los derechos
+reservados hasta que el mantenedor elija una. El contenido editorial de terceros
+se rige por sus propias licencias y permisos registrados en `content/sources/`.
