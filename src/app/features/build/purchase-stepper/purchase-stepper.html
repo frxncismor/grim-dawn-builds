@@ -1,0 +1,130 @@
+@if (isVisible()) {
+  <section id="orden" aria-labelledby="purchase-order-title">
+    <h2 id="purchase-order-title" i18n="@@purchaseStepper.title">Orden real de compra</h2>
+    @for (introduction of introductions(); track $index) {
+      <p class="introduction">{{ introduction }}</p>
+    }
+
+    @if (hasDuplicatePositions()) {
+      <p class="data-warning" role="alert" i18n="@@purchaseStepper.duplicatePositions">
+        Los datos de esta guía son inconsistentes porque tienen posiciones repetidas. La selección y
+        el progreso están desactivados.
+      </p>
+    }
+
+    @if (orderedSteps().length) {
+      <ol class="steps">
+        @for (step of orderedSteps(); track $index; let index = $index) {
+          <li class="step" data-step [attr.data-position]="step.position" [value]="step.position">
+            <div class="step__layout">
+              <div class="step__content">
+                <p class="step__threshold" data-threshold>{{ step.threshold_label }}</p>
+                <h3 data-title>{{ step.title }}</h3>
+                <p class="step__body" data-body>{{ step.body }}</p>
+
+                @if (stepHighlights(step).length) {
+                  <ul
+                    class="highlights"
+                    aria-label="Habilidades de este paso"
+                    i18n-aria-label="@@purchaseStepper.highlightsLabel"
+                  >
+                    @for (highlight of stepHighlights(step); track $index) {
+                      <li data-highlight>
+                        <span>{{ highlight.node.name_es }}</span>
+                        <span lang="en">{{ ' (' + highlight.node.name_en + ')' }}</span>
+                        <span class="points">{{ pointsLabel(highlight.points) }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+
+              <div class="step__controls">
+                <button
+                  type="button"
+                  data-select-step
+                  [attr.data-position]="step.position"
+                  [attr.aria-label]="selectLabel(step)"
+                  [disabled]="!controlsEnabled()"
+                  [attr.aria-pressed]="isSelected(step.position)"
+                  (click)="selectStep(step)"
+                  i18n="@@purchaseStepper.selectStep"
+                >
+                  Ver habilidades del paso
+                </button>
+
+                <label
+                  class="completion-label"
+                  [attr.for]="'purchase-completed-' + step.position + '-' + index"
+                >
+                  <input
+                    type="checkbox"
+                    data-completed
+                    [attr.data-completed]="step.position"
+                    [id]="'purchase-completed-' + step.position + '-' + index"
+                    [attr.aria-label]="completionLabel(step)"
+                    [checked]="isCompleted(step.position)"
+                    [disabled]="!controlsEnabled()"
+                    (change)="onCompletedChange(step.position, $event)"
+                  />
+                  <span i18n="@@purchaseStepper.markCompleted">Marcar paso como completado</span>
+                  @if (isCompleted(step.position)) {
+                    <strong
+                      class="completed-status"
+                      [attr.data-completed-label]="step.position"
+                      i18n="@@purchaseStepper.completed"
+                    >
+                      Completado
+                    </strong>
+                  }
+                </label>
+              </div>
+            </div>
+          </li>
+        }
+      </ol>
+
+      <div class="progress-controls" aria-labelledby="progress-controls-title">
+        <h3 id="progress-controls-title" i18n="@@purchaseStepper.progressTitle">
+          Checklist de progreso
+        </h3>
+        <label class="persistence-label" for="purchase-persist">
+          <input
+            type="checkbox"
+            id="purchase-persist"
+            data-persist
+            [checked]="persistenceEnabled()"
+            [disabled]="!controlsEnabled()"
+            (change)="onPersistenceChange($event)"
+          />
+          <span i18n="@@purchaseStepper.persistenceOptIn">Guardar progreso en este navegador</span>
+        </label>
+        <p class="privacy-note" i18n="@@purchaseStepper.privacyNote">
+          Solo se guarda en este navegador; no requiere cuenta ni se sincroniza.
+        </p>
+        <button
+          type="button"
+          data-clear-progress
+          [disabled]="!controlsEnabled()"
+          (click)="clearProgress()"
+          i18n="@@purchaseStepper.clearProgress"
+        >
+          Borrar progreso
+        </button>
+        @if (storageMessage()) {
+          <p class="storage-message" data-storage-message role="status" aria-live="polite">
+            {{ storageMessage() }}
+          </p>
+        }
+      </div>
+    } @else {
+      <p class="empty-state" role="status">{{ emptyMessage }}</p>
+    }
+
+    @if (!browserReady() && orderedSteps().length) {
+      <p class="no-script-note" i18n="@@purchaseStepper.javascriptRequired">
+        Los controles de selección y guardado se activan cuando JavaScript está disponible.
+      </p>
+    }
+  </section>
+}

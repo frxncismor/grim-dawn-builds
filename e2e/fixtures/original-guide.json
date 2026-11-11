@@ -1,0 +1,447 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "path": "elementalista-golpe-primigenio.html",
+    "sha256": "98fed8ba705523ecf99a813e725df904942c51f2af4b757c3ee184544150c040",
+    "rights_status": "pending",
+    "purpose": "Local migration parity only; not a publication license.",
+    "normalization": "LF"
+  },
+  "header": {
+    "eyebrow": "Grim Dawn · nombres en español",
+    "title": "Chamán + Demoledor",
+    "subtitle": "Golpe Primigenio de rayo, arma a dos manos. Azul = Chamán, naranja = Demoledor.",
+    "callout_title": "Lee esto primero",
+    "callout_body": [
+      "El número en cada habilidad es cuántos puntos necesitas en la barra de maestría para desbloquearla. No es cuántos puntos meterle.",
+      "Eso cambia todo el plan: Pacto de Clamatormentas pide barra 50, o sea la barra de Chamán completa. Y Escudo Explosivo pide barra 32 de Demoledor. Ninguna de las dos es para ahora."
+    ]
+  },
+  "mastery_roles": [
+    {
+      "name": "Chamán",
+      "role": "Tu daño. Aquí va la mayoría de los puntos y de la barra."
+    },
+    {
+      "name": "Demoledor",
+      "role": "Soporte. Barra baja mientras subes; lo bueno está muy al fondo."
+    }
+  ],
+  "skills": [
+    {
+      "mastery": "Chamán",
+      "name_es": "Golpe Primigenio",
+      "name_en": "Primal Strike",
+      "bar": "barra 5",
+      "rationale": "1 punto ahora, súbelo poco a poco. Se maxea al final, cuando ya tengas equipo de rayo.",
+      "tag": null
+    },
+    {
+      "mastery": "Chamán",
+      "name_es": "Golpe Atronador",
+      "name_en": "Thunderous Strike",
+      "bar": "barra 10",
+      "rationale": "Quita el enfriamiento a cambio de daño. Pasas de un golpe cada dos segundos a poder machacar sin parar. Es tu prioridad número uno. Con 1 punto basta.",
+      "tag": "Transmutador"
+    },
+    {
+      "mastery": "Chamán",
+      "name_es": "Torrente",
+      "name_en": "Torrent",
+      "bar": "barra 15",
+      "rationale": "Daño puro por punto. El mejor retorno del árbol. Máximo.",
+      "tag": null
+    },
+    {
+      "mastery": "Chamán",
+      "name_es": "Corriente de Tormenta",
+      "name_en": "Storm Surge",
+      "bar": "barra 25",
+      "rationale": "El segundo modificador de daño. Va después de Torrente.",
+      "tag": null
+    },
+    {
+      "mastery": "Chamán",
+      "name_es": "Viento Demoníaco",
+      "name_en": "Wind Devil",
+      "bar": "barra 10",
+      "rationale": "Torbellino que sueltas antes de entrar a pegar.",
+      "tag": null
+    },
+    {
+      "mastery": "Chamán",
+      "name_es": "Tempestad Furiosa",
+      "name_en": "Raging Tempest",
+      "bar": "barra 20",
+      "rationale": "Baja la resistencia elemental de los enemigos. Multiplica tu daño en lugar de sumarlo: vale más que subir Golpe Primigenio.",
+      "tag": null
+    },
+    {
+      "mastery": "Chamán",
+      "name_es": "Tótem Wendigo",
+      "name_en": "Wendigo Totem",
+      "bar": "barra 20",
+      "rationale": "Tu botón de no morir. Lo plantas y te cura mientras peleas alrededor.",
+      "tag": null
+    },
+    {
+      "mastery": "Chamán",
+      "name_es": "Pacto de Mogdrogen",
+      "name_en": "Mogdrogen's Pact",
+      "bar": "barra 5",
+      "rationale": "Buff permanente. Unos puntos por ahora, es el camino hacia lo de abajo.",
+      "tag": null
+    },
+    {
+      "mastery": "Chamán",
+      "name_es": "Pacto de Clamatormentas",
+      "name_en": "Stormcaller's Pact",
+      "bar": "barra 50",
+      "rationale": "La habilidad definitiva del build: convierte el pacto en daño de rayo y velocidad de ataque. Requiere la barra de Chamán completa, así que es una meta de nivel 60+, no de ahora.",
+      "tag": null
+    },
+    {
+      "mastery": "Demoledor",
+      "name_es": "Tocado por las Llamas",
+      "name_en": "Flame Touched",
+      "bar": "barra 5",
+      "rationale": "+% daño elemental. El rayo es elemental, así que te sube el daño directo. Barato y accesible: es lo mejor que te da Demoledor a corto plazo.",
+      "tag": null
+    },
+    {
+      "mastery": "Demoledor",
+      "name_es": "Llama Vengativa",
+      "name_en": "Vindictive Flame",
+      "bar": "barra 10",
+      "rationale": "Pasivo de velocidad de movimiento y puntería. Se activa solo.",
+      "tag": null
+    },
+    {
+      "mastery": "Demoledor",
+      "name_es": "Granada Cegadora",
+      "name_en": "Flashbang",
+      "bar": "barra 1",
+      "rationale": "1 punto. Sirve de control y abre el camino a lo de abajo.",
+      "tag": null
+    },
+    {
+      "mastery": "Demoledor",
+      "name_es": "Escudo Explosivo",
+      "name_en": "Blast Shield",
+      "bar": "barra 32",
+      "rationale": "Absorbe daño cuando bajas de vida. Excelente, pero 32 puntos de barra en una clase secundaria es una inversión enorme. Decisión de nivel alto.",
+      "tag": null
+    },
+    {
+      "mastery": "Demoledor",
+      "name_es": "Mina de Termita",
+      "name_en": "Thermite Mine",
+      "bar": "barra 32",
+      "rationale": "Reduce resistencia elemental de los enemigos: sinergia real con tu rayo. Misma barrera de barra 32 que el escudo — si vas por uno, te llevas los dos.",
+      "tag": null
+    }
+  ],
+  "omitted": [
+    {
+      "mastery": "Demoledor",
+      "title": "Templar · Golpe de Fuego · Granada",
+      "detail": "Sáltatelos. Daño físico o de fuego que tu personaje no usa."
+    }
+  ],
+  "skill_legend": "barra N = puntos requeridos en la maestría — el texto pequeño gris es el nombre en inglés",
+  "priorities": [
+    {
+      "label": "1 · Chamán",
+      "headline": "Golpe Atronador",
+      "detail": "1 punto. Es el transmutador de Golpe Primigenio: sin él el build se siente lento."
+    },
+    {
+      "label": "2 · Chamán",
+      "headline": "Torrente → máximo",
+      "detail": "Mejor retorno de daño por punto de todo el árbol."
+    },
+    {
+      "label": "3 · Chamán",
+      "headline": "Tempestad Furiosa → máximo",
+      "detail": "Baja resistencias enemigas: multiplica tu daño en vez de sumarlo."
+    },
+    {
+      "label": "4 · Chamán",
+      "headline": "Viento Demoníaco → 1 punto",
+      "detail": "Lo subes después. Es la habilidad donde atas Tempestad de la devoción."
+    },
+    {
+      "label": "5 · Chamán",
+      "headline": "Tótem Wendigo → 1 punto",
+      "detail": "Tu botón de sobrevivir. Súbelo cuando tengas puntos de sobra."
+    },
+    {
+      "label": "6 · Demoledor",
+      "headline": "Tocado por las Llamas → hasta 12",
+      "detail": "Daño elemental fijo por punto. Si tu equipo ya da +habilidades del Demoledor, resta esos puntos: no los desperdicies."
+    },
+    {
+      "label": "7 · Demoledor",
+      "headline": "Llama Vengativa → 1 ahora, 11 después",
+      "detail": "Pasar de 11 rinde muy poco: cinco puntos más dan solo 3% de velocidad."
+    },
+    {
+      "label": "8 · Chamán",
+      "headline": "Corriente de Tormenta → máximo",
+      "detail": "Cuando la barra de Chamán llegue a 25."
+    },
+    {
+      "label": "9 · Chamán",
+      "headline": "Golpe Primigenio → con lo que sobre",
+      "detail": "Hasta 16, al final: primero el equipo y los modificadores."
+    },
+    {
+      "label": "Devoción",
+      "headline": "Encrucijada morada → Trono Vacío",
+      "detail": "Es tu siguiente paso para abrir Tempestad. Ruta completa en la sección de devoción, más abajo."
+    },
+    {
+      "label": "Aún no",
+      "headline": "Escudo Explosivo · Mina de Termita · Pacto de Clamatormentas",
+      "detail": "Piden barra 32 de Demoledor las dos primeras y barra 50 de Chamán la última. Son metas de nivel 60+."
+    }
+  ],
+  "purchase_steps": [
+    {
+      "label": "Barra Chamán → 10",
+      "title": "Golpe Atronador",
+      "body": "Sube la barra de Chamán hasta 10 y mete 1 punto en Golpe Atronador. También 1 en Viento Demoníaco. Aquí el personaje deja de sentirse lento."
+    },
+    {
+      "label": "barra Chamán → 15",
+      "title": "Torrente al máximo",
+      "body": "Todo lo que sobre va a Torrente. Cada punto se nota en pantalla."
+    },
+    {
+      "label": "barra Chamán → 20",
+      "title": "Resistencias y supervivencia",
+      "body": "Tempestad Furiosa al máximo y 1 punto en Tótem Wendigo. Con esto ya aguantas jefes."
+    },
+    {
+      "label": "barra Demoledor → 10",
+      "title": "La parte útil del Demoledor",
+      "body": "Ahora sí lo tocas: Tocado por las Llamas hasta 12 y Llama Vengativa en 1 por ahora (súbela a 11 cuando te sobren puntos). Son pasivos, los pones y te olvidas. Antes de gastar, revisa si tu equipo ya te regala niveles en esa habilidad."
+    },
+    {
+      "label": "barra Chamán → 25",
+      "title": "Corriente de Tormenta",
+      "body": "Al máximo. A partir de aquí empieza a subir Golpe Primigenio con lo que sobre."
+    },
+    {
+      "label": "Nivel 60+ · la decisión",
+      "title": "Barra Chamán a 50, o Demoledor a 32",
+      "body": "Chamán 50 te da Pacto de Clamatormentas (daño). Demoledor 32 te da Escudo Explosivo + Mina de Termita (aguante). No alcanza para las dos pronto. Con este build yo iría primero por Chamán."
+    }
+  ],
+  "note_rows": [
+    {
+      "label": "Devociones",
+      "headline": "Ruta completa abajo",
+      "detail": "La versión anterior de esta guía saltaba las constelaciones intermedias y por eso Tempestad aparecía bloqueada. Corregido en la sección siguiente."
+    },
+    {
+      "label": "Nombres",
+      "headline": "Usa los ingleses para buscar",
+      "detail": "Las traducciones al español de las constelaciones no las tengo confirmadas; los nombres en inglés sí, y son los que aparecen en todas las guías y en grimtools."
+    },
+    {
+      "label": "Atributos",
+      "headline": "Casi todo a Physique",
+      "detail": "Mete Cunning o Spirit solo cuando un objeto concreto te lo pida. Sí existe forma de reiniciarlos (Tónico de Remodelación / Tonic of Reshaping, de misiones de Ashes of Malmouth), pero son contados: trátalos como si fueran definitivos."
+    },
+    {
+      "label": "Arma",
+      "headline": "Dos manos, siempre",
+      "detail": "Busca el afijo \"% del daño físico convertido en rayo\". Vale más que cinco niveles."
+    },
+    {
+      "label": "Más adelante",
+      "headline": "Golpe Atronador pierde fuerza hacia el nivel 50-60",
+      "detail": "Contra un solo objetivo y contra jefes se hace lento. Muchos jugadores cambian a Salvajismo + Hambre Salvaje a mitad de Élite. No cambies nada ahora; solo ten claro que si los jefes se eternizan, es el transmutador y no tú."
+    },
+    {
+      "label": "Rotación",
+      "headline": "Torbellino → machacar",
+      "detail": "Sueltas Viento Demoníaco, entras con Golpe Primigenio sin parar, Tótem Wendigo cuando la vida baje."
+    }
+  ],
+  "loot_columns": [
+    {
+      "name": "1ª columna · Calidad",
+      "subtitle": "Qué rarezas quieres ver",
+      "rules": [
+        {
+          "label": "Desmarca: Común",
+          "detail": "A nivel 14 es lo único que sobra. Los mágicos (amarillos) todavía te sirven; desmárcalos cuando vayas vestido de raro/épico, más o menos al 40."
+        },
+        {
+          "label": "Marca: Mostrar siempre únicos",
+          "detail": "Déjala siempre encendida. Es lo que evita que el filtro te esconda una legendaria porque no encaja con las casillas de daño que elegiste."
+        }
+      ]
+    },
+    {
+      "name": "2ª columna · Tipo",
+      "subtitle": "Qué piezas te sirven",
+      "rules": [
+        {
+          "label": "Marca",
+          "detail": "Armas cuerpo a cuerpo a dos manos · toda la armadura · anillos y amuletos · medallas y reliquias · componentes."
+        },
+        {
+          "label": "Desmarca",
+          "detail": "Armas a una mano · escudos · armas a distancia. Golpe Primigenio quiere un arma a dos manos, y todo lo demás es ruido en el suelo."
+        }
+      ]
+    },
+    {
+      "name": "3ª columna · Daño",
+      "subtitle": "Aquí es donde se nota que juegas rayo",
+      "rules": [
+        {
+          "label": "Marca",
+          "detail": "Rayo · Elemental · Electrocución · Físico (por los objetos que convierten físico en rayo) · velocidad de ataque y capacidad ofensiva si aparecen como opción."
+        },
+        {
+          "label": "Desmarca",
+          "detail": "Frío · Ácido y veneno · Vitalidad · Sangrado · Caos · Éter · bonos de mascota. Nada de eso hace daño en tu personaje."
+        },
+        {
+          "label": "Ojo con la lógica",
+          "detail": "El filtro es un O, no un Y: basta con que el objeto cumpla una casilla marcada para que aparezca. Cuantas más marques, menos filtra. Si ves demasiado, quita casillas en vez de añadirlas."
+        }
+      ]
+    },
+    {
+      "name": "4ª columna · Personaje",
+      "subtitle": "Lo que te ahorra morir en Élite",
+      "rules": [
+        {
+          "label": "Marca",
+          "detail": "Chamán · Demoledor (los objetos que dan +1 a habilidades de tus maestrías valen oro) y Resistencias. Déjalas encendidas aunque el objeto no tenga rayo: llegar a Élite con resistencias bajas es el motivo número uno por el que la gente abandona un personaje."
+        }
+      ]
+    }
+  ],
+  "loot_final": {
+    "title": "Aprieta el filtro poco a poco",
+    "body": "Pasado el nivel 25 ya puedes activar las columnas de daño de rayo. Si notas que dejas de ver mejoras claras, quita casillas antes de añadir más: el filtro suma opciones, no las exige todas."
+  },
+  "guide_rows": [
+    {
+      "label": "Acto 1",
+      "headline": "Sahdina — Cruce del Diablo",
+      "detail": "El que te toca ahora. Está en el piso superior de la prisión, en la esquina norte. Habla con ella una vez para completar el diálogo inicial y vuelve a interactuar: ahí se abre el menú de reembolso."
+    },
+    {
+      "label": "Después",
+      "headline": "Novi — Refugio del Aquelarre",
+      "detail": "Un poco al norte de Wevala, la ilusionista."
+    },
+    {
+      "label": "Después",
+      "headline": "Rena — Distrito Yelmo de Acero",
+      "detail": "Al oeste del portal de grieta, en el camino circular que da al patio."
+    },
+    {
+      "label": "Después",
+      "headline": "Bagalla — Cónclave de los Tres",
+      "detail": "Planta baja, a la derecha, bajo un toldo."
+    },
+    {
+      "label": "Coste",
+      "headline": "Arranca en 25 fragmentos de hierro",
+      "detail": "Sube conforme reasignas puntos, hasta un tope alto de miles por punto. Por eso experimentar ahora es casi gratis. Las devociones además cuestan cristales de éter, que sacas rompiendo formaciones de cristal por el mapa."
+    },
+    {
+      "label": "Aviso",
+      "headline": "Sahdina no dura toda la partida",
+      "detail": "Muere en un ataque a Cruce del Diablo durante la campaña de Ashes of Malmouth. Si un día no la encuentras, no es un bug: usa a Novi."
+    }
+  ],
+  "devotion_steps": [
+    {
+      "label": "Ya lo tienes",
+      "title": "Crossroads · Eel",
+      "body": "Anguila es Primordial de nivel 1. Con ella cubierta ya tienes medio requisito de Tempestad."
+    },
+    {
+      "label": "Paso 1",
+      "title": "Empty Throne — Trono Vacío",
+      "body": "1 punto en la Encrucijada morada para entrar, luego complétala. Te da Ascendente 5, que es lo que te falta para Tempestad. Se sostiene sola al terminarla."
+    },
+    {
+      "label": "Paso 2",
+      "title": "Lizard — Lagarto",
+      "body": "Barata, regeneración de vida. Es escalón y supervivencia a la vez."
+    },
+    {
+      "label": "Paso 3 · primer poder",
+      "title": "Tempest — Tempestad",
+      "body": "Ata Reckless Tempest a Viento Demoníaco. Se dispara con críticos, así que rinde más según sube tu capacidad ofensiva."
+    },
+    {
+      "label": "Paso 4",
+      "title": "Scholar's Light — Luz del Erudito",
+      "body": "Puro escalón hacia Kraken. No esperes gran cosa de sus bonos."
+    },
+    {
+      "label": "Paso 5",
+      "title": "Rhowan's Crown — Corona de Rhowan",
+      "body": "Ata Elemental Storm al Tótem de Tormenta. Reduce resistencias en área."
+    },
+    {
+      "label": "Paso 6 · supervivencia",
+      "title": "Ghoul · Behemoth",
+      "body": "Ghoul va al Pacto de Mogdrogen y Behemoth al Pacto de Clamatormentas. Ojo: los poderes que se activan al recibir daño solo pueden atarse a habilidades de buff, nunca a las de ataque. Por eso van a los pactos."
+    },
+    {
+      "label": "Paso 7",
+      "title": "Kraken",
+      "body": "Nivel 2, arriba del mapa. Sus bonos exigen arma a dos manos — tu build cumple, pero si algún día cambias a una mano, se apaga entera."
+    },
+    {
+      "label": "Paso 8 · el destino",
+      "title": "Ultos, Shepherd of Storms",
+      "body": "Ata Hand of Ultos a Golpe Primigenio. Nivel 3: pide 22+ de afinidad y no devuelve nada, por eso va al final."
+    },
+    {
+      "label": "Antes de gastar",
+      "title": "Simula la ruta en grimtools",
+      "body": "Las afinidades intermedias (Lagarto, Luz del Erudito, Ghoul, Behemoth) vienen de guías de la comunidad, no de una comprobación mía punto por punto. Pásala por la calculadora de devoción de grimtools: te avisa si en algún paso no llegas a la afinidad, y reasignar cuesta cristales de éter."
+    },
+    {
+      "label": "Limpieza",
+      "title": "Recupera la Encrucijada azul",
+      "body": "Cuando las constelaciones se sostengan solas, quita los puntos de la Encrucijada y mételos en Quill o Owl. Cuesta fragmentos de hierro y cristales de éter, así que hazlo de una sola vez al final."
+    }
+  ],
+  "introductions": [
+    {
+      "section": "Qué subir ya mismo",
+      "text": "Resumen en orden de prioridad. Los árboles completos con el porqué de cada cosa vienen justo abajo."
+    },
+    {
+      "section": "Orden real de compra",
+      "text": "Guíate por la barra, no por el nivel: los puntos de misión hacen que dos personajes del mismo nivel tengan totales distintos."
+    },
+    {
+      "section": "Filtro de botín",
+      "text": "El botón está en el HUD, a la izquierda de la barra de vida. Son cuatro columnas y funcionan en cadena: las dos primeras deciden qué objetos se muestran, las dos últimas los filtran por dentro. Si dejas vacías las dos primeras no verás nada, por muchas casillas que marques en las otras."
+    },
+    {
+      "section": "El Guía Espiritual",
+      "text": "Se reconocen por el icono de libro flotando sobre la cabeza. Todos ofrecen el mismo servicio: devolverte puntos de habilidad y de devoción."
+    },
+    {
+      "section": "Ruta de devoción",
+      "text": "Orden pensado para un Chamán a dos manos de rayo. Cada constelación que completas te da afinidad, y esa afinidad es la que abre la siguiente — por eso el orden importa más que la lista."
+    }
+  ],
+  "footer": "Nombres de habilidades y requisitos de barra tomados del listado en español del juego. Las cantidades de puntos por habilidad son orientativas: el equipo que te salga manda sobre cualquier plan, y todo lo de habilidades se puede deshacer con el Guía Espiritual."
+}

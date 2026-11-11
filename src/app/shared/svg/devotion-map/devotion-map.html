@@ -1,0 +1,283 @@
+<section class="devotion-map" [attr.aria-labelledby]="mapTitleId()">
+  <header class="devotion-map__header">
+    <h2 [id]="mapTitleId()">{{ text.heading }}</h2>
+    <p>{{ text.description }}</p>
+  </header>
+  @if (hasUnverified()) {
+    <p class="devotion-map__warning" data-diagram-warning>{{ warningText() }}</p>
+  }
+  @if (view().error) {
+    <p class="devotion-map__error" role="alert">{{ text.invalid }}</p>
+  } @else if (constellations().length === 0) {
+    <p class="devotion-map__empty">{{ text.empty }}</p>
+  } @else {
+    <div class="devotion-map__canvas" tabindex="0" [attr.aria-label]="text.heading">
+      <svg
+        class="devotion-map__svg"
+        data-devotion-map
+        [attr.data-graphic-node-count]="view().graphicNodeCount"
+        [attr.viewBox]="'0 0 ' + view().width + ' ' + view().height"
+        [attr.width]="view().width"
+        [attr.height]="view().height"
+        [attr.aria-labelledby]="svgTitleId() + ' ' + mapDescriptionId()"
+        focusable="false"
+      >
+        <title [id]="svgTitleId()">{{ text.heading }}</title>
+        <desc [id]="mapDescriptionId()">{{ text.description }}</desc>
+        <g role="group" [attr.aria-labelledby]="mapTitleId()">
+          @for (group of view().groups; track group.id) {
+            <g
+              class="devotion-map__constellation"
+              role="group"
+              [attr.aria-labelledby]="group.titleId"
+              [attr.transform]="'translate(' + group.x + ' ' + group.y + ')'"
+            >
+              <g
+                class="devotion-map__group"
+                [class.devotion-map__group--active]="group.active"
+                [class.devotion-map__group--selected]="group.selected"
+                [attr.data-constellation-id]="group.constellation.slug"
+                [attr.data-active-step]="group.active ? 'true' : null"
+                [attr.id]="group.id"
+                [attr.aria-labelledby]="
+                  group.titleId +
+                  ' ' +
+                  group.tierId +
+                  (group.active ? ' ' + group.id + '-active' : '')
+                "
+                [attr.aria-describedby]="group.listId"
+                [attr.aria-pressed]="group.selected"
+                role="button"
+                [tabIndex]="group.focused ? 0 : -1"
+                (focus)="setFocus(group.constellation.slug)"
+                (mouseenter)="setHovered(group.constellation.slug)"
+                (mouseleave)="clearHovered()"
+                (click)="selectGroup(group.constellation.slug, $event.currentTarget)"
+                (keydown)="onGroupKeydown($event, group.constellation.slug, group.index)"
+              >
+                <rect
+                  class="devotion-map__group-target"
+                  data-group-target
+                  x="0"
+                  y="0"
+                  [attr.width]="group.width"
+                  [attr.height]="group.height"
+                />
+                <text class="devotion-map__group-name" [attr.id]="group.titleId" x="20" y="34">
+                  @for (line of visibleNameLines(group.nameLabel); track $index) {
+                    <tspan x="20" [attr.dy]="$index === 0 ? 0 : 20">{{ ' ' + line + ' ' }}</tspan>
+                  }
+                </text>
+                <text
+                  class="devotion-map__tier"
+                  [attr.id]="group.tierId"
+                  text-anchor="end"
+                  [attr.x]="group.width - 20"
+                  y="34"
+                >
+                  {{ ' ' + group.tierLabel + ' ' }}
+                </text>
+                @if (group.active) {
+                  <text
+                    class="devotion-map__active-label"
+                    [attr.id]="group.id + '-active'"
+                    x="20"
+                    y="76"
+                  >
+                    {{ ' ' + activeStepLabel() + ' · ' + activeStepPosition() + ' ' }}
+                  </text>
+                }
+              </g>
+              <g class="devotion-map__geometry" aria-hidden="true">
+                <rect
+                  class="devotion-map__region"
+                  data-affinity-region
+                  [attr.x]="group.region.x"
+                  [attr.y]="group.region.y"
+                  [attr.width]="group.region.width"
+                  [attr.height]="group.region.height"
+                />
+                @for (threshold of group.thresholds; track threshold.id) {
+                  <g
+                    class="devotion-map__threshold"
+                    [attr.id]="threshold.id"
+                    [attr.data-threshold-key]="threshold.key"
+                  >
+                    <text x="20" [attr.y]="threshold.y">
+                      {{
+                        requirementLabel + ' ' + short(threshold.key, 14) + ' ' + threshold.value
+                      }}
+                    </text>
+                    <path class="devotion-map__threshold-arrow" [attr.d]="threshold.path" />
+                  </g>
+                }
+                <g class="devotion-map__edges">
+                  @for (edge of group.edges; track edge.id) {
+                    <line
+                      [attr.data-edge-from]="edge.from"
+                      [attr.data-edge-to]="edge.to"
+                      [attr.x1]="edge.x1"
+                      [attr.y1]="edge.y1"
+                      [attr.x2]="edge.x2"
+                      [attr.y2]="edge.y2"
+                    />
+                  }
+                </g>
+                @for (star of group.stars; track star.id) {
+                  <circle
+                    class="devotion-map__star"
+                    [attr.data-star-id]="star.localId"
+                    [attr.id]="star.id"
+                    [attr.cx]="star.x"
+                    [attr.cy]="star.y"
+                    r="10"
+                  />
+                }
+                @if (group.steps.length) {
+                  <text
+                    class="devotion-map__step-position"
+                    x="20"
+                    [attr.y]="group.region.y + group.region.height + 28"
+                  >
+                    {{ positionsLabel + ' ' + group.positionsLabel }}
+                  </text>
+                }
+                @for (row of group.bindingRows; track row.binding.id) {
+                  <text
+                    class="devotion-map__binding-power"
+                    [attr.data-binding-id]="row.binding.id"
+                    x="20"
+                    [attr.y]="row.y"
+                  >
+                    <tspan x="20">
+                      {{
+                        stepLabel(row.step.step.position, short(row.binding.binding.power_en, 24))
+                      }}
+                    </tspan>
+                    <tspan class="devotion-map__binding-target" x="20" dy="16">
+                      {{ '→ ' + short(bindingTarget(row.binding), 30) }}
+                    </tspan>
+                  </text>
+                }
+              </g>
+            </g>
+          }
+        </g>
+      </svg>
+    </div>
+    <p class="devotion-map__scroll-help">{{ text.scrollHelp }}</p>
+  }
+  <section
+    class="devotion-map__detail"
+    [attr.id]="mapId() + '-detail'"
+    data-detail-panel
+    tabindex="-1"
+    aria-live="polite"
+    aria-atomic="true"
+    (keydown)="onDetailKeydown($event)"
+  >
+    @if (detailGroup(); as group) {
+      <h3>{{ constellationName(group.constellation, true) }}</h3>
+      <ng-container
+        [ngTemplateOutlet]="affinityInfo"
+        [ngTemplateOutletContext]="{ $implicit: group.constellation }"
+      />
+      @for (step of group.steps; track step.id) {
+        <div [attr.data-detail-step-position]="step.step.position">
+          <ng-container
+            [ngTemplateOutlet]="stepInfo"
+            [ngTemplateOutletContext]="{ $implicit: step }"
+          />
+        </div>
+      }
+      @if (selectedSlug() === group.constellation.slug) {
+        <button type="button" data-close-detail (click)="closeDetail()">
+          {{ text.closeDetail }}
+        </button>
+      }
+    } @else {
+      <p>{{ text.detailHint }}</p>
+    }
+  </section>
+  <details class="devotion-map__list" open>
+    <summary>{{ text.listSummary }}</summary>
+    @if (constellations().length === 0) {
+      <p>{{ text.empty }}</p>
+    } @else {
+      <section [attr.aria-labelledby]="id('list', 'constellations', 'heading')">
+        <h3 [id]="id('list', 'constellations', 'heading')">{{ text.constellations }}</h3>
+        <ol>
+          @for (constellation of constellations(); track $index) {
+            <li
+              [attr.id]="id(constellation.slug, $index, 'listitem')"
+              data-list-constellation
+              [attr.data-constellation-id]="constellation.slug"
+            >
+              <h4>{{ constellationName(constellation, true) }}</h4>
+              <ng-container
+                [ngTemplateOutlet]="affinityInfo"
+                [ngTemplateOutletContext]="{ $implicit: constellation }"
+              />
+              @for (step of orderedSteps(); track $index) {
+                @if (step.constellation_slug === constellation.slug) {
+                  <p>{{ stepLabel(step.position, step.label) }}</p>
+                }
+              }
+            </li>
+          }
+        </ol>
+      </section>
+    }
+    <section [attr.aria-labelledby]="id('list', 'route', 'heading')">
+      <h3 [id]="id('list', 'route', 'heading')">{{ text.route }}</h3>
+      @if (orderedSteps().length === 0) {
+        <p>{{ text.emptyRoute }}</p>
+      } @else {
+        <ol>
+          @for (step of view().steps; track step.id) {
+            <li
+              [attr.id]="step.listId"
+              [attr.data-step-position]="step.step.position"
+              [attr.data-active-step]="step.active ? 'true' : null"
+              [attr.data-verification]="step.step.verification"
+            >
+              <ng-container
+                [ngTemplateOutlet]="stepInfo"
+                [ngTemplateOutletContext]="{ $implicit: step }"
+              />
+            </li>
+          }
+        </ol>
+      }
+    </section>
+  </details>
+</section>
+<ng-template #affinityInfo let-constellation>
+  <p>{{ tierText(constellation) }}</p>
+  <p data-affinity-required="required">
+    <span>{{ text.affinityRequired }}</span> {{ requiredAffinity(constellation.affinity_required) }}
+  </p>
+  <p [attr.data-affinity-granted]="constellation.slug">
+    <span>{{ text.affinityGranted }}</span> {{ grantedAffinity(constellation.affinity_granted) }}
+  </p>
+</ng-template>
+<ng-template #stepInfo let-row>
+  <h4>{{ stepLabel(row.step.position, row.step.title_override ?? row.step.label) }}</h4>
+  <p>
+    {{ row.step.label }} · {{ kindLabel(row.step.kind) }} ·
+    {{ statusLabel(row.step.verification) }}
+  </p>
+  <p>{{ stepConstellation(row.step) }}</p>
+  <p>{{ row.step.body }}</p>
+  @if (row.step.verification === 'sin_verificar') {
+    <p class="devotion-map__warning">{{ warningText() }}</p>
+  }
+  @for (binding of row.bindings; track binding.id) {
+    <p [attr.data-binding-id]="binding.id">
+      {{ binding.binding.power_en }} → {{ bindingTarget(binding) }}
+      @if (binding.invalid) {
+        <span role="alert">{{ text.bindingError }}</span>
+      }
+    </p>
+  }
+</ng-template>

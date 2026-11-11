@@ -7,7 +7,7 @@ const angular = require('angular-eslint');
 module.exports = defineConfig([
   globalIgnores(['dist/**', '.angular/**', 'coverage/**']),
   {
-    files: ['**/*.ts'],
+    files: ['**/*.{ts,mts}'],
     extends: [
       eslint.configs.recommended,
       tseslint.configs.recommended,
@@ -28,7 +28,7 @@ module.exports = defineConfig([
         'error',
         {
           type: 'element',
-          prefix: 'app',
+          prefix: ['app', 'gd'],
           style: 'kebab-case',
         },
       ],

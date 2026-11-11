@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  max-inline-size: var(--reading-measure);
+  padding-block: var(--space-6) var(--space-8);
+}
+h1 {
+  font-size: var(--text-heading);
+  margin-block: 0 var(--space-5);
+}
+section {
+  margin-block-start: var(--space-7);
+}
+h2 {
+  margin-block: 0 var(--space-3);
+}
+h3 {
+  margin-block: 0 var(--space-2);
+}
+ul {
+  padding-inline-start: var(--space-5);
+}
+li {
+  margin-block-end: var(--space-5);
+}
+li p {
+  margin-block-end: var(--space-2);
+}
+a:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}

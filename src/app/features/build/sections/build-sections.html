@@ -1,0 +1,94 @@
+@if (isVisible()) {
+  @switch (section()) {
+    @case ('resumen') {
+      <section class="build-section summary" id="resumen" aria-labelledby="build-title">
+        <h1 id="build-title">{{ content().title }}</h1>
+        <p class="subtitle" data-subtitle>{{ content().subtitle }}</p>
+        <p class="context-label" data-eyebrow>{{ content().eyebrow }}</p>
+        <aside class="callout" aria-labelledby="callout-title">
+          <h2 id="callout-title">{{ content().hero_callout_title }}</h2>
+          <div data-callout-body>
+            @for (paragraph of content().hero_callout_body; track $index) {
+              <p>{{ paragraph }}</p>
+            }
+          </div>
+        </aside>
+      </section>
+    }
+    @case ('prioridades') {
+      <section class="build-section" id="prioridades" aria-labelledby="priorities-title">
+        <h2 id="priorities-title" i18n="@@buildSections.priorities">Prioridades</h2>
+        @for (introduction of prioritiesIntroductions(); track $index) {
+          <p class="introduction">{{ introduction }}</p>
+        }
+        @if (orderedPriorities().length) {
+          <ul class="editorial-list priority-list">
+            @for (priority of orderedPriorities(); track $index) {
+              <li data-priority>
+                @if (priority.rank !== null) {
+                  <span class="priority-rank" data-rank>{{ priority.rank }}</span>
+                }
+                <span class="group-label" data-group>{{ priority.group_label }}</span>
+                <strong data-headline>{{ priority.headline }}</strong>
+                <p data-detail>{{ priority.note }}</p>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="empty-state" role="status">{{ emptyMessage }}</p>
+        }
+      </section>
+    }
+    @case ('notas') {
+      <section class="build-section" id="notas" aria-labelledby="notes-title">
+        <h2 id="notes-title" i18n="@@buildSections.notes">Notas</h2>
+        @if (notesForDisplay().length) {
+          <ul class="editorial-list">
+            @for (note of notesForDisplay(); track $index) {
+              <li data-note>
+                <span class="group-label" data-label>{{ note.label }}</span>
+                <strong data-headline>{{ note.headline }}</strong>
+                <p data-detail>{{ note.detail }}</p>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="empty-state" role="status">{{ emptyMessage }}</p>
+        }
+      </section>
+    }
+    @case ('guia-espiritual') {
+      <section class="build-section" id="guia-espiritual" aria-labelledby="spiritual-guide-title">
+        <h2 id="spiritual-guide-title" i18n="@@buildSections.spiritualGuide">Guía Espiritual</h2>
+        @for (introduction of spiritualGuideIntroductions(); track $index) {
+          <p class="introduction">{{ introduction }}</p>
+        }
+        @if (orderedGuideNpcs().length) {
+          <ul class="editorial-list guide-list">
+            @for (person of orderedGuideNpcs(); track $index) {
+              <li data-guide-person>
+                <span class="group-label" data-group>{{ person.group_label }}</span>
+                <strong data-name>{{ person.name }}</strong>
+                <span class="location" data-location>{{ person.location }}</span>
+                <p data-detail>{{ person.detail }}</p>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="empty-state" role="status">{{ emptyMessage }}</p>
+        }
+        @if (spiritualGuideNotes().length) {
+          <ul class="editorial-list guide-notes">
+            @for (note of spiritualGuideNotes(); track $index) {
+              <li data-guide-note>
+                <span class="group-label" data-label>{{ note.label }}</span>
+                <strong data-headline>{{ note.headline }}</strong>
+                <p data-detail>{{ note.detail }}</p>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  }
+}

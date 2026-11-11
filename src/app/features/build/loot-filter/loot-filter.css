@@ -1,0 +1,204 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+
+.loot-filter {
+  min-inline-size: 0;
+  padding: var(--space-4);
+  border: var(--frame-border);
+  background: var(--header-glow), var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel), var(--panel-shadow);
+}
+
+.loot-filter__heading {
+  margin: 0 0 var(--space-3);
+  color: var(--color-storm);
+}
+
+.loot-filter__introduction {
+  margin: 0 0 var(--space-5);
+}
+
+.loot-filter__columns {
+  display: grid;
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.loot-column {
+  min-inline-size: 0;
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel-2);
+  box-shadow: var(--frame-bevel);
+}
+
+.loot-column summary {
+  display: grid;
+  min-block-size: 44px;
+  align-content: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+}
+
+.loot-column summary:hover {
+  color: var(--color-storm);
+}
+
+.loot-column summary:focus-visible,
+.loot-filter__copy:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.loot-column__name,
+.loot-rule__label {
+  font-weight: var(--weight-emphasis);
+}
+
+.loot-column__subtitle,
+.loot-rule__detail,
+.loot-filter__tip p,
+.loot-filter__no-script {
+  color: var(--color-ash);
+}
+
+.loot-column__subtitle,
+.loot-filter__no-script {
+  font-size: var(--text-small);
+}
+
+.loot-column__rules {
+  margin: 0;
+  padding: 0 var(--space-3) var(--space-2);
+  list-style: none;
+}
+
+.loot-rule {
+  min-inline-size: 0;
+  padding-block: var(--space-3);
+  border-block-start: var(--frame-border);
+}
+
+.loot-rule__action {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  border: var(--frame-border);
+  font-size: var(--text-small);
+  font-weight: var(--weight-emphasis);
+  line-height: 1.25;
+}
+
+.loot-rule[data-action='marcar'] .loot-rule__action {
+  border-color: var(--color-storm);
+  background: var(--color-storm-dim);
+}
+
+.loot-rule[data-action='desmarcar'] .loot-rule__action {
+  border-color: var(--color-ember);
+  background: var(--color-ember-dim);
+}
+
+.loot-rule[data-action='aviso'] .loot-rule__action {
+  border-style: dashed;
+}
+
+.loot-rule__label {
+  margin: var(--space-2) 0 var(--space-1);
+}
+
+.loot-rule__detail,
+.loot-filter__tip p {
+  margin: 0;
+}
+
+.loot-filter__tip {
+  margin-block-start: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: var(--frame-accent-border);
+  background: var(--surface-sheen), var(--color-panel-2);
+  box-shadow: var(--frame-bevel);
+}
+
+.loot-filter__tip h3 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-storm);
+}
+
+.loot-filter__warning,
+.loot-filter__empty {
+  padding: var(--space-3);
+}
+
+.loot-filter__warning {
+  border: 1px dashed var(--color-ember);
+  background: var(--color-ember-dim);
+}
+
+.loot-filter__empty {
+  border: var(--frame-border);
+  background: var(--color-panel-2);
+}
+
+.loot-filter__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-block-start: var(--space-4);
+}
+
+.loot-filter__copy {
+  min-block-size: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: var(--frame-accent-border);
+  background: var(--surface-sheen), var(--color-storm-dim);
+  color: var(--color-bone);
+  font: inherit;
+  font-weight: var(--weight-emphasis);
+  cursor: pointer;
+}
+
+.loot-filter__copy:hover:not(:disabled) {
+  border-color: var(--color-bone);
+}
+
+.loot-filter__copy:active:not(:disabled) {
+  background: var(--color-soot);
+}
+
+.loot-filter__copy:disabled {
+  border-color: var(--color-line);
+  background: var(--color-panel-2);
+  color: var(--color-ash);
+  cursor: not-allowed;
+}
+
+.loot-filter__no-script {
+  flex: 1 1 18rem;
+  margin: 0;
+}
+
+.loot-filter__status {
+  min-block-size: 1.5em;
+  margin: var(--space-2) 0 0;
+  color: var(--color-storm);
+}
+
+@media (min-width: 48rem) {
+  .loot-filter {
+    padding: var(--space-5);
+  }
+
+  .loot-filter__columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 72rem) {
+  .loot-filter__columns {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

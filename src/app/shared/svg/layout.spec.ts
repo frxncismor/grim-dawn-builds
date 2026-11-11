@@ -16,6 +16,55 @@ const byId = (layout: ReturnType<typeof layoutForest>) =>
   new Map(layout.nodes.map((n) => [n.id, n]));
 
 describe('layoutForest', () => {
+  it('handles an empty forest and navigation without a focus target', () => {
+    const empty = layoutForest([]);
+    expect(empty).toEqual({ nodes: [], edges: [] });
+    expect(createKeyboardNav(empty)('missing', 'Home')).toBeNull();
+  });
+
+  it('breaks order ties by id regardless of input order without mutating nodes', () => {
+    const nodes = Object.freeze([
+      Object.freeze({ id: 'z', parentId: null, order: 1 }),
+      Object.freeze({ id: 'a', parentId: null, order: 1 }),
+      Object.freeze({ id: 'child-z', parentId: 'a', order: 0 }),
+      Object.freeze({ id: 'child-a', parentId: 'a', order: 0 }),
+    ]);
+    const result = layoutForest(nodes);
+    expect(result.nodes.map((node) => node.id)).toEqual(['a', 'child-a', 'child-z', 'z']);
+    expect(layoutForest([...nodes].reverse())).toEqual(result);
+    expect(nodes.map((node) => node.id)).toEqual(['z', 'a', 'child-z', 'child-a']);
+  });
+
+  it('rejects disconnected cycles even when another branch is valid', () => {
+    expect(() =>
+      layoutForest([
+        { id: 'root', parentId: null, order: 0 },
+        { id: 'a', parentId: 'b', order: 0 },
+        { id: 'b', parentId: 'a', order: 0 },
+      ]),
+    ).toThrow(/ciclo/);
+    expect(() => layoutForest([{ id: 'self', parentId: 'self', order: 0 }])).toThrow(/ciclo/);
+  });
+
+  it('places and navigates the full 120-node depth without overlap', () => {
+    const chain: GraphNode[] = Array.from({ length: 120 }, (_, i) => ({
+      id: `node-${i}`,
+      parentId: i === 0 ? null : `node-${i - 1}`,
+      order: 0,
+    }));
+    const result = layoutForest(chain.reverse());
+    expect(result.edges).toHaveLength(119);
+    expect(new Set(result.nodes.map((node) => `${node.x},${node.y}`)).size).toBe(120);
+    expect(result.nodes.at(-1)).toMatchObject({ id: 'node-119', level: 119, row: 119 });
+    const navigate = createKeyboardNav(result);
+    for (let i = 0; i < 119; i++) {
+      expect(navigate(`node-${i}`, 'ArrowRight')).toBe(`node-${i + 1}`);
+      expect(navigate(`node-${i + 1}`, 'ArrowLeft')).toBe(`node-${i}`);
+    }
+    expect(navigate('node-119', 'ArrowRight')).toBeNull();
+    expect(navigate('node-0', 'ArrowLeft')).toBeNull();
+  });
+
   it('places roots at level 0 and their children one level deeper', () => {
     const nodes = byId(layoutForest(chaman));
     expect(nodes.get('golpe-primigenio')?.level).toBe(0);

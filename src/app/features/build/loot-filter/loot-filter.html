@@ -1,0 +1,73 @@
+@if (isVisible()) {
+  <section class="loot-filter" [id]="sectionId()" [attr.aria-labelledby]="sectionId() + '-heading'">
+    <h2 class="loot-filter__heading" [id]="sectionId() + '-heading'" i18n="@@lootFilter.heading">
+      Filtro de botín
+    </h2>
+
+    @for (introduction of introductions(); track $index) {
+      <p class="loot-filter__introduction" data-introduction>{{ introduction.detail }}</p>
+    }
+
+    @if (hasDuplicatePositions()) {
+      <p class="loot-filter__warning" data-inconsistent-data role="alert">
+        {{ text.duplicatePositions }}
+      </p>
+    }
+
+    @if (orderedColumns().length > 0) {
+      <div class="loot-filter__columns">
+        @for (column of orderedColumns(); track $index) {
+          <details class="loot-column" open data-column [attr.data-position]="column.position">
+            <summary>
+              <span class="loot-column__name" data-column-name>{{ column.name }}</span>
+              <span class="loot-column__subtitle">{{ column.subtitle }}</span>
+            </summary>
+            <ul class="loot-column__rules">
+              @for (rule of column.rules; track $index) {
+                <li class="loot-rule" data-rule [attr.data-action]="rule.action">
+                  <span class="loot-rule__action" data-action-label>
+                    {{ actionLabel(rule.action) }}
+                  </span>
+                  <p class="loot-rule__label" data-rule-label>{{ rule.label }}</p>
+                  <p class="loot-rule__detail">{{ rule.detail }}</p>
+                </li>
+              }
+            </ul>
+          </details>
+        }
+      </div>
+    } @else {
+      <p class="loot-filter__empty" role="status">{{ text.empty }}</p>
+    }
+
+    @for (note of finalNotes(); track $index) {
+      <aside class="loot-filter__tip" data-final-tip>
+        <h3 data-headline>{{ note.headline }}</h3>
+        <p data-detail>{{ note.detail }}</p>
+      </aside>
+    }
+
+    <div class="loot-filter__actions">
+      <button
+        class="loot-filter__copy"
+        type="button"
+        data-copy-summary
+        [disabled]="copyDisabled()"
+        (click)="copySummary()"
+      >
+        @if (copying()) {
+          {{ text.copying }}
+        } @else {
+          {{ text.copy }}
+        }
+      </button>
+      @if (!browserReady()) {
+        <p class="loot-filter__no-script" data-no-script>{{ text.javascriptRequired }}</p>
+      }
+    </div>
+
+    <p class="loot-filter__status" role="status" aria-live="polite" aria-atomic="true">
+      {{ copyStatus() }}
+    </p>
+  </section>
+}

@@ -1,0 +1,119 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+article {
+  margin-block-end: var(--space-3);
+  padding: var(--space-4);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel);
+}
+h3 {
+  margin-block: var(--space-3) var(--space-2);
+}
+p {
+  margin-block: 0 var(--space-2);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+}
+.combination,
+.notice {
+  color: var(--color-bone);
+}
+.notice {
+  margin-block-start: var(--space-3);
+}
+.attribution {
+  padding-block-start: var(--space-2);
+}
+.catalog-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+.filters {
+  padding-block: var(--space-4);
+  border-block: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+}
+.search {
+  display: grid;
+  gap: var(--space-2);
+  max-inline-size: var(--reading-measure);
+}
+input {
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding: var(--space-2) var(--space-3);
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: var(--space-5) 0;
+  min-inline-size: 0;
+}
+legend {
+  padding: 0;
+  margin-block-end: var(--space-2);
+  font-weight: var(--weight-emphasis);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+button {
+  min-block-size: var(--space-7);
+  max-inline-size: 100%;
+  white-space: normal;
+}
+.chip {
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel-2);
+  box-shadow: var(--frame-bevel);
+}
+.chip[aria-pressed='true'] {
+  background: var(--color-storm);
+  color: var(--color-soot);
+  border: var(--frame-border-active);
+  font-weight: var(--weight-emphasis);
+}
+button:hover:enabled {
+  background: var(--color-panel-2);
+  color: var(--color-bone);
+}
+button:active:enabled {
+  border-color: var(--color-ember);
+}
+button:focus-visible,
+input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+button:disabled,
+input:disabled {
+  color: var(--color-ash);
+  cursor: not-allowed;
+}
+.empty {
+  padding: var(--space-5);
+  border: 1px dashed var(--color-ash);
+  background: var(--color-panel);
+}
+@media (min-width: 48rem) {
+  .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  button {
+    min-block-size: var(--space-6);
+  }
+}
+@media (min-width: 80rem) {
+  .catalog-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

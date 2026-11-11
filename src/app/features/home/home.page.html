@@ -1,0 +1,65 @@
+<section class="hero" aria-labelledby="home-title">
+  <h1 id="home-title" i18n="@@home.title">
+    Guías de Grim Dawn,<span>con el estado a la vista.</span>
+  </h1>
+  <p i18n="@@home.intro">
+    Explora combinaciones de maestrías y consulta qué está verificado, qué falta revisar y qué sigue
+    pendiente de guía.
+  </p>
+  <div class="hero-links">
+    <a class="primary-link" href="/tier-list" i18n="@@home.catalog">Explorar el catálogo</a>
+    <a href="#criterios" i18n="@@home.criteriaLink">Nuestros criterios</a>
+  </div>
+</section>
+
+<section class="publication" aria-labelledby="publication-title">
+  @if (featured; as guide) {
+    <h2 id="publication-title" i18n="@@home.latest">Publicación más reciente</h2>
+    <div>
+      <h3>
+        <a [href]="'/builds/' + guide.slug">{{ guide.title }}</a>
+      </h3>
+      <p><span i18n="@@home.version">Versión del juego:</span> {{ guide.gameVersion }}</p>
+      <p>
+        <span i18n="@@home.publishedOn">Publicada el</span>
+        <time [attr.datetime]="guide.publishedAt">{{ guide.publishedAt }}</time>
+      </p>
+      <p i18n="@@home.guideAttribution">
+        Consulta la guía y su atribución. La fecha de publicación no es una clasificación de poder.
+      </p>
+    </div>
+  } @else {
+    <h2 id="publication-title" i18n="@@home.noPublicGuides">Todavía no hay guías publicadas</h2>
+    <p i18n="@@home.catalogAvailable">
+      Puedes consultar todas las combinaciones en el catálogo. Las ranuras sin guía aparecen como
+      placeholder y no reciben una clasificación de poder.
+    </p>
+  }
+</section>
+
+<section id="criterios" class="criteria" aria-labelledby="criteria-title">
+  <h2 id="criteria-title" i18n="@@home.criteriaTitle">Qué puedes esperar del contenido</h2>
+  <dl>
+    <div>
+      <dt i18n="@@home.visibleStates">Estados visibles</dt>
+      <dd i18n="@@home.visibleStatesDescription">
+        Verificado, sin verificar y placeholder significan cosas distintas. Una ranura pendiente no
+        se presenta como una recomendación.
+      </dd>
+    </div>
+    <div>
+      <dt i18n="@@home.provenance">Autoría y procedencia</dt>
+      <dd i18n="@@home.provenanceDescription">
+        Las guías identifican autor y fuentes. Un enlace externo conserva la atribución; no
+        sustituye el permiso para republicar contenido.
+      </dd>
+    </div>
+    <div>
+      <dt i18n="@@home.rights">Publicación con derechos confirmados</dt>
+      <dd i18n="@@home.rightsDescription">
+        El contenido pendiente de permisos no forma parte de las guías públicas. La atribución por
+        sí sola no concede derechos de uso.
+      </dd>
+    </div>
+  </dl>
+</section>

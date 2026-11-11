@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Grim Dawn Builds</title>
+  <desc id="desc">Catálogo en español. Maestrías, procedencia y estados claros. Geometría original de dos maestrías conectadas.</desc>
+  <metadata>Composición y geometría originales del proyecto. Sin arte oficial de Grim Dawn.</metadata>
+  <style>
+    @font-face{font-family:Oswald;src:url('../fonts/oswald-latin-wght-normal.woff2') format('woff2');font-weight:200 700}
+    @font-face{font-family:Karla;src:url('../fonts/karla-latin-wght-normal.woff2') format('woff2');font-weight:200 800}
+    .title{font-family:Oswald,sans-serif;font-weight:400;fill:#e4dfd2}
+    .body{font-family:Karla,sans-serif;fill:#e4dfd2}
+  </style>
+  <rect width="1200" height="630" fill="#0f1218"/>
+  <rect x="790" y="0" width="410" height="630" fill="#171c25"/>
+  <text class="title" x="72" y="168" font-size="80">Grim Dawn</text>
+  <text class="title" x="72" y="272" font-size="80">Builds</text>
+  <text class="body" x="72" y="390" font-size="36">Catálogo en español</text>
+  <text class="body" x="72" y="448" font-size="28">Maestrías, procedencia</text>
+  <text class="body" x="72" y="488" font-size="28">y estados claros.</text>
+  <g fill="none" stroke="#79d0f5" stroke-width="3">
+    <path d="M900 186v92l94 62m102-154v92l-94 62"/>
+    <path d="m900 114 40 24v48l-40 24-40-24v-48Z"/>
+    <path d="m1096 114 40 24v48l-40 24-40-24v-48Z"/>
+    <path d="m998 318 62 62-62 62-62-62Z"/>
+  </g>
+  <g class="body" font-size="22" text-anchor="middle">
+    <text x="900" y="98">Maestría A</text>
+    <text x="1096" y="98">Maestría B</text>
+    <text x="998" y="500">Tu combinación</text>
+  </g>
+  <path d="M72 550h630" stroke="#2a313d"/>
+</svg>

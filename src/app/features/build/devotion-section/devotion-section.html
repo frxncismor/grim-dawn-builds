@@ -1,0 +1,72 @@
+@if (isVisible()) {
+  <section [id]="sectionId()" [attr.aria-labelledby]="sectionId() + '-heading'">
+    <h2 [id]="sectionId() + '-heading'" i18n="@@devotionSection.heading">Ruta de devoción</h2>
+
+    @for (introduction of introductions(); track $index) {
+      <p class="introduction" data-introduction>{{ introduction.detail }}</p>
+    }
+
+    @for (note of devotionNotes(); track $index) {
+      <aside class="devotion-note" data-devotion-note>
+        <p class="devotion-note__label" data-label>{{ note.label }}</p>
+        <h3 data-headline>{{ note.headline }}</h3>
+        <p data-detail>{{ note.detail }}</p>
+      </aside>
+    }
+
+    <div class="step-selector" [id]="sectionId() + '-selector'">
+      <nav
+        aria-label="Seleccionar un paso de devoción"
+        i18n-aria-label="@@devotionSection.selectSteps"
+      >
+        @if (hasDuplicatePositions()) {
+          <p class="data-warning" data-inconsistent-data role="alert">
+            {{ text.duplicatePositions }}
+          </p>
+        }
+
+        @if (orderedSteps().length > 0) {
+          <ol class="step-selector__list">
+            @for (step of orderedSteps(); track $index) {
+              <li>
+                <button
+                  type="button"
+                  class="step-selector__button"
+                  data-select-position
+                  [attr.data-position]="step.position"
+                  [attr.aria-controls]="mapId()"
+                  [attr.aria-pressed]="
+                    effectiveActiveStepPosition() === step.position ? 'true' : 'false'
+                  "
+                  [disabled]="!controlsEnabled()"
+                  (click)="selectStep(step)"
+                >
+                  <span class="step-selector__position">{{ step.position }}.</span>
+                  <span class="step-selector__label">{{ step.label }}</span>
+                  @if (step.title_override !== null && step.title_override !== step.label) {
+                    <span class="step-selector__title">{{ '· ' + step.title_override }}</span>
+                  }
+                </button>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="empty-state" role="status">{{ text.empty }}</p>
+        }
+      </nav>
+    </div>
+
+    @if (!browserReady()) {
+      <p class="no-script-note" data-no-script>{{ text.javascriptRequired }}</p>
+    }
+
+    <gd-devotion-map
+      [attr.id]="mapId()"
+      [mapId]="mapId()"
+      [constellations]="content().constellations"
+      [steps]="content().devotion_steps"
+      [skillNodes]="content().skill_nodes"
+      [activeStepPosition]="effectiveActiveStepPosition()"
+    />
+  </section>
+}
