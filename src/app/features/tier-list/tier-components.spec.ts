@@ -34,7 +34,7 @@ describe('controlled catalog components', () => {
     f.componentRef.setInput('entry', placeholder);
     f.componentRef.setInput('combinationName', 'Chamán + Demoledor');
     await f.whenStable();
-    expect(f.nativeElement.textContent).toContain('Guía próximamente');
+    expect(f.nativeElement.textContent).toContain('Guide coming soon');
     expect(f.nativeElement.textContent).toContain('Placeholder');
     expect(f.nativeElement.querySelector('a')).toBeNull();
     expect(f.nativeElement.querySelector('img').src).toContain(
@@ -91,7 +91,7 @@ describe('controlled catalog components', () => {
     expect(a.rel).toContain('noreferrer');
     expect(f.nativeElement.textContent).toContain('Autora de prueba');
     expect(f.nativeElement.textContent).toContain('Solo enlace');
-    expect(f.nativeElement.textContent).toContain('sitio de terceros');
+    expect(f.nativeElement.textContent).toContain('third-party site');
     expect(f.nativeElement.querySelectorAll('img').length).toBe(1); // own status glyph only
     expect(f.nativeElement.querySelector('a[href^="/builds/"]')).toBeNull();
   });
@@ -116,8 +116,8 @@ describe('controlled catalog components', () => {
   it('status always includes text and a decorative own icon', async () => {
     const f = TestBed.createComponent(ContentBadge);
     for (const [status, label] of [
-      ['verificado', 'Verificado'],
-      ['sin_verificar', 'Sin verificar'],
+      ['verificado', 'Verified'],
+      ['sin_verificar', 'Unverified'],
       ['placeholder', 'Placeholder'],
     ]) {
       f.componentRef.setInput('status', status);
@@ -167,7 +167,7 @@ describe('controlled catalog components', () => {
     input.value = 'Chamán';
     input.dispatchEvent(new Event('input'));
     expect(emitted[1]).toEqual({ ...state, text: 'Chamán' });
-    buttons.find((b) => b.textContent?.trim() === 'Limpiar filtros')!.click();
+    buttons.find((b) => b.textContent?.trim() === 'Clear filters')!.click();
     expect(emitted[2]).toEqual(EMPTY_FILTER);
     expect(f.nativeElement.querySelector('legend').textContent).toBe('Daño');
     expect(input.labels?.length).toBe(1);
@@ -177,7 +177,7 @@ describe('controlled catalog components', () => {
     let resets = 0;
     f.componentInstance.filtersReset.subscribe(() => resets++);
     await f.whenStable();
-    expect(f.nativeElement.textContent).toContain('Sin resultados');
+    expect(f.nativeElement.textContent).toContain('No results');
     f.nativeElement.querySelector('button').click();
     expect(resets).toBe(1);
   });

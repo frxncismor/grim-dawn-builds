@@ -36,7 +36,7 @@ describe('SiteLayout', () => {
     expect(root.querySelector('main')?.getAttribute('id')).toBe('main');
     expect(root.querySelector('main')?.getAttribute('tabindex')).toBe('-1');
     expect(root.querySelector('a')?.getAttribute('href')).toBe('/#main');
-    expect(root.querySelector('a')?.textContent).toContain('Saltar al contenido');
+    expect(root.querySelector('a')?.textContent).toContain('Skip to content');
   });
 
   it('renders legal attribution and real href values for navigation without JavaScript', async () => {
@@ -44,11 +44,19 @@ describe('SiteLayout', () => {
     await fixture.whenStable();
     const root: HTMLElement = fixture.nativeElement;
     expect(root.querySelector('footer')?.textContent).toContain(
-      'No está afiliado a Crate Entertainment',
+      'Not affiliated with Crate Entertainment',
     );
     const hrefs = [...root.querySelectorAll('a')].map((link) => link.getAttribute('href'));
     for (const href of ['/', '/tier-list', '/acerca', '/legal']) expect(hrefs).toContain(href);
-    expect(root.querySelector('nav')?.getAttribute('aria-label')).toBe('Navegación principal');
+    expect(root.querySelector('nav')?.getAttribute('aria-label')).toBe('Main navigation');
+    expect(
+      root.querySelector('.header-inner > gd-language-switcher .lang-switch')?.textContent,
+    ).toContain('English');
+    expect(
+      root
+        .querySelector('.header-inner > gd-language-switcher .lang-switch a[hreflang="es"]')
+        ?.getAttribute('href'),
+    ).toBe('/es/');
   });
   it('keeps the configured application base in the native skip target', async () => {
     TestBed.overrideProvider(APP_BASE_HREF, { useValue: '/project/' });

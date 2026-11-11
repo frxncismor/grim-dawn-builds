@@ -104,25 +104,25 @@ interface MapView {
 })
 export class DevotionMap {
   readonly text = {
-    unknown: $localize`:@@devotionMap.unknown:Sin datos`,
-    heading: $localize`:@@devotionMap.heading:Mapa de devociones`,
-    description: $localize`:@@devotionMap.description:Esquema editorial, ajeno al mapa del juego. Flechas: requisitos de afinidad documentados; líneas internas de cada constelación.`,
-    invalid: $localize`:@@devotionMap.invalid:No se pudo dibujar el mapa. Revisa los datos; consulta la lista.`,
-    empty: $localize`:@@devotionMap.empty:No hay constelaciones.`,
-    scrollHelp: $localize`:@@devotionMap.scrollHelp:Desplázate dentro del diagrama para verlo completo.`,
-    affinityRequired: $localize`:@@devotionMap.affinityRequired:Afinidad requerida:`,
-    affinityGranted: $localize`:@@devotionMap.affinityGranted:Afinidad otorgada:`,
-    closeDetail: $localize`:@@devotionMap.closeDetail:Cerrar detalle`,
-    detailHint: $localize`:@@devotionMap.detailHint:Enfoca o señala una constelación para ver sus datos.`,
-    listSummary: $localize`:@@devotionMap.listSummary:Constelaciones y ruta`,
-    constellations: $localize`:@@devotionMap.constellations:Constelaciones`,
-    route: $localize`:@@devotionMap.route:Ruta de devoción`,
-    emptyRoute: $localize`:@@devotionMap.emptyRoute:No hay pasos de devoción.`,
-    noConstellation: $localize`:@@devotionMap.noConstellation:Paso sin constelación asociada.`,
-    bindingError: $localize`:@@devotionMap.bindingError:Referencia inválida`,
+    unknown: $localize`:@@devotionMap.unknown:No data`,
+    heading: $localize`:@@devotionMap.heading:Devotion map`,
+    description: $localize`:@@devotionMap.description:Editorial outline, not part of the game map. Arrows: documented affinity requirements; internal lines of each constellation.`,
+    invalid: $localize`:@@devotionMap.invalid:The map could not be drawn. Check the data; see the list.`,
+    empty: $localize`:@@devotionMap.empty:No constellations.`,
+    scrollHelp: $localize`:@@devotionMap.scrollHelp:Scroll within the diagram to see it in full.`,
+    affinityRequired: $localize`:@@devotionMap.affinityRequired:Required affinity:`,
+    affinityGranted: $localize`:@@devotionMap.affinityGranted:Granted affinity:`,
+    closeDetail: $localize`:@@devotionMap.closeDetail:Close detail`,
+    detailHint: $localize`:@@devotionMap.detailHint:Focus or hover over a constellation to see its data.`,
+    listSummary: $localize`:@@devotionMap.listSummary:Constellations and route`,
+    constellations: $localize`:@@devotionMap.constellations:Constellations`,
+    route: $localize`:@@devotionMap.route:Devotion route`,
+    emptyRoute: $localize`:@@devotionMap.emptyRoute:No devotion steps.`,
+    noConstellation: $localize`:@@devotionMap.noConstellation:Step without an associated constellation.`,
+    bindingError: $localize`:@@devotionMap.bindingError:Invalid reference`,
   };
-  readonly requirementLabel = $localize`:@@devotionMap.requirement:Requiere`;
-  readonly positionsLabel = $localize`:@@devotionMap.positions:Pasos`;
+  readonly requirementLabel = $localize`:@@devotionMap.requirement:Requires`;
+  readonly positionsLabel = $localize`:@@devotionMap.positions:Steps`;
   readonly hasUnverified = computed(() =>
     this.steps().some((step) => step.verification === 'sin_verificar'),
   );
@@ -305,17 +305,17 @@ export class DevotionMap {
   }
 
   stepLabel(position: number, label: string): string {
-    return $localize`:@@devotionMap.stepLabel:Paso ${position}:position: · ${label}:label:`;
+    return $localize`:@@devotionMap.stepLabel:Step ${position}:position: · ${label}:label:`;
   }
 
   kindLabel(kind: DevotionStep['kind']): string {
     switch (kind) {
       case 'ruta':
-        return $localize`:@@devotionMap.kindRoute:Ruta`;
+        return $localize`:@@devotionMap.kindRoute:Route`;
       case 'verificacion':
-        return $localize`:@@devotionMap.kindVerification:Verificación`;
+        return $localize`:@@devotionMap.kindVerification:Verification`;
       case 'limpieza':
-        return $localize`:@@devotionMap.kindCleanup:Limpieza`;
+        return $localize`:@@devotionMap.kindCleanup:Cleanup`;
     }
   }
 
@@ -327,7 +327,7 @@ export class DevotionMap {
 
   constellationName(constellation: Constellation, englishSecondary = false): string {
     if (constellation.name_es === null) {
-      return $localize`:@@devotionMap.englishName:Nombre en inglés: ${constellation.name_en}:nameEn:`;
+      return $localize`:@@devotionMap.englishName:English name: ${constellation.name_en}:nameEn:`;
     }
     return englishSecondary
       ? `${constellation.name_es} (${constellation.name_en})`
@@ -335,7 +335,7 @@ export class DevotionMap {
   }
 
   activeStepLabel(): string {
-    return $localize`:@@devotionMap.activeStep:Paso activo`;
+    return $localize`:@@devotionMap.activeStep:Active step`;
   }
 
   affinityValueText(values: Record<string, number>): string {
@@ -349,20 +349,19 @@ export class DevotionMap {
     return values === null
       ? this.text.unknown
       : this.affinityValueText(values) ||
-          $localize`:@@devotionMap.noAffinityRequired:Sin requisitos documentados`;
+          $localize`:@@devotionMap.noAffinityRequired:No documented requirements`;
   }
 
   grantedAffinity(values: Record<string, number> | null): string {
     return values === null
       ? this.text.unknown
-      : this.affinityValueText(values) ||
-          $localize`:@@devotionMap.noneGranted:Sin afinidad otorgada`;
+      : this.affinityValueText(values) || $localize`:@@devotionMap.noneGranted:No affinity granted`;
   }
 
   bindingTarget(binding: BindingView): string {
     if (binding.invalid) return this.text.bindingError;
     if (binding.binding.skill_node_slug === null) {
-      return $localize`:@@devotionMap.externalTarget:Mención externa: ${binding.binding.skill_name_es}:name:`;
+      return $localize`:@@devotionMap.externalTarget:External mention: ${binding.binding.skill_name_es}:name:`;
     }
     return binding.skill
       ? `${binding.skill.name_es} (${binding.skill.name_en})`
@@ -441,12 +440,12 @@ export class DevotionMap {
 
   statusLabel(status: DevotionStep['verification']): string {
     return status === 'verificado'
-      ? $localize`:@@devotionMap.verified:Verificado`
-      : $localize`:@@devotionMap.unverified:Sin verificar`;
+      ? $localize`:@@devotionMap.verified:Verified`
+      : $localize`:@@devotionMap.unverified:Unverified`;
   }
 
   warningText(): string {
-    return $localize`:@@devotionMap.verifyWarning:verifica en GrimTools antes de gastar`;
+    return $localize`:@@devotionMap.verifyWarning:verify in GrimTools before spending points`;
   }
 
   visibleNameLines(name: string): string[] {

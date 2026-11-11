@@ -33,7 +33,6 @@ const DRAFTS_BUILD_COMMAND =
   "$env:INCLUDE_DRAFTS='true'; npx ng build --output-path dist/e2e-drafts";
 const GUIDE_PATH = '/builds/chaman-demoledor-golpe-primigenio';
 const GUIDE_TITLE = /Chamán \+ Demoledor/i;
-
 test.beforeEach(async ({ page }) => {
   page.setDefaultTimeout(15000);
 });
@@ -141,7 +140,7 @@ async function expectAnchorVisible(page: Page, anchorId: string, scope: string):
 /** Recuento del catálogo desde el `role="status"` que anuncia los resultados. */
 async function resultCount(page: Page): Promise<{ visible: number; total: number }> {
   const text = (await page.locator('.result-count').innerText()).trim();
-  const match = /^(\d+)\s+de\s+(\d+)/.exec(text);
+  const match = /^(\d+)\s+of\s+(\d+)/.exec(text);
   if (!match) throw new Error(`Recuento del catálogo ilegible: «${text}».`);
   return { visible: Number(match[1]), total: Number(match[2]) };
 }
@@ -150,15 +149,15 @@ test.describe('@journeys artefacto público', () => {
   test('portada → catálogo → portada con enlaces reales', async ({ page }) => {
     const home = await open(page, `${PUBLIC_BASE_URL}/`);
     expect(home.status(), 'la portada debe servirse').toBe(200);
-    await expectSingleHeading(page, /Guías de Grim Dawn/i, 'portada');
+    await expectSingleHeading(page, /Grim Dawn guides/i, 'portada');
 
-    await page.getByRole('link', { name: 'Explorar el catálogo', exact: true }).click();
+    await page.getByRole('link', { name: 'Browse the catalog', exact: true }).click();
     await page.waitForURL(/\/tier-list$/);
     await expectSingleHeading(page, /Catálogo de combinaciones de maestrías/i, 'catálogo');
 
     const cards = page.locator('gd-tier-card');
     expect(await cards.count(), 'el catálogo debe listar combinaciones').toBeGreaterThan(0);
-    await expect(page.locator('.result-count')).toContainText(/de \d+ entradas/);
+    await expect(page.locator('.result-count')).toContainText(/of \d+ entries/);
 
     // La guía del MVP sigue pendiente de derechos, así que el catálogo no debe
     // enlazar una ruta que el artefacto público no contiene. Si se publica, el
@@ -175,7 +174,7 @@ test.describe('@journeys artefacto público', () => {
       await page.goBack();
       await page.waitForURL(/\/tier-list$/);
     } else {
-      const pending = await page.getByText('Guía próximamente').count();
+      const pending = await page.getByText('Guide coming soon').count();
       expect(
         pending,
         'sin guías publicadas el catálogo debe marcar las ranuras como pendientes, no enlazarlas',
@@ -183,23 +182,23 @@ test.describe('@journeys artefacto público', () => {
       console.log('[journeys] catálogo: 0 enlaces a /builds (guía pendiente de derechos, T-044).');
     }
 
-    await page.getByRole('link', { name: 'Inicio', exact: true }).click();
+    await page.getByRole('link', { name: 'Home', exact: true }).click();
     await page.waitForURL(new RegExp(`${PUBLIC_BASE_URL.replaceAll('.', '\\.')}/$`));
-    await expectSingleHeading(page, /Guías de Grim Dawn/i, 'vuelta a portada');
+    await expectSingleHeading(page, /Grim Dawn guides/i, 'vuelta a portada');
   });
 
   test('enlaces del pie: aviso legal y autoría', async ({ page }) => {
     await open(page, `${PUBLIC_BASE_URL}/`);
 
-    await page.getByRole('link', { name: 'Aviso legal', exact: true }).click();
+    await page.getByRole('link', { name: 'Legal notice', exact: true }).click();
     await page.waitForURL(/\/legal$/);
-    await expectSingleHeading(page, 'Aviso legal', 'aviso legal');
+    await expectSingleHeading(page, 'Legal notice', 'aviso legal');
     const legalText = await page.locator('main').innerText();
     expect(legalText.length, '/legal servido con contenido real').toBeGreaterThan(200);
 
-    await page.getByRole('link', { name: 'Criterios editoriales', exact: true }).click();
+    await page.getByRole('link', { name: 'Editorial criteria', exact: true }).click();
     await page.waitForURL(/\/acerca$/);
-    await expectSingleHeading(page, 'Acerca del proyecto', 'acerca');
+    await expectSingleHeading(page, 'About the project', 'acerca');
 
     const authorLinks = page.locator('main a[href^="/autores/"]');
     await expect(
@@ -252,13 +251,35 @@ test.describe('@journeys artefacto público', () => {
   test('el build público no sirve la guía pendiente (404 real)', async ({ page }) => {
     const response = await open(page, `${PUBLIC_BASE_URL}${GUIDE_PATH}`);
     expect(response.status(), `GET ${GUIDE_PATH} en el artefacto público`).toBe(404);
-    await expectSingleHeading(page, 'Página no encontrada', '404 público');
+    await expectSingleHeading(page, 'Page not found', '404 público');
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
     await expect(page.locator('gd-build-toc')).toHaveCount(0);
     expect(
-      await page.getByText('Ruta de devoción').count(),
+      await page.getByText('Devotion path').count(),
       'el 404 no debe contener la guía pendiente',
     ).toBe(0);
+  });
+});
+
+test.describe('@journeys conmutador de idioma', () => {
+  test('el enlace a español conserva ruta y query y vuelve al inglés', async ({ page }) => {
+    await open(page, `${PUBLIC_BASE_URL}/tier-list?m=arcanista`);
+    await page.getByRole('link', { name: 'Español', exact: true }).click();
+    await page.waitForURL(/\/es\/tier-list\?m=arcanista$/);
+    expect(await page.locator('html').getAttribute('lang')).toBe('es');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      /\/es\/tier-list$/,
+    );
+    await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute(
+      'href',
+      /\/tier-list$/,
+    );
+    await expect(page.locator('gd-tier-card').first()).toBeVisible();
+
+    await page.getByRole('link', { name: 'English', exact: true }).click();
+    await page.waitForURL(/\/tier-list\?m=arcanista$/);
+    expect(await page.locator('html').getAttribute('lang')).toBe('en');
   });
 });
 
@@ -281,7 +302,7 @@ test.describe('@journeys guía en el artefacto de borradores', () => {
     await settle(page);
 
     await expect(page.locator('#devociones')).toBeVisible();
-    await expect(page.locator('#devociones h2')).toHaveText(/Ruta de devoción/i);
+    await expect(page.locator('#devociones h2')).toHaveText(/Devotion path/i);
     await expectAnchorVisible(page, 'devociones', 'guía de borradores');
 
     // Enlace compartido: recargar con el ancla debe volver a aterrizar en el destino.
@@ -302,18 +323,18 @@ test.describe('@journeys sin JavaScript', () => {
   test('navegación y ancla funcionan sin hidratación', async ({ page }) => {
     // Punto 1: mismo recorrido portada → catálogo → portada, sin bootstrap.
     await open(page, `${PUBLIC_BASE_URL}/`);
-    await expectSingleHeading(page, /Guías de Grim Dawn/i, 'portada sin JavaScript');
-    await page.getByRole('link', { name: 'Explorar el catálogo', exact: true }).click();
+    await expectSingleHeading(page, /Grim Dawn guides/i, 'portada sin JavaScript');
+    await page.getByRole('link', { name: 'Browse the catalog', exact: true }).click();
     await page.waitForURL(/\/tier-list$/);
     await expectSingleHeading(page, /Catálogo de combinaciones de maestrías/i, 'catálogo sin JS');
     expect(
       await page.locator('gd-tier-card').count(),
       'el catálogo completo debe estar en el HTML, sin depender de hidratación',
     ).toBeGreaterThan(0);
-    await expect(page.getByText(/El catálogo completo puede leerse sin JavaScript/)).toBeVisible();
-    await page.getByRole('link', { name: 'Inicio', exact: true }).click();
+    await expect(page.getByText(/The full catalog can be read without JavaScript/)).toBeVisible();
+    await page.getByRole('link', { name: 'Home', exact: true }).click();
     await page.waitForURL(new RegExp(`${PUBLIC_BASE_URL.replaceAll('.', '\\.')}/$`));
-    await expectSingleHeading(page, /Guías de Grim Dawn/i, 'vuelta a portada sin JS');
+    await expectSingleHeading(page, /Grim Dawn guides/i, 'vuelta a portada sin JS');
 
     // Punto 4: el ancla del TOC es un enlace HTML real y aterriza igual sin JS.
     const response = await open(page, `${DRAFTS_BASE_URL}${GUIDE_PATH}`);
@@ -331,7 +352,7 @@ test.describe('@journeys sin JavaScript', () => {
     await page.waitForLoadState('networkidle');
     await settleWithoutScripts(page);
 
-    await expect(page.locator('#devociones h2')).toHaveText(/Ruta de devoción/i);
+    await expect(page.locator('#devociones h2')).toHaveText(/Devotion path/i);
     await expectAnchorVisible(page, 'devociones', 'guía sin JavaScript');
     expect(
       await page.locator('#devociones').innerText(),

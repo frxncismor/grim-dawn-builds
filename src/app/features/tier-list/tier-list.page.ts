@@ -38,7 +38,7 @@ export class TierListPage {
       tier,
       label:
         tier === 'sin_clasificar'
-          ? $localize`:@@catalog.unranked:Sin clasificar`
+          ? $localize`:@@catalog.unranked:Unranked`
           : $localize`:@@catalog.tier:Tier ${tier}`,
       cards: this.visible().filter((card) => card.tier === tier),
     })).filter((row) => row.cards.length),
@@ -47,7 +47,7 @@ export class TierListPage {
     const seo = inject(SeoService);
     seo.setPage({
       title: this.catalog.title,
-      description: $localize`:@@catalog.description:Explora las combinaciones de maestrías de Grim Dawn. Filtra por daño, estilo y estado del contenido, con atribución y revisión visibles.`,
+      description: $localize`:@@catalog.description:Browse Grim Dawn mastery combinations. Filter by damage, style and content status, with visible attribution and review.`,
       path: '/tier-list',
       structuredData: [catalogItemList(this.catalog, (path) => seo.canonical(path))],
     });

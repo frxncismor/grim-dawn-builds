@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { DOCUMENT } from '@angular/core';
+import { DOCUMENT, LOCALE_ID } from '@angular/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SITE_BASE_URL } from './site-url';
 import { SeoService, type JsonLdRecord } from './seo.service';
@@ -160,5 +160,85 @@ describe('SeoService', () => {
       service.setPage({ title: 'Title', description: 'Description', path: '//external.test/' }),
     ).toThrow();
     expect(doc.title).toBe('Before');
+  });
+});
+
+describe('SeoService locales', () => {
+  let doc: Document;
+  const configure = (locale: string, base = 'https://example.test/site/') => {
+    TestBed.resetTestingModule();
+    doc = document.implementation.createHTMLDocument('Before');
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: DOCUMENT, useValue: doc },
+        { provide: LOCALE_ID, useValue: locale },
+        { provide: SITE_BASE_URL, useValue: base },
+      ],
+    });
+    return TestBed.inject(SeoService);
+  };
+  const page = { title: 'Catálogo', description: 'Combinaciones.', path: '/tier-list' };
+  const alternates = () =>
+    Array.from(doc.querySelectorAll('link[rel="alternate"][hreflang]')).map((link) => [
+      link.getAttribute('hreflang'),
+      link.getAttribute('href'),
+    ]);
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('uses the English root for en and the /es prefix for es', () => {
+    expect(configure('en-US').canonical('/tier-list')).toBe('https://example.test/site/tier-list');
+    expect(configure('es').canonical('/tier-list')).toBe('https://example.test/site/es/tier-list');
+    expect(configure('es').canonical('/')).toBe('https://example.test/site/es/');
+  });
+
+  it('emits exactly en, es and x-default alternates with absolute URLs', () => {
+    configure('es').setPage(page);
+    expect(doc.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
+      'https://example.test/site/es/tier-list',
+    );
+    expect(alternates()).toEqual([
+      ['en', 'https://example.test/site/tier-list'],
+      ['es', 'https://example.test/site/es/tier-list'],
+      ['x-default', 'https://example.test/site/tier-list'],
+    ]);
+    expect(doc.querySelector('meta[property="og:locale"]')?.getAttribute('content')).toBe('es_ES');
+    expect(doc.querySelector('meta[property="og:locale:alternate"]')?.getAttribute('content')).toBe(
+      'en_US',
+    );
+  });
+
+  it('keeps the head idempotent across repeated navigations', () => {
+    const service = configure('en');
+    service.setPage(page);
+    service.setPage({ ...page, path: '/' });
+    service.setPage(page);
+    expect(doc.querySelectorAll('link[rel="canonical"]')).toHaveLength(1);
+    expect(doc.querySelectorAll('link[rel="alternate"][hreflang]')).toHaveLength(3);
+    expect(doc.querySelectorAll('meta[property="og:locale"]')).toHaveLength(1);
+    expect(doc.querySelectorAll('meta[property="og:locale:alternate"]')).toHaveLength(1);
+    expect(alternates()[0]).toEqual(['en', 'https://example.test/site/tier-list']);
+  });
+
+  it('keeps subpath base URLs and static social images outside the locale prefix', () => {
+    const service = configure('es', 'https://example.test/grim/');
+    service.setPage(page);
+    expect(doc.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
+      'https://example.test/grim/es/tier-list',
+    );
+    expect(doc.querySelector('meta[property="og:image"]')?.getAttribute('content')).toBe(
+      'https://example.test/grim/og/site.png',
+    );
+  });
+
+  it('rejects external routes and paths that already carry the locale prefix', () => {
+    const service = configure('es');
+    for (const path of ['//external.test/', '/es/tier-list', '/es', '/es?x=1']) {
+      expect(() => service.canonical(path)).toThrow();
+      expect(() =>
+        service.setPage({ title: 'Título', description: 'Descripción', path }),
+      ).toThrow();
+    }
+    expect(doc.title).toBe('Before');
+    expect(doc.querySelectorAll('link[rel="alternate"][hreflang]')).toHaveLength(0);
   });
 });

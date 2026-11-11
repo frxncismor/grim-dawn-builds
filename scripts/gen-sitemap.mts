@@ -1,6 +1,7 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { lstat, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { readArtifactLocales } from './locales.mts';
 
 export const SITEMAP_ARTIFACT = 'sitemap.xml';
 export const ROBOTS_ARTIFACT = 'robots.txt';
@@ -12,6 +13,7 @@ export const TEMPLATE_PATH = join(
 );
 const ROUTES_ARTIFACT = 'prerendered-routes.json';
 const DEFAULT_DIST = join('dist', 'grim-dawn-builds');
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const LOCAL_BASE_URL = 'http://localhost:4200/';
 const BASE_TOKEN = '__BASE_URL__';
 const SEGMENT = /^[A-Za-z0-9_~-][A-Za-z0-9._~-]*$/;
@@ -139,14 +141,17 @@ function isNoindex(html: string): boolean {
 /**
  * Derives the public routes from the prerendered artifact itself. Each listed route must have its
  * HTML under `browser/`; `/404`, `*-preview` and `noindex` pages are excluded. Files are written
- * only after every check passes, and only inside `browser/`.
+ * only after every check passes, and only inside each locale root of `browser/`.
  */
 export async function generateSeoFiles(options: {
   distRoot: string;
   baseUrl: string;
   templatePath: string;
+  locales?: readonly (readonly string[])[];
 }): Promise<SeoFiles> {
   const base = normalizeBaseUrl(options.baseUrl);
+  const locales = options.locales ?? [[]];
+  if (locales.length === 0) fail('sin configuraciones regionales.');
   let template: string;
   try {
     template = await readFile(options.templatePath, 'utf8');
@@ -170,8 +175,12 @@ export async function generateSeoFiles(options: {
   if (routes.length === 0) fail('sin rutas publicables en el artefacto.');
   const sitemap = buildSitemap(routes, base);
   try {
-    await writeFile(join(browser, SITEMAP_ARTIFACT), sitemap);
-    await writeFile(join(browser, ROBOTS_ARTIFACT), robots);
+    for (const segments of locales) {
+      const localeRoot = join(browser, ...segments);
+      await readFile(join(localeRoot, 'index.html'));
+      await writeFile(join(localeRoot, SITEMAP_ARTIFACT), sitemap);
+      await writeFile(join(localeRoot, ROBOTS_ARTIFACT), robots);
+    }
   } catch {
     fail('no se pudieron escribir sitemap.xml y robots.txt en browser/.');
   }
@@ -186,14 +195,26 @@ export async function runCli(
     return { exitCode: 1, message: USAGE };
   const distRoot = resolve(argv[1] ?? DEFAULT_DIST);
   try {
+    const configured = await readArtifactLocales(REPO_ROOT);
+    const locales: (readonly string[])[] = [];
+    for (const locale of configured) {
+      try {
+        const stat = await lstat(join(distRoot, 'browser', ...locale.segments));
+        if (stat.isDirectory()) locales.push(locale.segments);
+      } catch {
+        // Un idioma sin artefacto no tiene robots.txt que sustituir; emit-404 ya exige su 404.
+      }
+    }
+    if (locales.length === 0) locales.push([]);
     const { routes } = await generateSeoFiles({
       distRoot,
       baseUrl: env.BASE_URL ?? LOCAL_BASE_URL,
       templatePath: TEMPLATE_PATH,
+      locales,
     });
     return {
       exitCode: 0,
-      message: `sitemap.xml y robots.txt generados en browser/ (${routes.length} rutas).`,
+      message: `sitemap.xml y robots.txt generados en browser/ (${routes.length} rutas, ${locales.length} idioma(s)).`,
     };
   } catch (error) {
     return {

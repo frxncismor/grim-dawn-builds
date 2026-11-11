@@ -128,39 +128,39 @@ export function catalogGroups(model: CatalogSnapshot): readonly FilterGroup[] {
   return [
     group(
       'masteries',
-      'Maestrías',
+      $localize`:@@catalog.group.masteries:Masteries`,
       model.masteries.map((m) => [m.slug, m.name_es] as const),
     ),
-    group('damageTypes', 'Tipo de daño', [
-      ['fisico', 'Físico'],
-      ['fuego', 'Fuego'],
-      ['frio', 'Frío'],
-      ['rayo', 'Rayo'],
-      ['acido', 'Ácido'],
-      ['vitalidad', 'Vitalidad'],
-      ['caos', 'Caos'],
-      ['eter', 'Éter'],
-      ['elemental', 'Elemental'],
-      ['sangrado', 'Sangrado'],
-      ['mascotas', 'Mascotas'],
+    group('damageTypes', $localize`:@@catalog.group.damageTypes:Damage type`, [
+      ['fisico', $localize`:@@catalog.option.fisico:Physical`],
+      ['fuego', $localize`:@@catalog.option.fuego:Fire`],
+      ['frio', $localize`:@@catalog.option.frio:Cold`],
+      ['rayo', $localize`:@@catalog.option.rayo:Lightning`],
+      ['acido', $localize`:@@catalog.option.acido:Acid`],
+      ['vitalidad', $localize`:@@catalog.option.vitalidad:Vitality`],
+      ['caos', $localize`:@@catalog.option.caos:Chaos`],
+      ['eter', $localize`:@@catalog.option.eter:Aether`],
+      ['elemental', $localize`:@@catalog.option.elemental:Elemental`],
+      ['sangrado', $localize`:@@catalog.option.sangrado:Bleeding`],
+      ['mascotas', $localize`:@@catalog.option.mascotas:Minions`],
     ]),
-    group('contentTags', 'Contenido', [
-      ['campana', 'Campaña'],
-      ['shattered_realm', 'Shattered Realm'],
-      ['crucible', 'Crucible'],
-      ['jefes', 'Jefes'],
-      ['farmeo', 'Farmeo'],
+    group('contentTags', $localize`:@@catalog.group.contentTags:Content`, [
+      ['campana', $localize`:@@catalog.option.campana:Campaign`],
+      ['shattered_realm', $localize`:@@catalog.option.shattered_realm:Shattered Realm`],
+      ['crucible', $localize`:@@catalog.option.crucible:Crucible`],
+      ['jefes', $localize`:@@catalog.option.jefes:Bosses`],
+      ['farmeo', $localize`:@@catalog.option.farmeo:Farming`],
     ]),
-    group('playstyles', 'Estilo', [
-      ['melee', 'Cuerpo a cuerpo'],
-      ['rango', 'A distancia'],
-      ['mascotas', 'Mascotas'],
-      ['hibrido', 'Híbrido'],
+    group('playstyles', $localize`:@@catalog.group.playstyles:Style`, [
+      ['melee', $localize`:@@catalog.option.melee:Melee`],
+      ['rango', $localize`:@@catalog.option.rango:Ranged`],
+      ['mascotas', $localize`:@@catalog.option.mascotas:Minions`],
+      ['hibrido', $localize`:@@catalog.option.hibrido:Hybrid`],
     ]),
-    group('contentStatuses', 'Estado del contenido', [
-      ['verificado', 'Verificado'],
-      ['sin_verificar', 'Sin verificar'],
-      ['placeholder', 'Placeholder'],
+    group('contentStatuses', $localize`:@@catalog.group.contentStatuses:Content status`, [
+      ['verificado', $localize`:@@catalog.option.verificado:Verified`],
+      ['sin_verificar', $localize`:@@catalog.option.sin_verificar:Unverified`],
+      ['placeholder', $localize`:@@catalog.option.placeholder:Placeholder`],
     ]),
   ];
 }

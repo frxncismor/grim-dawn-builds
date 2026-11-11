@@ -43,7 +43,7 @@ export interface SkillTreeSlot {
 const PLACEHOLDER_AUTHOR_SLUG = 'por-confirmar';
 const SITE_NAME = 'Grim Dawn Builds';
 const TREE_SUFFIXES = ['a', 'b'] as const;
-const HOME_LABEL = $localize`:@@buildPage.breadcrumbHome:Inicio`;
+const HOME_LABEL = $localize`:@@buildPage.breadcrumbHome:Home`;
 
 /** Only plain HTTP(S) URLs without credentials become structured-data URLs. */
 function publicHttpUrl(value: string | null | undefined): string | null {
@@ -129,18 +129,18 @@ export class BuildPage {
   nodeStatusLabel(status: SkillNode['status']): string {
     switch (status) {
       case 'recomendada':
-        return $localize`:@@buildPage.statusRecommended:Recomendada`;
+        return $localize`:@@buildPage.statusRecommended:Recommended`;
       case 'meta':
         return $localize`:@@buildPage.statusMeta:Meta`;
       case 'omitir':
-        return $localize`:@@buildPage.statusSkip:Omitir`;
+        return $localize`:@@buildPage.statusSkip:Skip`;
     }
   }
 
   verificationLabel(verification: DevotionStep['verification']): string {
     return verification === 'verificado'
-      ? $localize`:@@buildPage.verified:Verificado`
-      : $localize`:@@buildPage.unverified:Sin verificar`;
+      ? $localize`:@@buildPage.verified:Verified`
+      : $localize`:@@buildPage.unverified:Unverified`;
   }
 
   /** Public Article data only: drafts never claim authorship or publication dates. */

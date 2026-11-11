@@ -28,7 +28,7 @@ describe('catalog page with URL state', () => {
   it('restores a combined query filter, count and canonical structured data', async () => {
     const harness = await start('/tier-list?m=chaman&d=rayo');
     expect(harness.routeNativeElement!.querySelectorAll('gd-tier-card')).toHaveLength(1);
-    expect(harness.routeNativeElement!.textContent).toContain('1 de 2');
+    expect(harness.routeNativeElement!.textContent).toContain('1 of 2');
     expect(document.querySelector('link[rel=canonical]')?.getAttribute('href')).toBe(
       'https://example.org/tier-list',
     );
@@ -43,7 +43,7 @@ describe('catalog page with URL state', () => {
   it('synchronizes controls with URL and restores selection when navigating between history states', async () => {
     const harness = await start('/tier-list');
     const button = [...harness.routeNativeElement!.querySelectorAll('button')].find(
-      (b) => b.textContent?.trim() === 'Rayo',
+      (b) => b.textContent?.trim() === 'Lightning',
     )!;
     button.click();
     await harness.fixture.whenStable();
@@ -52,7 +52,7 @@ describe('catalog page with URL state', () => {
     await harness.navigateByUrl('/tier-list?m=arcanista');
     await harness.fixture.whenStable();
     expect(harness.routeNativeElement!.querySelectorAll('gd-tier-card')).toHaveLength(1);
-    expect(harness.routeNativeElement!.textContent).toContain('Guía próximamente');
+    expect(harness.routeNativeElement!.textContent).toContain('Guide coming soon');
     await harness.navigateByUrl('/tier-list?d=rayo');
     await harness.fixture.whenStable();
     expect(button.getAttribute('aria-pressed')).toBe('true');

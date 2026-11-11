@@ -109,7 +109,7 @@ describe('application routes', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.querySelectorAll('h1')).toHaveLength(1);
-    expect(root.querySelector('h1')?.textContent).toContain('no encontrada');
+    expect(root.querySelector('h1')?.textContent).toContain('Page not found');
     expect([...root.querySelectorAll('a')].map((link) => link.getAttribute('href'))).toEqual([
       '/',
       '/tier-list',

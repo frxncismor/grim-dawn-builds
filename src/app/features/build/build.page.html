@@ -1,6 +1,6 @@
 @if (content().draft) {
   <p class="draft-banner" role="status" data-draft-banner i18n="@@buildPage.draftBanner">
-    Borrador · no público
+    Draft · not public
   </p>
 }
 
@@ -15,7 +15,7 @@
 
     <ng-template #skillsFallback>
       <section class="build-block" id="habilidades" aria-labelledby="habilidades-title">
-        <h2 id="habilidades-title" i18n="@@buildPage.skills">Habilidades</h2>
+        <h2 id="habilidades-title" i18n="@@buildPage.skills">Skills</h2>
         @for (slot of treeSlots(); track slot.treeId) {
           <section class="fallback-tree" [attr.aria-labelledby]="slot.treeId + '-fallback-title'">
             <h3 [id]="slot.treeId + '-fallback-title'">
@@ -30,7 +30,7 @@
                     <span lang="en">({{ node.name_en }})</span>
                     <span class="fallback-status">{{ nodeStatusLabel(node.status) }}</span>
                     <span class="fallback-bar"
-                      ><span i18n="@@buildPage.bar">Barra</span> {{ node.bar_required }}</span
+                      ><span i18n="@@buildPage.bar">Bar</span> {{ node.bar_required }}</span
                     >
                     @if (node.tag) {
                       <span class="fallback-tag">{{ node.tag }}</span>
@@ -40,9 +40,7 @@
                 }
               </ol>
             } @else {
-              <p role="status" i18n="@@buildPage.noSkills">
-                No hay habilidades para esta maestría.
-              </p>
+              <p role="status" i18n="@@buildPage.noSkills">There are no skills for this mastery.</p>
             }
           </section>
         }
@@ -52,7 +50,7 @@
 
     @defer (on viewport) {
       <section class="build-block" id="habilidades" aria-labelledby="habilidades-title">
-        <h2 id="habilidades-title" i18n="@@buildPage.skills">Habilidades</h2>
+        <h2 id="habilidades-title" i18n="@@buildPage.skills">Skills</h2>
         @for (slot of treeSlots(); track slot.treeId) {
           <gd-skill-tree
             [treeId]="slot.treeId"
@@ -79,7 +77,7 @@
 
     <ng-template #devotionsFallback>
       <section class="build-block" id="devociones" aria-labelledby="devociones-heading">
-        <h2 id="devociones-heading" i18n="@@buildPage.devotions">Ruta de devoción</h2>
+        <h2 id="devociones-heading" i18n="@@buildPage.devotions">Devotion path</h2>
         @for (note of devotionIntroductions(); track note.position) {
           <p class="fallback-role">{{ note.detail }}</p>
         }
@@ -97,7 +95,7 @@
             }
           </ol>
         } @else {
-          <p role="status" i18n="@@buildPage.noDevotions">Sin información disponible</p>
+          <p role="status" i18n="@@buildPage.noDevotions">No information available</p>
         }
         <div class="build-skeleton" aria-hidden="true"><span></span><span></span></div>
       </section>

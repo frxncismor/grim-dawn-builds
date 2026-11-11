@@ -1,10 +1,11 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { Location } from '@angular/common';
+import { LanguageSwitcher } from './language-switcher';
 
 @Component({
   selector: 'gd-site-layout',
-  imports: [RouterLink],
+  imports: [RouterLink, LanguageSwitcher],
   templateUrl: './site-layout.html',
   styleUrl: './site-layout.css',
 })

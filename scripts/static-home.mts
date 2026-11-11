@@ -2,13 +2,15 @@ import { HtmlParser } from '@angular/compiler';
 import { lstat, readdir, readFile, writeFile, rename, rm } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFileSync } from 'node:fs';
+import { readArtifactLocales } from './locales.mts';
 
 export const STATIC_HOME_MARKER = 'gd-static-home';
 export const STATIC_PAGE_MARKER = 'gd-static-page';
 const STATIC_MARKERS = [STATIC_HOME_MARKER, STATIC_PAGE_MARKER];
 export const STATIC_PAGE_SELECTORS = ['gd-about-page', 'gd-legal-page', 'gd-author-page'] as const;
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 interface StaticContract {
   selector: string;
   marker: string;
@@ -47,7 +49,7 @@ function elements(html: string): Node[] {
 }
 const attr = (node: Node, name: string) =>
   node.attrs?.find((a) => a.name.toLowerCase() === name)?.value;
-const baseCustom = ['app-root', 'gd-site-layout', 'router-outlet'];
+const baseCustom = ['app-root', 'gd-site-layout', 'router-outlet', 'gd-language-switcher'];
 const forbiddenTags = new Set([
   'button',
   'input',
@@ -323,16 +325,14 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 async function finalizeFile(
-  output: string,
+  browser: string,
   segments: string[],
   transform: (html: string) => string,
 ): Promise<void> {
-  const browser = resolve(output, 'browser'),
-    file = join(browser, ...segments),
+  const file = join(browser, ...segments),
     dir = dirname(file),
     pending = join(dir, `.static-page-${randomUUID()}.tmp`);
   try {
-    await regular(resolve(output), 'dir');
     await regular(browser, 'dir');
     let current = browser;
     for (const segment of segments.slice(0, -1)) {
@@ -357,9 +357,8 @@ interface StaticTarget {
   segments: string[];
   selector: string;
 }
-async function staticPageTargets(output: string): Promise<StaticTarget[]> {
-  const browser = resolve(output, 'browser'),
-    targets: StaticTarget[] = [];
+async function staticPageTargets(browser: string): Promise<StaticTarget[]> {
+  const targets: StaticTarget[] = [];
   for (const [name, selector] of [
     ['acerca', 'gd-about-page'],
     ['legal', 'gd-legal-page'],
@@ -381,33 +380,57 @@ async function staticPageTargets(output: string): Promise<StaticTarget[]> {
   }
   return targets;
 }
-/** Transforms the home page (required) and each present content page; returns the processed routes. */
-export async function finalizeStaticHome(output: string): Promise<string[]> {
+/** Transforms the home page (required) and each present content page of every locale. */
+export async function finalizeStaticHome(
+  output: string,
+  locales: readonly (readonly string[])[] = [[]],
+): Promise<string[]> {
+  if (locales.length === 0) fail();
+  const routes: string[] = [];
   try {
-    await finalizeFile(output, ['index.html'], staticHomeHtml);
-    const targets = await staticPageTargets(output);
-    for (const target of targets)
-      await finalizeFile(output, target.segments, (html) => staticPageHtml(html, target.selector));
-    return ['/', ...targets.map((target) => target.route)];
+    const root = resolve(output);
+    await regular(root, 'dir');
+    for (const segments of locales) {
+      const browser = join(root, 'browser', ...segments);
+      await regular(browser, 'dir');
+      await finalizeFile(browser, ['index.html'], staticHomeHtml);
+      const targets = await staticPageTargets(browser);
+      for (const target of targets)
+        await finalizeFile(browser, target.segments, (html) =>
+          staticPageHtml(html, target.selector),
+        );
+      const prefix = segments.length === 0 ? '' : `/${segments.join('/')}`;
+      routes.push(prefix || '/', ...targets.map((target) => `${prefix}${target.route}`));
+    }
+    return routes;
   } catch {
     fail();
   }
 }
-/** The release build must emit about, legal and at least one author page. */
-export function assertCompleteStaticRoutes(routes: readonly string[]): void {
+/** The release build must emit about, legal and at least one author page per locale. */
+export function assertCompleteStaticRoutes(routes: readonly string[], prefix = ''): void {
+  const home = prefix || '/';
   if (
-    !routes.includes('/') ||
-    !routes.includes('/acerca') ||
-    !routes.includes('/legal') ||
-    !routes.some((route) => route.startsWith('/autores/'))
+    !routes.includes(home) ||
+    !routes.includes(`${prefix}/acerca`) ||
+    !routes.includes(`${prefix}/legal`) ||
+    !routes.some((route) => route.startsWith(`${prefix}/autores/`))
   )
     throw new Error('Faltan rutas estáticas obligatorias.');
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     if (process.argv.length !== 2) fail();
-    const routes = await finalizeStaticHome(resolve('dist/grim-dawn-builds'));
-    assertCompleteStaticRoutes(routes);
+    const locales = await readArtifactLocales(REPO_ROOT);
+    const routes = await finalizeStaticHome(
+      resolve('dist/grim-dawn-builds'),
+      locales.map((locale) => locale.segments),
+    );
+    for (const locale of locales)
+      assertCompleteStaticRoutes(
+        routes,
+        locale.segments.length === 0 ? '' : `/${locale.segments.join('/')}`,
+      );
     console.log(`static-home OK (HTML nativo, sin bootstrap cliente): ${routes.join(', ')}.`);
   } catch {
     console.error('static-home FALLÓ: comprobar contrato estático y output.');

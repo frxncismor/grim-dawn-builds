@@ -10,12 +10,12 @@ import { LegalPage } from './legal.page';
 const ISSUES_URL = 'https://github.com/frxncismor/grim-dawn-builds/issues';
 const CANONICAL = 'https://example.org/legal';
 const HEADINGS = [
-  'Titularidad y derechos',
-  'Atribución',
-  'Fuentes y activos',
-  'Retirada de contenido',
-  'Privacidad',
-  'No afiliación',
+  'Ownership and rights',
+  'Attribution',
+  'Sources and assets',
+  'Content takedown',
+  'Privacy',
+  'No affiliation',
 ];
 
 function render(): {
@@ -36,7 +36,7 @@ describe('legal notice page', () => {
   it('publishes the six content blocks under a single first-level heading', () => {
     const { root } = render();
     expect(root.querySelectorAll('h1')).toHaveLength(1);
-    expect(root.querySelector('h1')?.textContent?.trim()).toBe('Aviso legal');
+    expect(root.querySelector('h1')?.textContent?.trim()).toBe('Legal notice');
 
     const sections = [...root.querySelectorAll('section')];
     expect(sections).toHaveLength(6);
@@ -55,16 +55,16 @@ describe('legal notice page', () => {
     const { root } = render();
     const text = root.textContent ?? '';
 
-    expect(text).toContain('sin una licencia declarada');
-    expect(text).toContain('todos los derechos quedan reservados');
-    expect(text).toContain('no sustituye al permiso');
-    expect(text).toContain('No se hace scraping automático');
-    expect(text).toContain('estado aprobado');
-    expect(text).toContain('glifos SVG propios');
-    expect(text).toContain('se despublica primero');
-    expect(text).toContain('no tiene cuentas, comentarios ni analítica de terceros');
-    expect(text).toContain('progreso opcional del checklist de compra');
-    expect(text).toContain('no está afiliado con Crate Entertainment ni con GrimTools');
+    expect(text).toContain('without a declared license');
+    expect(text).toContain('all rights are reserved');
+    expect(text).toContain('does not replace permission');
+    expect(text).toContain('No automatic scraping is performed');
+    expect(text).toContain('approved status');
+    expect(text).toContain('our own SVG glyphs');
+    expect(text).toContain('Content is unpublished first');
+    expect(text).toContain('no accounts, comments or third-party analytics');
+    expect(text).toContain('optional progress of the purchase checklist');
+    expect(text).toContain('not affiliated with Crate Entertainment or GrimTools');
   });
 
   it('points takedown and general contact at the real GitHub issue channel only', () => {
@@ -91,13 +91,13 @@ describe('legal notice page', () => {
     ).toBe(false);
     expect(text).not.toMatch(/[\w.+-]+@[\w-]+\.[\w.]+/);
     expect(text).not.toMatch(/\+\d[\d\s().-]{6,}/);
-    expect(text.toLowerCase()).not.toContain('formulario de contacto');
+    expect(text.toLowerCase()).not.toContain('contact form');
   });
 
   it('publishes WebPage structured data with a canonical URL and description', () => {
     render();
 
-    expect(document.title).toBe('Aviso legal · Grim Dawn Builds');
+    expect(document.title).toBe('Legal notice · Grim Dawn Builds');
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(CANONICAL);
     expect(
       document.querySelector('meta[name="description"]')?.getAttribute('content')?.length ?? 0,
@@ -111,7 +111,7 @@ describe('legal notice page', () => {
     expect(parsed['@context']).toBe('https://schema.org');
     expect(parsed['@type']).toBe('WebPage');
     expect(parsed['url']).toBe(CANONICAL);
-    expect(parsed['name']).toBe('Aviso legal');
+    expect(parsed['name']).toBe('Legal notice');
   });
 
   it('renders static text without assigning innerHTML', () => {

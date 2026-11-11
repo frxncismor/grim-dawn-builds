@@ -51,16 +51,16 @@ const sectionAliases: Record<string, CanonicalSection> = {
 };
 
 const sectionLabels: Record<CanonicalSection, string> = {
-  resumen: $localize`:@@buildToc.resumen:Resumen`,
-  prioridades: $localize`:@@buildToc.prioridades:Prioridades`,
-  habilidades: $localize`:@@buildToc.habilidades:Habilidades`,
-  orden: $localize`:@@buildToc.orden:Orden de compra`,
-  notas: $localize`:@@buildToc.notas:Notas`,
-  'filtro-de-botin': $localize`:@@buildToc.lootFilter:Filtro de botín`,
-  'guia-espiritual': $localize`:@@buildToc.spiritualGuide:Guía Espiritual`,
-  devociones: $localize`:@@buildToc.devotions:Devociones`,
+  resumen: $localize`:@@buildToc.resumen:Overview`,
+  prioridades: $localize`:@@buildToc.prioridades:Priorities`,
+  habilidades: $localize`:@@buildToc.habilidades:Skills`,
+  orden: $localize`:@@buildToc.orden:Purchase order`,
+  notas: $localize`:@@buildToc.notas:Notes`,
+  'filtro-de-botin': $localize`:@@buildToc.lootFilter:Loot filter`,
+  'guia-espiritual': $localize`:@@buildToc.spiritualGuide:Spirit Guide`,
+  devociones: $localize`:@@buildToc.devotions:Devotions`,
   video: $localize`:@@buildToc.video:Video`,
-  fuentes: $localize`:@@buildToc.sources:Fuentes`,
+  fuentes: $localize`:@@buildToc.sources:Sources`,
 };
 
 function canonicalSection(key: string): CanonicalSection | null {

@@ -5,27 +5,27 @@
     </h2>
     <p>{{ mastery().role_text }}</p>
     @if (currentBar() === undefined) {
-      <p class="skill-tree__bar" i18n="@@skillTree.unknownBar">Barra desconocida</p>
+      <p class="skill-tree__bar" i18n="@@skillTree.unknownBar">Unknown bar</p>
     } @else {
       <p class="skill-tree__bar">
-        <span i18n="@@skillTree.currentBar">Barra</span> {{ currentBar() }}
+        <span i18n="@@skillTree.currentBar">Bar</span> {{ currentBar() }}
       </p>
     }
   </header>
 
   @if (tree().error) {
     <p class="skill-tree__error" role="alert" i18n="@@skillTree.invalidTree">
-      No se pudo dibujar este árbol porque sus relaciones tienen un error. La lista sigue
-      disponible.
+      This tree could not be drawn because its relationships contain an error. The list is still
+      available.
     </p>
   } @else if (tree().nodes.length === 0) {
-    <p class="skill-tree__empty" i18n="@@skillTree.empty">No hay habilidades para esta maestría.</p>
+    <p class="skill-tree__empty" i18n="@@skillTree.empty">There are no skills for this mastery.</p>
   } @else {
     <div
       class="skill-tree__canvas"
       tabindex="0"
       i18n-aria-label="@@skillTree.canvasLabel"
-      aria-label="Árbol de habilidades; desplázate dentro del diagrama para recorrerlo"
+      aria-label="Skill tree; scroll within the diagram to browse it"
     >
       <svg
         class="skill-tree__svg"
@@ -37,8 +37,8 @@
       >
         <title [id]="svgTitleId()">{{ svgTitle() }}</title>
         <desc [id]="svgDescriptionId()" i18n="@@skillTree.svgDescription">
-          Las líneas conectan cada habilidad con su requisito anterior. Usa las flechas para
-          recorrer los nodos.
+          Lines connect each skill to its preceding requirement. Use the arrow keys to move between
+          nodes.
         </desc>
         <g class="skill-tree__content" role="group" [attr.aria-labelledby]="headingId()">
           <g class="skill-tree__edges" aria-hidden="true">
@@ -139,7 +139,7 @@
       </svg>
     </div>
     <p class="skill-tree__scroll-help" i18n="@@skillTree.scrollHelp">
-      Si el árbol excede el ancho, desplázate dentro del diagrama para consultarlo.
+      If the tree is wider than the screen, scroll within the diagram to view it.
     </p>
   }
 
@@ -159,19 +159,19 @@
         <p>{{ node.tag }}</p>
       }
       <p>{{ node.rationale }}</p>
-      <p><span i18n="@@skillTree.requiredBarText">Requiere barra</span> {{ node.bar_required }}</p>
+      <p><span i18n="@@skillTree.requiredBarText">Requires bar</span> {{ node.bar_required }}</p>
       @if (node.points_label) {
         <p>{{ node.points_label }}</p>
       }
       @if (node.max_points_hint !== null) {
         <p>
-          <span i18n="@@skillTree.maxPoints">Puntos máximos orientativos:</span>
+          <span i18n="@@skillTree.maxPoints">Suggested maximum points:</span>
           {{ node.max_points_hint }}
         </p>
       }
       @if (barWarning(node)) {
         <p class="skill-tree__warning" role="note" i18n="@@skillTree.barWarning">
-          Barra insuficiente para asignar puntos ahora; puedes consultar esta recomendación.
+          Bar too low to assign points now; you can still review this recommendation.
         </p>
       }
       @if (selectedId() === node.slug) {
@@ -182,20 +182,18 @@
           (keydown)="onDetailKeydown($event)"
           i18n="@@skillTree.closeDetail"
         >
-          Cerrar detalle
+          Close detail
         </button>
       }
     } @else {
-      <p i18n="@@skillTree.detailHint">
-        Enfoca o pasa el cursor por una habilidad para consultar sus detalles.
-      </p>
+      <p i18n="@@skillTree.detailHint">Focus on or hover over a skill to see its details.</p>
     }
   </section>
 
   <details class="skill-tree__list" open>
-    <summary i18n="@@skillTree.listSummary">Lista de habilidades y recomendaciones</summary>
+    <summary i18n="@@skillTree.listSummary">Skill list and recommendations</summary>
     @if (masteryNodes().length === 0) {
-      <p i18n="@@skillTree.emptyList">No hay habilidades para consultar.</p>
+      <p i18n="@@skillTree.emptyList">There are no skills to review.</p>
     } @else {
       <ol>
         @for (node of orderedNodes(); track $index) {
@@ -203,7 +201,7 @@
             <strong>{{ node.name_es }}</strong> <span lang="en">({{ node.name_en }})</span>
             <span class="skill-tree__list-status">{{ statusLabel(node.status) }}</span>
             <span
-              ><span i18n="@@skillTree.requiredBarText">Requiere barra</span>
+              ><span i18n="@@skillTree.requiredBarText">Requires bar</span>
               {{ node.bar_required }}</span
             >
             @if (node.tag) {
@@ -215,13 +213,13 @@
             }
             @if (node.max_points_hint !== null) {
               <span
-                ><span i18n="@@skillTree.maxPoints">Puntos máximos orientativos:</span>
+                ><span i18n="@@skillTree.maxPoints">Suggested maximum points:</span>
                 {{ node.max_points_hint }}</span
               >
             }
             @if (barWarning(node)) {
               <span class="skill-tree__warning" i18n="@@skillTree.barWarningShort"
-                >Barra insuficiente</span
+                >Bar too low</span
               >
             }
           </li>

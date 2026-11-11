@@ -21,12 +21,12 @@
         }
         <div class="video-status" role="status">
           @if (state() === 'loading') {
-            <span i18n="@@videoFacade.loading">Cargando video…</span>
+            <span i18n="@@videoFacade.loading">Loading video…</span>
           }
         </div>
         @if (state() === 'error') {
           <p class="video-error" role="alert" i18n="@@videoFacade.blocked">
-            El reproductor está bloqueado. Puedes abrir el video en YouTube.
+            The player is blocked. You can open the video on YouTube.
           </p>
         }
       </div>
@@ -39,7 +39,7 @@
           (click)="activate()"
           i18n="@@videoFacade.activate"
         >
-          Cargar video
+          Load video
         </button>
         <a
           [href]="originalUrl()"
@@ -47,18 +47,18 @@
           target="_blank"
           i18n="@@videoFacade.fallback"
         >
-          Abrir en YouTube (nueva pestaña)
+          Open on YouTube (new tab)
         </a>
       </div>
       <p class="video-note" [id]="sectionId() + '-note'" i18n="@@videoFacade.javascript">
-        Cargar el reproductor requiere JavaScript.
+        Loading the player requires JavaScript.
       </p>
     } @else {
       <h2 [id]="sectionId() + '-heading'" i18n="@@videoFacade.unavailableHeading">
-        Video no disponible
+        Video unavailable
       </h2>
       <p class="video-error" role="alert" i18n="@@videoFacade.invalid">
-        La dirección del video no es válida.
+        The video address is not valid.
       </p>
     }
   </section>

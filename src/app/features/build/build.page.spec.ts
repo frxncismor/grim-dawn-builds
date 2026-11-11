@@ -236,7 +236,7 @@ describe('gd-build-page', () => {
   it('shows the draft banner and noindex,follow for drafts', async () => {
     const { root } = await render(draftPage);
     const banner = root.querySelector('[data-draft-banner]');
-    expect(banner?.textContent?.trim()).toBe('Borrador · no público');
+    expect(banner?.textContent?.trim()).toBe('Draft · not public');
     expect(banner?.getAttribute('role')).toBe('status');
     expect(robots()).toBe('noindex,follow');
     expect(document.querySelector('[data-draft-banner]')).not.toBeNull();
@@ -318,8 +318,8 @@ describe('gd-build-page', () => {
     expect(root.querySelector('#habilidades')).not.toBeNull();
     expect(root.textContent).toContain('Golpe Primigenio');
     expect(root.textContent).toContain('Primal Strike');
-    expect(root.textContent).toContain('Recomendada');
-    expect(root.textContent).toContain('Barra 5');
+    expect(root.textContent).toContain('Recommended');
+    expect(root.textContent).toContain('Bar 5');
     expect(root.textContent).toContain('Chamán');
     expect(root.textContent).toContain('Shaman');
 
@@ -340,7 +340,7 @@ describe('gd-build-page', () => {
     const section = root.querySelector('#devociones');
     expect(section).not.toBeNull();
     expect(section?.textContent).toContain('Anguila es Primordial de nivel 1.');
-    expect(section?.textContent).toContain('Sin verificar');
+    expect(section?.textContent).toContain('Unverified');
     expect(section?.textContent).toContain('Cuando las constelaciones se sostengan solas');
     expect(section?.querySelectorAll('[data-fallback-devotion-step]')).toHaveLength(
       draftContent.devotion_steps.length,

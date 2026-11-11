@@ -1,5 +1,12 @@
 import { Location } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  LOCALE_ID,
+} from '@angular/core';
 import type { PublicBuild } from '@gd/domain';
 
 export type BuildAttributionContent = Pick<
@@ -21,31 +28,24 @@ export type BuildAttributionContent = Pick<
 const PLACEHOLDER_AUTHOR_SLUG = 'por-confirmar';
 
 const reviewLabels: Record<PublicBuild['review_state'], string> = {
-  borrador: $localize`:@@buildAttribution.reviewDraft:Borrador`,
-  en_revision: $localize`:@@buildAttribution.reviewInReview:En revisión`,
-  publicado: $localize`:@@buildAttribution.reviewPublished:Publicado`,
+  borrador: $localize`:@@buildAttribution.reviewDraft:Draft`,
+  en_revision: $localize`:@@buildAttribution.reviewInReview:In review`,
+  publicado: $localize`:@@buildAttribution.reviewPublished:Published`,
 };
 
 const contentLabels: Record<PublicBuild['content_status'], string> = {
-  verificado: $localize`:@@buildAttribution.contentVerified:Verificado`,
-  sin_verificar: $localize`:@@buildAttribution.contentUnverified:Sin verificar`,
+  verificado: $localize`:@@buildAttribution.contentVerified:Verified`,
+  sin_verificar: $localize`:@@buildAttribution.contentUnverified:Unverified`,
   placeholder: $localize`:@@buildAttribution.contentPlaceholder:Placeholder`,
 };
 
 const kindLabels: Record<PublicBuild['sources'][number]['kind'], string> = {
   original: $localize`:@@buildAttribution.kindOriginal:Original`,
-  comunidad: $localize`:@@buildAttribution.kindCommunity:Comunidad`,
-  oficial: $localize`:@@buildAttribution.kindOfficial:Oficial`,
+  comunidad: $localize`:@@buildAttribution.kindCommunity:Community`,
+  oficial: $localize`:@@buildAttribution.kindOfficial:Official`,
   video: $localize`:@@buildAttribution.kindVideo:Video`,
-  externa_enlace: $localize`:@@buildAttribution.kindExternalLink:Enlace externo`,
+  externa_enlace: $localize`:@@buildAttribution.kindExternalLink:External link`,
 };
-
-const dateFormatter = new Intl.DateTimeFormat('es-ES', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-  timeZone: 'UTC',
-});
 
 interface LinkableUrl {
   href: string;
@@ -65,9 +65,9 @@ function parseHttpUrl(value: string | null | undefined): LinkableUrl | null {
   }
 }
 
-function formatDate(value: string): string {
+function formatDate(formatter: Intl.DateTimeFormat, value: string): string {
   const date = new Date(`${value}T00:00:00Z`);
-  return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date);
+  return Number.isNaN(date.getTime()) ? value : formatter.format(date);
 }
 
 @Component({
@@ -79,6 +79,12 @@ function formatDate(value: string): string {
 })
 export class BuildAttribution {
   private readonly location = inject(Location);
+  private readonly dateFormatter = new Intl.DateTimeFormat(inject(LOCALE_ID), {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
 
   readonly content = input.required<BuildAttributionContent>();
   readonly authorPlaceholder = input<boolean>(false);
@@ -102,7 +108,9 @@ export class BuildAttribution {
 
   protected readonly publishedLabel = computed(() => {
     const published = this.content().published_at;
-    return published ? formatDate(published) : $localize`:@@buildAttribution.noDate:Sin fecha`;
+    return published
+      ? formatDate(this.dateFormatter, published)
+      : $localize`:@@buildAttribution.noDate:No date`;
   });
 
   protected readonly disclaimer = computed(() => {
@@ -127,7 +135,7 @@ export class BuildAttribution {
   }
 
   protected sourceDate(value: string): string {
-    return formatDate(value);
+    return formatDate(this.dateFormatter, value);
   }
 
   protected sourceUrl(value: string | null): LinkableUrl | null {

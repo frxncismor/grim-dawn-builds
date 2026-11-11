@@ -1,6 +1,9 @@
-import { DOCUMENT, inject, Injectable } from '@angular/core';
+import { DOCUMENT, inject, Injectable, LOCALE_ID } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { canonicalUrl, SITE_BASE_URL } from './site-url';
+
+export type SiteLocale = 'en' | 'es';
+type HreflangKey = SiteLocale | 'x-default';
 
 export interface JsonLdRecord {
   '@context': 'https://schema.org';
@@ -19,11 +22,14 @@ export interface SeoPage {
 const SITE_NAME = 'Grim Dawn Builds';
 const DEFAULT_SOCIAL_IMAGE = {
   path: '/og/site.png',
-  alt: $localize`:@@seo.socialAlt:Grim Dawn Builds: catálogo en español, maestrías y estados claros.`,
+  alt: $localize`:@@seo.socialAlt:Grim Dawn Builds: English-language catalog, masteries and clear statuses.`,
   width: 1200,
   height: 630,
 };
 const JSON_LD_ID = 'gd-page-jsonld';
+const LOCALE_PREFIX: Record<SiteLocale, string> = { en: '', es: '/es' };
+const OG_LOCALE: Record<SiteLocale, string> = { en: 'en_US', es: 'es_ES' };
+const LOCALE_PREFIX_SEGMENT = /^\/es(?=[/?#]|$)/;
 const PRIVATE_KEYS = new Set([
   'reviewedby',
   'reviewedat',
@@ -76,15 +82,27 @@ function serializeJsonLd(records: readonly JsonLdRecord[]): string | null {
   }
 }
 
+export function siteLocale(value: string): SiteLocale {
+  return value.toLowerCase().startsWith('es') ? 'es' : 'en';
+}
+
 @Injectable({ providedIn: 'root' })
 export class SeoService {
   private readonly document = inject(DOCUMENT);
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
   private readonly baseUrl = inject(SITE_BASE_URL);
+  private readonly locale = siteLocale(inject(LOCALE_ID));
 
   canonical(path: string): string {
-    return canonicalUrl(this.baseUrl, path);
+    return this.localizedUrl(this.locale, path);
+  }
+
+  private localizedUrl(locale: SiteLocale, path: string): string {
+    canonicalUrl(this.baseUrl, path);
+    if (LOCALE_PREFIX_SEGMENT.test(path))
+      throw new Error('La ruta canonical no debe incluir el prefijo de idioma.');
+    return canonicalUrl(this.baseUrl, `${LOCALE_PREFIX[locale]}${path}`);
   }
 
   setPage(page: SeoPage): void {
@@ -96,7 +114,12 @@ export class SeoService {
     const canonical = this.canonical(page.path);
     const jsonLd = serializeJsonLd(page.structuredData ?? []);
     const selectedImage = page.image ?? DEFAULT_SOCIAL_IMAGE;
-    const image = { ...selectedImage, url: this.canonical(selectedImage.path) };
+    const alternates: Record<HreflangKey, string> = {
+      en: this.localizedUrl('en', page.path),
+      es: this.localizedUrl('es', page.path),
+      'x-default': this.localizedUrl('en', page.path),
+    };
+    const image = { ...selectedImage, url: canonicalUrl(this.baseUrl, selectedImage.path) };
     if (
       !image.alt.trim() ||
       !Number.isInteger(image.width) ||
@@ -114,6 +137,8 @@ export class SeoService {
     this.setMeta('property', 'og:url', canonical);
     this.setMeta('property', 'og:type', page.type ?? 'website');
     this.setMeta('property', 'og:site_name', SITE_NAME);
+    this.setMeta('property', 'og:locale', OG_LOCALE[this.locale]);
+    this.setMeta('property', 'og:locale:alternate', OG_LOCALE[this.locale === 'en' ? 'es' : 'en']);
     this.setMeta('name', 'twitter:card', 'summary_large_image');
     this.setMeta('name', 'twitter:title', title);
     this.setMeta('name', 'twitter:description', description);
@@ -137,6 +162,16 @@ export class SeoService {
     link.href = canonical;
     for (const duplicate of this.document.querySelectorAll('link[rel="canonical"]'))
       if (duplicate !== link) duplicate.remove();
+
+    for (const alternate of this.document.querySelectorAll('link[rel="alternate"][hreflang]'))
+      alternate.remove();
+    for (const [hreflang, href] of Object.entries(alternates)) {
+      const alternate = this.document.createElement('link');
+      alternate.setAttribute('rel', 'alternate');
+      alternate.setAttribute('hreflang', hreflang);
+      alternate.setAttribute('href', href);
+      this.document.head.appendChild(alternate);
+    }
 
     let script = this.document.querySelector<HTMLScriptElement>(`script#${JSON_LD_ID}`);
     if (!jsonLd) {

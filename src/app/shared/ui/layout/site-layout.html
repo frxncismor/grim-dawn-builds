@@ -1,25 +1,26 @@
-<a class="skip-link" [attr.href]="skipHref()" i18n="@@layout.skip">Saltar al contenido</a>
+<a class="skip-link" [attr.href]="skipHref()" i18n="@@layout.skip">Skip to content</a>
 
 <header class="site-header">
   <div class="page-width header-inner">
     <a class="brand" routerLink="/" i18n="@@layout.brand">Grim Dawn <span>Builds</span></a>
-    <nav aria-label="Navegación principal" i18n-aria-label="@@layout.primaryNav">
+    <nav aria-label="Main navigation" i18n-aria-label="@@layout.primaryNav">
       <a routerLink="/" [attr.aria-current]="isCurrent('/') ? 'page' : null" i18n="@@layout.home"
-        >Inicio</a
+        >Home</a
       >
       <a
         routerLink="/tier-list"
         [attr.aria-current]="isCurrent('/tier-list') ? 'page' : null"
         i18n="@@layout.catalog"
-        >Catálogo</a
+        >Catalog</a
       >
       <a
         routerLink="/acerca"
         [attr.aria-current]="isCurrent('/acerca') ? 'page' : null"
         i18n="@@layout.about"
-        >Acerca</a
+        >About</a
       >
     </nav>
+    <gd-language-switcher />
   </div>
 </header>
 
@@ -27,12 +28,10 @@
 
 <footer class="site-footer">
   <div class="page-width footer-inner">
-    <p i18n="@@layout.independent">
-      Proyecto independiente. No está afiliado a Crate Entertainment.
-    </p>
-    <nav aria-label="Información editorial y legal" i18n-aria-label="@@layout.legalNav">
-      <a routerLink="/acerca" i18n="@@layout.editorial">Criterios editoriales</a>
-      <a routerLink="/legal" i18n="@@layout.legal">Aviso legal</a>
+    <p i18n="@@layout.independent">Independent project. Not affiliated with Crate Entertainment.</p>
+    <nav aria-label="Editorial and legal information" i18n-aria-label="@@layout.legalNav">
+      <a routerLink="/acerca" i18n="@@layout.editorial">Editorial criteria</a>
+      <a routerLink="/legal" i18n="@@layout.legal">Legal notice</a>
     </nav>
   </div>
 </footer>

@@ -24,6 +24,10 @@ const ROUTES = [
   { name: 'catálogo', path: '/tier-list' },
   { name: 'acerca', path: '/acerca' },
   { name: 'legal', path: '/legal' },
+  { name: 'portada es', path: '/es' },
+  { name: 'catálogo es', path: '/es/tier-list' },
+  { name: 'acerca es', path: '/es/acerca' },
+  { name: 'legal es', path: '/es/legal' },
 ] as const;
 type RouteDefinition = (typeof ROUTES)[number];
 

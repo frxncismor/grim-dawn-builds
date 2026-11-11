@@ -1,4 +1,4 @@
-import { PLATFORM_ID } from '@angular/core';
+import { LOCALE_ID, PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -54,11 +54,16 @@ async function render(
   value: BuildAttributionContent = base,
   authorPlaceholder = false,
   platform = 'browser',
+  locale = 'en-US',
 ) {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     imports: [BuildAttribution],
-    providers: [provideRouter([]), { provide: PLATFORM_ID, useValue: platform }],
+    providers: [
+      provideRouter([]),
+      { provide: PLATFORM_ID, useValue: platform },
+      { provide: LOCALE_ID, useValue: locale },
+    ],
   });
   const fixture = TestBed.createComponent(BuildAttribution);
   fixture.componentRef.setInput('content', value);
@@ -86,8 +91,8 @@ describe('gd-build-attribution', () => {
     expect(root.querySelector('[data-author-link]')).toBeNull();
     expect(root.querySelector('[data-author-name]')?.textContent?.trim()).toBe('Ana la Forjadora');
     const badge = root.querySelector('[data-author-placeholder]');
-    expect(badge?.textContent?.trim()).toBe('Autor por confirmar');
-    expect(badge?.getAttribute('aria-label')).toBe('Autor por confirmar');
+    expect(badge?.textContent?.trim()).toBe('Author to be confirmed');
+    expect(badge?.getAttribute('aria-label')).toBe('Author to be confirmed');
   });
 
   it('never links the por-confirmar slug, even without the placeholder flag', async () => {
@@ -97,15 +102,15 @@ describe('gd-build-attribution', () => {
     });
     expect(root.querySelector('[data-author-link]')).toBeNull();
     expect(root.querySelector('[data-author-placeholder]')?.textContent).toContain(
-      'Autor por confirmar',
+      'Author to be confirmed',
     );
     expect(root.querySelector('[data-author-bio]')).toBeNull();
   });
 
   it.each([
-    ['borrador', 'Borrador'],
-    ['en_revision', 'En revisión'],
-    ['publicado', 'Publicado'],
+    ['borrador', 'Draft'],
+    ['en_revision', 'In review'],
+    ['publicado', 'Published'],
   ] as const)('shows the review state %s as text', async (review_state, label) => {
     const { root } = await render({ ...base, review_state });
     const badge = root.querySelector('[data-review-state]');
@@ -114,8 +119,8 @@ describe('gd-build-attribution', () => {
   });
 
   it.each([
-    ['verificado', 'Verificado'],
-    ['sin_verificar', 'Sin verificar'],
+    ['verificado', 'Verified'],
+    ['sin_verificar', 'Unverified'],
     ['placeholder', 'Placeholder'],
   ] as const)('shows the content status %s as text', async (content_status, label) => {
     const { root } = await render({ ...base, content_status });
@@ -132,19 +137,23 @@ describe('gd-build-attribution', () => {
     expect(content?.classList.contains('badge')).toBe(true);
     expect(review?.textContent?.trim()).not.toBe('');
     expect(content?.textContent?.trim()).not.toBe('');
-    expect(root.textContent).toContain('Estado de revisión');
-    expect(root.textContent).toContain('Estado del contenido');
+    expect(root.textContent).toContain('Review state');
+    expect(root.textContent).toContain('Content status');
   });
 
-  it('formats published_at in UTC or shows «Sin fecha» when null', async () => {
+  it('formats published_at in UTC or shows «No date» when null', async () => {
     const dated = await render();
     const published = dated.root.querySelector('[data-published]')?.textContent ?? '';
-    expect(published).toContain('2026');
-    expect(published).toContain('marzo');
-    expect(published).not.toContain('Sin fecha');
+    expect(published).toContain('March 5, 2026');
+    expect(published).not.toContain('No date');
+
+    const spanish = await render(base, false, 'browser', 'es');
+    expect(spanish.root.querySelector('[data-published]')?.textContent).toContain(
+      '5 de marzo de 2026',
+    );
 
     const undated = await render({ ...base, published_at: null });
-    expect(undated.root.querySelector('[data-published]')?.textContent?.trim()).toBe('Sin fecha');
+    expect(undated.root.querySelector('[data-published]')?.textContent?.trim()).toBe('No date');
   });
 
   it('keeps the received source order and never mutates the array', async () => {
@@ -172,7 +181,7 @@ describe('gd-build-attribution', () => {
     expect(links[0].getAttribute('target')).toBe('_blank');
     expect(links[0].textContent).toContain('Hilo de muestra');
     expect(links[0].textContent).toContain('foro.example.com');
-    expect(links[0].textContent).toMatch(/pestaña nueva/i);
+    expect(links[0].textContent).toMatch(/new tab/i);
     const invalidSource = root.querySelector('[data-source="documento-sin-enlace"]');
     expect(invalidSource?.querySelector('[data-source-link]')).toBeNull();
     expect(invalidSource?.textContent).toContain('Documento sin enlace utilizable');
@@ -198,10 +207,10 @@ describe('gd-build-attribution', () => {
 
   it.each([
     ['original', 'Original'],
-    ['comunidad', 'Comunidad'],
-    ['oficial', 'Oficial'],
+    ['comunidad', 'Community'],
+    ['oficial', 'Official'],
     ['video', 'Video'],
-    ['externa_enlace', 'Enlace externo'],
+    ['externa_enlace', 'External link'],
   ] as const)('localizes the source kind %s', async (kind, label) => {
     const { root } = await render({ ...base, sources: [{ ...base.sources[0], kind }] });
     expect(root.querySelector('[data-source-kind]')?.textContent?.trim()).toBe(label);
@@ -222,7 +231,7 @@ describe('gd-build-attribution', () => {
     const blocks = root.querySelectorAll('[data-disclaimer]');
     expect(blocks).toHaveLength(1);
     expect(blocks[0].textContent).toContain('Aviso de muestra del pie de página.');
-    expect(blocks[0].textContent).toContain('Descargo');
+    expect(blocks[0].textContent).toContain('Disclaimer');
   });
 
   it('ignores notes already consumed by other sections and non-Descargo notes', async () => {
@@ -256,7 +265,7 @@ describe('gd-build-attribution', () => {
     expect(root.textContent).toContain('Ana la Forjadora');
     expect(root.textContent).not.toContain('RolInventado');
     expect(root.textContent).not.toContain('31 de diciembre de 1999');
-    expect(root.textContent).toContain('marzo');
+    expect(root.textContent).toContain('March 5, 2026');
   });
 
   it('escapes hostile editorial strings as text without injecting markup', async () => {
@@ -295,7 +304,7 @@ describe('gd-build-attribution', () => {
     const section = root.querySelector('section');
     expect(section?.id).toBe('fuentes');
     expect(section?.getAttribute('aria-labelledby')).toBe('fuentes-heading');
-    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Autor y fuentes');
+    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Author and sources');
     expect(root.textContent).toContain('Ana la Forjadora');
     expect(root.textContent).toContain('Hilo de muestra');
     expect(root.textContent).toContain('Descargo de muestra');

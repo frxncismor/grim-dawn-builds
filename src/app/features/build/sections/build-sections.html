@@ -17,7 +17,7 @@
     }
     @case ('prioridades') {
       <section class="build-section" id="prioridades" aria-labelledby="priorities-title">
-        <h2 id="priorities-title" i18n="@@buildSections.priorities">Prioridades</h2>
+        <h2 id="priorities-title" i18n="@@buildSections.priorities">Priorities</h2>
         @for (introduction of prioritiesIntroductions(); track $index) {
           <p class="introduction">{{ introduction }}</p>
         }
@@ -41,7 +41,7 @@
     }
     @case ('notas') {
       <section class="build-section" id="notas" aria-labelledby="notes-title">
-        <h2 id="notes-title" i18n="@@buildSections.notes">Notas</h2>
+        <h2 id="notes-title" i18n="@@buildSections.notes">Notes</h2>
         @if (notesForDisplay().length) {
           <ul class="editorial-list">
             @for (note of notesForDisplay(); track $index) {
@@ -59,7 +59,7 @@
     }
     @case ('guia-espiritual') {
       <section class="build-section" id="guia-espiritual" aria-labelledby="spiritual-guide-title">
-        <h2 id="spiritual-guide-title" i18n="@@buildSections.spiritualGuide">Guía Espiritual</h2>
+        <h2 id="spiritual-guide-title" i18n="@@buildSections.spiritualGuide">Spirit Guide</h2>
         @for (introduction of spiritualGuideIntroductions(); track $index) {
           <p class="introduction">{{ introduction }}</p>
         }

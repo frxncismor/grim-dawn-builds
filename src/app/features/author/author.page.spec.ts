@@ -30,10 +30,10 @@ describe('author profile page', () => {
     });
     await f.whenStable();
     expect(f.nativeElement.querySelector('h1').textContent).toBe('Proyecto');
-    expect(document.title).toBe('Perfil de Proyecto · Grim Dawn Builds');
+    expect(document.title).toBe('Profile of Proyecto · Grim Dawn Builds');
     expect(f.nativeElement.textContent).toContain('<img src=x onerror=fail()>');
     expect(f.nativeElement.querySelector('img')).toBeNull();
-    expect(f.nativeElement.textContent).toContain('todavía no tiene guías publicadas');
+    expect(f.nativeElement.textContent).toContain('does not have any published guides yet');
     expect(f.nativeElement.querySelector('a[href="/tier-list"]')).not.toBeNull();
   });
   it('renders public guide metadata and a safe external author link', async () => {
@@ -64,7 +64,7 @@ describe('author profile page', () => {
   it('handles missing profiles with noindex', async () => {
     const f = create(null);
     await f.whenStable();
-    expect(f.nativeElement.textContent).toContain('Autor no encontrado');
+    expect(f.nativeElement.textContent).toContain('Author not found');
     expect(document.querySelector('meta[name=robots]')?.getAttribute('content')).toBe(
       'noindex,nofollow',
     );

@@ -38,6 +38,7 @@ export const VERIFY_STEPS = [
   { name: 'format', command: 'pnpm format:check' },
   { name: 'test', command: 'pnpm test' },
   { name: 'test:scripts', command: 'pnpm test:scripts' },
+  { name: 'check:locale-parity', command: 'pnpm run check:locale-parity' },
   { name: 'assets', command: 'pnpm assets:check' },
   { name: 'contrast', command: 'pnpm check:contrast' },
   { name: 'build', command: 'pnpm build' },

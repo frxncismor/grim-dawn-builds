@@ -75,7 +75,7 @@ describe('gd-build-toc', () => {
   it('lists every present and visible section in position order', async () => {
     const { root } = await render();
     expect(ids(root)).toEqual(canonical);
-    expect(root.querySelector('nav')?.getAttribute('aria-label')).toBe('Contenido de la guía');
+    expect(root.querySelector('nav')?.getAttribute('aria-label')).toBe('Guide contents');
     expect(root.querySelectorAll('nav a')).toHaveLength(canonical.length);
   });
 
@@ -110,7 +110,7 @@ describe('gd-build-toc', () => {
     expect(ids(root)).toEqual(['habilidades', 'filtro-de-botin', 'guia-espiritual']);
     expect(root.textContent).not.toContain('arboles');
     expect(root.textContent).not.toContain('guia_espiritual');
-    expect(root.textContent).toContain('Guía Espiritual');
+    expect(root.textContent).toContain('Spirit Guide');
   });
 
   it('shows video only when the shared validator accepts the URL', async () => {
@@ -174,7 +174,7 @@ describe('gd-build-toc', () => {
     const { root } = await render(content, 'server');
     const details = root.querySelector('details');
     expect(details?.open).toBe(true);
-    expect(details?.querySelector('summary')?.textContent?.trim()).toBe('Contenido');
+    expect(details?.querySelector('summary')?.textContent?.trim()).toBe('Contents');
     expect(details?.querySelector('nav a')).not.toBeNull();
   });
 
@@ -268,16 +268,16 @@ describe('gd-build-toc', () => {
     expect(root.querySelectorAll('nav a')).toHaveLength(canonical.length);
     const labels = [...root.querySelectorAll('nav a')].map((link) => link.textContent?.trim());
     expect(labels).toEqual([
-      'Resumen',
-      'Prioridades',
-      'Habilidades',
-      'Orden de compra',
-      'Notas',
-      'Filtro de botín',
-      'Guía Espiritual',
-      'Devociones',
+      'Overview',
+      'Priorities',
+      'Skills',
+      'Purchase order',
+      'Notes',
+      'Loot filter',
+      'Spirit Guide',
+      'Devotions',
       'Video',
-      'Fuentes',
+      'Sources',
     ]);
   });
 

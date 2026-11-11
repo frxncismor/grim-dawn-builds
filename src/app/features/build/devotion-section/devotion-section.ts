@@ -36,9 +36,9 @@ export class DevotionSection {
 
   readonly browserReady = signal(false);
   readonly text = {
-    duplicatePositions: $localize`:@@devotionSection.duplicatePositions:Los datos de esta guía son inconsistentes porque contienen posiciones repetidas. No se puede seleccionar un paso.`,
-    empty: $localize`:@@devotionSection.empty:Sin información disponible`,
-    javascriptRequired: $localize`:@@devotionSection.javascriptRequired:Seleccionar un paso requiere JavaScript; la ruta completa se puede leer más abajo en esta página.`,
+    duplicatePositions: $localize`:@@devotionSection.duplicatePositions:This guide's data is inconsistent because it contains repeated positions. A step cannot be selected.`,
+    empty: $localize`:@@devotionSection.empty:No information available`,
+    javascriptRequired: $localize`:@@devotionSection.javascriptRequired:Selecting a step requires JavaScript; the full path can be read further down this page.`,
   };
 
   readonly isVisible = computed(

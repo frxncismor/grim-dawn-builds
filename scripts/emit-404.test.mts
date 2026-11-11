@@ -6,19 +6,19 @@ import { basename, dirname, join } from 'node:path';
 import { assertNotFoundPage, emit404, NOT_FOUND_ARTIFACT } from './emit-404.mts';
 
 const notFoundHtml = `<!doctype html>
-<html lang="es-419">
+<html lang="en">
 <head>
   <base href="/">
   <meta name="robots" content="noindex,follow">
-  <title>Página no encontrada</title>
+  <title>Page not found</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <app-root>
     <section class="not-found" data-not-found aria-labelledby="not-found-title">
       <p class="not-found-eyebrow">Error 404</p>
-      <h1 id="not-found-title">Página no encontrada</h1>
-      <a href="/">Volver al inicio</a>
+      <h1 id="not-found-title">Page not found</h1>
+      <a href="/">Back to the home page</a>
     </section>
   </app-root>
   <script src="main.js" type="module"></script>
@@ -26,12 +26,19 @@ const notFoundHtml = `<!doctype html>
 </html>
 `;
 
-async function artifact(html = notFoundHtml): Promise<string> {
+const spanishNotFoundHtml = notFoundHtml
+  .replace('<html lang="en">', '<html lang="es">')
+  .replace('<base href="/">', '<base href="/es/">')
+  .replace('Page not found', 'Página no encontrada')
+  .replace('Back to the home page', 'Volver al inicio');
+
+async function artifact(html = notFoundHtml, segments: readonly string[] = []): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), 'gd-emit-404-'));
-  await mkdir(join(root, 'browser', '404'), { recursive: true });
-  await mkdir(join(root, 'browser', 'assets'), { recursive: true });
-  await writeFile(join(root, 'browser', '404', 'index.html'), html);
-  await writeFile(join(root, 'browser', 'index.html'), '<html><body>200</body></html>');
+  const browser = join(root, 'browser');
+  await mkdir(join(browser, ...segments, '404'), { recursive: true });
+  await mkdir(join(browser, 'assets'), { recursive: true });
+  await writeFile(join(browser, ...segments, '404', 'index.html'), html);
+  await writeFile(join(browser, 'index.html'), '<html><body>200</body></html>');
   return root;
 }
 async function cleanup(root: string): Promise<void> {
@@ -68,9 +75,11 @@ test('fails when the prerendered 404 page is missing instead of inventing an art
 test('rejects a 200 page dressed as 404 and any page without the static 404 contract', async () => {
   const variants = [
     '<!doctype html><html><head><base href="/"></head><body><app-root></app-root></body></html>',
-    '<!doctype html><html><head><meta name="robots" content="index,follow"></head><body><section data-not-found><h1>Página no encontrada</h1></section></body></html>',
-    '<!doctype html><html><head><meta name="robots" content="noindex,follow"></head><body><section data-not-found><h1>Catálogo</h1></section></body></html>',
-    '<!doctype html><html><head><meta name="robots" content="noindex,follow"><meta name="gd-static-home" content="1"></head><body><section data-not-found><h1>Página no encontrada</h1></section></body></html>',
+    '<!doctype html><html><head><base href="/"><meta name="robots" content="index,follow"></head><body><section data-not-found><h1>Page not found</h1></section></body></html>',
+    '<!doctype html><html><head><base href="/"><meta name="robots" content="noindex,follow"></head><body><section><h1>Page not found</h1></section></body></html>',
+    '<!doctype html><html><head><base href="/"><meta name="robots" content="noindex,follow"><meta name="gd-static-home" content="1"></head><body><section data-not-found><h1>Page not found</h1></section></body></html>',
+    '<!doctype html><html><head><base href="/"><meta name="robots" content="noindex,follow"></head><body><section data-not-found><h1> </h1></section></body></html>',
+    '<!doctype html><html><head><base href="/es/"><meta name="robots" content="noindex,follow"></head><body><section data-not-found><h1>Page not found</h1></section></body></html>',
   ];
   for (const html of variants) {
     const root = await artifact(html);
@@ -80,6 +89,43 @@ test('rejects a 200 page dressed as 404 and any page without the static 404 cont
     } finally {
       await cleanup(root);
     }
+  }
+});
+
+test('copies the 404 page of every configured locale with its own base href', async () => {
+  const root = await artifact();
+  try {
+    await mkdir(join(root, 'browser', 'es', '404'), { recursive: true });
+    await writeFile(join(root, 'browser', 'es', '404', 'index.html'), spanishNotFoundHtml);
+    await emit404(root, [[], ['es']]);
+    assert.equal(await readFile(join(root, 'browser', NOT_FOUND_ARTIFACT), 'utf8'), notFoundHtml);
+    assert.equal(
+      await readFile(join(root, 'browser', 'es', NOT_FOUND_ARTIFACT), 'utf8'),
+      spanishNotFoundHtml,
+    );
+    assertNotFoundPage(await readFile(join(root, 'browser', 'es', NOT_FOUND_ARTIFACT), 'utf8'), '/es/');
+  } finally {
+    await cleanup(root);
+  }
+});
+
+test('fails when a configured locale has no prerendered 404 page', async () => {
+  const root = await artifact();
+  try {
+    await assert.rejects(emit404(root, [[], ['es']]), { message: /404\.html inválido/ });
+  } finally {
+    await cleanup(root);
+  }
+});
+
+test('rejects a locale 404 page whose base href belongs to another locale', async () => {
+  const root = await artifact();
+  try {
+    await mkdir(join(root, 'browser', 'es', '404'), { recursive: true });
+    await writeFile(join(root, 'browser', 'es', '404', 'index.html'), notFoundHtml);
+    await assert.rejects(emit404(root, [['es']]), { message: /404\.html inválido/ });
+  } finally {
+    await cleanup(root);
   }
 });
 

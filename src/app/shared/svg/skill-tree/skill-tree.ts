@@ -160,7 +160,7 @@ export class SkillTree {
   );
   readonly detailId = computed(() => `${this.treeId()}-${this.mastery().slug}-detail`);
   readonly svgTitle = computed(
-    () => $localize`:@@skillTree.svgTitle:Árbol de ${this.mastery().name_es}:mastery:`,
+    () => $localize`:@@skillTree.svgTitle:Skill tree of ${this.mastery().name_es}:mastery:`,
   );
 
   nodeId(slug: string): string {
@@ -227,11 +227,11 @@ export class SkillTree {
   statusLabel(status: SkillNode['status']): string {
     switch (status) {
       case 'recomendada':
-        return $localize`:@@skillTree.status.recommended:Recomendada`;
+        return $localize`:@@skillTree.status.recommended:Recommended`;
       case 'meta':
         return $localize`:@@skillTree.status.meta:Meta`;
       case 'omitir':
-        return $localize`:@@skillTree.status.skip:Omitir`;
+        return $localize`:@@skillTree.status.skip:Skip`;
     }
   }
 
@@ -248,7 +248,7 @@ export class SkillTree {
   }
 
   activeStepLabel(): string {
-    return $localize`:@@skillTree.activeStep:Paso activo`;
+    return $localize`:@@skillTree.activeStep:Active step`;
   }
 
   visibleNameLines(name: string, maxChars: number): string[] {
@@ -282,7 +282,7 @@ export class SkillTree {
   }
 
   barLabel(bar: number): string {
-    return $localize`:@@skillTree.barLabel:Barra ${bar}:bar:`;
+    return $localize`:@@skillTree.barLabel:Bar ${bar}:bar:`;
   }
 
   barWarning(node: SkillNode): boolean {

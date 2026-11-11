@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../core/seo/seo.service';
 
-const TITLE = $localize`:@@notFound.seoTitle:Página no encontrada`;
-const DESCRIPTION = $localize`:@@notFound.seoDescription:La dirección solicitada no existe o ya no está disponible. Vuelve al inicio o consulta la tier list.`;
+const TITLE = $localize`:@@notFound.seoTitle:Page not found`;
+const DESCRIPTION = $localize`:@@notFound.seoDescription:The requested address does not exist or is no longer available. Go back to the home page or check the tier list.`;
 
 /**
  * Static 404 page: no repository, content or API dependency. Its markup is prerendered for
@@ -16,15 +16,13 @@ const DESCRIPTION = $localize`:@@notFound.seoDescription:La dirección solicitad
   template: `
     <section class="not-found" data-not-found aria-labelledby="not-found-title">
       <p class="not-found-eyebrow" i18n="@@notFound.eyebrow">Error 404</p>
-      <h1 id="not-found-title" i18n="@@notFound.title">Página no encontrada</h1>
-      <p i18n="@@notFound.body">La dirección que buscas no existe o ya no está disponible.</p>
-      <nav
-        class="not-found-links"
-        aria-label="Enlaces de recuperación"
-        i18n-aria-label="@@notFound.nav"
-      >
-        <a routerLink="/" i18n="@@notFound.home">Volver al inicio</a>
-        <a routerLink="/tier-list" i18n="@@notFound.catalog">Ver la tier list</a>
+      <h1 id="not-found-title" i18n="@@notFound.title">Page not found</h1>
+      <p i18n="@@notFound.body">
+        The address you are looking for does not exist or is no longer available.
+      </p>
+      <nav class="not-found-links" aria-label="Recovery links" i18n-aria-label="@@notFound.nav">
+        <a routerLink="/" i18n="@@notFound.home">Back to the home page</a>
+        <a routerLink="/tier-list" i18n="@@notFound.catalog">View the tier list</a>
       </nav>
     </section>
   `,

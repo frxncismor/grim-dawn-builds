@@ -1,0 +1,40 @@
+.site-header .lang-switch {
+  display: flex;
+  align-items: center;
+  border-inline-start: var(--frame-border);
+}
+
+.site-header .lang-switch a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  padding-inline: var(--space-3);
+  color: var(--color-ash);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-header .lang-switch a + a {
+  border-inline-start: var(--frame-border);
+}
+
+.site-header .lang-switch a:hover,
+.site-header .lang-switch a[aria-current='true'] {
+  color: var(--color-storm);
+  text-decoration: underline;
+  text-decoration-color: var(--color-storm-dim);
+  text-underline-offset: var(--space-1);
+}
+
+.site-header .lang-switch a[aria-current='true'] {
+  font-weight: var(--weight-emphasis);
+}
+
+.site-header .lang-switch a:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}

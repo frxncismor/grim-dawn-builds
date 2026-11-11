@@ -44,7 +44,7 @@ describe('gd-loot-filter', () => {
     const root = fixture.nativeElement as HTMLElement;
     const columns = Array.from(root.querySelectorAll<HTMLElement>('[data-column]'));
 
-    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Filtro de botín');
+    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Loot filter');
     expect(columns).toHaveLength(4);
     expect(
       columns.map((column) => column.querySelector('[data-column-name]')?.textContent?.trim()),
@@ -62,7 +62,7 @@ describe('gd-loot-filter', () => {
       content.loot_filter_columns.flatMap((column) =>
         column.rules.map((rule) => ({
           action: rule.action,
-          label: { marcar: 'Marcar', desmarcar: 'Desmarcar', aviso: 'Aviso' }[rule.action],
+          label: { marcar: 'Mark', desmarcar: 'Unmark', aviso: 'Notice' }[rule.action],
         })),
       ),
     );
@@ -114,7 +114,7 @@ describe('gd-loot-filter', () => {
       (note) => note.label === 'Filtro de botín' && !/^Introducci[oó]n\s+\d+$/i.test(note.headline),
     )!;
     const expected = [
-      'Filtro de botín',
+      'Loot filter',
       '',
       introduction.detail,
       '',
@@ -122,7 +122,7 @@ describe('gd-loot-filter', () => {
         `${column.name} — ${column.subtitle}`,
         ...column.rules.map(
           (rule) =>
-            `- [${{ marcar: 'Marcar', desmarcar: 'Desmarcar', aviso: 'Aviso' }[rule.action]}] ${rule.label}: ${rule.detail}`,
+            `- [${{ marcar: 'Mark', desmarcar: 'Unmark', aviso: 'Notice' }[rule.action]}] ${rule.label}: ${rule.detail}`,
         ),
         '',
       ]),
@@ -132,7 +132,7 @@ describe('gd-loot-filter', () => {
     expect(text).toBe(expected);
     expect(component.buildSummaryText()).toBe(text);
     expect(text).not.toMatch(/<\/?[a-z][^>]*>/i);
-    expect(text).toContain('- [Aviso] Ojo con la lógica: El filtro es un O, no un Y');
+    expect(text).toContain('- [Notice] Ojo con la lógica: El filtro es un O, no un Y');
   });
 
   it('sorts copied columns and rules by position without mutating frozen input', async () => {
@@ -203,7 +203,7 @@ describe('gd-loot-filter', () => {
     const fixture = await render({ ...content, loot_filter_columns: [] });
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(root.textContent).toContain('Sin información disponible');
+    expect(root.textContent).toContain('No information available');
     expect(root.querySelector('[data-column]')).toBeNull();
     expect(root.querySelector<HTMLButtonElement>('[data-copy-summary]')?.disabled).toBe(true);
   });
@@ -277,7 +277,7 @@ describe('gd-loot-filter', () => {
     expect(root.querySelector<HTMLButtonElement>('[data-copy-summary]')?.disabled).toBe(true);
     expect(root.querySelector('[data-no-script]')?.textContent).toContain('JavaScript');
     expect(root.querySelector('[data-no-script]')?.textContent).toContain(
-      'resumen completo ya está visible',
+      'the full summary is already visible',
     );
     expect(root.querySelector('[aria-live="polite"]')).not.toBeNull();
   });
@@ -299,7 +299,7 @@ describe('gd-loot-filter', () => {
       expect(writeText).toHaveBeenCalledWith(
         (fixture.componentInstance as unknown as { buildSummaryText(): string }).buildSummaryText(),
       );
-      expect(root.querySelector('[role="status"]')?.textContent).toContain('copiado');
+      expect(root.querySelector('[role="status"]')?.textContent).toContain('copied');
       expect(root.querySelector('[role="status"]')?.getAttribute('aria-live')).toBe('polite');
       expect(document.activeElement).toBe(button);
     } finally {
@@ -318,7 +318,7 @@ describe('gd-loot-filter', () => {
       await rejected.whenStable();
       rejected.detectChanges();
       expect(rejectedRoot.querySelector('[role="status"]')?.textContent).toMatch(
-        /No se pudo|error/i,
+        /could not be copied|error/i,
       );
     } finally {
       restoreRejectedClipboard();
@@ -332,7 +332,7 @@ describe('gd-loot-filter', () => {
       await missing.whenStable();
       missing.detectChanges();
       expect(missingRoot.querySelector('[role="status"]')?.textContent).toMatch(
-        /No está disponible|no disponible/i,
+        /is not available/i,
       );
     } finally {
       restoreMissingClipboard();

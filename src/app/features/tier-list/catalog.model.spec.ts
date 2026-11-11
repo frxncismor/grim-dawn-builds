@@ -21,6 +21,25 @@ describe('public catalog view model', () => {
     expect(applyFilter(model.cards, { ...EMPTY_FILTER, text: 'Shaman Soldier' })).toHaveLength(1);
     expect(catalogGroups(model).find((g) => g.key === 'masteries')?.options).toHaveLength(3);
   });
+  it('labels filter groups in English while keeping the stable option values', () => {
+    const groups = catalogGroups(buildCatalog(input));
+    expect(groups.map((g) => g.label)).toEqual([
+      'Masteries',
+      'Damage type',
+      'Content',
+      'Style',
+      'Content status',
+    ]);
+    const damage = groups.find((g) => g.key === 'damageTypes');
+    expect(damage?.options.find((o) => o.value === 'mascotas')?.label).toBe('Minions');
+    expect(damage?.options.find((o) => o.value === 'eter')?.label).toBe('Aether');
+    expect(groups.find((g) => g.key === 'playstyles')?.options.map((o) => o.value)).toEqual([
+      'melee',
+      'rango',
+      'mascotas',
+      'hibrido',
+    ]);
+  });
   it('retains multiple builds and suppresses redundant placeholders for their combination', () => {
     const model = buildCatalog({
       ...input,

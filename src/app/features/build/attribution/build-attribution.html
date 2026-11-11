@@ -1,9 +1,9 @@
 @if (isVisible()) {
   <section id="fuentes" aria-labelledby="fuentes-heading">
-    <h2 id="fuentes-heading" i18n="@@buildAttribution.heading">Autor y fuentes</h2>
+    <h2 id="fuentes-heading" i18n="@@buildAttribution.heading">Author and sources</h2>
 
     <div class="author" data-author>
-      <p class="label" i18n="@@buildAttribution.authorLabel">Autor</p>
+      <p class="label" i18n="@@buildAttribution.authorLabel">Author</p>
       @if (authorHref(); as href) {
         <a class="author__name author__link" [href]="href" data-author-link>{{
           content().author.display_name
@@ -14,10 +14,10 @@
           class="badge badge--pending"
           role="note"
           data-author-placeholder
-          aria-label="Autor por confirmar"
+          aria-label="Author to be confirmed"
           i18n="@@buildAttribution.authorPlaceholder"
         >
-          Autor por confirmar
+          Author to be confirmed
         </span>
       }
       @if (content().author.bio; as bio) {
@@ -27,11 +27,11 @@
 
     <dl class="facts" data-meta>
       <div class="facts__item">
-        <dt i18n="@@buildAttribution.gameVersion">Versión del juego</dt>
+        <dt i18n="@@buildAttribution.gameVersion">Game version</dt>
         <dd data-game-version>{{ content().game_version }}</dd>
       </div>
       <div class="facts__item">
-        <dt i18n="@@buildAttribution.published">Publicado</dt>
+        <dt i18n="@@buildAttribution.published">Published</dt>
         <dd data-published>
           @if (content().published_at; as published) {
             <time [attr.datetime]="published">{{ publishedLabel() }}</time>
@@ -41,7 +41,7 @@
         </dd>
       </div>
       <div class="facts__item">
-        <dt i18n="@@buildAttribution.reviewState">Estado de revisión</dt>
+        <dt i18n="@@buildAttribution.reviewState">Review state</dt>
         <dd>
           <span class="badge" data-review-state [attr.data-review-state]="reviewState()">{{
             reviewLabel()
@@ -49,7 +49,7 @@
         </dd>
       </div>
       <div class="facts__item">
-        <dt i18n="@@buildAttribution.contentStatus">Estado del contenido</dt>
+        <dt i18n="@@buildAttribution.contentStatus">Content status</dt>
         <dd>
           <span class="badge" data-content-status [attr.data-content-status]="contentState()">{{
             contentStatusLabel()
@@ -59,7 +59,7 @@
     </dl>
 
     <div class="sources" data-sources>
-      <h3 i18n="@@buildAttribution.sourcesHeading">Fuentes</h3>
+      <h3 i18n="@@buildAttribution.sourcesHeading">Sources</h3>
       @if (content().sources.length) {
         <ul class="sources__list">
           @for (source of content().sources; track source.slug) {
@@ -78,7 +78,7 @@
                   <a [href]="url.href" target="_blank" rel="noopener noreferrer" data-source-link>
                     {{ source.title }}
                     <span data-source-site>{{ url.host }}</span>
-                    <span i18n="@@buildAttribution.newTab">(abre en una pestaña nueva)</span>
+                    <span i18n="@@buildAttribution.newTab">(opens in a new tab)</span>
                   </a>
                 </p>
               }
@@ -87,13 +87,13 @@
         </ul>
       } @else {
         <p class="sources__empty" role="status" i18n="@@buildAttribution.noSources">
-          Sin fuentes registradas
+          No sources recorded
         </p>
       }
     </div>
 
     <div class="disclaimer" data-disclaimer>
-      <h3 i18n="@@buildAttribution.disclaimerHeading">Descargo</h3>
+      <h3 i18n="@@buildAttribution.disclaimerHeading">Disclaimer</h3>
       @if (disclaimer().headline; as headline) {
         <p class="disclaimer__headline" data-disclaimer-headline>{{ headline }}</p>
       }
