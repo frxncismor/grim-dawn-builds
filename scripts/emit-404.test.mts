@@ -103,7 +103,10 @@ test('copies the 404 page of every configured locale with its own base href', as
       await readFile(join(root, 'browser', 'es', NOT_FOUND_ARTIFACT), 'utf8'),
       spanishNotFoundHtml,
     );
-    assertNotFoundPage(await readFile(join(root, 'browser', 'es', NOT_FOUND_ARTIFACT), 'utf8'), '/es/');
+    assertNotFoundPage(
+      await readFile(join(root, 'browser', 'es', NOT_FOUND_ARTIFACT), 'utf8'),
+      '/es/',
+    );
   } finally {
     await cleanup(root);
   }

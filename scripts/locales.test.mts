@@ -55,8 +55,5 @@ test('rejects unsafe subPath segments instead of treating them as a locale direc
 });
 
 test('a project without i18n fails instead of silently using one locale', () => {
-  assert.throws(
-    () => artifactLocales({ projects: { app: {} } }),
-    /ningún proyecto declara i18n/,
-  );
+  assert.throws(() => artifactLocales({ projects: { app: {} } }), /ningún proyecto declara i18n/);
 });

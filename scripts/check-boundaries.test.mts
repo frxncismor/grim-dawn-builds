@@ -96,7 +96,10 @@ describe('allowed dependency graph (plan §12.4)', () => {
   });
 
   it('forbids relative paths that climb from the web into the API', () => {
-    const issues = checkSource('src/app/a.ts', "\nimport { server } from '../../apps/api/src/server';\n");
+    const issues = checkSource(
+      'src/app/a.ts',
+      "\nimport { server } from '../../apps/api/src/server';\n",
+    );
     assert.equal(issues.length, 1);
     assert.equal(issues[0].rule, 'zone-edge');
     assert.equal(issues[0].line, 2);
@@ -104,7 +107,9 @@ describe('allowed dependency graph (plan §12.4)', () => {
   });
 
   it('forbids the API importing web source relatively', () => {
-    assert.deepEqual(rulesOf('apps/api/src/a.ts', "import { x } from '../../../src/app/app.ts';"), ['zone-edge']);
+    assert.deepEqual(rulesOf('apps/api/src/a.ts', "import { x } from '../../../src/app/app.ts';"), [
+      'zone-edge',
+    ]);
   });
 
   it('reports the line of the module specifier in a multi-line import', () => {
@@ -134,29 +139,41 @@ describe('domain purity (plan §12.4)', () => {
   });
 
   it('forbids framework imports', () => {
-    assert.deepEqual(rulesOf(DOMAIN, "import { Injectable } from '@angular/core';"), ['domain-framework']);
+    assert.deepEqual(rulesOf(DOMAIN, "import { Injectable } from '@angular/core';"), [
+      'domain-framework',
+    ]);
     assert.deepEqual(rulesOf(DOMAIN, "import Fastify from 'fastify';"), ['domain-framework']);
     assert.deepEqual(rulesOf(DOMAIN, "import cors from '@fastify/cors';"), ['domain-framework']);
   });
 
   it('forbids Drizzle and database driver imports', () => {
-    assert.deepEqual(rulesOf(DOMAIN, "import { drizzle } from 'drizzle-orm/node-postgres';"), ['domain-database']);
-    assert.deepEqual(rulesOf(DOMAIN, "import { defineConfig } from 'drizzle-kit';"), ['domain-database']);
+    assert.deepEqual(rulesOf(DOMAIN, "import { drizzle } from 'drizzle-orm/node-postgres';"), [
+      'domain-database',
+    ]);
+    assert.deepEqual(rulesOf(DOMAIN, "import { defineConfig } from 'drizzle-kit';"), [
+      'domain-database',
+    ]);
     assert.deepEqual(rulesOf(DOMAIN, "import { Pool } from 'pg';"), ['domain-database']);
     assert.deepEqual(rulesOf(DOMAIN, "export * from 'postgres';"), ['domain-database']);
   });
 
   it('forbids Node HTTP and network modules', () => {
-    assert.deepEqual(rulesOf(DOMAIN, "import { createServer } from 'node:http';"), ['domain-network']);
+    assert.deepEqual(rulesOf(DOMAIN, "import { createServer } from 'node:http';"), [
+      'domain-network',
+    ]);
     assert.deepEqual(rulesOf(DOMAIN, "import { request } from 'https';"), ['domain-network']);
     assert.deepEqual(rulesOf(DOMAIN, "import axios from 'axios';"), ['domain-network']);
   });
 
   it('forbids I/O modules, including subpaths and dynamic or CommonJS forms', () => {
     assert.deepEqual(rulesOf(DOMAIN, "import { readFileSync } from 'node:fs';"), ['domain-io']);
-    assert.deepEqual(rulesOf(DOMAIN, "import { readFile } from 'node:fs/promises';"), ['domain-io']);
+    assert.deepEqual(rulesOf(DOMAIN, "import { readFile } from 'node:fs/promises';"), [
+      'domain-io',
+    ]);
     assert.deepEqual(rulesOf(DOMAIN, "import { join } from 'path';"), ['domain-io']);
-    assert.deepEqual(rulesOf(DOMAIN, "import { execFile } from 'node:child_process';"), ['domain-io']);
+    assert.deepEqual(rulesOf(DOMAIN, "import { execFile } from 'node:child_process';"), [
+      'domain-io',
+    ]);
     assert.deepEqual(rulesOf(DOMAIN, "import { env } from 'node:process';"), ['domain-io']);
     assert.deepEqual(rulesOf(DOMAIN, "const fs = require('fs');"), ['domain-io']);
     assert.deepEqual(rulesOf(DOMAIN, "const os = await import('node:os');"), ['domain-io']);
@@ -196,15 +213,23 @@ describe('precision: comments, strings and syntax', () => {
     const code = [
       "// import { Injectable } from '@angular/core';",
       "/* import Fastify from 'fastify'; */",
-      'const s = "import(\'fs\') and process.env.X and from \'../../apps/api/x\'";',
+      "const s = \"import('fs') and process.env.X and from '../../apps/api/x'\";",
       '',
     ].join('\n');
     assert.deepEqual(rulesOf('packages/domain/src/a.ts', code), []);
-    assert.deepEqual(rulesOf('src/app/a.ts', "// import x from '@gd/api';\nconst s = \"from '../../apps/api/x'\";"), []);
+    assert.deepEqual(
+      rulesOf(
+        'src/app/a.ts',
+        "// import x from '@gd/api';\nconst s = \"from '../../apps/api/x'\";",
+      ),
+      [],
+    );
   });
 
   it('flags a cross-zone type-only import', () => {
-    assert.deepEqual(rulesOf('src/app/a.ts', "type Thing = import('@gd/api').Thing;"), ['zone-edge']);
+    assert.deepEqual(rulesOf('src/app/a.ts', "type Thing = import('@gd/api').Thing;"), [
+      'zone-edge',
+    ]);
   });
 
   it('flags cross-zone re-exports', () => {
@@ -217,9 +242,15 @@ describe('precision: comments, strings and syntax', () => {
   });
 
   it('fails closed on dynamic imports whose target cannot be read statically', () => {
-    assert.deepEqual(rulesOf('src/app/a.ts', 'const m = await import(name);'), ['unresolvable-import']);
-    assert.deepEqual(rulesOf('packages/domain/src/a.ts', 'const m = require(p);'), ['unresolvable-import']);
-    assert.deepEqual(rulesOf('src/app/a.ts', 'const m = import(`./locale/${id}`);'), ['unresolvable-import']);
+    assert.deepEqual(rulesOf('src/app/a.ts', 'const m = await import(name);'), [
+      'unresolvable-import',
+    ]);
+    assert.deepEqual(rulesOf('packages/domain/src/a.ts', 'const m = require(p);'), [
+      'unresolvable-import',
+    ]);
+    assert.deepEqual(rulesOf('src/app/a.ts', 'const m = import(`./locale/${id}`);'), [
+      'unresolvable-import',
+    ]);
   });
 });
 
@@ -254,7 +285,10 @@ describe('scanWorkspace', () => {
     });
     const result = scanWorkspace(root);
     const found = result.issues.map((i) => `${i.file}:${i.line}:${i.rule}`).sort();
-    assert.deepEqual(found, ['packages/domain/src/io.ts:1:domain-io', 'src/app/bad.ts:2:zone-edge']);
+    assert.deepEqual(found, [
+      'packages/domain/src/io.ts:1:domain-io',
+      'src/app/bad.ts:2:zone-edge',
+    ]);
     assert.equal(result.scannedFiles, 5);
   });
 });
@@ -288,6 +322,9 @@ describe('check:boundaries CLI', () => {
     const root = makeFixture({ 'packages/domain/src/bad.ts': "import Fastify from 'fastify';\n" });
     const result = run(root);
     assert.equal(result.status, 1, result.stderr || result.stdout);
-    assert.match(result.stdout + result.stderr, /packages\/domain\/src\/bad\.ts:1 \[domain-framework\]/);
+    assert.match(
+      result.stdout + result.stderr,
+      /packages\/domain\/src\/bad\.ts:1 \[domain-framework\]/,
+    );
   });
 });

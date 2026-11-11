@@ -47,7 +47,10 @@ async function emitLocale404(output: string, segments: readonly string[]): Promi
   const localeRoot = join(browser, ...segments);
   const source = join(localeRoot, NOT_FOUND_SOURCE);
   const target = join(localeRoot, NOT_FOUND_ARTIFACT);
-  const pending = join(localeRoot, `.emit-404-${process.pid}-${Math.random().toString(16).slice(2)}.tmp`);
+  const pending = join(
+    localeRoot,
+    `.emit-404-${process.pid}-${Math.random().toString(16).slice(2)}.tmp`,
+  );
   const baseHref = segments.length === 0 ? '/' : `/${segments.join('/')}/`;
   try {
     for (const path of [root, browser]) {

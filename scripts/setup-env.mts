@@ -68,7 +68,10 @@ function runGit(root: string, args: string[]) {
 /** Falla cerrado si `root` no es la raíz de un repositorio git (no subir a un repo padre). */
 function assertGitRoot(root: string): void {
   const result = runGit(root, ['rev-parse', '--show-toplevel']);
-  if (result.status !== 0 || normalizePath(result.stdout.trim()) !== normalizePath(realpathSync(root))) {
+  if (
+    result.status !== 0 ||
+    normalizePath(result.stdout.trim()) !== normalizePath(realpathSync(root))
+  ) {
     throw new Error(`${root} no es la raíz de un repositorio git; no se escriben secretos`);
   }
 }
@@ -98,7 +101,9 @@ function secretKeysOf(template: string): string[] {
     const match = ASSIGNMENT.exec(line.trim());
     if (!match || !isSecretName(match[1])) continue;
     if (parseValue(match[2]) !== '') {
-      throw new Error(`${TEMPLATE_POSIX}: el campo secreto ${match[1]} no está vacío; corrija la plantilla`);
+      throw new Error(
+        `${TEMPLATE_POSIX}: el campo secreto ${match[1]} no está vacío; corrija la plantilla`,
+      );
     }
     if (!keys.includes(match[1])) keys.push(match[1]);
   }
@@ -234,7 +239,9 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     const report = setupEnv(rootFromArgs(process.argv.slice(2)));
     for (const { path, action } of report.actions) console.log(`${action}: ${path}`);
     for (const warning of report.warnings) console.warn(`aviso: ${warning}`);
-    console.log(`setup:env OK (${report.generated} secreto(s) generado(s); ningún valor se muestra)`);
+    console.log(
+      `setup:env OK (${report.generated} secreto(s) generado(s); ningún valor se muestra)`,
+    );
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     console.error(`setup:env ERROR: ${reason}`);

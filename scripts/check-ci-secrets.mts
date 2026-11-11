@@ -263,21 +263,34 @@ function checkWorkflow(file: string, text: string): CiFinding[] {
   const runLines: RunLine[] = [];
   for (const entry of entries) {
     if (entry.key !== 'run') continue;
-    for (const t of textOf(entry)) runLines.push({ ...t, job: jobOf(entry), step: stepIdOf(entry) });
+    for (const t of textOf(entry))
+      runLines.push({ ...t, job: jobOf(entry), step: stepIdOf(entry) });
   }
 
   for (const { line, text: content } of lines) {
     if (/pull_request_target/.test(content)) {
-      report(line, 'pull-request-target', 'trigger pull_request_target: ejecuta con secretos desde forks; use pull_request');
+      report(
+        line,
+        'pull-request-target',
+        'trigger pull_request_target: ejecuta con secretos desde forks; use pull_request',
+      );
     }
     if (events.includes('pull_request') && SECRET_REF.test(content)) {
-      report(line, 'secret-in-job', 'referencia a secreto en un workflow disparado por pull_request (los forks no reciben secretos)');
+      report(
+        line,
+        'secret-in-job',
+        'referencia a secreto en un workflow disparado por pull_request (los forks no reciben secretos)',
+      );
     }
   }
 
   for (const entry of envEntries) {
     if (isSecretName(entry.key) && entry.value !== '' && !UNRESOLVED_MARK.test(entry.value)) {
-      report(entry.line, 'literal-credential', `variable de nombre secreto "${entry.key}" con valor literal; genérela de forma efímera`);
+      report(
+        entry.line,
+        'literal-credential',
+        `variable de nombre secreto "${entry.key}" con valor literal; genérela de forma efímera`,
+      );
     }
   }
 
@@ -287,19 +300,36 @@ function checkWorkflow(file: string, text: string): CiFinding[] {
 
     if (SET_X.test(r.text)) report(r.line, 'set-x', 'set -x en un run puede volcar valores');
 
-    if (secretReferenced(r.text) && !masksOrPublishes && (PRINT_COMMAND.test(r.text) || SET_X.test(r.text))) {
-      report(r.line, 'secret-echo', 'un bloque run imprime un secreto (echo/printf/cat/set -x); no lo imprima');
+    if (
+      secretReferenced(r.text) &&
+      !masksOrPublishes &&
+      (PRINT_COMMAND.test(r.text) || SET_X.test(r.text))
+    ) {
+      report(
+        r.line,
+        'secret-echo',
+        'un bloque run imprime un secreto (echo/printf/cat/set -x); no lo imprima',
+      );
     }
 
     for (const segment of segments) {
       if (COMPOSE.test(segment) && COMPOSE_CONFIG.test(segment) && !QUIET_FLAG.test(segment)) {
-        report(r.line, 'compose-config-values', 'docker compose config sin --quiet imprime valores resueltos');
+        report(
+          r.line,
+          'compose-config-values',
+          'docker compose config sin --quiet imprime valores resueltos',
+        );
       }
       const dumpsEnv =
         /^printenv\b/.test(segment) ||
         segment === 'env' ||
         (ENV_CAT.test(segment) && !segment.includes('.env.example'));
-      if (dumpsEnv) report(r.line, 'env-dump', 'volcado de entorno o de .env en un run (printenv, env, cat .env)');
+      if (dumpsEnv)
+        report(
+          r.line,
+          'env-dump',
+          'volcado de entorno o de .env en un run (printenv, env, cat .env)',
+        );
     }
   }
 
@@ -312,7 +342,11 @@ function checkWorkflow(file: string, text: string): CiFinding[] {
   }
   for (const [job, r] of firstGenerated) {
     if (!masked.has(job)) {
-      report(r.line, 'unmasked-credential', `el job "${job}" genera una credencial efímera sin ::add-mask:: en el mismo job`);
+      report(
+        r.line,
+        'unmasked-credential',
+        `el job "${job}" genera una credencial efímera sin ::add-mask:: en el mismo job`,
+      );
     }
   }
 
@@ -321,7 +355,12 @@ function checkWorkflow(file: string, text: string): CiFinding[] {
     for (const entry of step.entries) {
       if (entry.key !== 'path' || parentOf(entry) !== 'with') continue;
       for (const t of textOf(entry)) {
-        if (t.text.trim().split(/[\s,]+/).some(isSecretPath)) {
+        if (
+          t.text
+            .trim()
+            .split(/[\s,]+/)
+            .some(isSecretPath)
+        ) {
           report(t.line, 'artifact-env', 'el artefacto incluye .env o secrets/');
         }
       }
@@ -332,16 +371,31 @@ function checkWorkflow(file: string, text: string): CiFinding[] {
   for (const job of jobs) {
     const jobEntries = entries.filter((e) => jobOf(e) === job);
     const jobName =
-      entries.find((e) => e.key === 'name' && e.ancestors.length === 2 && e.ancestors[1] === job)?.value ?? '';
+      entries.find((e) => e.key === 'name' && e.ancestors.length === 2 && e.ancestors[1] === job)
+        ?.value ?? '';
     if (DAST_NAME.test(job) || DAST_NAME.test(jobName)) {
       const runs = runLines.filter((r) => r.job === job);
-      checkDast(report, { job, step: undefined }, jobEntries, runs, jobEntries[0]?.line ?? 1, envEntries);
+      checkDast(
+        report,
+        { job, step: undefined },
+        jobEntries,
+        runs,
+        jobEntries[0]?.line ?? 1,
+        envEntries,
+      );
       continue;
     }
     for (const step of steps.filter((s) => s.job === job)) {
       const runs = runLines.filter((r) => r.step === step.id);
       if (DAST_NAME.test(directValue(step, 'name')) || runs.some((r) => ZAP_RUN.test(r.text))) {
-        checkDast(report, { job, step: step.id }, step.entries, runs, step.entries[0].line, envEntries);
+        checkDast(
+          report,
+          { job, step: step.id },
+          step.entries,
+          runs,
+          step.entries[0].line,
+          envEntries,
+        );
       }
     }
   }
@@ -353,7 +407,9 @@ function checkWorkflow(file: string, text: string): CiFinding[] {
 function lookupEnv(name: string, scope: Scope, envEntries: readonly Entry[]): Entry | undefined {
   const inScope = [
     ...envEntries.filter((e) => scope.step !== undefined && stepIdOf(e) === scope.step),
-    ...envEntries.filter((e) => e.ancestors[0] === 'jobs' && jobOf(e) === scope.job && !e.ancestors.includes('steps')),
+    ...envEntries.filter(
+      (e) => e.ancestors[0] === 'jobs' && jobOf(e) === scope.job && !e.ancestors.includes('steps'),
+    ),
     ...envEntries.filter((e) => e.ancestors.length === 1),
   ];
   return inScope.find((e) => e.key === name);
@@ -375,15 +431,18 @@ function resolveTarget(
   const text = unquote(raw.trim());
   let resolvedLine = line;
   let unresolved = false;
-  const value = text.replace(VARIABLE_REF, (_match, braced: string | undefined, plain: string | undefined) => {
-    const hit = lookupEnv(braced ?? plain ?? '', scope, envEntries);
-    if (hit === undefined || hit.value === '' || UNRESOLVED_MARK.test(hit.value)) {
-      unresolved = true;
-      return '';
-    }
-    resolvedLine = hit.line;
-    return hit.value;
-  });
+  const value = text.replace(
+    VARIABLE_REF,
+    (_match, braced: string | undefined, plain: string | undefined) => {
+      const hit = lookupEnv(braced ?? plain ?? '', scope, envEntries);
+      if (hit === undefined || hit.value === '' || UNRESOLVED_MARK.test(hit.value)) {
+        unresolved = true;
+        return '';
+      }
+      resolvedLine = hit.line;
+      return hit.value;
+    },
+  );
   return unresolved ? undefined : { value, line: resolvedLine };
 }
 
@@ -397,22 +456,36 @@ function checkDast(
 ): void {
   const candidates: { line: number; value: string }[] = [];
   for (const entry of scopeEntries) {
-    if (URL_KEY.test(entry.key) && entry.value !== '') candidates.push({ line: entry.line, value: entry.value });
+    if (URL_KEY.test(entry.key) && entry.value !== '')
+      candidates.push({ line: entry.line, value: entry.value });
   }
   for (const r of runs) {
-    for (const match of r.text.matchAll(TARGET_FLAG)) candidates.push({ line: r.line, value: match[1] });
+    for (const match of r.text.matchAll(TARGET_FLAG))
+      candidates.push({ line: r.line, value: match[1] });
   }
 
   if (candidates.length === 0) {
-    report(headerLine, 'remote-dast-target', 'paso DAST sin objetivo verificable (se exige localhost, 127.0.0.1 o [::1])');
+    report(
+      headerLine,
+      'remote-dast-target',
+      'paso DAST sin objetivo verificable (se exige localhost, 127.0.0.1 o [::1])',
+    );
     return;
   }
   for (const candidate of candidates) {
     const resolved = resolveTarget(candidate.value, candidate.line, scope, envEntries);
     if (resolved === undefined) {
-      report(candidate.line, 'remote-dast-target', 'objetivo DAST no verificable: referencia sin valor literal de loopback');
+      report(
+        candidate.line,
+        'remote-dast-target',
+        'objetivo DAST no verificable: referencia sin valor literal de loopback',
+      );
     } else if (!isLoopbackTarget(resolved.value)) {
-      report(resolved.line, 'remote-dast-target', 'objetivo DAST fuera del runner (se exige localhost, 127.0.0.1 o [::1])');
+      report(
+        resolved.line,
+        'remote-dast-target',
+        'objetivo DAST fuera del runner (se exige localhost, 127.0.0.1 o [::1])',
+      );
     }
   }
 }
