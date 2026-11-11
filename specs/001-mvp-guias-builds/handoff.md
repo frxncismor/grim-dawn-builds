@@ -882,3 +882,37 @@ deploy y el despliegue sigue fuera de alcance.
 
 Modelo realmente usado: implementación `opencode-go/deepseek-v4.1-flash`;
 orquestación `opencode-go/deepseek-v4.1-flash`. Sin commit, push ni PR.
+
+## T-145: TBT de páginas estáticas y puerta de rendimiento (2026-11-11)
+
+- **Estado**: hecha. Plan §17.53; tarea marcada `[x]` en `tasks.md` con evidencia.
+- **Archivos**: `scripts/static-home.mts` (finalizador generalizado; portada con
+  `gd-static-home`, `/acerca`, `/legal` y `/autores/:slug` con `gd-static-page`),
+  `lighthouserc.json` (`numberOfRuns` 3), `scripts/verify-local.mjs` (paso
+  `performance` devuelto como último paso tras `public-build`) y
+  `scripts/verify-local.test.mjs` (prueba de ausencia sustituida por una positiva).
+- **Evidencia**: `pnpm build` exit 0 (`static-home OK`; `/` 0/90000 B, `/tier-list`
+  110011/110500 B gzip). `pnpm check:performance` exit 0, `47/47`. TBT medianas
+  0 / 54 / 0 / 0 / 0 ms (`/`, `/tier-list`, `/acerca`, `/legal`, `/autores`),
+  3 corridas, Lighthouse 13.6.0, móvil. Tabla completa y logs en `quickstart.md`,
+  sección «T-145».
+- **Límites no ampliados**: TBT 150 ms y presupuestos de plan §6 sin cambios.
+- **Desviación**: el primer reporte del subagente afirmó `numberOfRuns=3` cuando
+  el archivo tenía 5. El orquestador lo detectó y lo corrigió a 3 antes de medir.
+- **Modelos realmente usados**: subagentes `opencode-go/claude-haiku-5-5`;
+  orquestación de dominio `opencode-go/deepseek-v4.1-flash`.
+- **Verificación de cierre** (ejecutada por el orquestador):
+  - `pnpm test:scripts` → exit 0, `# tests 372`, `# pass 370`, `# fail 0`,
+    `# skipped 2`. Log `C:\Users\paco_\AppData\Local\Temp\opencode\t145\test-scripts.log`.
+  - `pnpm verify` → exit 0, `verify OK (local)`. Orden completo y verde:
+    `check-scope`, `check-boundaries`, `check-secrets`, `check-ci-secrets`,
+    `domain:*`, `api:*`, `test:rotation`, `lint`, `lint:md`, `format`, `test`,
+    `test:scripts`, `assets`, `contrast`, `build`, `public-build` y `performance`.
+    Log `C:\Users\paco_\AppData\Local\Temp\opencode\t145\verify-orchestrator.log`.
+  - Dentro de `verify`, `check:performance` dio `47/47`, con TBT mediana
+    0 / 77 / 0 / 0 / 0 ms (`/`, `/tier-list`, `/acerca`, `/legal`, `/autores`),
+    JS inicial `/` 0 B y `/tier-list` 110013/110500 B gzip. Informes en
+    `dist/lighthouse-performance/run-20261111-035303-a5a62c`.
+  - Chrome 157.0.8103.39 (FileVersion), UA `HeadlessChrome/157.0.0.0`;
+    Lighthouse 13.6.0; `numberOfRuns` 3.
+- Sin commit, push ni PR.

@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -756,9 +757,10 @@ export interface LhciInvocation {
  * `yargs.config()` para todos los subcomandos (no es una opción de collect/upload,
  * pero sí se aplica a ambos y se resuelve contra `process.cwd()`), así que se pasa
  * absoluto junto con `--staticDistDir` (opción de collect) y `--outputDir`
- * (opción de upload). El `cwd` es un directorio temporal propio porque LHCI guarda
- * su sesión en `<cwd>/.lighthouseci`: nunca la raíz del repositorio, compartida con
- * otras ejecuciones.
+ * (opción de upload). `reportsDir` debe ser el subdirectorio único de la ejecución
+ * (ver `reportRunDir`), nunca el `ci.upload.outputDir` compartido. El `cwd` es un
+ * directorio temporal propio porque LHCI guarda su sesión en `<cwd>/.lighthouseci`:
+ * nunca la raíz del repositorio, compartida con otras ejecuciones.
  */
 export function lhciRunOptions(input: LhciInvocationInput): LhciInvocation[] {
   const workDir = resolve(input.workDir);
@@ -794,6 +796,29 @@ export function lhciRunOptions(input: LhciInvocationInput): LhciInvocation[] {
       env,
     },
   ];
+}
+
+/**
+ * Directorio de informes propio de esta ejecución:
+ * `<base>/run-<AAAAMMDD-HHmmss>-<sufijo>`.
+ *
+ * `ci.upload.outputDir` es un directorio compartido entre ejecuciones y agentes:
+ * escribir siempre en un subdirectorio único —y único por llamada— evita que dos
+ * mediciones mezclen informes y mantiene la publicación bajo `dist/` como
+ * evidencia. El directorio padre no se borra ni se modifica nunca.
+ */
+export function reportRunDir(
+  baseDir: string,
+  now: Date = new Date(),
+  suffix: string = randomBytes(3).toString('hex'),
+): string {
+  const clean = suffix.replace(/[^a-z0-9]/gi, '').slice(0, 12);
+  if (!clean) throw new Error('El sufijo del directorio de informes no es válido.');
+  const pad = (value: number) => String(value).padStart(2, '0');
+  const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(
+    now.getHours(),
+  )}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  return resolve(baseDir, `run-${stamp}-${clean}`);
 }
 
 /** cmd/PowerShell parten argumentos con espacios: se citan al lanzar el hijo. */
@@ -969,9 +994,10 @@ async function main(argv: string[]): Promise<number> {
     return 1;
   }
 
-  const reportsDir = resolve(REPO_ROOT, info.outputDir);
-  // Informes de una ejecución anterior: no pueden aprobar la puerta actual.
-  await rm(reportsDir, { recursive: true, force: true });
+  // Directorio de informes propio: `ci.upload.outputDir` es compartido con otras
+  // ejecuciones, así que se escribe en un subdirectorio único y el padre no se toca.
+  const reportsBase = resolve(REPO_ROOT, info.outputDir);
+  const reportsDir = reportRunDir(reportsBase);
 
   const lhciRuns = await withLighthouseTempDir(async (workDir) => {
     const invocations = lhciRunOptions({
@@ -995,6 +1021,7 @@ async function main(argv: string[]): Promise<number> {
   console.log(
     `check:performance: lhci terminó con códigos ${lhciRuns.map((run) => run.exitCode).join(', ')}; el resultado se decide evaluando los informes.`,
   );
+  console.log(`check:performance: informes publicados en ${reportsDir}`);
 
   let reports: ParsedReport[];
   try {
@@ -1115,6 +1142,7 @@ async function main(argv: string[]): Promise<number> {
   console.log(
     `  Configuración: formFactor=${info.formFactor ?? 'ausente'}, throttlingMethod=${info.throttlingMethod ?? 'ausente'}, numberOfRuns=${info.numberOfRuns} (lighthouserc.json)`,
   );
+  console.log(`  Informes: ${reportsDir}`);
 
   const failures: string[] = [];
   for (const gate of gates) {
@@ -1159,7 +1187,7 @@ async function main(argv: string[]): Promise<number> {
   ];
   const failed = checks.filter((pass) => !pass).length;
   console.log(
-    `\ncheck:performance ${failed === 0 ? 'OK' : 'FALLÓ'} (${checks.length - failed}/${checks.length} comprobaciones)`,
+    `\ncheck:performance ${failed === 0 ? 'OK' : 'FALLÓ'} (${checks.length - failed}/${checks.length} comprobaciones; informes en ${reportsDir})`,
   );
   return failed === 0 ? 0 : 1;
 }

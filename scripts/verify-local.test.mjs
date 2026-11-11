@@ -8,12 +8,14 @@ test('verify requires the offline public build secret guard after the normal bui
   assert.equal(VERIFY_STEPS[names.indexOf('public-build')].command, 'pnpm check:public-build');
 });
 
-test('performance is a standalone gate until T-145 fixes the static pages', () => {
+test('verify runs the performance gate last, after build and public-build (T-145)', () => {
   const names = VERIFY_STEPS.map((step) => step.name);
-  // T-042 built the gate; it stays out of `verify` while /acerca, /legal and
-  // /autores exceed the TBT budget (T-145). Putting it back must also delete
-  // this test, so the omission cannot become permanent by accident.
-  assert.equal(names.includes('performance'), false, 'performance must stay out of verify until T-145');
+  const index = names.indexOf('performance');
+  assert.notEqual(index, -1, 'performance step missing');
+  assert.equal(VERIFY_STEPS[index].command, 'pnpm check:performance');
+  assert.ok(index > names.indexOf('build'), 'performance must run after build');
+  assert.ok(index > names.indexOf('public-build'), 'performance must run after public-build');
+  assert.equal(index, VERIFY_STEPS.length - 1, 'performance must be the last step');
 });
 
 test('verify runs check-scope before the other steps (T-069)', () => {

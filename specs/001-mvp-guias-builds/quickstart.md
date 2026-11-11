@@ -2911,3 +2911,85 @@ Comprobado con comandos reales, no por inspección:
   de 0 y nombra `MD001` (además de `MD022`); al borrarlo, la suite vuelve a 0.
 - `pnpm verify` incluye el paso `lint:md` y `.github/workflows/ci.yml` ejecuta
   `pnpm run lint:md` con el comentario explícito de que no usa `--fix`.
+
+## T-145: TBT de las páginas estáticas y puerta de rendimiento (2026-11-11)
+
+Plan §17.53. Medición previa de T-042 con una sola pasada: `/acerca` 260 ms,
+`/autores/grim-dawn-builds` 230 ms y `/legal` 171 ms de TBT frente al límite de
+150 ms. Esas páginas son contenido estático y hidrataban el bundle completo.
+
+### Solución
+
+- `scripts/static-home.mts` generaliza el finalizador post-build. La portada
+  conserva el marcador `gd-static-home`; `/acerca`, `/legal` y `/autores/:slug`
+  se emiten con el marcador `gd-static-page`, sin `<script src>`, sin
+  modulepreload y sin scripts ejecutables. Su JS inicial es 0 B.
+- La 404 prerenderizada no se transforma.
+- `lighthouserc.json`: `numberOfRuns` pasa de 1 a 3 (mediana de tres pasadas).
+- `scripts/verify-local.mjs` recupera el paso
+  `{ name: 'performance', command: 'pnpm check:performance' }` como último paso,
+  tras `public-build`. La prueba de ausencia de `scripts/verify-local.test.mjs`
+  se sustituyó por una prueba positiva.
+- **No se amplió ningún límite**: el TBT sigue en 150 ms y los presupuestos de
+  plan §6 permanecen. `/tier-list` sigue en 110 011 / 110 500 B de JS inicial
+  gzip nivel 6.
+
+### Resultados (mediana de 3 corridas)
+
+| Ruta                        | LCP      | CLS   | TBT                | Rendimiento | A11y  | SEO   | Buenas prácticas | HTML      | CSS gzip 6 | JS inicial |
+| --------------------------- | -------- | ----- | ------------------ | ----------- | ----- | ----- | ---------------- | --------- | ---------- | ---------- |
+| `/`                         | 756.8 ms | 0.000 | 0 ms [0, 0, 0]     | 1.000       | 1.000 | 1.000 | 1.000            | 15 413 B  | 1 657 B    | 0 B        |
+| `/tier-list`                | 654.9 ms | 0.000 | 54 ms [98, 54, 50] | 1.000       | 1.000 | 1.000 | 1.000            | 111 666 B | 1 657 B    | 110 011 B  |
+| `/acerca`                   | 754.9 ms | 0.000 | 0 ms [0, 0, 0]     | 1.000       | 1.000 | 1.000 | 1.000            | 13 751 B  | 1 657 B    | 0 B        |
+| `/legal`                    | 755.5 ms | 0.000 | 0 ms [0, 0, 0]     | 1.000       | 1.000 | 1.000 | 1.000            | 14 821 B  | 1 657 B    | 0 B        |
+| `/autores/grim-dawn-builds` | 754.8 ms | 0.000 | 0 ms [0, 0, 0]     | 1.000       | 1.000 | 1.000 | 1.000            | 12 813 B  | 1 657 B    | 0 B        |
+
+Los corchetes son las tres corridas individuales de TBT. `/tier-list` mide 54 ms
+de mediana, por debajo de 150 ms, aunque su pasada 1 llegó a 98 ms.
+
+### Entorno
+
+Lighthouse 13.6.0, perfil móvil, throttling `simulate`, user agent
+`HeadlessChrome/157.0.0.0`, `numberOfRuns=3`. Informes en
+`dist/lighthouse-performance/*.report.json` (evidencia local, no versionada).
+
+### Comandos y salida
+
+| Comando                  | Exit | Salida                                                                                                                                                                          |
+| ------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm build`             | 0    | `static-home OK (HTML nativo, sin bootstrap cliente): /, /acerca, /legal, /autores/grim-dawn-builds.`; `check:initial-js` `/` 0/90000 B y `/tier-list` 110011/110500 B (gzip 6) |
+| `pnpm check:performance` | 0    | `check:performance OK (47/47 comprobaciones)`                                                                                                                                   |
+
+Logs: `C:\Users\paco_\AppData\Local\Temp\opencode\t145\build-orchestrator.log` y
+`C:\Users\paco_\AppData\Local\Temp\opencode\t145\performance-orchestrator.log`.
+
+### Verificación de cierre (`pnpm verify`)
+
+| Comando             | Exit | Salida                                                 |
+| ------------------- | ---- | ------------------------------------------------------ |
+| `pnpm test:scripts` | 0    | `# tests 372`, `# pass 370`, `# fail 0`, `# skipped 2` |
+| `pnpm verify`       | 0    | `verify OK (local)`                                    |
+
+Orden completo ejecutado y verde: `check-scope`, `check-boundaries`,
+`check-secrets`, `check-ci-secrets`, `domain:build`, `domain:typecheck`,
+`domain:lint`, `domain:test`, `api:typecheck`, `api:lint`, `api:test`,
+`test:rotation`, `lint`, `lint:md`, `format`, `test`, `test:scripts`, `assets`,
+`contrast`, `build`, `public-build` y `performance`. Log:
+`C:\Users\paco_\AppData\Local\Temp\opencode\t145\verify-orchestrator.log`;
+`test:scripts` en `...\t145\test-scripts.log`.
+
+Segunda medición de `check:performance`, dentro de `verify` (mediana de 3
+corridas, móvil, Lighthouse 13.6.0, `numberOfRuns` 3): `check:performance OK
+47/47`. TBT `/` 0 ms [0, 0, 19.3], `/tier-list` 77 ms [88.5, 61.5, 77],
+`/acerca` 0 ms, `/legal` 0 ms y `/autores/grim-dawn-builds` 0 ms. LCP 758.6 /
+663.6 / 757.8 / 757.8 / 755.3 ms. CLS 0.000 y puntuaciones 1.000 en las cinco
+rutas. JS inicial `/` 0 B y `/tier-list` 110013/110500 B gzip. HTML 15413 /
+111663 / 13751 / 14821 / 12813 B. CSS 1657 B. Informes:
+`dist/lighthouse-performance/run-20261111-035303-a5a62c`.
+
+Chrome real: 157.0.8103.39 (FileVersion del ejecutable), con UA
+`HeadlessChrome/157.0.0.0`.
+
+El JS inicial de `/tier-list` difiere entre `pnpm build` (110011 B) y `verify`
+(110013 B); ambas cifras quedan bajo 110500 B. Los límites de TBT y de
+presupuesto no se modificaron.

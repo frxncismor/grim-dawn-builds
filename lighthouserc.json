@@ -9,7 +9,7 @@
         "http://localhost/legal/index.html",
         "http://localhost/autores/grim-dawn-builds/index.html"
       ],
-      "numberOfRuns": 1,
+      "numberOfRuns": 3,
       "settings": {
         "formFactor": "mobile",
         "screenEmulation": {

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { isAbsolute, join, resolve } from 'node:path';
+import { isAbsolute, join, resolve, sep } from 'node:path';
 import { test } from 'node:test';
 import { gzipSync } from 'node:zlib';
 import { CATALOG_JS_LIMIT, INITIAL_JS_LIMIT, measureInitialRoutes } from './check-initial-js.mts';
@@ -21,6 +21,7 @@ import {
   normalizeRoute,
   readLighthouseBudgets,
   readLighthouseConfig,
+  reportRunDir,
   routeFilePath,
   type RouteRun,
 } from './check-performance.mts';
@@ -343,6 +344,44 @@ test('LHCI corre collect y upload en un directorio temporal propio con rutas abs
   } finally {
     await rm(workDir, { recursive: true, force: true });
   }
+});
+
+test('cada ejecución publica sus informes en un subdirectorio único bajo el directorio base', () => {
+  const base = resolve('artifact-root', 'dist', 'lighthouse-performance');
+  const first = reportRunDir(base);
+  const second = reportRunDir(base);
+  assert.ok(isAbsolute(first));
+  assert.ok(isAbsolute(second));
+  assert.notEqual(first, second, 'dos llamadas con el mismo directorio base deben diferir');
+  assert.ok(first.startsWith(`${base}${sep}`));
+  assert.ok(second.startsWith(`${base}${sep}`));
+  assert.match(first, /[\\/]run-\d{8}-\d{6}-[a-z0-9]+$/i);
+
+  const fixed = reportRunDir(base, new Date(2026, 10, 11, 3, 45, 7), 'abc123');
+  assert.equal(fixed, join(base, 'run-20261111-034507-abc123'));
+  assert.throws(() => reportRunDir(base, new Date(), ''));
+  assert.throws(() => reportRunDir(base, new Date(), '///'));
+});
+
+test('lhci upload escribe en el directorio único y nunca en el compartido', () => {
+  const repoRoot = resolve('artifact-root');
+  const base = join(repoRoot, 'dist', 'lighthouse-performance');
+  const runDir = reportRunDir(base, new Date(2026, 10, 11, 4, 5, 6), 'beef01');
+  const invocations = lhciRunOptions({
+    repoRoot,
+    artifactDir: join(repoRoot, 'dist', 'grim-dawn-builds'),
+    reportsDir: runDir,
+    configPath: join(repoRoot, 'lighthouserc.json'),
+    workDir: join(tmpdir(), 'gd-lhci-test-subdir'),
+    chromePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  });
+  const [collect, upload] = invocations;
+  assert.ok(collect && upload);
+  assert.ok(upload.args.includes(`--outputDir=${runDir}`));
+  const outputArg = upload.args.find((arg) => arg.startsWith('--outputDir='))!;
+  assert.ok(outputArg.slice('--outputDir='.length).startsWith(`${base}${sep}`));
+  assert.notEqual(outputArg, `--outputDir=${base}`, 'el directorio compartido queda intacto');
+  assert.ok(!collect.args.some((arg) => arg.startsWith('--outputDir=')));
 });
 
 test('sin artefacto el comando falla cerrado antes de lanzar Lighthouse', async () => {

@@ -1,11 +1,19 @@
 import { HtmlParser } from '@angular/compiler';
-import { lstat, readFile, writeFile, rename, rm } from 'node:fs/promises';
+import { lstat, readdir, readFile, writeFile, rename, rm } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { readFileSync } from 'node:fs';
 
 export const STATIC_HOME_MARKER = 'gd-static-home';
+export const STATIC_PAGE_MARKER = 'gd-static-page';
+const STATIC_MARKERS = [STATIC_HOME_MARKER, STATIC_PAGE_MARKER];
+export const STATIC_PAGE_SELECTORS = ['gd-about-page', 'gd-legal-page', 'gd-author-page'] as const;
+interface StaticContract {
+  selector: string;
+  marker: string;
+}
+const homeContract: StaticContract = { selector: 'app-home-page', marker: STATIC_HOME_MARKER };
 interface Node {
   name?: string;
   attrs?: { name: string; value: string }[];
@@ -16,6 +24,10 @@ interface Node {
 }
 function fail(): never {
   throw new Error('Portada estática inválida.');
+}
+function pageContract(selector: string): StaticContract {
+  if (!(STATIC_PAGE_SELECTORS as readonly string[]).includes(selector)) fail();
+  return { selector, marker: STATIC_PAGE_MARKER };
 }
 function elements(html: string): Node[] {
   const parsed = new HtmlParser().parse(html, 'Home');
@@ -35,7 +47,7 @@ function elements(html: string): Node[] {
 }
 const attr = (node: Node, name: string) =>
   node.attrs?.find((a) => a.name.toLowerCase() === name)?.value;
-const custom = new Set(['app-root', 'app-home-page', 'gd-site-layout', 'router-outlet']);
+const baseCustom = ['app-root', 'gd-site-layout', 'router-outlet'];
 const forbiddenTags = new Set([
   'button',
   'input',
@@ -87,8 +99,9 @@ function safeLink(value: string | undefined): boolean {
     return false;
   }
 }
-function structuralGuard(nodes: Node[]): void {
-  for (const tag of ['head', 'body', 'app-home-page', 'main', 'h1'])
+function structuralGuard(nodes: Node[], selector: string): void {
+  const custom = new Set([...baseCustom, selector]);
+  for (const tag of ['head', 'body', selector, 'main', 'h1'])
     if (nodes.filter((n) => n.name === tag).length !== 1) fail();
   if (!nodes.some((n) => n.name === 'title') || !nodes.some((n) => n.name === 'a')) fail();
   for (const node of nodes) {
@@ -129,20 +142,22 @@ function scriptPreload(node: Node): boolean {
       attr(node, 'as')?.toLowerCase() === 'script')
   );
 }
-function marker(nodes: Node[]): boolean {
-  if (nodes.filter((n) => n.name === 'meta' && attr(n, 'name') === STATIC_HOME_MARKER).length > 1)
-    fail();
+function marker(nodes: Node[], name: string): boolean {
+  if (nodes.filter((n) => n.name === 'meta' && attr(n, 'name') === name).length > 1) fail();
   return nodes.some(
-    (n) =>
-      n.name === 'meta' && attr(n, 'name') === STATIC_HOME_MARKER && attr(n, 'content') === '1',
+    (n) => n.name === 'meta' && attr(n, 'name') === name && attr(n, 'content') === '1',
   );
 }
+function hasMarker(nodes: Node[], name: string): boolean {
+  return nodes.some((n) => n.name === 'meta' && attr(n, 'name') === name);
+}
 /** A marker alone is insufficient: no executable request or JS-only control is accepted. */
-export function assertStaticHome(html: string): void {
+function assertStatic(html: string, contract: StaticContract): void {
   try {
     const nodes = elements(html);
-    structuralGuard(nodes);
-    if (!marker(nodes)) fail();
+    structuralGuard(nodes, contract.selector);
+    if (!marker(nodes, contract.marker)) fail();
+    if (STATIC_MARKERS.some((name) => name !== contract.marker && hasMarker(nodes, name))) fail();
     for (const node of nodes) {
       if (scriptPreload(node)) fail();
       if (node.name === 'script') {
@@ -153,6 +168,12 @@ export function assertStaticHome(html: string): void {
   } catch {
     fail();
   }
+}
+export function assertStaticHome(html: string): void {
+  assertStatic(html, homeContract);
+}
+export function assertStaticPage(html: string, selector: string): void {
+  assertStatic(html, pageContract(selector));
 }
 function body(html: string, node: Node): string {
   if (!node.startSourceSpan || !node.endSourceSpan) fail();
@@ -165,11 +186,10 @@ export function inlineExecutableScripts(html: string): string[] {
     .map((n) => body(html, n))
     .filter((s) => s.trim().length > 0);
 }
-/** Transform a trusted Angular prerender only after enforcing the static Home contract. */
-export function staticHomeHtml(html: string): string {
+function staticHtml(html: string, contract: StaticContract): string {
   try {
     // Angular's critical-CSS loader uses this one known handler. Make CSS native.
-    if (!marker(elements(html))) {
+    if (!marker(elements(html), contract.marker)) {
       const escape = (value: string) =>
         value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
       const links = elements(html).filter(
@@ -193,9 +213,9 @@ export function staticHomeHtml(html: string): string {
       }
     }
     const nodes = elements(html);
-    structuralGuard(nodes);
-    if (marker(nodes)) {
-      assertStaticHome(html);
+    structuralGuard(nodes, contract.selector);
+    if (marker(nodes, contract.marker)) {
+      assertStatic(html, contract);
       return html;
     }
     const edits: { start: number; end: number; value: string }[] = [];
@@ -270,42 +290,125 @@ export function staticHomeHtml(html: string): string {
     edits.push({
       start: head.endSourceSpan.start.offset,
       end: head.endSourceSpan.start.offset,
-      value: `<meta name="${STATIC_HOME_MARKER}" content="1">`,
+      value: `<meta name="${contract.marker}" content="1">`,
     });
     for (const edit of edits.sort((a, b) => b.start - a.start))
       html = html.slice(0, edit.start) + edit.value + html.slice(edit.end);
-    assertStaticHome(html);
+    assertStatic(html, contract);
     return html;
   } catch {
     fail();
   }
 }
-export async function finalizeStaticHome(output: string): Promise<void> {
-  const browser = resolve(output, 'browser'),
-    file = join(browser, 'index.html'),
-    pending = join(browser, `.static-home-${randomUUID()}.tmp`);
+/** Transform a trusted Angular prerender only after enforcing the static Home contract. */
+export function staticHomeHtml(html: string): string {
+  return staticHtml(html, homeContract);
+}
+/** Transform a trusted Angular prerender of a content page (about, legal, author). */
+export function staticPageHtml(html: string, selector: string): string {
+  return staticHtml(html, pageContract(selector));
+}
+async function regular(path: string, kind: 'dir' | 'file'): Promise<void> {
+  const stat = await lstat(path);
+  if (stat.isSymbolicLink() || (kind === 'file' ? !stat.isFile() : !stat.isDirectory())) fail();
+}
+async function exists(path: string): Promise<boolean> {
   try {
-    for (const path of [resolve(output), browser, file]) {
-      const stat = await lstat(path);
-      if (stat.isSymbolicLink() || (path === file ? !stat.isFile() : !stat.isDirectory())) fail();
+    await lstat(path);
+    return true;
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT')
+      return false;
+    fail();
+  }
+}
+async function finalizeFile(
+  output: string,
+  segments: string[],
+  transform: (html: string) => string,
+): Promise<void> {
+  const browser = resolve(output, 'browser'),
+    file = join(browser, ...segments),
+    dir = dirname(file),
+    pending = join(dir, `.static-page-${randomUUID()}.tmp`);
+  try {
+    await regular(resolve(output), 'dir');
+    await regular(browser, 'dir');
+    let current = browser;
+    for (const segment of segments.slice(0, -1)) {
+      current = join(current, segment);
+      await regular(current, 'dir');
     }
+    await regular(file, 'file');
     const html = await readFile(file, 'utf8'),
-      result = staticHomeHtml(html);
+      result = transform(html);
     if (result === html) return;
     await writeFile(pending, result, { flag: 'wx' });
     await rename(pending, file);
   } catch {
     fail();
   } finally {
-    if (dirname(pending) !== browser) fail();
+    if (dirname(pending) !== dir) fail();
     await rm(pending, { force: true });
   }
+}
+interface StaticTarget {
+  route: string;
+  segments: string[];
+  selector: string;
+}
+async function staticPageTargets(output: string): Promise<StaticTarget[]> {
+  const browser = resolve(output, 'browser'),
+    targets: StaticTarget[] = [];
+  for (const [name, selector] of [
+    ['acerca', 'gd-about-page'],
+    ['legal', 'gd-legal-page'],
+  ] as const)
+    if (await exists(join(browser, name)))
+      targets.push({ route: `/${name}`, segments: [name, 'index.html'], selector });
+  const authors = join(browser, 'autores');
+  if (await exists(authors)) {
+    await regular(authors, 'dir');
+    for (const entry of await readdir(authors, { withFileTypes: true })) {
+      if (entry.isSymbolicLink()) fail();
+      if (entry.isDirectory())
+        targets.push({
+          route: `/autores/${entry.name}`,
+          segments: ['autores', entry.name, 'index.html'],
+          selector: 'gd-author-page',
+        });
+    }
+  }
+  return targets;
+}
+/** Transforms the home page (required) and each present content page; returns the processed routes. */
+export async function finalizeStaticHome(output: string): Promise<string[]> {
+  try {
+    await finalizeFile(output, ['index.html'], staticHomeHtml);
+    const targets = await staticPageTargets(output);
+    for (const target of targets)
+      await finalizeFile(output, target.segments, (html) => staticPageHtml(html, target.selector));
+    return ['/', ...targets.map((target) => target.route)];
+  } catch {
+    fail();
+  }
+}
+/** The release build must emit about, legal and at least one author page. */
+export function assertCompleteStaticRoutes(routes: readonly string[]): void {
+  if (
+    !routes.includes('/') ||
+    !routes.includes('/acerca') ||
+    !routes.includes('/legal') ||
+    !routes.some((route) => route.startsWith('/autores/'))
+  )
+    throw new Error('Faltan rutas estáticas obligatorias.');
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     if (process.argv.length !== 2) fail();
-    await finalizeStaticHome(resolve('dist/grim-dawn-builds'));
-    console.log('static-home OK (HTML nativo, sin bootstrap cliente).');
+    const routes = await finalizeStaticHome(resolve('dist/grim-dawn-builds'));
+    assertCompleteStaticRoutes(routes);
+    console.log(`static-home OK (HTML nativo, sin bootstrap cliente): ${routes.join(', ')}.`);
   } catch {
     console.error('static-home FALLÓ: comprobar contrato estático y output.');
     process.exitCode = 1;
