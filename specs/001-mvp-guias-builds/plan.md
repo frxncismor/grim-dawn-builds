@@ -3243,6 +3243,14 @@ Alcance de la excepción: **solo** el techo de `/tier-list`. La portada mantiene
 sigue abierta para recuperar holgura real; si se consigue, el techo se vuelve a
 bajar y esta excepción se retira.
 
+**Segunda excepción autorizada (2026-11-11, T-138)**: el sitio pasa a inglés
+primario con español regional y el grafo inicial gana el soporte de hidratación
+i18n (`withI18nSupport()`, 1 225 B gzip) más el conmutador de idioma. El artefacto
+medido cierra en **111 949 B** y el usuario autorizó subir el techo a
+**112 000 B** (1,36 % sobre 110 500). Se mantiene como constante
+`CATALOG_JS_LIMIT`; `T-144` sigue siendo la vía para recuperar margen y revertir
+las dos excepciones. La portada sigue en 0 B.
+
 ### 17.52 Bloque de calidad E2E, axe y Lighthouse (T-040, T-041, T-042)
 
 **Estado de partida**: no existe `playwright.config.ts` ni `lighthouserc.json`. Solo
@@ -3303,3 +3311,202 @@ propósito.
 
 **Cierre de T-145**: las tres rutas bajo 150 ms de TBT, el paso `performance`
 devuelto a `verify-local.mjs` y la prueba de ausencia eliminada en el mismo cambio.
+
+**Estado 2026-11-11 (medición del orquestador de dominio de calidad)** — esta
+nota corrige lo que la medición posterior desmiente. El historial de arriba se
+conserva tal cual; lo que sigue es la lectura vigente.
+
+- **Las cifras de 171–260 ms de TBT no se reproducen.** Eran pasadas sueltas bajo
+  carga, y el TBT de Lighthouse depende de la contención de CPU del host. Con
+  **mediana de 5 corridas** por ruta, las cifras del 2026-11-11 son `/acerca`
+  44 ms, `/legal` 35 ms, `/autores` 26 ms y `/tier-list` 117,5 ms en la tanda
+  peor, con un máximo de 350 ms en una corrida suelta y 60–82 ms de mediana en
+  las demás tandas. Ninguna de las tres rutas «lentas» del diagnóstico original
+  supera el límite de 150 ms.
+- **La puerta decide por mediana de 5 y los umbrales siguen intactos.** No se
+  amplió ningún límite de plan §6; la mediana es la que evita que un pico aislado
+  de CPU se lea como regresión (misma ruta y artefacto dieron 305,7 ms en una
+  pasada y 48 ms en otra).
+- **El paso `performance` sí está en `scripts/verify-local.mjs`** como último
+  paso, tras `build` y `public-build`, tal como exige T-042. La decisión anterior
+  de dejarlo fuera queda sustituida; la prueba que afirmaba su ausencia se
+  reemplazó por una positiva.
+- **T-145 sigue abierta**, pero acotada a su alcance real: el margen estrecho de
+  `/tier-list` (110 011/110 500 B gzip y TBT sensible a la carga) y la hidratación
+  de las rutas estáticas, que debe remedirse aislada antes de cerrar. Sin ampliar
+  el límite de TBT.
+
+La medición que acredita la puerta quedó en **47/47, exit 0** sobre el artefacto
+finalizado; la segunda (46/47) falló solo por `robots.txt` con `__BASE_URL__` sin
+sustituir en un artefacto transitorio de otro trabajo en curso. Evidencia
+completa, tablas y límites en `quickstart.md`, sección «Evidencia ejecutada -
+Rendimiento T-042 (2026-11-11)».
+
+### 17.54 T-146: el contenido editorial y su `locale` explícito
+
+**Origen**: contrato «Contenido» de T-138 (§17.45). La mecánica de idioma quedó
+cerrada, pero el catálogo sigue pintando `title` y `name_es` en ambos idiomas:
+la portada inglesa y la española muestran el mismo título de catálogo y las
+mismas etiquetas de maestría. La guía (`BuildContentSchema`) ya declara
+`locale: 'es'`; el catálogo no.
+
+**Alcance**: añadir `locale` al contenido del catálogo y elegir el nombre de
+maestría según la configuración regional activa (`name_en` en `en`, `name_es` en
+`es`). El texto editorial sin versión inglesa se muestra en su idioma original
+con `lang` explícito y nunca se traduce por invención. No cambia el esquema
+público de builds ni la puerta de derechos.
+
+**Archivos**: `packages/domain/src/schema.ts` y su prueba,
+`content/tier-lists/principal.json`, `src/app/features/tier-list/catalog.model.ts`
+y su prueba, `src/app/core/content/catalog.server.ts`,
+`src/app/core/content/catalog.resolver.ts`, migración y vistas públicas en
+`apps/api/drizzle/**`, `apps/api/test/schema-parity.spec.ts` y
+`specs/001-mvp-guias-builds/data-model.md`.
+
+**Aceptación**: esquema y migración en paridad; el catálogo inglés muestra
+`name_en` y el español `name_es`; el título sin traducción lleva `lang`; pruebas
+de dominio, API y UI en verde; sin cambios en los presupuestos de §6.
+
+**Cierre**: no reabre T-138. Se marca cuando la paridad de esquema y la UI de
+ambos idiomas lo acrediten.
+
+### 17.55 T-144: recuperar holgura real en el JS inicial de `/tier-list`
+
+**Origen**: T-138 dejó el catálogo en **111 955/112 000 B gzip** (45 B de
+margen) tras la segunda excepción de §17.51. Cualquier cadena nueva vuelve a
+romper la puerta. T-144 sigue abierta con el objetivo de ≥ 1 000 B de holgura sin
+tocar umbrales ni quitar `withEventReplay()`.
+
+**Diagnóstico** (stats de producción del artefacto del 2026-11-11): el grafo
+inicial de `/tier-list` está dominado por Angular (core `_debug_node` 119 442 B
+de salida, router 74 136 B, platform-browser 22 923 B); el código propio son
+~26 KB de salida repartidos en la página y componentes (15,5 KB), el modelo de
+catálogo y filtros (5,5 KB) y SEO (4,8 KB). El icono compartido
+(`icon.ts` 1 485 B + `registry.ts` 1 183 B) entra en el inicial solo por la
+insignia de estado del catálogo; el resto de páginas que lo usan son lazy o no
+lo usan.
+
+**Alcance**: sacar del grafo inicial el componente `gd-icon` y su registro en la
+insignia de estado, sustituyéndolo por una imagen con la misma ruta pública
+(`assets/icons/status-*.svg`), el mismo fallback (`generic`) y la misma
+semántica accesible (icono decorativo + texto). Si no basta para ≥ 1 000 B,
+evaluar en segundo lugar el JSON-LD (`catalogItemList`) en un módulo diferido
+solo de servidor, sin perder el `ItemList` del HTML prerenderizado.
+
+**Archivos**: `src/app/features/tier-list/tier-components.ts`,
+`src/app/features/tier-list/tier-components.css`,
+`src/app/features/tier-list/tier-components.spec.ts`,
+`scripts/check-initial-js.mts` (solo lectura/medición).
+
+**Aceptación**: `pnpm build` verde; `check:initial-js` con `/tier-list`
+≤ 111 000 B (≥ 1 000 B de holgura bajo 112 000) y `/` en 0 B; paridad visual y
+accesible de la insignia (texto + icono decorativo, fallback `generic`); pruebas
+de `tier-components` y `pnpm verify` en verde; sin cambiar umbrales ni
+`withEventReplay()`.
+
+**Estado 2026-11-11: hecha.** El artefacto cierra en **110 996/112 000 B**:
+**1 004 B de holgura** (antes 45 B). Cambios medidos: la insignia de estado del
+catálogo deja de importar `gd-icon` y su registro (1 485 + 1 183 B de salida) y
+pinta la misma ruta pública (`assets/icons/status-*.svg`) con el mismo fallback
+`generic`; `applyFilter` pasa a ser genérico y elimina el map/set intermedio de
+la página; el conmutador se integra en `SiteLayout`, que ya trackea la URL, y
+desaparece el componente extra. Sin tocar umbrales, `withEventReplay()` ni el
+contrato accesible de la insignia (texto + icono decorativo). Verificado con
+`pnpm verify` OK, `pnpm test` 297/297, `e2e:a11y` 51/51 y `e2e:journeys` 21/21.
+La excepción de 112 000 B se mantiene porque el coste estructural de i18n
+(1 225 B) impide bajar a 110 500: recuperar esa cifra exigiría otros ~500 B y
+queda como trabajo posterior, no como cambio de umbral.
+
+**Estado 2026-11-11: hecha.** `TierListContentSchema` y `PublicTierListSchema`
+declaran `locale: 'es'`; `CatalogInput` lo transporta y `buildCatalog(input,
+locale)` resuelve nombres de maestría y combinaciones según el idioma activo
+(`name_en` en inglés, `name_es` en español). El catálogo expone `contentLocale`
+para que el `<h1>` lleve `lang="es"` solo cuando el contenido no está en el
+idioma de la página. En base de datos, la migración `0006` añade `locale` a
+`tier_lists` (default `es`), `v_public_tier_lists` lo publica al final de la
+vista y `TIER_QUERY` lo proyecta; no se tocaron derechos, DTO privados ni
+presupuestos de §6. Evidencia: `content:validate`/`catalog:check` OK, dominio
+151/151 (2 `it.fails` preexistentes), API 257/257 (48 integraciones omitidas),
+app 299/299, `test:scripts` 440/442, `pnpm verify` OK, `e2e:a11y` 51/51 y
+`e2e:journeys` 21/21. JS inicial: **111 111/112 000 B** (889 B de holgura).
+
+### 17.56 T-147: espacios de Herdr por orquestador, nunca pestañas en la instancia actual
+
+**Origen**: corrección del usuario (2026-11-11). El procedimiento documentado
+creaba la pestaña con los ids del **espacio y pestaña activos** (`$s.space`,
+`$s.tab`), así que un orquestador de dominio acababa como pestaña dentro de la
+misma instancia del nivel 0, con dos autores sobre el mismo espacio y sin la
+separación que exige la jerarquía.
+
+**Contrato**: cada orquestador de dominio se abre en un **espacio nuevo** de
+Herdr. El nombre del espacio es `<proyecto>/<especialidad>` en minúsculas con
+guiones (`grim-dawn-builds/ui`, `grim-dawn-builds/tests`). El espacio arranca
+con un agente orquestador interactivo (`opencode --auto` con el prompt dentro de
+`argv`) que recibe la tarea y despacha sub-tareas a **sus propios subagentes**.
+El nivel 0 no crea pestañas de dominio en su propia instancia.
+
+**Herramienta**: `scripts/herdr-space.mts` construye y ejecuta
+`herdr-app do space.new --name <proyecto>/<especialidad> --folder <repo>
+--tab <especialidad> --argv '["opencode","--auto","--prompt","<una línea>"]'`.
+Valida el nombre (segmentos `[a-z0-9][a-z0-9-]*`), exige carpeta absoluta
+existente, une el prompt en una sola línea y falla cerrada. `--print` muestra el
+comando sin lanzar nada; la verificación de esta tarea usa `--print`, no abre
+ventanas.
+
+**Archivos**: `AGENTS.md`, `docs/orchestration/herdr.md`,
+`docs/orchestration/hierarchy.md`, `scripts/herdr-space.mts`,
+`scripts/herdr-space.test.mts`, `package.json` y el documento transversal
+`C:/Users/paco_/.copilot/sdd/ORCHESTRATION.md`.
+
+**Aceptación**: el procedimiento y las reglas compartidas prohíben la pestaña en
+la instancia actual; la herramienta produce el espacio `proyecto/especialidad`
+con el prompt en `argv` y falla con nombres o carpetas inválidos; pruebas de la
+herramienta y `markdownlint-cli2` en verde; ningún agente real lanzado durante
+la verificación.
+**Estado 2026-11-11: hecha.** La política de `AGENTS.md`, `herdr.md`,
+`hierarchy.md` y `~/.copilot/sdd/ORCHESTRATION.md` prohíbe abrir pestañas de
+dominio en la instancia actual y fija el nombre `<proyecto>/<especialidad>`.
+`scripts/herdr-space.mts` (+5 pruebas) construye el `space.new` con el prompt
+dentro de `argv`, valida nombre y carpeta absoluta y falla cerrada; `--print`
+muestra el comando sin lanzar nada. Ensayo `--print`: `space:
+"grim-dawn-builds/ui"`, sin `--task` posicional. Evidencia: 5/5 pruebas de la
+herramienta, `test:scripts` 445/447 (2 omitidos preexistentes), `lint:md` 0
+incidencias y `format:check` limpio. No se lanzaron agentes reales.
+
+### 17.57 T-148: este PC como host SSH para Herdr remoto
+
+**Origen**: petición del usuario (2026-11-11): conectar al Herdr de este equipo
+desde otra computadora y desde la app móvil.
+
+**Diagnóstico verificado**: `hc server status` muestra el core `mamalona` vivo
+(0.1.20, 1 terminal). OpenSSH Server está registrado (`sshd` Stopped/Manual,
+binario en `C:\Windows\System32\OpenSSH\sshd.exe`) pero **falta**
+`C:\ProgramData\ssh\sshd_config` y no hay claves de host, así que no puede
+aceptar conexiones. El usuario `paco_` está en Administradores y tiene
+contraseña; `%USERPROFILE%\.ssh\authorized_keys` ya tiene su clave. LAN
+`192.168.100.35`; firewall TCP 22 habilitado en los tres perfiles; sin
+Tailscale; NordVPN instalado con el servicio detenido.
+
+**Alcance**: documentar el procedimiento y dejar un script idempotente para
+PowerShell elevada (`scripts/setup-ssh-remote.ps1`) que instala/repara OpenSSH
+Server, crea `sshd_config` desde la plantilla de Windows, genera claves de host,
+arranca `sshd` al inicio, asegura la regla de firewall y autoriza claves
+públicas (archivo de administradores y del usuario, con ACL correcta). La otra
+computadora se empareja con `hc machine add paco_@192.168.100.35 --name
+mamalona --install`; el móvil usa el mismo host en LAN o una IP de malla
+(NordVPN Meshnet/Tailscale). Sin abrir el 22 a Internet.
+
+**Archivos**: `docs/orchestration/remote-access.md`,
+`scripts/setup-ssh-remote.ps1`, este plan y `tasks.md`.
+
+**Aceptación**: el documento y el script parsean; el paso elevado queda
+explícito; `sshd` escuchando en 22 tras ejecutarlo; desde el otro equipo
+`ssh paco_@192.168.100.35` y `hc machine ls` muestran `mamalona` alcanzable; la
+app móvil lista la máquina. **Estado 2026-11-11**: el host SSH está operativo. `sshd` quedó
+`Running/Automatic`, escuchando en `0.0.0.0:22` y `[::]:22`, con la clave del
+usuario autorizada y `ssh paco_@192.168.100.35 "echo hc-remote-ok"` respondiendo;
+`hc machine add paco_@127.0.0.1` identifica «este core», lo que valida el
+handshake de hc por SSH. El script restringe DACL y propietario de claves y
+configuración, y fue suficiente para arrancar el servicio. Queda emparejar la
+laptop y el móvil y verificar `hc machine ls` desde ellos. No se declara
+cerrada hasta entonces.

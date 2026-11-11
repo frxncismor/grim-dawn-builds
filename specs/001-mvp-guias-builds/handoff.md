@@ -1,4 +1,31 @@
-# Relevo: T-020a ejecutada (PARCIAL, presupuesto bloqueado)
+# Relevo: T-138 cerrada; spec001 sigue abierta
+
+## Estado actual (2026-11-11, 12:30)
+
+La sesión anterior se interrumpió a las 04:24 por `OpenCode Go usage limit
+reached` y un reinicio de Windows a las 09:52 cerró las ventanas de Herdr. El
+trabajo i18n estaba en disco **sin commit** y el árbol en rojo. Esta sesión lo
+retomó y cerró **T-138** (mecánica y UI): `en` en la raíz y `es` bajo `/es`,
+catálogos XLF en paridad 290/290, conmutador accesible que conserva ruta y query,
+prerender de 12 rutas, `hreflang`/canonical por idioma, 404 por configuración
+regional, sitemap de 10 URLs y `robots.txt` sustituido en ambas raíces.
+
+Puertas ejecutadas y verdes: `pnpm test` 299/299; `pnpm test:scripts` 440/442
+(2 omitidos preexistentes); `pnpm lint`, `pnpm format:check` y `pnpm lint:md` sin
+incidencias; `e2e:a11y` 51/51 con 0 violaciones en inglés y español;
+`e2e:journeys` 21/21; `check:performance` 47/47; `/` 0 B y `/tier-list`
+111 955 B con techo **112 000 B** autorizado por el usuario (plan §17.51, segunda
+excepción) porque `withI18nSupport()` cuesta 1 225 B.
+
+Pendiente registrado, no reclamado como hecho: **T-146** (plan §17.54) para que
+`TierListContentSchema` declare `locale` y el catálogo use `name_en`/`lang` según
+la configuración regional. **T-144** sigue abierta para recuperar margen gzip y
+revertir las dos excepciones. La puerta de cuatro revisiones de spec002 sigue
+siendo obligatoria al cierre de la spec001. Sin push ni PR.
+
+---
+
+## Relevo anterior: T-020a ejecutada (PARCIAL, presupuesto bloqueado)
 
 Estado al 2026-11-10: T-033, T-135, T-034, T-035, T-036 y T-037 completadas. T-020
 tiene planificación vigente en plan §17.43, quedó **PARCIAL**, y su remediación
@@ -916,3 +943,185 @@ orquestación `opencode-go/deepseek-v4.1-flash`. Sin commit, push ni PR.
   - Chrome 157.0.8103.39 (FileVersion), UA `HeadlessChrome/157.0.0.0`;
     Lighthouse 13.6.0; `numberOfRuns` 3.
 - Sin commit, push ni PR.
+
+### Incidente de concurrencia (2026-11-11)
+
+- A las 04:03:33 otro proceso puso `ci.collect.numberOfRuns` en 5. El orquestador
+  lo restauró a 3 a las 04:12 y lo dejó así. Comprobado después en
+  `lighthouserc.json`: el valor es **5**, no 3. Queda pendiente de decisión del
+  orquestador; esta nota no lo modifica.
+- La pasada de `pnpm verify` de 04:05 falló SEO 0.920 en `/legal` y
+  `/autores/grim-dawn-builds` porque un build ajeno reemplazó `dist/` a mitad de
+  medición: `robots.txt` era la plantilla con `__BASE_URL__` sin sustituir y faltaba
+  `sitemap.xml`. No es una regresión de T-145.
+- Con el artefacto íntegro de 04:13 (build del dominio i18n en curso), la medición
+  de T-145 sigue verde: TBT mediana 0/74/0/0/0 ms en `/`, `/tier-list`, `/acerca`,
+  `/legal` y `/autores/grim-dawn-builds`; LCP 758.7/675.6/756/755.6/755.8 ms; CLS
+  0.000; puntuaciones 1.000. `/tier-list` JS inicial sube a **111346 B > 110500 B**
+  por los cambios de i18n en curso, no por T-145, que no toca su JS. Informes:
+  `dist/lighthouse-performance/run-20261111-041422-4405a9`.
+- Evidencia verde previa sobre la misma base: `pnpm verify` exit 0 a las 03:53 (log
+  `C:\Users\paco_\AppData\Local\Temp\opencode\t145\verify-orchestrator.log`), con
+  `/tier-list` 110013/110500; `pnpm build` exit 0 y `pnpm test:scripts` exit 0 (372
+  pruebas, 0 fallos) entre 03:59 y 04:01 (log
+  `C:\Users\paco_\AppData\Local\Temp\opencode\t145\final-t145-gates.log`).
+- Recomendación: serializar `build` y `check:performance` entre dominios antes de la
+  verificación de programa. T-145 no amplió ningún presupuesto y su código no
+  participa en el bundle de `/tier-list`.
+
+## T-139 y T-140: jerarquía de orquestadores y property-based testing (2026-11-11)
+
+- **Estado**: T-140 cerrada con evidencia; T-139 con entregables completos y
+  **sin marcar**, porque su aceptación del plan exige un ensayo real con dos
+  dominios disjuntos que no se ejecutó en este turno.
+- **Alcance**: T-139 documenta la jerarquía vigente de `ORCHESTRATION.md` §12 en
+  `docs/orchestration/hierarchy.md` y crea el rol
+  `~/.copilot/agents/sdd-orchestrator-domain.agent.md`. T-140 añade tres suites de
+  propiedades al dominio (`visibility`, `schema`, `adaptation`), con `fast-check`
+  4.10.2 exacto y el script `test:properties`.
+- **Archivos**: `docs/orchestration/hierarchy.md` (nuevo),
+  `packages/domain/src/visibility.property.spec.ts`,
+  `packages/domain/src/schema.property.spec.ts`,
+  `packages/domain/src/adaptation.property.spec.ts` (nuevos),
+  `packages/domain/package.json` (dependencia exacta + script),
+  `pnpm-lock.yaml` (+16 líneas: `fast-check` y `pure-rand@8.4.2`) y
+  `~/.copilot/agents/sdd-orchestrator-domain.agent.md` (nuevo, fuera del repo).
+  Ningún archivo de `src/`, `apps/api/`, `e2e/`, `scripts/` ni de la puerta de
+  rendimiento fue tocado por este dominio.
+- **Evidencia**: `pnpm --filter @gd/domain test:properties` exit 0 (3 archivos,
+  10 pruebas, 10 líneas `[property]` con `numRuns` y `seed`). `pnpm --filter
+@gd/domain test` exit 0: 122 pruebas (antes 112), cobertura 99.69 / 98.84 / 100 /
+  99.65 (antes 98.15 / 96.92 / 100 / 98.61). `domain:typecheck` 0, `domain:lint` 0,
+  `check:boundaries` 0 (243 archivos), `pnpm test:scripts` exit 0 (`# tests 374`,
+  `# pass 372`, `# fail 0`, `# skipped 2`), `markdownlint` 0 incidencias en 55
+  archivos. Tabla de propiedades, semillas y comandos en `quickstart.md`.
+- **Modelos realmente usados**: subagentes `opencode-go/claude-haiku-5-5#medium`;
+  orquestación de dominio `opencode-go/deepseek-v4.1-flash`.
+- **Desviación**: el plan incluye «round-trip de filtros» y «orden estable». El
+  codec `serializeFilter`/`parseFilter` vive en
+  `src/app/features/tier-list/filter.ts` (zona web, fuera de los archivos
+  autorizados e importable solo en dirección web → dominio); el orden lo imponen
+  los adaptadores de repositorio. El round-trip se cubre sobre el DTO público del
+  dominio; el del codec de filtros queda como seguimiento del dominio UI.
+- **Pendiente**: (1) ensayo real de T-139 con dos orquestadores de dominio (UI y
+  tests) sobre una tarea pequeña; (2) propiedades del codec de filtros en la zona
+  web cuando esa tarea se planifique.
+- Sin commit, push ni PR.
+
+## T-104 y T-113: derechos/adaptaciones en dominio y guardia de auth (2026-11-11)
+
+- **Estado**: T-104 y T-113 cerradas con evidencia; ambas sin commit, push ni PR.
+- **Alcance**: T-104 añade a `packages/domain` los tipos Zod de derechos y
+  adaptaciones (`SourceRightsEvidence`, `BuildAdaptation`,
+  `AdaptationPublication`, `PermissionRequest`, `TakedownEvent`,
+  `SourceChangeEvent`, enums y helpers), con `entry_kind='build_adaptada'` como
+  `ADAPTATION_ENTRY_KIND` sin tocar `ENTRY_KINDS` (el enum SQL llega en T-108 y
+  T-058 compara ambos lados). T-113 amplía `check-scope` con dependencias de
+  sesión/auth y una regla nueva `out-of-scope-route` para rutas de auth, registro,
+  cuenta y edición pública (AC-24), con detección contextual y comparación por
+  segmento exacto.
+- **Archivos**: `packages/domain/src/adaptation.ts` y `adaptation.spec.ts`
+  (nuevos), `packages/domain/src/index.ts`, `packages/domain/src/index.spec.ts`,
+  `scripts/domain-runtime.test.mts` (solo la lista esperada de exports, con
+  autorización explícita del usuario), `scripts/check-scope.mts`,
+  `scripts/check-scope.test.mts`. No se tocó `src/**`, `apps/**`, `e2e/**`,
+  `package.json` raíz, `pnpm-lock.yaml`, `lighthouserc.json` ni
+  `scripts/verify-local.*`.
+- **Evidencia**: `pnpm --filter @gd/domain test` exit 0 (6 archivos; 112 pruebas en
+  la primera medición, 122 tras las suites de T-140; cobertura
+  98,15/96,92/100/98,61 → 99,69/98,84/100/99,65), `pnpm --filter @gd/domain
+typecheck` 0, `pnpm --filter @gd/domain lint` 0, `prettier --check` 0,
+  `node --import tsx --test scripts/check-scope.test.mts` 39/39, fixture propio en
+  `$TEMP` con `passport` y `path: 'login'` → salida 1 con `[external-auth]` y
+  `[out-of-scope-route]`, `pnpm check:scope` 0 (246 archivos),
+  `pnpm test:scripts` exit 0 (383 pruebas, 381 pasan, 2 omitidas, 0 fallos),
+  `pnpm check:boundaries` 0 (243 archivos).
+- **Modelos realmente usados**: subagentes `opencode-go/deepseek-v4.1-flash`
+  (primario de la cadena, sin fallback); orquestación de dominio
+  `opencode-go/deepseek-v4.1-flash`.
+- **Desviaciones**: (1) `pnpm domain:test` no existe en el `package.json` raíz y
+  ese archivo está prohibido en este turno, así que la verificación se hizo con
+  `pnpm --filter @gd/domain test` (`pnpm domain:test` devuelve
+  `Command "domain:test" not found`); (2) se sincronizó la lista de exports de
+  `scripts/domain-runtime.test.mts` con autorización del usuario; (3)
+  `scripts/check-scope.mts` ya contenía las reglas de T-046/T-069b
+  (comentarios/calculadora y `scraping`) cuando el subagente lo releyó: se
+  absorbieron sin revertirlas.
+- **Pendiente**: T-107 (checklist completo de la puerta y degradación a
+  _link-only_), T-108 (migración SQL y enum `build_adaptada`), T-105/T-106 (UI).
+- Sin commit, push ni PR.
+
+## T-139 cerrada y T-141 parcial con dos hallazgos reales (2026-11-11)
+
+- **T-139 cerrada**: el nivel 0 confirmó el ensayo real con cinco orquestadores de
+  dominio en paralelo (derechos2, calidad, i18n, ci y rendimiento), archivos
+  disjuntos, contrato de reporte idéntico en los dos niveles y dos serializaciones
+  arbitradas (`scripts/check-scope.*` a derechos2 y `package.json` raíz a ci).
+  Registrado en `docs/orchestration/hierarchy.md` y `quickstart.md`; `tasks.md` y
+  el To-do de Over9k marcados `[x]`.
+- **T-141 parcial**: `packages/domain/src/adversarial.spec.ts` (nuevo) cubre las 10
+  clases de ataque con 151 pruebas verdes y 2 `it.fails` que documentan defectos
+  reales. `pnpm --filter @gd/domain test` exit 0 (`Tests 151 passed | 2 expected
+fail (153)`), cobertura 99.69 / 98.84 / 100 / 99.65; `typecheck`, `lint`,
+  `check:boundaries` (244 archivos) y Prettier en verde.
+- **Hallazgo 1 (derechos)**: `AuthorSchema` acepta URLs con credenciales
+  (`https://usuario:clave@…`), confirmado también con `tsx`
+  (`credenciales_aceptadas= true`). Afecta al `httpUrl` compartido (`source.url`,
+  `video_url`, `external_url`, `origin_url` de activos).
+- **Hallazgo 2 (publicación)**: `BuildSchema` acepta `publicado` con
+  `rights_status: 'link_only'` porque su gate usa `APPROVED_RIGHTS` (que lo
+  incluye). La vista pública lo bloquea, así que no hay filtración, pero el gate
+  editorial no falla cerrado.
+- **No se tocó** `packages/domain/src/schema.ts`: pertenece al dominio derechos2.
+  Los dos hallazgos necesitan una tarea de corrección con prueba de regresión;
+  quedan propuestos al nivel 0 (no se inventa número de tarea).
+- **Pendiente de T-141**: UI (`src/app/**/*.adversarial.spec.ts`), API
+  (`apps/api/test/adversarial.int.spec.ts`) y fixtures
+  (`scripts/fixtures/adversarial/**`), fuera del alcance asignado a este dominio.
+- **Modelos realmente usados**: subagentes `opencode-go/claude-haiku-5-5#medium`;
+  orquestación de dominio `opencode-go/deepseek-v4.1-flash`.
+- Sin commit, push ni PR.
+
+## T-126: CI de calidad de la spec (infraestructura/CI, 2026-11-11)
+
+- **Archivos**: `.github/workflows/ci.yml`, `scripts/ci-workflow.test.mts`,
+  `scripts/verify-local.mjs`, `scripts/verify-local.test.mjs`,
+  `specs/001-mvp-guias-builds/quickstart.md` y `tasks.md`. Sin cambios en
+  `package.json`, `pnpm-lock.yaml`, `playwright.config.ts`, `lighthouserc.json`,
+  `e2e/**` ni `src/**`: no hicieron falta.
+- **Pasos añadidos al job `verify`** (tras los controles de T-064): validación del
+  fixture real (`content:validate -- --dir content`), `catalog:check`, build de
+  borradores aislado (`ng build --output-path dist/e2e-drafts` con
+  `INCLUDE_DRAFTS=true`), instalación de Playwright Chromium, `e2e:journeys`
+  (T-040), `e2e:a11y` (T-041), paso de reporte de fuente que falla si un build de
+  PR emite `dist/build-info.json` (exclusivo de `build:release`, T-074) e informa
+  la fuente efectiva, y `check:performance` (T-042) con
+  `CHROME_PATH=/usr/bin/google-chrome`. Job a 45 minutos, sin deploy, sin
+  secretos y sin acciones nuevas.
+- **Pruebas estáticas**: `ci-workflow.test.mts` valida el YAML sin dependencia
+  externa (sangría par, entradas de `steps:`, `runs-on:` por job), exige los
+  comandos nuevos, prohíbe `ng serve`, el build hacia el directorio público, un
+  `timeout-minutes` insuficiente y `--update-snapshots`, y añade 13 regresiones
+  de mutación (26 en total). `verify-local` valida el fixture real y el catálogo
+  antes del build de la web, sin mover `performance` de su última posición.
+- **Evidencia local**: `ci-workflow.test.mts` 32/32 y `verify-local.test.mjs`
+  11/11 (exit 0); `pnpm test:scripts` 398 pruebas, 396 pasan, 2 `skipped`
+  preexistentes, 0 fallos; YAML parseado con PyYAML (`jobs=['verify']`,
+  37 pasos); `content:validate --dir content` y `catalog:check` OK; build de
+  borradores aislado (`Prerendered 7 static routes`) sin sobrescribir
+  `dist/grim-dawn-builds`; Playwright Chromium 158.0.8127.18 instalado;
+  `pnpm run e2e:a11y` 27/27 con 0 violaciones y el fixture negativo
+  `image-alt (critical)`.
+- **Sin demostrar (bloqueo ajeno)**: la ejecución real del runner (no hay push ni
+  PR autorizados) y las puertas de build, journeys y Lighthouse sobre un árbol
+  sano. En esta sesión `pnpm run build` sale 1 con `404.html inválido` porque
+  `not-found.page.ts` ya renderiza inglés y `scripts/emit-404.mts` exige «no
+  encontrada»; `e2e:journeys` da 18 fallos por el texto español esperado y
+  `check:performance` 44/47 (SEO 0.920 por `robots.txt` sin regenerar; JS
+  `111 346/110 500 B` por el bundle en curso). Es el trabajo de i18n (T-138), no
+  T-126; el nivel 0 re-ejecutará la puerta completa cuando i18n cierre.
+- **`lighthouserc.json` cambió a 5 corridas** por otro dominio durante la sesión:
+  el workflow y `check:performance` leen `numberOfRuns` del archivo y no lo fijan.
+- **Modelos**: orquestador de dominio `opencode-go/deepseek-v4.1-flash`;
+  subagentes `general` del harness con el modelo predeterminado (no se fijó
+  `model` explícito). Sin commit, push ni PR; sin deploy ni secretos reales.

@@ -2993,3 +2993,569 @@ Chrome real: 157.0.8103.39 (FileVersion del ejecutable), con UA
 El JS inicial de `/tier-list` difiere entre `pnpm build` (110011 B) y `verify`
 (110013 B); ambas cifras quedan bajo 110500 B. Los límites de TBT y de
 presupuesto no se modificaron.
+
+**Nota de cierre 2026-11-11 (T-042)**: esta sección se midió con
+`numberOfRuns` 3 y la puerta quedó fijada después en **5** (mediana de 5, umbrales
+intactos). La medición del artefacto de las 04:03 confirma **TBT 0 ms en las 5
+corridas** de `/acerca`, `/legal` y `/autores/grim-dawn-builds`, con su HTML en
+13 630/14 668/12 782 B frente a los 36 391/37 362/35 607 B previos: la resolución
+fue la emisión estática. T-145 queda cerrada; el margen de `/tier-list` (medianas
+de TBT 60–117,5 ms frente a 150 ms, con picos sueltos de 326–350 ms) queda como
+observación, sin tarea nueva. Detalle en «Evidencia ejecutada - Rendimiento T-042
+(2026-11-11)».
+
+### Incidente de concurrencia (2026-11-11)
+
+- A las 04:03:33 otro proceso puso `ci.collect.numberOfRuns` en 5. El orquestador
+  lo restauró a 3 a las 04:12 y lo dejó así. Comprobado después en
+  `lighthouserc.json`: el valor es **5**, no 3. Queda pendiente de decisión del
+  orquestador; esta nota no lo modifica.
+- La pasada de `pnpm verify` de 04:05 falló SEO 0.920 en `/legal` y
+  `/autores/grim-dawn-builds` porque un build ajeno reemplazó `dist/` a mitad de
+  medición: `robots.txt` era la plantilla con `__BASE_URL__` sin sustituir y faltaba
+  `sitemap.xml`. No es una regresión de T-145.
+- Con el artefacto íntegro de 04:13 (build del dominio i18n en curso), la medición
+  de T-145 sigue verde: TBT mediana 0/74/0/0/0 ms en `/`, `/tier-list`, `/acerca`,
+  `/legal` y `/autores/grim-dawn-builds`; LCP 758.7/675.6/756/755.6/755.8 ms; CLS
+  0.000; puntuaciones 1.000. `/tier-list` JS inicial sube a **111346 B > 110500 B**
+  por los cambios de i18n en curso, no por T-145, que no toca su JS. Informes:
+  `dist/lighthouse-performance/run-20261111-041422-4405a9`.
+- Evidencia verde previa sobre la misma base: `pnpm verify` exit 0 a las 03:53 (log
+  `C:\Users\paco_\AppData\Local\Temp\opencode\t145\verify-orchestrator.log`), con
+  `/tier-list` 110013/110500; `pnpm build` exit 0 y `pnpm test:scripts` exit 0 (372
+  pruebas, 0 fallos) entre 03:59 y 04:01 (log
+  `C:\Users\paco_\AppData\Local\Temp\opencode\t145\final-t145-gates.log`).
+- Recomendación: serializar `build` y `check:performance` entre dominios antes de la
+  verificación de programa. T-145 no amplió ningún presupuesto y su código no
+  participa en el bundle de `/tier-list`.
+
+## T-139 y T-140: jerarquía de orquestadores y property-based testing (2026-11-11)
+
+Ejecución por el orquestador de dominio de calidad y pruebas (plan §17.49). Dos
+sub-tareas despachadas en paralelo a subagentes propios, con archivos disjuntos y
+cero ediciones cruzadas; la verificación la repitió el orquestador con la salida
+real.
+
+### T-139 — jerarquía de orquestadores por dominio
+
+Entregables:
+
+- `docs/orchestration/hierarchy.md` (nuevo): nivel 0 decide y arbitra sin ejecutar;
+  orquestadores de dominio ejecutan y verifican; contrato de reporte del §3;
+  propiedad de archivos y paralelismo por archivos disjuntos; ventanas de Herdr;
+  escalado; presupuesto de modelos; registro. Describe la jerarquía vigente de
+  `ORCHESTRATION.md` §12, sin añadir niveles ni reglas.
+- `~/.copilot/agents/sdd-orchestrator-domain.agent.md` (nuevo, fuera del repo):
+  definición del rol con puerta de despacho, matriz de verificación por dominio,
+  agregación de reportes, Herdr, escalado y anti-patrones.
+
+| Comprobación                                        | Resultado                                                                                                         |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `markdownlint-cli2 docs/orchestration/hierarchy.md` | `Linting: 55 files`, `Summary: 0 issues in 0 files`, exit 0                                                       |
+| `pnpm lint:md`                                      | `Linting: 55 files`, `Summary: 0 issues in 0 files`, exit 0                                                       |
+| `git status --porcelain`                            | solo `docs/orchestration/hierarchy.md` nuevo por esta tarea en el repo; el `.agent.md` vive fuera del repositorio |
+
+**Aceptación del plan pendiente**: T-139 exige además un «ensayo real con dos
+dominios disjuntos» (UI y tests) con dos orquestadores de dominio. Este turno tuvo
+un solo orquestador de dominio con dos sub-tareas disjuntas, así que el ensayo
+completo **no** está cubierto y la tarea queda sin marcar.
+
+### T-140 — property-based testing del dominio
+
+- `fast-check` **4.10.2** exacto en `packages/domain/package.json`
+  (`devDependencies`); el lockfile solo suma `fast-check` y su transitiva
+  `pure-rand@8.4.2` (+16 líneas).
+- Script nuevo: `test:properties` = `vitest run property --reporter=verbose`
+  (sin `--coverage`, porque los umbrales del 85 % se miden sobre la suite completa;
+  `--reporter=verbose` es lo que hace visibles los contadores y las semillas).
+- Semilla base `SEED = 20261111`, una por propiedad (`SEED + n`), registro
+  reproducible de cada una.
+
+| #   | Propiedad                                                                                 | `numRuns` | Semilla  | Casos / contadores                                      |
+| --- | ----------------------------------------------------------------------------------------- | --------- | -------- | ------------------------------------------------------- |
+| 1   | `publicFilter` idempotente sobre listas                                                   | 150       | 20261112 | 150 casos, 426 elementos conservados                    |
+| 2   | `publicFilter(false)` solo deja publicado con derechos aprobados                          | 200       | 20261113 | 200 casos, 54 visibles, 146 ocultos                     |
+| 3   | `publicFilter(true)` es total                                                             | 150       | 20261114 | 150 casos                                               |
+| 4   | `publicFilter` monótono (público ⊆ con borradores)                                        | 200       | 20261115 | 200 casos, 62 premisas                                  |
+| 5   | `PublicBuildSchema` aceptado ⇒ publicado, derechos sobre contenido, fecha, autor y fuente | 200       | 20261116 | 200 casos, 20 aceptados, 180 rechazados                 |
+| 6   | `PublicBuildSchema` rechaza `link_only` (link-only sin contenido no publica)              | 150       | 20261117 | 150 rechazos por `rights_status`, 150 controles válidos |
+| 7   | Round-trip JSON e idempotencia del DTO público                                            | 150       | 20261118 | 150 casos, 21 DTO válidos                               |
+| 8   | `TierEntrySchema`: `enlace_externo` y `placeholder`                                       | 200       | 20261119 | 200 casos, 14 aceptados externos, 27 placeholders       |
+| 9   | `AdaptationPublicationSchema`: publicado ⇒ derecho publicable y evidencia vigente         | 200       | 20261120 | 200 casos, 110 aceptados, 19 publicados                 |
+| 10  | `pending`, `own_original` y `link_only` nunca publican (adaptaciones)                     | 150       | 20261121 | 150 rechazos por `rights_status`, 150 controles válidos |
+
+Total: **10 propiedades** y **1 750 casos** generados.
+
+| Comando (ejecutado por el orquestador)     | Exit | Salida                                                                                                         |
+| ------------------------------------------ | ---- | -------------------------------------------------------------------------------------------------------------- |
+| `pnpm --filter @gd/domain test:properties` | 0    | `Test Files 3 passed (3)`, `Tests 10 passed (10)`; 10 líneas `[property] … numRuns=… seed=… casos=…` en el log |
+| `pnpm --filter @gd/domain test`            | 0    | `Test Files 9 passed (9)`, `Tests 122 passed (122)`; cobertura 99.69 / 98.84 / 100 / 99.65                     |
+| `pnpm --filter @gd/domain typecheck`       | 0    | sin errores                                                                                                    |
+| `pnpm --filter @gd/domain lint`            | 0    | sin errores                                                                                                    |
+| `pnpm test:scripts`                        | 0    | `# tests 374`, `# pass 372`, `# fail 0`, `# skipped 2`                                                         |
+| `pnpm check:boundaries`                    | 0    | `check:boundaries OK (243 archivos revisados)`                                                                 |
+
+Cobertura antes de la tarea: 98.15 / 96.92 / 100 / 98.61 (112 pruebas). Después:
+99.69 / 98.84 / 100 / 99.65 (122 pruebas). No baja en ninguna métrica.
+
+**Fallos descubiertos por las propiedades**: ninguno del dominio. El único fallo
+fue del propio arbitrario (`fc.date` generaba fechas inválidas), corregido con
+enteros en milisegundos.
+
+**Desviación registrada**: el plan pide «round-trip de filtros» y «orden estable».
+El codec URL del catálogo (`serializeFilter`/`parseFilter`) vive en
+`src/app/features/tier-list/filter.ts`, zona web y fuera de los archivos
+autorizados de esta tarea, e importarlo desde `packages/domain` rompería la
+frontera `domain → web`. El round-trip se cubre sobre la superficie que el dominio
+sí posee (DTO público: `parse(JSON.parse(JSON.stringify(x))) === x`). El «orden
+estable» lo imponen los adaptadores de repositorio (web y API), no el dominio. El
+round-trip del codec de filtros queda como seguimiento del dominio UI.
+
+## Evidencia ejecutada - Rendimiento T-042 (2026-11-11)
+
+Cierra la evidencia de T-042 (plan §17.52) y corrige el hallazgo de TBT de plan
+§17.53. Se mide el artefacto real de `pnpm build`
+(`dist/grim-dawn-builds/browser`), nunca `ng serve`, con `pnpm check:performance`,
+que es además el **último paso de `pnpm verify`**, tras `build` y `public-build`
+(lo exige T-042; la decisión anterior de dejarlo fuera quedó sustituida).
+
+```powershell
+pnpm build
+pnpm check:performance
+```
+
+El 2026-11-11 hubo **dos mediciones** del mismo día con propósitos distintos:
+
+- **A — acredita la puerta.** Artefacto **finalizado** de `pnpm build` del
+  2026-11-11 03:28. `pnpm check:performance`, **exit 0, 47/47 comprobaciones**.
+  Log `%TEMP%\gd-t042-performance-N5-1.log`.
+- **B — no acredita la puerta, documenta.** Artefacto **en reconstrucción**: el
+  `index.html` se reconstruyó a las 04:08:44 durante la propia medición, por otro
+  agente que trabajaba en el mismo worktree. `pnpm check:performance`, **exit 1,
+  46/47**. Log `%TEMP%\gd-t042-evidencia-final.log`; informes en
+  `dist/lighthouse-performance/run-20261111-040348-903f58`.
+
+### Entorno de medición
+
+| Dato                | Valor                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------ |
+| Fecha               | 2026-11-11                                                                                             |
+| Sistema operativo   | Windows                                                                                                |
+| Node / pnpm         | Node v22.12.0 / pnpm 12.18.0                                                                           |
+| Herramienta         | `@lhci/cli` 0.16.0 con Lighthouse 13.6.0                                                               |
+| Navegador           | Chrome Headless `157.0.0.0`                                                                            |
+| Perfil              | `formFactor=mobile` (412×823, DPR 1,75)                                                                |
+| Throttling          | `throttlingMethod=simulate` (slow 4G: `rtt` 150 ms, 1638,4 kbps, CPU ×4)                               |
+| Corridas y decisión | 5 corridas por ruta en las mediciones A y B; decisión por **mediana**; umbrales de plan §6 sin cambios |
+
+Al ser 5 corridas, cada celda de LCP y TBT de la tabla siguiente publica la
+mediana y, entre corchetes, **los cinco valores individuales**.
+
+### Medición A — artefacto finalizado (acredita la puerta)
+
+`pnpm check:performance` → **exit 0, 47/47 comprobaciones**.
+
+| Ruta                        | LCP mediana (5 corridas)                         | CLS   | TBT mediana (5 corridas)             | Rend. | A11y  | SEO   | BP    |
+| --------------------------- | ------------------------------------------------ | ----- | ------------------------------------ | ----- | ----- | ----- | ----- |
+| `/`                         | 757,2 ms [763,6 / 757,7 / 757,2 / 756,1 / 756,6] | 0,000 | 0 ms [0 / 0 / 0 / 0 / 0]             | 1,000 | 1,000 | 1,000 | 1,000 |
+| `/tier-list`                | 661,9 ms [671,7 / 657,2 / 661,9 / 656 / 681,7]   | 0,000 | 60 ms [115 / 56 / 60 / 26,5 / 326,5] | 1,000 | 1,000 | 1,000 | 1,000 |
+| `/acerca`                   | 641,9 ms [641,9 / 641,3 / 639 / 644,8 / 647,5]   | 0,000 | 21 ms [21 / 61 / 0 / 2 / 68]         | 1,000 | 1,000 | 1,000 | 1,000 |
+| `/legal`                    | 635,1 ms [638,4 / 635,1 / 642,7 / 633,9 / 632]   | 0,000 | 25 ms [25 / 13 / 32 / 68 / 8]        | 1,000 | 1,000 | 1,000 | 1,000 |
+| `/autores/grim-dawn-builds` | 636,3 ms [631,6 / 637,7 / 638,5 / 605,8 / 636,3] | 0,000 | 37 ms [148 / 32 / 37 / 33 / 76]      | 1,000 | 1,000 | 1,000 | 1,000 |
+
+#### Presupuestos de bytes de la misma medición A
+
+| Ruta                        | HTML crudo (límite 120 000 B) | CSS crítico gzip 6 (límite 20 000 B) | JS inicial gzip 6                         |
+| --------------------------- | ----------------------------- | ------------------------------------ | ----------------------------------------- |
+| `/`                         | 15 413 B                      | 1 657 B                              | 0 B (límite 90 000 B)                     |
+| `/tier-list`                | 111 666 B                     | 1 657 B                              | 110 011 B (límite 110 500 B, plan §17.51) |
+| `/acerca`                   | 36 391 B                      | 1 657 B                              | sin presupuesto en plan §6                |
+| `/legal`                    | 37 362 B                      | 1 657 B                              | sin presupuesto en plan §6                |
+| `/autores/grim-dawn-builds` | 35 607 B                      | 1 657 B                              | sin presupuesto en plan §6                |
+
+Plan §6 fija presupuesto de JS inicial solo para `/`, `/tier-list` y
+`/builds/:slug`; a las páginas estáticas se les exige HTML, CSS y puntuaciones
+Lighthouse, no un techo de JS.
+
+### Medición B — artefacto en reconstrucción (no acredita la puerta)
+
+Build posterior, medido el 2026-11-11 a las 04:03 mientras otro agente
+reconstruía el mismo `dist/` (`index.html` reconstruido a las 04:08:44, en mitad
+de la medición).
+
+| Ruta                        | LCP      | TBT mediana (5 corridas)         | HTML      |
+| --------------------------- | -------- | -------------------------------- | --------- |
+| `/`                         | 760,4 ms | 0 ms                             | 15 260 B  |
+| `/tier-list`                | 680,5 ms | 82 ms [51 / 164 / 82 / 183 / 59] | 111 209 B |
+| `/acerca`                   | 756 ms   | 0 ms                             | 13 630 B  |
+| `/legal`                    | 756,5 ms | 0 ms                             | 14 668 B  |
+| `/autores/grim-dawn-builds` | 757,4 ms | 0 ms                             | 12 782 B  |
+
+Bytes de B: HTML 15 260 / 111 209 / 13 630 / 14 668 / 12 782 B, CSS 1 657 B y JS
+inicial 0 B (`/`) y 109 874/110 500 B (`/tier-list`): **todos los presupuestos de
+bytes cumplen** en B.
+
+**Único fallo de B (1 de 47)**: `/autores/grim-dawn-builds` con **SEO 0,920** en
+las cinco corridas (límite ≥ 0,95). La auditoría culpable es `robots-txt`
+(«robots.txt is not valid», 1 error): el `dist/` de ese momento servía
+`robots.txt` con el marcador sin sustituir `Sitemap: __BASE_URL__/sitemap.xml`.
+Es un artefacto **transitorio de otro trabajo en curso** (T-021/T-145) en el
+mismo worktree, no un fallo de la puerta: la puerta falló de forma honesta y
+localizada. B documenta ese artefacto ajeno; no acredita nada sobre la puerta.
+
+### Por qué la puerta decide por mediana
+
+Misma ruta y mismo artefacto, corridas sueltas de `/tier-list`: el TBT osciló
+entre **13,5 ms y 350 ms**; una sola pasada dio **305,7 ms** (rojo) y otra
+**48 ms** (verde). El TBT de Lighthouse depende de la carga del host, así que una
+pasada única no distingue una regresión de un pico de CPU. Por eso la puerta
+decide por **mediana de 5** y publica los cinco valores, y no se amplió ningún
+umbral de plan §6.
+
+### Pruebas de la puerta
+
+| Comprobación    | Comando                                                                                     | Resultado                                                                                |
+| --------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Puerta + verify | `node --import tsx --test scripts/check-performance.test.mts scripts/verify-local.test.mjs` | **29/29 en verde** (18 de la puerta + 11 de verify), exit 0 · `%TEMP%\gd-t042-tests.log` |
+
+La prueba unitaria cubre: TBT de 173 ms falla y 140 pasa; límites exactos de LCP
+2000, CLS 0,05 y puntuaciones 0,9/0,95; informe incompleto o `null` = «no
+medible»; HTML 120 000/120 001 B; CSS gzip 6 de 20 000/20 001 B y CSS externo o
+ausente = fallo cerrado; artefacto ausente = fallo cerrado con el comando de
+build; deriva entre `lighthouserc.json` y `BUDGETS`; número de informes distinto
+de N = falla cerrada; y directorio de informes único por ejecución.
+
+### Diseño implementado
+
+`lighthouserc.json` (configuración móvil y umbrales de plan §6 como fuente única)
+y `scripts/check-performance.mts` (`tsx`, `--dir` opcional): exige
+`dist/grim-dawn-builds/browser/index.html` y `stats.json`, nunca `ng serve`,
+ejecuta `lhci collect` + `lhci upload` en un cwd temporal propio con rutas
+absolutas, deja los informes en
+`dist/lighthouse-performance/run-<fecha>-<sufijo>`, decide por la mediana de N y
+publica los valores por corrida, reutiliza los límites de JS de
+`scripts/check-initial-js.mts`, mide CSS gzip 6 y HTML crudos, imprime la versión
+de Lighthouse, el user agent de Chrome y la configuración, y sale con 1 ante
+cualquier incumplimiento. El paso `performance` (`pnpm check:performance`) es el
+último de `scripts/verify-local.mjs`, tras `build` y `public-build`.
+
+### Límites de esta evidencia
+
+- **La medición A es la que acredita la puerta**: 47/47, mediana de 5 corridas y
+  artefacto finalizado de `pnpm build` de las 03:28. Ninguna otra medición del
+  día sustituye esa cifra.
+- **La medición B no acredita nada sobre la puerta**: 46/47, y su único fallo es
+  un `robots.txt` inválido (`Sitemap: __BASE_URL__/sitemap.xml` sin sustituir) en
+  un artefacto **en reconstrucción** por otro trabajo en curso (T-021). Falló el
+  artefacto ajeno, no la puerta.
+- **No mide `/builds/:slug`**: la única guía sigue con `rights_status=pending`
+  (T-044 pendiente) y esa ruta no existe en el artefacto público.
+- **No acredita el CI de T-126** ni ningún despliegue.
+- Los informes `run-*` se **acumulan** bajo `dist/` (ignorado por git) sin
+  política de retención.
+- La varianza de TBT depende de la carga del host: por eso N=5 y mediana.
+- **Configuración de la puerta: `numberOfRuns: 5`.** `lighthouserc.json` declara
+  `ci.collect.numberOfRuns: 5`; la mediana de 5 es la que evita que la decisión
+  caiga sobre picos (con 3 corridas se observaron muestras como `[185, 20, 91]`,
+  frente a `[51, 164, 82, 183, 59]` con 5) y los umbrales de plan §6 siguen
+  intactos. La versión anterior de esta entrada registraba un `numberOfRuns: 3`
+  heredado del commit `c5fdf08`; esa discrepancia ya no existe.
+- **Entorno compartido**: durante la sesión hubo otra sesión de agente
+  trabajando en el mismo worktree, midiendo y reconstruyendo `dist/`. Eso produjo
+  la medición B y obligó a aislar el directorio de informes y el cwd de LHCI.
+
+## T-139 cerrada: ensayo real de la jerarquía y T-141 (porción de dominio) — 2026-11-11
+
+### T-139 — ensayo real con orquestadores de dominio
+
+El nivel 0 registró el ensayo que faltaba para la aceptación: cinco orquestadores
+de dominio corriendo en paralelo en ventanas y sesiones distintas de Herdr, con
+archivos disjuntos y el mismo contrato de reporte en los dos niveles.
+
+| Dominio (ventana) | Archivos de su propiedad                                                                                                      |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| derechos2         | `packages/domain` (derechos/adaptaciones) y `scripts/check-scope.*`                                                           |
+| calidad           | `packages/domain/src/*.property.spec.ts`, `docs/orchestration/**`, `specs/001-mvp-guias-builds/{quickstart,handoff,tasks}.md` |
+| i18n              | `angular.json` y `src/app/**`                                                                                                 |
+| ci                | `.github/workflows/**` y `playwright.config.ts`                                                                               |
+| rendimiento       | cerrado con T-145                                                                                                             |
+
+Dos serializaciones reales arbitradas por el nivel 0: `scripts/check-scope.*`
+asignado a derechos2 y `package.json` raíz asignado a ci; el dominio de calidad no
+editó ninguno de los dos (`git diff -- package.json` vacío) y declaró `fast-check`
+en `packages/domain/package.json`. Cero ediciones cruzadas en el diff de calidad.
+Detalle en `docs/orchestration/hierarchy.md`, sección «Ensayo real con
+orquestadores de dominio (2026-11-11)».
+
+Verificación del registro documental: `markdownlint-cli2` → `Linting: 55 files`,
+`Summary: 0 issues in 0 files`; `pnpm lint:md` → 0 incidencias en 55 archivos.
+T-139 queda marcada como cerrada.
+
+### T-141 — suite adversarial, porción de dominio
+
+`packages/domain/src/adversarial.spec.ts` (nuevo): una prueba por clase de ataque
+del plan §17.49, todas con resultado cerrado.
+
+| Clase de ataque                                                                | Resultado                                                                        |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Campos de más                                                                  | rechazo (`.strict()`)                                                            |
+| Campos de menos                                                                | rechazo                                                                          |
+| Tipos cambiados                                                                | rechazo                                                                          |
+| `rights_status` falsificado                                                    | rechazo en DTO público y adaptaciones; **hallazgo** en `BuildSchema` (ver abajo) |
+| Referencias cruzadas rotas                                                     | rechazo                                                                          |
+| Ciclos de `parent` (autociclo, 2, 3)                                           | rechazo; bosque acíclico como control positivo                                   |
+| HTML/JS en textos                                                              | valor seguro (texto inerte); `javascript:` rechazado como URL                    |
+| URL con credenciales                                                           | **hallazgo** (aceptada)                                                          |
+| RTL, homoglifos, combinantes                                                   | valor seguro (RTL, combinantes); rechazo (homoglifo en slug)                     |
+| Entrada desmesurada (100 000 caracteres, 1 000 claves extra, 10 000 elementos) | rechazo o gestión sin excepción                                                  |
+
+| Comando (orquestador)                | Exit | Salida                                                                                                         |
+| ------------------------------------ | ---- | -------------------------------------------------------------------------------------------------------------- |
+| `pnpm --filter @gd/domain test`      | 0    | `Test Files 10 passed (10)`, `Tests 151 passed │ 2 expected fail (153)`; cobertura 99.69 / 98.84 / 100 / 99.65 |
+| `pnpm --filter @gd/domain typecheck` | 0    | sin errores                                                                                                    |
+| `pnpm --filter @gd/domain lint`      | 0    | sin errores                                                                                                    |
+| `pnpm check:boundaries`              | 0    | `check:boundaries OK (244 archivos revisados)`                                                                 |
+| Prettier (`adversarial.spec.ts`)     | 0    | `All matched files use Prettier code style!`                                                                   |
+
+**Hallazgos reales** (registrados con `it.fails`, no maquillados; el código de
+`schema.ts` no se tocó porque pertenece a otro dominio):
+
+1. `AuthorSchema` **acepta URLs con credenciales** (`https://usuario:clave@…`);
+   comprobado también de forma independiente con `tsx`
+   (`credenciales_aceptadas= true`). El `httpUrl` compartido afecta a `source.url`,
+   `video_url`, `external_url` y `origin_url` de los activos.
+2. `BuildSchema` (gate editorial) **acepta `review_state: 'publicado'` con
+   `rights_status: 'link_only'`**, porque usa `APPROVED_RIGHTS`, que incluye
+   `link_only`. La vista pública sí lo bloquea (`PublicBuildSchema` y
+   `publicFilter`), así que no hay filtración, pero el gate editorial no falla
+   cerrado.
+
+Ambos hallazgos necesitan una tarea de corrección en `packages/domain/src/schema.ts`
+con su prueba de regresión; quedan propuestos al nivel 0. T-141 **no** se marca
+cerrada: faltan UI (`src/app`), API (`apps/api`) y fixtures
+(`scripts/fixtures/adversarial`), que pertenecen a otros dominios.
+
+## T-126: CI de calidad de toda la spec (2026-11-11)
+
+El job `verify` de `.github/workflows/ci.yml` ejecuta, además de los controles de
+T-064, las puertas de T-040/T-041/T-042 y las validaciones de contenido, siempre
+sobre el artefacto construido y nunca sobre `ng serve`:
+
+| Paso del CI                                     | Comando                                                                 | Qué prueba                                                                                                                                                |
+| ----------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Content validation (real fixture content)       | `pnpm run content:validate -- --dir content`                            | El fixture real del repositorio valida con el esquema de dominio, además del fixture sintético de `scripts/fixtures/content-valid`.                       |
+| Catalog check                                   | `pnpm run catalog:check`                                                | El catálogo generado no deriva de su fuente (10 maestrías, 45 pares).                                                                                     |
+| Build drafts artifact                           | `pnpm exec ng build --output-path dist/e2e-drafts` con `INCLUDE_DRAFTS` | Artefacto local de borradores en un directorio propio; no sobrescribe `dist/grim-dawn-builds` (puertos 4321/4322 en `playwright.config.ts`).              |
+| Install Playwright Chromium                     | `pnpm exec playwright install --with-deps chromium`                     | Navegador fijado por `package.json` (Playwright 1.65.0).                                                                                                  |
+| E2E journeys                                    | `pnpm run e2e:journeys`                                                 | T-040: recorridos reales y HTML sin JavaScript en 3 viewports, sobre el artefacto público y el de borradores.                                             |
+| Accessibility gate                              | `pnpm run e2e:a11y`                                                     | T-041: axe WCAG 2.1/2.2 en 4 rutas × 3 viewports × 2 pases (app activa y HTML sin scripts) más el fixture negativo.                                       |
+| Artifact source report (fixture build)          | bloque multilínea `run` con `set -euo pipefail`                         | Falla si un build de PR emite `dist/build-info.json` e informa la fuente de contenido efectiva; no vuelca entorno.                                        |
+| Performance budgets (Lighthouse + byte budgets) | `pnpm run check:performance` con `CHROME_PATH=/usr/bin/google-chrome`   | T-042: mediana de las `numberOfRuns` de `lighthouserc.json`, LCP/CLS/TBT, puntuaciones y presupuestos HTML/CSS/JS sobre el artefacto de `pnpm run build`. |
+
+El job pasa a `timeout-minutes: 45` y declara `CONTENT_SOURCE: fixture` e
+`INCLUDE_DRAFTS: 'false'` (el paso del artefacto de borradores lo sobrescribe a
+`true`). `check:performance` lee `numberOfRuns` de `lighthouserc.json`; el
+workflow no fija ese número, así que un cambio en la configuración no lo
+desincroniza.
+
+### Reporte de fuente y pruebas negativas
+
+- **Reporte de fuente**: el único informe de fuente que ya existe en `scripts/`
+  es `dist/build-info.json`, exclusivo de `build:release` (T-074: `source`,
+  `migration`, `builtAt`, `contentHash`, validado por `check-release`). El CI de
+  PR construye solo fixtures y **no** emite ese informe; el paso lo comprueba y
+  publica la fuente efectiva. Un informe de fuente para el artefacto de fixtures
+  exigiría un script nuevo, que T-126 no crea para no inventar un formato.
+- **Prueba negativa de axe**: `e2e/a11y.spec.ts` incluye un fixture con `<img>`
+  sin `alt` que axe reporta como `image-alt (critical)` y que rompe la puerta; se
+  ejecuta en cada corrida del CI dentro de `pnpm run e2e:a11y`.
+- **Prueba negativa de presupuesto**: `scripts/check-performance.test.mts`
+  demuestra que la mediana de TBT [160, 170, 180] = 170 ms incumple el límite de
+  150 ms, que el CSS crítico falla un byte por encima de 20 000 y que una corrida
+  sin métrica invalida la ruta. Se ejecuta en `pnpm test:scripts`.
+- **Prueba negativa del propio workflow**: `scripts/ci-workflow.test.mts` aplica
+  26 mutaciones y cada una debe fallar la validación, incluidas la retirada de
+  journeys, axe, Lighthouse, `catalog:check`, la validación del fixture real y la
+  instalación de Playwright, el `ng build` hacia el directorio público, el
+  `INCLUDE_DRAFTS` incorrecto, la falta de `CHROME_PATH`, un `ng serve` y un
+  `timeout-minutes` insuficiente.
+
+### Evidencia local de esta sesión (2026-11-11)
+
+| Comando                                                             | Exit | Salida                                                                          |
+| ------------------------------------------------------------------- | ---- | ------------------------------------------------------------------------------- |
+| `node --import tsx --test scripts/ci-workflow.test.mts`             | 0    | `# tests 32`, `# pass 32`, `# fail 0`                                           |
+| `node --import tsx --test scripts/verify-local.test.mjs`            | 0    | `# tests 11`, `# pass 11`, `# fail 0`                                           |
+| `pnpm test:scripts`                                                 | 0    | `# tests 398`, `# pass 396`, `# fail 0`, `# skipped 2` (omitidos preexistentes) |
+| `pnpm run content:validate -- --dir content`                        | 0    | `content:validate OK (1 builds)`                                                |
+| `pnpm run content:validate -- --dir scripts/fixtures/content-valid` | 0    | `content:validate OK (1 builds)`                                                |
+| `pnpm run catalog:check`                                            | 0    | `gen-catalog OK (10 maestrías, 45 pares; comprobación)`                         |
+| `pnpm exec ng build --output-path dist/e2e-drafts`                  | 0    | `Prerendered 7 static routes.`; borradores con la guía y el público sin ella    |
+| `pnpm exec playwright install chromium`                             | 0    | `Chrome Headless Shell 158.0.8127.18`                                           |
+| `pnpm run e2e:a11y`                                                 | 0    | `27 passed`; 0 violaciones; fixture negativo `image-alt (critical)`             |
+| `python -c "import yaml; yaml.safe_load(...)"` sobre el workflow    | 0    | `yaml OK jobs= ['verify'] steps= 37`                                            |
+
+Las cuatro rutas públicas siguen en `0` violaciones axe de cualquier impacto y
+`color-contrast` continúa como regla incompleta que cubre `pnpm check:contrast`.
+
+### Límites registrados (no se declaran verdes)
+
+- **Build, journeys y Lighthouse ya están verdes (2026-11-11, tras T-138 y
+  T-144)**, lo que cierra el límite que esta sección registraba: `pnpm verify`
+  OK, `pnpm build` con 12 rutas prerenderizadas, `e2e:journeys` 21/21,
+  `e2e:a11y` 51/51 en inglés y español y `check:performance` 47/47 (SEO 1.000,
+  JS inicial 110 996/112 000 B). Las cifras rojas de la sesión anterior
+  (`404.html inválido`, 18 fallos de journeys y 44/47) eran el trabajo i18n en
+  curso, ya cerrado en T-138. Lo único que sigue sin acreditarse es la ejecución
+  real del runner, que exige push y PR.
+- **El runner no se ejecutó**: no hay push ni PR autorizados en esta tarea, así
+  que la duración real del job de 45 minutos, la ruta de Chrome y la estabilidad
+  de Lighthouse en `ubuntu-24.04` quedan sin observación directa. La medición
+  local usa Chrome de sistema (HeadlessChrome 157) en Windows con
+  `throttlingMethod=simulate`; sus medianas son estables (TBT 0-36 ms, LCP
+  660-760 ms), pero no acreditan el runner.
+- **`lighthouserc.json` cambió durante la sesión** (de 3 a 5 corridas por ruta) por
+  otro dominio. Ni el workflow ni `check:performance` fijan el número: ambos lo
+  leen del archivo, de modo que el CI medirá la mediana de las 5 corridas sin
+  cambios adicionales.
+
+## T-138 cerrada: inglés primario y español regional (2026-11-11)
+
+La sesión anterior quedó interrumpida por cuota de proveedor y un reinicio de
+Windows (`TrustedInstaller`, 09:52): el trabajo i18n estaba en disco sin commit y
+el árbol en rojo. Esta sesión retomó T-138 desde los artefactos SDD y cerró la
+mecánica de idioma; el contenido editorial pendiente quedó registrado en T-146.
+
+### Qué se completó
+
+- Catálogos XLF regenerados con `ng extract-i18n`: 290 unidades en `en` y 290 en
+  `es`; 30 unidades nuevas (grupos y opciones del catálogo y textos del
+  conmutador) traducidas y 6 entradas nuevas en `ALLOWED_IDENTICAL_IDS`
+  (`catalog.option.elemental`, `shattered_realm`, `crucible`, `placeholder` y los
+  endónimos `locale.english`/`locale.spanish`).
+- `scripts/locales.mts` deriva de `angular.json` la raíz de cada idioma y evita
+  tratar una ruta como configuración regional. Lo consumen los cuatro scripts de
+  post-build.
+- `static-home` emite HTML nativo en ambos idiomas (8 páginas), `emit-404` copia
+  el 404 de cada idioma con su `base href` (`/` y `/es/`), `gen-sitemap` escribe
+  `sitemap.xml` y `robots.txt` sustituido en las dos raíces y `check-initial-js`
+  mide las dos configuraciones.
+- `check:locale-parity` se añadió a `package.json` y a `scripts/verify-local.mjs`,
+  y su prueba más la de `locales.mts` entraron en `test:scripts`.
+
+### Evidencia de las puertas (T-138)
+
+| Comando                                             | Exit | Salida                                                                                          |
+| --------------------------------------------------- | ---- | ----------------------------------------------------------------------------------------------- |
+| `pnpm exec tsx scripts/check-locale-parity.mts`     | 0    | `check:locale-parity OK: 290 unidades en paridad, 0 fallos`                                     |
+| `pnpm test`                                         | 0    | `Test Files 32 passed`, `Tests 299 passed`                                                      |
+| `pnpm test:scripts`                                 | 0    | `# tests 442`, `# pass 440`, `# fail 0`, `# skipped 2`                                          |
+| `pnpm lint` / `pnpm format:check` / `pnpm lint:md`  | 0    | `All files pass linting`; `All matched files use Prettier code style!`; `0 issues` (55 archivos) |
+| `pnpm exec tsx scripts/static-home.mts`             | 0    | `/, /acerca, /legal, /autores/grim-dawn-builds, /es, /es/acerca, /es/legal, /es/autores/...`     |
+| `pnpm exec tsx scripts/emit-404.mts`                | 0    | `emit-404 OK (404.html copiado en en, es).`                                                     |
+| `pnpm exec tsx scripts/gen-sitemap.mts`             | 0    | `sitemap.xml y robots.txt generados en browser/ (10 rutas, 2 idioma(s)).`                        |
+| `pnpm exec tsx scripts/check-initial-js.mts`        | 0    | `/` 0/90 000 B; `/tier-list` 111 955/112 000 B; `/es` 0/90 000 B; `/es/tier-list` 111 955 B      |
+| `pnpm e2e:a11y`                                     | 0    | `51 passed`; 0 violaciones critical/serious en las 8 rutas (en y es), con y sin JavaScript       |
+| `pnpm e2e:journeys`                                 | 0    | `21 passed` (7 recorridos × 3 viewports), incluido el conmutador que conserva ruta y query        |
+| `pnpm check:performance`                            | 0    | `47/47`; SEO `1.000` en las 5 rutas; TBT 0 ms salvo `/tier-list` (mediana 14 ms)                 |
+
+### Presupuesto y decisión registrada
+
+El grafo inicial de `/tier-list` cerró en **111 955 B** frente al techo anterior
+de 110 500 B. `withI18nSupport()` cuesta 1 225 B del exceso y el conmutador el
+resto. El usuario autorizó expresamente subir `CATALOG_JS_LIMIT` a **112 000 B**
+(plan §17.51, segunda excepción); la portada mantiene 0 B y su techo de 90 000 B.
+`T-144` sigue abierta para recuperar margen real y revertir las dos excepciones.
+
+### Límite registrado
+
+El título del catálogo y los nombres de maestría siguen saliendo de `name_es` en
+ambos idiomas porque `TierListContentSchema` aún no declara `locale`. No se
+declara hecho: queda en **T-146** (plan §17.54), con migración, vistas públicas y
+paridad de esquema.
+
+## T-144 cerrada: 1 004 B de holgura en el JS inicial (2026-11-11)
+
+Partiendo de **111 955/112 000 B** (45 B de margen, consecuencia de T-138), el
+artefacto cierra en **110 996/112 000 B**. Recortes aplicados, todos con la misma
+funcionalidad:
+
+- La insignia `gd-content-badge` pinta `assets/icons/status-*.svg` directamente y
+  ya no importa `gd-icon` ni su registro: 2 668 B de salida fuera del grafo
+  inicial. Conserva texto, icono decorativo (`alt=""`, `aria-hidden="true"`) y
+  fallback a `generic`.
+- `applyFilter` es genérico (`<T extends CatalogItem>`), así que la página ya no
+  recorre el catálogo dos veces con un `Set` intermedio.
+- El conmutador de idioma se integra en `SiteLayout` (que ya seguía la URL para
+  `aria-current` y el skip link); desaparece el componente `LanguageSwitcher` y
+  sus tres archivos. Los casos de ruta/query, base `/es/` y endónimos se movieron
+  a `site-layout.spec.ts`.
+
+| Comando                          | Resultado                                                             |
+| -------------------------------- | --------------------------------------------------------------------- |
+| `pnpm build` + `check:initial-js`| `/` 0 B; `/tier-list` 110 996/112 000 B; `/es` 0 B; `/es/tier-list` 110 996 B |
+| `pnpm verify`                    | `verify OK (local)`                                                   |
+| `pnpm test`                      | 297/297 (se retiran 4 pruebas del componente y entran 2 en `SiteLayout`) |
+| `pnpm e2e:a11y`                  | 51/51, 0 violaciones critical/serious en en y es                      |
+| `pnpm e2e:journeys`              | 21/21                                                                 |
+| `pnpm check:performance`         | 47/47; HTML de `/tier-list` baja de 111 794 a 105 490 B               |
+
+No se tocó ningún umbral ni `withEventReplay()`. La excepción de 112 000 B sigue
+vigente porque el soporte de hidratación i18n cuesta 1 225 B; bajar a 110 500
+exigiría otros ~500 B, que quedan como trabajo posterior.
+
+## T-146 cerrada: `locale` del contenido del catálogo (2026-11-11)
+
+El catálogo ya declara el idioma de su contenido y la UI elige los nombres de
+maestría según la configuración regional activa:
+
+- `TierListContentSchema` añade `locale: 'es'` y `PublicTierListSchema` lo
+  hereda; el fixture `content/tier-lists/principal.json` y `gen-catalog` lo
+  emiten.
+- `catalogInputFromDocuments` transporta `locale`, `buildCatalog(input, locale)`
+  usa `name_en`/`name_es` y `CatalogSnapshot` distingue `locale` (UI) de
+  `contentLocale` (contenido).
+- El `<h1>` del catálogo lleva `lang="es"` solo cuando la página no está en
+  español; en `/es` se omite.
+- Migración `0006_shallow_garia.sql`: `tier_lists.locale` con default `es`,
+  `v_public_tier_lists` lo expone y `TIER_QUERY` lo proyecta.
+
+| Comando                          | Resultado                                                              |
+| -------------------------------- | ---------------------------------------------------------------------- |
+| `pnpm run content:validate`      | `content:validate OK (1 builds)`                                       |
+| `pnpm run catalog:check`         | `gen-catalog OK (10 maestrías, 45 pares; comprobación)`                |
+| `pnpm --filter @gd/domain test`  | 151/151 (2 `it.fails` preexistentes)                                   |
+| `pnpm --filter @gd/api test`     | 257/257 (48 integraciones omitidas sin PostgreSQL, preexistente)       |
+| `pnpm test`                      | 299/299                                                                |
+| `pnpm test:scripts`              | 440/442 (2 omitidos preexistentes)                                     |
+| `pnpm verify`                    | `verify OK (local)`                                                    |
+| `pnpm e2e:a11y`                  | 51/51, 0 violaciones en en y es                                        |
+| `pnpm e2e:journeys`              | 21/21                                                                  |
+
+Presupuesto: **111 111/112 000 B** de JS inicial (889 B de holgura). T-146
+consume 115 B del margen que dejó T-144; el techo autorizado no cambia.
+
+## T-147 cerrada: espacios de Herdr por orquestador (2026-11-11)
+
+Regla corregida: un orquestador de dominio **nunca** se abre como pestaña en el
+espacio o la instancia del nivel 0. Cada especialidad usa un espacio nuevo
+llamado `<proyecto>/<especialidad>` (`grim-dawn-builds/ui`,
+`grim-dawn-builds/tests`), con su propio agente orquestador y sus subagentes.
+
+- `AGENTS.md`, `docs/orchestration/herdr.md`, `docs/orchestration/hierarchy.md`
+  y el transversal `~/.copilot/sdd/ORCHESTRATION.md` recogen la prohibición y la
+  nomenclatura, y sustituyen la receta que reutilizaba `$s.space`/`$s.tab`.
+- `scripts/herdr-space.mts` (y `pnpm herdr:space`) construye
+  `herdr-app do space.new --name <proyecto>/<especialidad> --folder <absoluta>
+  --tab <especialidad> --argv '["opencode","--auto","--prompt","<una línea>"]'`.
+  Valida nombre y carpeta, une el prompt en una línea y `--print` no lanza nada.
+- El prompt va dentro de `argv`: `--task` se añade como argumento posicional y
+  `opencode` lo interpretaría como directorio.
+
+| Comando                                        | Resultado                                                                 |
+| ---------------------------------------------- | ------------------------------------------------------------------------- |
+| `node --import tsx --test scripts/herdr-space.test.mts` | `# tests 5`, `# pass 5`, `# fail 0`                              |
+| `pnpm test:scripts`                            | `# tests 447`, `# pass 445`, `# fail 0` (2 omitidos preexistentes)        |
+| `pnpm lint:md`                                 | 55 archivos, 0 incidencias                                                |
+| `pnpm format:check`                            | `All matched files use Prettier code style!`                              |
+| `pnpm herdr:space ... --print`                 | `space: "grim-dawn-builds/ui"`; prompt en `argv`, sin `--task`            |
