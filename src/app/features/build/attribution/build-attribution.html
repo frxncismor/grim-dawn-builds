@@ -1,0 +1,103 @@
+@if (isVisible()) {
+  <section id="fuentes" aria-labelledby="fuentes-heading">
+    <h2 id="fuentes-heading" i18n="@@buildAttribution.heading">Autor y fuentes</h2>
+
+    <div class="author" data-author>
+      <p class="label" i18n="@@buildAttribution.authorLabel">Autor</p>
+      @if (authorHref(); as href) {
+        <a class="author__name author__link" [href]="href" data-author-link>{{
+          content().author.display_name
+        }}</a>
+      } @else {
+        <p class="author__name" data-author-name>{{ content().author.display_name }}</p>
+        <span
+          class="badge badge--pending"
+          role="note"
+          data-author-placeholder
+          aria-label="Autor por confirmar"
+          i18n="@@buildAttribution.authorPlaceholder"
+        >
+          Autor por confirmar
+        </span>
+      }
+      @if (content().author.bio; as bio) {
+        <p class="author__bio" data-author-bio>{{ bio }}</p>
+      }
+    </div>
+
+    <dl class="facts" data-meta>
+      <div class="facts__item">
+        <dt i18n="@@buildAttribution.gameVersion">Versión del juego</dt>
+        <dd data-game-version>{{ content().game_version }}</dd>
+      </div>
+      <div class="facts__item">
+        <dt i18n="@@buildAttribution.published">Publicado</dt>
+        <dd data-published>
+          @if (content().published_at; as published) {
+            <time [attr.datetime]="published">{{ publishedLabel() }}</time>
+          } @else {
+            {{ publishedLabel() }}
+          }
+        </dd>
+      </div>
+      <div class="facts__item">
+        <dt i18n="@@buildAttribution.reviewState">Estado de revisión</dt>
+        <dd>
+          <span class="badge" data-review-state [attr.data-review-state]="reviewState()">{{
+            reviewLabel()
+          }}</span>
+        </dd>
+      </div>
+      <div class="facts__item">
+        <dt i18n="@@buildAttribution.contentStatus">Estado del contenido</dt>
+        <dd>
+          <span class="badge" data-content-status [attr.data-content-status]="contentState()">{{
+            contentStatusLabel()
+          }}</span>
+        </dd>
+      </div>
+    </dl>
+
+    <div class="sources" data-sources>
+      <h3 i18n="@@buildAttribution.sourcesHeading">Fuentes</h3>
+      @if (content().sources.length) {
+        <ul class="sources__list">
+          @for (source of content().sources; track source.slug) {
+            <li class="source" [attr.data-source]="source.slug" [attr.data-kind]="source.kind">
+              <p class="source__title" data-source-title>{{ source.title }}</p>
+              <p class="source__meta">
+                <span data-source-author>{{ source.author_name }}</span>
+                <span aria-hidden="true">·</span>
+                <span data-source-kind>{{ kindLabel(source.kind) }}</span>
+                <span aria-hidden="true">·</span>
+                <span data-source-date>{{ sourceDate(source.retrieved_on) }}</span>
+              </p>
+              <p class="source__license" data-source-license>{{ source.license_note }}</p>
+              @if (sourceUrl(source.url); as url) {
+                <p class="source__link">
+                  <a [href]="url.href" target="_blank" rel="noopener noreferrer" data-source-link>
+                    {{ source.title }}
+                    <span data-source-site>{{ url.host }}</span>
+                    <span i18n="@@buildAttribution.newTab">(abre en una pestaña nueva)</span>
+                  </a>
+                </p>
+              }
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="sources__empty" role="status" i18n="@@buildAttribution.noSources">
+          Sin fuentes registradas
+        </p>
+      }
+    </div>
+
+    <div class="disclaimer" data-disclaimer>
+      <h3 i18n="@@buildAttribution.disclaimerHeading">Descargo</h3>
+      @if (disclaimer().headline; as headline) {
+        <p class="disclaimer__headline" data-disclaimer-headline>{{ headline }}</p>
+      }
+      <p class="disclaimer__detail" data-disclaimer-detail>{{ disclaimer().detail }}</p>
+    </div>
+  </section>
+}

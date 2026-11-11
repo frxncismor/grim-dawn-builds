@@ -1,0 +1,117 @@
+/* Static SSR fallback: two header rows plus a gap, using existing spacing tokens.
+   The browser-only scroll padding refines this; anchors never depend on it. */
+main:has(gd-build-toc) {
+  --anchor-offset: calc(var(--space-8) * 2 + var(--space-4));
+}
+
+main:has(gd-build-toc)
+  :where(
+    section[id],
+    #resumen,
+    #prioridades,
+    #habilidades,
+    #orden,
+    #notas,
+    #filtro-de-botin,
+    #guia-espiritual,
+    #devociones,
+    #video,
+    #fuentes
+  ) {
+  scroll-margin-block-start: var(--anchor-offset);
+}
+
+gd-build-toc {
+  display: block;
+  min-inline-size: 0;
+}
+
+gd-build-toc .toc {
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel);
+}
+
+gd-build-toc summary {
+  display: flex;
+  align-items: center;
+  min-block-size: 44px;
+  padding: var(--space-2) var(--space-4);
+  color: var(--color-storm);
+  font-family: var(--font-display);
+  font-size: var(--text-large);
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+gd-build-toc summary:hover {
+  background: var(--color-panel-2);
+  color: var(--color-bone);
+}
+
+gd-build-toc summary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: calc(var(--focus-offset) * -1);
+}
+
+gd-build-toc nav {
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+gd-build-toc .toc__list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+gd-build-toc .toc__list a {
+  display: flex;
+  align-items: center;
+  min-block-size: 44px;
+  padding-block: var(--space-1);
+  padding-inline: var(--space-3);
+  border-inline-start: 2px solid transparent;
+  color: var(--color-bone);
+  text-decoration: none;
+}
+
+gd-build-toc .toc__list a:hover {
+  border-inline-start-color: var(--color-storm-dim);
+  background: var(--color-panel-2);
+  color: var(--color-storm);
+}
+
+gd-build-toc .toc__list a:active {
+  border-inline-start-color: var(--color-ember);
+  color: var(--color-ember);
+}
+
+gd-build-toc .toc__list a:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  color: var(--color-bone);
+}
+
+@media (min-width: 80rem) {
+  gd-build-toc {
+    position: sticky;
+    inset-block-start: var(--space-5);
+    align-self: start;
+    max-block-size: calc(100vh - var(--space-5) * 2);
+    overflow-y: auto;
+  }
+
+  gd-build-toc .toc {
+    box-shadow: var(--frame-bevel), var(--panel-shadow);
+  }
+
+  gd-build-toc .toc > summary {
+    display: none;
+  }
+
+  gd-build-toc nav {
+    padding-block-start: var(--space-3);
+  }
+}

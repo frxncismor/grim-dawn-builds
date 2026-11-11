@@ -1,9 +1,9 @@
-# Relevo: T-035 completada
+# Relevo: T-036 completada
 
-Estado al 2026-11-10: T-033, T-135, T-034 y T-035 completadas. T-036, T-037 y
-T-020 tienen planificación vigente en plan §17.41–§17.43. La spec001 sigue
+Estado al 2026-11-10: T-033, T-135, T-034, T-035 y T-036 completadas. T-037 y
+T-020 tienen planificación vigente en plan §17.42–§17.43. La spec001 sigue
 abierta y la puerta de revisión spec002 queda pendiente. Este turno se limitó
-a T-035 y no hubo commit, push ni PR.
+a T-036 y no hubo commit, push ni PR.
 
 ## Interrupción de la sesión y límite de modelos (2026-11-10)
 
@@ -55,8 +55,8 @@ artefactos spec.md, plan.md y tasks.md de esta carpeta. SDD con GitHub Spec Kit
 es obligatorio para cualquier harness/proveedor. Retomar el plan existente,
 no regenerarlo ni marcar tareas sin evidencia. Los skills están en .agents/skills;
 los roles y la correspondencia de modelos están referenciados por AGENTS.md.
-Una tarea a la vez. T-033/T-135 quedaron completadas; T-034 ya está completada y
-T-035 se verificó en su propio alcance. T-036, T-037 y T-020 siguen planificadas.
+Una tarea a la vez. T-033/T-135/T-034/T-035/T-036 quedaron completadas; T-037 y
+T-020 siguen planificadas.
 
 El objetivo completo sigue siendo acabar y validar toda la spec001. Solo después
 se autorizó hacer push y abrir una PR hacia develop, nunca solo al cerrar una tarea.
@@ -171,7 +171,47 @@ La sesión principal recompiló, repitió las pruebas y verificó el resultado e
 Chrome. Se autorizaron ejecuciones fuera del sandbox para el test, el build y
 los checks afectados por los permisos de Windows.
 
+## T-036: implementación y evidencia final
+
+Atribución, fuentes y TOC verificados según §17.41. RED por ausencia de ambos
+módulos y GREEN de 46 pruebas (32 de atribución y 14 de TOC). El preview
+`build-meta-preview` prerenderizó dos instancias sintéticas; Playwright + axe
+dieron 18/18 combinaciones OK y cero violaciones, con sticky a 1280, `details`
+plegable, foco de 2 px, ancla no tapada y sin overflow ni con texto al 200 %.
+El CSS de los componentes mide 4023/1788 bytes. Pasan `pnpm lint`, `pnpm build`,
+`check:initial-js`, `check:public-build` (175 archivos), `check:secrets` (126),
+`lint:md` (44) e Impeccable `[]`; `format:check` global falla solo por
+`AGENTS.md`, archivo previo ajeno a la tarea. El primer `check:public-build`
+falló por el preview sintético aún presente en `dist`; se retiró y se repitió.
+Detalle, comandos y logs en [quickstart.md](quickstart.md).
+
+La implementación y verificación se ejecutaron con
+`opencode/deepseek-v4.1-flash-free` (modelo realmente usado; los proveedores de
+pago seguían agotados). Sin cambios fuera de los archivos autorizados,
+dependencias ni datos de producción.
+
 ## Procesos y árbol de trabajo
+
+### Corrección verificada de anclas T-036 (2026-11-10)
+
+La reserva de desplazamiento dejó de depender de JavaScript: CSS del TOC aplica
+`scroll-margin-block-start` con tokens a secciones y los diez ids canónicos en
+su `main`; el padding hidratado permanece como refuerzo. El encargo identificó
+seis fallos reales en `placeholder` sin bundles/JS; el runner original ahora
+registra **18/18 OK, cero fallos** (no 12 combinaciones: esa cifra del encargo
+no coincide con la matriz existente). RED/GREEN de regresión y **47/47** pruebas,
+lint/formato/Markdown, build, JS inicial, guardia pública y presupuestos pasan;
+preview retirado y puerto 4331 libre. Evidencia vigente en `quickstart.md`,
+sección «T-036: regresión de anclas sin JavaScript», y
+`$env:TEMP/gd-t036-anchor-*.log`.
+
+Modelo realmente usado en esta corrección: `openai/gpt-6.1-sol`, rol `sdd-ui`.
+Al iniciar esta sesión `tasks.md` ya tenía T-036 marcada y el inventario ya la
+declaraba completada, a diferencia del estado descrito en el encargo; no se
+atribuyen esas marcas a esta corrección. El resultado actual permite mantener
+T-036 completada, pendiente de la comprobación de primera mano del orquestador.
+T-037/T-020 y el cierre integral de spec001 permanecen pendientes. Sin commit,
+push ni PR; no se modificaron otros componentes ni configuraciones existentes.
 
 Histórico del primer relevo: el agente /root/t031_ui había sido interrumpido y el
 agente de planificación había terminado.
@@ -259,7 +299,8 @@ con pnpm setup:gitleaks. No necesita excepciones amplias ni mostrar secretos.
   petición API no demuestran el presupuesto por página. No reinterpretar el límite.
 - T-020 aún debe transportar descriptores de activos aprobados desde API;
   la prueba fixture de T-048 no acredita ese cableado.
-- Anclas TOC deben conservar ruta/query bajo base href; T-134 corrigió skip-link.
+- Anclas TOC: T-036 verificó ruta/query y base href con pruebas y Playwright;
+  T-134 corrigió skip-link.
 - Las pruebas DB/rotación opt-in omitidas por verify no equivalen a ejecución real;
   NVDA humano, Lighthouse, CI remoto y las cuatro revisiones globales siguen pendientes.
 
@@ -270,11 +311,11 @@ Recuento mecánico de las líneas de tareas de tasks.md vigente, con todos los
 cuenta como no cerrado; puede haber implementación parcial que requiere
 verificación, no rehacerla a ciegas. Los checkboxes históricos tampoco sustituyen
 la auditoría final de requisitos.
-Total: **138** tareas; **68** marcadas completas (`[x]`); **70** sin cerrar (`[ ]`).
+Total: **138** tareas; **69** marcadas completas (`[x]`); **69** sin cerrar (`[ ]`).
 
 | Categoría   | Cantidad |
 | ----------- | -------: |
-| activa      |       40 |
+| activa      |       39 |
 | externa     |        2 |
 | opcional    |        2 |
 | diferida    |       22 |
@@ -289,11 +330,10 @@ Total: **138** tareas; **68** marcadas completas (`[x]`); **70** sin cerrar (`[ 
 | T-003  | Presupuestos de bundle en angular.json según plan §6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | T-004  | Verificación local unificada (lint, test, build público y con INCLUDE\_DRAFTS) como pnpm verify; **CI de despliegue diferida** (hosting=local\_first); el CI de verificación en PR se trata en T-064                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | T-012  | Medición base de presupuesto: página vacía con hidratación, Lighthouse CI **local**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| T-020 | Rutas lazy de `/builds/:slug`, `getPrerenderParams` filtrado por derechos, resolver con `TransferState`, 404 real y cableado FR-16 de descriptores públicos; plan §17.43. |
+| T-020  | Rutas lazy de `/builds/:slug`, `getPrerenderParams` filtrado por derechos, resolver con `TransferState`, 404 real y cableado FR-16 de descriptores públicos; plan §17.43.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | T-021  | Generador de sitemap.xml y robots.txt solo con publicado y derechos aprobados; BASE\_URL configurable                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | T-025  | [UI] Página /tier-list con SSG, catálogo por combinación, filtros hidratados desde ?, canonical base, JSON-LD ItemList (solo entradas públicas)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| T-036 | [UI] `gd-build-attribution` + `gd-build-toc`: autor/fuentes/insignias con texto, fechas y descargo, TOC sticky 1280 y plegable; plan §17.41. |
-| T-037 | [UI] Página `/builds/:slug` ensamblada con `@defer` y placeholder textual, estado de devociones, SEO `Article`/`BreadcrumbList`, banner y `noindex` de borrador; plan §17.42. |
+| T-037  | [UI] Página `/builds/:slug` ensamblada con `@defer` y placeholder textual, estado de devociones, SEO `Article`/`BreadcrumbList`, banner y `noindex` de borrador; plan §17.42.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | T-039  | [UI] /autores/:slug, /acerca, /legal                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | T-040  | E2E completos US1–US3 × 3 viewports + HTML sin JS (US1 en modo local INCLUDE\_DRAFTS; además, e2e del build público sin la guía migrada)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | T-041  | axe en 3 rutas × 3 viewports local y CI de verificación                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -390,7 +430,7 @@ No hubo revisión final global ni autorización para saltarse la puerta.
 
 ## Siguiente tarea, sin autorización implícita
 
-T-036 es la siguiente tarea planificada (§17.41), seguida por T-037 y T-020.
+T-037 es la siguiente tarea planificada (§17.42), seguida por T-020.
 Después siguen T-021/T-025 y el contacto de T-039.
 Completar CI/calidad/performance, contenido y documentación activas del inventario;
 al final, ejecutar spec002. No ejecutar las tareas reemplazadas, opcionales o

@@ -131,6 +131,21 @@
                 }
               ]
             },
+            "build-meta-preview": {
+              "browser": "src/app/features/build/attribution/preview.browser.ts",
+              "server": "src/app/features/build/attribution/preview.server.ts",
+              "outputPath": "dist/build-meta-preview",
+              "optimization": true,
+              "outputHashing": "all",
+              "statsJson": true,
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ]
+            },
             "build-sections-preview": {
               "browser": "src/app/features/build/sections/preview.browser.ts",
               "server": "src/app/features/build/sections/preview.server.ts",

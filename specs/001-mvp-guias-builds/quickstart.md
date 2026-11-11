@@ -1836,7 +1836,7 @@ Verificación de esta fase documental:
 - `./node_modules/.bin/markdownlint-cli2.cmd`: 43 archivos, 0 incidencias.
 - `node scripts/spec-review.mjs prepare --feature specs/001-mvp-guias-builds`:
   `{"status":"pending-tasks", ...}` con `reasons: ["active implementation tasks
-  remain unchecked"]`, salida 1; es el resultado esperado porque T-035–T-037 y
+remain unchecked"]`, salida 1; es el resultado esperado porque T-035–T-037 y
   T-020 continúan abiertas.
 
 Esta entrada acredita planificación y análisis, no implementación: no hay pruebas
@@ -1891,3 +1891,130 @@ entorno. Los logs de los checks se conservan en `$env:TEMP/gd-t035-*.log`.
 Tras marcar T-035, `node scripts/spec-review.mjs prepare --feature
 specs/001-mvp-guias-builds` devolvió `pending-tasks` (salida 1, 66 pendientes
 según el coordinador). La spec001 sigue abierta.
+
+## T-036: atribución, fuentes y TOC — 2026-11-10
+
+Se ejecutaron primero las dos suites con `ng test --watch=false --include
+src/app/features/build/attribution/build-attribution.spec.ts --include
+src/app/features/build/toc/build-toc.spec.ts`. La compilación salió con código 1
+y `TS2307` por `./build-attribution` y `./build-toc` ausentes; el rojo quedó en
+`$env:TEMP/gd-t036-red.log`. Con los componentes implementados,
+`$env:TEMP/gd-t036-green.log` registra **46/46** pruebas (32 de atribución y 14 de
+TOC): autor con enlace, placeholder y `por-confirmar` sin enlace, insignias con
+texto, fecha UTC y «Sin fecha», orden de fuentes sin mutación, URL válida,
+inválida y con credenciales, etiquetas `kind`, «Descargo» y fallback a
+`footer_disclaimer`, escape, SSR, visibilidad por `sections_meta`, alias,
+ausencia de video, deduplicación, `href` con base y query, `details open`,
+teclado nativo, `scroll-padding-block-start` aplicado y restaurado al destruir.
+
+`ng build --configuration build-meta-preview` prerenderizó las 2 rutas
+sintéticas (`/` con autor ficticio real y video, `/placeholder` con autor por
+confirmar y sin video) en `dist/build-meta-preview`; el log es
+`$env:TEMP/gd-t036-preview-build.log`. El CSS de los componentes mide 4023 bytes
+(atribución) y 1788 bytes (TOC), por debajo del aviso de 4 kB. Solo aparecen los
+avisos preexistentes de `skill-tree` (4.94 kB) y `devotion-map` (4.58 kB).
+
+Playwright 1.65 y axe-core 4.14 en Chrome local sobre las dos rutas, a
+375/768/1280 px y en modos hidratado, bundles bloqueados y sin JavaScript:
+**18/18 combinaciones OK** (`$env:TEMP/gd-t036-browser.log`). Se comprobaron
+`h1` único, 10 enlaces de TOC con video y 9 sin él, `details` abierto y
+plegable, sticky solo a 1280 sin solapar contenido, objetivos ≥24 px, cero
+overflow (también con texto al 200 %), foco visible de 2 px, ancla
+`#devociones` no tapada con `scroll-padding-block-start` aplicado, cero
+solicitudes externas, consola limpia y **cero violaciones axe** en las 12
+auditorías hidratadas/bloqueadas. Se inspeccionaron
+`$env:TEMP/gd-t036-{375,768,1280}.png` y
+`gd-t036-placeholder-{375,768,1280}.png`. El servidor se cerró y se eliminó
+`dist/build-meta-preview`.
+
+Checks finales de cierre:
+
+- `pnpm lint`: `All files pass linting`.
+- `pnpm build`: Home y Tier List prerenderizados; `static-home` y
+  `check:initial-js` OK (0/90000 bytes Home; 105259/110000 Tier List). El aviso
+  de bundle inicial (292.47 kB frente a 280 kB) es preexistente y ajeno a T-036.
+- `pnpm check:public-build`: OK, **175 archivos**, sin valores ni patrones.
+  El primer intento falló con `secret-pattern` porque `dist/build-meta-preview`
+  seguía presente y su estado SSR contiene la URL sintética con credenciales de
+  la fuente inválida; tras retirar el preview pasó. No se modificó el escáner.
+- `pnpm check:secrets`: OK, 126 archivos rastreados.
+- `pnpm lint:md`: 44 archivos, 0 incidencias.
+- `pnpm format:check`: los `.ts/.html/.css` de T-036 pasan `prettier --check`;
+  `angular.json` conserva los CRLF que genera Angular CLI y su contenido coincide
+  con prettier al normalizar EOL. El script global falla solo por `AGENTS.md`,
+  archivo previo y fuera del alcance de T-036. No se reformatearon documentos
+  ajenos.
+- Impeccable 4.8.1 `detect --json`: `[]`.
+
+Logs en `$env:TEMP/gd-t036-{red,green,preview-build,browser,lint,build,
+public-build,secrets,lint-md,format,impeccable}.log`. No hubo cambios fuera de
+los archivos autorizados, dependencias, dominio, API, rutas, CSS global ni
+commits/push/PR. La fecha de actualización sigue sin existir en el esquema y no
+se simuló; queda como límite parcial de FR-02 ya registrado.
+
+Tras marcar T-036, `node scripts/spec-review.mjs prepare --feature
+specs/001-mvp-guias-builds` devolvió `pending-tasks` (salida 1, T-037/T-020 y
+otras tareas siguen abiertas). La spec001 sigue abierta.
+
+### T-036: regresión de anclas sin JavaScript — 2026-11-10
+
+Esta evidencia sustituye cualquier afirmación previa de cierre de accesibilidad
+sin la reserva CSS: la solicitud de corrección documentó seis fallos reales de
+`placeholder` con bundles bloqueados o JavaScript desactivado. Se conservó el
+runner existente `$env:TEMP/gd-t036-verify.mjs`, sin alterar sus aserciones.
+**Discrepancia del encargo:** el runner cubre 18 combinaciones (2 instancias ×
+3 anchos × 3 modos), no 12; las 12 corresponden a las auditorías axe en los modos
+que permiten ejecutar el auditor.
+
+Corrección acotada a `toc/build-toc.ts`, `build-toc.css` y `build-toc.spec.ts`:
+`--anchor-offset: calc(var(--space-8) * 2 + var(--space-4))` reserva 144 px con
+tokens existentes. `scroll-margin-block-start` alcanza `section[id]` y los diez
+ids canónicos dentro de `main:has(gd-build-toc)`, sin depender de `:target`,
+handlers ni hidratación. Los destinos son hermanos del TOC y pertenecen a otros
+componentes: `ViewEncapsulation.None` permite alcanzarlos; todos los selectores
+visuales quedan prefijados por `gd-build-toc` y los de anclas por su `main`.
+No se cambian hojas globales, componentes de sección, preview, semántica,
+`Location.prepareExternalUrl`, `details open` ni el refinamiento JS reversible.
+
+- RED: `./node_modules/.bin/ng.cmd test --watch=false
+--include='src/app/features/build/toc/*.spec.ts'` → 14 pasan y la nueva prueba
+  falla porque `--anchor-offset` está vacío, antes de añadir la reserva CSS.
+  Se repitió retirando únicamente esas reglas con el host real reproducido
+  (TestBed crea un `div`): mismo fallo. Log:
+  `$env:TEMP/gd-t036-anchor-red.log`.
+- GREEN: mismo comando más
+  `--include='src/app/features/build/attribution/*.spec.ts'` → **47/47**
+  (15 TOC + 32 atribución). La regresión comprueba CSS en plataforma servidor,
+  diez destinos canónicos no `section`, otra `section[id]`, independencia de
+  `:target`, ausencia de efecto fuera de la guía y padding inline intacto.
+  Log: `$env:TEMP/gd-t036-anchor-green.log`.
+- `./node_modules/.bin/ng.cmd build --configuration build-meta-preview` →
+  dos rutas prerenderizadas. Log: `$env:TEMP/gd-t036-anchor-preview-build.log`.
+- Con `PLAYWRIGHT_BROWSERS_PATH=$env:TEMP/gd-ui-browser-binaries`,
+  `node "$env:TEMP/gd-t036-verify.mjs"` → **RESULTADO: OK (18 combinaciones:
+  2 instancias x 3 anchos x 3 modos)**, cero fallos. Incluye literalmente
+  con-video/placeholder, 375/768/1280 e hydrated/blocked-bundles/no-js; ancla
+  `#devociones` no tapada, sticky/details intactos, teclado/foco, cero overflow,
+  zoom 200 %, consola hidratada limpia y 12 auditorías axe sin violaciones.
+  Log: `$env:TEMP/gd-t036-anchor-verified.log`. Se inspeccionaron las capturas
+  nuevas `$env:TEMP/gd-t036-placeholder-{375,768,1280}.png`.
+- `pnpm lint` → OK; `pnpm exec prettier --check` sobre los archivos tocados →
+  OK; `pnpm lint:md` → OK. Logs:
+  `$env:TEMP/gd-t036-anchor-{lint,format,lint-md}.log`.
+- `pnpm build` y `pnpm check:initial-js` → OK, Home 0/90000 y Tier List
+  105259/110000 bytes gzip nivel 6. Logs:
+  `$env:TEMP/gd-t036-anchor-{build,initial-js}.log`.
+- CSS TOC emitido en HTML SSR: **1948 bytes**, menor que 4 kB/8 kB; CSS inicial
+  completo del preview **3133/20000 bytes gzip**. Sin aviso de presupuesto para
+  TOC/atribución; permanecen los avisos previos de skill-tree/devotion-map y
+  bundle inicial. Log: `$env:TEMP/gd-t036-anchor-budgets.log`.
+- Impeccable `detect --json` sobre los cambios UI → `[]`.
+  Log: `$env:TEMP/gd-t036-anchor-impeccable.log`.
+- Servidor del runner cerrado, puerto 4331 libre y
+  `dist/build-meta-preview` eliminado antes de `pnpm check:public-build` → OK.
+  Logs: `$env:TEMP/gd-t036-anchor-{cleanup,public-build}.log`.
+
+Entorno: PATH antepuesto con `$env:TEMP/gd-t057-tools` y
+`NG_BUILD_MAX_WORKERS=2`. Modelo realmente usado para esta corrección:
+`openai/gpt-6.1-sol` (sesión `sdd-ui`). Sin commit/push/PR ni cambios ajenos;
+no se ejecutó Docker ni se acredita release/API. La spec001 sigue abierta.
