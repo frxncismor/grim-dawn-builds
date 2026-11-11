@@ -94,18 +94,18 @@ domain tests, web tests, script tests, `assets:check` and `build`.
 
 Focused commands during development:
 
-| Command | What it checks |
-| --- | --- |
-| `pnpm test` | Web unit tests |
-| `pnpm --filter @gd/domain test` | Domain tests |
-| `pnpm test:scripts` | Verification script tests |
-| `pnpm lint` | ESLint |
-| `pnpm lint:md` | markdownlint over all tracked Markdown |
-| `pnpm format:check` | Prettier |
-| `pnpm content:validate -- --dir <folder>` | Content schema |
-| `pnpm check:contrast` | Color token contrast |
-| `pnpm check:initial-js` | Initial JavaScript budget |
-| `pnpm check:public-build` | No secrets and no pending content in the artifact |
+| Command                                   | What it checks                                    |
+| ----------------------------------------- | ------------------------------------------------- |
+| `pnpm test`                               | Web unit tests                                    |
+| `pnpm --filter @gd/domain test`           | Domain tests                                      |
+| `pnpm test:scripts`                       | Verification script tests                         |
+| `pnpm lint`                               | ESLint                                            |
+| `pnpm lint:md`                            | markdownlint over all tracked Markdown            |
+| `pnpm format:check`                       | Prettier                                          |
+| `pnpm content:validate -- --dir <folder>` | Content schema                                    |
+| `pnpm check:contrast`                     | Color token contrast                              |
+| `pnpm check:initial-js`                   | Initial JavaScript budget                         |
+| `pnpm check:public-build`                 | No secrets and no pending content in the artifact |
 
 Release build (requires the API running and `CONTENT_SOURCE=api`):
 

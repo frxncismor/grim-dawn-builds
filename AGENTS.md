@@ -96,24 +96,24 @@ Se usa el primero de la lista **cuyo modelo responda**. Si el primero agota su
 cuota, se baja un escalón sin degradar la verificación y se registra el modelo
 realmente usado.
 
-| Agente               | GitHub Copilot (`github-copilot/`)     | Codex (`openai/`)  | OpenCode Go (`opencode-go/`)          | DeepSeek (`deepseek/`)       | Razonamiento |
-| -------------------- | -------------------------------------- | ------------------ | ------------------------------------- | ---------------------------- | ------------ |
-| **Orquestador**      | `claude-sonnet-5.5#high`               | `gpt-6.1-sol#high` | `gemini-4-argon#high`                 | `deepseek-flash#high`        | `high`       |
-| `sdd-plan`           | `claude-sonnet-5.5#high`               | `gpt-6.1-sol#high` | `gemini-4-argon#high`                 | `deepseek-flash#high`        | `high`       |
-| `sdd-implement`      | `claude-haiku-5.5#medium`              | `gpt-6-luna#medium`| `claude-haiku-5-5#medium`             | `deepseek-flash#high`        | `medium`     |
-| `sdd-ui`             | `gpt-5.6-luna#high`                    | `gpt-6-luna#high`  | `gpt-6-luna#high`                     | `deepseek-flash#high`        | `high`       |
-| `sdd-escalation`     | `claude-sonnet-5.5#high`               | `gpt-6.1-sol#high` | `gemini-4-argon#high`                 | `deepseek-v4-pro#high`       | `high`       |
-| `sdd-second-opinion` | `gpt-5.6-terra#high`                   | `gpt-6.1-terra#high` | `grok-4.7#high`                     | `deepseek-v4-pro#high`       | `high`       |
-| **Revisión final de spec** | el modelo más potente disponible | —                  | —                                     | —                            | ver `T-136`  |
+| Agente                     | GitHub Copilot (`github-copilot/`) | Codex (`openai/`)    | OpenCode Go (`opencode-go/`) | DeepSeek (`deepseek/`) | Razonamiento |
+| -------------------------- | ---------------------------------- | -------------------- | ---------------------------- | ---------------------- | ------------ |
+| **Orquestador**            | `claude-sonnet-5.5#high`           | `gpt-6.1-sol#high`   | `gemini-4-argon#high`        | `deepseek-flash#high`  | `high`       |
+| `sdd-plan`                 | `claude-sonnet-5.5#high`           | `gpt-6.1-sol#high`   | `gemini-4-argon#high`        | `deepseek-flash#high`  | `high`       |
+| `sdd-implement`            | `claude-haiku-5.5#medium`          | `gpt-6-luna#medium`  | `claude-haiku-5-5#medium`    | `deepseek-flash#high`  | `medium`     |
+| `sdd-ui`                   | `gpt-5.6-luna#high`                | `gpt-6-luna#high`    | `gpt-6-luna#high`            | `deepseek-flash#high`  | `high`       |
+| `sdd-escalation`           | `claude-sonnet-5.5#high`           | `gpt-6.1-sol#high`   | `gemini-4-argon#high`        | `deepseek-v4-pro#high` | `high`       |
+| `sdd-second-opinion`       | `gpt-5.6-terra#high`               | `gpt-6.1-terra#high` | `grok-4.7#high`              | `deepseek-v4-pro#high` | `high`       |
+| **Revisión final de spec** | el modelo más potente disponible   | —                    | —                            | —                      | ver `T-136`  |
 
 ### Estado observado de cada escalón (2026-11-10)
 
-| Escalón | Estado | Evidencia |
-| --- | --- | --- |
-| GitHub Copilot | **agotado** | `You have exceeded your monthly quota` en `claude-sonnet-5.5` y `gpt-6-luna` |
-| Codex (`openai/`) | **disponible** | `gpt-6.1-sol#high` responde; cuota semanal de Codex era 4 % a las 19:52 |
-| OpenCode Go | **agotado** | `OpenCode Go usage limit reached`; el error no expone hora de reinicio |
-| DeepSeek | **disponible** | `deepseek-flash#high` y `deepseek-v4-pro#max` responden |
+| Escalón           | Estado         | Evidencia                                                                    |
+| ----------------- | -------------- | ---------------------------------------------------------------------------- |
+| GitHub Copilot    | **agotado**    | `You have exceeded your monthly quota` en `claude-sonnet-5.5` y `gpt-6-luna` |
+| Codex (`openai/`) | **disponible** | `gpt-6.1-sol#high` responde; cuota semanal de Codex era 4 % a las 19:52      |
+| OpenCode Go       | **agotado**    | `OpenCode Go usage limit reached`; el error no expone hora de reinicio       |
+| DeepSeek          | **disponible** | `deepseek-flash#high` y `deepseek-v4-pro#max` responden                      |
 
 Este cuadro caduca: se actualiza cuando cambie la disponibilidad, no se asume.
 

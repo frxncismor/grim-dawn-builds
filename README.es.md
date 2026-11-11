@@ -96,18 +96,18 @@ del dominio, tests de la web, tests de scripts, `assets:check` y `build`.
 
 Comandos focalizados durante el desarrollo:
 
-| Comando | Qué comprueba |
-| --- | --- |
-| `pnpm test` | Pruebas unitarias de la web |
-| `pnpm --filter @gd/domain test` | Pruebas del dominio |
-| `pnpm test:scripts` | Pruebas de los scripts de verificación |
-| `pnpm lint` | ESLint |
-| `pnpm lint:md` | markdownlint en todo el Markdown rastreado |
-| `pnpm format:check` | Prettier |
-| `pnpm content:validate -- --dir <carpeta>` | Esquema de contenido |
-| `pnpm check:contrast` | Contraste de los tokens de color |
-| `pnpm check:initial-js` | Presupuesto de JavaScript inicial |
-| `pnpm check:public-build` | Ausencia de secretos y de contenido pendiente |
+| Comando                                    | Qué comprueba                                 |
+| ------------------------------------------ | --------------------------------------------- |
+| `pnpm test`                                | Pruebas unitarias de la web                   |
+| `pnpm --filter @gd/domain test`            | Pruebas del dominio                           |
+| `pnpm test:scripts`                        | Pruebas de los scripts de verificación        |
+| `pnpm lint`                                | ESLint                                        |
+| `pnpm lint:md`                             | markdownlint en todo el Markdown rastreado    |
+| `pnpm format:check`                        | Prettier                                      |
+| `pnpm content:validate -- --dir <carpeta>` | Esquema de contenido                          |
+| `pnpm check:contrast`                      | Contraste de los tokens de color              |
+| `pnpm check:initial-js`                    | Presupuesto de JavaScript inicial             |
+| `pnpm check:public-build`                  | Ausencia de secretos y de contenido pendiente |
 
 Build de release (exige la API arriba y `CONTENT_SOURCE=api`):
 
