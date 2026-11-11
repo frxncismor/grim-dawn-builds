@@ -76,7 +76,7 @@ La metodología de orquestador y agentes por rol está en
 - **Todo agente se lanza visible en Herdr.** Un agente que no se ve no se puede
   supervisar. Regla obligatoria (ver `docs/orchestration/herdr.md`):
   - `hc run --bg --name <nombre> --cwd <repo> --label herdr.space=<id>
-    --label herdr.tab=<id> --parent <t> --outlive-parent <harness> ...`
+--label herdr.tab=<id> --parent <t> --outlive-parent <harness> ...`
   - **Las dos etiquetas son obligatorias.** Solo con `herdr.space` el terminal se
     queda fuera de la app: aparece en `hc ls` pero no en `herdr-app ls`.
   - El harness debe ser **interactivo** (`opencode --auto --prompt "…"`, `codex`,
