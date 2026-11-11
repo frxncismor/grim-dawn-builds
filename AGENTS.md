@@ -60,14 +60,33 @@ La metodología de orquestador y agentes por rol está en
 [`C:/Users/paco_/.copilot/sdd/ORCHESTRATION.md`](C:/Users/paco_/.copilot/sdd/ORCHESTRATION.md)
 (nivel usuario, transversal a este y futuros proyectos). Reglas que aplican aquí:
 
-- El **orquestador** (esta sesión principal) decide, despacha, verifica de
-  primera mano y consolida. Delega la ejecución; no la suplanta.
+- **Delegación automática y jerárquica.** El orquestador del programa (nivel 0) no
+  ejecuta: reparte por dominio. Cada **orquestador de dominio** (UI, tests, backend,
+  infraestructura, Herdr/DX) descompone su tarea y despacha a **sus propios
+  subagentes**. Ningún orquestador implementa lo que puede delegar.
+- **Todo agente se lanza visible en Herdr.** Un agente que no se ve no se puede
+  supervisar. Regla obligatoria (ver `docs/orchestration/herdr.md`):
+  - `hc run --bg --name <nombre> --cwd <repo> --label herdr.space=<id>
+    --label herdr.tab=<id> --parent <t> --outlive-parent <harness> ...`
+  - **Las dos etiquetas son obligatorias.** Solo con `herdr.space` el terminal se
+    queda fuera de la app: aparece en `hc ls` pero no en `herdr-app ls`.
+  - El harness debe ser **interactivo** (`opencode --auto --prompt "…"`, `codex`,
+    `copilot`), no un modo no interactivo: solo el interactivo reporta estado por
+    OSC 7501 y Herdr lo reconoce como agente.
+  - Verificación obligatoria tras lanzar: `herdr-app ls` debe mostrar `app` y
+    `status` no nulos para ese terminal. Si `status` es `null`, el agente no es
+    visible como agente y hay que relanzarlo.
+- **El registro de trabajo vive en el To-do de Over9k.** Además de `tasks.md`, las
+  tareas pendientes y hechas se mantienen en
+  `~/.local/share/over9k/todos/<slug>.md`, el archivo que lee el panel To-do. El
+  comando `todo` (wrapper del proyecto) y ese archivo deben reflejar el estado real:
+  una tarea cerrada se marca `[x]` también ahí.
 - Todo agente devuelve un **reporte con la forma del §3** de `ORCHESTRATION.md`
   (alcance, archivos, verificación con comando y salida, desviaciones, bloqueos,
   siguiente paso). Un anuncio de despacho o una afirmación de «verde» sin salida
   citable **no** acreditan ejecución.
-- **Una tarea a la vez.** Dos agentes no tocan los mismos archivos; el
-  paralelismo solo con tareas `[P]` de `tasks.md` y archivos disjuntos.
+- **Una tarea a la vez por agente.** Dos agentes no tocan los mismos archivos;
+  el paralelismo solo con tareas `[P]` de `tasks.md` y archivos disjuntos.
 - El orquestador verifica con la salida real (log, artefacto o pantalla de la
   terminal) antes de marcar una tarea, y no acepta el reporte del agente como
   prueba suficiente.

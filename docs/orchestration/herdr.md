@@ -41,14 +41,50 @@ C:\Users\paco_\AppData\Local\Programs\herdr-core\hc.exe
 
 ## Lanzar un agente
 
+Un agente lanzado en Herdr **debe verse en la app**. Para eso hacen falta tres
+cosas a la vez: las **dos etiquetas**, un harness **interactivo** y verificación.
+
 ```powershell
-$hc = 'C:\Users\paco_\AppData\Local\Programs\herdr-core\hc.exe'
-& $hc run --bg --name codex-t035 `
+$hc  = 'C:\Users\paco_\AppData\Local\Programs\herdr-core\hc.exe'
+$app = 'C:\Users\paco_\AppData\Local\Programs\herdr-app\herdr-app.exe'
+
+# 1. Espacio y pestaña activos (ids reales, no nombres)
+$s = & $app status | ConvertFrom-Json
+
+# 2. Lanzar con LAS DOS etiquetas y harness interactivo
+& $hc run --bg --name ci-orq `
   --cwd 'C:\Users\paco_\Documents\GitHub\grim-dawn-builds' `
-  --label "herdr.space=$space" `
+  --label "herdr.space=$($s.space)" `
+  --label "herdr.tab=$($s.tab)" `
   --parent t5 --outlive-parent `
-  codex $prompt
+  opencode --auto --prompt "<una sola línea, sin saltos>"
+
+# 3. Verificar adopción: app y status deben ser NO nulos
+& $app ls | ConvertFrom-Json | ForEach-Object { $_.spaces } |
+  ForEach-Object { $_.tabs } | ForEach-Object { $_.terminals } |
+  Select-Object terminal, app, status, name
 ```
+
+### Errores que ya cometimos
+
+| Error                                              | Síntoma                                                                                                         | Corrección                                                  |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Omitir `--label herdr.tab=<id>`                    | El terminal sale en `hc ls` pero **no** en `herdr-app ls`: invisible en la app                                  | Pasar siempre las dos etiquetas                             |
+| Usar `opencode run` (no interactivo)               | `app` y `status` quedan `null`; Herdr no lo reconoce como agente                                                | Usar el harness interactivo: `opencode --auto --prompt "…"` |
+| Prompt con saltos de línea                         | `{"kind":"spawn_failed","message":"… is a batch file: it can't take an argument with a line break"}` en Windows | Unir el prompt en **una sola línea**                        |
+| Lanzar desde `~` con un harness que pide confianza | Pantalla vacía, `turn: 0`                                                                                       | Lanzar con `--cwd` en un directorio ya confiado             |
+
+### Adoptar un terminal ya lanzado
+
+Si un agente ya corre sin etiquetas, no hace falta matarlo:
+
+```powershell
+& $hc label t11 "herdr.tab=<tab-id>"
+```
+
+La adopción activa `keep` y lo mete en esa pestaña. Aun así, si el proceso es no
+interactivo seguirá sin `status`: eso solo lo arregla relanzarlo con el harness
+interactivo.
 
 ## Supervisar un agente bloqueado
 
