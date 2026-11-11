@@ -1,0 +1,82 @@
+[
+  {
+    "slug": "arcanista",
+    "name_es": "Arcanista",
+    "name_en": "Arcanist",
+    "accent_token": "arcane",
+    "fallback_icon": "mastery-generic",
+    "asset_slug": null
+  },
+  {
+    "slug": "berserker",
+    "name_es": "Berserker",
+    "name_en": "Berserker",
+    "accent_token": "frost",
+    "fallback_icon": "mastery-generic",
+    "asset_slug": null
+  },
+  {
+    "slug": "chaman",
+    "name_es": "Chamán",
+    "name_en": "Shaman",
+    "accent_token": "storm",
+    "fallback_icon": "mastery-generic",
+    "asset_slug": null
+  },
+  {
+    "slug": "demoledor",
+    "name_es": "Demoledor",
+    "name_en": "Demolitionist",
+    "accent_token": "ember",
+    "fallback_icon": "mastery-generic",
+    "asset_slug": null
+  },
+  {
+    "slug": "filo-nocturno",
+    "name_es": "Filo Nocturno",
+    "name_en": "Nightblade",
+    "accent_token": "shadow",
+    "fallback_icon": "mastery-generic",
+    "asset_slug": null
+  },
+  {
+    "slug": "guardian-del-juramento",
+    "name_es": "Guardián del Juramento",
+    "name_en": "Oathkeeper",
+    "accent_token": "radiant",
+    "fallback_icon": "mastery-generic",
+    "asset_slug": null
+  },
+  {
+    "slug": "inquisidor",
+    "name_es": "Inquisidor",
+    "name_en": "Inquisitor",
+    "accent_token": "radiant",
+    "fallback_icon": "mastery-generic",
+    "asset_slug": null
+  },
+  {
+    "slug": "nigromante",
+    "name_es": "Nigromante",
+    "name_en": "Necromancer",
+    "accent_token": "grave",
+    "fallback_icon": "mastery-generic",
+    "asset_slug": null
+  },
+  {
+    "slug": "ocultista",
+    "name_es": "Ocultista",
+    "name_en": "Occultist",
+    "accent_token": "venom",
+    "fallback_icon": "mastery-generic",
+    "asset_slug": null
+  },
+  {
+    "slug": "soldado",
+    "name_es": "Soldado",
+    "name_en": "Soldier",
+    "accent_token": "iron",
+    "fallback_icon": "mastery-generic",
+    "asset_slug": null
+  }
+]

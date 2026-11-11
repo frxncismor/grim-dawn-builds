@@ -4,14 +4,10 @@
 # (.github/workflows/secret-scan.yml).
 #
 # Rules: the gitleaks default ruleset, unmodified (no custom or disabled rules).
-# Allowlist: kept minimal on purpose. Add an entry only with a written reason in
-# this file, scoped to one path or one regex, and never to a whole directory.
+# No project allowlist exceptions. Any future exception needs evidence and a
+# narrowly scoped SDD disposition.
 
 title = "grim-dawn-builds secret scan"
 
 [extend]
 useDefault = true
-
-[allowlist]
-description = "Minimal allowlist (T-083). Empty until a verified false positive needs a narrow entry."
-paths = []

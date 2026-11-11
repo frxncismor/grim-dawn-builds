@@ -3,6 +3,30 @@
  * (findParentCycle, APPROVED_RIGHTS, slug/date primitives) stay private to their modules.
  */
 export { AssetSchema, BuildSchema, TierEntrySchema } from './schema.js';
+export {
+  AuthorSchema,
+  PublicAuthorSchema,
+  SourceSchema,
+  PublicSourceSchema,
+  MasterySchema,
+  MasteryCombinationSchema,
+  BuildDocumentSchema,
+  PublicBuildSchema,
+  TierListSchema,
+  PublicTierListSchema,
+} from './schema.js';
+export type {
+  Author,
+  PublicAuthor,
+  Source,
+  PublicSource,
+  Mastery,
+  MasteryCombination,
+  BuildDocument,
+  PublicBuild,
+  TierList,
+  PublicTierList,
+} from './schema.js';
 export type { Asset, Build, BuildInput, ReviewState, RightsStatus, TierEntry } from './schema.js';
 export { CONTENT_STATUSES, TIERS } from './vocabulary.js';
 export type { ContentStatus, Tier } from './vocabulary.js';

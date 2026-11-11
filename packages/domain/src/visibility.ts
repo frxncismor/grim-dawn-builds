@@ -5,7 +5,9 @@ import { APPROVED_RIGHTS, type Build } from './schema.js';
  * `pending` (and any non-approved status) never passes unless drafts are explicitly included
  * for local review.
  */
-export function publicFilter(includeDrafts: boolean): (build: Build) => boolean {
+export function publicFilter(
+  includeDrafts: boolean,
+): (build: Pick<Build, 'review_state' | 'rights_status'>) => boolean {
   if (includeDrafts) return () => true;
   return (build) =>
     build.review_state === 'publicado' && APPROVED_RIGHTS.includes(build.rights_status);

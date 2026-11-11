@@ -12,5 +12,109 @@
   "content_status": "sin_verificar",
   "reviewed_by": null,
   "published_at": null,
-  "skill_nodes": [{ "slug": "golpe-primigenio", "bar_required": 5, "parent_slug": null }]
+  "skill_nodes": [
+    {
+      "slug": "golpe-primigenio",
+      "mastery_slug": "chaman",
+      "name_es": "Nodo de prueba",
+      "name_en": "Test node",
+      "bar_required": 5,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Punto de referencia sintético.",
+      "max_points_hint": 1,
+      "points_label": "1",
+      "layout": {
+        "x": 0,
+        "y": 0
+      }
+    }
+  ],
+  "eyebrow": "Fixture local",
+  "subtitle": "Documento de prueba",
+  "summary": "Contenido sintético para verificar el esquema de una guía.",
+  "title_a_mastery_slug": "chaman",
+  "title_b_mastery_slug": null,
+  "damage_types": ["rayo"],
+  "playstyle": "melee",
+  "content_tags": ["campana"],
+  "author": {
+    "slug": "por-confirmar",
+    "display_name": "Autor sin confirmar",
+    "bio": null,
+    "url": null,
+    "is_placeholder": true
+  },
+  "sources": [
+    {
+      "slug": "guia-original",
+      "kind": "original",
+      "title": "Fuente de fixture",
+      "url": null,
+      "author_name": "Autor sin confirmar",
+      "license_note": "Derechos pendientes",
+      "permission_ref": null,
+      "retrieved_on": "2026-11-08",
+      "notes": ""
+    }
+  ],
+  "reviewed_at": null,
+  "rights_notes": null,
+  "video_url": null,
+  "footer_disclaimer": "Ejemplo sintético de desarrollo.",
+  "hero_callout_title": "Prueba local",
+  "hero_callout_body": ["No es una guía publicada."],
+  "masteries": [
+    {
+      "slug": "chaman",
+      "name_es": "Chamán",
+      "name_en": "Shaman",
+      "role_text": "Daño de ejemplo"
+    }
+  ],
+  "priorities": [
+    {
+      "rank": 1,
+      "group_label": "Inicio",
+      "headline": "Nodo de ejemplo",
+      "note": "",
+      "skill_node_slugs": ["golpe-primigenio"]
+    }
+  ],
+  "purchase_steps": [
+    {
+      "position": 1,
+      "threshold_label": "Inicio",
+      "mastery_slug": "chaman",
+      "title": "Primer punto",
+      "body": "Paso sintético.",
+      "highlights": [
+        {
+          "skill_node_slug": "golpe-primigenio",
+          "points": 1
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "kind": "general",
+      "label": "Fixture",
+      "headline": "Contenido de prueba",
+      "detail": "No publicar.",
+      "position": 1
+    }
+  ],
+  "loot_filter_columns": [],
+  "guide_npcs": [],
+  "constellations": [],
+  "devotion_steps": [],
+  "sections_meta": [
+    {
+      "section_key": "habilidades",
+      "position": 1,
+      "visible": true
+    }
+  ]
 }

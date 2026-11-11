@@ -1,0 +1,1163 @@
+{
+  "slug": "chaman-demoledor-golpe-primigenio",
+  "locale": "es",
+  "title": "Chamán + Demoledor",
+  "eyebrow": "Grim Dawn · nombres en español",
+  "subtitle": "Golpe Primigenio de rayo, arma a dos manos. Azul = Chamán, naranja = Demoledor.",
+  "summary": "Transcripción local sin verificar: Golpe Primigenio de rayo con arma a dos manos. Autoría y derechos pendientes.",
+  "title_a_mastery_slug": "chaman",
+  "title_b_mastery_slug": "demoledor",
+  "damage_types": ["rayo"],
+  "playstyle": "melee",
+  "content_tags": ["campana"],
+  "author_slug": "por-confirmar",
+  "source_slugs": ["guia-original"],
+  "game_version": "Sin confirmar",
+  "review_state": "borrador",
+  "rights_status": "pending",
+  "rights_confirmed_by": null,
+  "rights_confirmed_on": null,
+  "content_status": "sin_verificar",
+  "reviewed_by": null,
+  "reviewed_at": null,
+  "rights_notes": "Autoría y derechos de republicación no confirmados. No publicar ni presentar como verificado.",
+  "published_at": null,
+  "author": {
+    "slug": "por-confirmar",
+    "display_name": "Autor por confirmar",
+    "bio": null,
+    "url": null,
+    "is_placeholder": true
+  },
+  "sources": [
+    {
+      "slug": "guia-original",
+      "kind": "comunidad",
+      "title": "HTML local: elementalista-golpe-primigenio.html",
+      "url": null,
+      "author_name": "Por confirmar",
+      "license_note": "Derechos pendientes. Solo migración y revisión local; no publicar.",
+      "permission_ref": null,
+      "retrieved_on": "2026-11-09",
+      "notes": "El HTML proporcionado no registra autor, URL original, permiso, fecha ni versión del juego. La transcripción conserva afirmaciones sin verificarlas."
+    }
+  ],
+  "video_url": null,
+  "footer_disclaimer": "Nombres de habilidades y requisitos de barra tomados del listado en español del juego. Las cantidades de puntos por habilidad son orientativas: el equipo que te salga manda sobre cualquier plan, y todo lo de habilidades se puede deshacer con el Guía Espiritual.",
+  "hero_callout_title": "Lee esto primero",
+  "hero_callout_body": [
+    "El número en cada habilidad es cuántos puntos necesitas en la barra de maestría para desbloquearla. No es cuántos puntos meterle.",
+    "Eso cambia todo el plan: Pacto de Clamatormentas pide barra 50, o sea la barra de Chamán completa. Y Escudo Explosivo pide barra 32 de Demoledor. Ninguna de las dos es para ahora."
+  ],
+  "masteries": [
+    {
+      "slug": "chaman",
+      "name_es": "Chamán",
+      "name_en": "Shaman",
+      "role_text": "Tu daño. Aquí va la mayoría de los puntos y de la barra."
+    },
+    {
+      "slug": "demoledor",
+      "name_es": "Demoledor",
+      "name_en": "Demolitionist",
+      "role_text": "Soporte. Barra baja mientras subes; lo bueno está muy al fondo."
+    }
+  ],
+  "skill_nodes": [
+    {
+      "slug": "golpe-primigenio",
+      "mastery_slug": "chaman",
+      "name_es": "Golpe Primigenio",
+      "name_en": "Primal Strike",
+      "bar_required": 5,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "1 punto ahora, súbelo poco a poco. Se maxea al final, cuando ya tengas equipo de rayo.",
+      "max_points_hint": null,
+      "points_label": "con lo que sobre",
+      "layout": {
+        "x": 40,
+        "y": 40
+      }
+    },
+    {
+      "slug": "golpe-atronador",
+      "mastery_slug": "chaman",
+      "name_es": "Golpe Atronador",
+      "name_en": "Thunderous Strike",
+      "bar_required": 10,
+      "parent_slug": "golpe-primigenio",
+      "status": "recomendada",
+      "tag": "Transmutador",
+      "rationale": "Quita el enfriamiento a cambio de daño. Pasas de un golpe cada dos segundos a poder machacar sin parar. Es tu prioridad número uno. Con 1 punto basta.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 220,
+        "y": 132
+      }
+    },
+    {
+      "slug": "torrente",
+      "mastery_slug": "chaman",
+      "name_es": "Torrente",
+      "name_en": "Torrent",
+      "bar_required": 15,
+      "parent_slug": "golpe-primigenio",
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Daño puro por punto. El mejor retorno del árbol. Máximo.",
+      "max_points_hint": null,
+      "points_label": "máximo",
+      "layout": {
+        "x": 220,
+        "y": 224
+      }
+    },
+    {
+      "slug": "corriente-de-tormenta",
+      "mastery_slug": "chaman",
+      "name_es": "Corriente de Tormenta",
+      "name_en": "Storm Surge",
+      "bar_required": 25,
+      "parent_slug": "golpe-primigenio",
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "El segundo modificador de daño. Va después de Torrente.",
+      "max_points_hint": null,
+      "points_label": "máximo",
+      "layout": {
+        "x": 220,
+        "y": 316
+      }
+    },
+    {
+      "slug": "viento-demoniaco",
+      "mastery_slug": "chaman",
+      "name_es": "Viento Demoníaco",
+      "name_en": "Wind Devil",
+      "bar_required": 10,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Torbellino que sueltas antes de entrar a pegar.",
+      "max_points_hint": null,
+      "points_label": "1 punto",
+      "layout": {
+        "x": 40,
+        "y": 408
+      }
+    },
+    {
+      "slug": "tempestad-furiosa",
+      "mastery_slug": "chaman",
+      "name_es": "Tempestad Furiosa",
+      "name_en": "Raging Tempest",
+      "bar_required": 20,
+      "parent_slug": "viento-demoniaco",
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Baja la resistencia elemental de los enemigos. Multiplica tu daño en lugar de sumarlo: vale más que subir Golpe Primigenio.",
+      "max_points_hint": null,
+      "points_label": "máximo",
+      "layout": {
+        "x": 220,
+        "y": 500
+      }
+    },
+    {
+      "slug": "totem-wendigo",
+      "mastery_slug": "chaman",
+      "name_es": "Tótem Wendigo",
+      "name_en": "Wendigo Totem",
+      "bar_required": 20,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Tu botón de no morir. Lo plantas y te cura mientras peleas alrededor.",
+      "max_points_hint": null,
+      "points_label": "1 punto",
+      "layout": {
+        "x": 40,
+        "y": 592
+      }
+    },
+    {
+      "slug": "pacto-de-mogdrogen",
+      "mastery_slug": "chaman",
+      "name_es": "Pacto de Mogdrogen",
+      "name_en": "Mogdrogen's Pact",
+      "bar_required": 5,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Buff permanente. Unos puntos por ahora, es el camino hacia lo de abajo.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 40,
+        "y": 684
+      }
+    },
+    {
+      "slug": "pacto-de-clamatormentas",
+      "mastery_slug": "chaman",
+      "name_es": "Pacto de Clamatormentas",
+      "name_en": "Stormcaller's Pact",
+      "bar_required": 50,
+      "parent_slug": "pacto-de-mogdrogen",
+      "status": "meta",
+      "tag": null,
+      "rationale": "La habilidad definitiva del build: convierte el pacto en daño de rayo y velocidad de ataque. Requiere la barra de Chamán completa, así que es una meta de nivel 60+, no de ahora.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 220,
+        "y": 776
+      }
+    },
+    {
+      "slug": "tocado-por-las-llamas",
+      "mastery_slug": "demoledor",
+      "name_es": "Tocado por las Llamas",
+      "name_en": "Flame Touched",
+      "bar_required": 5,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "+% daño elemental. El rayo es elemental, así que te sube el daño directo. Barato y accesible: es lo mejor que te da Demoledor a corto plazo.",
+      "max_points_hint": null,
+      "points_label": "hasta 12",
+      "layout": {
+        "x": 40,
+        "y": 40
+      }
+    },
+    {
+      "slug": "llama-vengativa",
+      "mastery_slug": "demoledor",
+      "name_es": "Llama Vengativa",
+      "name_en": "Vindictive Flame",
+      "bar_required": 10,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Pasivo de velocidad de movimiento y puntería. Se activa solo.",
+      "max_points_hint": null,
+      "points_label": "1 ahora, 11 después",
+      "layout": {
+        "x": 40,
+        "y": 132
+      }
+    },
+    {
+      "slug": "granada-cegadora",
+      "mastery_slug": "demoledor",
+      "name_es": "Granada Cegadora",
+      "name_en": "Flashbang",
+      "bar_required": 1,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "1 punto. Sirve de control y abre el camino a lo de abajo.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 40,
+        "y": 224
+      }
+    },
+    {
+      "slug": "escudo-explosivo",
+      "mastery_slug": "demoledor",
+      "name_es": "Escudo Explosivo",
+      "name_en": "Blast Shield",
+      "bar_required": 32,
+      "parent_slug": "granada-cegadora",
+      "status": "meta",
+      "tag": null,
+      "rationale": "Absorbe daño cuando bajas de vida. Excelente, pero 32 puntos de barra en una clase secundaria es una inversión enorme. Decisión de nivel alto.",
+      "max_points_hint": null,
+      "points_label": "· Mina de Termita · Pacto de Clamatormentas",
+      "layout": {
+        "x": 220,
+        "y": 316
+      }
+    },
+    {
+      "slug": "mina-de-termita",
+      "mastery_slug": "demoledor",
+      "name_es": "Mina de Termita",
+      "name_en": "Thermite Mine",
+      "bar_required": 32,
+      "parent_slug": null,
+      "status": "meta",
+      "tag": null,
+      "rationale": "Reduce resistencia elemental de los enemigos: sinergia real con tu rayo. Misma barrera de barra 32 que el escudo — si vas por uno, te llevas los dos.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 40,
+        "y": 408
+      }
+    }
+  ],
+  "priorities": [
+    {
+      "rank": 1,
+      "group_label": "1 · Chamán",
+      "headline": "Golpe Atronador",
+      "note": "1 punto. Es el transmutador de Golpe Primigenio: sin él el build se siente lento.",
+      "skill_node_slugs": ["golpe-atronador"]
+    },
+    {
+      "rank": 2,
+      "group_label": "2 · Chamán",
+      "headline": "Torrente → máximo",
+      "note": "Mejor retorno de daño por punto de todo el árbol.",
+      "skill_node_slugs": ["torrente"]
+    },
+    {
+      "rank": 3,
+      "group_label": "3 · Chamán",
+      "headline": "Tempestad Furiosa → máximo",
+      "note": "Baja resistencias enemigas: multiplica tu daño en vez de sumarlo.",
+      "skill_node_slugs": ["tempestad-furiosa"]
+    },
+    {
+      "rank": 4,
+      "group_label": "4 · Chamán",
+      "headline": "Viento Demoníaco → 1 punto",
+      "note": "Lo subes después. Es la habilidad donde atas Tempestad de la devoción.",
+      "skill_node_slugs": ["viento-demoniaco"]
+    },
+    {
+      "rank": 5,
+      "group_label": "5 · Chamán",
+      "headline": "Tótem Wendigo → 1 punto",
+      "note": "Tu botón de sobrevivir. Súbelo cuando tengas puntos de sobra.",
+      "skill_node_slugs": ["totem-wendigo"]
+    },
+    {
+      "rank": 6,
+      "group_label": "6 · Demoledor",
+      "headline": "Tocado por las Llamas → hasta 12",
+      "note": "Daño elemental fijo por punto. Si tu equipo ya da +habilidades del Demoledor, resta esos puntos: no los desperdicies.",
+      "skill_node_slugs": ["tocado-por-las-llamas"]
+    },
+    {
+      "rank": 7,
+      "group_label": "7 · Demoledor",
+      "headline": "Llama Vengativa → 1 ahora, 11 después",
+      "note": "Pasar de 11 rinde muy poco: cinco puntos más dan solo 3% de velocidad.",
+      "skill_node_slugs": ["llama-vengativa"]
+    },
+    {
+      "rank": 8,
+      "group_label": "8 · Chamán",
+      "headline": "Corriente de Tormenta → máximo",
+      "note": "Cuando la barra de Chamán llegue a 25.",
+      "skill_node_slugs": ["corriente-de-tormenta"]
+    },
+    {
+      "rank": 9,
+      "group_label": "9 · Chamán",
+      "headline": "Golpe Primigenio → con lo que sobre",
+      "note": "Hasta 16, al final: primero el equipo y los modificadores.",
+      "skill_node_slugs": ["golpe-primigenio"]
+    },
+    {
+      "rank": null,
+      "group_label": "Devoción",
+      "headline": "Encrucijada morada → Trono Vacío",
+      "note": "Es tu siguiente paso para abrir Tempestad. Ruta completa en la sección de devoción, más abajo.",
+      "skill_node_slugs": []
+    },
+    {
+      "rank": null,
+      "group_label": "Aún no",
+      "headline": "Escudo Explosivo · Mina de Termita · Pacto de Clamatormentas",
+      "note": "Piden barra 32 de Demoledor las dos primeras y barra 50 de Chamán la última. Son metas de nivel 60+.",
+      "skill_node_slugs": ["pacto-de-clamatormentas", "escudo-explosivo", "mina-de-termita"]
+    }
+  ],
+  "purchase_steps": [
+    {
+      "position": 1,
+      "threshold_label": "Barra Chamán → 10",
+      "mastery_slug": "chaman",
+      "title": "Golpe Atronador",
+      "body": "Sube la barra de Chamán hasta 10 y mete 1 punto en Golpe Atronador. También 1 en Viento Demoníaco. Aquí el personaje deja de sentirse lento.",
+      "highlights": [
+        {
+          "skill_node_slug": "golpe-atronador",
+          "points": 1
+        },
+        {
+          "skill_node_slug": "viento-demoniaco",
+          "points": 1
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "threshold_label": "barra Chamán → 15",
+      "mastery_slug": "chaman",
+      "title": "Torrente al máximo",
+      "body": "Todo lo que sobre va a Torrente. Cada punto se nota en pantalla.",
+      "highlights": [
+        {
+          "skill_node_slug": "torrente",
+          "points": null
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "threshold_label": "barra Chamán → 20",
+      "mastery_slug": "chaman",
+      "title": "Resistencias y supervivencia",
+      "body": "Tempestad Furiosa al máximo y 1 punto en Tótem Wendigo. Con esto ya aguantas jefes.",
+      "highlights": [
+        {
+          "skill_node_slug": "tempestad-furiosa",
+          "points": null
+        },
+        {
+          "skill_node_slug": "totem-wendigo",
+          "points": 1
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "threshold_label": "barra Demoledor → 10",
+      "mastery_slug": "demoledor",
+      "title": "La parte útil del Demoledor",
+      "body": "Ahora sí lo tocas: Tocado por las Llamas hasta 12 y Llama Vengativa en 1 por ahora (súbela a 11 cuando te sobren puntos). Son pasivos, los pones y te olvidas. Antes de gastar, revisa si tu equipo ya te regala niveles en esa habilidad.",
+      "highlights": [
+        {
+          "skill_node_slug": "tocado-por-las-llamas",
+          "points": 12
+        },
+        {
+          "skill_node_slug": "llama-vengativa",
+          "points": 1
+        }
+      ]
+    },
+    {
+      "position": 5,
+      "threshold_label": "barra Chamán → 25",
+      "mastery_slug": "chaman",
+      "title": "Corriente de Tormenta",
+      "body": "Al máximo. A partir de aquí empieza a subir Golpe Primigenio con lo que sobre.",
+      "highlights": [
+        {
+          "skill_node_slug": "corriente-de-tormenta",
+          "points": null
+        },
+        {
+          "skill_node_slug": "golpe-primigenio",
+          "points": null
+        }
+      ]
+    },
+    {
+      "position": 6,
+      "threshold_label": "Nivel 60+ · la decisión",
+      "mastery_slug": null,
+      "title": "Barra Chamán a 50, o Demoledor a 32",
+      "body": "Chamán 50 te da Pacto de Clamatormentas (daño). Demoledor 32 te da Escudo Explosivo + Mina de Termita (aguante). No alcanza para las dos pronto. Con este build yo iría primero por Chamán.",
+      "highlights": [
+        {
+          "skill_node_slug": "pacto-de-clamatormentas",
+          "points": null
+        },
+        {
+          "skill_node_slug": "escudo-explosivo",
+          "points": null
+        },
+        {
+          "skill_node_slug": "mina-de-termita",
+          "points": null
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "kind": "devociones",
+      "label": "Devociones",
+      "headline": "Ruta completa abajo",
+      "detail": "La versión anterior de esta guía saltaba las constelaciones intermedias y por eso Tempestad aparecía bloqueada. Corregido en la sección siguiente.",
+      "position": 1
+    },
+    {
+      "kind": "nombres",
+      "label": "Nombres",
+      "headline": "Usa los ingleses para buscar",
+      "detail": "Las traducciones al español de las constelaciones no las tengo confirmadas; los nombres en inglés sí, y son los que aparecen en todas las guías y en grimtools.",
+      "position": 2
+    },
+    {
+      "kind": "atributos",
+      "label": "Atributos",
+      "headline": "Casi todo a Physique",
+      "detail": "Mete Cunning o Spirit solo cuando un objeto concreto te lo pida. Sí existe forma de reiniciarlos (Tónico de Remodelación / Tonic of Reshaping, de misiones de Ashes of Malmouth), pero son contados: trátalos como si fueran definitivos.",
+      "position": 3
+    },
+    {
+      "kind": "arma",
+      "label": "Arma",
+      "headline": "Dos manos, siempre",
+      "detail": "Busca el afijo \"% del daño físico convertido en rayo\". Vale más que cinco niveles.",
+      "position": 4
+    },
+    {
+      "kind": "mas_adelante",
+      "label": "Más adelante",
+      "headline": "Golpe Atronador pierde fuerza hacia el nivel 50-60",
+      "detail": "Contra un solo objetivo y contra jefes se hace lento. Muchos jugadores cambian a Salvajismo + Hambre Salvaje a mitad de Élite. No cambies nada ahora; solo ten claro que si los jefes se eternizan, es el transmutador y no tú.",
+      "position": 5
+    },
+    {
+      "kind": "rotacion",
+      "label": "Rotación",
+      "headline": "Torbellino → machacar",
+      "detail": "Sueltas Viento Demoníaco, entras con Golpe Primigenio sin parar, Tótem Wendigo cuando la vida baje.",
+      "position": 6
+    },
+    {
+      "kind": "general",
+      "label": "Omitir · Demoledor",
+      "headline": "Templar · Golpe de Fuego · Granada",
+      "detail": "Sáltatelos. Daño físico o de fuego que tu personaje no usa.",
+      "position": 7
+    },
+    {
+      "kind": "general",
+      "label": "Guía Espiritual · Coste",
+      "headline": "Arranca en 25 fragmentos de hierro",
+      "detail": "Sube conforme reasignas puntos, hasta un tope alto de miles por punto. Por eso experimentar ahora es casi gratis. Las devociones además cuestan cristales de éter, que sacas rompiendo formaciones de cristal por el mapa.",
+      "position": 8
+    },
+    {
+      "kind": "general",
+      "label": "Guía Espiritual · Aviso",
+      "headline": "Sahdina no dura toda la partida",
+      "detail": "Muere en un ataque a Cruce del Diablo durante la campaña de Ashes of Malmouth. Si un día no la encuentras, no es un bug: usa a Novi.",
+      "position": 9
+    },
+    {
+      "kind": "general",
+      "label": "Qué subir ya mismo",
+      "headline": "Introducción 1",
+      "detail": "Resumen en orden de prioridad. Los árboles completos con el porqué de cada cosa vienen justo abajo.",
+      "position": 10
+    },
+    {
+      "kind": "general",
+      "label": "Orden real de compra",
+      "headline": "Introducción 1",
+      "detail": "Guíate por la barra, no por el nivel: los puntos de misión hacen que dos personajes del mismo nivel tengan totales distintos.",
+      "position": 11
+    },
+    {
+      "kind": "general",
+      "label": "Filtro de botín",
+      "headline": "Introducción 1",
+      "detail": "El botón está en el HUD, a la izquierda de la barra de vida. Son cuatro columnas y funcionan en cadena: las dos primeras deciden qué objetos se muestran, las dos últimas los filtran por dentro. Si dejas vacías las dos primeras no verás nada, por muchas casillas que marques en las otras.",
+      "position": 12
+    },
+    {
+      "kind": "general",
+      "label": "El Guía Espiritual",
+      "headline": "Introducción 1",
+      "detail": "Se reconocen por el icono de libro flotando sobre la cabeza. Todos ofrecen el mismo servicio: devolverte puntos de habilidad y de devoción.",
+      "position": 13
+    },
+    {
+      "kind": "general",
+      "label": "Ruta de devoción",
+      "headline": "Introducción 1",
+      "detail": "Orden pensado para un Chamán a dos manos de rayo. Cada constelación que completas te da afinidad, y esa afinidad es la que abre la siguiente — por eso el orden importa más que la lista.",
+      "position": 14
+    },
+    {
+      "kind": "general",
+      "label": "Filtro de botín",
+      "headline": "Aprieta el filtro poco a poco",
+      "detail": "Pasado el nivel 25 ya puedes activar las columnas de daño de rayo. Si notas que dejas de ver mejoras claras, quita casillas antes de añadir más: el filtro suma opciones, no las exige todas.",
+      "position": 15
+    },
+    {
+      "kind": "general",
+      "label": "Esquemas de habilidades y devociones",
+      "headline": "Representación esquemática sin verificar",
+      "detail": "Las posiciones representan el orden del HTML local, no el mapa oficial del juego. Las afinidades y los nombres de constelaciones no confirmados se muestran como desconocidos. Ghoul y Behemoth conservan la etiqueta de la fuente, que no indica el nombre de sus poderes.",
+      "position": 16
+    },
+    {
+      "kind": "general",
+      "label": "Referencias de devoción",
+      "headline": "Destino no presente en el árbol de la fuente",
+      "detail": "El vínculo Elemental Storm → Tótem de Tormenta se conserva por nombre; el HTML no incluye esa habilidad entre los nodos ni permite afirmar su barra o traducción inglesa.",
+      "position": 17
+    },
+    {
+      "kind": "general",
+      "label": "Qué tocar en cada árbol",
+      "headline": "Leyenda de la fuente",
+      "detail": "barra N = puntos requeridos en la maestría — el texto pequeño gris es el nombre en inglés",
+      "position": 18
+    }
+  ],
+  "loot_filter_columns": [
+    {
+      "position": 1,
+      "name": "1ª columna · Calidad",
+      "subtitle": "Qué rarezas quieres ver",
+      "rules": [
+        {
+          "action": "desmarcar",
+          "label": "Desmarca: Común",
+          "detail": "A nivel 14 es lo único que sobra. Los mágicos (amarillos) todavía te sirven; desmárcalos cuando vayas vestido de raro/épico, más o menos al 40.",
+          "position": 1
+        },
+        {
+          "action": "marcar",
+          "label": "Marca: Mostrar siempre únicos",
+          "detail": "Déjala siempre encendida. Es lo que evita que el filtro te esconda una legendaria porque no encaja con las casillas de daño que elegiste.",
+          "position": 2
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "name": "2ª columna · Tipo",
+      "subtitle": "Qué piezas te sirven",
+      "rules": [
+        {
+          "action": "marcar",
+          "label": "Marca",
+          "detail": "Armas cuerpo a cuerpo a dos manos · toda la armadura · anillos y amuletos · medallas y reliquias · componentes.",
+          "position": 1
+        },
+        {
+          "action": "desmarcar",
+          "label": "Desmarca",
+          "detail": "Armas a una mano · escudos · armas a distancia. Golpe Primigenio quiere un arma a dos manos, y todo lo demás es ruido en el suelo.",
+          "position": 2
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "name": "3ª columna · Daño",
+      "subtitle": "Aquí es donde se nota que juegas rayo",
+      "rules": [
+        {
+          "action": "marcar",
+          "label": "Marca",
+          "detail": "Rayo · Elemental · Electrocución · Físico (por los objetos que convierten físico en rayo) · velocidad de ataque y capacidad ofensiva si aparecen como opción.",
+          "position": 1
+        },
+        {
+          "action": "desmarcar",
+          "label": "Desmarca",
+          "detail": "Frío · Ácido y veneno · Vitalidad · Sangrado · Caos · Éter · bonos de mascota. Nada de eso hace daño en tu personaje.",
+          "position": 2
+        },
+        {
+          "action": "aviso",
+          "label": "Ojo con la lógica",
+          "detail": "El filtro es un O, no un Y: basta con que el objeto cumpla una casilla marcada para que aparezca. Cuantas más marques, menos filtra. Si ves demasiado, quita casillas en vez de añadirlas.",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "name": "4ª columna · Personaje",
+      "subtitle": "Lo que te ahorra morir en Élite",
+      "rules": [
+        {
+          "action": "marcar",
+          "label": "Marca",
+          "detail": "Chamán · Demoledor (los objetos que dan +1 a habilidades de tus maestrías valen oro) y Resistencias. Déjalas encendidas aunque el objeto no tenga rayo: llegar a Élite con resistencias bajas es el motivo número uno por el que la gente abandona un personaje.",
+          "position": 1
+        }
+      ]
+    }
+  ],
+  "guide_npcs": [
+    {
+      "position": 1,
+      "group_label": "Acto 1",
+      "name": "Sahdina",
+      "location": "Cruce del Diablo",
+      "detail": "El que te toca ahora. Está en el piso superior de la prisión, en la esquina norte. Habla con ella una vez para completar el diálogo inicial y vuelve a interactuar: ahí se abre el menú de reembolso."
+    },
+    {
+      "position": 2,
+      "group_label": "Después",
+      "name": "Novi",
+      "location": "Refugio del Aquelarre",
+      "detail": "Un poco al norte de Wevala, la ilusionista."
+    },
+    {
+      "position": 3,
+      "group_label": "Después",
+      "name": "Rena",
+      "location": "Distrito Yelmo de Acero",
+      "detail": "Al oeste del portal de grieta, en el camino circular que da al patio."
+    },
+    {
+      "position": 4,
+      "group_label": "Después",
+      "name": "Bagalla",
+      "location": "Cónclave de los Tres",
+      "detail": "Planta baja, a la derecha, bajo un toldo."
+    }
+  ],
+  "constellations": [
+    {
+      "slug": "crossroads",
+      "name_en": "Crossroads",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "crossroads",
+            "x": 60,
+            "y": 60
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "eel",
+      "name_en": "Eel",
+      "name_es": null,
+      "tier_level": 1,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "eel",
+            "x": 240,
+            "y": 60
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "empty-throne",
+      "name_en": "Empty Throne",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": {
+        "ascendente": 5
+      },
+      "layout": {
+        "nodes": [
+          {
+            "id": "empty-throne",
+            "x": 420,
+            "y": 60
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "lizard",
+      "name_en": "Lizard",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "lizard",
+            "x": 60,
+            "y": 180
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "tempest",
+      "name_en": "Tempest",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "tempest",
+            "x": 240,
+            "y": 180
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "scholars-light",
+      "name_en": "Scholar's Light",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "scholars-light",
+            "x": 420,
+            "y": 180
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "rhowans-crown",
+      "name_en": "Rhowan's Crown",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "rhowans-crown",
+            "x": 60,
+            "y": 300
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "ghoul",
+      "name_en": "Ghoul",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "ghoul",
+            "x": 240,
+            "y": 300
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "behemoth",
+      "name_en": "Behemoth",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "behemoth",
+            "x": 420,
+            "y": 300
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "kraken",
+      "name_en": "Kraken",
+      "name_es": null,
+      "tier_level": 2,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "kraken",
+            "x": 60,
+            "y": 420
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "ultos",
+      "name_en": "Ultos, Shepherd of Storms",
+      "name_es": null,
+      "tier_level": 3,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "ultos",
+            "x": 240,
+            "y": 420
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "quill",
+      "name_en": "Quill",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "quill",
+            "x": 420,
+            "y": 420
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "owl",
+      "name_en": "Owl",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "owl",
+            "x": 60,
+            "y": 540
+          }
+        ],
+        "edges": []
+      }
+    }
+  ],
+  "devotion_steps": [
+    {
+      "position": 1,
+      "label": "Ya lo tienes",
+      "constellation_slug": "eel",
+      "title_override": "Crossroads · Eel",
+      "body": "Anguila es Primordial de nivel 1. Con ella cubierta ya tienes medio requisito de Tempestad.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 2,
+      "label": "Paso 1",
+      "constellation_slug": "empty-throne",
+      "title_override": "Empty Throne — Trono Vacío",
+      "body": "1 punto en la Encrucijada morada para entrar, luego complétala. Te da Ascendente 5, que es lo que te falta para Tempestad. Se sostiene sola al terminarla.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 3,
+      "label": "Paso 2",
+      "constellation_slug": "lizard",
+      "title_override": "Lizard — Lagarto",
+      "body": "Barata, regeneración de vida. Es escalón y supervivencia a la vez.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 4,
+      "label": "Paso 3 · primer poder",
+      "constellation_slug": "tempest",
+      "title_override": "Tempest — Tempestad",
+      "body": "Ata Reckless Tempest a Viento Demoníaco. Se dispara con críticos, así que rinde más según sube tu capacidad ofensiva.",
+      "bindings": [
+        {
+          "power_en": "Reckless Tempest",
+          "skill_node_slug": "viento-demoniaco"
+        }
+      ],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 5,
+      "label": "Paso 4",
+      "constellation_slug": "scholars-light",
+      "title_override": "Scholar's Light — Luz del Erudito",
+      "body": "Puro escalón hacia Kraken. No esperes gran cosa de sus bonos.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 6,
+      "label": "Paso 5",
+      "constellation_slug": "rhowans-crown",
+      "title_override": "Rhowan's Crown — Corona de Rhowan",
+      "body": "Ata Elemental Storm al Tótem de Tormenta. Reduce resistencias en área.",
+      "bindings": [
+        {
+          "power_en": "Elemental Storm",
+          "skill_node_slug": null,
+          "skill_name_es": "Tótem de Tormenta"
+        }
+      ],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 7,
+      "label": "Paso 6 · supervivencia",
+      "constellation_slug": "ghoul",
+      "title_override": "Ghoul · Behemoth",
+      "body": "Ghoul va al Pacto de Mogdrogen y Behemoth al Pacto de Clamatormentas. Ojo: los poderes que se activan al recibir daño solo pueden atarse a habilidades de buff, nunca a las de ataque. Por eso van a los pactos.",
+      "bindings": [
+        {
+          "power_en": "Ghoul",
+          "skill_node_slug": "pacto-de-mogdrogen"
+        },
+        {
+          "power_en": "Behemoth",
+          "skill_node_slug": "pacto-de-clamatormentas"
+        }
+      ],
+      "accent": "ember",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 8,
+      "label": "Paso 7",
+      "constellation_slug": "kraken",
+      "title_override": "Kraken",
+      "body": "Nivel 2, arriba del mapa. Sus bonos exigen arma a dos manos — tu build cumple, pero si algún día cambias a una mano, se apaga entera.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 9,
+      "label": "Paso 8 · el destino",
+      "constellation_slug": "ultos",
+      "title_override": "Ultos, Shepherd of Storms",
+      "body": "Ata Hand of Ultos a Golpe Primigenio. Nivel 3: pide 22+ de afinidad y no devuelve nada, por eso va al final.",
+      "bindings": [
+        {
+          "power_en": "Hand of Ultos",
+          "skill_node_slug": "golpe-primigenio"
+        }
+      ],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 10,
+      "label": "Antes de gastar",
+      "constellation_slug": null,
+      "title_override": "Simula la ruta en grimtools",
+      "body": "Las afinidades intermedias (Lagarto, Luz del Erudito, Ghoul, Behemoth) vienen de guías de la comunidad, no de una comprobación mía punto por punto. Pásala por la calculadora de devoción de grimtools: te avisa si en algún paso no llegas a la afinidad, y reasignar cuesta cristales de éter.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "verificacion"
+    },
+    {
+      "position": 11,
+      "label": "Limpieza",
+      "constellation_slug": null,
+      "title_override": "Recupera la Encrucijada azul",
+      "body": "Cuando las constelaciones se sostengan solas, quita los puntos de la Encrucijada y mételos en Quill o Owl. Cuesta fragmentos de hierro y cristales de éter, así que hazlo de una sola vez al final.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "limpieza"
+    }
+  ],
+  "sections_meta": [
+    {
+      "section_key": "resumen",
+      "position": 1,
+      "visible": true
+    },
+    {
+      "section_key": "prioridades",
+      "position": 2,
+      "visible": true
+    },
+    {
+      "section_key": "habilidades",
+      "position": 3,
+      "visible": true
+    },
+    {
+      "section_key": "orden",
+      "position": 4,
+      "visible": true
+    },
+    {
+      "section_key": "notas",
+      "position": 5,
+      "visible": true
+    },
+    {
+      "section_key": "filtro-de-botin",
+      "position": 6,
+      "visible": true
+    },
+    {
+      "section_key": "guia-espiritual",
+      "position": 7,
+      "visible": true
+    },
+    {
+      "section_key": "devociones",
+      "position": 8,
+      "visible": true
+    },
+    {
+      "section_key": "video",
+      "position": 9,
+      "visible": false
+    },
+    {
+      "section_key": "fuentes",
+      "position": 10,
+      "visible": true
+    }
+  ]
+}

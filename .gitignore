@@ -2,6 +2,7 @@
 
 # Compiled output
 /dist
+/.tools/gitleaks/8.30.1/
 apps/api/dist/
 packages/domain/dist/
 /tmp
@@ -34,6 +35,22 @@ yarn-error.log
 # Miscellaneous
 /.angular/cache
 
+# Generated official Spec Kit skills: regenerate from the pinned source in
+# specs/001-mvp-guias-builds/tooling-provenance.md. Project review skills stay tracked.
+/.agents/skills/speckit-analyze/
+/.agents/skills/speckit-checklist/
+/.agents/skills/speckit-clarify/
+/.agents/skills/speckit-constitution/
+/.agents/skills/speckit-converge/
+/.agents/skills/speckit-implement/
+/.agents/skills/speckit-plan/
+/.agents/skills/speckit-specify/
+/.agents/skills/speckit-tasks/
+
+# Generated provider payload from pinned Impeccable; includes a local engine binary.
+# Reproduce using tooling-provenance.md. Project-owned reviewers stay tracked.
+/.agents/skills/impeccable/
+
 # Local secrets and overrides (never commit)
 .env
 .env.*
@@ -49,6 +66,8 @@ coverage
 testem.log
 /typings
 __screenshots__/
+/playwright-report/
+/test-results/
 
 # System files
 .DS_Store

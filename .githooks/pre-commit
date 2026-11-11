@@ -6,11 +6,30 @@
 # periódicamente; este hook no sustituye a esas comprobaciones.
 set -eu
 
-if ! command -v gitleaks >/dev/null 2>&1; then
-  echo "pre-commit: gitleaks no está instalado; no se puede verificar el commit." >&2
-  echo "pre-commit: instala gitleaks 8.30.1 (https://github.com/gitleaks/gitleaks) y reintenta." >&2
+repo_root=$(git rev-parse --show-toplevel)
+native=gitleaks
+if [ "${OS:-}" = "Windows_NT" ]; then
+  native=gitleaks.exe
+fi
+gitleaks_tool="$repo_root/.tools/gitleaks/8.30.1/$native"
+if [ -L "$gitleaks_tool" ]; then
+  echo "pre-commit: herramienta local inválida; ejecuta pnpm setup:gitleaks." >&2
   exit 1
 fi
-
-repo_root=$(git rev-parse --show-toplevel)
-exec gitleaks git --pre-commit --staged --redact --exit-code 1 --config "$repo_root/.gitleaks.toml" "$repo_root"
+if [ -f "$gitleaks_tool" ]; then
+  :
+elif command -v gitleaks >/dev/null 2>&1; then
+  gitleaks_tool=$(command -v gitleaks)
+else
+  echo "pre-commit: falta gitleaks 8.30.1; ejecuta pnpm setup:gitleaks." >&2
+  exit 1
+fi
+gitleaks_version=$("$gitleaks_tool" version 2>/dev/null) || {
+  echo "pre-commit: no se pudo verificar gitleaks; ejecuta pnpm setup:gitleaks." >&2
+  exit 1
+}
+if [ "$gitleaks_version" != "8.30.1" ]; then
+  echo "pre-commit: versión de gitleaks inválida; ejecuta pnpm setup:gitleaks." >&2
+  exit 1
+fi
+exec "$gitleaks_tool" git --pre-commit --staged --redact --exit-code 1 --config "$repo_root/.gitleaks.toml" "$repo_root"

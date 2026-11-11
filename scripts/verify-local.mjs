@@ -31,13 +31,16 @@ export const VERIFY_STEPS = [
   { name: 'api:typecheck', command: 'pnpm --filter @gd/api typecheck' },
   { name: 'api:lint', command: 'pnpm --filter @gd/api lint' },
   { name: 'api:test', command: 'pnpm --filter @gd/api test' },
+  { name: 'test:rotation', command: 'pnpm test:rotation' },
   { name: 'lint', command: 'pnpm lint' },
   { name: 'lint:md', command: 'pnpm lint:md' },
   { name: 'format', command: 'pnpm format:check' },
   { name: 'test', command: 'pnpm test' },
   { name: 'test:scripts', command: 'pnpm test:scripts' },
   { name: 'assets', command: 'pnpm assets:check' },
+  { name: 'contrast', command: 'pnpm check:contrast' },
   { name: 'build', command: 'pnpm build' },
+  { name: 'public-build', command: 'pnpm check:public-build' },
 ];
 
 /** @param {{ command: string }} step @returns {Promise<number>} */

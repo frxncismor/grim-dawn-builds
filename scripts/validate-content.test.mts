@@ -2,24 +2,15 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { validateBuildFiles } from './validate-content.mts';
 
-const validDraft = {
-  slug: 'chaman-demoledor-golpe-primigenio',
-  locale: 'es',
-  title: 'Chamán + Demoledor',
-  author_slug: 'por-confirmar',
-  source_slugs: ['guia-original'],
-  game_version: '1.2.x',
-  review_state: 'borrador',
-  rights_status: 'pending',
-  rights_confirmed_by: null,
-  rights_confirmed_on: null,
-  content_status: 'sin_verificar',
-  reviewed_by: null,
-  published_at: null,
-  skill_nodes: [{ slug: 'golpe-primigenio', bar_required: 5, parent_slug: null }],
-};
+const validDraft: Record<string, unknown> = JSON.parse(
+  readFileSync(
+    new URL('./fixtures/content-valid/builds/valid-draft.json', import.meta.url),
+    'utf8',
+  ),
+);
 
 describe('validateBuildFiles', () => {
   it('passes a valid draft build', () => {

@@ -1,0 +1,6 @@
+hooks:
+  after_implement:
+    - extension: spec-review
+      command: speckit.review.complete
+      enabled: true
+      optional: false

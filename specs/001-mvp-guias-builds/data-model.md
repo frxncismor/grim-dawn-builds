@@ -20,27 +20,28 @@ PostgreSQL como **destino portable**; en la fase `local_first` la verificación 
 ## Tablas
 
 **authors** — `id, slug UNIQUE, display_name, bio, url, is_placeholder bool`
-**sources** — `id, kind, title, url NULL, author_name, license_note, permission_ref NULL (enlace/ID a la prueba de permiso), retrieved_on date, notes`
+**sources** — `id, slug UNIQUE NOT NULL, kind, title, url NULL, author_name, license_note, permission_ref NULL (enlace/ID a la prueba de permiso), retrieved_on date, notes` _(T-127 añade identidad por slug; filas anteriores: `legacy-<uuid>`, nunca una atribución inventada)_
 **masteries** — `id, slug UNIQUE (chaman, demoledor…), name_es, name_en, accent_token (storm|ember|…), fallback_icon text (id de SVG local), asset_id FK NULL` _(catálogo; fuente de las combinaciones)_
 **mastery_combinations** — `id, slug UNIQUE ('chaman-demoledor'), mastery_a_id FK, mastery_b_id FK NULL, CHECK(mastery_a_id < mastery_b_id)` _(generada mecánicamente: todos los pares; opcional maestría única; UNIQUE(a,b); cobertura probada)_
 **assets** — `id, slug UNIQUE, file_path NULL, origin_url, rights_holder, license_or_permission, proof_ref, recorded_on date, status asset_status DEFAULT 'pending', fallback_svg, CHECK(status='approved' ⇒ origin_url, rights_holder, license_or_permission, proof_ref, file_path NOT NULL)` _(refleja `content/assets/manifest.json`)_
 **skills** — `id, mastery_id FK, slug, name_es, name_en, bar_required int, parent_skill_id FK NULL, UNIQUE(mastery_id, slug)` _(catálogo del juego, reutilizable entre builds)_
-**constellations** — `id, slug, name_en, name_es NULL, tier_level int (1-3), affinity_required jsonb NULL, affinity_granted jsonb NULL, layout jsonb (nodos/aristas esquemáticos)`
+**constellations** — `id, slug, name_en, name_es NULL, tier_level int NULL (1-3 cuando conocido), affinity_required jsonb NULL, affinity_granted jsonb NULL, layout jsonb (nodos/aristas esquemáticos)`
 
 **builds** — `id, slug UNIQUE, locale='es', title_a_mastery_id FK, title_b_mastery_id FK NULL, eyebrow, subtitle, summary text (meta/OG), damage_types damage_type[], playstyle, content_tags content_tag[], game_version, author_id FK, review_state, rights_status DEFAULT 'pending', rights_notes text NULL, rights_confirmed_by NULL, rights_confirmed_on NULL, content_status DEFAULT 'sin_verificar', reviewed_by NULL, reviewed_at NULL, published_at NULL, video_url NULL, footer_disclaimer, hero_callout_title, hero_callout_body text[]`
 **build_sources** — `build_id FK, source_id FK, role ('principal'|'referencia'), PK(build_id, source_id)`
 **build_masteries** — `build_id FK, mastery_id FK, position int, role_text, PK(build_id, mastery_id)` _(p. ej. «Tu daño…», «Soporte…»)_
 **build_skill_nodes** — `id, build_id FK, skill_id FK, status node_status, tag NULL ('Transmutador'), rationale text, max_points_hint int NULL, points_label NULL ('máximo','1 ahora, 11 después'), layout_x numeric, layout_y numeric, display_order int` _(capa de build sobre el catálogo; `layout_*` esquemático)_
-**build_priorities** — `id, build_id, rank int NULL, group_label ('1 · Chamán'|'Devoción'|'Aún no'), headline, note, skill_node_ids uuid[]`
-**build_purchase_steps** — `id, build_id, position, threshold_label ('barra Chamán → 10'), mastery_id NULL, title, body, highlights jsonb [{node_id, points}]`
+**build_priorities** — `id, build_id, position int NOT NULL, rank int NULL, group_label ('1 · Chamán'|'Devoción'|'Aún no'), headline, note, skill_node_ids uuid[]`
+**build_purchase_steps** — `id, build_id, position, threshold_label ('barra Chamán → 10'), mastery_id NULL, title, body, highlights jsonb [{skill_node_slug, points: number|null}]` _(referencias canónicas validadas antes de escritura)_
 **build_notes** — `id, build_id, kind ('devociones'|'nombres'|'atributos'|'arma'|'mas_adelante'|'rotacion'|'general'), label, headline, detail, position`
-**build_devotion_steps** — `id, build_id, position, label ('Paso 3 · primer poder'), constellation_id FK NULL, title_override NULL, body, bindings jsonb [{power_en, skill_node_id}], accent (storm|ember), verification, kind ('ruta'|'verificacion'|'limpieza')`
+**build_constellations** — `build_id FK CASCADE, constellation_id FK, position int, PK(build_id, constellation_id)` _(conserva todas las menciones, incluso sin paso; T-127)_
+**build_devotion_steps** — `id, build_id, position, label ('Paso 3 · primer poder'), constellation_id FK NULL, title_override NULL, body, bindings jsonb [{power_en, skill_node_slug}] o [{power_en, skill_node_slug:null, skill_name_es}], accent (storm|ember), verification, kind ('ruta'|'verificacion'|'limpieza')` _(variante externa solo sin_verificar; contrato T-130)_
 **loot_filter_columns** — `id, build_id, position (1-4), name ('Calidad'|'Tipo'|'Daño'|'Personaje'), subtitle`
 **loot_filter_rules** — `id, column_id FK, action ('marcar'|'desmarcar'|'aviso'), label, detail, position`
 **build_guides_npcs** — `id, build_id, position, group_label ('Acto 1'|'Después'|'Coste'|'Aviso'), name NULL, location NULL, detail`
 **build_sections_meta** — _(opcional)_ orden/visibilidad de secciones por build: `build_id, section_key, position, visible`
 **tier_lists** — `id, slug ('principal'), title, game_version, review_state, author_id`
-**tier_entries** — `id, tier_list_id FK, combination_id FK (siempre), build_id FK NULL, display_name (si no hay build), entry_kind ('placeholder'|'enlace_externo'|'build_propia'), tier, mastery_ids uuid[], damage_types[], playstyle, content_tags[], note, content_status, rights_status, review_state, external_url NULL, external_author NULL, source_id FK NULL, evaluated_on date NULL, position int` _(CHECKs: build_id NOT NULL OR display_name NOT NULL; `entry_kind='placeholder'` ⇒ tier='sin_clasificar', build_id NULL, external_url NULL, content_status='placeholder', source_id NULL permitido; `enlace_externo` ⇒ external_url, external_author, source_id NOT NULL, rights_status='link_only', sin campos de texto de guía; `tier<>'sin_clasificar'` ⇒ source_id y evaluated_on NOT NULL)_
+**tier_entries** — `id, tier_list_id FK, combination_id FK (siempre), build_id FK NULL, display_name (si no hay build), entry_kind ('placeholder'|'enlace_externo'|'build_propia'), tier, mastery_ids uuid[], damage_types[], playstyle NULL (desconocido para placeholder/enlace sin guía), content_tags[], note, content_status, rights_status, review_state, external_url NULL, external_author NULL, source_id FK NULL, evaluated_on date NULL, position int` _(CHECKs: build_id NOT NULL OR display_name NOT NULL; `entry_kind='placeholder'` ⇒ tier='sin_clasificar', build_id NULL, external_url NULL, content_status='placeholder', source_id NULL permitido; `enlace_externo` ⇒ external_url, external_author, source_id NOT NULL, rights_status='link_only', sin campos de texto de guía; `tier<>'sin_clasificar'` ⇒ source_id y evaluated_on NOT NULL)_
 
 ## Índices y restricciones
 
@@ -103,3 +104,18 @@ Las tablas se materializan en T-108 (tras Fase 8); mientras tanto, equivalentes 
 - Chamán: Golpe Primigenio(5) → Golpe Atronador(10, Transmutador), Torrente(15), Corriente de Tormenta(25); Viento Demoníaco(10) → Tempestad Furiosa(20); Tótem Wendigo(20); Pacto de Mogdrogen(5) → Pacto de Clamatormentas(50, meta).
 - Demoledor: Tocado por las Llamas(5), Llama Vengativa(10), Granada Cegadora(1) → Escudo Explosivo(32, meta), Mina de Termita(32, meta), grupo omitido (Templar · Golpe de Fuego · Granada).
 - Devoción: Crossroads/Eel (ya tienes) → Empty Throne → Lizard → Tempest → Scholar's Light → Rhowan's Crown → Ghoul·Behemoth → Kraken → Ultos; + verificación y limpieza (Quill/Owl).
+
+## Precisión de transcripción del HTML local (T-130)
+
+highlights.points admite entero no negativo o null (objetivo numérico no indicado;
+la etiqueta «máximo» permanece en el cuerpo del paso). constellations.tier_level
+admite 1–3 o null si la fuente no lo indica. No usar cero para representar un dato
+desconocido. T-127 debe conservar ese null en PostgreSQL mediante migración nueva.
+
+bindings tiene dos variantes estrictas: {power_en, skill_node_slug} para un nodo
+real de la guía, o {power_en, skill_node_slug: null, skill_name_es} para una mención
+externa al árbol cuyo nombre fue transcrito. La segunda variante solo se admite
+en pasos sin_verificar. No relaja el control de referencias de la primera.
+El grupo de habilidades omitidas y las filas informativas Coste/Aviso se guardan
+en notes general con sus títulos/textos originales; no se crean filas de catálogo
+para un grupo sin barra ni NPC inexistentes.

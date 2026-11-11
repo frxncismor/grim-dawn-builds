@@ -1,0 +1,11 @@
+{
+  "slug": "catalogo-maestrias",
+  "kind": "oficial",
+  "title": "Grim Dawn — catálogo oficial de maestrías",
+  "url": "https://www.grimdawn.com/guide/character/masteries/",
+  "author_name": "Crate Entertainment",
+  "license_note": "Fuente factual de nombres EN y pertenencia al catálogo. Combinaciones y rótulos ES elaborados por Grim Dawn Builds; los rótulos ES no se presentan como traducciones oficiales verificadas. No se reproducen descripciones, arte ni rankings.",
+  "permission_ref": null,
+  "retrieved_on": "2026-11-09",
+  "notes": "Consulta manual de fuente primaria. Incluye Berserker y Fangs of Asterkarn. La rama 1.3.x no afirma cuál es el último parche ni verifica la versión de la guía local. Sin scraping ni ingesta automática."
+}

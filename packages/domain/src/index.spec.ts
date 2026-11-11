@@ -5,6 +5,16 @@ import pkg from '../package.json' with { type: 'json' };
 
 // Narrow public API of @gd/domain. Adding an export is a deliberate contract change.
 const PUBLIC_RUNTIME_EXPORTS = [
+  'AuthorSchema',
+  'PublicAuthorSchema',
+  'SourceSchema',
+  'PublicSourceSchema',
+  'MasterySchema',
+  'MasteryCombinationSchema',
+  'BuildDocumentSchema',
+  'PublicBuildSchema',
+  'TierListSchema',
+  'PublicTierListSchema',
   'AssetSchema',
   'BuildSchema',
   'CONTENT_STATUSES',

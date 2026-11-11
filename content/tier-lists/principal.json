@@ -1,0 +1,986 @@
+{
+  "slug": "principal",
+  "title": "Catálogo de combinaciones de maestrías",
+  "game_version": "1.3.x (Fangs of Asterkarn)",
+  "review_state": "publicado",
+  "author_slug": "grim-dawn-builds",
+  "masteries": [
+    {
+      "slug": "arcanista",
+      "name_es": "Arcanista",
+      "name_en": "Arcanist",
+      "accent_token": "arcane",
+      "fallback_icon": "mastery-generic",
+      "asset_slug": null
+    },
+    {
+      "slug": "berserker",
+      "name_es": "Berserker",
+      "name_en": "Berserker",
+      "accent_token": "frost",
+      "fallback_icon": "mastery-generic",
+      "asset_slug": null
+    },
+    {
+      "slug": "chaman",
+      "name_es": "Chamán",
+      "name_en": "Shaman",
+      "accent_token": "storm",
+      "fallback_icon": "mastery-generic",
+      "asset_slug": null
+    },
+    {
+      "slug": "demoledor",
+      "name_es": "Demoledor",
+      "name_en": "Demolitionist",
+      "accent_token": "ember",
+      "fallback_icon": "mastery-generic",
+      "asset_slug": null
+    },
+    {
+      "slug": "filo-nocturno",
+      "name_es": "Filo Nocturno",
+      "name_en": "Nightblade",
+      "accent_token": "shadow",
+      "fallback_icon": "mastery-generic",
+      "asset_slug": null
+    },
+    {
+      "slug": "guardian-del-juramento",
+      "name_es": "Guardián del Juramento",
+      "name_en": "Oathkeeper",
+      "accent_token": "radiant",
+      "fallback_icon": "mastery-generic",
+      "asset_slug": null
+    },
+    {
+      "slug": "inquisidor",
+      "name_es": "Inquisidor",
+      "name_en": "Inquisitor",
+      "accent_token": "radiant",
+      "fallback_icon": "mastery-generic",
+      "asset_slug": null
+    },
+    {
+      "slug": "nigromante",
+      "name_es": "Nigromante",
+      "name_en": "Necromancer",
+      "accent_token": "grave",
+      "fallback_icon": "mastery-generic",
+      "asset_slug": null
+    },
+    {
+      "slug": "ocultista",
+      "name_es": "Ocultista",
+      "name_en": "Occultist",
+      "accent_token": "venom",
+      "fallback_icon": "mastery-generic",
+      "asset_slug": null
+    },
+    {
+      "slug": "soldado",
+      "name_es": "Soldado",
+      "name_en": "Soldier",
+      "accent_token": "iron",
+      "fallback_icon": "mastery-generic",
+      "asset_slug": null
+    }
+  ],
+  "combinations": [
+    {
+      "slug": "arcanista-berserker",
+      "mastery_a_slug": "arcanista",
+      "mastery_b_slug": "berserker"
+    },
+    {
+      "slug": "arcanista-chaman",
+      "mastery_a_slug": "arcanista",
+      "mastery_b_slug": "chaman"
+    },
+    {
+      "slug": "arcanista-demoledor",
+      "mastery_a_slug": "arcanista",
+      "mastery_b_slug": "demoledor"
+    },
+    {
+      "slug": "arcanista-filo-nocturno",
+      "mastery_a_slug": "arcanista",
+      "mastery_b_slug": "filo-nocturno"
+    },
+    {
+      "slug": "arcanista-guardian-del-juramento",
+      "mastery_a_slug": "arcanista",
+      "mastery_b_slug": "guardian-del-juramento"
+    },
+    {
+      "slug": "arcanista-inquisidor",
+      "mastery_a_slug": "arcanista",
+      "mastery_b_slug": "inquisidor"
+    },
+    {
+      "slug": "arcanista-nigromante",
+      "mastery_a_slug": "arcanista",
+      "mastery_b_slug": "nigromante"
+    },
+    {
+      "slug": "arcanista-ocultista",
+      "mastery_a_slug": "arcanista",
+      "mastery_b_slug": "ocultista"
+    },
+    {
+      "slug": "arcanista-soldado",
+      "mastery_a_slug": "arcanista",
+      "mastery_b_slug": "soldado"
+    },
+    {
+      "slug": "berserker-chaman",
+      "mastery_a_slug": "berserker",
+      "mastery_b_slug": "chaman"
+    },
+    {
+      "slug": "berserker-demoledor",
+      "mastery_a_slug": "berserker",
+      "mastery_b_slug": "demoledor"
+    },
+    {
+      "slug": "berserker-filo-nocturno",
+      "mastery_a_slug": "berserker",
+      "mastery_b_slug": "filo-nocturno"
+    },
+    {
+      "slug": "berserker-guardian-del-juramento",
+      "mastery_a_slug": "berserker",
+      "mastery_b_slug": "guardian-del-juramento"
+    },
+    {
+      "slug": "berserker-inquisidor",
+      "mastery_a_slug": "berserker",
+      "mastery_b_slug": "inquisidor"
+    },
+    {
+      "slug": "berserker-nigromante",
+      "mastery_a_slug": "berserker",
+      "mastery_b_slug": "nigromante"
+    },
+    {
+      "slug": "berserker-ocultista",
+      "mastery_a_slug": "berserker",
+      "mastery_b_slug": "ocultista"
+    },
+    {
+      "slug": "berserker-soldado",
+      "mastery_a_slug": "berserker",
+      "mastery_b_slug": "soldado"
+    },
+    {
+      "slug": "chaman-demoledor",
+      "mastery_a_slug": "chaman",
+      "mastery_b_slug": "demoledor"
+    },
+    {
+      "slug": "chaman-filo-nocturno",
+      "mastery_a_slug": "chaman",
+      "mastery_b_slug": "filo-nocturno"
+    },
+    {
+      "slug": "chaman-guardian-del-juramento",
+      "mastery_a_slug": "chaman",
+      "mastery_b_slug": "guardian-del-juramento"
+    },
+    {
+      "slug": "chaman-inquisidor",
+      "mastery_a_slug": "chaman",
+      "mastery_b_slug": "inquisidor"
+    },
+    {
+      "slug": "chaman-nigromante",
+      "mastery_a_slug": "chaman",
+      "mastery_b_slug": "nigromante"
+    },
+    {
+      "slug": "chaman-ocultista",
+      "mastery_a_slug": "chaman",
+      "mastery_b_slug": "ocultista"
+    },
+    {
+      "slug": "chaman-soldado",
+      "mastery_a_slug": "chaman",
+      "mastery_b_slug": "soldado"
+    },
+    {
+      "slug": "demoledor-filo-nocturno",
+      "mastery_a_slug": "demoledor",
+      "mastery_b_slug": "filo-nocturno"
+    },
+    {
+      "slug": "demoledor-guardian-del-juramento",
+      "mastery_a_slug": "demoledor",
+      "mastery_b_slug": "guardian-del-juramento"
+    },
+    {
+      "slug": "demoledor-inquisidor",
+      "mastery_a_slug": "demoledor",
+      "mastery_b_slug": "inquisidor"
+    },
+    {
+      "slug": "demoledor-nigromante",
+      "mastery_a_slug": "demoledor",
+      "mastery_b_slug": "nigromante"
+    },
+    {
+      "slug": "demoledor-ocultista",
+      "mastery_a_slug": "demoledor",
+      "mastery_b_slug": "ocultista"
+    },
+    {
+      "slug": "demoledor-soldado",
+      "mastery_a_slug": "demoledor",
+      "mastery_b_slug": "soldado"
+    },
+    {
+      "slug": "filo-nocturno-guardian-del-juramento",
+      "mastery_a_slug": "filo-nocturno",
+      "mastery_b_slug": "guardian-del-juramento"
+    },
+    {
+      "slug": "filo-nocturno-inquisidor",
+      "mastery_a_slug": "filo-nocturno",
+      "mastery_b_slug": "inquisidor"
+    },
+    {
+      "slug": "filo-nocturno-nigromante",
+      "mastery_a_slug": "filo-nocturno",
+      "mastery_b_slug": "nigromante"
+    },
+    {
+      "slug": "filo-nocturno-ocultista",
+      "mastery_a_slug": "filo-nocturno",
+      "mastery_b_slug": "ocultista"
+    },
+    {
+      "slug": "filo-nocturno-soldado",
+      "mastery_a_slug": "filo-nocturno",
+      "mastery_b_slug": "soldado"
+    },
+    {
+      "slug": "guardian-del-juramento-inquisidor",
+      "mastery_a_slug": "guardian-del-juramento",
+      "mastery_b_slug": "inquisidor"
+    },
+    {
+      "slug": "guardian-del-juramento-nigromante",
+      "mastery_a_slug": "guardian-del-juramento",
+      "mastery_b_slug": "nigromante"
+    },
+    {
+      "slug": "guardian-del-juramento-ocultista",
+      "mastery_a_slug": "guardian-del-juramento",
+      "mastery_b_slug": "ocultista"
+    },
+    {
+      "slug": "guardian-del-juramento-soldado",
+      "mastery_a_slug": "guardian-del-juramento",
+      "mastery_b_slug": "soldado"
+    },
+    {
+      "slug": "inquisidor-nigromante",
+      "mastery_a_slug": "inquisidor",
+      "mastery_b_slug": "nigromante"
+    },
+    {
+      "slug": "inquisidor-ocultista",
+      "mastery_a_slug": "inquisidor",
+      "mastery_b_slug": "ocultista"
+    },
+    {
+      "slug": "inquisidor-soldado",
+      "mastery_a_slug": "inquisidor",
+      "mastery_b_slug": "soldado"
+    },
+    {
+      "slug": "nigromante-ocultista",
+      "mastery_a_slug": "nigromante",
+      "mastery_b_slug": "ocultista"
+    },
+    {
+      "slug": "nigromante-soldado",
+      "mastery_a_slug": "nigromante",
+      "mastery_b_slug": "soldado"
+    },
+    {
+      "slug": "ocultista-soldado",
+      "mastery_a_slug": "ocultista",
+      "mastery_b_slug": "soldado"
+    }
+  ],
+  "entries": [
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "arcanista-berserker",
+      "display_name": "Arcanista + Berserker",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "arcanista-chaman",
+      "display_name": "Arcanista + Chamán",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "arcanista-demoledor",
+      "display_name": "Arcanista + Demoledor",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "arcanista-filo-nocturno",
+      "display_name": "Arcanista + Filo Nocturno",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "arcanista-guardian-del-juramento",
+      "display_name": "Arcanista + Guardián del Juramento",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "arcanista-inquisidor",
+      "display_name": "Arcanista + Inquisidor",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "arcanista-nigromante",
+      "display_name": "Arcanista + Nigromante",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "arcanista-ocultista",
+      "display_name": "Arcanista + Ocultista",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "arcanista-soldado",
+      "display_name": "Arcanista + Soldado",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "berserker-chaman",
+      "display_name": "Berserker + Chamán",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "berserker-demoledor",
+      "display_name": "Berserker + Demoledor",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "berserker-filo-nocturno",
+      "display_name": "Berserker + Filo Nocturno",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "berserker-guardian-del-juramento",
+      "display_name": "Berserker + Guardián del Juramento",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "berserker-inquisidor",
+      "display_name": "Berserker + Inquisidor",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "berserker-nigromante",
+      "display_name": "Berserker + Nigromante",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "berserker-ocultista",
+      "display_name": "Berserker + Ocultista",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "berserker-soldado",
+      "display_name": "Berserker + Soldado",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "chaman-demoledor",
+      "display_name": "Chamán + Demoledor",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "chaman-filo-nocturno",
+      "display_name": "Chamán + Filo Nocturno",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "chaman-guardian-del-juramento",
+      "display_name": "Chamán + Guardián del Juramento",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "chaman-inquisidor",
+      "display_name": "Chamán + Inquisidor",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "chaman-nigromante",
+      "display_name": "Chamán + Nigromante",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "chaman-ocultista",
+      "display_name": "Chamán + Ocultista",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "chaman-soldado",
+      "display_name": "Chamán + Soldado",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "demoledor-filo-nocturno",
+      "display_name": "Demoledor + Filo Nocturno",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "demoledor-guardian-del-juramento",
+      "display_name": "Demoledor + Guardián del Juramento",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "demoledor-inquisidor",
+      "display_name": "Demoledor + Inquisidor",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "demoledor-nigromante",
+      "display_name": "Demoledor + Nigromante",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "demoledor-ocultista",
+      "display_name": "Demoledor + Ocultista",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "demoledor-soldado",
+      "display_name": "Demoledor + Soldado",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "filo-nocturno-guardian-del-juramento",
+      "display_name": "Filo Nocturno + Guardián del Juramento",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "filo-nocturno-inquisidor",
+      "display_name": "Filo Nocturno + Inquisidor",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "filo-nocturno-nigromante",
+      "display_name": "Filo Nocturno + Nigromante",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "filo-nocturno-ocultista",
+      "display_name": "Filo Nocturno + Ocultista",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "filo-nocturno-soldado",
+      "display_name": "Filo Nocturno + Soldado",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "guardian-del-juramento-inquisidor",
+      "display_name": "Guardián del Juramento + Inquisidor",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "guardian-del-juramento-nigromante",
+      "display_name": "Guardián del Juramento + Nigromante",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "guardian-del-juramento-ocultista",
+      "display_name": "Guardián del Juramento + Ocultista",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "guardian-del-juramento-soldado",
+      "display_name": "Guardián del Juramento + Soldado",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "inquisidor-nigromante",
+      "display_name": "Inquisidor + Nigromante",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "inquisidor-ocultista",
+      "display_name": "Inquisidor + Ocultista",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "inquisidor-soldado",
+      "display_name": "Inquisidor + Soldado",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "nigromante-ocultista",
+      "display_name": "Nigromante + Ocultista",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "nigromante-soldado",
+      "display_name": "Nigromante + Soldado",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "placeholder",
+      "combination_slug": "ocultista-soldado",
+      "display_name": "Ocultista + Soldado",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "placeholder",
+      "rights_status": "own_original",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "catalogo-maestrias",
+      "evaluated_on": null
+    },
+    {
+      "entry_kind": "build_propia",
+      "combination_slug": "chaman-demoledor",
+      "display_name": "Chamán + Demoledor",
+      "build_slug": "chaman-demoledor-golpe-primigenio",
+      "tier": "sin_clasificar",
+      "content_status": "sin_verificar",
+      "rights_status": "pending",
+      "review_state": "borrador",
+      "external_url": null,
+      "external_author": null,
+      "source_slug": "guia-original",
+      "evaluated_on": null
+    }
+  ],
+  "sources": [
+    {
+      "slug": "catalogo-maestrias",
+      "kind": "oficial",
+      "title": "Grim Dawn — catálogo oficial de maestrías",
+      "url": "https://www.grimdawn.com/guide/character/masteries/",
+      "author_name": "Crate Entertainment",
+      "license_note": "Fuente factual de nombres EN y pertenencia al catálogo. Combinaciones y rótulos ES elaborados por Grim Dawn Builds; los rótulos ES no se presentan como traducciones oficiales verificadas. No se reproducen descripciones, arte ni rankings.",
+      "permission_ref": null,
+      "retrieved_on": "2026-11-09",
+      "notes": "Consulta manual de fuente primaria. Incluye Berserker y Fangs of Asterkarn. La rama 1.3.x no afirma cuál es el último parche ni verifica la versión de la guía local. Sin scraping ni ingesta automática."
+    },
+    {
+      "slug": "guia-original",
+      "kind": "comunidad",
+      "title": "HTML local: elementalista-golpe-primigenio.html",
+      "url": null,
+      "author_name": "Por confirmar",
+      "license_note": "Derechos pendientes. Solo migración y revisión local; no publicar.",
+      "permission_ref": null,
+      "retrieved_on": "2026-11-09",
+      "notes": "El HTML proporcionado no registra autor, URL original, permiso, fecha ni versión del juego. La transcripción conserva afirmaciones sin verificarlas."
+    }
+  ]
+}
