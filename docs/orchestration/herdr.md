@@ -86,3 +86,84 @@ por nombre genérico (`node`, `python`): el servidor de OpenCode también es `no
   relanzarlo.
 - La cuota del modelo es independiente de herdr: un agente puede estar `working`
   mientras su proveedor devuelve 503 o 429.
+
+## Dos programas, no uno
+
+Herdr son dos binarios con responsabilidades separadas:
+
+| Programa                | Qué controla                                                               | Cómo se usa                            |
+| ----------------------- | -------------------------------------------------------------------------- | -------------------------------------- |
+| **`herdr-app`**         | la **ventana**: espacios, pestañas, layouts, paneles y mods                | `herdr-app status`, `ls`, `do`, `shot` |
+| **`herdr-core` (`hc`)** | **ejecuta** cada terminal y cada agente; sobrevive al cierre de la ventana | `hc run`, `read`, `send`, `wait`       |
+
+Un agente sigue vivo cuando cierras la ventana: la ventana es un cliente más.
+
+```text
+C:\Users\paco_\AppData\Local\Programs\herdr-app\herdr-app.exe
+```
+
+## Inspeccionar la ventana
+
+| Comando                        | Devuelve                                                                                             |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `herdr-app status`             | layout mostrado, espacio y pestaña activos, pane enfocado, overlays y **errores de archivos o mods** |
+| `herdr-app ls`                 | espacios → pestañas → terminales, con estado de agente y subagentes                                  |
+| `herdr-app do <comando>`       | ejecuta un comando de la app y devuelve lo creado o `{error}`                                        |
+| `herdr-app shot [archivo.png]` | captura el fotograma renderizado; útil para depurar un panel                                         |
+
+`status` es la primera parada cuando algo “no se ve”: los errores de un layout o de
+un mod aparecen ahí, no en el terminal.
+
+## Estados de agente
+
+Un agente reporta por OSC 7501 y solo puede estar en cuatro estados:
+
+```text
+working  >  blocked  >  done  >  idle      (urgencia de un espacio o pestaña)
+```
+
+- **`blocked`** exige al usuario: es el que interrumpe el trabajo.
+- **`done`** significa «terminó mientras no mirabas»; pasa a `idle` al mirarlo.
+- Un **subagente** es un terminal que el agente lanzó con `hc run`: el core registra
+  el `parent` y el panel de agentes lo muestra bajo su padre, sin panel propio.
+
+Regla para el orquestador: **`blocked` se atiende; `working` se espera; `done` se
+lee; `idle` no requiere nada.** Confundir `blocked` con «lento» es el error que más
+turnos cuesta.
+
+## La interfaz es archivos
+
+Todo lo que se ve en la ventana está descrito en
+`~/.config/herdr-app/` y se recarga en caliente:
+
+| Archivo                 | Decide                                                         |
+| ----------------------- | -------------------------------------------------------------- |
+| `layouts/<nombre>.json` | la ventana entera: bloques, tema, fuentes, marcos              |
+| `keys.json`             | qué hace cada tecla                                            |
+| `settings.json`         | zoom, sonidos, fuentes, contraste, telemetría                  |
+| `mods/<nombre>/`        | paneles: pequeños programas en gpui-kit (sin HTML, CSS ni DOM) |
+| `programs.json`         | nombres e iconos de los programas                              |
+
+Advertencias que importan:
+
+- `AGENTS.md` dentro de `~/.config/herdr-app/` **lo reescribe la app en cada
+  arranque**: no se edita.
+- Los layouts y mods que trae Herdr son de solo lectura. Para cambiar estructura o
+  código se **clona** (`layout.clone`, `mod.clone`).
+- Un archivo inválido no rompe la app: escribe `<nombre>.error` y conserva la última
+  versión buena. Hay que comprobar ese archivo tras cada edición.
+- `ctrl-alt-shift-escape` siempre funciona: aparta `keys.json` y el layout mostrado
+  y vuelve al layout `main`. Es la salida de emergencia.
+
+## Qué podría aportar a la orquestación
+
+Un panel propio (un _mod_) podría mostrar las tareas en curso, el estado de cada
+orquestador de dominio y el presupuesto de modelo consumido, leyendo `hc` y
+`herdr-app`. Está registrado como trabajo futuro en `T-139`; hoy la supervisión se
+hace con `hc read`, `hc get` y este documento.
+
+## Fuente de verdad
+
+`~/.config/herdr-app/AGENTS.md` documenta la app completa (layouts, mods, comandos,
+settings) y se regenera en cada arranque. Este documento es el resumen operativo
+para el orquestador; si algo difiere, manda el de la app.

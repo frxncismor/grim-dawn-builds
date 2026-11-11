@@ -3242,3 +3242,36 @@ Alcance de la excepción: **solo** el techo de `/tier-list`. La portada mantiene
 `INITIAL_JS_LIMIT = 90 000` y su regla de 0 B con contrato estático válido. `T-144`
 sigue abierta para recuperar holgura real; si se consigue, el techo se vuelve a
 bajar y esta excepción se retira.
+
+### 17.52 Bloque de calidad E2E, axe y Lighthouse (T-040, T-041, T-042)
+
+**Estado de partida**: no existe `playwright.config.ts` ni `lighthouserc.json`. Solo
+hay `playwright.svg.config.ts` y `e2e/svg-responsive.spec.ts`, que cubren los SVG,
+no las rutas.
+
+**Rutas objeto**: `/`, `/tier-list`, `/acerca`, `/legal`, `/autores/:slug` y
+`/builds/:slug` en modo borradores (`INCLUDE_DRAFTS=true`), más el build público que
+**no** contiene la guía `pending`.
+
+**T-040 — E2E de recorrido**: `playwright.config.ts` con un `webServer` que sirve el
+artefacto prerenderizado, y `e2e/journeys.spec.ts` cubriendo navegación real entre
+portada → catálogo → guía → autor, filtros por URL con recarga e historial, ancla
+`#devociones`, y el mismo recorrido con `javaScriptEnabled: false` comprobando que el
+contenido esencial sigue en el HTML. Tres viewports (375/768/1280).
+
+**T-041 — axe**: `e2e/a11y.spec.ts` con `@axe-core/playwright` sobre las rutas
+anteriores en los tres anchos, en hidratado y con JS desactivado. Criterio: **cero
+violaciones** de impactos `critical` y `serious`; las moderadas se listan con
+justificación. No sustituye a la revisión manual de `T-043`.
+
+**T-042 — Lighthouse y presupuestos**: `lighthouserc.json` con configuración móvil,
+`scripts/check-performance.mts` y su prueba, midiendo LCP, CLS, TBT, JS/CSS/HTML y
+las puntuaciones de `plan.md` §6. Falla si se incumple cualquiera. Debe medir sobre
+el artefacto real, no sobre el servidor de desarrollo.
+
+**Regla común**: medir el artefacto, no la intención. Un informe sin cifras no
+acredita la puerta. Los tres integran en CI mediante `T-126`.
+
+**Aceptación**: los tres comandos existen, fallan con un fixture que viola el
+umbral y pasan con el artefacto actual; las cifras quedan registradas en
+`quickstart.md` con fecha y entorno.
