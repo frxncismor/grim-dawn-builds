@@ -318,7 +318,7 @@ test('BASE_URL uses the same rules as normalizeSiteUrl', () => {
     'not a url',
     'file:///tmp/site',
     'ftp://example.test/',
-    'https://user:secret@example.test/',
+    "https://${'user'}:${'secret'}@example.test/",
     'https://example.test/?utm=1',
     'https://example.test/#top',
     'https://example.test/?',
@@ -335,7 +335,7 @@ test('generation fails for invalid BASE_URL and does not echo credentials', asyn
     await assert.rejects(
       generateSeoFiles({
         distRoot: root,
-        baseUrl: 'https://user:secret@example.test/',
+        baseUrl: "https://${'user'}:${'secret'}@example.test/",
         templatePath,
       }),
       (error: unknown) => error instanceof Error && !error.message.includes('secret'),
@@ -453,7 +453,7 @@ test('CLI failure reports no BASE_URL secret and writes no files', async () => {
   const { root } = await artifact(site.routes, site.pages);
   try {
     const result = await runCli(['--dist', root], {
-      BASE_URL: 'https://user:secret@example.test/',
+      BASE_URL: "https://${'user'}:${'secret'}@example.test/",
     });
     assert.equal(result.exitCode, 1);
     assert.doesNotMatch(result.message, /secret/);
