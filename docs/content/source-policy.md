@@ -62,6 +62,21 @@ Sin los pasos 4 y 5, la fuente sigue en `evaluando` y no se publica nada derivad
 - **Revocación**: cualquier retirada se atiende con el
   [runbook](takedown-runbook.md) y tiene prioridad sobre cualquier otra tarea.
 
+## Guardia automática (`check-scope`, T-109)
+
+`pnpm check:scope` falla si el código de la aplicación o de la ingesta contiene
+una llamada HTTP automatizada a un host que no sea el propio del proyecto
+(`external-source-access`), y si un registro de `content/sources/` figura
+`habilitada` o `limitada` sin evidencia completa (`source-rights-gate`). Un
+registro sin `status` se trata como `pending` y no se marca.
+
+La regla de acceso admite **una excepción explícita y acotada**: un comentario en
+la misma línea de la llamada, o en la inmediatamente anterior, con el marcador
+`check-scope:external-http-ok` y un motivo de al menos 10 caracteres. Sin motivo
+válido, el marcador no exime. La excepción justifica tooling de desarrollo (por
+ejemplo, descargar un binario fijado) y **nunca** sustituye al permiso de una
+fuente.
+
 ## Trazabilidad
 
 Cada fuente habilitada debe poder responder: quién la aprobó, con qué evidencia,
