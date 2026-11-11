@@ -13,6 +13,8 @@ computadora y desde la app móvil, usando el mismo canal SSH que usa
   `ssh paco_@192.168.100.35 "echo hc-remote-ok"` devuelve `hc-remote-ok`.
   `hc machine add paco_@127.0.0.1` responde «este core», lo que confirma que el
   handshake de `hc` por SSH funciona; falta emparejar la laptop y el móvil.
+- Clave `herdr-mobile` (ED25519, `SHA256:lxCHn2q1vkPjUiwBsjbnrzGdr8rtSE/wHFnQuZPYXCA`)
+  autorizada en `administrators_authorized_keys` y en el archivo del usuario.
 - El usuario `paco_` está en **Administradores** y tiene contraseña.
   `%USERPROFILE%\.ssh\authorized_keys` ya contiene su clave `id_ed25519.pub`.
 - IPv4 de LAN: **192.168.100.35** (Ethernet, perfil Público).
@@ -89,6 +91,22 @@ Get-NetTCPConnection -LocalPort 22 -State Listen
    listar `mamalona` (la app añade hosts de `~/.ssh/config` o los que ya conoce
    `hc`). Los espacios remotos aparecen con prefijo `mamalona/`; los nuevos se
    crean con `space.new --machine mamalona`.
+
+## Cuenta Microsoft y contraseña
+
+`paco_` es una cuenta **MicrosoftAccount**. SSH **no acepta el PIN de Windows**:
+la autenticación por contraseña usa la contraseña online de la cuenta. Si no la
+recuerdas, o la cuenta es passwordless, hay dos salidas:
+
+- **Clave (recomendado)**: autoriza la clave pública del dispositivo y elige esa
+  identidad en la app. El móvil ya tiene `herdr-mobile` autorizada.
+- **Restablecer la contraseña**: en `account.microsoft.com` (Seguridad) o en
+  **Configuración > Cuentas > Opciones de inicio de sesión > Contraseña**. Tras
+  cambiarla, bloquea/desbloquea la sesión del PC y reintenta.
+
+Si la app pide una contraseña y no ofrece elegir clave, está usando
+autenticación por contraseña: necesita la contraseña de la cuenta Microsoft, no
+el PIN.
 
 ## Paso 3 — app móvil
 
