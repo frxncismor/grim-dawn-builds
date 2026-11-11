@@ -41,6 +41,72 @@ describe('GET /health', () => {
   });
 });
 
+describe('GET /ready', () => {
+  it('exposes the migration fingerprint only after successful readiness', async () => {
+    const fingerprint = 'a'.repeat(64);
+    for (const ready of [true, false]) {
+      const app = buildApp(loadConfig({ LOG_LEVEL: 'silent' }), {
+        readiness: async () => ready,
+        migration: () => fingerprint,
+      });
+      const response = await app.inject('/ready');
+      expect(response.headers['x-content-migration']).toBe(ready ? fingerprint : undefined);
+      expect(response.json()).toEqual({ status: ready ? 'ready' : 'not_ready' });
+      await app.close();
+    }
+  });
+
+  it('fails readiness closed if the migration fingerprint cannot be calculated', async () => {
+    const app = buildApp(loadConfig({ LOG_LEVEL: 'silent' }), {
+      readiness: async () => true,
+      migration: () => {
+        throw new Error('private SQL details');
+      },
+    });
+    const response = await app.inject('/ready');
+    expect(response.statusCode).toBe(503);
+    expect(response.headers['x-content-migration']).toBeUndefined();
+    expect(response.json()).toEqual({ status: 'not_ready' });
+    await app.close();
+  });
+  it('returns 200 only when the database probe reports matching migrations', async () => {
+    const app = buildApp(loadConfig({}), {
+      logStream: captureStream().stream,
+      readiness: async () => true,
+    });
+    const response = await app.inject({ method: 'GET', url: '/ready' });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ status: 'ready' });
+    await app.close();
+  });
+
+  it('returns 503 if the database is down or migrations do not match', async () => {
+    const app = buildApp(loadConfig({}), {
+      logStream: captureStream().stream,
+      readiness: async () => false,
+    });
+    const response = await app.inject({ method: 'GET', url: '/ready' });
+    expect(response.statusCode).toBe(503);
+    expect(response.json()).toEqual({ status: 'not_ready' });
+    await app.close();
+  });
+
+  it('keeps liveness healthy when the readiness probe throws', async () => {
+    const app = buildApp(loadConfig({}), {
+      logStream: captureStream().stream,
+      readiness: async () => {
+        throw new Error('database details must not escape');
+      },
+    });
+    const ready = await app.inject({ method: 'GET', url: '/ready' });
+    const health = await app.inject({ method: 'GET', url: '/health' });
+    expect(ready.statusCode).toBe(503);
+    expect(health.statusCode).toBe(200);
+    expect(ready.body).not.toContain('database details');
+    await app.close();
+  });
+});
+
 describe('structured logging and redaction', () => {
   it('emits JSON log lines and never the raw Authorization or Cookie header values', async () => {
     const { stream, text } = captureStream();

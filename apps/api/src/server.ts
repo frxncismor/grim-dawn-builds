@@ -1,5 +1,8 @@
 import { buildApp } from './app.js';
 import { formatConfigError, loadConfig } from './config.js';
+import { checkDatabaseReadiness } from './db/readiness.mjs';
+import { createDatabaseContentRepository } from './content/repository.js';
+import { migrationFingerprint } from './db/migration-state.js';
 
 /**
  * Executable entrypoint. Validates config first (fail fast, no values printed),
@@ -15,7 +18,15 @@ async function main(): Promise<void> {
     return;
   }
 
-  const app = buildApp(config);
+  const content = createDatabaseContentRepository(process.env);
+  const app = buildApp(config, {
+    readiness: () => checkDatabaseReadiness(process.env),
+    migration: migrationFingerprint,
+    content: content.repository,
+  });
+  app.addHook('onClose', async () => {
+    await content.close();
+  });
   const shutdown = (): void => {
     void app.close().then(() => process.exit(0));
   };

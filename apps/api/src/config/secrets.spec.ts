@@ -1,7 +1,7 @@
 import { inspect } from 'node:util';
 import { describe, expect, it } from 'vitest';
 import { buildApp } from '../app.js';
-import { ConfigError, formatConfigError } from '../config.js';
+import { ConfigError, formatConfigError, loadConfig } from '../config.js';
 import { loadSecrets, PROHIBITED_SECRET_VALUES } from './secrets.js';
 import type { SecretIO, SecretSpec } from './secret-source.js';
 
@@ -130,10 +130,9 @@ describe('loadSecrets: redaction in errors and serialization', () => {
   it('redacts secrets written to structured logs', () => {
     const secrets = loadSecrets([REQUIRED], { DB_PASSWORD: LEAK }, noFiles);
     let output = '';
-    const app = buildApp(
-      { host: '127.0.0.1', port: 3000, logLevel: 'info' },
-      { logStream: { write: (chunk) => (output += chunk) } },
-    );
+    const app = buildApp(loadConfig({ LOG_LEVEL: 'info' }), {
+      logStream: { write: (chunk) => (output += chunk) },
+    });
     app.log.info(
       { db: { password: secrets['dbPassword'] }, secret: secrets['dbPassword'] },
       'probe',

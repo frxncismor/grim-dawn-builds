@@ -1,0 +1,1 @@
+ALTER TABLE "tier_entries" ALTER COLUMN "playstyle" DROP NOT NULL;

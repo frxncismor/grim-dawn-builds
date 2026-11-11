@@ -13,8 +13,12 @@
     "test": "vitest run",
     "build": "pnpm --filter @gd/domain build && tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
+    "db:migrate": "node dist/db/migrate.mjs",
+    "db:seed": "pnpm build && node dist/db/seed.mjs",
     "db:generate": "drizzle-kit generate",
-    "db:check": "drizzle-kit check"
+    "db:check": "drizzle-kit check",
+    "db:edit": "pnpm build && node dist/db/editor.mjs",
+    "db:bootstrap": "pnpm build && node dist/db/bootstrap.mjs"
   },
   "dependencies": {
     "@gd/domain": "workspace:*",
