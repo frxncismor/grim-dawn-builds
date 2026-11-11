@@ -72,3 +72,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Lighthouse CI run artifacts (T-042); reports are evidence, not source.
+/.lighthouseci/
