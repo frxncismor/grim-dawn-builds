@@ -190,6 +190,8 @@ ejecuta `pnpm content:validate -- --dir scripts/fixtures/content-valid`, que val
 solo el fixture, porque `content/builds` aún no tiene contenido (T-014). El CI
 ejecuta `lint:md` solo en modo comprobación; nunca aplica `--fix`.
 
+Gate matrix and language policy: see [docs/quality-gates.md](docs/quality-gates.md).
+
 ## Logs de PostgreSQL en Docker
 
 Desde la raíz, consulta los últimos errores y sigue los eventos nuevos:
