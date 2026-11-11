@@ -84,7 +84,7 @@ function assertSourceParity(build: Build): void {
 test('golden snapshot identifies the unchanged original local HTML', async () => {
   assert.equal(golden.schemaVersion, 1);
   assert.equal(golden.source.rights_status, 'pending');
-  assert.equal(golden.source.path, 'elementalista-golpe-primigenio.html');
+  assert.equal(golden.source.path, 'docs/prototipos/elementalista-golpe-primigenio.html');
   assert.equal(golden.source.normalization, 'LF');
   const html = await readFile(resolve(root, golden.source.path), 'utf8');
   assert.equal(createHash('sha256').update(html.replace(/\r\n/g, '\n')).digest('hex'), golden.source.sha256);
