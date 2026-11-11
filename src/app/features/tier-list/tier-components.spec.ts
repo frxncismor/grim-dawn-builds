@@ -123,7 +123,12 @@ describe('controlled catalog components', () => {
       f.componentRef.setInput('status', status);
       await f.whenStable();
       expect(f.nativeElement.textContent).toContain(label);
-      expect(f.nativeElement.querySelector('gd-icon').getAttribute('aria-hidden')).toBe('true');
+      const icon = f.nativeElement.querySelector('img');
+      expect(icon?.getAttribute('aria-hidden')).toBe('true');
+      expect(icon?.getAttribute('alt')).toBe('');
+      expect(icon?.getAttribute('src')).toContain(
+        `assets/icons/status-${status.replace('_', '-')}.svg`,
+      );
     }
   });
   it('chip announces selection and honors native disabled', async () => {

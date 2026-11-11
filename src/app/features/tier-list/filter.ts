@@ -55,7 +55,7 @@ function matchesText(item: CatalogItem, terms: readonly string[]): boolean {
 }
 
 /** Returns the items that satisfy every active group. Pure: the input is not modified. */
-export function applyFilter(items: readonly CatalogItem[], filter: TierFilter): CatalogItem[] {
+export function applyFilter<T extends CatalogItem>(items: readonly T[], filter: TierFilter): T[] {
   const terms = normalizeText(filter.text).split(' ').filter(Boolean);
   return items.filter(
     (item) =>

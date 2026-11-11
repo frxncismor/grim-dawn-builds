@@ -29,10 +29,7 @@ export class TierListPage {
   readonly catalog = this.route.snapshot.data['catalog'] as CatalogSnapshot;
   readonly filter = signal<TierFilter>(EMPTY_FILTER);
   readonly groups = catalogGroups(this.catalog);
-  readonly visible = computed(() => {
-    const ids = new Set(applyFilter(this.catalog.cards, this.filter()).map((card) => card.id));
-    return this.catalog.cards.filter((card) => ids.has(card.id));
-  });
+  readonly visible = computed(() => applyFilter(this.catalog.cards, this.filter()));
   readonly rows = computed(() =>
     TIERS.map((tier) => ({
       tier,

@@ -1,22 +1,33 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { PublicBuild, PublicSource, TierEntry } from '@gd/domain';
 import type { ContentStatus } from '@gd/domain/vocabulary';
-import { Icon } from '../../shared/ui/icon/icon';
 import { EMPTY_FILTER, type TierFilter } from './filter';
 
 @Component({
   selector: 'gd-content-badge',
-  imports: [Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<span class="badge"
-    ><gd-icon [name]="icon()" /><span>{{ label() }}</span></span
+    ><img
+      class="badge-icon"
+      [src]="iconSrc()"
+      alt=""
+      aria-hidden="true"
+      (error)="imageFailed()"
+    /><span>{{ label() }}</span></span
   >`,
   styleUrl: './tier-components.css',
 })
 export class ContentBadge {
   readonly status = input.required<ContentStatus>();
-  readonly icon = computed(() => `status-${this.status().replace('_', '-')}`);
+  private readonly failed = signal(false);
+  imageFailed(): void {
+    this.failed.set(true);
+  }
+  readonly iconSrc = computed(() => {
+    if (this.failed()) return 'assets/icons/generic.svg';
+    return `assets/icons/status-${this.status().replace('_', '-')}.svg`;
+  });
   readonly label = computed(
     () =>
       ({

@@ -20,7 +20,24 @@
         >About</a
       >
     </nav>
-    <gd-language-switcher />
+    <nav class="lang-switch" aria-label="Language" i18n-aria-label="@@locale.navLabel">
+      <a
+        [href]="localeHref('en')"
+        hreflang="en"
+        lang="en"
+        [attr.aria-current]="currentLocale === 'en' ? 'true' : null"
+        i18n="@@locale.english"
+        >English</a
+      >
+      <a
+        [href]="localeHref('es')"
+        hreflang="es"
+        lang="es"
+        [attr.aria-current]="currentLocale === 'es' ? 'true' : null"
+        i18n="@@locale.spanish"
+        >Español</a
+      >
+    </nav>
   </div>
 </header>
 
