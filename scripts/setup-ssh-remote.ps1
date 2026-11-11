@@ -72,14 +72,42 @@ if (-not (Test-Path $sshdConfig)) {
 } else {
   Write-Host 'sshd_config ya existía; se conserva.'
 }
+$configAcl = Get-Acl $sshdConfig
+$configAcl.SetOwner([System.Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))
+Set-Acl -Path $sshdConfig -AclObject $configAcl
 
 Write-Step 'Claves de host'
 & (Join-Path $env:WINDIR 'System32\OpenSSH\ssh-keygen.exe') -A | Out-Null
-Write-Host 'Claves de host generadas o ya presentes.'
+# sshd rechaza claves privadas de host con ACE de usuario: la DACL debe contener
+# solo SYSTEM y Administradores (sin herencia ni el usuario que ejecutó el script).
+$administrators = [System.Security.Principal.SecurityIdentifier]::new('S-1-5-32-544')
+$system = [System.Security.Principal.SecurityIdentifier]::new('S-1-5-18')
+Get-ChildItem -Path $sshDir -Filter 'ssh_host_*_key' | ForEach-Object {
+  $acl = [System.Security.AccessControl.FileSecurity]::new()
+  $acl.SetAccessRuleProtection($true, $false)
+  # OpenSSH también es estricto con el propietario: SYSTEM/Administradores.
+  $acl.SetOwner($administrators)
+  $acl.AddAccessRule(
+    [System.Security.AccessControl.FileSystemAccessRule]::new(
+      $administrators, 'FullControl', 'Allow'
+    )
+  )
+  $acl.AddAccessRule(
+    [System.Security.AccessControl.FileSystemAccessRule]::new($system, 'FullControl', 'Allow')
+  )
+  Set-Acl -Path $_.FullName -AclObject $acl
+}
+Write-Host 'Claves de host generadas o ya presentes, con DACL restringida.'
 
 Write-Step 'Servicio sshd'
 Set-Service -Name sshd -StartupType Automatic
-if ((Get-Service sshd).Status -ne 'Running') { Start-Service sshd }
+try {
+  if ((Get-Service sshd).Status -ne 'Running') { Start-Service sshd -ErrorAction Stop }
+  Write-Host 'sshd en marcha.'
+} catch {
+  Write-Warning "No se pudo arrancar sshd: $($_.Exception.Message)"
+  Write-Warning 'Revisa C:\ProgramData\ssh\logs\sshd.log y el Visor de eventos (System).'
+}
 Get-Service sshd | Format-Table Name, Status, StartType -AutoSize
 
 Write-Step 'Firewall (TCP 22, todos los perfiles)'

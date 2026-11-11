@@ -7,9 +7,11 @@ computadora y desde la app móvil, usando el mismo canal SSH que usa
 ## Estado comprobado (2026-11-11)
 
 - `hc server status`: core `mamalona` vivo, 1 terminal, versión 0.1.20.
-- `sshd` existe (`C:\Windows\System32\OpenSSH\sshd.exe`) pero está **detenido**,
-  en `Manual`, y **falta** `C:\ProgramData\ssh\sshd_config` y no hay claves de
-  host: el servidor no puede aceptar conexiones todavía.
+- `sshd` existe (`C:\Windows\System32\OpenSSH\sshd.exe`, 9.5p2), en `Manual` y
+  **detenido**. Tras ejecutar el script ya existen `sshd_config`, las claves de
+  host y su DACL restringida, pero el servicio **sigue terminando con código
+  1067** (4 intentos) y no escribe `sshd.log`: falta el diagnóstico elevado con
+  `sshd -d` o reinstalar la capacidad OpenSSH Server.
 - El usuario `paco_` está en **Administradores** y tiene contraseña.
   `%USERPROFILE%\.ssh\authorized_keys` ya contiene su clave `id_ed25519.pub`.
 - IPv4 de LAN: **192.168.100.35** (Ethernet, perfil Público).
@@ -33,6 +35,21 @@ clave de la laptop o del móvil, pásalas como rutas:
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/setup-ssh-remote.ps1 `
   -PublicKeyPath "$env:USERPROFILE\.ssh\id_ed25519.pub", "C:\keys\laptop.pub"
+```
+
+Si el servicio sigue en **1067** con `sshd_config` y claves ya creadas, en la
+misma consola elevada:
+
+```powershell
+& C:\Windows\System32\OpenSSH\sshd.exe -d
+```
+
+Ese comando muestra el error real. Si no es accionable, reinstala la capacidad
+y repite el script:
+
+```powershell
+Remove-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
 ```
 
 Verificación local:
@@ -110,6 +127,7 @@ espacio de esa máquina y comprueba que `herdr-app ls` lo muestra.
 | Síntoma | Causa probable | Corrección |
 | --- | --- | --- |
 | `Connection refused` | `sshd` detenido o sin configuración | Paso 1; `Get-Service sshd` |
+| El servicio termina con **1067** y no hay `sshd.log` | Configuración/claves rechazadas o capacidad dañada | `& C:\Windows\System32\OpenSSH\sshd.exe -d` en consola elevada para ver el error; si persiste, `Remove-WindowsCapability` + `Add-WindowsCapability` de `OpenSSH.Server~~~~0.0.1.0` y repetir el paso 1 |
 | `Permission denied (publickey)` | Clave no autorizada o ACL incorrecta | Repite el paso 1; el script escribe `administrators_authorized_keys` y su ACL |
 | `REMOTE HOST IDENTIFICATION HAS CHANGED` | El PC cambió de IP o se reinstaló | Borra la entrada en `known_hosts` del cliente y acepta la nueva |
 | La app móvil no ve la máquina | Móvil en otra red o firewall | Misma Wi-Fi o VPN; regla TCP 22 habilitada |
