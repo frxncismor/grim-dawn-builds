@@ -7,14 +7,14 @@
   "coverageAnalysis": "perTest",
   "reporters": ["clear-text", "json"],
   "jsonReporter": {
-    "fileName": "C:/Users/paco_/AppData/Local/Temp/gd-t142-mutation/mutation.json"
+    "fileName": "reports/mutation/mutation.json"
   },
-  "tempDirName": "C:/Users/paco_/AppData/Local/Temp/gd-t142-stryker-tmp",
+  "tempDirName": ".stryker-tmp",
   "cleanTempDir": true,
   "thresholds": {
     "high": 80,
     "low": 60,
-    "break": null
+    "break": 60
   },
   "timeoutMS": 30000,
   "concurrency": 4
