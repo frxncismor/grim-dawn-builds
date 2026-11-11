@@ -2975,3 +2975,214 @@ Registrar comandos y artefactos en `quickstart.md`.
 **Cierre**: marcar `T-021` solo con la generación desde la fuente activa, las
 exclusiones probadas y el artefacto público verificado. No publica la guía
 `pending`, no cambia `T-044` y no sustituye a `T-040`/`T-041`/`T-126`.
+
+### 17.47 T-020a: remediación de T-020 (presupuesto, 404 real y FR-16)
+
+**Origen**: `T-020` se ejecutó y quedó **PARCIAL** (2026-11-10). No se marcó. Tres
+bloqueos verificados por el orquestador:
+
+1. `pnpm build` **falla**: `bundle initial exceeded maximum budget. Budget 300.00 kB
+was not met by 6.11 kB with a total of 306.11 kB` (log
+   `%TEMP%\gd-t020-verify-build.log`).
+2. Angular 21.2.29 **no emite `404.html`** con el catch-all del prerender.
+3. **FR-16 sigue abierto**: falta el endpoint de descriptores públicos de activos
+   aprobados y su consumidor con `resolveIcon`.
+
+**Causa del presupuesto**: `content.resolvers.ts` importa `CONTENT_REPOSITORY`
+desde `./repository` de forma **estática**. El resolver es estático por naturaleza
+(lo importa `app.routes.ts`), así que arrastra el repositorio y el dominio al chunk
+inicial. La base pasaba con 300 kB; el añadido son 6,11 kB.
+
+**Regla que no se puede romper**: los presupuestos de `plan.md` §6 **no se amplían
+para conseguir verde** (constitución IV y las tareas T-003/T-132/T-133). La solución
+es sacar el peso del chunk inicial, no subir el límite.
+
+**Archivos autorizados**: `src/app/core/content/content.resolvers.ts`,
+`content.resolvers.spec.ts`, `src/app/app.routes.server.ts`, `app.routes.spec.ts`,
+`src/app/features/build/build-route.page.ts`, `src/app/features/static-pages/not-found.page.ts`,
+`scripts/emit-404.mts`, `scripts/emit-404.test.mts`, `package.json`
+(encadenar el emisor en `build`/`build:release`), `apps/api/src/routes/content.ts`,
+`apps/api/src/content/map-content.ts`, `apps/api/test/content.int.spec.ts`,
+`src/app/core/content/api.repository.ts`, `src/app/shared/ui/icon/resolve-icon.server.ts`,
+`specs/001-mvp-guias-builds/quickstart.md`, `handoff.md`, `tasks.md`.
+
+**Arreglo 1 — presupuesto**: el resolver no debe importar el repositorio ni el
+dominio de forma estática. Solo `TransferState` en el navegador; en servidor, carga
+diferida (`await import(...)`) del repositorio y del validador. Criterio: `pnpm
+build` vuelve a verde **sin** tocar `angular.json`, `check:initial-js` vuelve a
+105 259/110 000 gzip en `/tier-list` y el chunk inicial queda bajo 300 kB.
+
+**Arreglo 2 — `404.html` real**: script de post-build
+`scripts/emit-404.mts` que toma el HTML del comodín prerenderizado y escribe
+`404.html` en la raíz del artefacto, con prueba que falla si el archivo no existe o
+si su contenido no es la página 404. Se encadena en `build` y `build:release`. No se
+inventa un 200 disfrazado: el archivo existe y el host lo sirve con su estado.
+
+**Arreglo 3 — FR-16**: endpoint de solo lectura que devuelve los descriptores
+públicos de activos `approved` (sin evidencia privada) y consumidor en la web que
+llama `resolveIcon`. Prueba de contrato: un activo `pending` produce fallback SVG y
+nunca el activo oficial; un `approved` completo produce el descriptor público.
+
+**Aceptación**: los tres arreglos verificados con evidencia; `pnpm verify` verde;
+build público sin la ruta de la guía `pending` y con `404.html`; build local con
+`INCLUDE_DRAFTS` con banner y `noindex`; presupuestos intactos.
+
+**Cierre**: `T-020` solo se marca **después** de que esta remediación pase. Mientras
+tanto sigue abierta, con su estado PARCIAL registrado en `handoff.md`.
+
+**Excepción autorizada de presupuesto (2026-11-10)**: el usuario autorizó subir el
+budget raw del bundle inicial de `280/300 kB` a `300/320 kB` en `angular.json` para
+desbloquear `T-020`, tras comprobar que el exceso de 6,23 kB viene de framework
+compartido con el chunk lazy de `BuildPage` y no de código propio evitable. Es una
+excepción **explícita y registrada**, no un relajamiento silencioso: los presupuestos
+gzip de §6 (`90 000` portada, `110 000` catálogo) **siguen intactos** y se miden
+después del arreglo. Cualquier nuevo exceso gzip se corrige recortando peso, no
+subiendo el límite.
+
+### 17.48 T-020b: devolver `/tier-list` a su presupuesto gzip sin tocar límites
+
+**Origen**: tras autorizar el budget raw a `300/320 kB`, `T-020` sigue fallando en la
+puerta gzip: `check:initial-js FALLÓ /tier-list (110 996/110 000 bytes gzip nivel 6)`.
+Antes de `T-020` la cifra era **105 259**. El exceso es de **996 bytes** y el
+crecimiento atribuible a `T-020` ronda **5,7 kB**.
+
+**Restricción**: el techo de `110 000` bytes gzip **no se toca**. Se recorta peso.
+
+**Diagnóstico verificado**: `/tier-list` precarga once chunks, entre ellos
+`chunk-XUCRLYTB.js` (64 648 gzip), `chunk-23EENDPT.js` (20 464 gzip) y
+`chunk-ZFVT2EQO.js` (6 468 gzip). El resolver de `/builds/:slug` se importa de forma
+estática desde `app.routes.ts`, así que su código entra en el grafo inicial y se
+precarga en todas las rutas, incluida `/tier-list`.
+
+**Objetivo**: identificar qué chunk creció por `T-020` y sacarlo del grafo inicial
+sin perder la ruta, el prerender ni el 404.
+
+**Archivos autorizados**: `src/app/app.routes.ts`, `src/app/core/content/content.resolvers.ts`,
+`src/app/features/static-pages/not-found.page.ts`, `src/app/core/seo/seo.service.ts`
+(solo si el peso viene de ahí), `scripts/check-initial-js.mts` (solo lectura; no
+relajar la medición), `specs/001-mvp-guias-builds/{quickstart,handoff}.md`.
+
+**Aceptación**: `pnpm build` en verde con `check:initial-js` mostrando
+`/tier-list` ≤ 110 000 gzip y `/` en 0; ningún cambio en `angular.json` ni en los
+umbrales de §6; la ruta `/builds/:slug` sigue prerenderizándose en modo borradores y
+sigue ausente del build público.
+
+**Cierre**: marcar `T-020` solo cuando esta tarea y `T-020a` estén verdes.
+
+### 17.49 Fase de calidad multiagente y orquestación jerárquica
+
+**Origen**: petición del usuario (2026-11-10): tests adversariales,
+property-based testing, mutation testing, contexto de herdr documentado y una
+jerarquía de orquestadores por dominio (UI, tests, backend, infraestructura).
+
+Estas tareas **no bloquean** el cierre del MVP; se ejecutan después del hito de
+cierre, salvo `T-143`, que ya está hecha.
+
+#### T-139 — Jerarquía de orquestadores por dominio
+
+**Problema**: hoy hay un único orquestador que despacha a todos los roles. Con más
+dominios (UI, tests, backend, infraestructura, contenido) eso produce dos fallos
+conocidos: el orquestador pierde contexto de dominio y verifica con menos criterio
+del que el dominio exige.
+
+**Diseño**: dos niveles.
+
+```text
+Orquestador de programa (nivel 0)
+  ├── Orquestador de UI          → sdd-ui
+  ├── Orquestador de tests       → pruebas, property-based, mutación
+  ├── Orquestador de backend     → sdd-implement + API/BD
+  └── Orquestador de infra/CI    → pipelines, contenedores, secretos
+```
+
+Reglas del modelo:
+
+1. **El nivel 0 no ejecuta**: decide alcance, reparte entre dominios, arbitra
+   conflictos entre orquestadores y es el único que habla con el usuario.
+2. **Cada orquestador de dominio** tiene: un conjunto de tareas, sus propias
+   puertas de verificación y sus propios agentes «empleados».
+3. **Contrato de reporte idéntico** al de `~/.copilot/sdd/ORCHESTRATION.md` §3. Un
+   orquestador de dominio devuelve el mismo bloque que un agente, agregando por
+   tarea.
+4. **Sin delegación cruzada**: un orquestador de dominio no despacha a otro
+   dominio; escala al nivel 0.
+5. **Propiedad de archivos**: si dos dominios necesitan el mismo archivo, el nivel 0
+   serializa. Nunca en paralelo.
+6. **Presupuesto de modelos**: cada orquestador declara el modelo con el que trabaja;
+   el nivel 0 aplica la cadena de fallback del `AGENTS.md`.
+
+**Entregables**: este diseño en `ORCHESTRATION.md` §12, una definición
+`sdd-orchestrator-domain` en `~/.copilot/agents/`, y un ensayo real con dos dominios
+(UI y tests) sobre una tarea pequeña.
+
+**Aceptación**: dos orquestadores de dominio trabajando en tareas disjuntas,
+reportes agregados correctamente por el nivel 0, y cero ediciones cruzadas.
+
+#### T-140 — Property-based testing
+
+**Objetivo**: cubrir las funciones puras del dominio con propiedades, no con casos.
+
+**Alcance**: `packages/domain` (`publicFilter`, reglas de derechos y publicación,
+filtros del catálogo, serialización de filtros a query). Biblioteca `fast-check`
+como dependencia de desarrollo, versión fijada y justificada.
+
+**Propiedades mínimas**:
+
+- `publicFilter` es idempotente y su resultado nunca contiene `borrador`,
+  `en_revision` ni derechos no aprobados.
+- La serialización de filtros hace round-trip exacto con la deserialización.
+- Cualquier build publicado satisface las mismas invariantes que el esquema Zod.
+- El orden de las colecciones es estable ante permutaciones de la entrada.
+
+**Aceptación**: `pnpm --filter @gd/domain test:properties` en verde, con semillas
+reportadas y sin falsos positivos; los contadores por propiedad quedan en el log.
+
+#### T-141 — Tests adversariales
+
+**Objetivo**: probar el sistema con entradas hostiles, no con las amables.
+
+**Alcance**:
+
+- Contenido: JSON con campos de más y de menos, tipos cambiados, `rights_status`
+  falsificado, referencias cruzadas rotas, ciclos de `parent`, textos con HTML/JS,
+  URLs con credenciales, Unicode RTL y homoglifos.
+- UI: payloads con HTML inyectado en cada campo interpolado, listas vacías, valores
+  `null` donde el esquema los permite, y números fuera de rango.
+- API: rutas con traversal, parámetros gigantes, cabeceras malformadas y métodos no
+  permitidos.
+
+**Regla**: cada caso adversario debe fallar **cerrado** (rechazo explícito o valor
+seguro), nunca degradar en silencio ni filtrar datos privados.
+
+**Aceptación**: suite adversarial en CI, con un caso por clase de ataque y evidencia
+de que cada uno falla cerrado.
+
+#### T-142 — Mutation testing
+
+**Objetivo**: medir si las pruebas detectan defectos reales, no solo si pasan.
+
+**Alcance**: `packages/domain` completo y las guardas de publicación/derechos.
+Herramienta Stryker, versión fijada, ejecución **no bloqueante en PR** y umbral
+inicial conservador.
+
+**Método**: línea base medida y registrada; el umbral sube solo cuando el número
+real lo justifica, nunca se declara por deseo.
+
+**Aceptación**: informe de mutantes con _score_ real, mutantes supervivientes
+listados con su ubicación, y una tarea de seguimiento por cada grupo de mutantes
+supervivientes que revele una prueba faltante.
+
+**Límite**: la mutación se mide en el dominio, no en la UI; un _score_ alto en
+plantillas no aporta.
+
+#### T-143 — Contexto de herdr para el orquestador (hecha)
+
+`docs/orchestration/herdr.md` documenta binario, comandos, conceptos (`space`,
+`parent`, `keep`, `blocked`), lanzamiento de agentes, supervisión de bloqueos,
+detección de cuelgues por PID y límites conocidos.
+
+**Aceptación**: cubierta por el documento; no requiere código.
+
+**Orden sugerido**: `T-143` (hecha) → `T-140` → `T-141` → `T-142` → `T-139`.
+La jerarquía va al final porque necesita que las suites de calidad existan para
+repartirlas entre orquestadores.

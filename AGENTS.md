@@ -84,10 +84,15 @@ Política vigente (decisión del usuario, 2026-11-10 noche). Sustituye a la cade
 anterior de cuatro escalones.
 
 ```text
-Primario    → deepseek/deepseek-flash
-Fallback 1  → GLM Flash gratuito  (opencode/glm-5.3-flash-free)
-Fallback 2  → claude-haiku-5-5    (opencode-go/claude-haiku-5-5)
+Primario    → opencode-go/deepseek-v4.1-flash
+Fallback 1  → deepseek/deepseek-flash            (crédito directo: ~3 $ restantes)
+Fallback 2  → opencode/glm-5.3-flash-free
+Fallback 3  → opencode-go/claude-haiku-5-5
 ```
+
+**Regla de coste**: el crédito directo de DeepSeek es de ~3 $ y se reserva para
+cuando `opencode-go` agote su ventana. No se usa como primera opción aunque sea el
+mismo modelo: primero la suscripción, después el crédito.
 
 Los proveedores `zai/*` y `anthropic/*` **no están configurados** en esta máquina:
 `opencode/glm-5.3-flash-free` es el equivalente real del GLM gratuito y
