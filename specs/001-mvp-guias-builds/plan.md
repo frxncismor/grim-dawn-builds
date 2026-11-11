@@ -3318,12 +3318,13 @@ conserva tal cual; lo que sigue es la lectura vigente.
 
 - **Las cifras de 171–260 ms de TBT no se reproducen.** Eran pasadas sueltas bajo
   carga, y el TBT de Lighthouse depende de la contención de CPU del host. Con
-  **mediana de 5 corridas** por ruta, las cifras del 2026-11-11 son `/acerca`
+  **mediana de 5 pasadas manuales** por ruta, las cifras del 2026-11-11 son `/acerca`
   44 ms, `/legal` 35 ms, `/autores` 26 ms y `/tier-list` 117,5 ms en la tanda
   peor, con un máximo de 350 ms en una corrida suelta y 60–82 ms de mediana en
   las demás tandas. Ninguna de las tres rutas «lentas» del diagnóstico original
   supera el límite de 150 ms.
-- **La puerta decide por mediana de 5 y los umbrales siguen intactos.** No se
+- **La puerta decide por mediana de 3 (`numberOfRuns: 3`, valor rastreado en
+  `lighthouserc.json`) y los umbrales siguen intactos.** No se
   amplió ningún límite de plan §6; la mediana es la que evita que un pico aislado
   de CPU se lea como regresión (misma ruta y artefacto dieron 305,7 ms en una
   pasada y 48 ms en otra).
@@ -3331,10 +3332,11 @@ conserva tal cual; lo que sigue es la lectura vigente.
   paso, tras `build` y `public-build`, tal como exige T-042. La decisión anterior
   de dejarlo fuera queda sustituida; la prueba que afirmaba su ausencia se
   reemplazó por una positiva.
-- **T-145 sigue abierta**, pero acotada a su alcance real: el margen estrecho de
-  `/tier-list` (110 011/110 500 B gzip y TBT sensible a la carga) y la hidratación
-  de las rutas estáticas, que debe remedirse aislada antes de cerrar. Sin ampliar
-  el límite de TBT.
+- **T-145 queda cerrada**
+  (manda `tasks.md`, 2026-11-11): la emisión estática resolvió el TBT de las tres
+  rutas y el paso `performance` volvió a `verify`. El margen estrecho de
+  `/tier-list` queda como **observación**, sin tarea nueva y sin ampliar el
+  límite de TBT.
 
 La medición que acredita la puerta quedó en **47/47, exit 0** sobre el artefacto
 finalizado; la segunda (46/47) falló solo por `robots.txt` con `__BASE_URL__` sin
