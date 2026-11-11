@@ -106,14 +106,18 @@ realmente usado.
 | `sdd-second-opinion`       | `gpt-5.6-terra#high`               | `gpt-6.1-terra#high` | `grok-4.7#high`              | `deepseek-v4-pro#high` | `high`       |
 | **Revisión final de spec** | el modelo más potente disponible   | —                    | —                            | —                      | ver `T-136`  |
 
-### Estado observado de cada escalón (2026-11-10)
+### Estado observado de cada escalón (2026-11-10, tarde)
 
-| Escalón           | Estado         | Evidencia                                                                    |
-| ----------------- | -------------- | ---------------------------------------------------------------------------- |
-| GitHub Copilot    | **agotado**    | `You have exceeded your monthly quota` en `claude-sonnet-5.5` y `gpt-6-luna` |
-| Codex (`openai/`) | **disponible** | `gpt-6.1-sol#high` responde; cuota semanal de Codex era 4 % a las 19:52      |
-| OpenCode Go       | **agotado**    | `OpenCode Go usage limit reached`; el error no expone hora de reinicio       |
-| DeepSeek          | **disponible** | `deepseek-flash#high` y `deepseek-v4-pro#max` responden                      |
+| Escalón           | Estado                  | Evidencia                                                                                                                                                                                                          |
+| ----------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GitHub Copilot    | **agotado**             | `You have exceeded your monthly quota` en `claude-sonnet-5.5` y `gpt-6-luna`                                                                                                                                       |
+| Codex (`openai/`) | **disponible**          | `gpt-6.1-sol#high` responde                                                                                                                                                                                        |
+| OpenCode Go       | **disponible otra vez** | Consola: ventana de 5 h al 0 %, semanal 40 % usado (reinicia en 4 d 21 h), mensual 20 % usado (reinicia en 29 d 18 h), 0,00 $ de crédito; suscripción «Cancelled» activa 29 d 18 h. `gemini-4-argon#high` responde |
+| DeepSeek          | **disponible**          | `deepseek-flash#high` y `deepseek-v4-pro#max` responden; `deepseek-v4.1-flash-free` se sobrecargó una vez                                                                                                          |
+
+La cuota de OpenCode Go se recupera por la **ventana de 5 horas**, no por el día.
+El error `OpenCode Go usage limit reached` no indica la hora de reinicio: se
+consulta en la consola.
 
 Este cuadro caduca: se actualiza cuando cambie la disponibilidad, no se asume.
 
