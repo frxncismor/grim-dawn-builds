@@ -246,14 +246,14 @@ Fases (cada una un PR): **M0** hoy: solo `fixture`. **M1** BD + API en dev, seed
 
 ### 12.9 Decisiones (rev. 4)
 
-| ID  | Decisión                                                               | Estado                                                                                          |
-| --- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| B-1 | Framework API                                                          | **Cerrada: Fastify**                                                                            |
-| B-2 | Acceso a datos/migraciones                                             | **Cerrada: Drizzle ORM + drizzle-kit** (SQL personalizado para puertas)                         |
-| B-3 | Versiones                                                              | **Cerrada: Node.js 22 LTS, PostgreSQL 17** (fijar tag/digest exacto al implementar T-054/T-056) |
-| B-4 | BD vs `content/`                                                       | **Cerrada: BD = fuente de verdad; `content/` = fixtures/importación**                           |
-| B-5 | CORS/orígenes                                                          | **Cerrada 2026-11-09**: solo `http://localhost:4200`; no wildcard ni `127.0.0.1:4200` |
-| B-6 | Consumo de la API desde la web                                         | **Cerrada por implicación**: el build de release lee la API (T-062/T-074)                       |
+| ID  | Decisión                                   | Estado                                                                                            |
+| --- | ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| B-1 | Framework API                              | **Cerrada: Fastify**                                                                              |
+| B-2 | Acceso a datos/migraciones                 | **Cerrada: Drizzle ORM + drizzle-kit** (SQL personalizado para puertas)                           |
+| B-3 | Versiones                                  | **Cerrada: Node.js 22 LTS, PostgreSQL 17** (fijar tag/digest exacto al implementar T-054/T-056)   |
+| B-4 | BD vs `content/`                           | **Cerrada: BD = fuente de verdad; `content/` = fixtures/importación**                             |
+| B-5 | CORS/orígenes                              | **Cerrada 2026-11-09**: solo `http://localhost:4200`; no wildcard ni `127.0.0.1:4200`             |
+| B-6 | Consumo de la API desde la web             | **Cerrada por implicación**: el build de release lee la API (T-062/T-074)                         |
 | B-7 | Vía de escritura editorial tras el cutover | **Cerrada 2026-11-09**: CLI local con rol `editor` y dominio; T-129 antes de T-072; sin API admin |
 
 ### 12.10 Integración web ↔ API
@@ -287,7 +287,7 @@ Fases (cada una un PR): **M0** hoy: solo `fixture`. **M1** BD + API en dev, seed
 | R-M8  | `drizzle-kit push` o edición manual de SQL rompe el historial                                      | Prohibido `push` fuera de BD desechable; CI de diff de generate                                                                      |
 | R-M9  | Secreto commiteado, filtrado en logs/imagen/bundle web o credencial compartida entre roles de BD   | §13 (capas, escaneo, roles separados, runbook), T-078–T-090                                                                          |
 | R-M10 | Ingesta futura copia contenido sin permiso o lo da por permitido implícitamente                    | §14: registro de fuentes, puerta de permiso por fuente, `borrador` obligatorio, link-only por defecto, T-091–T-100 diferidas, AC-19  |
-| R-M11 | Cutover antes de verificar la CLI editorial elegida | T-129 implementa B-7 antes de T-072; conserva derechos pending y controles BD |
+| R-M11 | Cutover antes de verificar la CLI editorial elegida                                                | T-129 implementa B-7 antes de T-072; conserva derechos pending y controles BD                                                        |
 | R-M12 | La config de markdownlint se relaja hasta no validar nada, o `--fix` altera el contenido semántico | §12.14: solo se desactivan MD013 (y MD060 si procede) con motivo escrito; `--fix` solo con reglas seguras y revisión del diff; T-123 |
 
 ### 12.14 Calidad de Markdown: markdownlint (rev. 8)
@@ -2912,3 +2912,66 @@ mensajes de commit históricos.
 
 **Cierre**: marcar `T-138` solo con ambas configuraciones construidas, paridad en
 verde, axe sin violaciones en las dos y presupuestos de `plan.md` §6 conservados.
+
+### 17.46 T-021: sitemap y robots derivados de la fuente activa
+
+**Alcance previo a código**: FR-11/FR-13 y AC-09/AC-13; índice y descubrimiento
+públicos sin exponer contenido no publicable. Depende de T-020 (rutas y prerender
+reales), T-010/T-062 (fuente de contenido) y T-018 (URL base validada). No añade
+dependencias, no toca el backend y no publica la guía migrada.
+
+**Archivos exactos**: `scripts/gen-sitemap.mts`, `scripts/gen-sitemap.test.mts`,
+`public/robots.txt` (plantilla versionada), `.gitignore` (solo si el sitemap se
+genera y no se versiona), `package.json` (script `sitemap:generate` y su inclusión
+en `build`/`build:release`), `scripts/verify-local.mjs`,
+`specs/001-mvp-guias-builds/quickstart.md`.
+
+**Regla de oro**: el sitemap **se deriva de la fuente activa del build**, no de un
+archivo escrito a mano. Con `CONTENT_SOURCE=fixture` se genera para desarrollo y el
+artefacto queda marcado como no publicable; con `CONTENT_SOURCE=api` se genera desde
+la API. Nunca se versiona un `sitemap.xml` con contenido: se genera en `dist/`.
+
+**Entradas incluidas**: exactamente las rutas prerenderizadas que el build produjo,
+leídas del propio artefacto (no de una lista paralela que pueda divergir):
+
+- `/`, `/tier-list`, `/acerca`.
+- `/autores/:slug` solo para autores con contenido visible y sin `is_placeholder`.
+- `/builds/:slug` solo para builds con `review_state=publicado` y
+  `rights_status` aprobado.
+
+Si una ruta está en el sitemap y no existe en `dist/`, la tarea falla: es la forma
+de detectar que el filtro público y el prerender divergen.
+
+**Entradas excluidas, con prueba**: `borrador`, `en_revision`, `rights_status`
+`pending`/denegado/revocado, `link_only` sin cuerpo publicado, rutas de preview
+(`*-preview`), `404.html` y cualquier ruta con `noindex`.
+
+**robots.txt**: plantilla versionada en `public/robots.txt` con `User-agent: *`,
+`Allow: /` y la línea `Sitemap: <BASE_URL>/sitemap.xml` sustituida en build. El
+build **falla** si `BASE_URL` no es una URL absoluta válida, reutilizando el
+validador de `src/app/core/seo/site-url.ts` (misma regla, sin duplicarla). El build
+público no incluye `Disallow` hacia rutas inexistentes ni `noindex` global.
+
+**Determinismo**: orden estable por ruta, sin fechas del reloj de la máquina; si se
+incluye `lastmod`, se toma de la fecha pública del contenido
+(`published_at`/`updated_at` cuando exista), no de `Date.now()`. Dos ejecuciones
+seguidas sobre la misma fuente producen bytes idénticos (prueba de idempotencia).
+
+**Pruebas primero**: `gen-sitemap.test.mts` en rojo antes del script, con fixtures
+sintéticos propios:
+
+1. Incluye las rutas publicadas y excluye cada estado no publicable.
+2. Falla si una ruta del sitemap no existe en el artefacto de build.
+3. `robots.txt` recibe la `BASE_URL` absoluta; una URL relativa, con credenciales,
+   query o fragmento falla.
+4. Dos ejecuciones producen el mismo hash.
+5. El sitemap no contiene `*-preview`, `404` ni rutas con `noindex`.
+
+**Verificación**: `pnpm sitemap:generate` sobre el build de fixtures y sobre el
+build de release; inspección del `sitemap.xml` y del `robots.txt` resultantes;
+`check:public-build` confirma que el artefacto público no filtra rutas pendientes.
+Registrar comandos y artefactos en `quickstart.md`.
+
+**Cierre**: marcar `T-021` solo con la generación desde la fuente activa, las
+exclusiones probadas y el artefacto público verificado. No publica la guía
+`pending`, no cambia `T-044` y no sustituye a `T-040`/`T-041`/`T-126`.
