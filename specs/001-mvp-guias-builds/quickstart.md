@@ -2298,3 +2298,31 @@ Evidencia: `$env:TEMP/gd-t020a-red.log` (RED),
 `$env:TEMP/gd-t020a-prod-{nodfeer,defer}.log`. Artefactos temporales (`dist/probe*`,
 `dist/grim-dawn-builds`) eliminados. Modelo realmente usado:
 `deepseek/deepseek-flash`. Sin commit, push ni PR.
+
+## Verificación de `/legal` (T-039, 2026-11-10)
+
+La página es estática, sin interacción: `src/app/features/static-pages/legal.page.{ts,html}`
+con `editorial.css`, ruta `legal` lazy en `app.routes.ts` y `RenderMode.Prerender` en
+`app.routes.server.ts`. El único canal de contacto es
+`https://github.com/frxncismor/grim-dawn-builds/issues` (decisión del usuario);
+no hay correo, responsable, servicio ni SLA.
+
+Comandos y resultados:
+
+| Comprobación         | Comando                                                                                                          | Resultado                                                                  |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Pruebas de la página | `pnpm exec ng test --watch=false --include src/app/features/static-pages/legal.page.spec.ts`                     | 7/7                                                                        |
+| Suites afectadas     | `--include src/app/features/static-pages --include src/app/features/author --include src/app/app.routes.spec.ts` | 19 pruebas, 4 archivos                                                     |
+| Build                | `pnpm build`                                                                                                     | `check:initial-js FALLÓ /tier-list (110 011/110 000)`; resto OK            |
+| Artefacto            | `dist/grim-dawn-builds/browser/legal/index.html`                                                                 | 37 362 B, enlace a Issues, `canonical`, `WebPage`, 6 rutas prerenderizadas |
+| axe + Playwright     | 375/768/1280 con y sin JS                                                                                        | 0 violaciones, 0 overflow, foco visible                                    |
+
+Atribución del exceso: la entrada de ruta lazy cuesta 21 B gzip en el chunk inicial
+(109 990 → 110 011; quitarla del `main` construido baja su gzip de 2 345 a 2 324).
+El cuerpo de la página es un chunk lazy propio de 2,00 kB gzip y no entra en el
+inicial. Con 10 B de holgura, ninguna ruta lazy nueva cabe en el techo; hace falta
+subir el umbral con autorización expresa o emitir `/legal` sin bootstrap con el
+patrón de `scripts/static-home.mts`.
+
+Evidencia: `$env:TEMP/gd-t039-{red,green,suites2,build3,lint,a11y,public-build}.log`
+y capturas `$env:TEMP/gd-t039-{375,768,1280}.png`.

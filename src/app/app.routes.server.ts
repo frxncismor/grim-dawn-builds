@@ -29,6 +29,11 @@ export const serverRoutes: ServerRoute[] = [
     getPrerenderParams: buildPrerenderParams,
   },
   {
+    // Static notice with no data dependency; prerendered as its own artifact.
+    path: 'legal',
+    renderMode: RenderMode.Prerender,
+  },
+  {
     // Angular 21 skips the catch-all in the prerender, so the same static page is
     // prerendered at `/404` and `scripts/emit-404.mts` copies it to `404.html`.
     path: '404',

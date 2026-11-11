@@ -3225,3 +3225,20 @@ cumplir: se declara el objetivo operativo, no una garantía legal.
 **Aceptación**: los tres documentos pasan `markdownlint`, no contienen correos ni
 datos personales inventados, citan la constitución y no afirman derechos que no
 existan.
+
+### 17.51 Excepción autorizada del techo gzip del catálogo (2026-11-11)
+
+`/tier-list` quedó en **110 011 B gzip** con techo `110 000` al añadir la ruta
+`/legal`, que aporta **21 B** a `main.js` (la página en sí es un chunk lazy de
+2,00 kB y no entra en el inicial). El margen previo era de **10 B**, así que
+cualquier ruta nueva rompía la puerta.
+
+El usuario **autorizó subir el techo a 110 500 B** (0,45 %) como excepción
+explícita. Se implementa como constante `CATALOG_JS_LIMIT` en
+`scripts/check-initial-js.mts`, con el motivo escrito junto a ella, para que el
+número no vuelva a estar disperso.
+
+Alcance de la excepción: **solo** el techo de `/tier-list`. La portada mantiene
+`INITIAL_JS_LIMIT = 90 000` y su regla de 0 B con contrato estático válido. `T-144`
+sigue abierta para recuperar holgura real; si se consigue, el techo se vuelve a
+bajar y esta excepción se retira.

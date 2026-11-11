@@ -5,6 +5,10 @@ import { pathToFileURL } from 'node:url';
 import { assertStaticHome, STATIC_HOME_MARKER, inlineExecutableScripts } from './static-home.mts';
 
 export const INITIAL_JS_LIMIT = 90000;
+/** `/tier-list` budget. Raised to 110500 on 2026-11-11 by explicit user decision:
+ * the catalog plus the legal route entry cost 110011 B, and a round 110000 left only
+ * 10 B of headroom, which made every new route fail the gate. See plan §17.51. */
+export const CATALOG_JS_LIMIT = 110500;
 interface Output {
   entryPoint?: string;
   imports: { path: string; kind: string; external?: boolean }[];
@@ -117,7 +121,7 @@ export async function measureInitialJs(root: string, route: 'home' | 'tier-list'
   return {
     files,
     totalGzipBytes: files.reduce((sum, file) => sum + file.gzipBytes, 0),
-    limitBytes: route === 'home' ? INITIAL_JS_LIMIT : 110000,
+    limitBytes: route === 'home' ? INITIAL_JS_LIMIT : CATALOG_JS_LIMIT,
   };
 }
 

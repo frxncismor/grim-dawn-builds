@@ -33,6 +33,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/static-pages/about.page').then((m) => m.AboutPage),
   },
   {
+    path: 'legal',
+    loadComponent: () => import('./features/static-pages/legal.page').then((m) => m.LegalPage),
+  },
+  {
     path: 'autores/:slug',
     loadComponent: () => import('./features/author/author.page').then((m) => m.AuthorPage),
     resolve: { author: resolveAuthor },

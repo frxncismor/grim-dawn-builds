@@ -608,3 +608,87 @@ Build público sin la guía `pending` y con `404.html`; build `INCLUDE_DRAFTS=tr
 con 6 rutas, la guía de borrador con banner «Borrador» y `noindex`. Evidencia en
 `$env:TEMP/gd-t020b-{build,build-final,drafts,test,lint,prettier,lintmd,public,secrets}.log`.
 Modelo realmente usado: `deepseek/deepseek-flash`. Sin commit, push ni PR.
+
+## T-039: `/legal` implementada, puerta de presupuesto inicial bloqueada (2026-11-10)
+
+Decisión del usuario: el canal real de contacto es GitHub Issues del repositorio
+(`https://github.com/frxncismor/grim-dawn-builds/issues`), para retirada y contacto
+general. No se inventó correo, responsable, servicio ni SLA.
+
+Estado de partida verificado: `/autores/:slug` y `/acerca` ya existían
+(`features/author/*`, `static-pages/about.page.*`, `editorial.css`) con 5 pruebas
+verdes y prerender; el enlace «Aviso legal» del pie ya estaba en
+`site-layout.html` y su prueba. Lo que faltaba era la propia `/legal`.
+
+### Añadido
+
+- `src/app/features/static-pages/legal.page.{ts,html}`: página estática sin
+  JavaScript de interacción, `h1` único, seis bloques con `aria-labelledby`
+  (titularidad, atribución, fuentes y activos, retirada, privacidad, no
+  afiliación), `SeoService` con `WebPage` y canonical, enlace a Issues con
+  `target="_blank"` y `rel="noopener noreferrer"`, estilos con `editorial.css` y
+  tokens existentes (cero colores o tamaños hardcodeados).
+- `legal.page.spec.ts`: 7 pruebas (bloques, hechos, canal único, ausencia de
+  correo/teléfono inventado, SEO/JSON-LD, ausencia de `innerHTML` con espía del
+  setter, y ruta cliente lazy + prerender).
+- `app.routes.ts`: ruta `legal` lazy. `app.routes.server.ts`: `legal` en
+  `RenderMode.Prerender`.
+
+**Cada dato factual es rastreable**: licencia no declarada y derechos reservados
+(`README.md` §License), registro de fuentes (`content/sources/`), atribución y
+adaptación (`CONTRIBUTING.md`, constitución I/II/VII), manifiesto de activos
+`approved` y SVG propios (`content/assets/manifest.json` vacío + VII), progreso
+opcional del checklist con botón «Borrar progreso» (`purchase-stepper`), y no
+afiliación con Crate Entertainment ni GrimTools (README, CONTRIBUTING).
+
+**TDD**: rojo en `$env:TEMP/gd-t039-red.log` (módulo `./legal.page` inexistente),
+verde en `$env:TEMP/gd-t039-green.log` (7/7). Suites de `static-pages` + `author` +
+`app.routes.spec.ts`: **19 pruebas, 4 archivos, verde** (`gd-t039-suites2.log`).
+
+**Bloqueo: presupuesto del chunk inicial.** `pnpm build` sale **1** únicamente en
+`check:initial-js`: `/tier-list` **110 011/110 000 gzip** (11 B de exceso;
+`gd-t039-build3.log`). La atribución está medida, no supuesta: al eliminar la
+entrada `legal` del `main` construido su gzip pasa de 2 345 a 2 324 B (−21), que
+devuelve el total a los 109 990 de T-020b. Es decir, el cuerpo de la página
+(5,46 kB crudos / 2,00 kB gzip en `chunk-YNCZLHBL.js`, chunk lazy propio) **no**
+entra en el inicial; lo que cuesta son los 21 B de la propia entrada de ruta (hash
+del chunk y nombre de la ruta/clase). El techo tiene 10 B de holgura, así que la
+puerta es inalcanzable con cualquier ruta lazy nueva.
+
+Probado y descartado, con medición sobre el `main` real: deduplicar el cargador de
+`404`/`**` en un `const` **empeora** +13 B (gzip comprime mejor la repetición que
+una referencia), export por defecto del componente ahorra 3 B, compartir chunk con
+`/acerca` unos 8 B (y rompe el requisito de chunk propio). Ninguna combinación baja
+de 11 B, y todas las palancas grandes (`withEventReplay()`, `@defer`, `Location` en
+`site-layout.ts`) están fuera de los archivos autorizados de T-039.
+
+**Artefacto**: el build completa `ng build` + `static-home` + `emit-404` antes de
+fallar la puerta; `dist/grim-dawn-builds/browser/legal/index.html` existe
+(37 362 B), contiene el enlace a Issues, `canonical` y el `WebPage`. 6 rutas
+prerenderizadas.
+
+**Accesibilidad medida** (Playwright 1.65 + axe-core 4.14 sobre el artefacto
+servido en `127.0.0.1:4319`, 375/768/1280 con JS y con `javaScriptEnabled:
+false`): 0 violaciones (wcag2a/2aa/21a/21aa/22aa), 0 overflow, `h1` único, seis
+`h2`, enlace «Aviso legal» del pie alcanzable con Tab, `outline: 2px solid`
+visible y activación con Enter; desde `/acerca` el enlace navega a `/legal` con y
+sin JS (`gd-t039-nav.log`). Evidencia: `$env:TEMP/gd-t039-a11y.log`; capturas
+`$env:TEMP/gd-t039-{375,768,1280}.png` (y variantes `-nojs`) inspeccionadas
+visualmente.
+
+**Puertas en verde**: `pnpm lint`, `prettier --check` de los archivos tocados,
+`pnpm lint:md` (49 archivos), `pnpm check:public-build` (208 archivos) y
+`pnpm check:secrets` (433 archivos). Logs: `gd-t039-lint.log`,
+`gd-t039-public-build.log`.
+
+**Decisión pendiente para cerrar T-039** (no se marca la tarea):
+
+1. Autorizar +21 B en el techo de `/tier-list` (`scripts/check-initial-js.mts`),
+   con la medición de esta entrada como justificación; requiere la autorización
+   explícita que T-132 exige.
+2. Tarea de seguimiento: emitir `/legal` como HTML estático sin bootstrap con el
+   patrón de `scripts/static-home.mts` y enlace nativo en el pie. Coste 0 B en el
+   chunk inicial y es la opción recomendada, porque un aviso legal no necesita
+   hidratación.
+
+Modelo realmente usado: `opencode-go/deepseek-v4.1-flash`. Sin commit, push ni PR.
