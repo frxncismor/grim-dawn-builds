@@ -41,34 +41,46 @@ C:\Users\paco_\AppData\Local\Programs\herdr-core\hc.exe
 
 ## Lanzar un agente
 
-Un agente lanzado en Herdr **debe verse en la app**. Para eso hacen falta tres
-cosas a la vez: las **dos etiquetas**, un harness **interactivo** y verificación.
+Un agente lanzado en Herdr **debe verse en la app**, y un orquestador de dominio
+**nunca se abre como pestaña del espacio actual**: eso mezcla dominios en la misma
+instancia. Cada especialidad recibe un **espacio nuevo** llamado
+`<proyecto>/<especialidad>`.
 
 ```powershell
-$hc  = 'C:\Users\paco_\AppData\Local\Programs\herdr-core\hc.exe'
-$app = 'C:\Users\paco_\AppData\Local\Programs\herdr-app\herdr-app.exe'
+$app  = 'C:\Users\paco_\AppData\Local\Programs\herdr-app\herdr-app.exe'
+$repo = 'C:\Users\paco_\Documents\GitHub\grim-dawn-builds'
 
-# 1. Espacio y pestaña activos (ids reales, no nombres)
-$s = & $app status | ConvertFrom-Json
+# 1. Espacio NUEVO con su orquestador interactivo (prompt en argv, una línea).
+#    La herramienta valida nombre y carpeta y falla cerrada.
+pnpm herdr:space --specialty ui --folder $repo --task "<tarea del orquestador>"
 
-# 2. Lanzar con LAS DOS etiquetas y harness interactivo
-& $hc run --bg --name ci-orq `
-  --cwd 'C:\Users\paco_\Documents\GitHub\grim-dawn-builds' `
-  --label "herdr.space=$($s.space)" `
-  --label "herdr.tab=$($s.tab)" `
-  --parent t5 --outlive-parent `
-  opencode --auto --prompt "<una sola línea, sin saltos>"
+# 2. Equivalente manual
+& $app do space.new `
+  --name 'grim-dawn-builds/ui' `
+  --folder $repo `
+  --tab 'ui' `
+  --argv '["opencode","--auto","--prompt","Eres el ORQUESTADOR DE DOMINIO de ui..."]'
 
-# 3. Verificar adopción: app y status deben ser NO nulos
+# 3. Verificar: el espacio y su terminal deben mostrar app y status no nulos
 & $app ls | ConvertFrom-Json | ForEach-Object { $_.spaces } |
-  ForEach-Object { $_.tabs } | ForEach-Object { $_.terminals } |
-  Select-Object terminal, app, status, name
+  ForEach-Object {
+    $space = $_.name
+    $_.tabs | ForEach-Object { $_.terminals } |
+      Select-Object @{n='space';e={$space}}, terminal, app, status, name
+  }
 ```
+
+`--print` (o `pnpm herdr:space ... --print`) muestra el comando y el nombre del
+espacio sin lanzar nada. El prompt va **dentro de `argv`**: `space.new --task` y
+`tab.new --task` se añaden como argumento posicional y `opencode` lo interpreta
+como **directorio**.
 
 ### Errores que ya cometimos
 
 | Error                                              | Síntoma                                                                                                         | Corrección                                                  |
 | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Abrir `tab.new` en el espacio actual               | Dos dominios comparten instancia, autoría y foco; el nivel 0 y el dominio se pisan                             | `space.new --name <proyecto>/<especialidad>`                 |
+| Nombrar el espacio solo con la especialidad        | No se sabe a qué proyecto pertenece                                                                             | `<proyecto>/<especialidad>` en minúsculas                    |
 | Omitir `--label herdr.tab=<id>`                    | El terminal sale en `hc ls` pero **no** en `herdr-app ls`: invisible en la app                                  | Pasar siempre las dos etiquetas                             |
 | Usar `opencode run` (no interactivo)               | `app` y `status` quedan `null`; Herdr no lo reconoce como agente                                                | Usar el harness interactivo: `opencode --auto --prompt "…"` |
 | Prompt con saltos de línea                         | `{"kind":"spawn_failed","message":"… is a batch file: it can't take an argument with a line break"}` en Windows | Unir el prompt en **una sola línea**                        |

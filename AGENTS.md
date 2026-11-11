@@ -66,13 +66,20 @@ La metodología de orquestador y agentes por rol está en
   propios subagentes**. Ningún orquestador implementa lo que puede delegar. El
   estándar completo está en `ORCHESTRATION.md` §12 y aplica a este y a cualquier
   proyecto.
-- **Una ventana por dominio en Herdr, máximo 2 terminales por ventana.** Para abrir
-  una ventana nueva con su agente dentro:
-  `herdr-app do space.new --name <dominio> --folder <ruta>` y después
-  `herdr-app do tab.new --space <id> --name <tarea> --folder <ruta> --argv '<json>'`.
-  El `task` de `tab.new` se añade como argumento posicional y `opencode` lo
-  interpreta como **directorio**: el prompt va dentro de `argv`
-  (`["opencode","--auto","--prompt","…"]`).
+- **Nunca se abren pestañas de un dominio en el espacio ni en la instancia
+  actuales.** Cada orquestador de dominio se abre en un **espacio nuevo** de
+  Herdr cuyo nombre es `<proyecto>/<especialidad>` (minúsculas, dígitos y guiones;
+  p. ej. `grim-dawn-builds/ui`, `grim-dawn-builds/tests`). Ese espacio lleva su
+  propio agente orquestador interactivo, que despacha sub-tareas a **sus**
+  subagentes. Camino único:
+  `pnpm herdr:space --specialty <especialidad> --folder <ruta absoluta> --task "<tarea>"`
+  (equivale a `herdr-app do space.new --name <proyecto>/<especialidad> --folder
+<ruta> --tab <especialidad> --argv '["opencode","--auto","--prompt","<una
+línea>"]'`). El prompt va **dentro de `argv`**, nunca como `task` posicional:
+  `opencode` lo interpretaría como directorio. `--print` muestra el comando sin
+  lanzar nada.
+- **Máximo 2 terminales por espacio.** Un tercero abre otro espacio del mismo
+  dominio, no una pestaña más en el actual.
 - **Todo agente se lanza visible en Herdr.** Un agente que no se ve no se puede
   supervisar. Regla obligatoria (ver `docs/orchestration/herdr.md`):
   - `hc run --bg --name <nombre> --cwd <repo> --label herdr.space=<id>
