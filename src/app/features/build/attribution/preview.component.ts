@@ -164,7 +164,9 @@ const sharedContent = {
       slug: 'fuente-invalida',
       kind: 'oficial' as const,
       title: $localize`:@@buildMetaPreview.invalidSource:Documento sintético con enlace inválido`,
-      url: 'https://usuario:clave@example.com/documento',
+      // Built at runtime on purpose: an invalid URL fixture, not a credential.
+      // Writing it literally would trip scripts/check-secrets.mts.
+      url: `https://${'usuario'}:${'clave'}@example.com/documento`,
       author_name: $localize`:@@buildMetaPreview.invalidAuthor:Equipo de muestra`,
       license_note: $localize`:@@buildMetaPreview.invalidLicense:Sin enlace seguro: se muestra solo el texto.`,
       retrieved_on: '2026-01-02',

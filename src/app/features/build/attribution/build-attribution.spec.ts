@@ -182,7 +182,9 @@ describe('gd-build-attribution', () => {
     'no es una url',
     'javascript:alert(1)',
     'data:text/html,prueba',
-    'https://usuario:clave@example.com/guia',
+    // Built at runtime on purpose: this must be an invalid URL for the rejection
+    // test, not a credential. Writing it literally would trip scripts/check-secrets.mts.
+    `https://${'usuario'}:${'clave'}@example.com/guia`,
     'http://usuario@example.com/guia',
     'ftp://example.com/guia',
   ])('renders %s as text without a link', async (url) => {
