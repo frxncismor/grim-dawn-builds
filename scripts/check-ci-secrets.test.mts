@@ -82,17 +82,25 @@ describe('check-ci-secrets (T-086 ST-1)', () => {
 
   describe('pull-request-target', () => {
     it('falla si el trigger es pull_request_target', () => {
-      assert.deepEqual(rulesOf(mutate('  pull_request:', '  pull_request_target:')), ['pull-request-target']);
+      assert.deepEqual(rulesOf(mutate('  pull_request:', '  pull_request_target:')), [
+        'pull-request-target',
+      ]);
     });
 
     it('ignora una mención en comentario', () => {
-      assert.deepEqual(rulesOf(CLEAN.replace('permissions:', '# never use pull_request_target\npermissions:')), []);
+      assert.deepEqual(
+        rulesOf(CLEAN.replace('permissions:', '# never use pull_request_target\npermissions:')),
+        [],
+      );
     });
   });
 
   describe('secret-in-job', () => {
     const withToken = (text: string): string =>
-      text.replace('persist-credentials: false', 'persist-credentials: false\n          token: ${{ secrets.DEPLOY_TOKEN }}');
+      text.replace(
+        'persist-credentials: false',
+        'persist-credentials: false\n          token: ${{ secrets.DEPLOY_TOKEN }}',
+      );
 
     it('falla con referencia a secreto en un workflow pull_request', () => {
       assert.deepEqual(rulesOf(withToken(CLEAN)), ['secret-in-job']);
@@ -105,20 +113,39 @@ describe('check-ci-secrets (T-086 ST-1)', () => {
 
   describe('secret-echo', () => {
     it('falla si un run imprime una variable de nombre secreto', () => {
-      assert.deepEqual(rulesOf(mutate('          set -euo pipefail\n', '          set -euo pipefail\n          echo "$DB_PASSWORD"\n')), [
-        'secret-echo',
-      ]);
+      assert.deepEqual(
+        rulesOf(
+          mutate(
+            '          set -euo pipefail\n',
+            '          set -euo pipefail\n          echo "$DB_PASSWORD"\n',
+          ),
+        ),
+        ['secret-echo'],
+      );
     });
 
     it('falla si un run imprime un secreto de Actions', () => {
       assert.deepEqual(
-        rulesOf(mutate('          set -euo pipefail\n', '          set -euo pipefail\n          echo "${{ secrets.DEPLOY_TOKEN }}"\n')),
+        rulesOf(
+          mutate(
+            '          set -euo pipefail\n',
+            '          set -euo pipefail\n          echo "${{ secrets.DEPLOY_TOKEN }}"\n',
+          ),
+        ),
         ['secret-echo', 'secret-in-job'],
       );
     });
 
     it('no falla al imprimir variables sin nombre secreto', () => {
-      assert.deepEqual(rulesOf(mutate('          set -euo pipefail\n', '          set -euo pipefail\n          echo "$RUNNER_TEMP"\n')), []);
+      assert.deepEqual(
+        rulesOf(
+          mutate(
+            '          set -euo pipefail\n',
+            '          set -euo pipefail\n          echo "$RUNNER_TEMP"\n',
+          ),
+        ),
+        [],
+      );
     });
 
     it('no falla al imprimir un enmascarado con add-mask', () => {
@@ -148,7 +175,9 @@ describe('check-ci-secrets (T-086 ST-1)', () => {
 
   describe('unmasked-credential', () => {
     it('falla si el job genera una credencial sin add-mask', () => {
-      assert.deepEqual(rulesOf(mutate('          echo "::add-mask::${db_password}"\n', '')), ['unmasked-credential']);
+      assert.deepEqual(rulesOf(mutate('          echo "::add-mask::${db_password}"\n', '')), [
+        'unmasked-credential',
+      ]);
     });
 
     it('no falla si el valor generado no tiene nombre secreto', () => {
@@ -204,7 +233,8 @@ jobs:
   });
 
   describe('env-dump', () => {
-    const withLine = (line: string): string => mutate('          set -euo pipefail\n', `          set -euo pipefail\n          ${line}\n`);
+    const withLine = (line: string): string =>
+      mutate('          set -euo pipefail\n', `          set -euo pipefail\n          ${line}\n`);
 
     it('falla con printenv', () => {
       assert.deepEqual(rulesOf(withLine('printenv')), ['env-dump']);
@@ -235,20 +265,34 @@ jobs:
 
     for (const [target, expected] of loopbackOrRemote) {
       it(`objetivo ${target} → ${expected.length ? 'falla' : 'pasa'}`, () => {
-        assert.deepEqual(rulesOf(CLEAN.replace('ZAP_TARGET_URL: http://127.0.0.1:8080', `ZAP_TARGET_URL: ${target}`)), expected);
+        assert.deepEqual(
+          rulesOf(
+            CLEAN.replace('ZAP_TARGET_URL: http://127.0.0.1:8080', `ZAP_TARGET_URL: ${target}`),
+          ),
+          expected,
+        );
       });
     }
 
     it('falla con objetivo remoto literal en -t', () => {
-      assert.deepEqual(rulesOf(mutate('zap-baseline.py -t "$ZAP_TARGET_URL"', 'zap-baseline.py -t https://dast.example.invalid')), [
-        'remote-dast-target',
-      ]);
+      assert.deepEqual(
+        rulesOf(
+          mutate(
+            'zap-baseline.py -t "$ZAP_TARGET_URL"',
+            'zap-baseline.py -t https://dast.example.invalid',
+          ),
+        ),
+        ['remote-dast-target'],
+      );
     });
 
     it('falla si la referencia del objetivo no se puede resolver', () => {
-      assert.deepEqual(rulesOf(mutate('zap-baseline.py -t "$ZAP_TARGET_URL"', 'zap-baseline.py -t "$UNKNOWN_TARGET"')), [
-        'remote-dast-target',
-      ]);
+      assert.deepEqual(
+        rulesOf(
+          mutate('zap-baseline.py -t "$ZAP_TARGET_URL"', 'zap-baseline.py -t "$UNKNOWN_TARGET"'),
+        ),
+        ['remote-dast-target'],
+      );
     });
 
     it('detecta un paso DAST por su run aunque el job no se llame DAST', () => {
@@ -262,7 +306,10 @@ jobs:
         run: zap-baseline.py --target https://dast.example.invalid
 `;
       assert.deepEqual(rulesOf(remote), ['remote-dast-target']);
-      assert.deepEqual(rulesOf(remote.replace('https://dast.example.invalid', 'http://localhost:8080')), []);
+      assert.deepEqual(
+        rulesOf(remote.replace('https://dast.example.invalid', 'http://localhost:8080')),
+        [],
+      );
     });
   });
 
@@ -271,7 +318,10 @@ jobs:
       const dir = mkdtempSync(join(tmpdir(), 'ci-secrets-'));
       try {
         writeFileSync(join(dir, 'a.yml'), CLEAN);
-        writeFileSync(join(dir, 'b.yaml'), CLEAN.replace('  pull_request:', '  pull_request_target:'));
+        writeFileSync(
+          join(dir, 'b.yaml'),
+          CLEAN.replace('  pull_request:', '  pull_request_target:'),
+        );
         writeFileSync(join(dir, 'notes.txt'), 'pull_request_target');
         const result = scanWorkflowDir(dir);
         assert.equal(result.scanned, 2);
@@ -286,7 +336,8 @@ jobs:
 
     it('CLI: 0 sin hallazgos, 1 con hallazgos, 2 con error', () => {
       const dir = mkdtempSync(join(tmpdir(), 'ci-secrets-cli-'));
-      const runCli = (args: string[]) => spawnSync(process.execPath, ['--import', 'tsx', CLI, ...args], { encoding: 'utf8' });
+      const runCli = (args: string[]) =>
+        spawnSync(process.execPath, ['--import', 'tsx', CLI, ...args], { encoding: 'utf8' });
       try {
         const clean = join(dir, 'clean');
         const bad = join(dir, 'bad');
@@ -295,7 +346,10 @@ jobs:
         mkdirSync(bad);
         mkdirSync(empty);
         writeFileSync(join(clean, 'ci.yml'), CLEAN);
-        writeFileSync(join(bad, 'ci.yml'), CLEAN.replace('  pull_request:', '  pull_request_target:'));
+        writeFileSync(
+          join(bad, 'ci.yml'),
+          CLEAN.replace('  pull_request:', '  pull_request_target:'),
+        );
 
         const ok = runCli(['--dir', clean]);
         assert.equal(ok.status, 0, ok.stderr + ok.stdout);

@@ -7,7 +7,9 @@
         "http://localhost/tier-list/index.html",
         "http://localhost/acerca/index.html",
         "http://localhost/legal/index.html",
-        "http://localhost/autores/grim-dawn-builds/index.html"
+        "http://localhost/autores/grim-dawn-builds/index.html",
+        "http://localhost/es/index.html",
+        "http://localhost/es/tier-list/index.html"
       ],
       "numberOfRuns": 3,
       "settings": {
