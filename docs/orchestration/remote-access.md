@@ -7,11 +7,12 @@ computadora y desde la app móvil, usando el mismo canal SSH que usa
 ## Estado comprobado (2026-11-11)
 
 - `hc server status`: core `mamalona` vivo, 1 terminal, versión 0.1.20.
-- `sshd` existe (`C:\Windows\System32\OpenSSH\sshd.exe`, 9.5p2), en `Manual` y
-  **detenido**. Tras ejecutar el script ya existen `sshd_config`, las claves de
-  host y su DACL restringida, pero el servicio **sigue terminando con código
-  1067** (4 intentos) y no escribe `sshd.log`: falta el diagnóstico elevado con
-  `sshd -d` o reinstalar la capacidad OpenSSH Server.
+- **`sshd` en marcha** (`Running`, `Automatic`) y escuchando en `0.0.0.0:22` y
+  `[::]:22`. `Test-NetConnection 192.168.100.35 -Port 22` responde `True`.
+- Autenticación por clave verificada:
+  `ssh paco_@192.168.100.35 "echo hc-remote-ok"` devuelve `hc-remote-ok`.
+  `hc machine add paco_@127.0.0.1` responde «este core», lo que confirma que el
+  handshake de `hc` por SSH funciona; falta emparejar la laptop y el móvil.
 - El usuario `paco_` está en **Administradores** y tiene contraseña.
   `%USERPROFILE%\.ssh\authorized_keys` ya contiene su clave `id_ed25519.pub`.
 - IPv4 de LAN: **192.168.100.35** (Ethernet, perfil Público).
@@ -44,8 +45,10 @@ misma consola elevada:
 & C:\Windows\System32\OpenSSH\sshd.exe -d
 ```
 
-Ese comando muestra el error real. Si no es accionable, reinstala la capacidad
-y repite el script:
+Ese comando muestra el error real. El script ya restringe DACL y propietario de
+las claves de host y de `sshd_config`; en este equipo fue suficiente para
+dejarlo en `Running`. Si en otro equipo persiste, reinstala la capacidad y
+repite el script:
 
 ```powershell
 Remove-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
