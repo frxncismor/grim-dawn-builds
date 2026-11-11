@@ -2685,3 +2685,192 @@ Entradas del sitemap con `BASE_URL` por defecto:
 - `pnpm test:scripts` incluye trabajo en curso de otro dominio en
   `scripts/check-performance.*`; no se atribuye a T-021.
 - No ejecutados: `build:release` y `check:release` (requieren PostgreSQL/API Docker).
+
+## T-046: verificación de fuera de alcance — 2026-11-11
+
+Acredita sobre el árbol real que no hay autenticación, comentarios, calculadora,
+scraping, workers, arte oficial sin aprobación, ni secretos o workflows de
+despliegue. Las salidas de abajo son las que devolvieron los comandos el
+2026-11-11; no se reconstruyen ni se completan a mano. El árbol tenía cambios en
+curso de otros dominios (`README*.md`, `.env.example`) que no se atribuyen a
+T-046.
+
+### Decisión: se amplió `check:scope` (TDD)
+
+Al ejecutar las puertas existentes quedaban dos huecos reales:
+
+1. **Scraping**: ninguna regla cubría `cheerio`, `crawlee`/`@crawlee/*`,
+   `puppeteer`/`puppeteer-core`, `scrape-it`, `node-crawler` ni equivalentes.
+2. **Pantallas fuera de alcance**: no había regla para `/comentarios`,
+   `/comments`, `/calculadora` ni `/calculator`.
+
+`assets:check` ya cubre el arte oficial y `check:boundaries` la frontera entre
+zonas; no se duplicaron. La ampliación se hizo en `scripts/check-scope.mts` y
+`scripts/check-scope.test.mts`, primero las pruebas y después la implementación:
+las pruebas nuevas fallaron con `expected: [ 'scraping' ]` y
+`expected: [ 'out-of-scope-route' ]` frente a `actual: []`, y pasaron al añadir
+las dos reglas. Reglas añadidas:
+
+- `scraping` en `FORBIDDEN_CAPABILITIES`: paquetes, imágenes (`browserless`,
+  `standalone-chrome`, `standalone-firefox`, `standalone-edge`) y servicios
+  (`browserless`, `scraper`, `scraping`). `playwright`, `@playwright/test`,
+  `jsdom`, `lighthouse` y `chrome-launcher` quedan **fuera** de la tabla por ser
+  herramientas de prueba legítimas, y una prueba lo fija.
+- `out-of-scope-route`: valor de `path:` o enlace absoluto con esos segmentos.
+  Exige forma de ruta, así que la prosa «sin cuentas, comentarios ni analítica»
+  (`legal.page.html`) y «la calculadora de devoción de grimtools» no fallan; una
+  prueba lo fija. Las rutas de auth/registro/edición pública **no** se añadieron:
+  son el alcance de T-113.
+
+### Comandos ejecutados y salida literal
+
+| Comando                                                      | Exit | Salida literal                                         |
+| ------------------------------------------------------------ | ---- | ------------------------------------------------------ |
+| `pnpm check:scope`                                           | 0    | `check:scope OK (245 archivos revisados)`              |
+| `pnpm assets:check`                                          | 0    | `assets:check OK (0 entradas)`                         |
+| `node --import tsx --test scripts/check-scope.test.mts`      | 0    | `# tests 30`, `# pass 30`, `# fail 0`, `# skipped 0`   |
+| `node --import tsx --test scripts/compose.test.mts`          | 0    | `# tests 20`, `# pass 20`, `# fail 0`, `# skipped 0`   |
+| `pnpm check:boundaries`                                      | 0    | `check:boundaries OK (238 archivos revisados)`         |
+| `pnpm check:secrets`                                         | 0    | `check:secrets OK (451 archivos rastreados revisados)` |
+| `pnpm check:ci-secrets`                                      | 0    | `check-ci-secrets OK (2 workflow(s) revisados)`        |
+| `node --import tsx scripts/check-scope.mts --root <fixture>` | 1    | 3 incidencias (`scraping` y dos `out-of-scope-route`)  |
+
+```powershell
+pnpm check:scope
+# $ tsx scripts/check-scope.mts
+# check:scope OK (245 archivos revisados)
+```
+
+```powershell
+pnpm assets:check
+# $ tsx scripts/check-assets.mts
+# assets:check OK (0 entradas)
+```
+
+```powershell
+node --import tsx --test scripts/compose.test.mts
+# 1..2
+# tests 20
+# suites 2
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 410.844
+```
+
+```powershell
+node --import tsx --test scripts/check-scope.test.mts
+# 1..5
+# tests 30
+# suites 5
+# pass 30
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1852.1713
+```
+
+```powershell
+pnpm check:boundaries
+# $ tsx scripts/check-boundaries.mts
+# check:boundaries OK (238 archivos revisados)
+```
+
+```powershell
+pnpm check:secrets
+# $ tsx scripts/check-secrets.mts
+# check:secrets OK (451 archivos rastreados revisados)
+```
+
+```powershell
+pnpm check:ci-secrets
+# $ tsx scripts/check-ci-secrets.mts
+# check-ci-secrets OK (2 workflow(s) revisados)
+```
+
+Demostración de que la regla nueva falla de forma cerrada, con un fixture temporal
+**fuera del repo** que añade `cheerio` a `dependencies` y las rutas
+`comentarios` y `calculadora`:
+
+```powershell
+node --import tsx scripts/check-scope.mts --root $env:TEMP/gd-t046-fixture
+# package.json:1 [scraping] dependencia "cheerio" en dependencies (scraping o automatización de navegador) prohibida por la constitución, principio VIII
+# src/app/app.routes.ts:1 [out-of-scope-route] ruta "comentarios" (pantalla de comentarios o calculadora, fuera de alcance) prohibida por la constitución, principio VIII
+# src/app/app.routes.ts:1 [out-of-scope-route] ruta "calculadora" (pantalla de comentarios o calculadora, fuera de alcance) prohibida por la constitución, principio VIII
+# check:scope FALLÓ (3 incidencia(s), 2 archivos revisados)
+```
+
+### Qué prohíbe hoy `check:scope`
+
+| Regla (`[id]` del mensaje) | Qué prohíbe                                                                                                                                                                                                  | Dónde lo busca                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `redis`                    | `redis`, `redis-*`, `ioredis`, `@redis/*`, `@upstash/redis`; imágenes y servicios Redis, Valkey, KeyDB, Dragonfly; URLs `redis://` y `rediss://`                                                             | `package.json`, imports/`require`/`import()`, Compose y configuración |
+| `queue-worker`             | Bull, BullMQ, bee-queue, kue, agenda, bree, resque, pg-boss, AMQP, Kafka, SQS, Pub/Sub, NATS, piscina, workerpool; imágenes y servicios; URLs `amqp(s)://` y `nats://`                                       | igual                                                                 |
+| `external-auth`            | Passport, Auth0, Clerk, Keycloak, Firebase, MSAL, `@supabase/supabase-js`, NextAuth, Okta, Kinde; imágenes y servicios de IdP                                                                                | igual                                                                 |
+| `object-storage`           | MinIO, SDK S3, Google Cloud Storage, Azure Blob, Supabase Storage; imágenes y servicios; URL `s3://`                                                                                                         | igual                                                                 |
+| `scraping`                 | cheerio, crawlee, puppeteer (con `-core`/`-extra`), scrape-it, node-crawler, simplecrawler, website-scraper, x-ray, selenium-webdriver, webdriverio, nightmare, phantomjs; imágenes y servicios de navegador | igual                                                                 |
+| `out-of-scope-route`       | `path:` o enlace absoluto con `comentarios`, `comments`, `calculadora` o `calculator`                                                                                                                        | código y plantillas/configuración escaneadas                          |
+| `compose-topology`         | Más de un servicio de aplicación y más de una base de datos en Compose; `migrate` está exento                                                                                                                | `infra/docker/compose*.yaml`                                          |
+
+El script falla cerrado ante JSON inválido (`invalid-input`) y ante sintaxis de
+Compose que no entiende, e informa fichero y línea de cada incidencia.
+
+### Qué cubre `assets:check` (no duplicado)
+
+`scripts/check-assets.mts` compara `public/assets/**` con
+`content/assets/manifest.json` mediante `checkAssetManifest` (`@gd/domain`) y
+publica `assets:check OK (0 entradas)`. Hoy `public/assets` no existe, el
+manifiesto es `{ "assets": [] }` y no hay arte oficial aprobado. Los 29 SVG de
+`src/assets/icons/` son glifos propios (T-048), no arte de juego. Esta puerta no
+se reimplementa en `check:scope`.
+
+### Evidencia de ausencia
+
+| Qué se buscó                      | Comando                                                                                                                                                                                                   | Resultado real                                                                                                                                                                                                       |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth, scraping y rutas prohibidas | `git grep -n -i -E "passport\|auth0\|clerk\|keycloak\|supabase-js\|cheerio\|crawlee\|puppeteer\|/login\|path: *'(comentarios\|calculadora)'"` sobre `src apps packages scripts infra public package.json` | exit 0 con 39 líneas, **todas** en `scripts/check-scope.mts` (19) y `scripts/check-scope.test.mts` (20): la propia tabla de reglas y sus pruebas. 0 en `src`, `apps`, `packages`, `infra`, `public` y `package.json` |
+| Dependencias de scraping          | `git grep -n -i -E "cheerio\|crawlee\|puppeteer\|scrape-it\|node-crawler\|selenium\|webdriverio\|playwright-extra" -- "*package.json"`                                                                    | exit 1: sin coincidencias en ningún `package.json`                                                                                                                                                                   |
+| Redis, colas y workers            | `git grep -n -i -E "bullmq\|ioredis\|redis\|amqplib\|kafkajs\|worker_threads\|pg-boss\|piscina" -- src apps packages infra package.json`                                                                  | exit 0 con 1 línea: `apps/api/src/manifest.spec.ts:49`, una prueba que exige rechazar `redis` en el manifiesto; ningún uso real                                                                                      |
+| Rutas declaradas                  | `git grep -n -E "path: *'" -- src/app/app.routes.ts src/app/app.routes.server.ts`                                                                                                                         | 13 líneas `path:` (8 rutas distintas): `acerca`, `legal`, `autores/:slug`, `tier-list`, `builds/:slug`, `''`, `404`, `**`; ninguna de comentarios ni calculadora                                                     |
+| Rutas de auth, registro o edición | `git grep -n -E "path: *'(login\|entrar\|registro\|registrar\|signup\|signin\|editar\|edicion\|publicar\|editor)'" -- src apps`                                                                           | exit 1: sin coincidencias                                                                                                                                                                                            |
+| Servicios de Compose              | `git grep -n -E "^services:\|^  [A-Za-z0-9_.-]+:" -- infra/docker/compose.yaml infra/docker/compose.debug.yaml`                                                                                           | `db`, `migrate`, `api`; el override de depuración solo publica `db`. 20/20 pruebas de Compose pasan                                                                                                                  |
+| Despliegue en workflows           | `git grep -n -i "deploy" -- .github/workflows`                                                                                                                                                            | 3 líneas, todas comentarios que declaran «no deployment»; solo existen `ci.yml` y `secret-scan.yml`                                                                                                                  |
+
+### Límites
+
+- **Rutas de auth, registro y edición pública: T-113, pendiente.** No se
+  acreditan aquí y `check:scope` solo detecta hoy paquetes, imágenes y servicios
+  de autenticación, no rutas. Añadirlas antes duplicaría el alcance de T-113.
+- **Hosting y despliegue: diferidos.** No hay workflow de despliegue y esta
+  sección no acredita un despliegue.
+- **El script no sustituye una auditoría manual** ni un DAST: comprueba patrones
+  conocidos sobre los árboles que escanea.
+- **Fronteras del escaneo**: `check:scope` ignora `specs/`, `docs/`, `content/`
+  (raíz), `test/`, `tests/`, `e2e/`, `fixtures/`, `node_modules`, `dist` y
+  `.angular`; sus reglas no dicen nada de esos árboles. `git grep` solo mira
+  archivos rastreados, así que el `.env.example` sin rastrear no entra en esas
+  búsquedas.
+- El recuento de `check:scope` pasó de 244 a 245 archivos por un `.env.example`
+  sin rastrear de otro dominio; no es un archivo de T-046.
+- Esta evidencia no marca T-046 en `tasks.md` ni acredita el cierre de la spec
+  001; el registro de tareas lo actualiza el orquestador.
+
+## Tareas sustituidas por decisiones posteriores (2026-11-11)
+
+Cuatro tareas del plan original quedaron **reemplazadas** por decisiones de
+revisión posteriores y no deben ejecutarse. Se cierran como anuladas, no como
+implementadas:
+
+| Tarea   | Sustituida por   | Motivo                                                                |
+| ------- | ---------------- | --------------------------------------------------------------------- |
+| `T-007` | `T-071`, `T-055` | Esquema Drizzle + migraciones sustituyen la migración SQL de Supabase |
+| `T-008` | `T-073`          | Vistas `v_public_*` + rol `api_ro` sustituyen las políticas RLS       |
+| `T-011` | `T-062`          | `ApiContentRepository` es el adaptador de producción                  |
+| `T-013` | `T-059`, `T-072` | `db:seed` y `db:bootstrap` sustituyen el importador a Supabase        |
+
+Ninguna de las cuatro tiene artefacto propio que verificar: su alcance lo cubren
+las tareas sucesoras, que sí están cerradas con sus pruebas. Cerrarlas como
+anuladas evita que aparezcan como trabajo pendiente en la puerta de cierre.
