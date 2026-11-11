@@ -204,7 +204,7 @@ function withoutScripts(html: string): string {
 }
 
 for (const route of ROUTES) {
-  test.describe(`${route.name} (${route.path})`, () => {
+  test.describe(`@a11y ${route.name} (${route.path})`, () => {
     test.describe('JavaScript activo', () => {
       test(`${route.name}: sin violaciones critical/serious con la app activa`, async ({
         page,
@@ -269,7 +269,7 @@ const FIXTURE_WITHOUT_ALT = [
   '</html>',
 ].join('');
 
-test.describe('prueba negativa del detector', () => {
+test.describe('@a11y prueba negativa del detector', () => {
   test('un fixture con imagen sin alt produce violación y rompe la puerta', async ({ page }) => {
     await page.setContent(FIXTURE_WITHOUT_ALT);
     const result = await audit(page);

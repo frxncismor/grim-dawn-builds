@@ -63,7 +63,8 @@ export function validateCiWorkflow(source: string): string[] {
   const text = lines.join('\n');
 
   if (/pull_request_target/.test(text)) problems.push('uses pull_request_target (forbidden)');
-  if (/\bsecrets\./.test(text)) problems.push('references secrets (workflow must need none)');
+  // Solo una expresión de secreto ${{ secrets.X }}, no un nombre de archivo que contenga «secrets.».
+  if (/\$\{\{[^}]*\bsecrets\./.test(text)) problems.push('references secrets (workflow must need none)');
   if (/\bset -x\b/.test(text)) problems.push('uses set -x (may leak values)');
   if (/\bpermissions:\s*(read-all|write-all)\b/.test(text)) {
     problems.push('uses read-all/write-all permissions');
@@ -180,6 +181,14 @@ describe('PR verification workflow (T-064)', () => {
 
   it('the repository workflow passes every static rule', () => {
     assert.deepEqual(validateCiWorkflow(real), []);
+  });
+
+  it('allows the secrets validator command (T-086: a file name is not a secret reference)', () => {
+    const withValidator = mutate(
+      /( {8}run: pnpm run check:secrets\n)/,
+      '$1\n      - name: Check CI workflows for secrets\n        run: pnpm exec tsx scripts/check-ci-secrets.mts\n',
+    );
+    assert.deepEqual(validateCiWorkflow(withValidator), []);
   });
 
   /** Applies one textual mutation and asserts it changed the workflow. */

@@ -2355,3 +2355,149 @@ violaciones de cualquier impacto, 14-16 reglas WCAG en verde por ruta y
 5,811:1). La portada se publica sin JavaScript por el contrato de 0 B de
 `check:initial-js`, así que ese pase audita el HTML estático. Logs:
 `$env:TEMP/gd-t041-a11y.log` y caso negativo `$env:TEMP/gd-t041-negative.log`.
+
+## T-086: guarda de workflows sin secretos reales (2026-11-11)
+
+Estado: implementada y verificada en su alcance local. No acredita ejecución en
+GitHub Actions ni cierra la spec.
+
+### Artefactos
+
+| Ruta                                    | Cambio                                                                                                                                                  |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/check-ci-secrets.mts`          | Nuevo. Validador estático de `.github/workflows/*.yml`, sin dependencias. Reutiliza `isSecretName` de `scripts/check-secrets.mts`.                      |
+| `scripts/check-ci-secrets.test.mts`     | Nuevo. 36 pruebas.                                                                                                                                      |
+| `.github/workflows/ci.yml`              | Paso `Check CI workflows for secrets` (`run: pnpm exec tsx scripts/check-ci-secrets.mts`) justo después de `Check tracked secrets`. Diff solo de líneas añadidas. |
+| `scripts/ci-workflow.test.mts`          | Endurecido: `/\bsecrets\./` pasa a `/\$\{\{[^}]*\bsecrets\./`, para no confundir un nombre de archivo con una referencia a secreto. Caso nuevo que fija esa intención; 18 pruebas. |
+| `scripts/secret-scan.test.mts`          | Mismo endurecimiento del patrón.                                                                                                                        |
+
+### Reglas del validador
+
+| Regla                    | Qué rechaza                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `pull-request-target`    | Disparador `pull_request_target`, que ejecuta con secretos desde forks.                                      |
+| `secret-in-job`          | Referencia `${{ secrets.… }}` en un workflow con `pull_request`.                                              |
+| `secret-echo`            | Bloque `run` que imprime un secreto (`echo`, `printf`, `cat`, `set -x`).                                      |
+| `literal-credential`     | Variable de nombre secreto con valor literal; debe generarse de forma efímera.                                |
+| `unmasked-credential`    | Credencial efímera sin `::add-mask::` en el job. Exige algún `::add-mask::`; no comprueba que cite la variable concreta. |
+| `set-x`                  | `set -x` en un bloque `run`, que puede volcar valores.                                                        |
+| `compose-config-values`  | `docker compose config` sin `--quiet`.                                                                        |
+| `artifact-env`           | Artefactos que incluyen `.env` o `secrets/`.                                                                  |
+| `env-dump`               | Volcado de entorno o de `.env` en un `run` (`printenv`, `env`, `cat .env`).                                   |
+| `remote-dast-target`     | Objetivo DAST distinto de `localhost`, `127.0.0.1` o `[::1]`.                                                 |
+
+CLI: `pnpm exec tsx scripts/check-ci-secrets.mts [--dir <carpeta>]`. Códigos de
+salida: 0 correcto, 1 incidencias, 2 error de uso o lectura (fallo cerrado).
+
+### Evidencia ejecutada
+
+| Comprobación                                                      | Comando                                                                                  | Resultado                                                                                   |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Workflows del repo                                                | `pnpm exec tsx scripts/check-ci-secrets.mts`                                             | `check-ci-secrets OK (2 workflow(s) revisados)`, exit 0                                     |
+| Validador                                                         | `node --import tsx --test scripts/check-ci-secrets.test.mts`                             | 36 tests, 36 pass, 0 fail                                                                   |
+| Guarda de workflows                                               | `node --import tsx --test scripts/ci-workflow.test.mts`                                  | 18 tests, 18 pass                                                                           |
+| Escáner de secretos y compose                                     | `node --import tsx --test scripts/secret-scan.test.mts scripts/compose.test.mts`         | 43 tests, 43 pass                                                                           |
+
+Fixtures de rechazo (carpetas temporales creadas para la prueba, fuera del repo):
+
+| Fixture                                                                 | Salida literal                                                                                                                                  | Exit |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| Disparador `pull_request_target`                                        | `bad.yml:3 [pull-request-target] trigger pull_request_target: ejecuta con secretos desde forks; use pull_request`                               | 1    |
+| DAST remoto `-t https://scan.example.invalid`                           | `bad.yml:9 [remote-dast-target] objetivo DAST fuera del runner (se exige localhost, 127.0.0.1 o [::1])`                                         | 1    |
+| `echo "${{ secrets.API_TOKEN }}"` en `run`                              | `bad.yml:8 [secret-echo] un bloque run imprime un secreto (echo/printf/cat/set -x); no lo imprima` (2 incidencias, incluye `secret-in-job`)     | 1    |
+| Limpio: DAST a `http://127.0.0.1:4200` y credencial efímera enmascarada | `check-ci-secrets OK (1 workflow(s) revisados)`                                                                                                 | 0    |
+
+El nombre `API_TOKEN` y el dominio `scan.example.invalid` son marcadores de prueba;
+no son credenciales ni destinos reales.
+
+### Límites y pendientes
+
+- No existe aún job de DAST en el CI (T-077 pendiente). Las reglas
+  `remote-dast-target`, `unmasked-credential` y `artifact-env` quedan armadas y
+  probadas, pero solo actuarán sobre un job real cuando T-077 lo añada.
+- `scripts/check-ci-secrets.test.mts` no está registrado en `test:scripts` de
+  `package.json` ni en `scripts/verify-local.mjs`: ambos archivos quedaban fuera
+  del alcance de T-086 (los usaba otro agente). Por tanto, `pnpm verify` aún no
+  cubre estas pruebas.
+- `unmasked-credential` exige algún `::add-mask::` en el job, sin comprobar que
+  cite la variable concreta.
+- Sin verificación en GitHub Actions real: el workflow no se ha ejecutado en remoto.
+
+## T-040: recorridos E2E sobre el artefacto (2026-11-11)
+
+Estado: implementada y verificada en su alcance local. No acredita CI (T-126), ni
+Lighthouse (T-042), ni la publicación de la guía (T-044).
+
+### Archivos de T-040
+
+| Ruta                                         | Cambio                                                                                                                                                                                                     |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `e2e/journeys.spec.ts`                       | Nuevo. Seis recorridos con títulos `@journeys`: navegación real, enlaces del pie, filtros por URL con recarga e historial, ancla `#devociones`, recorrido y ancla sin JavaScript, y 404 del build público. |
+| `playwright.config.ts`                       | `testMatch` pasa a `['a11y.spec.ts', 'journeys.spec.ts']`; segundo `webServer` opcional para el artefacto de borradores; `E2E_ARTIFACT_DIR`, `E2E_PORT`, `E2E_DRAFTS_ARTIFACT_DIR` y `E2E_DRAFTS_PORT`.          |
+| `e2e/a11y.spec.ts`                           | Solo etiquetas `@a11y` en los títulos de los dos `describe`; ninguna aserción cambia.                                                                                                                     |
+| `package.json`                               | `e2e:a11y` con `--grep "@a11y"` y `e2e:journeys` con `--grep "@journeys"`.                                                                                                                                 |
+
+Sin cambios en `src/**`, `angular.json`, `playwright.svg.config.ts`,
+`e2e/svg-responsive.spec.ts` ni dependencias.
+
+### Artefacto de borradores
+
+Se construye en un directorio aislado dentro de `dist/` (ignorado por git), sin
+tocar `dist/grim-dawn-builds`:
+
+```powershell
+$env:PATH=(Join-Path $env:TEMP 'gd-t057-tools')+';'+$env:PATH
+$env:NG_BUILD_MAX_WORKERS='2'
+$env:INCLUDE_DRAFTS='true'
+npx ng build --output-path dist/e2e-drafts
+```
+
+Salida 0 y **7 rutas prerenderizadas**, incluida
+`dist/e2e-drafts/browser/builds/chaman-demoledor-golpe-primigenio/index.html`
+(140 250 bytes, un `h1`, `id="devociones"` y 10 enlaces de TOC). No se ejecutan
+`static-home` ni `emit-404` para este directorio: la portada de borradores es la
+prerenderizada y el 404 se verifica sobre el artefacto público. Cuando el
+directorio no existe, el `webServer` de borradores no se inicia y los casos de
+guía fallan indicando el comando exacto; no se saltan.
+
+### Comprobaciones de T-040
+
+| Comprobación                  | Comando                                                                             | Resultado                                                                                                    |
+| ----------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Recorridos E2E                | `pnpm e2e:journeys`                                                                 | **18/18** en 27,3 s (6 casos × 375/768/1280), salida 0                                                        |
+| Puerta axe (regresión)        | `pnpm e2e:a11y`                                                                     | **27/27**, salida 0; 0 violaciones y 14-23 reglas WCAG en verde por ruta                                      |
+| Build y presupuesto           | `pnpm build`                                                                        | Salida 0; `/` 0/90 000 y `/tier-list` **110 011/110 500** gzip                                                |
+| Prueba negativa de la puerta  | `pnpm e2e:journeys` con `E2E_ARTIFACT_DIR=dist/e2e-drafts/browser`                   | 3 fallos `GET /builds/… · Expected 404 · Received 200`; salida 1                                              |
+| Lint / formato / Markdown     | `pnpm lint`, `prettier --check`, `pnpm lint:md`                                      | Los tres limpios                                                                                              |
+
+Logs: `$env:TEMP/gd-t040-journeys.log`, `$env:TEMP/gd-t040-a11y.log`,
+`$env:TEMP/gd-t040-negative.log`, `$env:TEMP/gd-t040-build.log`,
+`$env:TEMP/gd-t040-drafts-build.log`, `$env:TEMP/gd-t040-lint.log`,
+`$env:TEMP/gd-t040-format.log` y `$env:TEMP/gd-t040-lint-md.log`.
+
+Criterio del ancla `#devociones`: el mismo que fijó T-036. Tras navegar con el
+TOC (y tras recargar con el hash), `#devociones` debe tener `top >= -1`, el punto
+`(left + 8, top + 8)` medido con `document.elementFromPoint` debe pertenecer al
+destino y el TOC fijo no debe solaparlo a ningún ancho. Se comprueba con y sin
+JavaScript.
+
+Entorno: Windows 11, Node 22.12.0, pnpm 12.18.0, `@playwright/test` 1.65.0 con
+Chromium en `$env:TEMP/gd-ui-browser-binaries`, `NG_BUILD_MAX_WORKERS=2`.
+
+### Límites registrados
+
+- La única guía del MVP sigue `review_state=borrador` y `rights_status=pending`
+  (T-044). Por eso el catálogo —público y de borradores— no publica ningún enlace
+  `/builds/:slug`: todas las entradas son placeholder «Guía próximamente». El
+  recorrido lo comprueba explícitamente y sigue el enlace si algún día existe; el
+  paso de guía se verifica hoy sobre su URL prerenderizada y su TOC. No se
+  simula un enlace inexistente.
+- Con `javaScriptEnabled: false` los temporizadores y `requestAnimationFrame` del
+  documento no corren (misma causa que documentó T-041 para axe): la espera del
+  caso sin JS se hace desde el runner y las mediciones siguen siendo `evaluate`
+  síncronos.
+- `pnpm e2e:journeys` exige el artefacto de borradores ya construido; el build
+  no está encadenado en el script porque `INCLUDE_DRAFTS` necesita entorno y
+  `cross-env` no está en dependencias. T-126 puede encadenarlo en CI.
+- El servidor estático sigue sin soportar `Range`/`ETag`: suficiente para lo que
+  se mide aquí y para la puerta axe.

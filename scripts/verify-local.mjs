@@ -24,6 +24,7 @@ export const VERIFY_STEPS = [
   { name: 'check-scope', command: 'pnpm run check:scope' },
   { name: 'check-boundaries', command: 'pnpm run check:boundaries' },
   { name: 'check-secrets', command: 'pnpm run check:secrets' },
+  { name: 'check-ci-secrets', command: 'pnpm run check:ci-secrets' },
   { name: 'domain:build', command: 'pnpm --filter @gd/domain build' },
   { name: 'domain:typecheck', command: 'pnpm --filter @gd/domain typecheck' },
   { name: 'domain:lint', command: 'pnpm --filter @gd/domain lint' },

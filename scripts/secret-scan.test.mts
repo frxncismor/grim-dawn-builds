@@ -114,7 +114,9 @@ describe('pre-commit hook (.githooks/pre-commit)', () => {
     assert.doesNotMatch(text, /\|\|\s*true/);
     assert.doesNotMatch(text, /^\s*exit 0\s*$/m);
     assert.doesNotMatch(text, /\bset -x\b/);
-    assert.doesNotMatch(text, /--no-verify|secrets\./);
+    assert.doesNotMatch(text, /--no-verify/);
+    // Solo una expresión de secreto ${{ secrets.X }}, no un nombre de archivo que contenga «secrets.».
+    assert.doesNotMatch(text, /\$\{\{[^}]*\bsecrets\./);
   });
 });
 
@@ -171,7 +173,8 @@ describe('PR diff scan in ci.yml', () => {
     assert.ok(at('Secret scan (PR commit range)') < at('pnpm run test:scripts'));
     const code = codeOnly(CI_WORKFLOW);
     assert.doesNotMatch(code, /^\s*schedule:/m);
-    assert.doesNotMatch(code, /\bsecrets\./);
+    // Solo una expresión de secreto ${{ secrets.X }}, no un nombre de archivo que contenga «secrets.».
+    assert.doesNotMatch(code, /\$\{\{[^}]*\bsecrets\./);
   });
 });
 
@@ -191,7 +194,8 @@ describe('scheduled history scan (secret-scan.yml)', () => {
     assert.match(code, /^permissions:\n {2}contents: read\n/m);
     assert.match(code, /^ {4}permissions:\n {6}contents: read$/m);
     assert.doesNotMatch(code, /:\s*write\b/);
-    assert.doesNotMatch(code, /\bsecrets\./);
+    // Solo una expresión de secreto ${{ secrets.X }}, no un nombre de archivo que contenga «secrets.».
+    assert.doesNotMatch(code, /\$\{\{[^}]*\bsecrets\./);
     assert.doesNotMatch(code, /id-token/);
   });
 

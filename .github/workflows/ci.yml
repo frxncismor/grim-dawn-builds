@@ -58,6 +58,11 @@ jobs:
       - name: Check tracked secrets
         run: pnpm run check:secrets
 
+      # T-086: fails if a workflow leaks secrets via set -x, compose config with values,
+      # env artifacts or secrets in fork-reachable jobs.
+      - name: Check CI workflows for secrets
+        run: pnpm exec tsx scripts/check-ci-secrets.mts
+
       # gitleaks (T-083): release tarball pinned by version and SHA-256, verified before use.
       # No token, no secrets and no third-party action are needed for the CLI.
       - name: Install gitleaks (pinned, SHA-256 verified)
