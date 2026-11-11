@@ -2995,9 +2995,11 @@ El JS inicial de `/tier-list` difiere entre `pnpm build` (110011 B) y `verify`
 presupuesto no se modificaron.
 
 **Nota de cierre 2026-11-11 (T-042)**: esta sección se midió con
-`numberOfRuns` 3 y la puerta quedó fijada después en **5** (mediana de 5, umbrales
-intactos). La medición del artefacto de las 04:03 confirma **TBT 0 ms en las 5
-corridas** de `/acerca`, `/legal` y `/autores/grim-dawn-builds`, con su HTML en
+`numberOfRuns` 3, que sigue siendo el valor rastreado en `lighthouserc.json`; la
+puerta decide por mediana de 3 (umbrales intactos). Las tandas de 5 pasadas
+citadas en esta sección son **mediciones manuales** para juzgar la varianza, no la
+configuración de la puerta. La medición del artefacto de las 04:03 confirma **TBT
+0 ms en las 5 pasadas** de `/acerca`, `/legal` y `/autores/grim-dawn-builds`, con su HTML en
 13 630/14 668/12 782 B frente a los 36 391/37 362/35 607 B previos: la resolución
 fue la emisión estática. T-145 queda cerrada; el margen de `/tier-list` (medianas
 de TBT 60–117,5 ms frente a 150 ms, con picos sueltos de 326–350 ms) queda como
@@ -3006,10 +3008,10 @@ observación, sin tarea nueva. Detalle en «Evidencia ejecutada - Rendimiento T-
 
 ### Incidente de concurrencia (2026-11-11)
 
-- A las 04:03:33 otro proceso puso `ci.collect.numberOfRuns` en 5. El orquestador
-  lo restauró a 3 a las 04:12 y lo dejó así. Comprobado después en
-  `lighthouserc.json`: el valor es **5**, no 3. Queda pendiente de decisión del
-  orquestador; esta nota no lo modifica.
+- A las 04:03:33 otro proceso puso `ci.collect.numberOfRuns` en **5 en el árbol
+  de trabajo** (cambio local, nunca commiteado). El orquestador lo restauró a 3
+  a las 04:12; el valor rastreado en `lighthouserc.json` es **3** y así consta en
+  todos los commits (`ca36fed` 1; `c5fdf08` y `ca561ac`, 3).
 - La pasada de `pnpm verify` de 04:05 falló SEO 0.920 en `/legal` y
   `/autores/grim-dawn-builds` porque un build ajeno reemplazó `dist/` a mitad de
   medición: `robots.txt` era la plantilla con `__BASE_URL__` sin sustituir y faltaba
@@ -3253,16 +3255,21 @@ cualquier incumplimiento. El paso `performance` (`pnpm check:performance`) es el
 - **No acredita el CI de T-126** ni ningún despliegue.
 - Los informes `run-*` se **acumulan** bajo `dist/` (ignorado por git) sin
   política de retención.
-- La varianza de TBT depende de la carga del host: por eso N=5 y mediana.
-- **Configuración de la puerta: `numberOfRuns: 5`.** `lighthouserc.json` declara
-  `ci.collect.numberOfRuns: 5`; la mediana de 5 es la que evita que la decisión
-  caiga sobre picos (con 3 corridas se observaron muestras como `[185, 20, 91]`,
-  frente a `[51, 164, 82, 183, 59]` con 5) y los umbrales de plan §6 siguen
-  intactos. La versión anterior de esta entrada registraba un `numberOfRuns: 3`
-  heredado del commit `c5fdf08`; esa discrepancia ya no existe.
+- La varianza de TBT depende de la carga del host: la puerta promedia las
+  `numberOfRuns` pasadas configuradas.
+- **Configuración de la puerta: `numberOfRuns: 3`.** `lighthouserc.json`
+  declara `ci.collect.numberOfRuns: 3` (1 en `ca36fed`, 3 desde `c5fdf08` y
+  `ca561ac`); nunca se commiteó un 5. Las tandas de 5 pasadas que cita esta
+  evidencia son mediciones manuales hechas con un cambio local sin rastrear
+  (ver «Incidente de concurrencia»), útiles para juzgar la varianza pero no
+  para describir la puerta. Los umbrales de plan §6 siguen intactos.
 - **Entorno compartido**: durante la sesión hubo otra sesión de agente
   trabajando en el mismo worktree, midiendo y reconstruyendo `dist/`. Eso produjo
   la medición B y obligó a aislar el directorio de informes y el cwd de LHCI.
+- **Márgenes justos que no se declaran verdes** (observación del 2026-11-11):
+  CLS de `/es` **0,037** y de `/es/tier-list` **0,044** frente al límite 0,05, y
+  TBT de `/tier-list` **137 ms** frente a 150 ms. Pasan, pero sin holgura para
+  una regresión de contenido o de hidratación.
 
 ## T-139 cerrada: ensayo real de la jerarquía y T-141 (porción de dominio) — 2026-11-11
 
