@@ -166,6 +166,10 @@ jobs:
       - name: Catalog check (generated catalog is current)
         run: pnpm run catalog:check
 
+      # T-150: the en/es catalogs must match; verify-local.mjs already runs it.
+      - name: Locale parity (en/es catalogs match)
+        run: pnpm run check:locale-parity
+
       - name: Assets check
         run: pnpm run assets:check
 
