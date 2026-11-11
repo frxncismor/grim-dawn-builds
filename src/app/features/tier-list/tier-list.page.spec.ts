@@ -8,14 +8,14 @@ import { input } from './catalog.test-data';
 import { SITE_BASE_URL } from '../../core/seo/site-url';
 describe('catalog page with URL state', () => {
   afterEach(() => TestBed.resetTestingModule());
-  const start = async (url: string) => {
+  const start = async (url: string, locale: 'en' | 'es' = 'en') => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([
           {
             path: 'tier-list',
             component: TierListPage,
-            resolve: { catalog: () => buildCatalog(input) },
+            resolve: { catalog: () => buildCatalog(input, locale) },
           },
         ]),
         { provide: SITE_BASE_URL, useValue: 'https://example.org/' },
@@ -29,6 +29,7 @@ describe('catalog page with URL state', () => {
     const harness = await start('/tier-list?m=chaman&d=rayo');
     expect(harness.routeNativeElement!.querySelectorAll('gd-tier-card')).toHaveLength(1);
     expect(harness.routeNativeElement!.textContent).toContain('1 of 2');
+    expect(harness.routeNativeElement!.querySelector('h1')?.getAttribute('lang')).toBe('es');
     expect(document.querySelector('link[rel=canonical]')?.getAttribute('href')).toBe(
       'https://example.org/tier-list',
     );
@@ -67,5 +68,9 @@ describe('catalog page with URL state', () => {
     await harness.fixture.whenStable();
     expect(TestBed.inject(Router).url).toBe('/tier-list');
     expect(harness.routeNativeElement!.querySelectorAll('gd-tier-card')).toHaveLength(2);
+  });
+  it('omits lang when the active locale matches the content locale', async () => {
+    const harness = await start('/tier-list', 'es');
+    expect(harness.routeNativeElement!.querySelector('h1')?.hasAttribute('lang')).toBe(false);
   });
 });

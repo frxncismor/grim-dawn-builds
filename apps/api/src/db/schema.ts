@@ -457,6 +457,7 @@ export const buildSectionsMeta = pgTable(
 export const tierLists = pgTable('tier_lists', {
   id: idColumn(),
   slug: text('slug').notNull().unique(),
+  locale: text('locale').notNull().default('es'),
   title: text('title').notNull(),
   game_version: text('game_version').notNull(),
   review_state: reviewStateEnum('review_state').notNull(),

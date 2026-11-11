@@ -228,6 +228,7 @@ export function contractCollections(): ContractCollections {
   });
   const tier: TierList = {
     slug: 'principal',
+    locale: 'es',
     title: 'Catálogo sintético',
     game_version: 'test',
     review_state: 'publicado',

@@ -43,6 +43,13 @@
       "when": 1794279958631,
       "tag": "0005_bootstrap_permissions",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794423924562,
+      "tag": "0006_shallow_garia",
+      "breakpoints": true
     }
   ]
 }

@@ -217,7 +217,7 @@ test.describe('@journeys artefacto público', () => {
 
   test('filtros de /tier-list siguen la URL al recargar y en el historial', async ({ page }) => {
     await open(page, `${PUBLIC_BASE_URL}/tier-list`);
-    const chip = page.getByRole('button', { name: 'Arcanista', exact: true });
+    const chip = page.getByRole('button', { name: 'Arcanist', exact: true });
     await expect(chip).toHaveAttribute('aria-pressed', 'false');
     const initial = await resultCount(page);
 

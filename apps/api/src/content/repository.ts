@@ -34,7 +34,7 @@ const PUBLIC_GUIDE =
 
 // All SQL targets public views. Parameters never form SQL identifiers or expressions.
 const TIER_QUERY = `SELECT jsonb_build_object(
-  'slug', t.slug, 'title', t.title, 'game_version', t.game_version,
+  'slug', t.slug, 'locale', t.locale, 'title', t.title, 'game_version', t.game_version,
   'review_state', t.review_state, 'author_slug', a.slug,
   'masteries', COALESCE((SELECT jsonb_agg(jsonb_build_object(
     'slug', m.slug, 'name_es', m.name_es, 'name_en', m.name_en,

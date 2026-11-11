@@ -14,6 +14,7 @@ export const entry: TierEntry = {
   evaluated_on: '2026-11-09',
 };
 export const input = {
+  locale: 'es',
   title: 'Catálogo propio',
   gameVersion: 'test-version',
   masteries: [

@@ -1,5 +1,7 @@
 <header class="catalog-intro">
-  <h1>{{ catalog.title }}</h1>
+  <h1 [attr.lang]="catalog.contentLocale !== catalog.locale ? catalog.contentLocale : null">
+    {{ catalog.title }}
+  </h1>
   <p i18n="@@catalog.intro">
     All combinations, with their status in view. A slot without a guide is a placeholder: it is not
     a recommendation or a power ranking.

@@ -296,6 +296,7 @@ describe('complete guide and catalog contracts', () => {
 
   const catalog = () => ({
     slug: 'principal',
+    locale: 'es',
     title: 'Catálogo sintético',
     game_version: '1.2.x',
     review_state: 'publicado',

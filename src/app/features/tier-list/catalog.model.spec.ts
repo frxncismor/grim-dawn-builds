@@ -40,6 +40,26 @@ describe('public catalog view model', () => {
       'hibrido',
     ]);
   });
+  it('names combinations and mastery options in the active locale while keeping the content locale', () => {
+    const en = buildCatalog(input, 'en');
+    const es = buildCatalog(input, 'es');
+    const card = (model: typeof en) =>
+      model.cards.find((candidate) => candidate.entry.build_slug === 'tormenta');
+    expect(en.locale).toBe('en');
+    expect(en.contentLocale).toBe('es');
+    expect(card(en)?.combinationName).toBe('Shaman + Soldier');
+    expect(card(es)?.combinationName).toBe('Chamán + Soldado');
+    expect(
+      catalogGroups(en)
+        .find((group) => group.key === 'masteries')
+        ?.options.find((option) => option.value === 'chaman')?.label,
+    ).toBe('Shaman');
+    expect(
+      catalogGroups(es)
+        .find((group) => group.key === 'masteries')
+        ?.options.find((option) => option.value === 'chaman')?.label,
+    ).toBe('Chamán');
+  });
   it('retains multiple builds and suppresses redundant placeholders for their combination', () => {
     const model = buildCatalog({
       ...input,

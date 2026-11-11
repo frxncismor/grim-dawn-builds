@@ -22,8 +22,9 @@ function project(raw: object, shape: Record<string, unknown>): Record<string, un
 /** Server-only: public projection remains mandatory even during local draft review. */
 export async function loadCatalogSnapshot(
   repository: ContentRepository<boolean>,
+  locale: 'en' | 'es' = 'en',
 ): Promise<CatalogSnapshot> {
-  return buildCatalog(await loadCatalogData(repository));
+  return buildCatalog(await loadCatalogData(repository), locale);
 }
 export async function loadCatalogData(
   repository: ContentRepository<boolean>,
@@ -84,6 +85,7 @@ export async function loadPublicDocuments(
 }
 export function catalogInputFromDocuments({ tier, builds }: PublicCatalogDocuments): CatalogInput {
   return {
+    locale: tier.locale,
     title: tier.title,
     gameVersion: tier.game_version,
     masteries: tier.masteries.map((m) => ({
