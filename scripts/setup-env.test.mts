@@ -49,13 +49,17 @@ function makeRoot({ ignore = true }: { ignore?: boolean } = {}): string {
   tempDirs.push(root);
   if (ignore) copyFileSync(join(REPO_ROOT, '.gitignore'), join(root, '.gitignore'));
   mkdirSync(join(root, 'infra', 'docker'), { recursive: true });
-  copyFileSync(join(REPO_ROOT, 'infra', 'docker', '.env.example'), join(root, 'infra', 'docker', '.env.example'));
+  copyFileSync(
+    join(REPO_ROOT, 'infra', 'docker', '.env.example'),
+    join(root, 'infra', 'docker', '.env.example'),
+  );
   git(root, ['init', '-q']);
   return root;
 }
 
 const envPath = (root: string) => join(root, 'infra', 'docker', '.env');
-const secretPath = (root: string, key: string) => join(root, 'infra', 'docker', 'secrets', secretFileName(key));
+const secretPath = (root: string, key: string) =>
+  join(root, 'infra', 'docker', 'secrets', secretFileName(key));
 
 /** Valores de `.env` por clave (solo para pruebas). */
 function envValues(root: string): Map<string, string> {
@@ -80,7 +84,10 @@ function allGeneratedValues(root: string): string[] {
 }
 
 const run = (args: string[]) =>
-  spawnSync(process.execPath, ['--import', 'tsx', SCRIPT, ...args], { cwd: REPO_ROOT, encoding: 'utf8' });
+  spawnSync(process.execPath, ['--import', 'tsx', SCRIPT, ...args], {
+    cwd: REPO_ROOT,
+    encoding: 'utf8',
+  });
 
 describe('first run (T-079)', () => {
   it('creates .env from the template and one secret file per secret field', () => {
@@ -92,7 +99,11 @@ describe('first run (T-079)', () => {
     assert.equal(env.get('DB_USER_API_RO'), 'api_ro', 'role names are kept');
     for (const key of SECRET_KEYS) {
       assert.ok(existsSync(secretPath(root, key)), `${key} file exists`);
-      assert.equal(readFileSync(secretPath(root, key), 'utf8'), env.get(key), `${key} file matches .env`);
+      assert.equal(
+        readFileSync(secretPath(root, key), 'utf8'),
+        env.get(key),
+        `${key} file matches .env`,
+      );
     }
     assert.equal(report.generated, SECRET_KEYS.length);
     assert.deepEqual(
@@ -109,7 +120,10 @@ describe('first run (T-079)', () => {
     assert.equal(new Set(values).size, SECRET_KEYS.length, 'no two roles share a password');
     for (const value of values) {
       assert.match(value, BASE64URL);
-      assert.ok(Buffer.from(value, 'base64url').length >= PASSWORD_BYTES, 'at least 24 bytes of entropy');
+      assert.ok(
+        Buffer.from(value, 'base64url').length >= PASSWORD_BYTES,
+        'at least 24 bytes of entropy',
+      );
     }
   });
 
@@ -121,12 +135,16 @@ describe('first run (T-079)', () => {
     }
   });
 
-  it('restricts new secret files to the owner on POSIX systems', { skip: process.platform === 'win32' }, () => {
-    const root = makeRoot();
-    setupEnv(root);
-    assert.equal(statSync(envPath(root)).mode & 0o777, 0o600);
-    assert.equal(statSync(secretPath(root, 'DB_PASSWORD_API_RO')).mode & 0o777, 0o600);
-  });
+  it(
+    'restricts new secret files to the owner on POSIX systems',
+    { skip: process.platform === 'win32' },
+    () => {
+      const root = makeRoot();
+      setupEnv(root);
+      assert.equal(statSync(envPath(root)).mode & 0o777, 0o600);
+      assert.equal(statSync(secretPath(root, 'DB_PASSWORD_API_RO')).mode & 0o777, 0o600);
+    },
+  );
 });
 
 describe('idempotence (T-079)', () => {
@@ -138,19 +156,29 @@ describe('idempotence (T-079)', () => {
     const second: SetupReport = setupEnv(root);
     assert.deepEqual(snapshot(root), first, 'values and files are byte-identical');
     assert.equal(second.generated, 0);
-    assert.ok(second.actions.every((a) => a.action === 'conservado'), JSON.stringify(second.actions));
+    assert.ok(
+      second.actions.every((a) => a.action === 'conservado'),
+      JSON.stringify(second.actions),
+    );
   });
 
   it('keeps a value the developer set and fills only the empty secret fields', () => {
     const root = makeRoot();
     const custom = ['developer', 'owned', 'value', '7'].join('-');
     const template = readFileSync(join(root, 'infra', 'docker', '.env.example'), 'utf8');
-    writeFileSync(envPath(root), template.replace('DB_PASSWORD_API_RO=', `DB_PASSWORD_API_RO=${custom}`));
+    writeFileSync(
+      envPath(root),
+      template.replace('DB_PASSWORD_API_RO=', `DB_PASSWORD_API_RO=${custom}`),
+    );
 
     setupEnv(root);
 
     assert.equal(envValues(root).get('DB_PASSWORD_API_RO'), custom, 'existing value untouched');
-    assert.equal(readFileSync(secretPath(root, 'DB_PASSWORD_API_RO'), 'utf8'), custom, 'file follows .env value');
+    assert.equal(
+      readFileSync(secretPath(root, 'DB_PASSWORD_API_RO'), 'utf8'),
+      custom,
+      'file follows .env value',
+    );
     const migrator = envValues(root).get('DB_PASSWORD_MIGRATOR') ?? '';
     assert.ok(migrator.length > 0, 'empty field is filled');
     assert.equal(readFileSync(secretPath(root, 'DB_PASSWORD_MIGRATOR'), 'utf8'), migrator);
@@ -161,7 +189,10 @@ describe('idempotence (T-079)', () => {
     setupEnv(root);
     const kept = readFileSync(secretPath(root, 'DB_PASSWORD_IMPORTER'), 'utf8');
     // Simulate a .env whose importer field was cleared: the existing secret file must win.
-    const cleared = readFileSync(envPath(root), 'utf8').replace(/^DB_PASSWORD_IMPORTER=.*$/m, 'DB_PASSWORD_IMPORTER=');
+    const cleared = readFileSync(envPath(root), 'utf8').replace(
+      /^DB_PASSWORD_IMPORTER=.*$/m,
+      'DB_PASSWORD_IMPORTER=',
+    );
     writeFileSync(envPath(root), cleared);
     assert.ok(/^DB_PASSWORD_IMPORTER=\r?$/m.test(readFileSync(envPath(root), 'utf8')));
 
@@ -249,7 +280,8 @@ describe('fail-closed guards (T-080 patterns)', () => {
     );
     assert.throws(
       () => setupEnv(root),
-      (error: Error) => error.message.includes('DB_PASSWORD_API_RO') && !error.message.includes(leaked),
+      (error: Error) =>
+        error.message.includes('DB_PASSWORD_API_RO') && !error.message.includes(leaked),
     );
     assert.ok(!existsSync(envPath(root)));
   });

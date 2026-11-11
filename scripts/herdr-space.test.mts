@@ -3,13 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import {
-  oneLine,
-  orchestratorPrompt,
-  parseCliArgs,
-  planSpace,
-  spaceName,
-} from './herdr-space.mts';
+import { oneLine, orchestratorPrompt, parseCliArgs, planSpace, spaceName } from './herdr-space.mts';
 
 test('space names follow <project>/<specialty> in lowercase with dashes', () => {
   assert.equal(spaceName('grim-dawn-builds', 'ui'), 'grim-dawn-builds/ui');

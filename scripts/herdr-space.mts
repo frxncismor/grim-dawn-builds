@@ -133,7 +133,9 @@ async function main(argv: string[]): Promise<number> {
     const options = parseCliArgs(argv, process.cwd());
     const plan = planSpace(options);
     if (options.print) {
-      console.log(JSON.stringify({ space: plan.name, tab: plan.tab, command: plan.command }, null, 2));
+      console.log(
+        JSON.stringify({ space: plan.name, tab: plan.tab, command: plan.command }, null, 2),
+      );
       console.log(
         'Comprobación pendiente tras lanzar: `herdr-app ls` debe mostrar `app` y `status` no nulos.',
       );

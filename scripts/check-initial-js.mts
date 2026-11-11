@@ -109,12 +109,7 @@ export async function measureInitialJs(
   const [stats, html] = await Promise.all([
     readFile(join(root, 'stats.json'), 'utf8'),
     readFile(
-      join(
-        root,
-        'browser',
-        ...segments,
-        route === 'home' ? 'index.html' : 'tier-list/index.html',
-      ),
+      join(root, 'browser', ...segments, route === 'home' ? 'index.html' : 'tier-list/index.html'),
       'utf8',
     ),
   ]);

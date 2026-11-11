@@ -267,10 +267,7 @@ test.describe('@journeys conmutador de idioma', () => {
     await page.getByRole('link', { name: 'Español', exact: true }).click();
     await page.waitForURL(/\/es\/tier-list\?m=arcanista$/);
     expect(await page.locator('html').getAttribute('lang')).toBe('es');
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-      'href',
-      /\/es\/tier-list$/,
-    );
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/es\/tier-list$/);
     await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute(
       'href',
       /\/tier-list$/,

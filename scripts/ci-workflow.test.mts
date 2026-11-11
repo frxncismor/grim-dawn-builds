@@ -74,7 +74,8 @@ export function validateCiWorkflow(source: string): string[] {
 
   if (/pull_request_target/.test(text)) problems.push('uses pull_request_target (forbidden)');
   // Solo una expresión de secreto ${{ secrets.X }}, no un nombre de archivo que contenga «secrets.».
-  if (/\$\{\{[^}]*\bsecrets\./.test(text)) problems.push('references secrets (workflow must need none)');
+  if (/\$\{\{[^}]*\bsecrets\./.test(text))
+    problems.push('references secrets (workflow must need none)');
   if (/\bset -x\b/.test(text)) problems.push('uses set -x (may leak values)');
   if (/\bpermissions:\s*(read-all|write-all)\b/.test(text)) {
     problems.push('uses read-all/write-all permissions');
@@ -113,9 +114,7 @@ export function validateCiWorkflow(source: string): string[] {
   }
 
   // Permissions: top-level and every job-level block must be exactly `contents: read`.
-  const permIdx = lines
-    .map((l, i) => (/^\s*permissions:/.test(l) ? i : -1))
-    .filter((i) => i >= 0);
+  const permIdx = lines.map((l, i) => (/^\s*permissions:/.test(l) ? i : -1)).filter((i) => i >= 0);
   if (!permIdx.some((i) => indentOf(lines[i]) === 0)) {
     problems.push('missing top-level permissions block');
   }
@@ -172,7 +171,10 @@ export function validateCiWorkflow(source: string): string[] {
     if (!runs.includes(command)) problems.push(`missing required check: ${command}`);
   }
   for (const run of runs) {
-    if (/--fix\b|--write\b|:fix\b|--update-snapshots\b/.test(run) || /^pnpm (run )?format$/.test(run)) {
+    if (
+      /--fix\b|--write\b|:fix\b|--update-snapshots\b/.test(run) ||
+      /^pnpm (run )?format$/.test(run)
+    ) {
       problems.push(`check must not modify the tree: ${run}`);
     }
     if (/\bdeploy\b|\bpublish\b|docker push/i.test(run)) {
@@ -286,7 +288,9 @@ describe('PR verification workflow (T-064)', () => {
       return index;
     };
 
-    const fixtureContent = indexOf('pnpm run content:validate -- --dir scripts/fixtures/content-valid');
+    const fixtureContent = indexOf(
+      'pnpm run content:validate -- --dir scripts/fixtures/content-valid',
+    );
     const realContent = indexOf('pnpm run content:validate -- --dir content');
     const catalog = indexOf('pnpm run catalog:check');
     const draftsBuild = indexOf('pnpm exec ng build --output-path dist/e2e-drafts');
@@ -318,34 +322,45 @@ describe('PR verification workflow (T-064)', () => {
     ['missing target branch main', () => mutate(/ {6}- main\n/, '')],
     ['extra trigger (push)', () => mutate(/^on:\n/m, 'on:\n  push:\n    branches: [main]\n')],
     ['contents: write', () => mutate(/contents: read/, 'contents: write')],
-    ['write-all permissions', () => mutate(/^permissions:\n {2}contents: read/m, 'permissions: write-all')],
+    [
+      'write-all permissions',
+      () => mutate(/^permissions:\n {2}contents: read/m, 'permissions: write-all'),
+    ],
     ['tag instead of SHA', () => mutate(/actions\/checkout@[0-9a-f]{40}/, 'actions/checkout@v7')],
     ['SHA without version comment', () => mutate(/ # v7\.0\.1/, '')],
     ['floating runner', () => mutate('ubuntu-24.04', 'ubuntu-latest')],
     ['unfrozen install', () => mutate('pnpm install --frozen-lockfile', 'pnpm install')],
-    ['secrets check removed', () => mutate(/ {6}- name: Check tracked secrets\n {8}run: pnpm run check:secrets\n/, '')],
+    [
+      'secrets check removed',
+      () => mutate(/ {6}- name: Check tracked secrets\n {8}run: pnpm run check:secrets\n/, ''),
+    ],
     ['lint:md removed', () => mutate(/\n {6}- name: [^\n]*\n {8}run: pnpm run lint:md\n/, '\n')],
     ['markdown fix in CI', () => mutate('pnpm run lint:md\n', 'pnpm run lint:md:fix\n')],
-    ['content validate not fixture-scoped', () => mutate('pnpm run content:validate -- --dir scripts/fixtures/content-valid', 'pnpm run content:validate')],
-    ['secret reference', () => mutate('pnpm run build', 'pnpm run build\n        env:\n          X: ${{ secrets.X }}')],
-    ['deploy step', () => mutate('pnpm run build', 'pnpm run build\n      - run: deploy-now')],
-    ['checkout keeps credentials', () => mutate('persist-credentials: false', 'persist-credentials: true')],
-    // T-126: each quality gate and content check must stay in the PR workflow.
     [
-      'journeys gate removed',
+      'content validate not fixture-scoped',
       () =>
         mutate(
-          /\n {6}- name: E2E journeys[^\n]*\n {8}run: pnpm run e2e:journeys\n/,
-          '\n',
+          'pnpm run content:validate -- --dir scripts/fixtures/content-valid',
+          'pnpm run content:validate',
         ),
     ],
     [
+      'secret reference',
+      () => mutate('pnpm run build', 'pnpm run build\n        env:\n          X: ${{ secrets.X }}'),
+    ],
+    ['deploy step', () => mutate('pnpm run build', 'pnpm run build\n      - run: deploy-now')],
+    [
+      'checkout keeps credentials',
+      () => mutate('persist-credentials: false', 'persist-credentials: true'),
+    ],
+    // T-126: each quality gate and content check must stay in the PR workflow.
+    [
+      'journeys gate removed',
+      () => mutate(/\n {6}- name: E2E journeys[^\n]*\n {8}run: pnpm run e2e:journeys\n/, '\n'),
+    ],
+    [
       'axe gate removed',
-      () =>
-        mutate(
-          /\n {6}- name: Accessibility gate[^\n]*\n {8}run: pnpm run e2e:a11y\n/,
-          '\n',
-        ),
+      () => mutate(/\n {6}- name: Accessibility gate[^\n]*\n {8}run: pnpm run e2e:a11y\n/, '\n'),
     ],
     [
       'performance gate removed',
@@ -357,11 +372,7 @@ describe('PR verification workflow (T-064)', () => {
     ],
     [
       'catalog check removed',
-      () =>
-        mutate(
-          /\n {6}- name: Catalog check[^\n]*\n {8}run: pnpm run catalog:check\n/,
-          '\n',
-        ),
+      () => mutate(/\n {6}- name: Catalog check[^\n]*\n {8}run: pnpm run catalog:check\n/, '\n'),
     ],
     [
       'playwright install removed',
@@ -400,7 +411,10 @@ describe('PR verification workflow (T-064)', () => {
         ),
     ],
     ['short timeout', () => mutate('timeout-minutes: 45', 'timeout-minutes: 30')],
-    ['tab indentation', () => mutate(/\n {8}run: pnpm run check:scope/, '\n\t        run: pnpm run check:scope')],
+    [
+      'tab indentation',
+      () => mutate(/\n {8}run: pnpm run check:scope/, '\n\t        run: pnpm run check:scope'),
+    ],
     [
       'e2e snapshots rewritten in CI',
       () => mutate('run: pnpm run e2e:journeys', 'run: pnpm run e2e:journeys --update-snapshots'),

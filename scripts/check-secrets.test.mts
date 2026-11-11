@@ -29,7 +29,8 @@ after(() => {
 });
 
 const noContent = (): string => '';
-const scanText = (files: Record<string, string>): Finding[] => scanFiles(Object.keys(files), (p) => files[p]);
+const scanText = (files: Record<string, string>): Finding[] =>
+  scanFiles(Object.keys(files), (p) => files[p]);
 const rules = (findings: Finding[]): string[] => findings.map((f) => f.rule);
 const CLEAN = 'export const ok = 1;\n';
 
@@ -48,7 +49,8 @@ function git(root: string, args: string[]): void {
 function makeRepo(tracked: Record<string, string>, untracked: Record<string, string> = {}): string {
   const root = mkdtempSync(join(tmpdir(), 'check-secrets-'));
   tempDirs.push(root);
-  for (const [rel, content] of Object.entries({ ...tracked, ...untracked })) write(root, rel, content);
+  for (const [rel, content] of Object.entries({ ...tracked, ...untracked }))
+    write(root, rel, content);
   git(root, ['init', '-q']);
   git(root, ['add', '--', ...Object.keys(tracked)]);
   return root;
@@ -56,7 +58,13 @@ function makeRepo(tracked: Record<string, string>, untracked: Record<string, str
 
 describe('tracked .env files', () => {
   it('fails tracked .env files at any depth', () => {
-    for (const path of ['.env', '.env.local', '.env.production', 'infra/docker/.env', 'apps/api/.env.test']) {
+    for (const path of [
+      '.env',
+      '.env.local',
+      '.env.production',
+      'infra/docker/.env',
+      'apps/api/.env.test',
+    ]) {
       assert.deepEqual(rules(scanFiles([path], noContent)), ['tracked-env-file'], path);
     }
   });
@@ -83,7 +91,10 @@ describe('.env.example', () => {
   });
 
   it('passes an empty secret field followed by an inline comment', () => {
-    assert.deepEqual(scanText({ '.env.example': 'DB_PASSWORD_MIGRATOR= # set by pnpm setup:env\n' }), []);
+    assert.deepEqual(
+      scanText({ '.env.example': 'DB_PASSWORD_MIGRATOR= # set by pnpm setup:env\n' }),
+      [],
+    );
   });
 
   it('fails a secret field with a non-empty value without echoing it', () => {
@@ -99,39 +110,72 @@ describe('.env.example', () => {
   });
 
   it('fails weak placeholder markers in any value', () => {
-    for (const value of ['changeme', 'CHANGE_ME', 'password', 'db_password', 'passwd', 'xxx', '<your-key>', 'your-token-here', 'replace-me']) {
-      assert.deepEqual(rules(scanText({ '.env.example': `POSTGRES_USER=${value}\n` })), ['env-example-placeholder'], value);
+    for (const value of [
+      'changeme',
+      'CHANGE_ME',
+      'password',
+      'db_password',
+      'passwd',
+      'xxx',
+      '<your-key>',
+      'your-token-here',
+      'replace-me',
+    ]) {
+      assert.deepEqual(
+        rules(scanText({ '.env.example': `POSTGRES_USER=${value}\n` })),
+        ['env-example-placeholder'],
+        value,
+      );
     }
   });
 });
 
 describe('tracked secrets directories', () => {
   it('fails tracked files inside any secrets/ directory', () => {
-    for (const path of ['infra/docker/secrets/db_password.txt', 'secrets/readme.txt', 'apps/api/Secrets/key']) {
+    for (const path of [
+      'infra/docker/secrets/db_password.txt',
+      'secrets/readme.txt',
+      'apps/api/Secrets/key',
+    ]) {
       assert.deepEqual(rules(scanFiles([path], noContent)), ['tracked-secrets-dir'], path);
     }
   });
 
   it('does not flag files merely named after secrets', () => {
-    assert.deepEqual(scanText({ 'docs/security/secrets.md': '', 'src/app/secrets-panel.ts': CLEAN }), []);
+    assert.deepEqual(
+      scanText({ 'docs/security/secrets.md': '', 'src/app/secrets-panel.ts': CLEAN }),
+      [],
+    );
   });
 });
 
 describe('Dockerfile ARG/ENV/COPY secret injection', () => {
   it('checks every Dockerfile naming form', () => {
     for (const path of ['apps/api/Dockerfile', 'Dockerfile.dev', 'api.Dockerfile']) {
-      assert.deepEqual(rules(scanText({ [path]: 'ARG DB_PASSWORD\n' })), ['docker-secret-injection'], path);
+      assert.deepEqual(
+        rules(scanText({ [path]: 'ARG DB_PASSWORD\n' })),
+        ['docker-secret-injection'],
+        path,
+      );
     }
   });
 
   it('fails ARG and ENV with secret names, with or without defaults', () => {
-    assert.deepEqual(rules(scanText({ Dockerfile: 'ARG API_TOKEN=abc\n' })), ['docker-secret-injection']);
-    assert.deepEqual(rules(scanText({ Dockerfile: 'ENV API_TOKEN=abc\n' })), ['docker-secret-injection']);
-    assert.deepEqual(rules(scanText({ Dockerfile: 'ENV DB_PASSWORD hunter\n' })), ['docker-secret-injection']);
+    assert.deepEqual(rules(scanText({ Dockerfile: 'ARG API_TOKEN=abc\n' })), [
+      'docker-secret-injection',
+    ]);
+    assert.deepEqual(rules(scanText({ Dockerfile: 'ENV API_TOKEN=abc\n' })), [
+      'docker-secret-injection',
+    ]);
+    assert.deepEqual(rules(scanText({ Dockerfile: 'ENV DB_PASSWORD hunter\n' })), [
+      'docker-secret-injection',
+    ]);
   });
 
   it('fails a secret ENV hidden in a continued instruction and reports its first line', () => {
-    const findings = scanText({ Dockerfile: 'ENV NODE_ENV=production \\\n    DB_PASSWORD=value\n' });
+    const findings = scanText({
+      Dockerfile: 'ENV NODE_ENV=production \\\n    DB_PASSWORD=value\n',
+    });
     assert.deepEqual(rules(findings), ['docker-secret-injection']);
     assert.equal(findings[0].line, 1);
   });
@@ -153,14 +197,20 @@ describe('Dockerfile ARG/ENV/COPY secret injection', () => {
 
   it('fails COPY or ADD of .env files and secrets directories', () => {
     assert.deepEqual(rules(scanText({ Dockerfile: 'COPY .env ./\n' })), ['docker-secret-copy']);
-    assert.deepEqual(rules(scanText({ Dockerfile: 'ADD infra/docker/secrets/db /run/db\n' })), ['docker-secret-copy']);
+    assert.deepEqual(rules(scanText({ Dockerfile: 'ADD infra/docker/secrets/db /run/db\n' })), [
+      'docker-secret-copy',
+    ]);
   });
 });
 
 describe('high-confidence secret patterns', () => {
   it('fails synthetic provider tokens and private key headers in code and config', () => {
-    assert.deepEqual(rules(scanText({ 'src/app/config.ts': `export const t = '${SYN_GH}';\n` })), ['secret-pattern']);
-    assert.deepEqual(rules(scanText({ 'scripts/setup.mts': `const id = '${SYN_AWS}';\n` })), ['secret-pattern']);
+    assert.deepEqual(rules(scanText({ 'src/app/config.ts': `export const t = '${SYN_GH}';\n` })), [
+      'secret-pattern',
+    ]);
+    assert.deepEqual(rules(scanText({ 'scripts/setup.mts': `const id = '${SYN_AWS}';\n` })), [
+      'secret-pattern',
+    ]);
     assert.deepEqual(rules(scanText({ 'infra/key.conf': `${SYN_PEM}\n` })), ['secret-pattern']);
   });
 
@@ -193,7 +243,10 @@ describe('high-confidence secret patterns', () => {
   });
 
   it('fails URLs with a literal password in content and package scripts', () => {
-    assert.deepEqual(rules(scanText({ 'content/builds/x.json': `{"url":"${SYN_URL(SYN_PW)}"}\n` })), ['credential-url']);
+    assert.deepEqual(
+      rules(scanText({ 'content/builds/x.json': `{"url":"${SYN_URL(SYN_PW)}"}\n` })),
+      ['credential-url'],
+    );
     const manifest = JSON.stringify({ scripts: { db: `psql ${SYN_URL(SYN_PW)}` } });
     assert.deepEqual(rules(scanText({ 'package.json': manifest })), ['credential-url']);
   });
@@ -225,11 +278,15 @@ describe('intentional exclusions (pattern rules only)', () => {
 
   it('still fails structural rules inside fixture folders', () => {
     assert.deepEqual(rules(scanFiles(['scripts/fixtures/.env'], noContent)), ['tracked-env-file']);
-    assert.deepEqual(rules(scanText({ 'scripts/fixtures/Dockerfile': 'ARG DB_PASSWORD\n' })), ['docker-secret-injection']);
+    assert.deepEqual(rules(scanText({ 'scripts/fixtures/Dockerfile': 'ARG DB_PASSWORD\n' })), [
+      'docker-secret-injection',
+    ]);
   });
 
   it('skips binary content but still applies path rules', () => {
-    const findings = scanFiles(['assets/logo.png', '.env'], (p) => (p.endsWith('.png') ? undefined : `${SYN_PW}`));
+    const findings = scanFiles(['assets/logo.png', '.env'], (p) =>
+      p.endsWith('.png') ? undefined : `${SYN_PW}`,
+    );
     assert.deepEqual(rules(findings), ['tracked-env-file']);
   });
 });
@@ -287,7 +344,10 @@ describe('git-tracked scan', () => {
 
   it('reports committed .env files and secrets directories', () => {
     const root = makeRepo({ '.env': 'X=1\n', 'infra/docker/secrets/db.txt': 'x' });
-    assert.deepEqual(rules(scanRepository(root).findings).sort(), ['tracked-env-file', 'tracked-secrets-dir']);
+    assert.deepEqual(rules(scanRepository(root).findings).sort(), [
+      'tracked-env-file',
+      'tracked-secrets-dir',
+    ]);
   });
 
   it('reports the line of a tracked secret pattern', () => {
@@ -308,7 +368,10 @@ describe('repository and CLI', () => {
   });
 
   const run = (args: string[]) =>
-    spawnSync(process.execPath, ['--import', 'tsx', SCRIPT, ...args], { cwd: REPO_ROOT, encoding: 'utf8' });
+    spawnSync(process.execPath, ['--import', 'tsx', SCRIPT, ...args], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+    });
 
   it('exits 0 for the current repository', () => {
     const result = run([]);
