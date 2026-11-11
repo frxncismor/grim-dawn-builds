@@ -78,53 +78,59 @@ La metodología de orquestador y agentes por rol está en
 - Si un proveedor agota su cuota, se elige un modelo disponible, se reduce la
   unidad de trabajo y **se consigna en el relevo el modelo realmente usado**.
 
-## Correspondencia de modelos en OpenCode Go y Codex
+## Correspondencia de modelos por proveedor y orden de prioridad
 
 Al usar los agentes SDD configurados previamente para Copilot, conservar sus
-responsabilidades, instrucciones y límites, y elegir estos modelos disponibles
-en la suscripción activa de OpenCode Go (`opencode-go`) o en Codex según el
-harness en ejecución. La correspondencia es por función; no implica capacidades
-idénticas.
+responsabilidades, instrucciones y límites, y elegir el modelo disponible según
+este **orden de prioridad por disponibilidad** (decisión del usuario,
+2026-11-10):
 
-| Agente               | Modelo original de Copilot | Modelo en OpenCode Go (`opencode-go`) | Modelo en Codex | Razonamiento |
-| -------------------- | -------------------------- | ------------------------------------- | --------------- | ------------ |
-| `sdd-plan`           | Claude Sonnet 5.5          | `opencode-go/gemini-4-argon#high`     | `gpt-6.1-sol`   | `high`       |
-| `sdd-implement`      | Claude Haiku 5.5           | `opencode-go/claude-haiku-5-5#medium` | `gpt-6-luna`    | `medium`     |
-| `sdd-ui`             | GPT-5.6 Luna               | `opencode-go/gpt-6-luna#high`         | `gpt-6-luna`    | `high`       |
-| `sdd-escalation`     | Claude Sonnet 5.5          | `opencode-go/gemini-4-argon#high`     | `gpt-6.1-sol`   | `high`       |
-| `sdd-second-opinion` | GPT-5.6 Terra              | `opencode-go/grok-4.7#high`           | `gpt-6.1-terra` | `high`       |
+```text
+1. GitHub Copilot   (github-copilot/*)
+2. Codex            (openai/*)
+3. OpenCode Go      (opencode-go/*)
+4. DeepSeek         (deepseek/*)
+```
 
-### Capa de continuidad (cuando la suscripción de pago está agotada)
+Se usa el primero de la lista **cuyo modelo responda**. Si el primero agota su
+cuota, se baja un escalón sin degradar la verificación y se registra el modelo
+realmente usado.
 
-Los proveedores de pago se agotan. Cuando `opencode-go` devuelve
-`OpenCode Go usage limit reached` o `opencode` devuelve `Insufficient balance`,
-se usa esta capa **sin degradar la verificación**:
+| Agente               | GitHub Copilot (`github-copilot/`)     | Codex (`openai/`)  | OpenCode Go (`opencode-go/`)          | DeepSeek (`deepseek/`)       | Razonamiento |
+| -------------------- | -------------------------------------- | ------------------ | ------------------------------------- | ---------------------------- | ------------ |
+| **Orquestador**      | `claude-sonnet-5.5#high`               | `gpt-6.1-sol#high` | `gemini-4-argon#high`                 | `deepseek-flash#high`        | `high`       |
+| `sdd-plan`           | `claude-sonnet-5.5#high`               | `gpt-6.1-sol#high` | `gemini-4-argon#high`                 | `deepseek-flash#high`        | `high`       |
+| `sdd-implement`      | `claude-haiku-5.5#medium`              | `gpt-6-luna#medium`| `claude-haiku-5-5#medium`             | `deepseek-flash#high`        | `medium`     |
+| `sdd-ui`             | `gpt-5.6-luna#high`                    | `gpt-6-luna#high`  | `gpt-6-luna#high`                     | `deepseek-flash#high`        | `high`       |
+| `sdd-escalation`     | `claude-sonnet-5.5#high`               | `gpt-6.1-sol#high` | `gemini-4-argon#high`                 | `deepseek-v4-pro#high`       | `high`       |
+| `sdd-second-opinion` | `gpt-5.6-terra#high`                   | `gpt-6.1-terra#high` | `grok-4.7#high`                     | `deepseek-v4-pro#high`       | `high`       |
+| **Revisión final de spec** | el modelo más potente disponible | —                  | —                                     | —                            | ver `T-136`  |
 
-| Agente               | Modelo de continuidad recomendado | Coste / notas |
-| -------------------- | --------------------------------- | ------------- |
-| **Orquestador**      | `deepseek/deepseek-flash#high`     | $0,15/$0,60 por M tokens; verificado en 2,4 M tokens por ~$0,05 |
-| `sdd-plan`           | `deepseek/deepseek-flash#high`     | mismo modelo; buena retención de contexto largo |
-| `sdd-implement`      | `deepseek/deepseek-flash#high`     | ejecución de una tarea por vez |
-| `sdd-ui`             | `deepseek/deepseek-flash#high`     | revisar axe y capturas con más rigor por ser modelo flash |
-| `sdd-escalation`     | `deepseek/deepseek-v4-pro#high`    | $0,66/$1,98; solo para desbloqueos difíciles |
-| `sdd-second-opinion` | `deepseek/deepseek-v4-pro#high`    | familia distinta a `deepseek-flash` no aplica: usar `gemini-4-argon` o `grok-4.7` cuando vuelvan |
-| **Revisión final de spec** | el modelo **más potente disponible** | requisito explícito del usuario; ver `T-136` |
+### Estado observado de cada escalón (2026-11-10)
 
-Alternativa sin coste: `opencode/deepseek-v4.1-flash-free#high` es el mismo
-modelo de DeepSeek por la ruta gratuita. Se prefiere el proveedor `deepseek`
-porque no comparte cuota con los modelos gratuitos y evita los límites de tasa
-que cortaron varias tareas en esta sesión.
+| Escalón | Estado | Evidencia |
+| --- | --- | --- |
+| GitHub Copilot | **agotado** | `You have exceeded your monthly quota` en `claude-sonnet-5.5` y `gpt-6-luna` |
+| Codex (`openai/`) | **disponible** | `gpt-6.1-sol#high` responde; cuota semanal de Codex era 4 % a las 19:52 |
+| OpenCode Go | **agotado** | `OpenCode Go usage limit reached`; el error no expone hora de reinicio |
+| DeepSeek | **disponible** | `deepseek-flash#high` y `deepseek-v4-pro#max` responden |
 
-Reglas de la capa de continuidad:
+Este cuadro caduca: se actualiza cuando cambie la disponibilidad, no se asume.
+
+### Reglas de la cadena de prioridad
 
 - Se consigna siempre en `handoff.md` el modelo **realmente usado**, no el
   planificado.
-- Si el modelo de continuidad es flash, el orquestador **sube la profundidad de
-  verificación**: repite él mismo las comprobaciones de accesibilidad y capturas
-  que el agente declare, en lugar de fiarse del log del agente.
-- Cuando vuelva a haber saldo, **no se reinicia** el trabajo en curso: se
-  termina la tarea con el modelo actual y el cambio de modelo se aplica a la
-  tarea siguiente.
+- Cuando el escalón usado es `deepseek-flash`, el orquestador **sube la
+  profundidad de verificación**: repite él mismo las comprobaciones de
+  accesibilidad y capturas que el agente declare, en lugar de fiarse del log.
+- Cuando vuelva a haber cuota, **no se reinicia** el trabajo en curso: se termina
+  la tarea con el modelo actual y el cambio se aplica a la tarea siguiente.
+- La segunda opinión debe venir de una **familia distinta** a la de planificación
+  cuando ambas estén disponibles en el mismo escalón.
+- Alternativa sin coste: `opencode/deepseek-v4.1-flash-free#high` es el mismo
+  modelo DeepSeek por la ruta gratuita; se prefiere el proveedor `deepseek`
+  porque no comparte cuota con los modelos gratuitos.
 
 ## Uso
 
