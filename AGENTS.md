@@ -62,8 +62,17 @@ La metodología de orquestador y agentes por rol está en
 
 - **Delegación automática y jerárquica.** El orquestador del programa (nivel 0) no
   ejecuta: reparte por dominio. Cada **orquestador de dominio** (UI, tests, backend,
-  infraestructura, Herdr/DX) descompone su tarea y despacha a **sus propios
-  subagentes**. Ningún orquestador implementa lo que puede delegar.
+  infraestructura, Herdr/DX, acceso remoto) descompone su tarea y despacha a **sus
+  propios subagentes**. Ningún orquestador implementa lo que puede delegar. El
+  estándar completo está en `ORCHESTRATION.md` §12 y aplica a este y a cualquier
+  proyecto.
+- **Una ventana por dominio en Herdr, máximo 2 terminales por ventana.** Para abrir
+  una ventana nueva con su agente dentro:
+  `herdr-app do space.new --name <dominio> --folder <ruta>` y después
+  `herdr-app do tab.new --space <id> --name <tarea> --folder <ruta> --argv '<json>'`.
+  El `task` de `tab.new` se añade como argumento posicional y `opencode` lo
+  interpreta como **directorio**: el prompt va dentro de `argv`
+  (`["opencode","--auto","--prompt","…"]`).
 - **Todo agente se lanza visible en Herdr.** Un agente que no se ve no se puede
   supervisar. Regla obligatoria (ver `docs/orchestration/herdr.md`):
   - `hc run --bg --name <nombre> --cwd <repo> --label herdr.space=<id>
