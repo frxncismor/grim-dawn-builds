@@ -151,7 +151,7 @@ Sin elegir proveedor. **[SIN PROVEEDOR]** = implementable ya; **[DIFERIDA-HOSTIN
 
 **Toda la sección está DIFERIDA y no se implementa en el MVP.** Ninguna tarea concede permiso ni habilita fuentes. Cada fuente exige enmienda/spec propio y decisión del usuario. Única parte ya admisible: documental (T-091) y la guarda `check-scope` (T-069 ampliada).
 
-- [ ] **T-091** [LISTA, documental] Política de fuentes permitidas/prohibidas (clases A–F) y flujo de solicitud de permiso — `docs/content/source-policy.md` — revisado; coincide con plan §14.1; sin código.
+- [x] **T-091** [LISTA, documental] Política de fuentes permitidas/prohibidas (clases A–F) y flujo de solicitud de permiso — `docs/content/source-policy.md` — revisado; coincide con plan §14.1; sin código.
 - [ ] **T-069b** [LISTA] Ampliar `check-scope` para fallar ante crawlers/scrapers o parsers de sitios de terceros (p. ej. `puppeteer`, `cheerio`, `playwright` fuera de tests e2e, `crawler`) en dependencias/código de ingesta — `scripts/check-scope.mts` + test — pasa hoy; falla con un fixture que añade un scraper (AC-19). Depende de T-069.
 - [ ] **T-092** [DIFERIDA] Registro de fuentes extendido (clase, prueba, alcance, caducidad, estado) en esquema Drizzle + CHECK: fuente no `habilitada` ⇒ sin lotes — migración — pruebas SQL de rechazo.
 - [ ] **T-093** [DIFERIDA] Puerta de permiso: lote exige fuente habilitada con `rights_status` aprobado y vigente; revocación suspende y marca lotes — pruebas de integración.
@@ -168,8 +168,8 @@ Sin elegir proveedor. **[SIN PROVEEDOR]** = implementable ya; **[DIFERIDA-HOSTIN
 
 Ninguna tarea habilita fuentes reales ni scraping. Orden: T-101/T-102/T-103 → T-104 → T-107 → T-105/T-106 → T-108 → T-109.
 
-- [ ] **T-101** [LISTA, documental] Plantilla de solicitud de permiso — `docs/content/permission-request-template.md` — cubre alcance, atribución, vigencia, retirada y exige respuesta explícita; revisada contra plan §15.3.
-- [ ] **T-102** [LISTA, documental] Runbook de retirada/takedown y canal de contacto — `docs/content/takedown-runbook.md` — pasos, plazos (≤ 72 h) y registro; revisado.
+- [x] **T-101** [LISTA, documental] Plantilla de solicitud de permiso — `docs/content/permission-request-template.md` — cubre alcance, atribución, vigencia, retirada y exige respuesta explícita; revisada contra plan §15.3.
+- [x] **T-102** [LISTA, documental] Runbook de retirada/takedown y canal de contacto — `docs/content/takedown-runbook.md` — pasos, plazos (≤ 72 h) y registro; revisado.
 - [ ] **T-103** [LISTA, documental] Procedimiento de revisión de cambios de la fuente + evaluación del foro de Grim Dawn (términos y rights por autor) — `docs/content/source-change-review.md`, `docs/content/forum-source-assessment.md` — sin acceso automatizado; estado inicial del foro `pending`.
 - [ ] **T-104** [LISTA] Tipos Zod/dominio: `SourceRightsEvidence`, `BuildAdaptation`, `PermissionRequest`, `TakedownEvent`, `SourceChangeEvent`, `entry_kind='build_adaptada'` — `src/app/core/content/schema.ts` (luego `packages/domain`) + pruebas unitarias — rechazan: sin campo FR-28, evidencia sin `covers_adaptation`, evidencia caducada/revocada, editor = verificador (AC-20).
 - [ ] **T-107** [LISTA] Reglas puras de la puerta de publicación (checklist plan §15.2) y degradación a _link-only_ — dominio + pruebas — «solo atribución» ⇒ rechazada; evidencia revocada ⇒ degrada. Depende de T-104.

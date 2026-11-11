@@ -1534,9 +1534,11 @@ Ampliación confirmada por sdd-escalation antes de código: `features/author/*` 
 core/content/catalog.server.ts (extraer documentos/proyección sin cambiar wrapper
 loadCatalogData), core/content/author-pages.server.ts/.test.mts; package.json y
 quickstart.md. No cambios al contrato canónico/API/SQL ni dependencias nuevas.
-La página legal requiere canal real de contacto: pregunta async pendiente; no
-inventar correo, responsable, servicio ni SLA. Autor/acerca se implementan ahora,
-legal y cierre T-039 esperan ese dato. Guía→autor se verifica al existir T-037.
+La página legal usa el **canal de contacto decidido el 2026-11-10**: GitHub Issues
+del repositorio (`https://github.com/frxncismor/grim-dawn-builds/issues`), para
+retiradas y contacto general. No inventar correo, responsable, servicio ni SLA.
+Ese canal desbloquea `/legal` y `T-102`. Autor/acerca ya existen y verifican;
+`T-039` se cierra con la página legal y el enlace del pie.
 
 loadPublicSiteData comparte lecturas públicas tier/builds ya existentes; deriva
 perfiles desde PublicBuild.author y resuelve solo propietario de tier restante
@@ -3186,3 +3188,40 @@ detección de cuelgues por PID y límites conocidos.
 **Orden sugerido**: `T-143` (hecha) → `T-140` → `T-141` → `T-142` → `T-139`.
 La jerarquía va al final porque necesita que las suites de calidad existan para
 repartirlas entre orquestadores.
+
+### 17.50 Bloque documental de derechos y fuentes (T-091, T-101, T-102)
+
+**Origen**: tareas activas del MVP, sin sección de plan propia. Son documentales:
+no tocan código, no publican contenido y no habilitan ninguna fuente.
+
+**Archivos**: `docs/content/source-policy.md` (T-091),
+`docs/content/permission-request-template.md` (T-101) y
+`docs/content/takedown-runbook.md` (T-102). Sin dependencias ni cambios de código.
+
+**Reglas de contenido**, derivadas de la constitución I, II y VII:
+
+- Ninguna fuente se considera permitida por ser pública, por silencio del autor ni
+  por `robots.txt`. El permiso es explícito, por fuente y por alcance.
+- La atribución es obligatoria y **nunca sustituye** al permiso.
+- Sin derechos confirmados solo cabe la tarjeta _link-only_ con metadatos
+  factuales propios.
+- Prohibido eludir controles de acceso y raspar sitios que lo prohíban.
+- El canal de retirada es **GitHub Issues** del repositorio (decisión del
+  2026-11-10). No se inventa correo, responsable, servicio ni SLA.
+
+**T-091 — política de fuentes**: clases A–F con criterio de permiso, estado
+inicial `pending`, y flujo de solicitud. Debe ser operativa: para cada clase, quién
+puede aprobarla y qué evidencia se exige.
+
+**T-101 — plantilla de solicitud**: cubre alcance (adaptación, traducción,
+atribución, vigencia, retirada), exige respuesta explícita y registra la evidencia.
+Incluye un cuerpo en español y otro en inglés (idioma primario del repo).
+
+**T-102 — runbook de retirada**: pasos, plazos (≤ 72 h hasta la retirada efectiva),
+registro del evento, despublicación cautelar, canal por GitHub Issues y qué se
+conserva como evidencia. No promete plazos que el hosting no esté definido para
+cumplir: se declara el objetivo operativo, no una garantía legal.
+
+**Aceptación**: los tres documentos pasan `markdownlint`, no contienen correos ni
+datos personales inventados, citan la constitución y no afirman derechos que no
+existan.
