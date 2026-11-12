@@ -45,6 +45,11 @@ const adaptationsSql = readFileSync(
   fileURLToPath(new URL('../drizzle/0007_third_party_adaptations.sql', import.meta.url)),
   'utf8',
 );
+// T-169 custom SQL: the public asset view stops publishing provenance (LOW-2).
+const assetViewSql = readFileSync(
+  fileURLToPath(new URL('../drizzle/0008_public_asset_view.sql', import.meta.url)),
+  'utf8',
+);
 
 interface SafeParseLike {
   success: boolean;
@@ -210,6 +215,30 @@ describe('parity: nullability (Drizzle notNull ↔ Zod nullable)', () => {
       expect(columnOf(table, name).notNull, name).toBe(!nullableInZod(zod));
     });
   }
+});
+
+describe('parity: v_public_assets drops private provenance (T-169 LOW-2)', () => {
+  const start = assetViewSql.indexOf('CREATE VIEW v_public_assets');
+  const end = assetViewSql.indexOf(';', start);
+  const view = start > -1 && end > start ? assetViewSql.slice(start, end) : '';
+
+  it('publishes the descriptor fields only when the asset is approved', () => {
+    expect(view).toContain('CREATE VIEW v_public_assets');
+    for (const field of ['id', 'slug', 'file_path', 'status', 'fallback_svg']) {
+      expect(view, field).toContain(field);
+    }
+    expect(view).toMatch(/WHERE status = 'approved'/);
+  });
+
+  it('never exposes origin_url, rights_holder or license_or_permission', () => {
+    for (const forbidden of ['origin_url', 'rights_holder', 'license_or_permission']) {
+      expect(view, forbidden).not.toContain(forbidden);
+    }
+  });
+
+  it('restores the api_ro read grant after recreating the view', () => {
+    expect(assetViewSql).toMatch(/GRANT SELECT ON v_public_assets TO api_ro;/);
+  });
 });
 
 describe('parity: builds publication gate (SQL builds_publication_ck + gates_check_build ↔ BuildSchema)', () => {

@@ -481,6 +481,29 @@ databaseSuite('PostgreSQL publication and API-role gates (T-073)', () => {
     expect(assets.output).toContain('fixture-approved-asset');
   });
 
+  it('publishes asset descriptors without private provenance (T-169 LOW-2)', () => {
+    const columns = psql(
+      "SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'v_public_assets' ORDER BY ordinal_position",
+    );
+    expectDockerSuccess(columns, 'read public asset view columns');
+    expect(columns.output.trim().split(/\s+/)).toEqual([
+      'id',
+      'slug',
+      'file_path',
+      'status',
+      'proof_ref',
+      'fallback_svg',
+    ]);
+    for (const forbidden of ['origin_url', 'rights_holder', 'license_or_permission']) {
+      const read = psql(`SELECT ${forbidden} FROM v_public_assets`, { user: 'api_ro', tcp: true });
+      expect(read.status, forbidden).not.toBe(0);
+      expect(read.output, forbidden).toContain('42703');
+    }
+    const write = psql('DELETE FROM v_public_assets', { user: 'api_ro', tcp: true });
+    expect(write.status).not.toBe(0);
+    expect(write.output).toMatch(/42501|55000/);
+  });
+
   it('denies api_ro access to base tables and writes', () => {
     const baseRead = psql('SELECT slug FROM builds LIMIT 1', { user: 'api_ro', tcp: true });
     expect(baseRead.status).not.toBe(0);
