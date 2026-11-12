@@ -68,6 +68,24 @@ export type {
 } from './adaptation.js';
 export { CONTENT_STATUSES, TIERS } from './vocabulary.js';
 export type { ContentStatus, Tier } from './vocabulary.js';
+export {
+  FR28_METADATA_FIELDS,
+  LINK_ONLY_METADATA_FIELDS,
+  PUBLICATION_GATE_CHECKLIST_POINTS,
+  PUBLICATION_GATE_CODES,
+  evaluatePublicationGate,
+  toLinkOnlyMetadata,
+} from './publication-gate.js';
+export type {
+  LinkOnlyMetadata,
+  LinkOnlyMetadataField,
+  PublicationGateChecklistPoint,
+  PublicationGateCode,
+  PublicationGateFailure,
+  PublicationGateInput,
+  PublicationGateResult,
+  PublicationOutcome,
+} from './publication-gate.js';
 export { publicFilter } from './visibility.js';
 export { checkAssetManifest } from './asset.js';
 export type { AssetIssue } from './asset.js';
