@@ -307,6 +307,38 @@ test('the versioned public/robots.txt template is valid and has no Disallow', as
   );
 });
 
+test('the versioned public/robots.txt has no CR bytes, even on a Windows checkout', async () => {
+  const bytes = await readFile(TEMPLATE_PATH);
+  assert.equal(
+    bytes.includes(0x0d),
+    false,
+    'public/robots.txt must be LF in the working tree: force eol=lf in .gitattributes and run `git add --renormalize`.',
+  );
+});
+
+test('a CRLF template produces the same LF robots.txt bytes as an LF template', async () => {
+  const lf = buildRobots(TEMPLATE, BASE);
+  const crlf = buildRobots(TEMPLATE.replace(/\n/g, '\r\n'), BASE);
+  const bareCr = buildRobots(TEMPLATE.replace(/\n/g, '\r'), BASE);
+  assert.equal(crlf, lf);
+  assert.equal(bareCr, lf);
+  assert.doesNotMatch(crlf, /\r/);
+  assert.equal(lf, 'User-agent: *\nAllow: /\n\nSitemap: https://example.test/sitemap.xml\n');
+
+  const { root, templatePath } = await artifact(
+    { '/': {} },
+    { '/': indexable('Inicio') },
+    TEMPLATE.replace(/\n/g, '\r\n'),
+  );
+  try {
+    const { robots } = await generateSeoFiles({ distRoot: root, baseUrl: BASE, templatePath });
+    assert.equal(robots, lf);
+    assert.equal(await readFile(join(root, 'browser', 'robots.txt'), 'utf8'), lf);
+  } finally {
+    await cleanup(root);
+  }
+});
+
 test('BASE_URL uses the same rules as normalizeSiteUrl', () => {
   assert.equal(normalizeBaseUrl('https://example.test'), 'https://example.test/');
   assert.equal(normalizeBaseUrl('https://example.test/grim'), 'https://example.test/grim/');
