@@ -2,7 +2,7 @@ import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PublicBuild } from '@gd/domain';
-import draftFixture from '../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
+import draftFixture from '../../../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
 import { LootFilter } from './loot-filter';
 
 type LootFilterContent = Pick<

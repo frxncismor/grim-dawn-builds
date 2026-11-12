@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import contentFixture from '../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
+import contentFixture from '../../../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
 import { BuildSections, type BuildSectionsContent } from './build-sections';
 
 const fixture = contentFixture as unknown as BuildSectionsContent;

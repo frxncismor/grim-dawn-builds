@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 import { BuildSchema, type Build } from '@gd/domain';
 import { createFixtureRepository } from './fixture-source.server.ts';
 
-const root = resolve(import.meta.dirname, '../../../..');
+const root = resolve(import.meta.dirname, '../../../../../../');
 // Golden data comes from the original local prototype. Only factual game data
 // is compared: the published guide must not reuse its editorial prose.
 const golden = JSON.parse(

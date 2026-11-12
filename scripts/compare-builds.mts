@@ -382,10 +382,11 @@ function buildError(message: string): Error {
 }
 
 function runNgBuild(output: string, env: Record<string, string>): Promise<void> {
-  const cli = join(REPO_ROOT, 'node_modules', '@angular', 'cli', 'bin', 'ng.js');
+  const webRoot = join(REPO_ROOT, 'apps', 'web');
+  const cli = join(webRoot, 'node_modules', '@angular', 'cli', 'bin', 'ng.js');
   return new Promise((done, fail) => {
     const child = spawn(process.execPath, [cli, 'build', '--output-path', output], {
-      cwd: REPO_ROOT,
+      cwd: webRoot,
       env,
       stdio: ['ignore', 'pipe', 'pipe'],
       windowsHide: true,

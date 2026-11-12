@@ -3,7 +3,7 @@ import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { afterEach, describe, expect, it } from 'vitest';
-import draftFixture from '../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
+import draftFixture from '../../../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
 import { BuildToc, type BuildTocContent } from './build-toc';
 
 const fixture = draftFixture as unknown as BuildTocContent;

@@ -7,7 +7,7 @@ import { createFixtureRepository } from './fixture-source.server.ts';
 import { PublicTierListSchema } from '@gd/domain';
 
 test('server loader reads real fixture files without publishing their draft content', async () => {
-  const root = join(import.meta.dirname, '../../../../scripts/fixtures/content-valid');
+  const root = join(import.meta.dirname, '../../../../../../scripts/fixtures/content-valid');
   const local = createFixtureRepository(root, { INCLUDE_DRAFTS: 'true' });
   assert.equal((await local.listBuilds()).length, 1);
   assert.equal((await local.listBuilds())[0].rights_status, 'pending');
@@ -15,7 +15,7 @@ test('server loader reads real fixture files without publishing their draft cont
 });
 
 test('real catalog has 46 public slots, including the published own guide', async () => {
-  const root = join(import.meta.dirname, '../../../../content');
+  const root = join(import.meta.dirname, '../../../../../../content');
   const publicRepo = createFixtureRepository(root, {});
   const catalog = await publicRepo.getTierList('principal');
   assert.equal(PublicTierListSchema.safeParse(catalog).success, true);
@@ -64,7 +64,7 @@ test('disk collections resolve normalized attribution and load tier lists as wel
       await readFile(
         join(
           import.meta.dirname,
-          '../../../../scripts/fixtures/content-valid/builds/valid-draft.json',
+          '../../../../../../scripts/fixtures/content-valid/builds/valid-draft.json',
         ),
         'utf8',
       ),

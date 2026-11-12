@@ -381,8 +381,8 @@ export interface CatalogPaths {
 /** Interpreta `--en <ruta>` y `--es <ruta>`. Las rutas relativas parten de process.cwd(). */
 export function parseCliArgs(argv: readonly string[]): CatalogPaths {
   const paths: CatalogPaths = {
-    en: resolve(REPO_ROOT, 'src/locale/messages.en.xlf'),
-    es: resolve(REPO_ROOT, 'src/locale/messages.es.xlf'),
+    en: resolve(REPO_ROOT, 'apps/web/src/locale/messages.en.xlf'),
+    es: resolve(REPO_ROOT, 'apps/web/src/locale/messages.es.xlf'),
   };
   for (let index = 0; index < argv.length; index += 2) {
     const flag = argv[index];

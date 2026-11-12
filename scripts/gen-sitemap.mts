@@ -8,6 +8,8 @@ export const ROBOTS_ARTIFACT = 'robots.txt';
 export const TEMPLATE_PATH = join(
   dirname(fileURLToPath(import.meta.url)),
   '..',
+  'apps',
+  'web',
   'public',
   ROBOTS_ARTIFACT,
 );

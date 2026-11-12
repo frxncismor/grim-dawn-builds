@@ -2,7 +2,7 @@ import { PLATFORM_ID } from '@angular/core';
 import { DeferBlockBehavior, DeferBlockState, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { afterEach, describe, expect, it } from 'vitest';
-import draftFixture from '../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
+import draftFixture from '../../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
 import { sampleAdaptation } from './source-attribution/source-attribution.fixture';
 import { SITE_BASE_URL } from '../../core/seo/site-url';
 import { BuildPage, type BuildPageContent } from './build.page';

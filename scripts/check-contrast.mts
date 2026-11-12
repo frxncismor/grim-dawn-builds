@@ -41,7 +41,7 @@ async function main(argv: string[]): Promise<number> {
   try {
     if (argv.length && (argv.length !== 2 || argv[0] !== '--file'))
       throw new Error('Argumento desconocido.');
-    const css = await readFile(resolve(argv[1] ?? 'src/styles/tokens.css'), 'utf8');
+    const css = await readFile(resolve(argv[1] ?? 'apps/web/src/styles/tokens.css'), 'utf8');
     const checks = checkTokenContrast(css);
     for (const check of checks)
       console.log(
