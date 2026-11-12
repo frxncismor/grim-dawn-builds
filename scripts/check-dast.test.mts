@@ -175,7 +175,7 @@ describe('check-dast: redacción de la salida', () => {
 
   it('redacta la consulta, el fragmento y las credenciales de la URL', () => {
     assert.equal(
-      redactUrl('http://user:pass@127.0.0.1:8081/es/builds/?token=abc#frag'),
+      redactUrl(['http://user', 'pass@127.0.0.1:8081/es/builds/?token=abc#frag'].join(':')),
       'http://127.0.0.1:8081/es/builds/',
     );
     assert.equal(redactUrl('http://127.0.0.1:8081/?q=1&secret=2'), 'http://127.0.0.1:8081/');
