@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
     "test:rotation": "vitest run scripts/rotate-secret.int.spec.mts",
-    "test:scripts": "node --import tsx --test scripts/verify-local.test.mjs scripts/lint-md.test.mjs scripts/validate-content.test.mts scripts/check-scope.test.mts scripts/check-boundaries.test.mts scripts/check-secrets.test.mts scripts/check-ci-secrets.test.mts scripts/check-container.test.mts scripts/ci-workflow.test.mts scripts/domain-runtime.test.mts scripts/setup-env.test.mts scripts/secret-scan.test.mts scripts/compose.test.mts scripts/gen-catalog.test.mts scripts/check-contrast.test.mts scripts/check-initial-js.test.mts scripts/rotate-secret.test.mts scripts/seed-content.test.mts src/app/core/content/fixture-source.server.test.mts src/app/core/content/parity.test.mts src/app/core/content/api.repository.server.test.mts src/app/core/content/content-source.server.test.mts scripts/check-release.test.mts scripts/build-release.test.mts scripts/editor-content.test.mts scripts/bootstrap-content.test.mts scripts/check-public-build.test.mts scripts/setup-gitleaks.test.mts src/app/shared/ui/icon/resolve-icon.server.test.mts src/app/core/content/catalog.server.test.mts scripts/static-home.test.mts src/app/core/content/author-pages.server.test.mts scripts/svg-preview.test.mts scripts/emit-404.test.mts scripts/check-performance.test.mts scripts/gen-sitemap.test.mts scripts/check-locale-parity.test.mts scripts/locales.test.mts scripts/herdr-space.test.mts scripts/font-preload.test.mts scripts/fixtures/adversarial/adversarial.test.mts",
+    "test:scripts": "node --import tsx --test scripts/verify-local.test.mjs scripts/lint-md.test.mjs scripts/validate-content.test.mts scripts/check-scope.test.mts scripts/check-boundaries.test.mts scripts/check-secrets.test.mts scripts/check-ci-secrets.test.mts scripts/check-container.test.mts scripts/ci-workflow.test.mts scripts/domain-runtime.test.mts scripts/setup-env.test.mts scripts/secret-scan.test.mts scripts/compose.test.mts scripts/gen-catalog.test.mts scripts/check-contrast.test.mts scripts/check-initial-js.test.mts scripts/rotate-secret.test.mts scripts/seed-content.test.mts src/app/core/content/fixture-source.server.test.mts src/app/core/content/parity.test.mts src/app/core/content/api.repository.server.test.mts src/app/core/content/content-source.server.test.mts scripts/check-release.test.mts scripts/build-release.test.mts scripts/editor-content.test.mts scripts/bootstrap-content.test.mts scripts/check-public-build.test.mts scripts/setup-gitleaks.test.mts src/app/shared/ui/icon/resolve-icon.server.test.mts src/app/core/content/catalog.server.test.mts scripts/static-home.test.mts src/app/core/content/author-pages.server.test.mts scripts/svg-preview.test.mts scripts/emit-404.test.mts scripts/check-performance.test.mts scripts/gen-sitemap.test.mts scripts/check-locale-parity.test.mts scripts/locales.test.mts scripts/herdr-space.test.mts scripts/font-preload.test.mts scripts/fixtures/adversarial/adversarial.test.mts scripts/compare-builds.test.mts",
     "content:validate": "tsx scripts/validate-content.mts",
     "catalog:generate": "tsx scripts/gen-catalog.mts",
     "catalog:check": "tsx scripts/gen-catalog.mts --check",
@@ -44,7 +44,8 @@
     "e2e:svg": "tsx scripts/run-svg-e2e.mts",
     "e2e:a11y": "playwright test --config playwright.config.ts --grep \"@a11y\"",
     "e2e:journeys": "playwright test --config playwright.config.ts --grep \"@journeys\"",
-    "typecheck:e2e": "tsc -p tsconfig.e2e.json"
+    "typecheck:e2e": "tsc -p tsconfig.e2e.json",
+    "compare:builds": "tsx scripts/compare-builds.mts"
   },
   "private": true,
   "packageManager": "pnpm@12.18.0",
