@@ -366,14 +366,14 @@ Recuento mecánico de las líneas de tareas de tasks.md vigente, con todos los
 cuenta como no cerrado; puede haber implementación parcial que requiere
 verificación, no rehacerla a ciegas. Los checkboxes históricos tampoco sustituyen
 la auditoría final de requisitos.
-Total: **160** tareas; **120** marcadas completas (`[x]`); **40** sin cerrar (`[ ]`).
+Total: **163** tareas; **123** marcadas completas (`[x]`); **40** sin cerrar (`[ ]`).
 
-> Inventario regenerado el 2026-11-11 (T-154, T-155 y T-157; pasada final con los conteos del archivo) con los comandos de S02; tasks.md es la fuente única. No editar a mano.
+> Inventario regenerado el 2026-11-11 (T-154 con T-155, T-157, T-158, T-159 y T-160; pasada final con los conteos del archivo) con los comandos de S02; tasks.md es la fuente única. No editar a mano.
 
 | Categoría   | Cantidad |
 | ----------- | -------: |
-| activa      |       13 |
-| externa     |        3 |
+| activa      |       14 |
+| externa     |        2 |
 | opcional    |        2 |
 | diferida    |       22 |
 | reemplazada |        0 |
@@ -395,6 +395,7 @@ Total: **160** tareas; **120** marcadas completas (`[x]`); **40** sin cerrar (`[
 | T-128  | Verificar presupuestos backend medibles                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | T-141 | [LISTA] Tests adversariales de contenido, UI y API |
 | T-157 | [LISTA, seguimiento] Reducir por grupo los mutantes supervivientes de T-142 en el dominio |
+| T-158 | [DX, documental] Traducir a *.es.md los documentos públicos estables |
 
 ### Categoría: externa
 
@@ -402,7 +403,6 @@ Total: **160** tareas; **120** marcadas completas (`[x]`); **40** sin cerrar (`[
 | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | T-044 | **[BLOQUEADA por derechos]** Revisión editorial y publicación de la guía migrada: solo ejecutable cuando el usuario confirme autoría y derechos de republicación (rights\_status pasa de pending a own\_original/licensed/permission\_granted con rights\_confirmed\_by/on); entonces confirmar fuentes, versión del juego, verificación de devociones y pasar a publicado |
 | T-110 | [BLOQUEADA, externa] Publicar la primera adaptación real: requiere decisión del usuario sobre fuente/autor, términos del foro revisados (T-103), solicitud enviada (T-101) y permiso/licencia registrado y verificado. Hasta entonces, solo \_link-only\_.                                                                                                                 |
-| T-148 | [DX, acceso remoto] Host SSH de este PC para conectar Herdr desde otra computadora y la app móvil |
 
 ### Categoría: opcional
 
