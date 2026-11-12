@@ -712,6 +712,39 @@ describe('TierEntrySchema', () => {
     });
     expect(result.success).toBe(true);
   });
+
+  // T-108: the SQL entry_kind enum gains build_adaptada; the domain contract mirrors it.
+  it('accepts an adapted third-party build tied to a build slug', () => {
+    const result = TierEntrySchema.safeParse({
+      ...placeholder(),
+      entry_kind: 'build_adaptada',
+      build_slug: 'adaptacion-sintetica',
+      display_name: null,
+      tier: 'A',
+      content_status: 'sin_verificar',
+      rights_status: 'licensed',
+      source_slug: 'fuente-externa',
+      evaluated_on: '2026-11-11',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an adapted third-party build without a build_slug', () => {
+    const result = TierEntrySchema.safeParse({
+      ...placeholder(),
+      entry_kind: 'build_adaptada',
+      build_slug: null,
+      display_name: 'Adaptación sin build',
+      content_status: 'sin_verificar',
+      rights_status: 'licensed',
+      source_slug: 'fuente-externa',
+      evaluated_on: '2026-11-11',
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map((issue) => issue.message)).toContain(
+      'build_adaptada requiere build_slug',
+    );
+  });
 });
 
 describe('AssetSchema', () => {
