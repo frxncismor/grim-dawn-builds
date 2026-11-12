@@ -1,0 +1,11 @@
+{
+  "slug": "guia-original",
+  "kind": "comunidad",
+  "title": "Fuente sintetica",
+  "url": "javascript:alert(1)",
+  "author_name": "Autor sintetico",
+  "license_note": "Derechos pendientes",
+  "permission_ref": null,
+  "retrieved_on": "2026-11-08",
+  "notes": "Uso interno de pruebas."
+}

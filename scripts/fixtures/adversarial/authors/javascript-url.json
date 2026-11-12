@@ -1,0 +1,7 @@
+{
+  "slug": "autor-sintetico",
+  "display_name": "Autor sintetico",
+  "bio": null,
+  "url": "javascript:alert(1)",
+  "is_placeholder": false
+}
