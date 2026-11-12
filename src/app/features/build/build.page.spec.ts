@@ -3,6 +3,7 @@ import { DeferBlockBehavior, DeferBlockState, TestBed } from '@angular/core/test
 import { provideRouter } from '@angular/router';
 import { afterEach, describe, expect, it } from 'vitest';
 import draftFixture from '../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
+import { sampleAdaptation } from './source-attribution/source-attribution.fixture';
 import { SITE_BASE_URL } from '../../core/seo/site-url';
 import { BuildPage, type BuildPageContent } from './build.page';
 
@@ -283,6 +284,79 @@ describe('gd-build-page', () => {
     const [article] = jsonLd();
     expect(article['author']).toBeUndefined();
     expect(article['datePublished']).toBeUndefined();
+  });
+
+  it('renders the adaptation block and its source in isBasedOn for the server markup', async () => {
+    const { root } = await render(
+      { ...publicContent, adaptation: sampleAdaptation },
+      { platform: 'server' },
+    );
+
+    const block = root.querySelector('gd-source-attribution');
+    expect(block).not.toBeNull();
+    expect(block?.querySelector('[data-attribution-text]')?.textContent?.trim()).toBe(
+      sampleAdaptation.attribution_text,
+    );
+    expect(block?.querySelector('[data-original-title]')?.textContent?.trim()).toBe(
+      sampleAdaptation.original_title,
+    );
+    expect(block?.querySelector('[data-original-author]')?.textContent?.trim()).toBe(
+      sampleAdaptation.original_author,
+    );
+    expect(block?.querySelector('[data-original-site]')?.textContent?.trim()).toBe(
+      sampleAdaptation.original_site,
+    );
+    expect(block?.querySelector('[data-original-link]')?.getAttribute('href')).toBe(
+      sampleAdaptation.source_url,
+    );
+
+    const [article] = jsonLd();
+    expect(article['isBasedOn']).toEqual([
+      'https://foro.example.com/hilo-de-muestra',
+      sampleAdaptation.source_url,
+    ]);
+  });
+
+  it('omits the adaptation block and leaves isBasedOn unchanged without adaptation', async () => {
+    const { root } = await render(publicContent, { platform: 'server' });
+
+    expect(root.querySelector('gd-source-attribution')).toBeNull();
+    const [article] = jsonLd();
+    expect(article['isBasedOn']).toEqual(['https://foro.example.com/hilo-de-muestra']);
+    expect(JSON.stringify(article)).not.toContain('attribution_text');
+  });
+
+  it('never duplicates an adaptation URL already cited nor adds an unsafe one', async () => {
+    const cited = {
+      ...publicContent.sources[0],
+      slug: 'adaptacion-citada',
+      url: sampleAdaptation.source_url,
+    };
+    await render(
+      {
+        ...publicContent,
+        sources: [...publicContent.sources, cited],
+        adaptation: sampleAdaptation,
+      },
+      { platform: 'server' },
+    );
+    const [duplicated] = jsonLd();
+    expect(
+      (duplicated['isBasedOn'] as string[]).filter((url) => url === sampleAdaptation.source_url),
+    ).toHaveLength(1);
+
+    const { root } = await render(
+      {
+        ...publicContent,
+        adaptation: { ...sampleAdaptation, source_url: 'javascript:alert(1)' },
+      },
+      { platform: 'server' },
+    );
+    expect(root.querySelector('gd-source-attribution')).not.toBeNull();
+    expect(root.querySelector('[data-original-link]')).toBeNull();
+    const [article] = jsonLd();
+    expect(article['isBasedOn']).toEqual(['https://foro.example.com/hilo-de-muestra']);
+    expect(JSON.stringify(article)).not.toContain('javascript:');
   });
 
   it('keeps a single h1, unique ids and the canonical anchors in server markup', async () => {

@@ -1,0 +1,48 @@
+<section class="attribution" aria-labelledby="source-attribution-heading" data-attribution>
+  <h2 id="source-attribution-heading" i18n="@@sourceAttribution.heading">
+    This build was adapted from
+  </h2>
+
+  <p class="attribution__text" data-attribution-text>{{ attribution().attribution_text }}</p>
+
+  <dl class="facts" data-original>
+    <div class="facts__item">
+      <dt i18n="@@sourceAttribution.originalTitle">Original title</dt>
+      <dd data-original-title>{{ attribution().original_title }}</dd>
+    </div>
+    <div class="facts__item">
+      <dt i18n="@@sourceAttribution.originalAuthor">Original author</dt>
+      <dd data-original-author>{{ attribution().original_author }}</dd>
+    </div>
+    <div class="facts__item">
+      <dt i18n="@@sourceAttribution.originalSite">Original site</dt>
+      <dd data-original-site>{{ attribution().original_site }}</dd>
+    </div>
+    <div class="facts__item">
+      <dt i18n="@@sourceAttribution.retrievedOn">Retrieved on</dt>
+      <dd>
+        <time [attr.datetime]="attribution().retrieved_on" data-retrieved-on>
+          {{ retrievedLabel() }}
+        </time>
+      </dd>
+    </div>
+  </dl>
+
+  @if (originalLink(); as url) {
+    <p class="attribution__original">
+      <a
+        class="attribution__link"
+        [href]="url.href"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-original-link
+      >
+        <span i18n="@@sourceAttribution.openOriginal">Open the original build</span>
+        <span class="attribution__host" data-original-host>{{ url.host }}</span>
+        <span i18n="@@sourceAttribution.newTab">(opens in a new tab)</span>
+      </a>
+    </p>
+  } @else if (attribution().source_url) {
+    <p class="attribution__url" data-original-url>{{ attribution().source_url }}</p>
+  }
+</section>

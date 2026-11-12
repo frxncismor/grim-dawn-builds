@@ -754,6 +754,62 @@
           <context context-type="linenumber">36</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="sourceAttribution.heading" datatype="html">
+        <source> This build was adapted from </source>
+        <target state="translated"> Esta build fue adaptada de </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">3,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.originalTitle" datatype="html">
+        <source>Original title</source>
+        <target state="translated">Título original</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.originalAuthor" datatype="html">
+        <source>Original author</source>
+        <target state="translated">Autor original</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">14,15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.originalSite" datatype="html">
+        <source>Original site</source>
+        <target state="translated">Sitio original</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">18,19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.retrievedOn" datatype="html">
+        <source>Retrieved on</source>
+        <target state="translated">Consultado el</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">22,24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.openOriginal" datatype="html">
+        <source>Open the original build</source>
+        <target state="translated">Abrir la build original</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">40,41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.newTab" datatype="html">
+        <source>(opens in a new tab)</source>
+        <target state="translated">(se abre en una pestaña nueva)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">42,45</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="buildToc.summary" datatype="html">
         <source>Contents</source>
         <target state="translated">Contenido</target>
