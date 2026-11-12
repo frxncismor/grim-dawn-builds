@@ -44,7 +44,7 @@ function assertNoSymlinkPath(root, absolute) {
 }
 
 function excludedFromSnapshot(relative) {
-  return relative === '.specify/feature.json' || /^specs\/[^/]+\/reviews(?:\/|$)/.test(relative);
+  return relative === '.specify/feature.json' || /^specs\/.+\/reviews(?:\/|$)/.test(relative);
 }
 
 function snapshotFor(root) {
@@ -84,8 +84,20 @@ function snapshotFor(root) {
   return hash.digest('hex');
 }
 
+const TASK_ID_PARTS = /^(T-?)(\d+)([a-z]*)$/i;
+
+// Comparison key: canonical prefix and upper-cased suffix so `T-066a` and `T-066A` collide.
 function normalizeTaskId(value) {
-  return value.toUpperCase().replace(/^T-?/, 'T-');
+  const match = TASK_ID_PARTS.exec(String(value).trim());
+  if (!match) return String(value).toUpperCase().replace(/^T-?/, 'T-');
+  return `T-${match[2]}${match[3].toUpperCase()}`;
+}
+
+// Reported ID: canonical prefix but the suffix casing exactly as written in tasks.md.
+function displayTaskId(value) {
+  const match = TASK_ID_PARTS.exec(String(value).trim());
+  if (!match) return String(value).toUpperCase().replace(/^T-?/, 'T-');
+  return `T-${match[2]}${match[3]}`;
 }
 
 function explicitDisposition(description) {
@@ -99,48 +111,114 @@ function explicitDisposition(description) {
     if (!match) continue;
     const explanation = match[1].trim();
     if (!explanation) return null;
+    let referencedIds;
     if (marker.kind === 'replaced') {
       const ids = explanation.split(';', 1)[0].trim();
       if (!/^(?:T-?\d+[a-z]*)(?:\s*\/\s*T-?\d+[a-z]*)*$/i.test(ids)) return null;
+      referencedIds = ids.split('/').map((id) => id.trim());
     } else if (!/\bT-?\d+[a-z]*\b/i.test(explanation)) {
       return null;
+    } else {
+      referencedIds = explanation.match(/\bT-?\d+[a-z]*\b/gi) ?? [];
     }
-    return { kind: marker.kind, reason: explanation };
+    return { kind: marker.kind, reason: explanation, referencedIds };
   }
   return null;
+}
+
+// Closed set of accepted task formats. Anything else that still looks like a checkbox task
+// line (a bullet plus bracketed checkbox that mentions a T-NNN id, including `*`, `+`,
+// `[T-NNN]`, `(T-NNN)` and backticked variants) fails closed as malformed.
+const ACCEPTED_TASK_FORMATS = [
+  /^\s*-\s+\[([ xX])\]\s+\*\*(T-?\d+[a-z]*)\*\*(?=\s|$)(.*)$/i,
+  /^\s*-\s+\[([ xX])\]\s+(T-?\d+[a-z]*)(?=\s|$)(.*)$/i,
+  /^\s*-\s+\*\*(T-\d+[a-z]*)\*\*(.*)$/i,
+];
+
+function stripHtmlComments(line, state) {
+  if (!line.includes('<!--') && !state.inComment) return line;
+  let visible = '';
+  let cursor = 0;
+  while (cursor <= line.length) {
+    if (state.inComment) {
+      const end = line.indexOf('-->', cursor);
+      if (end === -1) return visible;
+      state.inComment = false;
+      cursor = end + 3;
+      continue;
+    }
+    const start = line.indexOf('<!--', cursor);
+    if (start === -1) {
+      visible += line.slice(cursor);
+      break;
+    }
+    visible += line.slice(cursor, start);
+    state.inComment = true;
+    cursor = start + 4;
+  }
+  return visible;
+}
+
+function looksLikeCheckboxTask(line) {
+  if (!/\bT-?\d+[a-z]*\b/i.test(line)) return false;
+  const hasBullet = /^\s*(?:[-*+]|\d+[.)])\s+/.test(line);
+  const startsWithCheckbox = /^\s*[`*_]*\[[^\]]*\]/.test(line);
+  return (hasBullet || startsWithCheckbox) && /\[[^\]]*\]/.test(line);
 }
 
 function parseTasks(contents) {
   const tasks = [];
   const seen = new Set();
   const lines = contents.split(/\r?\n/);
+  const comment = { inComment: false };
+  let fence = null;
   for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index];
-    const boldModern = /^\s*-\s+\[([ xX])\]\s+\*\*(T-?\d+[a-z]*)\*\*(?=\s|$)(.*)$/i.exec(line);
-    const plainModern = boldModern
-      ? null
-      : /^\s*-\s+\[([ xX])\]\s+(T-?\d+[a-z]*)(?=\s|$)(.*)$/i.exec(line);
-    const legacy =
-      boldModern || plainModern ? null : /^\s*-\s+\*\*(T-\d+[a-z]*)\*\*(.*)$/i.exec(line);
+    const raw = lines[index];
+    if (fence) {
+      const closing = /^\s{0,3}(`{3,}|~{3,})\s*$/.exec(raw);
+      if (closing && closing[1][0] === fence[0] && closing[1].length >= fence.length) fence = null;
+      continue;
+    }
+    const opening = /^\s{0,3}(`{3,}|~{3,})/.exec(raw);
+    if (opening) {
+      fence = opening[1];
+      continue;
+    }
+    const line = stripHtmlComments(raw, comment);
+    if (!line.trim()) continue;
+    const [boldModern, plainModern, legacy] = ACCEPTED_TASK_FORMATS.map((pattern) =>
+      pattern.exec(line),
+    );
     if (!boldModern && !plainModern && !legacy) {
-      if (/^\s*-\s+(?:\[[^\]]*\]\s*)*(?:T-?\d+|\*\*T-?\d+)/i.test(line)) {
-        throw new Error(`malformed task line ${index + 1}`);
-      }
+      if (looksLikeCheckboxTask(line)) throw new Error(`malformed task line ${index + 1}`);
       continue;
     }
     const modern = boldModern ?? plainModern;
     const checked = Boolean(modern && modern[1].toLowerCase() === 'x');
-    const id = normalizeTaskId(modern ? modern[2] : legacy[1]);
+    const rawId = modern ? modern[2] : legacy[1];
+    const id = displayTaskId(rawId);
+    const key = normalizeTaskId(rawId);
     const description = modern ? modern[3] : legacy[2];
-    if (seen.has(id)) throw new Error(`duplicate task ID ${id}`);
-    seen.add(id);
+    if (seen.has(key)) throw new Error(`duplicate task ID ${id}`);
+    seen.add(key);
     const disposition = explicitDisposition(description);
     if (/\[(?:REEMPLAZADA\b|DIFERIDA:|OPCIONAL\s+NO\s+SELECCIONADA:)/i.test(description)) {
       if (!disposition) throw new Error(`invalid task disposition for ${id}`);
     }
-    tasks.push({ id, checked, line: index + 1, description: description.trim(), disposition });
+    tasks.push({ id, key, checked, line: index + 1, description: description.trim(), disposition });
   }
   if (tasks.length === 0) throw new Error('tasks.md contains no recognized tasks');
+  const byKey = new Map(tasks.map((task) => [task.key, task]));
+  for (const task of tasks) {
+    if (!task.disposition) continue;
+    for (const reference of task.disposition.referencedIds) {
+      const referenced = byKey.get(normalizeTaskId(reference));
+      if (!referenced)
+        throw new Error(`disposition reference ${reference} for ${task.id} is not a known task`);
+      if (task.disposition.kind === 'replaced' && referenced.disposition)
+        throw new Error(`replacement target ${referenced.id} is not active or verified`);
+    }
+  }
   return tasks;
 }
 
@@ -168,6 +246,8 @@ function prepare(rootPath, feature) {
     const taskText = readFileSync(path.join(target.absolute, 'tasks.md'), 'utf8');
     const tasks = parseTasks(taskText);
     const activeTasks = tasks.filter((task) => !task.disposition);
+    if (activeTasks.length === 0)
+      throw new Error('tasks.md must keep at least one active implementation task');
     const excludedTasks = tasks
       .filter((task) => task.disposition)
       .map((task) => ({
@@ -357,7 +437,7 @@ function check(rootPath, feature) {
   const verifiedTaskIds = new Set(
     parseTasks(readFileSync(tasksPath, 'utf8'))
       .filter((task) => task.checked && !task.disposition)
-      .map((task) => task.id),
+      .map((task) => task.key),
   );
   const reportRelative = `${prepared.feature}/reviews/completion-review.json`;
   const reportSafe = safeRelativePath(root, reportRelative);

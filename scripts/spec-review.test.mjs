@@ -162,6 +162,9 @@ integrationTest(
       tasks: [
         '- [x] **T-051** verified task\n',
         '- [X] **T-066a** verified suffix task\n',
+        '- [x] **T-071** replacement target\n',
+        '- [x] **T-055** replacement target\n',
+        '- [x] **T-073** replacement target\n',
         '- **T-007** [REEMPLAZADA por T-071/T-055; no ejecutar]\n',
         '- **T-008** [REEMPLAZADA por T-073; no ejecutar]\n',
         '- **T-009** legacy pending task\n',
@@ -221,6 +224,161 @@ integrationTest(
     const malformedResult = cli(malformed, 'prepare');
     assert.equal(malformedResult.status, 2);
     assert.equal(malformedResult.json?.status, 'invalid');
+  },
+);
+
+integrationTest(
+  'prepare requires at least one active task and resolves disposition references',
+  async (t) => {
+    for (const tasks of [
+      '- [ ] T-001 [DIFERIDA: ingesta fuera del MVP; ver T-001]\n',
+      '- [ ] T-001 Refactor [OPCIONAL NO SELECCIONADA: sin efecto funcional; ver T-001]\n',
+    ]) {
+      const f = await fixture({ tasks });
+      t.after(() => f.close());
+      const result = cli(f, 'prepare');
+      assert.equal(result.status, 2, result.stderr || result.stdout);
+      assert.equal(result.json?.status, 'invalid');
+    }
+
+    const invented = await fixture({
+      tasks: '- [ ] T-001 replaced [REEMPLAZADA por T-999; no ejecutar]\n',
+    });
+    t.after(() => invented.close());
+    const unknown = cli(invented, 'prepare');
+    assert.equal(unknown.status, 2, unknown.stderr || unknown.stdout);
+    assert.equal(unknown.json?.status, 'invalid');
+
+    const inventedDeferred = await fixture({
+      tasks: '- [x] T-001 done\n- [ ] T-002 later [DIFERIDA: fuera del MVP; ver T-999]\n',
+    });
+    t.after(() => inventedDeferred.close());
+    const unknownDeferred = cli(inventedDeferred, 'prepare');
+    assert.equal(unknownDeferred.status, 2, unknownDeferred.stderr || unknownDeferred.stdout);
+    assert.equal(unknownDeferred.json?.status, 'invalid');
+
+    const chained = await fixture({
+      tasks: [
+        '- [x] T-000 verified anchor\n',
+        '- [ ] T-001 replaced [REEMPLAZADA por T-002; no ejecutar]\n',
+        '- [ ] T-002 deferred [DIFERIDA: fuera del MVP; ver T-002]\n',
+      ].join(''),
+    });
+    t.after(() => chained.close());
+    const disposedTarget = cli(chained, 'prepare');
+    assert.equal(disposedTarget.status, 2, disposedTarget.stderr || disposedTarget.stdout);
+    assert.equal(disposedTarget.json?.status, 'invalid');
+  },
+);
+
+integrationTest(
+  'parseTasks ignores fenced code blocks and HTML comments, including as finding evidence',
+  async (t) => {
+    const fence = '`'.repeat(3);
+    const f = await fixture({
+      tasks: [
+        '- [x] T-001 complete\n',
+        '\n',
+        `${fence}text\n`,
+        '- [x] T-999 fenced documentation example\n',
+        `${fence}\n`,
+        '\n',
+        '<!--\n',
+        '- [x] T-998 commented documentation example\n',
+        '-->\n',
+        '\n',
+        'Visible prose mentions T-997 without a checkbox and is not a task.\n',
+      ].join(''),
+    });
+    t.after(() => f.close());
+    const tasksText = await readFile(path.join(f.featureDir, 'tasks.md'), 'utf8');
+    assert.deepEqual(
+      helperApi.parseTasks(tasksText).map(({ id }) => id),
+      ['T-001'],
+    );
+    const prepared = cli(f, 'prepare');
+    assert.equal(prepared.status, 0, prepared.stderr || prepared.stdout);
+    assert.equal(prepared.json?.status, 'ready');
+
+    const reportPath = path.join(f.featureDir, 'reviews', 'completion-review.json');
+    await mkdir(path.dirname(reportPath), { recursive: true });
+    const report = validReport(prepared.json.snapshot);
+    report.reviews[0].findings = [
+      {
+        id: 'F-1',
+        severity: 'HIGH',
+        path: 'specs/sample-feature/spec.md',
+        line: 1,
+        evidence: 'evidence',
+        impact: 'impact',
+        recommendation: 'fix',
+        disposition: 'resolved',
+        resolution: 'Verified in T-999: fenced documentation example only',
+      },
+    ];
+    await writeFile(reportPath, JSON.stringify(report));
+    const checked = cli(f, 'check');
+    assert.equal(checked.status, 1, checked.stderr || checked.stdout);
+    assert.equal(checked.json?.status, 'pending-review');
+  },
+);
+
+integrationTest('prepare fails closed on every unsupported checkbox task syntax', async (t) => {
+  for (const variant of [
+    '- [ ] [T-002] pending\n',
+    '- [ ] (T-002) pending\n',
+    '- [ ] `T-002` pending\n',
+    '* [ ] T-002 pending\n',
+    '+ [ ] T-002 pending\n',
+  ]) {
+    const f = await fixture({ tasks: `- [x] T-001 done\n${variant}` });
+    t.after(() => f.close());
+    const result = cli(f, 'prepare');
+    assert.equal(result.status, 2, `${variant}: ${result.stderr || result.stdout}`);
+    assert.equal(result.json?.status, 'invalid');
+  }
+});
+
+integrationTest(
+  'prepare preserves the original letter suffix casing in reported task IDs',
+  async (t) => {
+    const pending = await fixture({ tasks: '- [x] T-001 done\n- [ ] T-066a pending\n' });
+    t.after(() => pending.close());
+    const pendingResult = cli(pending, 'prepare');
+    assert.equal(pendingResult.status, 1, pendingResult.stderr || pendingResult.stdout);
+    assert.deepEqual(
+      pendingResult.json?.pendingTasks?.map(({ id }) => id),
+      ['T-066a'],
+    );
+
+    const excluded = await fixture({
+      tasks: '- [x] T-001 done\n- [ ] T-066a replaced [REEMPLAZADA por T-001; no ejecutar]\n',
+    });
+    t.after(() => excluded.close());
+    const excludedResult = cli(excluded, 'prepare');
+    assert.equal(excludedResult.status, 0, excludedResult.stderr || excludedResult.stdout);
+    assert.deepEqual(
+      excludedResult.json?.excludedTasks?.map(({ id }) => id),
+      ['T-066a'],
+    );
+  },
+);
+
+integrationTest(
+  'nested feature paths can store their own review report without going stale',
+  async (t) => {
+    const f = await readyFixture({ feature: 'specs/nested/sample' });
+    t.after(() => f.close());
+    const prepared = cli(f, 'prepare', 'specs/nested/sample');
+    const reportPath = path.join(f.featureDir, 'reviews', 'completion-review.json');
+    await mkdir(path.dirname(reportPath), { recursive: true });
+    await writeFile(
+      reportPath,
+      JSON.stringify(validReport(prepared.json.snapshot, { feature: 'specs/nested/sample' })),
+    );
+    const result = cli(f, 'check', 'specs/nested/sample');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.equal(result.json?.status, 'passed');
   },
 );
 
