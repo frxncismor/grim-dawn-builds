@@ -148,7 +148,7 @@ Ver spec §7. Se reservan las abstracciones (repositorio, esquema, i18n) pero no
 ## 11. Local-first y portabilidad (decisión `hosting=local_first`)
 
 - **Ahora**: `ng serve`/`ng build` locales, `docker compose` local (PostgreSQL 17 + API Fastify), Playwright/axe/Lighthouse contra `http://localhost`, sin secretos con claves ni proveedor remoto. Sin Docker, `pnpm verify` usa fixtures (marcado `source=fixture`).
-- **Diferido (no implementar)**: proveedor de hosting, dominio, BD remota, secretos de despliegue, workflows de CI/**deploy**. (Los workflows de **verificación** en PR son admisibles, §12.8.)
+- **Diferido (no implementar)**: proveedor de hosting, dominio, BD remota, secretos de despliegue, workflows de CI/**deploy**. (Los workflows de **verificación** en PR son admisibles, §12.8.) **Decisión cerrada el 2026-11-11 (S11, §17.58): MVP local; el hosting queda fuera del MVP por decisión de Paco.**
 - **Portabilidad preservada**: salida estática independiente del host; `BASE_URL` configurable; repositorio de contenido tras interfaz; PostgreSQL estándar (sin APIs de proveedor); nada en el código asume un dominio.
 - **Reglas**: ningún secreto en el repositorio; `.env.example` solo con nombres de variables y valores por defecto seguros no secretos (rev. 5, ver §13.2).
 
@@ -3512,3 +3512,37 @@ handshake de hc por SSH. El script restringe DACL y propietario de claves y
 configuración, y fue suficiente para arrancar el servicio. Queda emparejar la
 laptop y el móvil y verificar `hc machine ls` desde ellos. No se declara
 cerrada hasta entonces.
+
+### 17.58 S11: decisión de publicación del MVP — local (2026-11-11)
+
+**Origen**: hallazgo C3 del informe externo. El plan difería hosting, dominio,
+secretos y despliegue (§11) y el README lo confirmaba («Hosting is still deferred
+and out of scope», `README.md:175-179`). Existían un build de release
+(`pnpm build:release`, `pnpm check:release`) y una guarda del artefacto
+(`pnpm check:public-build`) sin destino ni runbook, y la decisión estaba abierta.
+
+**Decisión de Paco (2026-11-11)**: MVP local; el hosting queda fuera del MVP por
+decisión de Paco (2026-11-11). El entregable es el artefacto estático que hoy
+produce el build y se sirve en local. No hay proveedor, dominio, certificado,
+pipeline de publicación ni credenciales de despliegue, y ninguno se añade.
+
+**Tareas cerradas como fuera de alcance**: T-087 (almacén gestionado de secretos
+y _break-glass_), T-088 (OIDC de GitHub Actions hacia el proveedor), T-089
+(inyección de secretos en el orquestador de producción) y T-090 (calendario de
+rotación en producción) salen del MVP en `tasks.md`. Si algún día se decide
+publicar, continúan como backlog y se abren con su propio spec de despliegue:
+workflow `deploy.yml` disparado solo por tag `v*` en `main` que ejecute
+`build:release`, `check:release` y `check:public-build`; secretos únicamente en
+GitHub Environments con `scripts/check-ci-secrets.mts` vigente; y runbook
+`docs/release.md` con versionado, publicación, reversión y verificación posterior
+(`/` y `/es`, sitemap y 404).
+
+**Lo que no cambia**: T-126 (CI de calidad) y las tareas de verificación siguen
+vigentes: verifican el artefacto, no lo publican. Se conservan la salida estática
+independiente del host, `BASE_URL` configurable y la portabilidad de §11, de modo
+que publicar más adelante no exige rehacer el build. La API se consume solo en
+tiempo de build (`CONTENT_SOURCE=api`, §12.1), así que el MVP local no necesita
+servirla en ninguna red distinta de la local.
+
+**Consecuencia**: §11 conserva su redacción y remite a esta decisión; el estado
+definitivo del MVP es local y no queda ninguna tarea de hosting abierta.
