@@ -627,6 +627,19 @@ describe('TierEntrySchema', () => {
     evaluated_on: null,
   });
 
+  const linkEntry = (overrides: Record<string, unknown> = {}) => ({
+    ...placeholder(),
+    entry_kind: 'enlace_externo',
+    tier: 'sin_clasificar',
+    content_status: 'sin_verificar',
+    rights_status: 'link_only',
+    external_url: 'https://example.org/guia',
+    external_author: 'Autor externo',
+    source_slug: 'fuente-externa',
+    evaluated_on: '2026-11-11',
+    ...overrides,
+  });
+
   it('accepts a placeholder slot with no tier, guide or link', () => {
     expect(TierEntrySchema.safeParse(placeholder()).success).toBe(true);
   });
@@ -673,6 +686,31 @@ describe('TierEntrySchema', () => {
         external_author: 'Autor externo',
       }).success,
     ).toBe(true);
+  });
+
+  it('accepts a link card classified as unranked', () => {
+    expect(TierEntrySchema.safeParse(linkEntry()).success).toBe(true);
+  });
+
+  it('rejects a link card carrying a ranking derived from the source', () => {
+    const result = TierEntrySchema.safeParse(linkEntry({ tier: 'S' }));
+    expect(result.success).toBe(false);
+    const issue = result.error?.issues.find((i) => i.path.includes('tier'));
+    expect(issue?.message).toContain('ranking derivado de la fuente');
+  });
+
+  it('keeps a real tier valid for own builds with source and date', () => {
+    const result = TierEntrySchema.safeParse({
+      ...placeholder(),
+      entry_kind: 'build_propia',
+      build_slug: 'chaman-demoledor-golpe-primigenio',
+      tier: 'S',
+      content_status: 'verificado',
+      rights_status: 'own_original',
+      source_slug: 'fuente-propia',
+      evaluated_on: '2026-11-11',
+    });
+    expect(result.success).toBe(true);
   });
 });
 

@@ -289,6 +289,7 @@ describe('parity: tier_entries CHECKs (SQL tier_entries_*_ck ↔ TierEntrySchema
     entry_kind: 'enlace_externo',
     build_slug: null,
     display_name: 'Guía externa',
+    tier: 'sin_clasificar',
     external_url: 'https://example.com/guia',
     external_author: 'Autor externo',
     rights_status: 'link_only',

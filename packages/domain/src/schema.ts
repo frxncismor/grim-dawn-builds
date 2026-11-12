@@ -444,6 +444,9 @@ export const TierEntrySchema = z
       if (entry.rights_status !== 'link_only') {
         fail(ctx, ['rights_status'], 'enlace_externo requiere rights_status=link_only');
       }
+      if (entry.tier !== 'sin_clasificar') {
+        fail(ctx, ['tier'], 'una tarjeta de enlace no lleva ranking derivado de la fuente');
+      }
     }
 
     if (entry.entry_kind === 'build_propia' && !entry.build_slug) {
