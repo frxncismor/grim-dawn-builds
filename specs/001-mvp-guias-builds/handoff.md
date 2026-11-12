@@ -366,16 +366,16 @@ Recuento mecánico de las líneas de tareas de tasks.md vigente, con todos los
 cuenta como no cerrado; puede haber implementación parcial que requiere
 verificación, no rehacerla a ciegas. Los checkboxes históricos tampoco sustituyen
 la auditoría final de requisitos.
-Total: **163** tareas; **123** marcadas completas (`[x]`); **40** sin cerrar (`[ ]`).
+Total: **163** tareas; **127** marcadas completas (`[x]`); **36** sin cerrar (`[ ]`).
 
-> Inventario regenerado el 2026-11-11 (T-154 con T-155, T-157, T-158, T-159 y T-160; pasada final con los conteos del archivo) con los comandos de S02; tasks.md es la fuente única. No editar a mano.
+> Inventario regenerado el 2026-11-11 (T-154 con T-155, T-157, T-158, T-159, T-160 y S11; pasada final con los conteos del archivo tras T-087..T-090) con los comandos de S02; tasks.md es la fuente única. No editar a mano.
 
 | Categoría   | Cantidad |
 | ----------- | -------: |
 | activa      |       14 |
 | externa     |        2 |
 | opcional    |        2 |
-| diferida    |       22 |
+| diferida    |       18 |
 | reemplazada |        0 |
 
 ### Categoría: activa
@@ -415,10 +415,6 @@ Total: **163** tareas; **123** marcadas completas (`[x]`); **40** sin cerrar (`[
 
 | ID    | Trabajo pendiente según tasks.md                                                                                                                                                              |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| T-087 | [DIFERIDA-HOSTING] Almacén gestionado (proveedor por decidir) detrás de SecretSource, auditoría de acceso, procedimiento y simulacro de \_break-glass\_ (caducidad ≤ 1 h, rotación posterior) |
-| T-088 | [DIFERIDA-HOSTING] OIDC de GitHub Actions hacia el proveedor (sin credenciales de larga vida) y secretos de entorno con revisores requeridos                                                  |
-| T-089 | [DIFERIDA-HOSTING] Inyección en runtime en el orquestador (archivos/volumen 0400, no-root; nunca ARG/ENV de imagen)                                                                           |
-| T-090 | [DIFERIDA-HOSTING] Calendario de rotación en producción (C1 ≤ 90 d, C4 ≤ 180 d), revisión trimestral de accesos; reevaluar Vault/OpenBao según plan §13.9.                                    |
 | T-092 | [DIFERIDA] Registro de fuentes extendido (clase, prueba, alcance, caducidad, estado) en esquema Drizzle + CHECK: fuente no habilitada ⇒ sin lotes                                             |
 | T-093 | [DIFERIDA] Puerta de permiso: lote exige fuente habilitada con rights\_status aprobado y vigente; revocación suspende y marca lotes                                                           |
 | T-094 | [DIFERIDA] import\_batches + import\_review\_queue + origin='import'; versionado y diff entre revisiones                                                                                      |
