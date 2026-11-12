@@ -1,0 +1,207 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+.devotion-map {
+  padding: var(--space-4);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel), var(--panel-shadow);
+  overflow-wrap: anywhere;
+  min-inline-size: 0;
+  color: var(--color-bone);
+}
+.devotion-map__header {
+  border-block-end: var(--frame-border);
+  padding-block-end: var(--space-3);
+}
+.devotion-map__header h2,
+.devotion-map__detail h3,
+.devotion-map__list h3 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-bone);
+  font: var(--weight-display) var(--text-large)/var(--line-heading) var(--font-display);
+}
+.devotion-map__header p,
+.devotion-map__empty,
+.devotion-map__error,
+.devotion-map__detail p,
+.devotion-map__list p {
+  max-inline-size: var(--reading-measure);
+  margin: 0 0 var(--space-2);
+}
+.devotion-map__header p,
+.devotion-map__scroll-help {
+  color: var(--color-ash);
+}
+.devotion-map__canvas {
+  max-inline-size: 100%;
+  margin-block: var(--space-4);
+  overflow: auto;
+  overscroll-behavior-inline: contain;
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-soot);
+  box-shadow: var(--frame-bevel);
+  scrollbar-color: var(--color-ash) var(--color-panel);
+}
+.devotion-map__canvas:focus-visible,
+.devotion-map__detail button:focus-visible,
+.devotion-map__list summary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+.devotion-map__svg {
+  display: block;
+  max-inline-size: none;
+  overflow: visible;
+  color: var(--color-bone);
+  font-family: var(--font-body);
+}
+.devotion-map__group {
+  cursor: pointer;
+  outline: none;
+}
+.devotion-map__geometry {
+  pointer-events: none;
+}
+.devotion-map__group-target {
+  fill: var(--color-panel);
+  stroke: var(--color-line);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  transition:
+    fill 160ms ease-out,
+    stroke 160ms ease-out;
+}
+.devotion-map__group--active .devotion-map__group-target {
+  fill: var(--color-panel-2);
+  stroke: var(--color-bone);
+  stroke-width: 2;
+}
+.devotion-map__group--selected .devotion-map__group-target,
+.devotion-map__group:hover .devotion-map__group-target,
+.devotion-map__group:focus-visible .devotion-map__group-target {
+  stroke: var(--color-storm);
+  stroke-width: 3;
+}
+.devotion-map__group:hover .devotion-map__group-target,
+.devotion-map__group:focus-visible .devotion-map__group-target {
+  fill: var(--color-panel-2);
+}
+.devotion-map__group-name {
+  fill: var(--color-bone);
+  font: var(--weight-display) var(--text-base) var(--font-display);
+}
+.devotion-map__tier,
+.devotion-map__active-label,
+.devotion-map__threshold text {
+  font: var(--text-small) var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.devotion-map__tier {
+  fill: var(--color-ash);
+}
+.devotion-map__active-label {
+  fill: var(--color-storm);
+  font-weight: var(--weight-emphasis);
+}
+.devotion-map__threshold text {
+  fill: var(--color-bone);
+}
+.devotion-map__threshold-arrow {
+  stroke: var(--color-storm);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.devotion-map__threshold-arrow {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.devotion-map__edges line {
+  stroke: var(--color-ash);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.devotion-map__star {
+  fill: var(--color-ember-dim);
+  stroke: var(--color-ember);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.devotion-map__step-position,
+.devotion-map__binding-target {
+  fill: var(--color-ash);
+  font-size: var(--text-small);
+}
+.devotion-map__binding-power {
+  fill: var(--color-bone);
+  font-size: var(--text-small);
+}
+.devotion-map__detail {
+  min-block-size: 3.5rem;
+  margin-block: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel-2);
+  box-shadow: var(--frame-bevel);
+}
+.devotion-map__detail h4,
+.devotion-map__list h4 {
+  margin: var(--space-3) 0 var(--space-1);
+  font-size: var(--text-base);
+  font-weight: var(--weight-emphasis);
+}
+.devotion-map__warning,
+.devotion-map__error {
+  color: var(--color-ember);
+}
+.devotion-map__detail button {
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  margin-block-start: var(--space-2);
+  padding-inline: var(--space-4);
+  border: var(--frame-border);
+  background: var(--color-panel-2);
+  color: var(--color-bone);
+  font: inherit;
+  cursor: pointer;
+}
+.devotion-map__detail button:hover {
+  border-color: var(--color-storm);
+}
+.devotion-map__list {
+  border-block-start: var(--frame-border);
+  padding-block-start: var(--space-3);
+}
+.devotion-map__list summary {
+  display: flex;
+  min-block-size: 44px;
+  align-items: center;
+  color: var(--color-storm);
+  cursor: pointer;
+  font-weight: var(--weight-emphasis);
+}
+.devotion-map__list ol {
+  margin: 0;
+  padding-inline-start: var(--space-6);
+}
+.devotion-map__list li {
+  padding-block: var(--space-3);
+  border-block-end: var(--frame-border);
+}
+.devotion-map__scroll-help {
+  margin: var(--space-2) 0;
+  font-size: var(--text-small);
+}
+@media (prefers-reduced-motion: reduce) {
+  .devotion-map__group-target {
+    transition: none;
+  }
+}
+
+.devotion-map__region {
+  fill: none;
+  stroke: var(--color-ash);
+  stroke-width: 1;
+}

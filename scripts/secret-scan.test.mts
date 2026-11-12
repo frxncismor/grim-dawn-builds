@@ -1,9 +1,21 @@
 import { after, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { randomBytes } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { basename, delimiter, dirname, join, resolve } from 'node:path';
+import { findGitleaks } from './setup-gitleaks.mts';
 import { fileURLToPath } from 'node:url';
 
 /**
@@ -12,8 +24,8 @@ import { fileURLToPath } from 'node:url';
  * Two layers:
  * - Static (always run): config, pre-commit hook, package.json script and both
  *   workflows (PR diff in ci.yml, scheduled history in secret-scan.yml).
- * - Detection (run when the gitleaks CLI is on PATH; skipped locally otherwise,
- *   and a hard failure when CI=true so CI can never silently skip them).
+ * - Detection uses the pinned project-local native executable or PATH fallback.
+ *   A failed availability gate blocks verification locally and in CI.
  *
  * Synthetic secrets are assembled at runtime and written only to temp repositories,
  * so no secret-shaped literal exists in this file, in the working tree or in history.
@@ -32,7 +44,8 @@ const GITLEAKS_VERSION = '8.30.1';
 const GITLEAKS_SHA256 = '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb';
 const CHECKOUT_PIN = 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1';
 
-const SYN_GH_PAT = ['gh', 'p_'].join('') + 'x1'.repeat(18);
+const SYN_GH_PAT =
+  ['gh', 'p_'].join('') + randomBytes(40).toString('base64url').replace(/[-_]/g, 'A').slice(0, 36);
 const SYN_PEM = ['-----BEGIN ', 'RSA PRIVATE KEY-----'].join('');
 const SYN_VALUES = [SYN_GH_PAT, SYN_PEM];
 
@@ -47,17 +60,21 @@ const codeOnly = (path: string): string =>
 
 const tempDirs: string[] = [];
 after(() => {
-  for (const dir of tempDirs) rmSync(dir, { recursive: true, force: true });
+  for (const dir of tempDirs) {
+    assert.equal(dirname(realpathSync(dir)), realpathSync(tmpdir()));
+    assert.ok(basename(dir).startsWith('secret-scan-'));
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
-function gitleaksOnPath(): boolean {
-  const result = spawnSync('gitleaks', ['version'], { encoding: 'utf8' });
-  return result.status === 0;
-}
-
-const AVAILABLE = gitleaksOnPath();
-const IN_CI = process.env.CI === 'true';
-const SKIP_REASON = 'gitleaks CLI not on PATH (install 8.30.1; CI always runs these)';
+const GITLEAKS = findGitleaks(REPO_ROOT);
+const AVAILABLE = Boolean(GITLEAKS);
+const SKIP_REASON = 'setup:gitleaks required; availability gate fails closed';
+const GIT = (process.env['PATH'] ?? process.env['Path'] ?? '')
+  .split(delimiter)
+  .map((folder) => resolve(folder, process.platform === 'win32' ? 'git.exe' : 'git'))
+  .find((file) => existsSync(file));
+if (!GIT) throw new Error('Git executable unavailable');
 
 describe('gitleaks config (.gitleaks.toml)', () => {
   const text = read(CONFIG);
@@ -68,15 +85,9 @@ describe('gitleaks config (.gitleaks.toml)', () => {
     assert.doesNotMatch(text, /^\s*disabled\s*=/m);
   });
 
-  it('keeps a single, minimal allowlist with no regexes or catch-all paths', () => {
-    assert.equal((text.match(/^\[allowlist\]$/gm) ?? []).length, 1);
-    assert.doesNotMatch(text, /^\[\[allowlists?\]\]/m);
-    assert.doesNotMatch(text, /^regexes\s*=/m);
-    const paths = /^paths\s*=\s*\[(.*)\]\s*$/m.exec(text);
-    assert.ok(paths, 'allowlist paths must be declared');
-    const entries = paths[1].split(',').map((e) => e.trim()).filter(Boolean);
-    assert.ok(entries.length <= 2, 'allowlist must stay minimal');
-    for (const entry of entries) assert.doesNotMatch(entry, /^['"]?(\.\*|\.|\*)['"]?$/);
+  it('declares no project allowlist exceptions', () => {
+    assert.doesNotMatch(text, /^\[\[?allowlists?\]?\]/m);
+    assert.doesNotMatch(text, /^paths\s*=/m);
   });
 });
 
@@ -86,11 +97,16 @@ describe('pre-commit hook (.githooks/pre-commit)', () => {
   it('is a POSIX sh script that scans staged changes with the repo config', () => {
     assert.equal(text.split('\n')[0], '#!/bin/sh');
     assert.match(text, /^set -eu$/m);
-    assert.match(text, /gitleaks git --pre-commit --staged --redact --exit-code 1 --config "\$repo_root\/\.gitleaks\.toml"/);
+    assert.match(
+      text,
+      /exec "\$gitleaks_tool" git --pre-commit --staged --redact --exit-code 1 --config "\$repo_root\/\.gitleaks\.toml"/,
+    );
   });
 
   it('fails closed when gitleaks is missing', () => {
-    assert.match(text, /if ! command -v gitleaks >\/dev\/null 2>&1; then/);
+    assert.match(text, /command -v gitleaks >\/dev\/null 2>&1/);
+    assert.match(text, /pnpm setup:gitleaks/);
+    assert.match(text, /gitleaks_version.*8\.30\.1/);
     assert.match(text, /exit 1\n\s*fi/);
   });
 
@@ -120,14 +136,23 @@ describe('PR diff scan in ci.yml', () => {
   const at = (needle: string) => text.indexOf(needle);
 
   it('checks out full history and keeps credentials out of the checkout', () => {
-    assert.match(text, /uses: actions\/checkout@[0-9a-f]{40} # v\d+\.\d+\.\d+\n\s+with:\n\s+# [^\n]*\n\s+fetch-depth: 0\n\s+persist-credentials: false/);
+    assert.match(
+      text,
+      /uses: actions\/checkout@[0-9a-f]{40} # v\d+\.\d+\.\d+\n\s+with:\n\s+# [^\n]*\n\s+fetch-depth: 0\n\s+persist-credentials: false/,
+    );
   });
 
   it('installs the pinned gitleaks version with SHA-256 verification', () => {
-    assert.match(text, new RegExp(`GITLEAKS_VERSION: ${GITLEAKS_VERSION.replace(/\./g, '\\.')}\\n`));
+    assert.match(
+      text,
+      new RegExp(`GITLEAKS_VERSION: ${GITLEAKS_VERSION.replace(/\./g, '\\.')}\\n`),
+    );
     assert.match(text, new RegExp(`GITLEAKS_SHA256: ${GITLEAKS_SHA256}\\n`));
     assert.match(text, /sha256sum --check --strict/);
-    assert.match(text, /https:\/\/github\.com\/gitleaks\/gitleaks\/releases\/download\/v\$\{GITLEAKS_VERSION\}\//);
+    assert.match(
+      text,
+      /https:\/\/github\.com\/gitleaks\/gitleaks\/releases\/download\/v\$\{GITLEAKS_VERSION\}\//,
+    );
   });
 
   it('scans only the PR commit range, redacted, failing on findings', () => {
@@ -140,7 +165,9 @@ describe('PR diff scan in ci.yml', () => {
   });
 
   it('runs the install and the scan before the script tests, and never on a schedule', () => {
-    assert.ok(at('Install gitleaks') > 0 && at('Install gitleaks') < at('Secret scan (PR commit range)'));
+    assert.ok(
+      at('Install gitleaks') > 0 && at('Install gitleaks') < at('Secret scan (PR commit range)'),
+    );
     assert.ok(at('Secret scan (PR commit range)') < at('pnpm run test:scripts'));
     const code = codeOnly(CI_WORKFLOW);
     assert.doesNotMatch(code, /^\s*schedule:/m);
@@ -176,19 +203,24 @@ describe('scheduled history scan (secret-scan.yml)', () => {
 
   it('installs the same pinned gitleaks and scans the whole history with the repo config', () => {
     assert.match(text, new RegExp(`GITLEAKS_SHA256: ${GITLEAKS_SHA256}\\n`));
-    assert.match(text, new RegExp(`GITLEAKS_VERSION: ${GITLEAKS_VERSION.replace(/\./g, '\\.')}\\n`));
+    assert.match(
+      text,
+      new RegExp(`GITLEAKS_VERSION: ${GITLEAKS_VERSION.replace(/\./g, '\\.')}\\n`),
+    );
     assert.match(text, /gitleaks git --redact --exit-code 1 --config \.gitleaks\.toml \./);
   });
 });
 
 describe('gitleaks CLI availability', () => {
-  it('is installed when running in CI (detection tests must not be skipped there)', { skip: !IN_CI }, () => {
-    assert.ok(AVAILABLE, 'gitleaks must be on PATH in CI; the install step failed or was removed');
+  it('requires the pinned native tool locally and in CI', () => {
+    assert.ok(AVAILABLE, 'Run pnpm setup:gitleaks; required by local verification and CI');
   });
 });
 
 function git(root: string, args: string[]): string {
-  const result = spawnSync('git', ['-C', root, '-c', 'commit.gpgsign=false', ...args], { encoding: 'utf8' });
+  const result = spawnSync(GIT!, ['-C', root, '-c', 'commit.gpgsign=false', ...args], {
+    encoding: 'utf8',
+  });
   assert.equal(result.status, 0, result.stderr);
   return result.stdout.trim();
 }
@@ -237,7 +269,7 @@ function scanHistory(root: string, logOpts?: string) {
   ];
   if (logOpts !== undefined) args.push(`--log-opts=${logOpts}`);
   args.push(root);
-  const result = spawnSync('gitleaks', args, { encoding: 'utf8' });
+  const result = spawnSync(GITLEAKS!, args, { encoding: 'utf8' });
   const report = (() => {
     try {
       return readFileSync(reportPath, 'utf8');
@@ -249,58 +281,118 @@ function scanHistory(root: string, logOpts?: string) {
 }
 
 /** Detection tests: real gitleaks, synthetic secrets in temp repositories only. */
-describe('detection with gitleaks (synthetic fixtures)', { skip: AVAILABLE ? false : SKIP_REASON }, () => {
-  it('passes on the current repository history', () => {
-    const scan = scanHistory(REPO_ROOT);
-    assert.equal(scan.status, 0, `history scan found a finding in the repository:\n${scan.output}`);
-  });
+describe(
+  'detection with gitleaks (synthetic fixtures)',
+  { skip: AVAILABLE ? false : SKIP_REASON },
+  () => {
+    it('passes on the current repository history', () => {
+      const scan = scanHistory(REPO_ROOT);
+      assert.equal(
+        scan.status,
+        0,
+        `history scan found a finding in the repository:\n${scan.output}`,
+      );
+    });
 
-  it('fails a commit that adds a synthetic secret, without printing its value', () => {
-    const root = newTempRepo();
-    writeFile(root, 'src/config.ts', SECRET_FILE);
-    writeFile(root, 'infra/key.conf', `${SYN_PEM}\n`);
-    commitAll(root, 'add synthetic fixture');
-    const scan = scanHistory(root);
-    assert.equal(scan.status, 1, scan.output);
-    const ids = (JSON.parse(scan.report || '[]') as { RuleID: string; File: string }[]).map((f) => `${f.RuleID}:${f.File}`);
-    assert.ok(ids.some((id) => id.startsWith('github-pat:') && id.includes('src/config.ts')), ids.join(', '));
-    for (const value of SYN_VALUES) assert.ok(!scan.output.includes(value), 'secret value leaked into output');
-  });
+    it('fails a commit that adds a synthetic secret, without printing its value', () => {
+      const root = newTempRepo();
+      writeFile(root, 'src/config.ts', SECRET_FILE);
+      writeFile(root, 'infra/key.conf', `${SYN_PEM}\n`);
+      commitAll(root, 'add synthetic fixture');
+      const scan = scanHistory(root);
+      assert.equal(scan.status, 1, scan.output);
+      const ids = (JSON.parse(scan.report || '[]') as { RuleID: string; File: string }[]).map(
+        (f) => `${f.RuleID}:${f.File}`,
+      );
+      assert.ok(
+        ids.some((id) => id.startsWith('github-pat:') && id.includes('src/config.ts')),
+        ids.join(', '),
+      );
+      for (const value of SYN_VALUES)
+        assert.ok(!scan.output.includes(value), 'secret value leaked into output');
+    });
 
-  it('passes a clean repository', () => {
-    const root = newTempRepo();
-    writeFile(root, 'src/app.ts', CLEAN_FILE);
-    commitAll(root, 'clean');
-    assert.equal(scanHistory(root).status, 0);
-  });
+    it('passes a clean repository', () => {
+      const root = newTempRepo();
+      writeFile(root, 'src/app.ts', CLEAN_FILE);
+      commitAll(root, 'clean');
+      assert.equal(scanHistory(root).status, 0);
+    });
 
-  it('scans only the PR commit range (base..head)', () => {
-    const root = newTempRepo();
-    writeFile(root, 'src/app.ts', CLEAN_FILE);
-    const base = commitAll(root, 'base');
-    writeFile(root, 'src/more.ts', CLEAN_FILE);
-    const middle = commitAll(root, 'clean change');
-    writeFile(root, 'src/config.ts', SECRET_FILE);
-    const head = commitAll(root, 'pr adds secret');
-    assert.equal(scanHistory(root, `${base}..${middle}`).status, 0, 'clean range must pass');
-    const pr = scanHistory(root, `${middle}..${head}`);
-    assert.equal(pr.status, 1, pr.output);
-    assert.ok(!pr.output.includes(SYN_GH_PAT));
-  });
+    it('scans only the PR commit range (base..head)', () => {
+      const root = newTempRepo();
+      writeFile(root, 'src/app.ts', CLEAN_FILE);
+      const base = commitAll(root, 'base');
+      writeFile(root, 'src/more.ts', CLEAN_FILE);
+      const middle = commitAll(root, 'clean change');
+      writeFile(root, 'src/config.ts', SECRET_FILE);
+      const head = commitAll(root, 'pr adds secret');
+      assert.equal(scanHistory(root, `${base}..${middle}`).status, 0, 'clean range must pass');
+      const pr = scanHistory(root, `${middle}..${head}`);
+      assert.equal(pr.status, 1, pr.output);
+      assert.ok(!pr.output.includes(SYN_GH_PAT));
+    });
 
-  it('pre-commit hook blocks a staged synthetic secret and allows a clean one', () => {
-    const root = newTempRepo();
-    mkdirSync(join(root, '.githooks'), { recursive: true });
-    copyFileSync(HOOK, join(root, HOOK_REL));
-    writeFile(root, 'src/app.ts', CLEAN_FILE);
-    git(root, ['add', '-A']);
-    const clean = spawnSync('sh', [HOOK_REL], { cwd: root, encoding: 'utf8' });
-    assert.equal(clean.status, 0, clean.stdout + clean.stderr);
-
-    writeFile(root, 'src/config.ts', SECRET_FILE);
-    git(root, ['add', '-A']);
-    const blocked = spawnSync('sh', [HOOK_REL], { cwd: root, encoding: 'utf8' });
-    assert.notEqual(blocked.status, 0, 'hook must block the staged secret');
-    assert.ok(!(blocked.stdout + blocked.stderr).includes(SYN_GH_PAT));
-  });
-});
+    const prepareHook = (root: string): void => {
+      mkdirSync(join(root, '.githooks'), { recursive: true });
+      copyFileSync(HOOK, join(root, HOOK_REL));
+      chmodSync(join(root, HOOK_REL), 0o755);
+      writeFile(root, '.gitignore', '/.tools/gitleaks/8.30.1/\n');
+      git(root, ['config', 'core.hooksPath', '.githooks']);
+    };
+    const commit = (root: string, env = process.env) =>
+      spawnSync(
+        GIT!,
+        ['-C', root, '-c', 'commit.gpgsign=false', 'commit', '-q', '-m', 'hook fixture'],
+        { encoding: 'utf8', env },
+      );
+    it('pre-commit blocks an actual commit containing a staged synthetic secret and permits clean data', () => {
+      const root = newTempRepo();
+      prepareHook(root);
+      const toolDir = join(root, '.tools/gitleaks/8.30.1');
+      mkdirSync(toolDir, { recursive: true });
+      copyFileSync(
+        GITLEAKS!,
+        join(toolDir, process.platform === 'win32' ? 'gitleaks.exe' : 'gitleaks'),
+      );
+      chmodSync(join(toolDir, process.platform === 'win32' ? 'gitleaks.exe' : 'gitleaks'), 0o755);
+      writeFile(root, 'src/app.ts', CLEAN_FILE);
+      git(root, ['add', '-A']);
+      const clean = commit(root);
+      assert.equal(clean.status, 0, clean.stdout + clean.stderr);
+      writeFile(root, 'src/config.ts', SECRET_FILE);
+      git(root, ['add', '-A']);
+      const blocked = commit(root);
+      assert.notEqual(blocked.status, 0, 'hook must block the actual commit');
+      assert.ok(!(blocked.stdout + blocked.stderr).includes(SYN_GH_PAT));
+    });
+    it('blocks a commit when the tool is absent without relying on the host PATH', () => {
+      const root = newTempRepo();
+      prepareHook(root);
+      const bin = join(root, 'only-git');
+      mkdirSync(bin);
+      const quotedGit = "'" + GIT!.replaceAll("'", "'\\''") + "'";
+      writeFile(root, 'only-git/git', '#!/bin/sh\nexec ' + quotedGit + ' "$@"\n');
+      chmodSync(join(bin, 'git'), 0o755);
+      writeFile(root, 'src/app.ts', CLEAN_FILE);
+      git(root, ['add', '-A']);
+      const env = { ...process.env, PATH: bin };
+      if (process.platform === 'win32') delete (env as Record<string, string | undefined>)['Path'];
+      const blocked = commit(root, env);
+      assert.notEqual(blocked.status, 0);
+      assert.match(blocked.stdout + blocked.stderr, /pnpm setup:gitleaks/);
+    });
+    it('blocks a tool reporting a different version before scanning a commit', () => {
+      const root = newTempRepo();
+      prepareHook(root);
+      const file = join(root, '.tools/gitleaks/8.30.1/gitleaks');
+      writeFile(root, '.tools/gitleaks/8.30.1/gitleaks', '#!/bin/sh\nprintf "%s\\n" "0.0.0"\n');
+      chmodSync(file, 0o755);
+      writeFile(root, 'src/app.ts', CLEAN_FILE);
+      git(root, ['add', '-A']);
+      const blocked = commit(root, { ...process.env, OS: 'Linux' });
+      assert.notEqual(blocked.status, 0);
+      assert.match(blocked.stdout + blocked.stderr, /versión de gitleaks inválida/);
+    });
+  },
+);

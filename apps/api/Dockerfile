@@ -54,6 +54,7 @@ WORKDIR /app
 
 COPY --from=build /prod/api/package.json ./package.json
 COPY --from=build /prod/api/dist ./dist
+COPY --from=build /repo/apps/api/drizzle ./drizzle
 COPY --from=build /prod/api/node_modules ./node_modules
 
 USER 10001:10001

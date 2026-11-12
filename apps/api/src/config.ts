@@ -35,12 +35,28 @@ const ConfigSchema = z.object({
   API_HOST: z.string().regex(SAFE_HOST).default('127.0.0.1'),
   API_PORT: PortSchema.default(3000),
   LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
+  CORS_ORIGINS: z.literal('http://localhost:4200').default('http://localhost:4200'),
+  API_BODY_LIMIT_BYTES: z
+    .string()
+    .regex(/^\d{1,5}$/)
+    .transform(Number)
+    .pipe(z.number().int().min(1024).max(65536))
+    .default(16384),
+  API_RATE_LIMIT: z
+    .string()
+    .regex(/^\d{1,5}$/)
+    .transform(Number)
+    .pipe(z.number().int().min(1).max(10000))
+    .default(120),
 });
 
 export interface AppConfig {
   readonly host: string;
   readonly port: number;
   readonly logLevel: LogLevel;
+  readonly corsOrigin: string;
+  readonly bodyLimit: number;
+  readonly rateLimit: number;
 }
 
 /**
@@ -61,6 +77,9 @@ export function loadConfig(env: Readonly<Record<string, string | undefined>>): A
     host: result.data.API_HOST,
     port: result.data.API_PORT,
     logLevel: result.data.LOG_LEVEL,
+    corsOrigin: result.data.CORS_ORIGINS,
+    bodyLimit: result.data.API_BODY_LIMIT_BYTES,
+    rateLimit: result.data.API_RATE_LIMIT,
   };
 }
 

@@ -8,14 +8,16 @@
  * Runtime behaviour (`docker compose up`, health) is verified with Docker, not here.
  */
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { describe, it } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { provisionDatabaseRoles } from '../infra/docker/init/provision-roles.mts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = readFileSync(join(ROOT, 'infra', 'docker', 'compose.yaml'), 'utf8');
 const DEBUG = readFileSync(join(ROOT, 'infra', 'docker', 'compose.debug.yaml'), 'utf8');
+const INIT = readFileSync(join(ROOT, 'infra', 'docker', 'init', '001-provision-roles.sh'), 'utf8');
 
 /** Lines of one top-level section (e.g. `services`) without its header. */
 function section(text: string, name: string): string[] {
@@ -49,7 +51,11 @@ function services(text: string): Map<string, string[]> {
 const svc = services(BASE);
 const debugSvc = services(DEBUG);
 /** Compose text without comment lines, so comments cannot satisfy or violate a rule. */
-const code = (text: string) => text.split(/\r?\n/).filter((l) => !l.trim().startsWith('#')).join('\n');
+const code = (text: string) =>
+  text
+    .split(/\r?\n/)
+    .filter((l) => !l.trim().startsWith('#'))
+    .join('\n');
 const BASE_CODE = code(BASE);
 const DEBUG_CODE = code(DEBUG);
 const block = (name: string) => svc.get(name) ?? [];
@@ -76,7 +82,9 @@ describe('compose.yaml services (T-056)', () => {
   it('pins db to PostgreSQL 17 with an exact tag and sha256 digest, never latest', () => {
     const image = block('db').find((l) => /^ {4}image:/.test(l)) ?? '';
     assert.match(image, /image: postgres:17\.\d+-[a-z]+@sha256:[0-9a-f]{64}$/);
-    const uncommented = BASE.split(/\r?\n/).filter((l) => !l.trim().startsWith('#')).join('\n');
+    const uncommented = BASE.split(/\r?\n/)
+      .filter((l) => !l.trim().startsWith('#'))
+      .join('\n');
     assert.doesNotMatch(uncommented, /latest/i);
   });
 
@@ -123,6 +131,7 @@ describe('compose.yaml services (T-056)', () => {
     assert.ok(has(block('db'), /^ {4}healthcheck:/));
     assert.ok(has(block('api'), /^ {4}healthcheck:/));
     assert.ok(block('db').some((l) => l.includes('pg_isready')));
+    assert.ok(block('db').some((l) => l.includes('pg_roles')));
     assert.ok(block('api').some((l) => l.includes('/health')));
     assert.ok(has(block('migrate'), /^ {8}condition: service_healthy$/));
     assert.ok(has(block('api'), /^ {8}condition: service_completed_successfully$/));
@@ -137,24 +146,137 @@ describe('compose.yaml services (T-056)', () => {
       if (!/^ {6}- /.test(line)) break;
       volumes.push(line);
     }
-    assert.deepEqual(volumes, ['      - pgdata:/var/lib/postgresql/data']);
+    assert.deepEqual(volumes, [
+      '      - pgdata:/var/lib/postgresql/data',
+      '      - ./init:/docker-entrypoint-initdb.d:ro',
+    ]);
     const top = section(BASE, 'volumes');
     assert.ok(top.some((l) => /^ {2}pgdata:/.test(l)));
   });
 
   it('reads secrets only from git-ignored files through Compose secrets and *_FILE', () => {
-    assert.ok(block('db').some((l) => l.includes('POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password')));
+    assert.ok(
+      block('db').some((l) => l.includes('POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password')),
+    );
     const secretsTop = section(BASE, 'secrets');
     assert.ok(secretsTop.some((l) => /file: \.\/secrets\/postgres_password\.txt/.test(l)));
     assert.doesNotMatch(BASE, /POSTGRES_PASSWORD:\s*\S/);
-    assert.doesNotMatch(BASE, /DB_PASSWORD_\w+:\s*\S/);
+    assert.doesNotMatch(BASE_CODE, /DB_PASSWORD_(?:MIGRATOR|API_RO|IMPORTER|EDITOR):\s*\S/);
     assert.doesNotMatch(BASE, /^\s*env_file:/m);
+  });
+
+  it('delivers only each service credential and mounts the idempotent initializer in db', () => {
+    const db = block('db').join('\n');
+    const migrate = block('migrate').join('\n');
+    const api = block('api').join('\n');
+    assert.match(db, /POSTGRES_PASSWORD_FILE: \/run\/secrets\/postgres_password/);
+    assert.match(db, /- db_password_migrator/);
+    assert.match(db, /- db_password_api_ro/);
+    assert.match(db, /\.\/init:\/docker-entrypoint-initdb\.d:ro/);
+    assert.match(migrate, /DB_PASSWORD_MIGRATOR_FILE: \/run\/secrets\/db_password_migrator/);
+    assert.match(api, /DB_PASSWORD_API_RO_FILE: \/run\/secrets\/db_password_api_ro/);
+    assert.doesNotMatch(migrate, /api_ro|POSTGRES_PASSWORD|api_password/);
+    assert.doesNotMatch(api, /migrator|POSTGRES_PASSWORD|importer|editor/);
+    assert.doesNotMatch(db, /DB_PASSWORD_(?:IMPORTER|EDITOR)/);
+  });
+
+  it('declares only the role credentials needed by db, migrate and api', () => {
+    const secretsTop = section(BASE, 'secrets').join('\n');
+    assert.match(secretsTop, /db_password_migrator:/);
+    assert.match(secretsTop, /db_password_api_ro:/);
+    assert.doesNotMatch(secretsTop, /db_password_(?:importer|editor)/);
+  });
+
+  it('precreates roles without login, provisions only migrator and api_ro, and hashes passwords client-side', () => {
+    assert.match(INIT, /for role in migrator importer editor api_ro/);
+    assert.match(INIT, /CREATE ROLE %I NOLOGIN/);
+    assert.match(INIT, /GRANT CREATE ON DATABASE %I TO migrator/);
+    assert.match(INIT, /GRANT USAGE, CREATE ON SCHEMA public TO migrator/);
+    assert.match(INIT, /CREATE SCHEMA IF NOT EXISTS drizzle AUTHORIZATION migrator/);
+    assert.match(INIT, /provision_login migrator/);
+    assert.match(INIT, /provision_login api_ro/);
+    assert.doesNotMatch(INIT, /provision_login importer|provision_login editor/);
+    assert.match(INIT, /\\password \$\{role\}/);
+    assert.match(INIT, /printf '%s\\n%s\\n' "\$password" "\$password" \|/);
+    assert.doesNotMatch(INIT, /echo .*password|set -x|--password\s+\$password/i);
+    assert.match(INIT, /role provisioning failed: required secret unavailable/);
+    assert.doesNotMatch(INIT, /\$password.*(printf|echo).*stderr/);
+  });
+
+  it('uses an explicit reprovisioner that never surfaces subprocess output', async () => {
+    let safeError = '';
+    try {
+      await provisionDatabaseRoles({
+        run: async () => ({ code: 1, output: 'sensitive subprocess output' }),
+      });
+    } catch (error) {
+      safeError = error instanceof Error ? error.message : String(error);
+    }
+    assert.equal(safeError, 'Falló la provisión de roles (código 1)');
+    assert.doesNotMatch(safeError, /sensitive/);
+    assert.equal(existsSync(join(ROOT, 'infra', 'docker', 'init', '001-provision-roles.sh')), true);
+  });
+
+  it('routes existing-volume reprovisioning through a fixed command with no secret arguments', async () => {
+    const calls: Array<{ command: string; args: readonly string[] }> = [];
+    await provisionDatabaseRoles({
+      run: async (command, args) => {
+        calls.push({ command, args });
+        return { code: 0, output: 'role credentials provisioned\n' };
+      },
+    });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].command, 'docker');
+    assert.deepEqual(calls[0].args, [
+      'compose',
+      '-f',
+      'infra/docker/compose.yaml',
+      'exec',
+      '-T',
+      'db',
+      'sh',
+      '/docker-entrypoint-initdb.d/001-provision-roles.sh',
+    ]);
   });
 
   it('never grants privilege, Docker socket or host bind mounts', () => {
     assert.doesNotMatch(BASE_CODE, /privileged:\s*true/);
     assert.doesNotMatch(BASE_CODE, /docker\.sock/);
-    assert.doesNotMatch(BASE_CODE, /^[ \t]*- \.{0,2}\/[^:\n]*:/m);
+    const localMounts = BASE_CODE.split(/\r?\n/).filter((line) => /^\s+- \.{0,2}\//.test(line));
+    assert.deepEqual(localMounts, [
+      '      - ./init:/docker-entrypoint-initdb.d:ro',
+      '      - /tmp',
+      '      - /var/run/postgresql',
+      '      - /tmp',
+      '      - /tmp',
+    ]);
+  });
+
+  it('keeps database diagnostics without logging SQL, bind values or row details (T-125)', () => {
+    const db = code(block('db').join('\n'));
+    for (const setting of [
+      'logging_collector=off',
+      'log_destination=stderr',
+      'log_timezone=UTC',
+      'log_error_verbosity=terse',
+      'log_statement=none',
+      'log_min_error_statement=panic',
+      'log_min_duration_statement=-1',
+      'log_min_duration_sample=-1',
+      'log_duration=off',
+      'log_parameter_max_length=0',
+      'log_parameter_max_length_on_error=0',
+      'log_lock_waits=on',
+    ]) {
+      assert.ok(db.includes(`- ${setting}\n`), `db must preserve ${setting}`);
+    }
+    const prefix = db.split('\n').find((line) => line.includes('log_line_prefix=')) ?? '';
+    for (const field of ['%m', '%p', '%e', '%u', '%d', '%a', '%r', '%c']) {
+      assert.ok(prefix.includes(field), `missing diagnostic field ${field}`);
+    }
+    assert.match(db, /driver: local/);
+    assert.match(db, /max-size: "10m"/);
+    assert.match(db, /max-file: "3"/);
   });
 
   it('adds no Redis, queue or external-auth service (constitution VIII)', () => {

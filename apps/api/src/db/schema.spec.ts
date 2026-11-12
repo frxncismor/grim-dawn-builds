@@ -33,6 +33,7 @@ const EXPECTED_TABLES = [
   'constellations',
   'builds',
   'build_sources',
+  'build_constellations',
   'build_masteries',
   'build_skill_nodes',
   'build_priorities',
@@ -48,7 +49,7 @@ const EXPECTED_TABLES = [
   'content_origin',
 ];
 
-const JOIN_TABLES = ['build_sources', 'build_masteries'];
+const JOIN_TABLES = ['build_sources', 'build_masteries', 'build_constellations'];
 const ENTITY_TABLES = EXPECTED_TABLES.filter((n) => !JOIN_TABLES.includes(n));
 
 describe('database schema: tables', () => {

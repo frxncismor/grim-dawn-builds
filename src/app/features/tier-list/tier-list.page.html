@@ -1,0 +1,43 @@
+<header class="catalog-intro">
+  <h1>{{ catalog.title }}</h1>
+  <p i18n="@@catalog.intro">
+    Todas las combinaciones, con su estado a la vista. Una ranura sin guía es un placeholder: no es
+    una recomendación ni una clasificación de poder.
+  </p>
+  <p><span i18n="@@catalog.version">Versión del juego:</span> {{ catalog.gameVersion }}</p>
+</header>
+<details class="filter-panel" open>
+  <summary i18n="@@catalog.filterHeading">Filtrar catálogo</summary>
+  <gd-filter-bar [value]="filter()" [groups]="groups" (valueChange)="updateFilter($event)" />
+  <p class="filter-help" i18n="@@catalog.filterHelp">
+    Se combinan los grupos de filtros. Dentro de cada grupo basta con una coincidencia. Las entradas
+    sin datos de daño o estilo no aparecen al filtrar por esos datos.
+  </p>
+</details>
+<p
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+  class="result-count"
+  i18n="@@catalog.resultCount"
+>
+  {{ visible().length }} de {{ catalog.cards.length }} entradas
+</p>
+@for (row of rows(); track row.tier) {
+  <gd-tier-row [label]="row.label">
+    @for (card of row.cards; track card.id) {
+      <gd-tier-card
+        [entry]="card.entry"
+        [combinationName]="card.combinationName"
+        [guide]="card.guide"
+        [source]="card.source"
+        [gameVersion]="card.gameVersion"
+      />
+    }
+  </gd-tier-row>
+} @empty {
+  <gd-empty-state (filtersReset)="clear()" />
+}
+<p i18n="@@catalog.noScript">
+  El catálogo completo puede leerse sin JavaScript. Los filtros requieren JavaScript.
+</p>

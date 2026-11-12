@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { getTableConfig, type PgTable } from 'drizzle-orm/pg-core';
 import { describe, expect, it } from 'vitest';
 import { AssetSchema, BuildSchema, CONTENT_STATUSES, TIERS, TierEntrySchema } from '@gd/domain';
+import { contractDoc } from '@gd/domain/testing';
 import * as db from '../src/db/schema.js';
 
 const gatesSql = readFileSync(
@@ -21,7 +22,7 @@ const gatesSql = readFileSync(
 
 interface SafeParseLike {
   success: boolean;
-  error?: { issues: ReadonlyArray<{ message: string }> };
+  error?: { issues: readonly { message: string }[] };
 }
 
 const messagesOf = (result: SafeParseLike): string[] =>
@@ -102,6 +103,18 @@ describe('parity: enums (Drizzle pgEnum ↔ domain Zod options)', () => {
 });
 
 describe('parity: nullability (Drizzle notNull ↔ Zod nullable)', () => {
+  it('preserves unknown constellation tiers and source slug identity', () => {
+    expect(columnOf(db.constellations, 'tier_level').notNull).toBe(false);
+    expect(columnOf(db.sources, 'slug').notNull).toBe(true);
+    expect(columnOf(db.sources, 'slug').isUnique).toBe(true);
+  });
+  it('permits unknown catalog playstyle while requiring real guide playstyle', () => {
+    expect(columnOf(db.tierEntries, 'playstyle').notNull).toBe(false);
+    expect(columnOf(db.builds, 'playstyle').notNull).toBe(true);
+    expect(
+      BuildSchema.safeParse({ ...contractDoc('unknown-style'), playstyle: null }).success,
+    ).toBe(false);
+  });
   // [table, DB column, domain schema for the same field]
   const pairs: [PgTable, string, { safeParse: (v: unknown) => SafeParseLike }][] = [
     [db.builds, 'slug', BuildSchema.shape.slug],
@@ -154,6 +167,7 @@ describe('parity: builds publication gate (SQL builds_publication_ck + gates_che
   ].map((m) => m[1] ?? '');
 
   const published: Record<string, unknown> = {
+    ...contractDoc('build-publicada', { author_slug: 'autor-real', source_slugs: ['fuente-real'] }),
     slug: 'build-publicada',
     locale: 'es',
     title: 'Build publicada',
@@ -167,7 +181,6 @@ describe('parity: builds publication gate (SQL builds_publication_ck + gates_che
     content_status: 'verificado',
     reviewed_by: 'Revisor',
     published_at: '2026-01-02',
-    skill_nodes: [],
   };
 
   it('the publication CHECK exists in the migration and approves the four rights statuses', () => {
@@ -181,6 +194,7 @@ describe('parity: builds publication gate (SQL builds_publication_ck + gates_che
     expect(BuildSchema.safeParse(published).success).toBe(true);
     const draft = {
       ...published,
+      ...contractDoc('build-borrador', { author_slug: 'por-confirmar', source_slugs: [] }),
       review_state: 'borrador',
       author_slug: 'por-confirmar',
       source_slugs: [],

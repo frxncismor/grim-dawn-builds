@@ -1,0 +1,106 @@
+:host {
+  display: block;
+}
+.hero {
+  margin-block-end: var(--space-6);
+  padding: var(--space-6);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel), var(--panel-shadow);
+}
+.hero h1 {
+  margin-block: 0 var(--space-5);
+}
+.hero h1 span {
+  display: block;
+  color: var(--color-storm);
+}
+.hero p {
+  font-size: var(--text-large);
+  margin-block-end: var(--space-5);
+}
+.hero-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-5);
+}
+.hero-links a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--space-7);
+  text-underline-offset: var(--space-2);
+}
+.primary-link {
+  padding: var(--space-3) var(--space-5);
+  border: var(--frame-border-active);
+  background: var(--color-storm);
+  color: var(--color-soot);
+  font-weight: var(--weight-emphasis);
+  text-decoration-thickness: 1px;
+}
+.primary-link:hover {
+  background: var(--color-bone);
+  color: var(--color-soot);
+}
+.primary-link:active {
+  background: var(--color-ember);
+  color: var(--color-soot);
+}
+a:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+.publication,
+.criteria {
+  padding-block: var(--space-6);
+}
+
+.publication {
+  margin-block-end: var(--space-6);
+  padding: var(--space-5);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel);
+}
+
+.criteria {
+  border-block-start: var(--frame-border);
+}
+.publication h2,
+.criteria h2 {
+  margin-block-start: 0;
+}
+.publication h3 {
+  margin-block-start: 0;
+}
+.criteria {
+  padding-block-end: var(--space-8);
+  scroll-margin-block-start: var(--space-5);
+}
+dl {
+  margin: var(--space-5) 0 0;
+  display: grid;
+  gap: var(--space-6);
+}
+dt {
+  color: var(--color-storm);
+  font-weight: var(--weight-emphasis);
+  margin-block-end: var(--space-2);
+}
+dd {
+  margin: 0;
+  max-inline-size: var(--reading-measure);
+}
+@media (min-width: 64rem) {
+  dl {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+}
+
+@media (max-width: 30rem) {
+  .hero {
+    padding: var(--space-5);
+  }
+}

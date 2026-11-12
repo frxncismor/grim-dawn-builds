@@ -1,0 +1,124 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+
+section {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+h2 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-storm);
+}
+
+.video-title {
+  margin: 0 0 var(--space-3);
+  font-weight: var(--weight-emphasis);
+}
+
+.video-stage {
+  position: relative;
+  display: grid;
+  aspect-ratio: 16 / 9;
+  place-items: center;
+  border: var(--frame-border);
+  background: var(--header-glow), var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel);
+  color: var(--color-storm);
+}
+
+iframe {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+}
+
+.video-status {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline: var(--space-2);
+  pointer-events: none;
+  text-align: center;
+}
+
+.video-status span {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-panel);
+  color: var(--color-bone);
+}
+
+.video-error {
+  margin: 0;
+  color: var(--color-ember);
+}
+
+.video-stage .video-error {
+  padding: var(--space-3);
+  text-align: center;
+}
+
+.video-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-block-start: var(--space-3);
+}
+
+button,
+a {
+  display: inline-flex;
+  min-block-size: 44px;
+  max-inline-size: 100%;
+  align-items: center;
+}
+
+button {
+  padding: var(--space-1) var(--space-3);
+  border: var(--frame-accent-border);
+  background: var(--color-panel-2);
+  color: var(--color-bone);
+  font: inherit;
+  cursor: pointer;
+}
+
+button:not(:disabled, [aria-disabled='true']):hover {
+  background: var(--color-storm-dim);
+}
+
+button:not(:disabled, [aria-disabled='true']):active {
+  background: var(--color-storm);
+  color: var(--color-soot);
+}
+
+button:disabled,
+button[aria-disabled='true'] {
+  border: var(--frame-border);
+  color: var(--color-ash);
+  cursor: default;
+}
+
+a {
+  color: var(--color-storm);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  color: var(--color-bone);
+}
+
+:is(button, a, iframe):focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.video-note {
+  margin: var(--space-1) 0 0;
+  color: var(--color-ash);
+}

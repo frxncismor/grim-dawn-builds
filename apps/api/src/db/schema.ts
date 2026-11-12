@@ -143,6 +143,7 @@ export const authors = pgTable('authors', {
 
 export const sources = pgTable('sources', {
   id: idColumn(),
+  slug: text('slug').notNull().unique(),
   kind: sourceKindEnum('kind').notNull(),
   title: text('title').notNull(),
   url: text('url'),
@@ -223,7 +224,7 @@ export const constellations = pgTable('constellations', {
   slug: text('slug').notNull().unique(),
   name_en: text('name_en').notNull(),
   name_es: text('name_es'),
-  tier_level: integer('tier_level').notNull(),
+  tier_level: integer('tier_level'),
   affinity_required: jsonb('affinity_required'),
   affinity_granted: jsonb('affinity_granted'),
   layout: jsonb('layout').notNull(),
@@ -331,6 +332,7 @@ export const buildPriorities = pgTable('build_priorities', {
     .notNull()
     .references(() => builds.id, { onDelete: 'cascade' }),
   rank: integer('rank'),
+  position: integer('position').notNull(),
   group_label: text('group_label').notNull(),
   headline: text('headline').notNull(),
   note: text('note').notNull(),
@@ -365,6 +367,20 @@ export const buildNotes = pgTable('build_notes', {
   position: integer('position').notNull(),
   ...timestamps(),
 });
+
+export const buildConstellations = pgTable(
+  'build_constellations',
+  {
+    build_id: uuid('build_id')
+      .notNull()
+      .references(() => builds.id, { onDelete: 'cascade' }),
+    constellation_id: uuid('constellation_id')
+      .notNull()
+      .references(() => constellations.id),
+    position: integer('position').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.build_id, t.constellation_id] })],
+);
 
 export const buildDevotionSteps = pgTable('build_devotion_steps', {
   id: idColumn(),
@@ -467,7 +483,7 @@ export const tierEntries = pgTable(
     tier: tierEnum('tier').notNull(),
     mastery_ids: uuid('mastery_ids').array().notNull(),
     damage_types: damageTypeEnum('damage_types').array().notNull(),
-    playstyle: playstyleEnum('playstyle').notNull(),
+    playstyle: playstyleEnum('playstyle'),
     content_tags: contentTagEnum('content_tags').array().notNull(),
     note: text('note').notNull(),
     content_status: contentStatusEnum('content_status').notNull(),

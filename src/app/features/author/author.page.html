@@ -1,0 +1,50 @@
+@if (author; as page) {
+  <h1>{{ page.profile.display_name }}</h1>
+  @if (page.profile.bio) {
+    <p>{{ page.profile.bio }}</p>
+  }
+  @if (externalUrl) {
+    <p>
+      <a [href]="externalUrl" target="_blank" rel="noopener noreferrer" i18n="@@author.site"
+        >Sitio del autor (nueva pestaña)</a
+      >
+    </p>
+  }
+  @if (page.ownsCatalog) {
+    <section aria-labelledby="author-catalog">
+      <h2 id="author-catalog" i18n="@@author.catalogHeading">Responsable del catálogo</h2>
+      <p i18n="@@author.catalogDescription">
+        Mantiene el catálogo de combinaciones. Las ranuras informativas no son guías ni rankings
+        verificados.
+      </p>
+      <a href="/tier-list" i18n="@@author.catalogLink">Consultar el catálogo</a>
+    </section>
+  }
+  <section aria-labelledby="author-guides">
+    <h2 id="author-guides" i18n="@@author.guides">Guías publicadas</h2>
+    @if (page.guides.length) {
+      <ul>
+        @for (guide of page.guides; track guide.slug) {
+          <li>
+            <h3>
+              <a [href]="'/builds/' + guide.slug">{{ guide.title }}</a>
+            </h3>
+            <p><span i18n="@@author.version">Versión:</span> {{ guide.game_version }}</p>
+            @if (guide.published_at; as date) {
+              <p>
+                <span i18n="@@author.published">Publicada el</span>
+                <time [attr.datetime]="date">{{ date }}</time>
+              </p>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p i18n="@@author.empty">Este autor todavía no tiene guías publicadas.</p>
+    }
+  </section>
+} @else {
+  <h1 i18n="@@author.notFound">Autor no encontrado</h1>
+  <p i18n="@@author.unavailable">Este perfil no está disponible públicamente.</p>
+  <a href="/tier-list" i18n="@@author.backToCatalog">Volver al catálogo</a>
+}

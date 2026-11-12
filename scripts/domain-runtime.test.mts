@@ -98,10 +98,20 @@ describe('@gd/domain built output', () => {
     const loaded = JSON.parse(run.stdout) as Record<string, string[]>;
     assert.deepEqual(loaded.root, [
       'AssetSchema',
+      'AuthorSchema',
+      'BuildDocumentSchema',
       'BuildSchema',
       'CONTENT_STATUSES',
+      'MasteryCombinationSchema',
+      'MasterySchema',
+      'PublicAuthorSchema',
+      'PublicBuildSchema',
+      'PublicSourceSchema',
+      'PublicTierListSchema',
+      'SourceSchema',
       'TIERS',
       'TierEntrySchema',
+      'TierListSchema',
       'checkAssetManifest',
       'publicFilter',
     ]);

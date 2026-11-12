@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "moduleResolution": "bundler",
+    "types": ["node"]
+  },
+  "include": [
+    "e2e/**/*.ts",
+    "playwright.svg.config.ts",
+    "scripts/run-svg-e2e.mts",
+    "scripts/serve-svg-preview.mts",
+    "scripts/svg-preview.test.mts"
+  ]
+}

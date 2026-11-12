@@ -15,6 +15,34 @@
       "when": 1794209200000,
       "tag": "0001_gates",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794252923743,
+      "tag": "0002_public_content",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794261263173,
+      "tag": "0003_unknown_catalog_playstyle",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794270356357,
+      "tag": "0004_editor_permissions",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794279958631,
+      "tag": "0005_bootstrap_permissions",
+      "breakpoints": true
     }
   ]
 }

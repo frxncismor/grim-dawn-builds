@@ -1,0 +1,232 @@
+<section class="skill-tree" [attr.aria-labelledby]="headingId()">
+  <header class="skill-tree__header">
+    <h2 [id]="headingId()">
+      {{ mastery().name_es }} <span lang="en">({{ mastery().name_en }})</span>
+    </h2>
+    <p>{{ mastery().role_text }}</p>
+    @if (currentBar() === undefined) {
+      <p class="skill-tree__bar" i18n="@@skillTree.unknownBar">Barra desconocida</p>
+    } @else {
+      <p class="skill-tree__bar">
+        <span i18n="@@skillTree.currentBar">Barra</span> {{ currentBar() }}
+      </p>
+    }
+  </header>
+
+  @if (tree().error) {
+    <p class="skill-tree__error" role="alert" i18n="@@skillTree.invalidTree">
+      No se pudo dibujar este árbol porque sus relaciones tienen un error. La lista sigue
+      disponible.
+    </p>
+  } @else if (tree().nodes.length === 0) {
+    <p class="skill-tree__empty" i18n="@@skillTree.empty">No hay habilidades para esta maestría.</p>
+  } @else {
+    <div
+      class="skill-tree__canvas"
+      tabindex="0"
+      i18n-aria-label="@@skillTree.canvasLabel"
+      aria-label="Árbol de habilidades; desplázate dentro del diagrama para recorrerlo"
+    >
+      <svg
+        class="skill-tree__svg"
+        [attr.viewBox]="'0 0 ' + tree().width + ' ' + tree().height"
+        [attr.width]="tree().width"
+        [attr.height]="tree().height"
+        [attr.aria-labelledby]="svgTitleId() + ' ' + svgDescriptionId()"
+        focusable="false"
+      >
+        <title [id]="svgTitleId()">{{ svgTitle() }}</title>
+        <desc [id]="svgDescriptionId()" i18n="@@skillTree.svgDescription">
+          Las líneas conectan cada habilidad con su requisito anterior. Usa las flechas para
+          recorrer los nodos.
+        </desc>
+        <g class="skill-tree__content" role="group" [attr.aria-labelledby]="headingId()">
+          <g class="skill-tree__edges" aria-hidden="true">
+            @for (edge of tree().edges; track edge.id) {
+              <line
+                [attr.data-edge-from]="edge.from"
+                [attr.data-edge-to]="edge.to"
+                [attr.x1]="edge.x1"
+                [attr.y1]="edge.y1"
+                [attr.x2]="edge.x2"
+                [attr.y2]="edge.y2"
+              />
+            }
+          </g>
+          @for (item of tree().nodes; track item.id) {
+            <g
+              class="skill-tree__node"
+              [class.skill-tree__node--recommended]="item.node.status === 'recomendada'"
+              [class.skill-tree__node--meta]="item.node.status === 'meta'"
+              [class.skill-tree__node--skip]="item.node.status === 'omitir'"
+              [class.skill-tree__node--active]="item.active"
+              [class.skill-tree__node--selected]="item.selected"
+              [attr.data-skill-id]="item.node.slug"
+              [attr.data-skill-state]="item.node.status"
+              [attr.data-active-step]="item.active ? 'true' : null"
+              [attr.data-selected]="item.selected ? 'true' : null"
+              [attr.id]="item.id"
+              [attr.transform]="'translate(' + item.x + ' ' + item.y + ')'"
+              [attr.aria-labelledby]="nodeLabelIds(item)"
+              [attr.aria-describedby]="listItemId(item.node)"
+              [attr.aria-pressed]="item.selected"
+              [attr.aria-keyshortcuts]="'ArrowUp ArrowDown ArrowLeft ArrowRight Home End Enter Space Escape'"
+              role="button"
+              [tabIndex]="item.focused ? 0 : -1"
+              (focus)="setRovingFocus(item.node.slug)"
+              (mouseenter)="setHovered(item.node.slug)"
+              (mouseleave)="clearHovered()"
+              (click)="selectNode(item.node.slug, $event.currentTarget)"
+              (keydown)="onNodeKeydown($event, item.node.slug)"
+            >
+              @switch (item.node.status) {
+                @case ('recomendada') {
+                  <circle class="skill-tree__shape" r="22" />
+                }
+                @case ('meta') {
+                  <path class="skill-tree__shape" d="M-19 -18 H12 L21 -9 V18 H-12 L-21 9 V-18 Z" />
+                }
+                @case ('omitir') {
+                  <path class="skill-tree__shape" d="M0 -22 L22 0 L0 22 L-22 0 Z" />
+                }
+              }
+              <g class="skill-tree__glyph" aria-hidden="true">
+                @switch (item.node.status) {
+                  @case ('recomendada') {
+                    <path d="M-8 0 L-2 6 L9 -7" />
+                  }
+                  @case ('meta') {
+                    <path d="M0 -8 L8 0 L0 8 L-8 0 Z" />
+                  }
+                  @case ('omitir') {
+                    <path d="M-6 -6 L6 6 M6 -6 L-6 6" />
+                  }
+                }
+              </g>
+              <text
+                class="skill-tree__name"
+                [attr.id]="item.id + '-name'"
+                text-anchor="middle"
+                [attr.y]="35"
+              >
+                @for (line of item.labelLines; track $index) {
+                  <tspan [attr.x]="0" [attr.dy]="$index === 0 ? 0 : 14">
+                    {{ ' ' + line + ' ' }}
+                  </tspan>
+                }
+              </text>
+              <text
+                class="skill-tree__bar-required"
+                [attr.id]="item.id + '-bar'"
+                text-anchor="middle"
+                [attr.y]="66"
+              >
+                <tspan [attr.x]="0">{{ ' ' + barLabel(item.node.bar_required) + ' ' }}</tspan>
+              </text>
+              @if (item.active) {
+                <text
+                  class="skill-tree__active-label"
+                  [attr.id]="item.id + '-active'"
+                  text-anchor="middle"
+                  [attr.y]="-30"
+                >
+                  <tspan [attr.x]="0">{{ ' ' + activeStepLabel() + ' ' }}</tspan>
+                </text>
+              }
+            </g>
+          }
+        </g>
+      </svg>
+    </div>
+    <p class="skill-tree__scroll-help" i18n="@@skillTree.scrollHelp">
+      Si el árbol excede el ancho, desplázate dentro del diagrama para consultarlo.
+    </p>
+  }
+
+  <section
+    class="skill-tree__detail"
+    [attr.id]="detailId()"
+    data-detail-panel
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    @if (detailNode(); as node) {
+      <h3>
+        {{ node.name_es }} <span lang="en">({{ node.name_en }})</span>
+      </h3>
+      <p class="skill-tree__detail-status">{{ statusLabel(node.status) }}</p>
+      @if (node.tag) {
+        <p>{{ node.tag }}</p>
+      }
+      <p>{{ node.rationale }}</p>
+      <p><span i18n="@@skillTree.requiredBarText">Requiere barra</span> {{ node.bar_required }}</p>
+      @if (node.points_label) {
+        <p>{{ node.points_label }}</p>
+      }
+      @if (node.max_points_hint !== null) {
+        <p>
+          <span i18n="@@skillTree.maxPoints">Puntos máximos orientativos:</span>
+          {{ node.max_points_hint }}
+        </p>
+      }
+      @if (barWarning(node)) {
+        <p class="skill-tree__warning" role="note" i18n="@@skillTree.barWarning">
+          Barra insuficiente para asignar puntos ahora; puedes consultar esta recomendación.
+        </p>
+      }
+      @if (selectedId() === node.slug) {
+        <button
+          type="button"
+          data-close-detail
+          (click)="closeDetail()"
+          (keydown)="onDetailKeydown($event)"
+          i18n="@@skillTree.closeDetail"
+        >
+          Cerrar detalle
+        </button>
+      }
+    } @else {
+      <p i18n="@@skillTree.detailHint">
+        Enfoca o pasa el cursor por una habilidad para consultar sus detalles.
+      </p>
+    }
+  </section>
+
+  <details class="skill-tree__list" open>
+    <summary i18n="@@skillTree.listSummary">Lista de habilidades y recomendaciones</summary>
+    @if (masteryNodes().length === 0) {
+      <p i18n="@@skillTree.emptyList">No hay habilidades para consultar.</p>
+    } @else {
+      <ol>
+        @for (node of orderedNodes(); track $index) {
+          <li [attr.id]="listItemId(node)" [attr.data-skill-state]="node.status">
+            <strong>{{ node.name_es }}</strong> <span lang="en">({{ node.name_en }})</span>
+            <span class="skill-tree__list-status">{{ statusLabel(node.status) }}</span>
+            <span
+              ><span i18n="@@skillTree.requiredBarText">Requiere barra</span>
+              {{ node.bar_required }}</span
+            >
+            @if (node.tag) {
+              <span>{{ node.tag }}</span>
+            }
+            <p>{{ node.rationale }}</p>
+            @if (node.points_label) {
+              <span>{{ node.points_label }}</span>
+            }
+            @if (node.max_points_hint !== null) {
+              <span
+                ><span i18n="@@skillTree.maxPoints">Puntos máximos orientativos:</span>
+                {{ node.max_points_hint }}</span
+              >
+            }
+            @if (barWarning(node)) {
+              <span class="skill-tree__warning" i18n="@@skillTree.barWarningShort"
+                >Barra insuficiente</span
+              >
+            }
+          </li>
+        }
+      </ol>
+    }
+  </details>
+</section>

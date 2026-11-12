@@ -1,0 +1,128 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+
+section {
+  min-inline-size: 0;
+  margin-block: var(--space-7);
+}
+
+h2 {
+  margin-block: 0 var(--space-4);
+  color: var(--color-bone);
+}
+
+.introduction {
+  max-inline-size: var(--reading-measure);
+  color: var(--color-bone);
+  font-size: var(--text-large);
+}
+
+.devotion-note {
+  max-inline-size: var(--reading-measure);
+  margin-block: var(--space-5);
+  padding-block: var(--space-4);
+  border-block-start: var(--frame-border);
+}
+
+.devotion-note__label {
+  margin-block: 0 var(--space-2);
+  color: var(--color-storm);
+  font-size: var(--text-small);
+  font-weight: var(--weight-emphasis);
+}
+
+.devotion-note h3 {
+  margin-block: 0 var(--space-2);
+}
+
+.devotion-note [data-detail] {
+  margin-block-end: 0;
+}
+
+.step-selector {
+  margin-block: var(--space-6);
+}
+
+.step-selector__list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step-selector__button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  inline-size: 100%;
+  min-block-size: 44px;
+  align-items: start;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel);
+  text-align: start;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.step-selector__button[aria-pressed='true'] {
+  border: var(--frame-border-active);
+  background: var(--surface-sheen), var(--color-panel-2);
+}
+
+.step-selector__position {
+  grid-row: span 2;
+  color: var(--color-storm);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.step-selector__label {
+  font-weight: var(--weight-emphasis);
+}
+
+.step-selector__title {
+  grid-column: 2;
+  color: var(--color-ash);
+}
+
+.data-warning,
+.empty-state,
+.no-script-note {
+  max-inline-size: var(--reading-measure);
+  margin-block: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel);
+}
+
+.data-warning {
+  color: var(--color-bone);
+  border-color: var(--color-ember);
+}
+
+.empty-state,
+.no-script-note {
+  color: var(--color-ash);
+}
+
+.no-script-note {
+  margin-block-start: 0;
+}
+
+gd-devotion-map {
+  display: block;
+  min-inline-size: 0;
+}
+
+@media (min-width: 48rem) {
+  .step-selector__list {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  }
+}

@@ -1,0 +1,272 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+
+.skill-tree {
+  padding: var(--space-4);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel), var(--panel-shadow);
+  color: var(--color-bone);
+  min-inline-size: 0;
+}
+
+.skill-tree__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+  border-block-end: var(--frame-border);
+  padding-block-end: var(--space-3);
+}
+
+.skill-tree__header h2 {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--color-bone);
+  font-family: var(--font-display);
+  font-size: var(--text-large);
+  font-weight: var(--weight-display);
+  line-height: var(--line-heading);
+}
+
+.skill-tree__header h2 span,
+.skill-tree__header p {
+  color: var(--color-ash);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: var(--weight-body);
+}
+
+.skill-tree__header p {
+  margin: 0;
+}
+
+.skill-tree__bar {
+  justify-self: end;
+  font-family: var(--font-mono) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.skill-tree__canvas {
+  max-inline-size: 100%;
+  margin-block: var(--space-4);
+  overflow: auto;
+  overscroll-behavior-inline: contain;
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-soot);
+  box-shadow: var(--frame-bevel);
+  scrollbar-color: var(--color-ash) var(--color-panel);
+}
+
+.skill-tree__canvas:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.skill-tree__svg {
+  display: block;
+  max-inline-size: none;
+  overflow: visible;
+  color: var(--color-bone);
+  font-family: var(--font-body);
+}
+
+.skill-tree__edges line {
+  stroke: var(--color-ash);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.skill-tree__node {
+  cursor: pointer;
+  outline: none;
+}
+
+.skill-tree__shape {
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  transition:
+    fill 160ms ease-out,
+    stroke 160ms ease-out;
+}
+
+.skill-tree__node--recommended .skill-tree__shape {
+  fill: var(--color-storm-dim);
+  stroke: var(--color-storm);
+}
+
+.skill-tree__node--meta .skill-tree__shape {
+  fill: var(--color-ember-dim);
+  stroke: var(--color-ember);
+}
+
+.skill-tree__node--skip .skill-tree__shape {
+  fill: var(--color-panel-2);
+  stroke: var(--color-ash);
+  stroke-dasharray: 4 3;
+}
+
+.skill-tree__node--active .skill-tree__shape {
+  stroke: var(--color-bone);
+  stroke-width: 3;
+}
+
+.skill-tree__node--selected .skill-tree__shape {
+  fill: var(--color-panel-2);
+  stroke: var(--color-storm);
+  stroke-width: 4;
+}
+
+.skill-tree__node:hover .skill-tree__shape,
+.skill-tree__node:focus-visible .skill-tree__shape {
+  fill: var(--color-panel-2);
+  stroke: var(--color-bone);
+  stroke-width: 4;
+}
+
+.skill-tree__node:focus-visible .skill-tree__shape {
+  stroke: var(--color-storm);
+}
+
+.skill-tree__glyph {
+  fill: none;
+  stroke: var(--color-bone);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+  pointer-events: none;
+}
+
+.skill-tree__name {
+  fill: var(--color-bone);
+  font-size: var(--text-small);
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.skill-tree__bar-required {
+  fill: var(--color-ash);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.skill-tree__active-label {
+  fill: var(--color-storm);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  font-weight: var(--weight-emphasis);
+  pointer-events: none;
+}
+
+.skill-tree__scroll-help {
+  margin: var(--space-2) 0;
+  color: var(--color-ash);
+  font-size: var(--text-small);
+}
+
+.skill-tree__detail {
+  min-block-size: 3.5rem;
+  margin-block: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel-2);
+  box-shadow: var(--frame-bevel);
+}
+
+.skill-tree__detail h3 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-bone);
+  font-family: var(--font-display);
+  font-size: var(--text-large);
+  font-weight: var(--weight-display);
+}
+
+.skill-tree__detail h3 span {
+  color: var(--color-ash);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: var(--weight-body);
+}
+
+.skill-tree__detail p,
+.skill-tree__empty,
+.skill-tree__error {
+  max-inline-size: var(--reading-measure);
+  margin: 0 0 var(--space-2);
+}
+
+.skill-tree__detail-status,
+.skill-tree__list-status {
+  color: var(--color-storm);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+}
+
+.skill-tree__warning,
+.skill-tree__error {
+  color: var(--color-ember);
+}
+
+.skill-tree__detail button {
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  margin-block-start: var(--space-2);
+  padding-inline: var(--space-4);
+  border: var(--frame-border);
+  background: var(--color-panel-2);
+  color: var(--color-bone);
+  font: inherit;
+  cursor: pointer;
+}
+
+.skill-tree__detail button:hover {
+  border-color: var(--color-storm);
+}
+
+.skill-tree__detail button:focus-visible,
+.skill-tree__list summary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.skill-tree__list {
+  border-block-start: var(--frame-border);
+  padding-block-start: var(--space-3);
+}
+
+.skill-tree__list summary {
+  min-block-size: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--color-storm);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.skill-tree__list ol {
+  margin: 0;
+  padding-inline-start: var(--space-6);
+}
+
+.skill-tree__list li {
+  padding-block: var(--space-3);
+  border-block-end: var(--frame-border);
+}
+
+.skill-tree__list li > span {
+  margin-inline-start: var(--space-2);
+}
+
+.skill-tree__list li p {
+  margin: var(--space-1) 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skill-tree__shape {
+    transition: none;
+  }
+}

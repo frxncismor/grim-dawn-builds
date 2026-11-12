@@ -1,0 +1,53 @@
+<h1 i18n="@@about.title">Acerca del proyecto</h1>
+<p i18n="@@about.purpose">
+  Grim Dawn Builds es un proyecto independiente en español para consultar combinaciones de maestrías
+  y guías con procedencia visible. No está afiliado a Crate Entertainment.
+</p>
+<section aria-labelledby="about-states">
+  <h2 id="about-states" i18n="@@about.states">Qué significan los estados</h2>
+  <ul>
+    <li i18n="@@about.verified">
+      Verificado: contenido revisado según los criterios editoriales y la versión del juego
+      indicada.
+    </li>
+    <li i18n="@@about.unverified">
+      Sin verificar: hay datos que necesitan revisión. No se presentan con la misma confianza que
+      los verificados.
+    </li>
+    <li i18n="@@about.placeholder">
+      Placeholder: ranura informativa sin una guía catalogada. No es una recomendación ni tiene un
+      tier de poder.
+    </li>
+  </ul>
+</section>
+<section aria-labelledby="about-review">
+  <h2 id="about-review" i18n="@@about.review">Revisión y atribución</h2>
+  <p i18n="@@about.reviewDescription">
+    Las guías identifican autor, fuentes y versión del juego. La publicación exige revisión y
+    derechos confirmados. Un enlace externo conserva la atribución, pero no concede permiso para
+    copiar o adaptar una guía.
+  </p>
+  <p i18n="@@about.tiers">
+    Los tiers necesitan una evaluación editorial con fuente y fecha. Lo que no tiene esa evaluación
+    permanece sin clasificar.
+  </p>
+</section>
+<section aria-labelledby="about-rights">
+  <h2 id="about-rights" i18n="@@about.rights">Contenido y activos</h2>
+  <p i18n="@@about.rightsDescription">
+    No hacemos scraping automático. El contenido de terceros requiere una licencia o permiso que
+    cubra su uso. Sin ello, se conserva únicamente un enlace con metadatos permitidos. Los iconos
+    son propios mientras no exista autorización registrada para utilizar arte oficial.
+  </p>
+</section>
+<section aria-labelledby="about-owner">
+  <h2 id="about-owner" i18n="@@about.owner">Responsable del catálogo</h2>
+  <ul>
+    @for (owner of owners; track owner.profile.slug) {
+      <li>
+        <a [href]="'/autores/' + owner.profile.slug">{{ owner.profile.display_name }}</a>
+      </li>
+    }
+  </ul>
+  <a href="/tier-list" i18n="@@about.catalogLink">Explorar el catálogo</a>
+</section>

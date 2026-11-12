@@ -2,6 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runSteps, VERIFY_STEPS } from './verify-local.mjs';
 
+test('verify requires the offline public build secret guard after the normal build (T-084)', () => {
+  const names = VERIFY_STEPS.map((step) => step.name);
+  assert.equal(names.indexOf('public-build'), names.indexOf('build') + 1);
+  assert.equal(VERIFY_STEPS[names.indexOf('public-build')].command, 'pnpm check:public-build');
+});
+
 test('verify runs check-scope before the other steps (T-069)', () => {
   const names = VERIFY_STEPS.map((step) => step.name);
   assert.ok(names.includes('check-scope'), 'check-scope step missing');
@@ -46,6 +52,18 @@ test('verify builds @gd/domain before any consumer (T-071 blocker 2)', () => {
     assert.notEqual(index, -1, `${consumer} missing`);
     assert.ok(build < index, `domain build must run before "${consumer}"`);
   }
+});
+
+test('a failed rotation integration blocks the remaining verification gates (T-082)', async () => {
+  const calls = [];
+  const result = await runSteps(VERIFY_STEPS, async (step) => {
+    calls.push(step.name);
+    return step.name === 'test:rotation' ? 1 : 0;
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.failedStep, 'test:rotation');
+  assert.equal(calls.at(-1), 'test:rotation');
+  assert.equal(calls.includes('build'), false);
 });
 
 test('runs every step in order when all succeed', async () => {

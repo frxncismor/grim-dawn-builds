@@ -88,6 +88,35 @@ describe('applyFilter', () => {
     expect(applyFilter([noted], withFilter({ text: 'rotacion' }))).toHaveLength(1);
   });
 
+  it('finds English names alongside Spanish names in catalog text', () => {
+    const bilingual = item({
+      id: 'elementalista',
+      displayName: 'Chamán + Demoledor · Golpe Primigenio',
+      note: 'Shaman + Demolitionist · Primal Strike',
+    });
+    for (const text of ['primal strike', 'SHAMAN', 'demolitionist', 'golpe primigenio']) {
+      expect(applyFilter([bilingual], withFilter({ text }))).toEqual([bilingual]);
+    }
+    expect(applyFilter([bilingual], withFilter({ text: 'nightblade' }))).toEqual([]);
+  });
+
+  it('accepts frozen items and filter groups without modifying them', () => {
+    const frozenItem = Object.freeze({
+      ...rayoChaman,
+      masteries: Object.freeze(['chaman']),
+      damageTypes: Object.freeze(['rayo']),
+      contentTags: Object.freeze([]),
+    });
+    const frozenFilter = Object.freeze({
+      ...EMPTY_FILTER,
+      masteries: Object.freeze(['chaman']),
+      damageTypes: Object.freeze(['rayo']),
+    });
+    const frozenCatalog = Object.freeze([frozenItem]);
+    expect(applyFilter(frozenCatalog, frozenFilter)).toEqual([frozenItem]);
+    expect(applyFilter(frozenCatalog, frozenFilter)).not.toBe(frozenCatalog);
+  });
+
   it('requires every whitespace-separated text term to match', () => {
     expect(applyFilter(catalog, withFilter({ text: 'rayo chaman' })).map((i) => i.id)).toEqual([
       'rayo-chaman',
@@ -142,6 +171,33 @@ describe('serializeFilter / parseFilter', () => {
 
   it('accepts a leading question mark when parsing', () => {
     expect(parseFilter('?d=rayo').damageTypes).toEqual(['rayo']);
+  });
+
+  it('round-trips all groups and reserved text characters in canonical form', () => {
+    const filter = withFilter({
+      masteries: ['demoledor', 'chaman', 'chaman'],
+      damageTypes: ['rayo', 'fuego'],
+      contentTags: ['jefes', 'campana'],
+      playstyles: ['rango', 'melee'],
+      contentStatuses: ['placeholder', 'verificado', 'verificado'],
+      text: '  CHAMÁN   Primal + Strike & fuego? #1 ',
+    });
+    const canonical = {
+      masteries: ['chaman', 'demoledor'],
+      damageTypes: ['fuego', 'rayo'],
+      contentTags: ['campana', 'jefes'],
+      playstyles: ['melee', 'rango'],
+      contentStatuses: ['verificado', 'placeholder'],
+      text: 'chaman primal + strike & fuego? #1',
+    };
+    const before = JSON.stringify(filter);
+    const query = serializeFilter(filter);
+    expect(parseFilter(query)).toEqual(canonical);
+    expect(serializeFilter(parseFilter(query))).toBe(query);
+    expect(JSON.stringify(filter)).toBe(before);
+    expect(new URL(`https://example.test/tier-list?${query}`).searchParams.get('q')).toBe(
+      canonical.text,
+    );
   });
 
   it('sorts and de-duplicates values so equal filters serialize identically', () => {

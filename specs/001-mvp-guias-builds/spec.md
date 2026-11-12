@@ -80,6 +80,7 @@ Como colaborador invitado, creo borradores de guías originales con un editor es
 - **FR-08** Progreso local opcional (checklist de pasos de compra) en `localStorage`, sin cuenta; se puede borrar.
 - **FR-09** SEO: title/description únicos, canonical, Open Graph/Twitter, JSON-LD (`Article`/`BreadcrumbList`, `ItemList` en tier list), `sitemap.xml`, `robots.txt`.
 - **FR-10** Tras publicar contenido, las páginas públicas son HTML prerenderizado.
+- **FR-10a** La portada mínima conserva todo su contenido, SEO, accesibilidad y navegación sin JavaScript. No ofrece controles que dependan de código cliente. El catálogo y las guías mantienen sus mejoras interactivas hidratadas; acceder desde la portada abre una página completa funcional. Los presupuestos aprobados no aumentan por esta política de entrega.
 - **FR-11** Video: campo opcional (URL de YouTube); se carga con «facade» (sin cargar el iframe hasta interacción).
 - **FR-12** Catálogo/tier list con marco completo: se generan desde el catálogo de maestrías todas las ranuras de combinación (pares y, si se decide, maestría única) como entradas `placeholder`; el seed añade solo entradas con procedencia documentada (ver A3 y FR-14).
 - **FR-13** Estado de derechos `rights_status` (`pending | own_original | licensed | permission_granted | link_only`) en toda build/entrada con contenido propio o de terceros. `pending` (y cualquier valor no aprobado) **bloquea la publicación pública**: la página no se prerenderiza en el build público, no entra en sitemap, y la validación falla si `review_state='publicado'`. Los borradores se pueden ver solo en modo local (`INCLUDE_DRAFTS`) con banner «Borrador · no público» y `noindex`.
@@ -95,7 +96,7 @@ Como colaborador invitado, creo borradores de guías originales con un editor es
 - **FR-23** (rev. 4) Las puertas se imponen en BD y API: (a) `review_state='publicado'` exige autor no placeholder, `published_at`, `reviewed_by`, ≥1 fuente y `rights_status` aprobado con `rights_confirmed_by/on` (CHECK/trigger); (b) `pending`/borrador/`en_revision` jamás aparecen en vistas públicas ni en respuestas; (c) un activo solo puede tener `file_path`/ser servido como oficial con `status='approved'` y procedencia completa (origen exacto, titular, licencia/permiso, prueba); si no, solo `fallback_svg`; (d) el rol de la API no puede escribir ni leer tablas base. La validación Zod del dominio es defensa adicional, no la única.
 - **FR-26** (rev. 5, **hoja de ruta futura; no MVP, no se implementa**) Carril de adquisición y normalización de información de builds existentes hacia el formato interactivo canónico, solo desde fuentes **permitidas**: envíos de autores con licencia/consentimiento, datos con licencia o exportados por su titular, APIs documentadas o permiso explícito y registrado, y metadatos de solo enlace (_link-only_, datos factuales propios + atribución). **Prohibido**: scraping automático y copia de texto, imágenes o activos de guías de terceros sin permiso. El permiso nunca es implícito. Canalización por etapas en plan §14; toda fila resultante nace como `borrador` y pasa por verificación humana y las puertas de publicación existentes (FR-23). Si falla una etapa o falta permiso, el contenido queda en cola de revisión o degrada a solo enlace con atribución.
 - **FR-25** (rev. 5) Gestión de secretos por capas (Constitución XII, plan §13): ningún secreto en el repo, Dockerfiles, scripts, fixtures, builds del frontend, logs o artefactos de CI; `.env.example` solo nombres y valores seguros no secretos; credenciales de BD separadas por rol y por servicio; detección automática (pre-commit + CI); runbook de exposición y rotación; producción diferida con interfaz neutral al proveedor. Sin Vault ni proveedor por ahora.
-- **FR-24** (rev. 4) Ciclo de vida de la BD: migraciones Drizzle versionadas aplicadas por un paso explícito; **seed** de fixtures solo en `development`/`test` (desechable); **bootstrap** de una sola vez para cargar el contenido real inicial, registrado en la BD, tras el cual los fixtures no pueden reimportarse sobre esa BD. La vía de escritura editorial posterior (CLI editorial o API admin) es la decisión B-7 y requiere su propio spec si implica endpoints.
+- **FR-24** (rev. 4, B-7 cerrada 2026-11-09) Ciclo de vida de la BD: migraciones Drizzle versionadas por paso explícito; seed de fixtures solo en `development`/`test`; bootstrap inicial de una sola vez registrado en BD, tras el que se bloquea reimportar fixtures. La escritura posterior usa **CLI local con rol `editor` y validación de dominio**, elegida por el usuario; sin API admin, auth, cuentas ni editor público. Las puertas de publicación y derechos se conservan en dominio/BD.
 
 - **FR-27** (rev. 6) **Build adaptada** (decisión del usuario: adaptar builds existentes, p. ej. del foro de Grim Dawn, al formato interactivo nativo con atribución visible en una sección «Fuentes», p. ej. «Esta build fue adaptada de: [fuente]»). Solo se publica una adaptación completa si `rights_status ∈ {licensed, permission_granted}` y la evidencia de derechos **cubre expresamente adaptación/republicación** (licencia explícita, o permiso registrado del autor/sitio). **La atribución sola nunca basta.** Modo «adaptación» ≠ modo «solo enlace»: no se mezclan en la misma entrada.
 - **FR-28** (rev. 6) Procedencia obligatoria de toda adaptación: URL de origen, título/autor/sitio originales, fecha de captura, evidencia de derechos (tipo, referencia, alcance, vigencia), editor de la adaptación, alcance de la transformación (`estructura`, `traduccion`, `reescritura`, `datos_factuales`; qué se conservó/omitió), y versión/revisión/historial de cambios. Falta cualquier campo ⇒ no publicable.
@@ -141,9 +142,9 @@ Derivados de `elementalista-golpe-primigenio.html`; ver mapeo a tablas en `data-
 
 ## 5. UI
 
-### Tokens (extraídos de la guía; ver `plan.md` §Tokens)
+### Tokens (estética Grim Dawn / Cairn; ver `plan.md` §Tokens)
 
-Fondo `soot`, paneles `panel/panel-2`, acento A `storm` (Chamán/azul), acento B `ember` (Demoledor/naranja), texto `bone/ash`, líneas `line`. Tipografías: Oswald (display), Karla (cuerpo), Space Mono (datos). Los valores hex finales viven en `plan.md` y en CSS custom properties.
+Fondo abisal `soot`, paneles de pizarra y cuero oscuro `panel/panel-2`, acento A `storm` (oro/latón arcano de cabeceras y marcos de Grim Dawn), acento B `ember` (ascua/fuego ctónico), texto `bone` (pergamino envejecido) y `ash` (bronce/ceniza cálida), filetes metálicos `line` y tokens de enmarcado biselado (`--frame-*`, `--surface-sheen`, `--header-glow`). Tipografías: Oswald (display), Karla (cuerpo), Space Mono (datos). Los valores hex finales viven en `plan.md` y en CSS custom properties.
 
 ### Iconografía
 
@@ -176,8 +177,8 @@ default, hover, `focus-visible`, active, disabled, loading, empty, error. Espec�
 - **AC-02** La página de build contiene el 100 % del contenido de la guía original (verificado por checklist de campos §4) con nombres ES/EN correctos.
 - **AC-03** Los árboles de Chamán y Demoledor y la ruta de devoción se renderizan como SVG desde datos, con alternativa textual y operables por teclado.
 - **AC-04** Tier list/catálogo: filtros combinables, URL compartible, estado vacío; contiene una ranura por cada combinación de maestrías del catálogo (cobertura 100 % verificada por prueba contra el catálogo de maestrías); toda entrada con `content_status`, procedencia y `rights_status`; ninguna entrada `placeholder` con tier o guía.
-- **AC-05** Presupuestos de rendimiento de `plan.md` cumplidos en la verificación local (Lighthouse móvil local: Performance ≥ 90, LCP, CLS, JS inicial); CI diferida.
-- **AC-06** 0 violaciones críticas/serias de axe en las 3 rutas a 375/768/1280.
+- **AC-05** Presupuestos de rendimiento de `plan.md` cumplidos en la verificación local y en CI de verificación (Lighthouse móvil: Performance ≥ 90, LCP, CLS, JS inicial). El despliegue permanece diferido; CI no publica artefactos como sitio.
+- **AC-06** 0 violaciones críticas/serias de axe en las 3 rutas a 375/768/1280, automatizado localmente y en CI de verificación.
 - **AC-07** Ninguna entrada/guía publicada sin autor, fuente, estado de revisión y `rights_status` aprobado; la validación lo impide (prueba con la guía migrada en `pending` → falla al marcarla `publicado`).
 - **AC-09** El build público (sin `INCLUDE_DRAFTS`) no emite HTML, sitemap ni JSON-LD de contenido con derechos no aprobados.
 - **AC-10** Ningún archivo de arte oficial en el repo sin entrada `approved` en el manifiesto; la validación del manifiesto y una prueba de la UI con activo `pending` confirman el uso del SVG fallback.
@@ -211,7 +212,7 @@ Cuentas públicas, comentarios, calculadora de build (reparto interactivo de pun
 
 - **A1** (rev. 2) Autor/crédito de la guía migrada: el HTML no lo indica. **Decisión `guide_rights=pending`**: no se asume autoría; `author` placeholder `por-confirmar`, `rights_status=pending`, `review_state=borrador`. Solo fixture local de migración hasta confirmar autoría y derechos de republicación.
 - **A2** Versión del juego: se asume la vigente en el momento de la revisión (campo `game_version`, p. ej. «1.2.x»); se confirma al migrar.
-- **A3** (rev. 2) Seed del catálogo: (i) todas las ranuras de combinación generadas del catálogo de maestrías como `placeholder` (sin tier, sin guía); (ii) la build migrada como entrada `borrador` con derechos `pending` (no pública); (iii) entradas adicionales solo si traen procedencia y derechos documentados (`link_only` o propias); prohibido sembrar builds/tiers «de memoria» o copiados. Un tier provisional sin fuente no se permite: queda «Sin clasificar». El número de maestrías/combinaciones se toma del catálogo y se verifica contra la versión del juego (`[NEEDS CLARIFICATION]` no bloqueante: confirmar lista de maestrías de expansiones vigente al sembrar; referencia: 9 maestrías → 36 pares).
+- **A3** (rev. 2) Seed del catálogo: (i) todas las ranuras de combinación generadas del catálogo de maestrías como `placeholder` (sin tier, sin guía); (ii) la build migrada como entrada `borrador` con derechos `pending` (no pública); (iii) entradas adicionales solo si traen procedencia y derechos documentados (`link_only` o propias); prohibido sembrar builds/tiers «de memoria» o copiados. Un tier provisional sin fuente no se permite: queda «Sin clasificar». El número de maestrías/combinaciones se toma del catálogo y se verifica contra la versión del juego (confirmada 2026-11-09: diez maestrías, incluida Berserker, 45 pares; fuente primaria en research.md; rama 1.3.x/Fangs of Asterkarn, sin afirmar último parche).
 - **A3b** El catálogo es un marco: la completitud del MVP se mide por cobertura de combinaciones, no por cantidad de guías.
 - **A4** Tiers: S, A, B, C, D, ordenados; un tier por build (no por contenido) en el MVP; campo opcional futuro por contenido.
 - **A5** «Interactivo» = resaltado de pasos en árboles, tooltips/paneles, progreso local, copiar filtro; no hay reparto de puntos con validación (eso es la futura calculadora).
@@ -222,12 +223,31 @@ Cuentas públicas, comentarios, calculadora de build (reparto interactivo de pun
 - **A10** Analítica: ninguna en el MVP (sin banner de cookies); se evaluará después.
 - **A11** (rev. 4) Backend confirmado: Fastify, Drizzle ORM, Node.js 22 LTS, PostgreSQL 17 en Docker. Sin hosting remoto.
 - **A12** (rev. 4, reemplaza rev. 3) El sitio público de release depende de la API/BD en tiempo de **build** (prerender sigue siendo estático; 0 consultas en runtime público). `FileContentRepository` queda solo para dev/test/CI sin Docker.
-- **A13** (rev. 4, reemplaza rev. 3) La BD es la fuente de verdad editorial; `content/` son fixtures/importación. Mientras no exista vía de escritura editorial (B-7) no hay «producción» real: el bootstrap queda diferido hasta resolver B-7 y la guía sigue `pending`/borrador (T-044).
+- **A13** La BD es la fuente de verdad editorial; `content/` son fixtures/importación. B-7 quedó resuelta: la CLI local con rol `editor` debe estar implementada/verificada antes del bootstrap/cutover. Esa decisión no confirma derechos: la guía sigue `pending`/borrador (T-044).
 
 ## 9. Estado de confirmaciones (rev. 2)
 
 Resueltas (ver §0): hosting local-first, política de arte (manifiesto + fallback), alcance de la tier list (catálogo completo con procedencia), derechos de la guía (`pending` = bloquea publicación).
 Pendientes **no bloqueantes** (no frenan el desarrollo local): autor y derechos de la guía migrada (bloquean solo su publicación, T-044); permisos/licencias concretos para cualquier icono oficial (bloquean solo su aprobación en el manifiesto); lista vigente de maestrías para el catálogo (A3); decisión futura de hosting/secretos de despliegue.
-Pendientes (rev. 4) que **bloquean solo tareas de API/producción** (plan §12.9): B-5 CORS/orígenes y publicación de la API; B-7 vía de escritura editorial tras el bootstrap (CLI editorial con rol `editor` vs API admin; bloquea solo el bootstrap/cutover). Cerradas: B-1 Fastify, B-2 Drizzle, B-3 Node 22/PostgreSQL 17, B-4 BD = fuente de verdad, B-6 (la web de release consume la API).
+Cerradas: B-1 Fastify, B-2 Drizzle, B-3 Node 22/PostgreSQL 17, B-4 BD = fuente de verdad, B-6 consumo API en release. **2026-11-09**: B-5 permite solo `http://localhost:4200` (sin wildcard ni `127.0.0.1:4200`); B-7 elige CLI local con rol `editor` y dominio. Los escaneos DAST/imagen bloquean desde severidad **MEDIA**. T-061/T-072 están activas, con sus dependencias técnicas; no quedan decisiones abiertas de esos cuatro puntos.
 
-[NEEDS CLARIFICATION: B-7 vía de escritura editorial tras el cutover; B-5 CORS. Ninguno bloquea el desarrollo local ni T-050–T-060]
+## 10. Adenda de cierre integral y recuperación SDD (2026-11-09)
+
+El objetivo autorizado es completar y verificar todos los requisitos activos de esta especificación, incluidos backend/API, release desde PostgreSQL, UI, adaptaciones con fixtures sintéticos, documentación y controles de calidad. Un build fixture con la portada de andamiaje o el cierre de T-057 no constituyen el cierre integral. Las fases 0–7 pueden desarrollarse sin Docker; ello no dispensa AC-12–AC-18 ni la integración de la fase 8 al cerrar la spec.
+
+Se mantienen las exclusiones y decisiones externas: T-044 conserva la guía migrada como borrador `pending`; T-110 no publica adaptaciones reales sin permiso. T-067/T-075 son opcionales. T-087–T-090, T-092–T-100 y T-114–T-122 siguen diferidas según sus condiciones; T-091 y T-111–T-113 conservan su parte documental/guarda activa. Hosting, scraping, cuentas y editor público no se activan por esta adenda. B-5/B-7 y umbrales quedan resueltos según §9; T-061/T-072 y la CLI editorial forman parte del cierre.
+
+La vista local de la guía pendiente usa únicamente fixtures, `INCLUDE_DRAFTS` y `noindex`; puede emitir JSON-LD local para comprobar T-037. Ese HTML, sus datos y su JSON-LD jamás forman parte del build público/release ni de su sitemap. El release solo admite API/PostgreSQL, sin acceso público a borradores.
+
+La recuperación de comandos, scripts, plantillas y skills oficiales de Spec Kit restaura la capacidad de seguir SDD; su procedencia y reproducción se registran en T-124. No se reescriben instrucciones oficiales para hacerlas pasar checks. Las skills oficiales generadas son material regenerable local y no se rastrean; los Markdown propios y las plantillas/scripts versionados siguen sujetos a los checks aplicables.
+
+**Regularización retrospectiva, no planificación previa**: los cambios de logging de PostgreSQL en Compose y su documentación se implementaron antes de contar con planificación SDD para ese alcance. `blockers.md` conserva la desviación y evidencia previa; T-125 registra la revisión y comprobaciones pendientes antes de ampliar o cerrar ese trabajo. Se requiere diagnóstico local visible con SQLSTATE/metadatos de sesión y rotación de logs, sin texto SQL, parámetros ni secretos.
+
+### Precisión de paridad local (2026-11-09)
+
+Para cumplir §4 y AC-01/AC-07, conservar las 14 habilidades con ES/EN, el grupo
+omitido como nota editorial y las seis filas de Guía Espiritual (cuatro NPC y dos
+notas Coste/Aviso) que realmente existen en el HTML. Los objetivos máximos sin
+cifra, niveles de constelación y referencias fuera del árbol no autorizan datos
+inventados: se representan explícitamente como desconocidos/no verificados según
+plan §17.4 y T-130. Esto no verifica los consejos de la fuente ni sus derechos.

@@ -10,6 +10,14 @@ Si algo de esta guía contradice la constitución o las especificaciones SDD, pr
 
 ## Antes de empezar
 
+Todo agente, subagente o harness que trabaje en el proyecto debe seguir **SDD con
+GitHub Spec Kit**, independientemente del proveedor o modelo. Lee las
+[instrucciones compartidas](AGENTS.md) y transmítelas a cualquier agente delegado.
+Retoma las tareas ya planificadas; el alcance nuevo requiere spec, aclaraciones
+necesarias, plan, tareas y análisis antes de implementarse, mediante los comandos
+y plantillas de Spec Kit. Si no están disponibles, localiza la instalación antes
+de iniciar esa fase. Esto incluye cambios en documentación, configuración e infra.
+
 1. Lee la [constitución](.specify/memory/constitution.md), la
    [especificación](specs/001-mvp-guias-builds/spec.md), el
    [plan](specs/001-mvp-guias-builds/plan.md) y las
@@ -19,6 +27,18 @@ Si algo de esta guía contradice la constitución o las especificaciones SDD, pr
 3. Marca una tarea como `[x]` en `tasks.md` solo cuando sus comprobaciones pasen.
 4. Si la especificación o el plan son ambiguos o se contradicen, pregunta antes de
    implementar. No cambies la especificación para hacer encajar el código.
+
+### Puerta de revisión al cierre
+
+Al completar las tareas de implementación de una spec, ejecuta y espera las
+cuatro revisiones descritas en [spec002](specs/002-spec-completion-reviews/),
+usando el [coordinador](.agents/skills/speckit-review-complete/SKILL.md). Solo
+declara completa la spec si el informe real, vigente y completo pasa la puerta.
+El hook local puede no ser despachado por un harness sin router: en ese caso
+carga el skill explícitamente; si el harness tampoco puede ejecutar las
+revisiones, informa que el cierre sigue pendiente. Transmite las reglas de
+`AGENTS.md` y el contexto SDD al delegar; un anuncio de invocación no acredita
+que las revisiones hayan ocurrido.
 
 ## Flujo de ramas (GitFlow)
 
@@ -93,11 +113,46 @@ Instalación y arranque:
 
 ```bash
 pnpm install --frozen-lockfile
+pnpm setup:gitleaks
+pnpm setup:hooks
 pnpm start
 ```
 
 Abre `http://localhost:4200/`. Usa `--frozen-lockfile` igual que el CI para no
 modificar `pnpm-lock.yaml` sin querer.
+
+`setup:gitleaks` instala Gitleaks 8.30.1 solo en
+`.tools/gitleaks/8.30.1/` (ignorado), para Windows/Linux x64. Descarga el asset
+oficial fijado y verifica SHA-256 antes de extraer/ejecutar; no cambia el PATH
+global. Otros entornos necesitan esa versión nativa en PATH. `setup:hooks`
+activa `.githooks` únicamente en este clon. El hook requiere la versión exacta,
+escanea staging con redacción y bloquea si falta la herramienta. La verificación
+local también la exige: las pruebas de detección no se omiten silenciosamente.
+
+### API local con PostgreSQL
+
+Prepara los archivos locales ignorados y arranca PostgreSQL y la API:
+
+```bash
+pnpm setup:env
+docker compose -f infra/docker/compose.yaml up -d --wait
+```
+
+En un volumen nuevo, PostgreSQL crea los roles sin login y habilita únicamente
+`migrator` y `api_ro` a partir de sus archivos secretos antes de ejecutar la
+migración. `importer` y `editor` permanecen `NOLOGIN` hasta sus tareas.
+`migrate` recibe solo la credencial `migrator`; la API solo `api_ro`; el secreto
+de superusuario se entrega únicamente al contenedor `db`.
+
+Si ya existe el volumen PostgreSQL y cambiaste las credenciales locales, vuelve a
+aprovisionar los dos roles sin borrar datos ni recrear el volumen:
+
+```bash
+pnpm exec tsx infra/docker/init/provision-roles.mts
+```
+
+El aprovisionador es idempotente y no imprime contraseñas. La API lee únicamente
+las vistas públicas; no recibe credenciales de migración ni de superusuario.
 
 ## Comandos de verificación
 
@@ -134,6 +189,40 @@ El CI de pull request ejecuta los mismos controles, excepto `pnpm verify` en sí
 ejecuta `pnpm content:validate -- --dir scripts/fixtures/content-valid`, que valida
 solo el fixture, porque `content/builds` aún no tiene contenido (T-014). El CI
 ejecuta `lint:md` solo en modo comprobación; nunca aplica `--fix`.
+
+## Logs de PostgreSQL en Docker
+
+Desde la raíz, consulta los últimos errores y sigue los eventos nuevos:
+
+```bash
+docker compose -f infra/docker/compose.yaml logs --tail=100 --timestamps -f db
+docker compose -f infra/docker/compose.yaml logs --since=30m db
+```
+
+Cada mensaje del servidor incluye fecha UTC, PID, código SQLSTATE, usuario, base,
+aplicación, cliente e identificador de sesión. Se registran conexiones y cierres,
+esperas de bloqueos superiores a `deadlock_timeout` (por defecto 1 s), checkpoints
+y errores. Las conexiones breves de `pg_isready` también aparecen: son del
+healthcheck. Para correlacionar fallos del migrador, busca `app=gd-api-migrate`;
+la comprobación de disponibilidad usa `app=gd-api-ready`.
+
+Los logs salen por stderr, visibles también en Docker Desktop. El driver `local`
+rota hasta tres archivos de 10 MB por contenedor y comprime los rotados. Los
+mensajes antiguos se descartan; exporta el intervalo necesario antes de recrear
+el contenedor si investigas un incidente.
+
+No se habilita el volcado de sentencias ni de parámetros SQL. La verbosidad
+`terse` evita DETAIL, HINT y CONTEXT que pueden incluir valores de filas. El
+mensaje principal de un error todavía puede contener datos de la aplicación:
+revisa y redacta los logs antes de compartirlos. No actives trazas de todas las
+consultas ni registres contraseñas para diagnosticar un fallo.
+
+Para aplicar cambios de configuración recrea solo PostgreSQL, conservando su
+volumen (no uses `down -v`):
+
+```bash
+docker compose -f infra/docker/compose.yaml up -d --no-deps db
+```
 
 ## Calidad de código
 
@@ -175,7 +264,9 @@ Principio XII de la constitución y plan §13.
   remotos.
 - `pnpm check:secrets` falla si git rastrea `.env*`, archivos de `secrets/`, patrones
   de credenciales o URLs con contraseña. **No sustituye** al secret scanning de GitHub
-  (configuración manual) ni a un escáner en pre-commit, que todavía no existe (T-083).
+  (configuración manual). Gitleaks complementa esa guardia en pre-commit, CI de PR
+  e historial programado (T-083), con reglas predeterminadas y sin excepciones del
+  proyecto. Ningún resultado local acredita que los workflows remotos ya corrieron.
 - Si un secreto se publica por error, trátalo como comprometido: rótalo o revócalo
   en su proveedor y avisa al mantenedor. Borrar el commit no basta. El runbook completo
   (T-081) está pendiente; ver plan §13.8.
@@ -262,3 +353,57 @@ y completa cada punto, o márcalo como no aplicable con una justificación.
 - [Tareas](specs/001-mvp-guias-builds/tasks.md): tareas, dependencias y orden. Relevantes para este proceso: T-064 (CI de verificación), T-066a (secretos), T-076 (esta guía), T-077 (DAST, pendiente) y T-123 (markdownlint).
 - [README](README.md): visión general del proyecto y comandos básicos.
 - [Configuración del CI](.github/workflows/ci.yml): controles que se ejecutan en cada pull request.
+
+## Impeccable para las tareas sdd-ui
+
+El rol UI requiere el skill Impeccable. Reprodúcelo desde la raíz con la versión
+fijada (solo herramienta del agente, sin dependencia de la web):
+
+```powershell
+$env:NPM_CONFIG_CACHE = Join-Path ([IO.Path]::GetTempPath()) 'gd-impeccable-npm-cache'
+$env:IMPECCABLE_HOME = Join-Path ([IO.Path]::GetTempPath()) 'gd-impeccable-runtime'
+npx --yes impeccable@4.8.1 install --providers=codex --scope=project --no-hooks
+```
+
+El payload generado y su binario quedan ignorados exactamente bajo
+`.agents/skills/impeccable/`. No se instalan hooks nativos ni se activa confianza
+para ejecutar hooks; cargar el SKILL.md explícitamente y ejecutar su detector al
+terminar el cambio UI. Cualquier harness puede leer el mismo skill; los comandos
+Windows usan su launcher `.cmd`. La instalación no sustituye las cuatro revisiones
+obligatorias de cierre de Spec Kit.
+
+Angular vive en la raíz: el contexto UI debe señalar el archivo o ruta web activo,
+por ejemplo `context --target src/styles.css`; `apps/api` y `packages/domain` no
+son la app visual. Los tokens y el alcance aprobados de la spec prevalecen; una
+tarea de estilos sobre ese sistema no requiere reabrir decisiones de producto.
+Versiones, integridad y evidencia en
+[tooling-provenance.md](specs/001-mvp-guias-builds/tooling-provenance.md).
+
+## Presupuesto JavaScript inicial
+
+El comando canónico `pnpm build` ejecuta Angular, finaliza la portada estática
+y ejecuta `check:initial-js`. La portada conserva HTML, SEO, estilos y enlaces
+nativos; no arranca JavaScript cliente. El finalizador rechaza controles que
+dependan de JS, handlers desconocidos y estructuras incompatibles. Si la portada
+necesita nueva interacción, actualizar primero su contrato SDD; no excluirla del
+checker ni retirar funciones para conseguir cero bytes.
+
+La puerta mide gzip real nivel 6, máximo 90000 bytes para la portada y 110000 para
+el catálogo prerenderizado. Cero solo se acepta con el contrato estático validado.
+Las rutas hidratadas incluyen bootstrap, módulo lazy, imports compartidos y
+scripts inline ejecutables; JSON-LD y TransferState son datos. El catálogo usa
+soporte de hidratación i18n y replay; sus scripts no se retiran.
+El límite raw aproximado de Angular (warning 280kB/error 300kB) no sustituye la
+medición gzip. Ejecutar solo `pnpm ng build` omite finalización y puerta gzip.
+
+La medición usa `dist/grim-dawn-builds/stats.json`, que queda fuera del directorio
+público `browser`; sirve solo `browser` al previsualizar. No publiques los stats
+junto con el sitio. Para comprobar un artefacto existente:
+
+```bash
+pnpm check:initial-js
+```
+
+Este control no acredita presupuestos de guías, CSS/HTML ni Lighthouse. Los
+checks de T-042/T-126 completan esa cobertura antes del cierre. El release usa
+la misma finalización antes del hash y escanea secretos antes y después.

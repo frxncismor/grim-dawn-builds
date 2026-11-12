@@ -7,12 +7,41 @@ describe('loadConfig', () => {
       host: '127.0.0.1',
       port: 3000,
       logLevel: 'info',
+      corsOrigin: 'http://localhost:4200',
+      bodyLimit: 16384,
+      rateLimit: 120,
     });
   });
 
   it('parses a valid port and log level', () => {
     const config = loadConfig({ API_PORT: '8080', LOG_LEVEL: 'debug', API_HOST: '0.0.0.0' });
-    expect(config).toEqual({ host: '0.0.0.0', port: 8080, logLevel: 'debug' });
+    expect(config).toEqual({
+      host: '0.0.0.0',
+      port: 8080,
+      logLevel: 'debug',
+      corsOrigin: 'http://localhost:4200',
+      bodyLimit: 16384,
+      rateLimit: 120,
+    });
+  });
+  it('accepts only the approved CORS origin and bounded integer HTTP limits', () => {
+    for (const value of [
+      '*',
+      '',
+      'null',
+      'http://127.0.0.1:4200',
+      'http://localhost:4200,https://other.example',
+    ]) {
+      expect(() => loadConfig({ CORS_ORIGINS: value })).toThrow(ConfigError);
+    }
+    for (const value of ['0', '1023', '65537', '1.5', 'unbounded'])
+      expect(() => loadConfig({ API_BODY_LIMIT_BYTES: value })).toThrow(ConfigError);
+    for (const value of ['0', '-1', '10001', 'NaN'])
+      expect(() => loadConfig({ API_RATE_LIMIT: value })).toThrow(ConfigError);
+    expect(loadConfig({ API_BODY_LIMIT_BYTES: '1024', API_RATE_LIMIT: '2' })).toMatchObject({
+      bodyLimit: 1024,
+      rateLimit: 2,
+    });
   });
 
   it('does not require any database variable', () => {

@@ -1,0 +1,38 @@
+<a class="skip-link" [attr.href]="skipHref()" i18n="@@layout.skip">Saltar al contenido</a>
+
+<header class="site-header">
+  <div class="page-width header-inner">
+    <a class="brand" routerLink="/" i18n="@@layout.brand">Grim Dawn <span>Builds</span></a>
+    <nav aria-label="Navegación principal" i18n-aria-label="@@layout.primaryNav">
+      <a routerLink="/" [attr.aria-current]="isCurrent('/') ? 'page' : null" i18n="@@layout.home"
+        >Inicio</a
+      >
+      <a
+        routerLink="/tier-list"
+        [attr.aria-current]="isCurrent('/tier-list') ? 'page' : null"
+        i18n="@@layout.catalog"
+        >Catálogo</a
+      >
+      <a
+        routerLink="/acerca"
+        [attr.aria-current]="isCurrent('/acerca') ? 'page' : null"
+        i18n="@@layout.about"
+        >Acerca</a
+      >
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="page-width" tabindex="-1"><ng-content /></main>
+
+<footer class="site-footer">
+  <div class="page-width footer-inner">
+    <p i18n="@@layout.independent">
+      Proyecto independiente. No está afiliado a Crate Entertainment.
+    </p>
+    <nav aria-label="Información editorial y legal" i18n-aria-label="@@layout.legalNav">
+      <a routerLink="/acerca" i18n="@@layout.editorial">Criterios editoriales</a>
+      <a routerLink="/legal" i18n="@@layout.legal">Aviso legal</a>
+    </nav>
+  </div>
+</footer>
