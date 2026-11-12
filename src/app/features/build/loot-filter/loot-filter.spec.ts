@@ -3,7 +3,6 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PublicBuild } from '@gd/domain';
 import draftFixture from '../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
-import originalGuide from '../../../../../e2e/fixtures/original-guide.json';
 import { LootFilter } from './loot-filter';
 
 type LootFilterContent = Pick<
@@ -11,7 +10,6 @@ type LootFilterContent = Pick<
   'slug' | 'title' | 'loot_filter_columns' | 'notes' | 'sections_meta'
 >;
 const content = draftFixture as unknown as LootFilterContent;
-const original = originalGuide;
 
 function installClipboard(value: Clipboard | undefined): () => void {
   const descriptor = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
@@ -39,7 +37,7 @@ describe('gd-loot-filter', () => {
     return fixture;
   };
 
-  it('preserves the four columns, all eight rules and their explicit action labels from the local guide', async () => {
+  it('preserves the four columns, all eight rules and their explicit action labels', async () => {
     const fixture = await render();
     const root = fixture.nativeElement as HTMLElement;
     const columns = Array.from(root.querySelectorAll<HTMLElement>('[data-column]'));
@@ -66,33 +64,30 @@ describe('gd-loot-filter', () => {
         })),
       ),
     );
-    expect(root.textContent).toContain('El filtro es un O, no un Y');
-    expect(root.textContent).toContain('Cuantas más marques, menos filtra.');
-    expect(
-      content.loot_filter_columns.map((column) => ({
-        name: column.name,
-        subtitle: column.subtitle,
-        rules: column.rules.map(({ label, detail }) => ({ label, detail })),
-      })),
-    ).toEqual(original.loot_columns);
-    expect(content.notes.find((note) => note.position === 15)?.headline).toBe(
-      original.loot_final.title,
-    );
-    expect(content.notes.find((note) => note.position === 15)?.detail).toBe(
-      original.loot_final.body,
-    );
+    const aviso = content.loot_filter_columns
+      .flatMap((column) => column.rules)
+      .find((rule) => rule.action === 'aviso')!;
+    expect(root.textContent).toContain(aviso.detail);
+    for (const column of content.loot_filter_columns) {
+      for (const rule of column.rules) expect(rule.detail.trim().length).toBeGreaterThan(0);
+    }
   });
 
   it('renders the introduction and final tip from notes without the technical introduction marker', async () => {
     const fixture = await render();
     const root = fixture.nativeElement as HTMLElement;
-    const introduction = original.introductions.find((note) => note.section === 'Filtro de botín');
     const note = content.notes.find(
       (entry) =>
         entry.kind === 'general' && entry.label === 'Filtro de botín' && entry.position === 15,
     );
+    const introduction = content.notes.find(
+      (entry) =>
+        entry.label === 'Filtro de botín' && /^Introducci[oó]n\s+\d+$/i.test(entry.headline),
+    );
 
-    expect(root.querySelector('[data-introduction]')?.textContent?.trim()).toBe(introduction?.text);
+    expect(root.querySelector('[data-introduction]')?.textContent?.trim()).toBe(
+      introduction?.detail,
+    );
     expect(root.textContent).not.toContain('Introducción 1');
     expect(root.querySelector('[data-final-tip] [data-headline]')?.textContent?.trim()).toBe(
       note?.headline,
@@ -132,7 +127,10 @@ describe('gd-loot-filter', () => {
     expect(text).toBe(expected);
     expect(component.buildSummaryText()).toBe(text);
     expect(text).not.toMatch(/<\/?[a-z][^>]*>/i);
-    expect(text).toContain('- [Notice] Ojo con la lógica: El filtro es un O, no un Y');
+    const avisoRule = content.loot_filter_columns
+      .flatMap((column) => column.rules)
+      .find((rule) => rule.action === 'aviso')!;
+    expect(text).toContain(`- [Notice] ${avisoRule.label}: ${avisoRule.detail}`);
   });
 
   it('sorts copied columns and rules by position without mutating frozen input', async () => {

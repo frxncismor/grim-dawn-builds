@@ -144,9 +144,9 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', () => {
       (SELECT count(*) FROM v_public_build_documents)::int AS documents,
       (SELECT count(*) FROM v_public_tier_entries)::int AS entries`)
     ).rows[0];
-    expect(visibility).toEqual({ builds: 0, documents: 0, entries: 45 });
+    expect(visibility).toEqual({ builds: 1, documents: 1, entries: 46 });
     const state = (await admin!.query('SELECT review_state, rights_status FROM builds')).rows[0];
-    expect(state).toEqual({ review_state: 'borrador', rights_status: 'pending' });
+    expect(state).toEqual({ review_state: 'publicado', rights_status: 'own_original' });
     const unknown = await admin!.query(
       "SELECT count(*)::int AS count FROM tier_entries WHERE entry_kind='placeholder' AND playstyle IS NOT NULL",
     );

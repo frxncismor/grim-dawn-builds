@@ -148,7 +148,7 @@ suite('atomic bootstrap on real PostgreSQL (T-072)', () => {
     await admin!.query('DROP DATABASE ' + database + ' WITH (FORCE)');
   });
 
-  it('loads a complete pending fixture atomically and records canonical hash, migration and date once', async () => {
+  it('loads a complete own published fixture atomically and records canonical hash, migration and date once', async () => {
     expect(await bootstrapData(importer!, data)).toEqual({ builds: 1, tierLists: 1 });
     const marker = (
       await importer!.query(
@@ -160,13 +160,13 @@ suite('atomic bootstrap on real PostgreSQL (T-072)', () => {
     expect(marker.bootstrapped_at).toBeInstanceOf(Date);
     expect(
       (await importer!.query('SELECT review_state,rights_status,origin FROM builds')).rows[0],
-    ).toEqual({ review_state: 'borrador', rights_status: 'pending', origin: 'bootstrap' });
+    ).toEqual({ review_state: 'publicado', rights_status: 'own_original', origin: 'bootstrap' });
     expect((await viewer!.query('SELECT count(*)::int AS n FROM v_public_builds')).rows[0].n).toBe(
-      0,
+      1,
     );
     expect(
       (await viewer!.query('SELECT count(*)::int AS n FROM v_public_tier_entries')).rows[0].n,
-    ).toBe(45);
+    ).toBe(46);
     await expect(bootstrapData(importer!, data)).rejects.toThrow('already');
     await expect(seedData(importer!, data)).rejects.toThrow('bootstrapped');
     for (const sql of [

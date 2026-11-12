@@ -122,7 +122,8 @@ export class PurchaseStepper {
   }
 
   selectLabel(step: PurchaseStepperContent['purchase_steps'][number]): string {
-    return $localize`:@@purchaseStepper.selectLabel:View skills for step ${step.position}:position:, ${step.title}:title:, ${step.threshold_label}:threshold:`;
+    // WCAG 2.5.3: the accessible name must contain the visible button text.
+    return $localize`:@@purchaseStepper.selectLabel:View step skills: step ${step.position}:position:, ${step.title}:title:, ${step.threshold_label}:threshold:`;
   }
 
   completionLabel(step: PurchaseStepperContent['purchase_steps'][number]): string {

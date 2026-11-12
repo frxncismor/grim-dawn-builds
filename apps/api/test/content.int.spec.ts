@@ -205,7 +205,7 @@ suite('HTTP content contract on real PostgreSQL public views (T-060)', () => {
   };
   runContentRepositoryContract('PostgreSQL/api_ro over HTTP', factory, { localDrafts: false });
 
-  it('serves the complete real catalog without its pending guide or private source', async () => {
+  it('serves the complete real catalog with its published own guide', async () => {
     const input = await readSeedFixtures(join(root, 'content'));
     const repo = await factory(
       input.builds,
@@ -215,15 +215,16 @@ suite('HTTP content contract on real PostgreSQL public views (T-060)', () => {
     const tier = await repo.getTierList('principal');
     expect(tier?.masteries).toEqual(input.tierLists[0]!.masteries);
     expect(tier?.combinations).toEqual(input.tierLists[0]!.combinations);
-    expect(tier?.entries).toEqual(
-      input.tierLists[0]!.entries.filter((entry) => entry.entry_kind === 'placeholder'),
-    );
-    expect(tier?.entries).toHaveLength(45);
-    expect(await repo.listBuilds()).toEqual([]);
-    expect(await repo.findBuild(input.builds[0]!.slug)).toBeNull();
+    expect(tier?.entries).toEqual(input.tierLists[0]!.entries);
+    expect(tier?.entries).toHaveLength(46);
+    const builds = await repo.listBuilds();
+    expect(builds).toHaveLength(1);
+    expect(builds[0]?.slug).toBe('chaman-demoledor-golpe-primigenio');
+    expect((await repo.findBuild(input.builds[0]!.slug))?.slug).toBe(input.builds[0]!.slug);
+    expect((await repo.getAuthor('grim-dawn-builds'))?.display_name).toBe('Grim Dawn Builds');
     expect(await repo.getAuthor('por-confirmar')).toBeNull();
     expect(JSON.stringify(tier)).not.toMatch(
-      /guia-original|permission_ref|rights_confirmed|is_placeholder/,
+      /permission_ref|rights_confirmed|is_placeholder|rights_notes|reviewed_by/,
     );
   });
 

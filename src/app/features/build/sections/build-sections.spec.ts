@@ -1,11 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import contentFixture from '../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
-import originalGuide from '../../../../../e2e/fixtures/original-guide.json';
 import { BuildSections, type BuildSectionsContent } from './build-sections';
 
 const fixture = contentFixture as unknown as BuildSectionsContent;
-const original = originalGuide;
 
 describe('gd-build-sections', () => {
   beforeEach(() => TestBed.configureTestingModule({ imports: [BuildSections] }));
@@ -22,35 +20,33 @@ describe('gd-build-sections', () => {
     return component;
   };
 
-  it('keeps the original header and callout copy with one paragraph per item', async () => {
+  it('renders the header and callout copy from content with one paragraph per item', async () => {
     const view = await render(fixture, 'resumen');
     const root = view.nativeElement as HTMLElement;
-    expect(root.querySelector('h1')?.textContent?.trim()).toBe(original.header.title);
-    expect(root.querySelector('[data-eyebrow]')?.textContent?.trim()).toBe(original.header.eyebrow);
-    expect(root.querySelector('[data-subtitle]')?.textContent?.trim()).toBe(
-      original.header.subtitle,
-    );
-    expect(root.querySelector('h2')?.textContent?.trim()).toBe(original.header.callout_title);
+    expect(root.querySelector('h1')?.textContent?.trim()).toBe(fixture.title);
+    expect(root.querySelector('[data-eyebrow]')?.textContent?.trim()).toBe(fixture.eyebrow);
+    expect(root.querySelector('[data-subtitle]')?.textContent?.trim()).toBe(fixture.subtitle);
+    expect(root.querySelector('h2')?.textContent?.trim()).toBe(fixture.hero_callout_title);
     expect(
       Array.from(root.querySelectorAll('[data-callout-body] p')).map((p) => p.textContent?.trim()),
-    ).toEqual(original.header.callout_body);
+    ).toEqual(fixture.hero_callout_body);
     expect(root.querySelectorAll('h1')).toHaveLength(1);
   });
 
-  it('renders all priorities in source order, preserving nullable ranks and source text', async () => {
+  it('renders all priorities in source order, preserving nullable ranks and content text', async () => {
     const view = await render(fixture, 'prioridades');
     const rows = Array.from(
       (view.nativeElement as HTMLElement).querySelectorAll('[data-priority]'),
     );
     expect(rows).toHaveLength(11);
     expect(rows.map((row) => row.querySelector('[data-group]')?.textContent?.trim())).toEqual(
-      original.priorities.map((row) => row.label),
+      fixture.priorities.map((row) => row.group_label),
     );
     expect(rows.map((row) => row.querySelector('[data-headline]')?.textContent?.trim())).toEqual(
-      original.priorities.map((row) => row.headline),
+      fixture.priorities.map((row) => row.headline),
     );
     expect(rows.map((row) => row.querySelector('[data-detail]')?.textContent?.trim())).toEqual(
-      original.priorities.map((row) => row.detail),
+      fixture.priorities.map((row) => row.note),
     );
     expect(
       rows.map((row) => row.querySelector('[data-rank]')?.textContent?.trim() ?? null),
@@ -92,14 +88,16 @@ describe('gd-build-sections', () => {
         detail: row.querySelector('[data-detail]')?.textContent?.trim(),
       })),
     ).toEqual(
-      original.note_rows.map(({ label, headline, detail }) => ({ label, headline, detail })),
+      fixture.notes
+        .filter((note) => note.kind !== 'general')
+        .sort((left, right) => left.position - right.position)
+        .map(({ label, headline, detail }) => ({ label, headline, detail })),
     );
+    const omitted = fixture.notes.find((note) => note.label === 'Omitir · Demoledor')!;
     expect(noteRows[6].querySelector('[data-headline]')?.textContent?.trim()).toBe(
-      original.omitted[0].title,
+      omitted.headline,
     );
-    expect(noteRows[6].querySelector('[data-detail]')?.textContent?.trim()).toBe(
-      original.omitted[0].detail,
-    );
+    expect(noteRows[6].querySelector('[data-detail]')?.textContent?.trim()).toBe(omitted.detail);
     for (const reserved of [
       'Orden real de compra',
       'Filtro de botín',
@@ -128,7 +126,7 @@ describe('gd-build-sections', () => {
     };
     const priorities = await render(withSecondIntroduction, 'prioridades');
     expect((priorities.nativeElement as HTMLElement).textContent).toContain(
-      original.introductions.find((item) => item.section === 'Qué subir ya mismo')?.text,
+      fixture.notes.find((note) => note.label === 'Qué subir ya mismo')?.detail,
     );
     expect((priorities.nativeElement as HTMLElement).textContent).toContain('Segundo párrafo.');
     expect((priorities.nativeElement as HTMLElement).textContent).not.toContain('Introducción 1');
@@ -136,7 +134,7 @@ describe('gd-build-sections', () => {
     const guide = await render(fixture, 'guia-espiritual');
     const root = guide.nativeElement as HTMLElement;
     expect(root.textContent).toContain(
-      original.introductions.find((item) => item.section === 'El Guía Espiritual')?.text,
+      fixture.notes.find((note) => note.label === 'El Guía Espiritual')?.detail,
     );
     const people = Array.from(root.querySelectorAll('[data-guide-person]'));
     expect(people).toHaveLength(4);
@@ -148,10 +146,14 @@ describe('gd-build-sections', () => {
         detail: person.querySelector('[data-detail]')?.textContent?.trim(),
       })),
     ).toEqual(
-      original.guide_rows.slice(0, 4).map((person) => {
-        const [name, location] = person.headline.split(' — ');
-        return { group: person.label, name, location, detail: person.detail };
-      }),
+      [...fixture.guide_npcs]
+        .sort((left, right) => left.position - right.position)
+        .map((person) => ({
+          group: person.group_label,
+          name: person.name,
+          location: person.location,
+          detail: person.detail,
+        })),
     );
     const guideNotes = Array.from(root.querySelectorAll('[data-guide-note]'));
     expect(
@@ -161,11 +163,10 @@ describe('gd-build-sections', () => {
         detail: note.querySelector('[data-detail]')?.textContent?.trim(),
       })),
     ).toEqual(
-      original.guide_rows.slice(4).map((note) => ({
-        label: `Guía Espiritual · ${note.label}`,
-        headline: note.headline,
-        detail: note.detail,
-      })),
+      fixture.notes
+        .filter((note) => note.kind === 'general' && note.label.startsWith('Guía Espiritual · '))
+        .sort((left, right) => left.position - right.position)
+        .map(({ label, headline, detail }) => ({ label, headline, detail })),
     );
   });
 

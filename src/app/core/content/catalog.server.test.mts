@@ -5,18 +5,25 @@ import { loadCatalogSnapshot } from './catalog.server.ts';
 import { resolve } from 'node:path';
 import { BuildSchema } from '@gd/domain';
 
-test('real draft-enabled fixtures still produce only public catalog metadata', async () => {
+test('real fixtures produce only public catalog metadata, including the published guide card', async () => {
   const repository = createFixtureRepository(resolve('content'), { INCLUDE_DRAFTS: 'true' });
   const model = await loadCatalogSnapshot(repository);
   assert.equal(model.cards.length, 45);
-  assert.ok(model.cards.every((card) => card.entry.entry_kind === 'placeholder' && !card.guide));
+  const guides = model.cards.filter((card) => card.guide);
+  assert.equal(guides.length, 1);
+  assert.equal(guides[0]?.guide?.slug, 'chaman-demoledor-golpe-primigenio');
+  const placeholders = model.cards.filter((card) => !card.guide);
+  assert.equal(placeholders.length, 44);
+  assert.ok(placeholders.every((card) => card.entry.entry_kind === 'placeholder'));
   const output = JSON.stringify(model);
   for (const key of [
     'reviewed_by',
     'rights_confirmed_by',
+    'rights_notes',
     'permission_ref',
     'proof_ref',
     'skill_nodes',
+    'purchase_steps',
     'Golpe Primigenio',
   ])
     assert.ok(!output.includes(key));
@@ -95,7 +102,7 @@ test('synthetic own publication projects filters and excludes every private cana
     getTierList: async () => tier,
     listBuilds: async () => [original, guide],
   } as never);
-  const card = result.cards.find((c) => c.guide);
+  const card = result.cards.find((c) => c.guide?.slug === guide.slug);
   assert.equal(result.cards.length, 45);
   assert.equal(card?.guide?.slug, guide.slug);
   assert.deepEqual(card?.damageTypes, guide.damage_types);

@@ -23,13 +23,13 @@ test('site loader reads catalog once and only its public owner; legacy wrapper k
     return source.getAuthor(slug);
   };
   const data = await loadPublicSiteData(repository);
-  assert.deepEqual(counts, { tier: 1, builds: 1, author: 1 });
+  assert.deepEqual(counts, { tier: 1, builds: 1, author: 0 });
   assert.deepEqual(
     data.authors.map((a) => a.profile.slug),
     ['grim-dawn-builds'],
   );
   assert.equal(data.authors[0].ownsCatalog, true);
-  assert.deepEqual(data.authors[0].guideSlugs, []);
+  assert.deepEqual(data.authors[0].guideSlugs, ['chaman-demoledor-golpe-primigenio']);
   for (const key of [
     'is_placeholder',
     'rights_confirmed_by',
