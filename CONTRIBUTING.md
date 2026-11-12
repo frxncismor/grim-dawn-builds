@@ -18,6 +18,8 @@ necesarias, plan, tareas y análisis antes de implementarse, mediante los comand
 y plantillas de Spec Kit. Si no están disponibles, localiza la instalación antes
 de iniciar esa fase. Esto incluye cambios en documentación, configuración e infra.
 
+Claude Code carga `CLAUDE.md`, que remite a estas mismas reglas y a la metodología de usuario, y prohíbe delegar con sus herramientas internas.
+
 1. Lee la [constitución](.specify/memory/constitution.md), la
    [especificación](specs/001-mvp-guias-builds/spec.md), el
    [plan](specs/001-mvp-guias-builds/plan.md) y las
@@ -357,17 +359,17 @@ spec. **Sin labels no se mergea**, aunque el CI esté en verde.
 - Al menos **un label de área**: `ci`, `dx` o `performance`.
 - Un label de **spec o procedencia** cuando aplique: `spec001` u `orquestacion`.
 
-| Label | Cuándo usarlo |
-| --- | --- |
+| Label           | Cuándo usarlo                                                              |
+| --------------- | -------------------------------------------------------------------------- |
 | `documentation` | Documentación: `README`, `docs/`, este `CONTRIBUTING.md` o artefactos SDD. |
-| `enhancement` | Funcionalidad nueva o ampliación de producto. |
-| `bug` | Corrige un defecto reproducible. |
-| `accessibility` | Afecta o mejora accesibilidad (WCAG, axe, teclado, foco). |
-| `ci` | Flujos de `.github/workflows/` y puertas de verificación. |
-| `dx` | Entorno local, scripts de desarrollo, herramientas y skills. |
-| `performance` | Presupuestos de bundle, Lighthouse, LCP/CLS/TBT. |
-| `spec001` | El cambio pertenece al MVP de la spec 001. |
-| `orquestacion` | Orquestación jerárquica, espacios de Herdr y agentes. |
+| `enhancement`   | Funcionalidad nueva o ampliación de producto.                              |
+| `bug`           | Corrige un defecto reproducible.                                           |
+| `accessibility` | Afecta o mejora accesibilidad (WCAG, axe, teclado, foco).                  |
+| `ci`            | Flujos de `.github/workflows/` y puertas de verificación.                  |
+| `dx`            | Entorno local, scripts de desarrollo, herramientas y skills.               |
+| `performance`   | Presupuestos de bundle, Lighthouse, LCP/CLS/TBT.                           |
+| `spec001`       | El cambio pertenece al MVP de la spec 001.                                 |
+| `orquestacion`  | Orquestación jerárquica, espacios de Herdr y agentes.                      |
 
 Se aplican al crear el PR o después, con `gh`:
 
