@@ -13,11 +13,9 @@ import { RIGHTS_STATUSES, type RightsStatus } from './schema.js';
  *
  * T-104 scope: Zod shapes plus the minimal publication gate checks in
  * `AdaptationPublicationSchema`. The full checklist (plan §15.2) and the
- * degradation to link-only are T-107; database CHECK/triggers and the
- * `tier_entries` enum sync are T-108. `ADAPTATION_ENTRY_KIND` is therefore NOT
- * added to `ENTRY_KINDS` in schema.ts here: the SQL enum of `tier_entries` only
- * changes in T-108, and the T-058 parity test compares both sides, so adding it
- * now would break parity without a migration.
+ * degradation to link-only are T-107; the database CHECK/triggers/views are
+ * T-108. Since T-108 the SQL `entry_kind` enum and `ENTRY_KINDS` both carry
+ * `build_adaptada`, so the T-058 parity test compares them on equal terms.
  */
 
 export const EVIDENCE_TYPES = ['licencia_explicita', 'permiso_escrito'] as const;

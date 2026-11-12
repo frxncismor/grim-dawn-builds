@@ -394,7 +394,7 @@ databaseSuite('PostgreSQL publication and API-role gates (T-073)', () => {
       ${insertTierEntry()}
       ${insertTierEntry({
         entryKind: 'enlace_externo',
-        tier: 'A',
+        tier: 'sin_clasificar',
         contentStatus: 'verificado',
         rightsStatus: 'link_only',
       })}

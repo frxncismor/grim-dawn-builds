@@ -11,12 +11,38 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { getTableConfig, type PgTable } from 'drizzle-orm/pg-core';
 import { describe, expect, it } from 'vitest';
-import { AssetSchema, BuildSchema, CONTENT_STATUSES, TIERS, TierEntrySchema } from '@gd/domain';
+import {
+  ADAPTATION_ENTRY_KIND,
+  ADAPTATION_STATES,
+  AdaptationPublicationSchema,
+  AssetSchema,
+  BuildSchema,
+  CONTENT_STATUSES,
+  EVIDENCE_STATUSES,
+  EVIDENCE_TYPES,
+  PERMISSION_REQUEST_STATUSES,
+  PermissionRequestSchema,
+  SOURCE_CHANGE_OUTCOMES,
+  SOURCE_CHANGE_TYPES,
+  SourceChangeEventSchema,
+  SourceRightsEvidenceSchema,
+  TAKEDOWN_ACTIONS,
+  TakedownEventSchema,
+  TIERS,
+  TierEntrySchema,
+  type BuildAdaptation,
+  type SourceRightsEvidence,
+} from '@gd/domain';
 import { contractDoc } from '@gd/domain/testing';
 import * as db from '../src/db/schema.js';
 
 const gatesSql = readFileSync(
   fileURLToPath(new URL('../drizzle/0001_gates.sql', import.meta.url)),
+  'utf8',
+);
+// T-108 custom SQL: enum value, adaptation gates, link-only/adaptation CHECKs and view.
+const adaptationsSql = readFileSync(
+  fileURLToPath(new URL('../drizzle/0007_third_party_adaptations.sql', import.meta.url)),
   'utf8',
 );
 
@@ -87,6 +113,35 @@ describe('parity: enums (Drizzle pgEnum ↔ domain Zod options)', () => {
     {
       column: [db.assets, 'status'],
       domain: [AssetSchema.shape.status.options],
+    },
+    // T-108: third-party adaptation enums.
+    {
+      column: [db.sourceRightsEvidence, 'evidence_type'],
+      domain: [EVIDENCE_TYPES],
+    },
+    {
+      column: [db.sourceRightsEvidence, 'status'],
+      domain: [EVIDENCE_STATUSES],
+    },
+    {
+      column: [db.buildAdaptations, 'adaptation_state'],
+      domain: [ADAPTATION_STATES],
+    },
+    {
+      column: [db.permissionRequests, 'status'],
+      domain: [PERMISSION_REQUEST_STATUSES],
+    },
+    {
+      column: [db.takedownEvents, 'action'],
+      domain: [TAKEDOWN_ACTIONS],
+    },
+    {
+      column: [db.sourceChangeEvents, 'change_type'],
+      domain: [SOURCE_CHANGE_TYPES],
+    },
+    {
+      column: [db.sourceChangeEvents, 'outcome'],
+      domain: [SOURCE_CHANGE_OUTCOMES],
     },
   ];
 
@@ -365,4 +420,255 @@ describe('parity: tier_entries CHECKs (SQL tier_entries_*_ck ↔ TierEntrySchema
       expect(gatesSql).toMatch(new RegExp(`ADD CONSTRAINT ${ck} CHECK`));
     });
   }
+});
+
+describe('parity: tier_entries gains build_adaptada (0007 SQL ↔ TierEntrySchema)', () => {
+  it('adds the adapted kind to the SQL enum and to ENTRY_KINDS', () => {
+    expect(adaptationsSql).toMatch(/ALTER TYPE "public"\."entry_kind" ADD VALUE 'build_adaptada'/);
+    expect(columnOf(db.tierEntries, 'entry_kind').enumValues).toContain(ADAPTATION_ENTRY_KIND);
+    expect([...TierEntrySchema.shape.entry_kind.options]).toContain(ADAPTATION_ENTRY_KIND);
+  });
+
+  const adapted: Record<string, unknown> = {
+    entry_kind: 'build_adaptada',
+    combination_slug: 'combo-a-b',
+    display_name: null,
+    build_slug: 'build-adaptada-sintetica',
+    tier: 'A',
+    content_status: 'verificado',
+    rights_status: 'licensed',
+    review_state: 'publicado',
+    external_url: null,
+    external_author: null,
+    source_slug: 'fuente-externa',
+    evaluated_on: '2026-01-10',
+  };
+
+  it('accepts an adapted entry that points at its build', () => {
+    expect(TierEntrySchema.safeParse(adapted).success).toBe(true);
+  });
+
+  it('rejects an adapted entry without build_slug; the SQL CHECK states the same rule', () => {
+    expect(
+      messagesOf(
+        TierEntrySchema.safeParse({ ...adapted, build_slug: null, display_name: 'Adaptación' }),
+      ),
+    ).toContain('build_adaptada requiere build_slug');
+    expect(adaptationsSql).toMatch(
+      /ADD CONSTRAINT tier_entries_adaptation_ck CHECK \(\s*entry_kind::text <> 'build_adaptada' OR build_id IS NOT NULL/,
+    );
+  });
+
+  it('keeps link cards unranked in the domain and in the recreated SQL CHECK', () => {
+    expect(
+      messagesOf(
+        TierEntrySchema.safeParse({
+          ...adapted,
+          entry_kind: 'enlace_externo',
+          build_slug: null,
+          display_name: 'Guía externa',
+          tier: 'A',
+          rights_status: 'link_only',
+          external_url: 'https://example.invalid/guia',
+          external_author: 'Autor externo',
+        }),
+      ),
+    ).toContain('una tarjeta de enlace no lleva ranking derivado de la fuente');
+    expect(adaptationsSql).toMatch(/ADD CONSTRAINT tier_entries_link_only_ck CHECK/);
+    expect(adaptationsSql).toMatch(/tier = 'sin_clasificar'/);
+  });
+});
+
+describe('parity: adaptation publication gate (0007 SQL ↔ AdaptationPublicationSchema)', () => {
+  const evidence = (): SourceRightsEvidence => ({
+    id: 'evidencia-licencia',
+    source_slug: 'fuente-externa',
+    evidence_type: 'licencia_explicita',
+    evidence_ref: 'evidencia-privada/licencia-sintetica.txt',
+    license_name: 'Licencia sintética de ejemplo',
+    license_url: 'https://example.invalid/licencia',
+    covers_adaptation: true,
+    covers_translation: true,
+    covers_images: false,
+    scope_notes: 'Alcance sintético para pruebas de paridad.',
+    granted_by: 'Titular sintético',
+    recorded_on: '2026-01-01',
+    valid_until: '2027-01-01',
+    status: 'vigente',
+    verified_by: 'Revisor de derechos sintético',
+    verified_on: '2026-01-02',
+  });
+
+  const adaptation = (): BuildAdaptation => ({
+    build_slug: 'build-adaptada-sintetica',
+    entry_kind: 'build_adaptada',
+    source_slug: 'fuente-externa',
+    evidence_id: 'evidencia-licencia',
+    rights_status: 'licensed',
+    source_url: 'https://example.invalid/build-original',
+    original_title: 'Build original sintética',
+    original_author: 'Autor sintético',
+    original_site: 'Sitio sintético',
+    retrieved_on: '2026-01-10',
+    adaptation_editor: 'Editor sintético',
+    rights_verified_by: 'Revisor de derechos sintético',
+    transformation_scope: ['estructura', 'traduccion'],
+    transformation_notes: 'Se conservó la estructura y se tradujo el texto al español.',
+    adaptation_version: 2,
+    source_revision_ref: 'revision-7',
+    last_reviewed_on: '2026-06-01',
+    reviewed_by: 'Revisor de contenido sintético',
+    change_log: [
+      { adaptation_version: 1, changed_on: '2026-02-01', summary: 'Primera adaptación.' },
+      { adaptation_version: 2, changed_on: '2026-06-01', summary: 'Revisión contra el juego.' },
+    ],
+    attribution_text: 'Esta build fue adaptada de la fuente sintética.',
+    adaptation_state: 'publicado',
+  });
+
+  const publish = (patch: {
+    adaptation?: Partial<BuildAdaptation>;
+    evidence?: Partial<SourceRightsEvidence>;
+  }) =>
+    AdaptationPublicationSchema.safeParse({
+      adaptation: { ...adaptation(), ...patch.adaptation },
+      evidence: { ...evidence(), ...patch.evidence },
+    });
+
+  it('accepts a complete publication and states every SQL gate rule', () => {
+    expect(publish({}).success).toBe(true);
+    for (const rule of [
+      'IF NOT evidence.covers_adaptation THEN',
+      "IF evidence.status <> 'vigente' THEN",
+      'IF evidence.valid_until IS NOT NULL AND evidence.valid_until < adaptation.last_reviewed_on THEN',
+      'IF adaptation.adaptation_editor = evidence.verified_by THEN',
+      "IF 'imagenes' = ANY(adaptation.transformation_scope) AND NOT evidence.covers_images THEN",
+      "IF 'traduccion' = ANY(adaptation.transformation_scope) AND NOT evidence.covers_translation THEN",
+      "IF build_rights NOT IN ('licensed', 'permission_granted') THEN",
+    ]) {
+      expect(adaptationsSql, rule).toContain(rule);
+    }
+  });
+
+  it('rejects evidence that does not cover the adaptation', () => {
+    expect(messagesOf(publish({ evidence: { covers_adaptation: false } }))).toContain(
+      'la evidencia no cubre la adaptación',
+    );
+  });
+
+  it('rejects revoked and expired evidence', () => {
+    expect(messagesOf(publish({ evidence: { status: 'revocada' } }))).toContain(
+      'evidencia revocada no habilita publicación',
+    );
+    expect(
+      messagesOf(
+        publish({
+          evidence: { status: 'caducada', valid_until: '2026-05-01' },
+        }),
+      ),
+    ).toContain('la evidencia estaba caducada en la última revisión');
+  });
+
+  it('rejects the adaptation editor as the rights verifier', () => {
+    expect(
+      messagesOf(
+        publish({
+          adaptation: {
+            adaptation_editor: 'Revisor de derechos sintético',
+            rights_verified_by: 'Revisor de derechos sintético',
+          },
+        }),
+      ),
+    ).toContain('quien verifica los derechos no puede ser el editor de la adaptación');
+  });
+
+  it('publishes only allowed adaptation columns and never the private evidence', () => {
+    const start = adaptationsSql.indexOf('CREATE VIEW v_public_build_adaptations');
+    const end = adaptationsSql.indexOf('CREATE TRIGGER gates_importer_cutover_build_adaptations');
+    expect(start).toBeGreaterThan(-1);
+    expect(end).toBeGreaterThan(start);
+    const view = adaptationsSql.slice(start, end);
+    for (const field of [
+      'source_url',
+      'original_title',
+      'original_author',
+      'original_site',
+      'attribution_text',
+      'retrieved_on',
+      'license_name',
+      'license_url',
+    ]) {
+      expect(view, field).toContain(field);
+    }
+    for (const forbidden of ['evidence_ref', 'transformation_notes', 'change_log', 'scope_notes']) {
+      expect(view, forbidden).not.toContain(forbidden);
+    }
+    expect(adaptationsSql).toMatch(/GRANT SELECT ON v_public_build_adaptations TO api_ro;/);
+    expect(adaptationsSql).not.toMatch(
+      /GRANT [^;]* ON (build_adaptations|source_rights_evidence|permission_requests|takedown_events|source_change_events) TO api_ro/,
+    );
+  });
+
+  it('mirrors the private adaptation table CHECKs with their domain rules', () => {
+    const cases: [string, RegExp, SafeParseLike, string][] = [
+      [
+        'source_rights_evidence_license_ck',
+        /ADD CONSTRAINT source_rights_evidence_license_ck CHECK \(\s*\(evidence_type = 'licencia_explicita'/,
+        SourceRightsEvidenceSchema.safeParse({ ...evidence(), license_name: null }),
+        'una licencia explícita requiere nombre de licencia',
+      ],
+      [
+        'permission_requests_response_ck',
+        /ADD CONSTRAINT permission_requests_response_ck CHECK/,
+        PermissionRequestSchema.safeParse({
+          id: 'solicitud-sintetica',
+          source_slug: 'fuente-externa',
+          author_contact_ref: 'contacto-sintetico',
+          requested_on: '2026-01-01',
+          scope_requested: 'Adaptar la build al formato interactivo.',
+          status: 'concedida',
+          response_ref: null,
+          responded_on: null,
+        }),
+        'un permiso concedido requiere referencia de respuesta',
+      ],
+      [
+        'takedown_events_target_ck',
+        /num_nonnulls\(build_id, tier_entry_id\) = 1/,
+        TakedownEventSchema.safeParse({
+          id: 'retirada-sintetica',
+          build_slug: 'build-adaptada-sintetica',
+          tier_entry_ref: 'entrada-sintetica',
+          requested_by: 'Solicitante sintético',
+          received_on: '2026-01-01',
+          action: 'retirada_total',
+          executed_on: null,
+          executed_by: null,
+          notes: 'Solicitud sintética de retirada.',
+        }),
+        'requiere exactamente build_slug o tier_entry_ref',
+      ],
+      [
+        'source_change_events_outcome_ck',
+        /outcome = 'sin_accion' AND change_type = 'sin_cambios'/,
+        SourceChangeEventSchema.safeParse({
+          id: 'cambio-sintetico',
+          source_slug: 'fuente-externa',
+          build_slug: null,
+          observed_on: '2026-01-01',
+          change_type: 'edicion',
+          fingerprint: null,
+          reviewed_by: null,
+          outcome: 'sin_accion',
+        }),
+        'sin_accion requiere change_type=sin_cambios',
+      ],
+    ];
+
+    for (const [constraint, sqlTerm, result, message] of cases) {
+      expect(messagesOf(result), constraint).toContain(message);
+      expect(adaptationsSql, constraint).toMatch(sqlTerm);
+      expect(adaptationsSql, constraint).toContain(`CONSTRAINT ${constraint}`);
+    }
+  });
 });

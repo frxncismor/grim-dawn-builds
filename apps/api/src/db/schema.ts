@@ -12,12 +12,16 @@
  *   (`title` comes from the domain, the rest from data-model.md).
  * - DB-only enums (no domain contract yet): verification, damage_type, playstyle, content_tag,
  *   node_status, source_kind, note_kind, accent, build_source_role, loot_rule_action,
- *   devotion_step_kind. They are not in `@gd/domain` and must not be duplicated there silently.
+ *   devotion_step_kind, evidence_type, evidence_status, adaptation_state,
+ *   permission_request_status, takedown_action, source_change_type, source_change_outcome.
+ *   They are not in `@gd/domain` and must not be duplicated there silently; the adaptation
+ *   enums are compared with the `@gd/domain` constants of `adaptation.ts` by the parity test.
  * - `origin` ('fixture' | 'bootstrap' | 'editor') and `content_origin` are database-only provenance.
  *
  * Scope: this file declares structure only. Publication gates, asset gates, tier-entry CHECKs,
- * triggers, views and roles are added by the custom migration in T-055, not here. The only CHECK
- * declared is the structural mastery-pair ordering from data-model.md.
+ * triggers, views and roles are added by the custom migration in T-055 (and T-108 for
+ * third-party adaptations), not here. The only CHECK declared is the structural
+ * mastery-pair ordering from data-model.md.
  */
 import { sql } from 'drizzle-orm';
 import {
@@ -88,6 +92,7 @@ export const entryKindEnum = pgEnum('entry_kind', [
   'placeholder',
   'enlace_externo',
   'build_propia',
+  'build_adaptada',
 ]);
 export const originEnum = pgEnum('origin', ['fixture', 'bootstrap', 'editor']);
 export const noteKindEnum = pgEnum('note_kind', [
@@ -106,6 +111,42 @@ export const devotionStepKindEnum = pgEnum('devotion_step_kind', [
   'ruta',
   'verificacion',
   'limpieza',
+]);
+// Third-party adaptations (data-model rev. 6, plan §15). Declared here with the
+// same values as the @gd/domain constants of adaptation.ts; schema-parity.spec.ts
+// fails when they drift.
+export const evidenceTypeEnum = pgEnum('evidence_type', ['licencia_explicita', 'permiso_escrito']);
+export const evidenceStatusEnum = pgEnum('evidence_status', ['vigente', 'caducada', 'revocada']);
+export const adaptationStateEnum = pgEnum('adaptation_state', [
+  'borrador',
+  'en_revision',
+  'publicado',
+  'revision_pendiente',
+  'retirada',
+]);
+export const permissionRequestStatusEnum = pgEnum('permission_request_status', [
+  'enviada',
+  'concedida',
+  'denegada',
+  'limitada',
+  'sin_respuesta',
+]);
+export const takedownActionEnum = pgEnum('takedown_action', [
+  'link_only',
+  'retirada_total',
+  'rechazada',
+]);
+export const sourceChangeTypeEnum = pgEnum('source_change_type', [
+  'edicion',
+  'licencia',
+  'eliminacion',
+  'bloqueo',
+  'sin_cambios',
+]);
+export const sourceChangeOutcomeEnum = pgEnum('source_change_outcome', [
+  'sin_accion',
+  'revision_abierta',
+  'retirada',
 ]);
 
 // ---------------------------------------------------------------------------
@@ -504,3 +545,109 @@ export const tierEntries = pgTable(
     index('tier_entries_content_tags_gin').using('gin', t.content_tags),
   ],
 );
+
+// ---------------------------------------------------------------------------
+// Third-party adaptations (data-model rev. 6, plan §15, FR-27–FR-33)
+// ---------------------------------------------------------------------------
+
+/**
+ * Private rights evidence. `evidence_ref` points at the archived proof and is
+ * never projected by a public view. Actors stay `text` until `contributors`
+ * exists (T-114).
+ */
+export const sourceRightsEvidence = pgTable('source_rights_evidence', {
+  id: idColumn(),
+  source_id: uuid('source_id')
+    .notNull()
+    .references(() => sources.id),
+  evidence_type: evidenceTypeEnum('evidence_type').notNull(),
+  evidence_ref: text('evidence_ref').notNull(),
+  license_name: text('license_name'),
+  license_url: text('license_url'),
+  covers_adaptation: boolean('covers_adaptation').notNull(),
+  covers_translation: boolean('covers_translation').notNull(),
+  covers_images: boolean('covers_images').notNull().default(false),
+  scope_notes: text('scope_notes').notNull(),
+  granted_by: text('granted_by').notNull(),
+  recorded_on: date('recorded_on', { mode: 'string' }).notNull(),
+  valid_until: date('valid_until', { mode: 'string' }),
+  status: evidenceStatusEnum('status').notNull(),
+  verified_by: text('verified_by').notNull(),
+  verified_on: date('verified_on', { mode: 'string' }).notNull(),
+  ...timestamps(),
+});
+
+/**
+ * One adaptation per native build (`build_id` is the primary key). The
+ * publication gate (evidence coverage/validity, rights status, editor ≠
+ * verifier, image scope) is a trigger in `drizzle/0001`/`0007`, not a Drizzle
+ * CHECK, because it reads `source_rights_evidence` and `builds`.
+ */
+export const buildAdaptations = pgTable('build_adaptations', {
+  build_id: uuid('build_id')
+    .primaryKey()
+    .references(() => builds.id, { onDelete: 'cascade' }),
+  source_id: uuid('source_id')
+    .notNull()
+    .references(() => sources.id),
+  evidence_id: uuid('evidence_id')
+    .notNull()
+    .references(() => sourceRightsEvidence.id, { onDelete: 'restrict' }),
+  source_url: text('source_url').notNull(),
+  original_title: text('original_title').notNull(),
+  original_author: text('original_author').notNull(),
+  original_site: text('original_site').notNull(),
+  retrieved_on: date('retrieved_on', { mode: 'string' }).notNull(),
+  adaptation_editor: text('adaptation_editor').notNull(),
+  transformation_scope: text('transformation_scope').array().notNull(),
+  transformation_notes: text('transformation_notes').notNull(),
+  adaptation_version: integer('adaptation_version').notNull(),
+  source_revision_ref: text('source_revision_ref'),
+  last_reviewed_on: date('last_reviewed_on', { mode: 'string' }).notNull(),
+  reviewed_by: text('reviewed_by').notNull(),
+  change_log: jsonb('change_log').notNull(),
+  attribution_text: text('attribution_text').notNull(),
+  adaptation_state: adaptationStateEnum('adaptation_state').notNull(),
+  ...timestamps(),
+});
+
+export const permissionRequests = pgTable('permission_requests', {
+  id: idColumn(),
+  source_id: uuid('source_id')
+    .notNull()
+    .references(() => sources.id),
+  author_contact_ref: text('author_contact_ref').notNull(),
+  requested_on: date('requested_on', { mode: 'string' }).notNull(),
+  scope_requested: text('scope_requested').notNull(),
+  status: permissionRequestStatusEnum('status').notNull(),
+  response_ref: text('response_ref'),
+  responded_on: date('responded_on', { mode: 'string' }),
+  ...timestamps(),
+});
+
+export const takedownEvents = pgTable('takedown_events', {
+  id: idColumn(),
+  build_id: uuid('build_id').references(() => builds.id),
+  tier_entry_id: uuid('tier_entry_id').references(() => tierEntries.id),
+  requested_by: text('requested_by').notNull(),
+  received_on: date('received_on', { mode: 'string' }).notNull(),
+  action: takedownActionEnum('action').notNull(),
+  executed_on: date('executed_on', { mode: 'string' }),
+  executed_by: text('executed_by'),
+  notes: text('notes').notNull(),
+  ...timestamps(),
+});
+
+export const sourceChangeEvents = pgTable('source_change_events', {
+  id: idColumn(),
+  source_id: uuid('source_id')
+    .notNull()
+    .references(() => sources.id),
+  build_id: uuid('build_id').references(() => builds.id),
+  observed_on: date('observed_on', { mode: 'string' }).notNull(),
+  change_type: sourceChangeTypeEnum('change_type').notNull(),
+  fingerprint: text('fingerprint'),
+  reviewed_by: text('reviewed_by'),
+  outcome: sourceChangeOutcomeEnum('outcome').notNull(),
+  ...timestamps(),
+});
