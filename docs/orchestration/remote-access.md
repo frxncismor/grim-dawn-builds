@@ -1,165 +1,168 @@
-# Acceso remoto al Herdr de este PC (SSH)
+# Remote access to this PC's Herdr (SSH)
 
-**Objetivo (T-148)**: conectar al Herdr de este equipo (`mamalona`) desde otra
-computadora y desde la app móvil, usando el mismo canal SSH que usa
-`hc machine add`. No se abre un puerto nuevo ni se expone el 22 a Internet.
+**English** · [Español](remote-access.es.md)
 
-## Estado comprobado (2026-11-11)
+**Goal (T-148)**: connect to this machine's Herdr (`mamalona`) from another
+computer and from the mobile app, using the same SSH channel that
+`hc machine add` uses. No new port is opened and port 22 is not exposed to the
+Internet.
 
-- `hc server status`: core `mamalona` vivo, 1 terminal, versión 0.1.20.
-- **`sshd` en marcha** (`Running`, `Automatic`) y escuchando en `0.0.0.0:22` y
-  `[::]:22`. `Test-NetConnection 192.168.100.35 -Port 22` responde `True`.
-- Autenticación por clave verificada:
-  `ssh paco_@192.168.100.35 "echo hc-remote-ok"` devuelve `hc-remote-ok`.
-  `hc machine add paco_@127.0.0.1` responde «este core», lo que confirma que el
-  handshake de `hc` por SSH funciona; falta emparejar la laptop y el móvil.
-- Clave `herdr-mobile` (ED25519, `SHA256:lxCHn2q1vkPjUiwBsjbnrzGdr8rtSE/wHFnQuZPYXCA`)
-  autorizada en `administrators_authorized_keys` y en el archivo del usuario.
-- El usuario `paco_` está en **Administradores** y tiene contraseña.
-  `%USERPROFILE%\.ssh\authorized_keys` ya contiene su clave `id_ed25519.pub`.
-- IPv4 de LAN: **192.168.100.35** (Ethernet, perfil Público).
-- Firewall: regla `OpenSSH Server` habilitada, TCP 22, perfiles
+## Verified state (2026-11-11)
+
+- `hc server status`: core `mamalona` alive, 1 terminal, version 0.1.20.
+- **`sshd` running** (`Running`, `Automatic`) and listening on `0.0.0.0:22` and
+  `[::]:22`. `Test-NetConnection 192.168.100.35 -Port 22` responds `True`.
+- Key authentication verified:
+  `ssh paco_@192.168.100.35 "echo hc-remote-ok"` returns `hc-remote-ok`.
+  `hc machine add paco_@127.0.0.1` answers «este core», which confirms that the
+  `hc` handshake over SSH works; pairing the laptop and the phone is still
+  pending.
+- `herdr-mobile` key (ED25519, `SHA256:lxCHn2q1vkPjUiwBsjbnrzGdr8rtSE/wHFnQuZPYXCA`)
+  authorized in `administrators_authorized_keys` and in the user's file.
+- The `paco_` account is in **Administrators** and has a password.
+  `%USERPROFILE%\.ssh\authorized_keys` already contains its `id_ed25519.pub` key.
+- LAN IPv4: **192.168.100.35** (Ethernet, Public profile).
+- Firewall: `OpenSSH Server` rule enabled, TCP 22, profiles
   `Domain, Private, Public`.
-- Sin Tailscale. NordVPN está instalado pero su servicio está detenido.
+- No Tailscale. NordVPN is installed but its service is stopped.
 
-## Paso 1 — preparar este PC (PowerShell elevada)
+## Step 1 — prepare this PC (elevated PowerShell)
 
-En una terminal **como administrador**, desde la raíz del repo:
+In a terminal **as administrator**, from the repo root:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/setup-ssh-remote.ps1
 ```
 
-El script instala/repara OpenSSH Server, crea `sshd_config` desde la plantilla de
-Windows si falta, genera las claves de host, arranca `sshd` al inicio, asegura
-la regla de firewall y autoriza las claves públicas indicadas. Para autorizar la
-clave de la laptop o del móvil, pásalas como rutas:
+The script installs/repairs OpenSSH Server, creates `sshd_config` from the Windows
+template if it is missing, generates the host keys, starts `sshd` at boot, ensures
+the firewall rule and authorizes the given public keys. To authorize the laptop's
+or the phone's key, pass them as paths:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/setup-ssh-remote.ps1 `
   -PublicKeyPath "$env:USERPROFILE\.ssh\id_ed25519.pub", "C:\keys\laptop.pub"
 ```
 
-Si el servicio sigue en **1067** con `sshd_config` y claves ya creadas, en la
-misma consola elevada:
+If the service still ends in **1067** with `sshd_config` and keys already created,
+in the same elevated console:
 
 ```powershell
 & C:\Windows\System32\OpenSSH\sshd.exe -d
 ```
 
-Ese comando muestra el error real. El script ya restringe DACL y propietario de
-las claves de host y de `sshd_config`; en este equipo fue suficiente para
-dejarlo en `Running`. Si en otro equipo persiste, reinstala la capacidad y
-repite el script:
+That command shows the real error. The script already restricts the DACL and the
+owner of the host keys and of `sshd_config`; on this machine it was enough to
+leave it in `Running`. If it persists on another machine, reinstall the capability
+and repeat the script:
 
 ```powershell
 Remove-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
 Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
 ```
 
-Verificación local:
+Local verification:
 
 ```powershell
 Get-Service sshd
 Get-NetTCPConnection -LocalPort 22 -State Listen
 ```
 
-`sshd` debe estar `Running` y el puerto 22 escuchando en `0.0.0.0`/`::`.
+`sshd` must be `Running` and port 22 listening on `0.0.0.0`/`::`.
 
-## Paso 2 — desde la otra computadora
+## Step 2 — from the other computer
 
-1. Genera o reutiliza su clave y autorízala en el PC (paso 1 con
-   `-PublicKeyPath ...laptop.pub`). Si prefieres empezar con contraseña, omite
-   este punto: `sshd_config` la permite por defecto.
-2. Comprueba el acceso:
+1. Generate or reuse its key and authorize it on the PC (step 1 with
+   `-PublicKeyPath ...laptop.pub`). If you prefer to start with a password, skip
+   this point: `sshd_config` allows it by default.
+2. Check access:
 
    ```sh
    ssh paco_@192.168.100.35
    ```
 
-3. Añade el PC como máquina de Herdr desde esa computadora:
+3. Add the PC as a Herdr machine from that computer:
 
    ```sh
    hc machine add paco_@192.168.100.35 --name mamalona --install
    hc machine login mamalona    # solo si pide contraseña, código o aceptar host key
    ```
 
-   `--install` copia el `hc` de esa computadora si en el PC faltara o fuera
-   antiguo; en este PC ya hay core 0.1.20.
+   `--install` copies that computer's `hc` if the PC lacked it or had an old one;
+   this PC already has core 0.1.20.
 
-4. Abre la app de Herdr en la otra computadora: **Settings > Machines** debe
-   listar `mamalona` (la app añade hosts de `~/.ssh/config` o los que ya conoce
-   `hc`). Los espacios remotos aparecen con prefijo `mamalona/`; los nuevos se
-   crean con `space.new --machine mamalona`.
+4. Open the Herdr app on the other computer: **Settings > Machines** must list
+   `mamalona` (the app adds hosts from `~/.ssh/config` or the ones `hc` already
+   knows). Remote spaces appear with the `mamalona/` prefix; new ones are created
+   with `space.new --machine mamalona`.
 
-## Cuenta Microsoft y contraseña
+## Microsoft account and password
 
-`paco_` es una cuenta **MicrosoftAccount**. SSH **no acepta el PIN de Windows**:
-la autenticación por contraseña usa la contraseña online de la cuenta. Si no la
-recuerdas, o la cuenta es passwordless, hay dos salidas:
+`paco_` is a **MicrosoftAccount** account. SSH **does not accept the Windows PIN**:
+password authentication uses the account's online password. If you do not
+remember it, or the account is passwordless, there are two ways out:
 
-- **Clave (recomendado)**: autoriza la clave pública del dispositivo y elige esa
-  identidad en la app. El móvil ya tiene `herdr-mobile` autorizada.
-- **Restablecer la contraseña**: en `account.microsoft.com` (Seguridad) o en
-  **Configuración > Cuentas > Opciones de inicio de sesión > Contraseña**. Tras
-  cambiarla, bloquea/desbloquea la sesión del PC y reintenta.
+- **Key (recommended)**: authorize the device's public key and choose that
+  identity in the app. The phone already has `herdr-mobile` authorized.
+- **Reset the password**: at `account.microsoft.com` (Security) or in
+  **Settings > Accounts > Sign-in options > Password**. After changing it,
+  lock/unlock the PC session and retry.
 
-Si la app pide una contraseña y no ofrece elegir clave, está usando
-autenticación por contraseña: necesita la contraseña de la cuenta Microsoft, no
-el PIN.
+If the app asks for a password and does not offer to choose a key, it is using
+password authentication: it needs the Microsoft account password, not the PIN.
 
-## Paso 3 — app móvil
+## Step 3 — mobile app
 
-La app móvil necesita lo mismo: host, usuario, puerto 22 y autenticación.
+The mobile app needs the same thing: host, user, port 22 and authentication.
 
-- **Misma Wi-Fi**: host `192.168.100.35`, usuario `paco_`, puerto `22`.
-- **Fuera de casa**: no publiques el 22. Usa una VPN de malla:
-  - **NordVPN Meshnet** (ya instalado en el PC): activa Meshnet en el PC y en el
-    móvil, y usa la IPv4 de malla del PC (`100.x.x.x`) como host.
-  - **Tailscale** como alternativa: instala en PC y móvil y usa el nombre
-    MagicDNS o la IP `100.x`.
-- **Autenticación**: si la app permite importar una clave OpenSSH, genera una
-  clave en el móvil y autoriza su `.pub` en el PC (paso 1). Si solo admite
-  contraseña, usa la del usuario `paco_`; el host key se acepta la primera vez.
-- Si la app pide un "machine"/"host" de Herdr, es el mismo destino:
-  `paco_@192.168.100.35` (o la IP de la VPN).
+- **Same Wi-Fi**: host `192.168.100.35`, user `paco_`, port `22`.
+- **Outside the home**: do not publish port 22. Use a mesh VPN:
+  - **NordVPN Meshnet** (already installed on the PC): enable Meshnet on the PC
+    and on the phone, and use the PC's mesh IPv4 (`100.x.x.x`) as the host.
+  - **Tailscale** as an alternative: install it on the PC and the phone and use the
+    MagicDNS name or the `100.x` IP.
+- **Authentication**: if the app allows importing an OpenSSH key, generate a key
+  on the phone and authorize its `.pub` on the PC (step 1). If it only accepts a
+  password, use the `paco_` account's; the host key is accepted the first time.
+- If the app asks for a Herdr "machine"/"host", it is the same target:
+  `paco_@192.168.100.35` (or the VPN IP).
 
-## Verificación de extremo a extremo
+## End-to-end verification
 
-En el PC:
+On the PC:
 
 ```powershell
 Get-Service sshd
 hc server status
 ```
 
-En la otra computadora o el móvil:
+On the other computer or the phone:
 
 ```sh
 ssh paco_@192.168.100.35 "hc --version"
 hc machine ls
 ```
 
-`hc machine ls` debe mostrar `mamalona` en estado alcanzable. En la app, abre un
-espacio de esa máquina y comprueba que `herdr-app ls` lo muestra.
+`hc machine ls` must show `mamalona` as reachable. In the app, open a space from
+that machine and check that `herdr-app ls` shows it.
 
-## Problemas conocidos
+## Known issues
 
-| Síntoma | Causa probable | Corrección |
+| Symptom | Probable cause | Fix |
 | --- | --- | --- |
-| `Connection refused` | `sshd` detenido o sin configuración | Paso 1; `Get-Service sshd` |
-| El servicio termina con **1067** y no hay `sshd.log` | Configuración/claves rechazadas o capacidad dañada | `& C:\Windows\System32\OpenSSH\sshd.exe -d` en consola elevada para ver el error; si persiste, `Remove-WindowsCapability` + `Add-WindowsCapability` de `OpenSSH.Server~~~~0.0.1.0` y repetir el paso 1 |
-| `Permission denied (publickey)` | Clave no autorizada o ACL incorrecta | Repite el paso 1; el script escribe `administrators_authorized_keys` y su ACL |
-| `REMOTE HOST IDENTIFICATION HAS CHANGED` | El PC cambió de IP o se reinstaló | Borra la entrada en `known_hosts` del cliente y acepta la nueva |
-| La app móvil no ve la máquina | Móvil en otra red o firewall | Misma Wi-Fi o VPN; regla TCP 22 habilitada |
-| La IP cambia | DHCP | Reserva la IP en el router o usa la IP de Meshnet/Tailscale |
-| `hc: command not found` en el otro equipo | Herdr no está instalado allí | Instala Herdr o usa `hc machine add ... --install` desde una copia local de `hc` |
+| `Connection refused` | `sshd` stopped or without configuration | Step 1; `Get-Service sshd` |
+| The service ends with **1067** and there is no `sshd.log` | Configuration/keys rejected or damaged capability | `& C:\Windows\System32\OpenSSH\sshd.exe -d` in an elevated console to see the error; if it persists, `Remove-WindowsCapability` + `Add-WindowsCapability` of `OpenSSH.Server~~~~0.0.1.0` and repeat step 1 |
+| `Permission denied (publickey)` | Key not authorized or incorrect ACL | Repeat step 1; the script writes `administrators_authorized_keys` and its ACL |
+| `REMOTE HOST IDENTIFICATION HAS CHANGED` | The PC changed IP or was reinstalled | Delete the entry in the client's `known_hosts` and accept the new one |
+| The mobile app cannot see the machine | Phone on another network or firewall | Same Wi-Fi or VPN; TCP 22 rule enabled |
+| The IP changes | DHCP | Reserve the IP in the router or use the Meshnet/Tailscale IP |
+| `hc: command not found` on the other machine | Herdr is not installed there | Install Herdr or use `hc machine add ... --install` from a local copy of `hc` |
 
-## Seguridad
+## Security
 
-- Prefiere **solo claves** (`PasswordAuthentication no`) cuando todas las
-  dispositivos tengan clave; el script no cambia esa opción para no dejarte
-  fuera a mitad de la configuración.
-- No abras el puerto 22 en el router. Para acceso fuera de la LAN, VPN de malla.
-- Revisa `C:\ProgramData\ssh\administrators_authorized_keys` y
-  `%USERPROFILE%\.ssh\authorized_keys`; retira claves que ya no uses.
+- Prefer **keys only** (`PasswordAuthentication no`) once every device has a key;
+  the script does not change that option so it does not leave the user out in the
+  middle of the configuration.
+- Do not open port 22 on the router. For access outside the LAN, a mesh VPN.
+- Review `C:\ProgramData\ssh\administrators_authorized_keys` and
+  `%USERPROFILE%\.ssh\authorized_keys`; remove keys you no longer use.
