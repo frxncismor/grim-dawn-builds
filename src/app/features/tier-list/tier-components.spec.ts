@@ -95,6 +95,42 @@ describe('controlled catalog components', () => {
     expect(f.nativeElement.querySelectorAll('img').length).toBe(1); // own status glyph only
     expect(f.nativeElement.querySelector('a[href^="/builds/"]')).toBeNull();
   });
+  it('link-only never renders a ranking, guide text or source image', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    const f = TestBed.createComponent(TierCard);
+    f.componentRef.setInput('combinationName', 'Chamán + Demoledor');
+    f.componentRef.setInput('gameVersion', '1.2.0.5');
+    f.componentRef.setInput('entry', {
+      ...placeholder,
+      entry_kind: 'enlace_externo',
+      display_name: 'Guía enlazada',
+      // Defensive: even if a ranking slipped into the data, the card must not show it.
+      tier: 'S',
+      rights_status: 'link_only',
+      content_status: 'sin_verificar',
+      external_url: 'https://example.org/guide',
+      external_author: 'Autora de prueba',
+      source_slug: 'demo',
+    });
+    f.componentRef.setInput('source', {
+      title: 'Fuente propia de prueba',
+      license_note: 'Solo enlace',
+    });
+    await f.whenStable();
+    const text: string = f.nativeElement.textContent;
+    expect(text).toContain('Guía enlazada');
+    expect(text).toContain('Autora de prueba');
+    expect(text).toContain('Fuente propia de prueba');
+    expect(text).not.toContain('Tier S');
+    expect(text).not.toContain('Unranked');
+    expect(text).not.toContain('Guide coming soon');
+    expect(f.nativeElement.querySelector('a[href^="/builds/"]')).toBeNull();
+    const images: HTMLImageElement[] = [...f.nativeElement.querySelectorAll('img')];
+    expect(images.length).toBe(1);
+    expect(images.every((img) => img.getAttribute('src')?.startsWith('assets/icons/status-'))).toBe(
+      true,
+    );
+  });
   it('unsafe and credential-bearing external URLs remain text', async () => {
     const f = TestBed.createComponent(ExternalAttribution);
     const credentialUrl = new URL('https://example.org');

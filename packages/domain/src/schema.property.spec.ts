@@ -314,7 +314,7 @@ const tierEntryArb = fc.oneof(
 describe('TierEntrySchema properties', () => {
   it('enlace_externo y placeholder respetan sus invariantes de tier', () => {
     const name =
-      'TierEntrySchema enlace_externo ⇒ link_only+URL+autor+fuente; placeholder ⇒ sin build ni URL';
+      'TierEntrySchema enlace_externo ⇒ link_only+URL+autor+fuente+sin_clasificar; placeholder ⇒ sin build ni URL';
     const numRuns = 200;
     const seed = SEED + 8;
     let cases = 0;
@@ -331,6 +331,7 @@ describe('TierEntrySchema properties', () => {
           expect(data.external_url).toBeTruthy();
           expect(data.external_author).toBeTruthy();
           expect(data.source_slug).toBeTruthy();
+          expect(data.tier).toBe('sin_clasificar');
         }
         if (data.entry_kind === 'placeholder') {
           acceptedByKind['placeholder'] = (acceptedByKind['placeholder'] ?? 0) + 1;
