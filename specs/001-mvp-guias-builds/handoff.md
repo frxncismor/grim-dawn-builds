@@ -366,13 +366,13 @@ Recuento mecánico de las líneas de tareas de tasks.md vigente, con todos los
 cuenta como no cerrado; puede haber implementación parcial que requiere
 verificación, no rehacerla a ciegas. Los checkboxes históricos tampoco sustituyen
 la auditoría final de requisitos.
-Total: **169** tareas; **145** marcadas completas (`[x]`); **24** sin cerrar (`[ ]`).
+Total: **169** tareas; **146** marcadas completas (`[x]`); **23** sin cerrar (`[ ]`).
 
-> Inventario regenerado el 2026-11-11 (pasada final de la ola, tras T-165) con los comandos de S02; tasks.md es la fuente única. No editar a mano.
+> Inventario regenerado el 2026-11-11 (última pasada de la corrida, tras cerrar T-165) con los comandos de S02; tasks.md es la fuente única. No editar a mano.
 
 | Categoría   | Cantidad |
 | ----------- | -------: |
-| activa      |        2 |
+| activa      |        1 |
 | externa     |        2 |
 | opcional    |        2 |
 | diferida    |       18 |
@@ -383,7 +383,6 @@ Total: **169** tareas; **145** marcadas completas (`[x]`); **24** sin cerrar (`[
 | ID     | Trabajo pendiente según tasks.md                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | T-043  | Revisión manual: teclado + NVDA + contraste; checklist en specs/001-mvp-guias-builds/checklists/a11y.md                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| T-165 | [LISTA, seguridad] Base mínima/distroless de la imagen API para reducir hallazgos sin corrección |
 
 ### Categoría: externa
 
