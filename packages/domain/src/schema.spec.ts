@@ -210,6 +210,53 @@ function publicBuild() {
   return { ...body, author, sources };
 }
 
+const placeholderEntry = () => ({
+  entry_kind: 'placeholder',
+  combination_slug: 'chaman-demoledor',
+  display_name: 'Chamán + Demoledor',
+  build_slug: null,
+  tier: 'sin_clasificar',
+  content_status: 'placeholder',
+  rights_status: 'own_original',
+  review_state: 'publicado',
+  external_url: null,
+  external_author: null,
+  source_slug: null,
+  evaluated_on: null,
+});
+
+const catalogFixture = () => ({
+  slug: 'principal',
+  locale: 'es',
+  title: 'Catálogo sintético',
+  game_version: '1.2.x',
+  review_state: 'publicado',
+  author_slug: 'autor-real',
+  sources: [],
+  masteries: [
+    {
+      slug: 'chaman',
+      name_es: 'Chamán',
+      name_en: 'Shaman',
+      accent_token: 'storm',
+      fallback_icon: 'sword',
+      asset_slug: null,
+    },
+    {
+      slug: 'demoledor',
+      name_es: 'Demoledor',
+      name_en: 'Demolitionist',
+      accent_token: 'ember',
+      fallback_icon: 'sword',
+      asset_slug: null,
+    },
+  ],
+  combinations: [
+    { slug: 'chaman-demoledor', mastery_a_slug: 'chaman', mastery_b_slug: 'demoledor' },
+  ],
+  entries: [placeholderEntry()],
+});
+
 describe('complete guide and catalog contracts', () => {
   it('shares the editorial alias without loosening required content', () => {
     expect(DomainSchema.BuildDocumentSchema).toBe(BuildSchema);
@@ -793,6 +840,359 @@ describe('AssetSchema', () => {
   });
 });
 
+describe('documented vocabularies and formats', () => {
+  const assetBase = () => ({
+    slug: 'icono-rayo',
+    status: 'pending',
+    file_path: null,
+    origin_url: null,
+    rights_holder: null,
+    license_or_permission: null,
+    proof_ref: null,
+    recorded_on: '2026-11-08',
+    fallback_svg: 'src/assets/icons/rayo.svg',
+  });
+
+  it('accepts every documented damage type and rejects an unknown one', () => {
+    const document = draftBuild();
+    for (const damageType of [
+      'fisico',
+      'fuego',
+      'frio',
+      'rayo',
+      'acido',
+      'vitalidad',
+      'caos',
+      'eter',
+      'elemental',
+      'sangrado',
+      'mascotas',
+    ]) {
+      expect(BuildSchema.safeParse({ ...document, damage_types: [damageType] }).success).toBe(true);
+    }
+    expect(BuildSchema.safeParse({ ...document, damage_types: ['arcano'] }).success).toBe(false);
+  });
+
+  it('accepts every documented playstyle and content tag', () => {
+    const document = draftBuild();
+    for (const playstyle of ['melee', 'rango', 'mascotas', 'hibrido']) {
+      expect(BuildSchema.safeParse({ ...document, playstyle }).success).toBe(true);
+    }
+    expect(BuildSchema.safeParse({ ...document, playstyle: 'magia' }).success).toBe(false);
+    for (const tag of ['campana', 'shattered_realm', 'crucible', 'jefes', 'farmeo']) {
+      expect(BuildSchema.safeParse({ ...document, content_tags: [tag] }).success).toBe(true);
+    }
+    expect(BuildSchema.safeParse({ ...document, content_tags: ['dlc'] }).success).toBe(false);
+  });
+
+  it('accepts every documented note kind and loot action', () => {
+    const document = draftBuild();
+    for (const kind of [
+      'devociones',
+      'nombres',
+      'atributos',
+      'arma',
+      'mas_adelante',
+      'rotacion',
+      'general',
+    ]) {
+      expect(
+        BuildSchema.safeParse({ ...document, notes: [{ ...document.notes[0], kind }] }).success,
+      ).toBe(true);
+    }
+    expect(
+      BuildSchema.safeParse({ ...document, notes: [{ ...document.notes[0], kind: 'otro' }] })
+        .success,
+    ).toBe(false);
+    const column = document.loot_filter_columns[0]!;
+    for (const action of ['marcar', 'desmarcar', 'aviso']) {
+      const rules = [{ ...column.rules[0], action }];
+      expect(
+        BuildSchema.safeParse({
+          ...document,
+          loot_filter_columns: [{ ...column, rules }],
+        }).success,
+      ).toBe(true);
+    }
+    expect(
+      BuildSchema.safeParse({
+        ...document,
+        loot_filter_columns: [{ ...column, rules: [{ ...column.rules[0], action: 'borrar' }] }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('accepts every documented source kind and skill node status', () => {
+    const source = draftBuild().sources[0];
+    for (const kind of ['original', 'comunidad', 'oficial', 'video', 'externa_enlace']) {
+      expect(DomainSchema.SourceSchema.safeParse({ ...source, kind }).success).toBe(true);
+    }
+    expect(DomainSchema.SourceSchema.safeParse({ ...source, kind: 'blog' }).success).toBe(false);
+    const document = draftBuild();
+    const withStatus = (status: string) => [
+      { ...document.skill_nodes[0], status },
+      document.skill_nodes[1],
+    ];
+    for (const status of ['recomendada', 'meta', 'omitir']) {
+      expect(BuildSchema.safeParse({ ...document, skill_nodes: withStatus(status) }).success).toBe(
+        true,
+      );
+    }
+    expect(
+      BuildSchema.safeParse({ ...document, skill_nodes: withStatus('opcional') }).success,
+    ).toBe(false);
+  });
+
+  it('accepts every documented devotion enum value and rejects unknown ones', () => {
+    const document = draftBuild();
+    const step = document.devotion_steps[0];
+    for (const accent of ['storm', 'ember']) {
+      expect(
+        BuildSchema.safeParse({ ...document, devotion_steps: [{ ...step, accent }] }).success,
+      ).toBe(true);
+    }
+    for (const kind of ['ruta', 'verificacion', 'limpieza']) {
+      expect(
+        BuildSchema.safeParse({ ...document, devotion_steps: [{ ...step, kind }] }).success,
+      ).toBe(true);
+    }
+    for (const verification of ['verificado', 'sin_verificar']) {
+      expect(
+        BuildSchema.safeParse({ ...document, devotion_steps: [{ ...step, verification }] }).success,
+      ).toBe(true);
+    }
+    expect(
+      BuildSchema.safeParse({
+        ...document,
+        devotion_steps: [{ ...step, accent: 'frost' }],
+      }).success,
+    ).toBe(false);
+    expect(
+      BuildSchema.safeParse({
+        ...document,
+        devotion_steps: [{ ...step, kind: 'extra' }],
+      }).success,
+    ).toBe(false);
+    expect(
+      BuildSchema.safeParse({
+        ...document,
+        devotion_steps: [{ ...step, verification: 'dudoso' }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('accepts the documented asset statuses and rejects an unknown one', () => {
+    for (const status of ['pending', 'rejected']) {
+      expect(AssetSchema.safeParse({ ...assetBase(), status }).success).toBe(true);
+    }
+    expect(AssetSchema.safeParse({ ...assetBase(), status: 'draft' }).success).toBe(false);
+  });
+
+  it('enforces the documented slug grammar', () => {
+    for (const value of ['a', 'abc', 'a1', '0', 'a-b', 'chaman-demoledor', 'a1-b2-c3']) {
+      expect(AssetSchema.safeParse({ ...assetBase(), slug: value }).success).toBe(true);
+    }
+    for (const value of ['', 'A', 'a b', 'a_b', '-a', 'a-', 'a--b', 'á', 'a.b', ' a']) {
+      expect(AssetSchema.safeParse({ ...assetBase(), slug: value }).success).toBe(false);
+    }
+  });
+
+  it('accepts only http and https web links', () => {
+    const source = draftBuild().sources[0];
+    for (const url of ['http://example.org/a', 'https://example.org/a?b=1#c']) {
+      expect(DomainSchema.SourceSchema.safeParse({ ...source, url }).success).toBe(true);
+    }
+    for (const url of [
+      'ftp://example.org/a',
+      'javascript:alert(1)',
+      'HTTPS://example.org/a',
+      'file:///tmp/a',
+      'mailto:autor@example.org',
+      'example.org/a',
+    ]) {
+      expect(DomainSchema.SourceSchema.safeParse({ ...source, url }).success).toBe(false);
+    }
+    expect(
+      DomainSchema.AuthorSchema.safeParse({
+        ...draftBuild().author,
+        url: 'ftp://example.org/autor',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('keeps optional mastery references truly optional', () => {
+    const document = draftBuild();
+    expect(BuildSchema.safeParse({ ...document, title_b_mastery_slug: null }).success).toBe(true);
+    expect(
+      BuildSchema.safeParse({
+        ...document,
+        purchase_steps: [{ ...document.purchase_steps[0], mastery_slug: null }],
+      }).success,
+    ).toBe(true);
+    expect(
+      BuildSchema.safeParse({
+        ...document,
+        devotion_steps: [{ ...document.devotion_steps[0], constellation_slug: null }],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('rejects a source list that does not cover the declared source slugs', () => {
+    const document = draftBuild();
+    const extraSource = { ...document.sources[0], slug: 'guia-secundaria' };
+    expect(
+      BuildSchema.safeParse({
+        ...document,
+        sources: [...document.sources, extraSource],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('requires both rights confirmation fields for publicado', () => {
+    expect(
+      BuildSchema.safeParse({ ...publishableBuild(), rights_confirmed_on: null }).success,
+    ).toBe(false);
+    expect(
+      BuildSchema.safeParse({ ...publishableBuild(), rights_confirmed_by: null }).success,
+    ).toBe(false);
+  });
+
+  it('accepts every documented review state, tier and permitted published rights', () => {
+    for (const reviewState of ['borrador', 'en_revision']) {
+      expect(BuildSchema.safeParse({ ...draftBuild(), review_state: reviewState }).success).toBe(
+        true,
+      );
+    }
+    for (const reviewState of ['borrador', 'en_revision', 'publicado']) {
+      expect(
+        DomainSchema.TierListSchema.safeParse({ ...catalogFixture(), review_state: reviewState })
+          .success,
+      ).toBe(true);
+    }
+    for (const rightsStatus of ['own_original', 'licensed', 'permission_granted']) {
+      expect(
+        BuildSchema.safeParse({ ...publishableBuild(), rights_status: rightsStatus }).success,
+      ).toBe(true);
+      expect(
+        DomainSchema.PublicBuildSchema.safeParse({
+          ...publicBuild(),
+          rights_status: rightsStatus,
+        }).success,
+      ).toBe(true);
+    }
+    for (const tier of ['S', 'A', 'B', 'C', 'D', 'sin_clasificar']) {
+      const sourceSlug = tier === 'sin_clasificar' ? null : 'fuente-propia';
+      const evaluatedOn = tier === 'sin_clasificar' ? null : '2026-11-11';
+      expect(
+        TierEntrySchema.safeParse({
+          ...placeholderEntry(),
+          entry_kind: 'build_propia',
+          build_slug: 'chaman-demoledor-golpe-primigenio',
+          tier,
+          source_slug: sourceSlug,
+          evaluated_on: evaluatedOn,
+        }).success,
+      ).toBe(true);
+    }
+  });
+
+  it('rejects a placeholder entry whose content status is not placeholder', () => {
+    const result = TierEntrySchema.safeParse({
+      ...placeholderEntry(),
+      content_status: 'verificado',
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map((issue) => issue.message)).toContain(
+      'placeholder requiere content_status=placeholder',
+    );
+  });
+
+  it('rejects a build_propia entry without a build slug', () => {
+    const result = TierEntrySchema.safeParse({
+      ...placeholderEntry(),
+      entry_kind: 'build_propia',
+      build_slug: null,
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map((issue) => issue.message)).toContain(
+      'build_propia requiere build_slug',
+    );
+  });
+
+  it('enforces cross references in the public build and tier list DTOs', () => {
+    const dto = publicBuild() as unknown as Record<string, unknown> & {
+      skill_nodes: (Record<string, unknown> | undefined)[];
+      priorities: Record<string, unknown>[];
+    };
+    expect(
+      DomainSchema.PublicBuildSchema.safeParse({
+        ...dto,
+        skill_nodes: [dto.skill_nodes[0], dto.skill_nodes[0]],
+      }).success,
+    ).toBe(false);
+    expect(
+      DomainSchema.PublicBuildSchema.safeParse({
+        ...dto,
+        priorities: dto.priorities.map((priority) => ({
+          ...priority,
+          skill_node_slugs: ['nodo-inexistente'],
+        })),
+      }).success,
+    ).toBe(false);
+    const list = catalogFixture();
+    expect(
+      DomainSchema.PublicTierListSchema.safeParse({
+        ...list,
+        entries: [{ ...list.entries[0], combination_slug: 'combinacion-inexistente' }],
+      }).success,
+    ).toBe(false);
+    expect(
+      DomainSchema.PublicTierListSchema.safeParse({
+        ...list,
+        entries: [{ ...list.entries[0], source_slug: 'fuente-inexistente' }],
+        sources: draftBuild().sources,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('requires either a build slug or a display name in every tier entry', () => {
+    const result = TierEntrySchema.safeParse({
+      entry_kind: 'build_propia',
+      combination_slug: 'rayo-chaman',
+      display_name: null,
+      build_slug: null,
+      tier: 'sin_clasificar',
+      content_status: 'sin_verificar',
+      rights_status: 'own_original',
+      review_state: 'publicado',
+      external_url: null,
+      external_author: null,
+      source_slug: null,
+      evaluated_on: null,
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map((issue) => issue.message)).toContain(
+      'requiere build_slug o display_name',
+    );
+  });
+});
+
+describe('findParentCycle edge cases', () => {
+  it('finds a cycle that hangs from an acyclic root', () => {
+    const cycle = findParentCycle([
+      { slug: 'root', parent_slug: null },
+      { slug: 'x', parent_slug: 'y' },
+      { slug: 'y', parent_slug: 'x' },
+    ]);
+    expect(cycle?.sort()).toEqual(['x', 'y']);
+  });
+
+  it('treats a parent outside the forest and an empty forest as acyclic', () => {
+    expect(findParentCycle([{ slug: 'a', parent_slug: 'fantasma' }])).toBeNull();
+    expect(findParentCycle([])).toBeNull();
+  });
+});
+
 describe('T-130 faithful source values', () => {
   const unknownDetails = () => {
     const original = draftBuild();
@@ -892,6 +1292,519 @@ describe('T-130 faithful source values', () => {
             bindings: [{ power_en: 'Reckless Tempest', skill_node_slug: 'unknown-node' }],
           },
         ],
+      }).success,
+    ).toBe(false);
+  });
+});
+
+interface DiagnosticResult {
+  success: boolean;
+  error?: {
+    issues: readonly { code?: string; path: readonly PropertyKey[]; message: string }[];
+  };
+}
+
+const diagnostics = (result: DiagnosticResult) =>
+  result.success
+    ? []
+    : (result.error?.issues ?? []).map((issue) => ({
+        path: issue.path.map(String),
+        message: issue.message,
+      }));
+
+const expectDiagnostic = (result: DiagnosticResult, path: (string | number)[], message: string) =>
+  expect(diagnostics(result)).toContainEqual({ path: path.map(String), message });
+
+describe('rejection diagnostics', () => {
+  const linkEntry = (overrides: Record<string, unknown> = {}) => ({
+    ...placeholderEntry(),
+    entry_kind: 'enlace_externo',
+    content_status: 'sin_verificar',
+    rights_status: 'link_only',
+    external_url: 'https://example.org/guia',
+    external_author: 'Autor externo',
+    source_slug: 'fuente-externa',
+    evaluated_on: '2026-11-11',
+    ...overrides,
+  });
+
+  const rankedEntry = () => ({
+    ...placeholderEntry(),
+    entry_kind: 'build_propia',
+    build_slug: 'guia-sintetica',
+    tier: 'A',
+    content_status: 'sin_verificar',
+    source_slug: 'fuente-propia',
+    evaluated_on: '2026-11-11',
+  });
+
+  it('reports duplicate slugs for every guide entity list', () => {
+    for (const field of ['masteries', 'skill_nodes', 'constellations', 'sources'] as const) {
+      const document = draftBuild();
+      expectDiagnostic(
+        BuildSchema.safeParse({
+          ...document,
+          [field]: [document[field][0], document[field][0]],
+        }),
+        [field],
+        'slugs duplicados',
+      );
+    }
+  });
+
+  it('reports unknown mastery references with their field path', () => {
+    const document = draftBuild();
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...document, title_a_mastery_slug: 'desconocida' }),
+      ['title_a_mastery_slug'],
+      'maestría desconocida',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...document, title_b_mastery_slug: 'desconocida' }),
+      ['title_b_mastery_slug'],
+      'maestría desconocida',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({
+        ...document,
+        skill_nodes: document.skill_nodes.map((node, index) =>
+          index === 0 ? { ...node, mastery_slug: 'desconocida' } : node,
+        ),
+      }),
+      ['skill_nodes', 0, 'mastery_slug'],
+      'maestría desconocida',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({
+        ...document,
+        purchase_steps: [{ ...document.purchase_steps[0], mastery_slug: 'desconocida' }],
+      }),
+      ['purchase_steps', 0, 'mastery_slug'],
+      'maestría desconocida',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({
+        ...document,
+        devotion_steps: [{ ...document.devotion_steps[0], constellation_slug: 'desconocida' }],
+      }),
+      ['devotion_steps', 0, 'constellation_slug'],
+      'constelación desconocida',
+    );
+  });
+
+  it('reports the first mastery cycle with its members', () => {
+    const document = draftBuild();
+    expectDiagnostic(
+      BuildSchema.safeParse({
+        ...document,
+        skill_nodes: [
+          { ...document.skill_nodes[0], slug: 'a', parent_slug: 'b' },
+          { ...document.skill_nodes[1], slug: 'b', parent_slug: 'a' },
+        ],
+      }),
+      ['skill_nodes'],
+      'ciclo de padres en el árbol: a, b',
+    );
+  });
+
+  it('reports every unknown node reference with its path', () => {
+    const document = draftBuild();
+    expectDiagnostic(
+      BuildSchema.safeParse({
+        ...document,
+        priorities: document.priorities.map((priority) => ({
+          ...priority,
+          skill_node_slugs: ['fantasma'],
+        })),
+      }),
+      ['priorities', 0, 'skill_node_slugs'],
+      'nodo de guía desconocido',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({
+        ...document,
+        skill_nodes: document.skill_nodes.map((node, index) =>
+          index === 0 ? { ...node, parent_slug: 'fantasma' } : node,
+        ),
+      }),
+      ['skill_nodes', 0, 'parent_slug'],
+      'nodo de guía desconocido',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({
+        ...document,
+        purchase_steps: document.purchase_steps.map((step) => ({
+          ...step,
+          highlights: [{ skill_node_slug: 'fantasma', points: 1 }],
+        })),
+      }),
+      ['purchase_steps', 0, 'highlights'],
+      'nodo de guía desconocido',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({
+        ...document,
+        devotion_steps: document.devotion_steps.map((step) => ({
+          ...step,
+          bindings: [{ power_en: 'Storm', skill_node_slug: 'fantasma' }],
+        })),
+      }),
+      ['devotion_steps', 0, 'bindings'],
+      'nodo de guía desconocido',
+    );
+  });
+
+  it('reports incoherent source references for every broken shape', () => {
+    const source = draftBuild().sources[0]!;
+    const other = { ...source, slug: 'guia-secundaria' };
+    const document = draftBuild();
+    const changes = [
+      { source_slugs: ['guia-original', 'guia-original'], sources: [source] },
+      { source_slugs: ['guia-original'], sources: [source, other] },
+      { source_slugs: ['guia-original', 'guia-fantasma'], sources: [source, other] },
+      { source_slugs: ['guia-fantasma'], sources: [source] },
+    ];
+    for (const change of changes) {
+      expectDiagnostic(
+        BuildSchema.safeParse({ ...document, ...change }),
+        ['source_slugs'],
+        'referencias de fuentes incoherentes',
+      );
+    }
+  });
+
+  it('reports each publication requirement with its own path', () => {
+    const published = publishableBuild();
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...published, rights_status: 'pending' }),
+      ['rights_status'],
+      'publicado no admite rights_status=pending',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...published, rights_confirmed_by: null }),
+      ['rights_confirmed_by'],
+      'publicado requiere confirmación de derechos',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...published, rights_confirmed_on: null }),
+      ['rights_confirmed_by'],
+      'publicado requiere confirmación de derechos',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...published, reviewed_by: null }),
+      ['reviewed_by'],
+      'publicado requiere revisor',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...published, published_at: null }),
+      ['published_at'],
+      'publicado requiere fecha de publicación',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...published, source_slugs: [], sources: [] }),
+      ['source_slugs'],
+      'publicado requiere al menos una fuente',
+    );
+    const placeholder = {
+      ...published,
+      author_slug: 'por-confirmar',
+      author: { ...published.author, slug: 'por-confirmar' },
+    };
+    expectDiagnostic(
+      BuildSchema.safeParse(placeholder),
+      ['author_slug'],
+      'publicado requiere un autor confirmado',
+    );
+  });
+
+  it('reports each public DTO requirement with its own path', () => {
+    const dto = publicBuild();
+    expectDiagnostic(
+      DomainSchema.PublicBuildSchema.safeParse({ ...dto, review_state: 'borrador' }),
+      ['review_state'],
+      'DTO público requiere publicado',
+    );
+    expectDiagnostic(
+      DomainSchema.PublicBuildSchema.safeParse({ ...dto, rights_status: 'pending' }),
+      ['rights_status'],
+      'una guía pública requiere derechos sobre su contenido',
+    );
+    expectDiagnostic(
+      DomainSchema.PublicBuildSchema.safeParse({ ...dto, published_at: null }),
+      ['published_at'],
+      'DTO público requiere fecha de publicación',
+    );
+    expectDiagnostic(
+      DomainSchema.PublicBuildSchema.safeParse({
+        ...dto,
+        author_slug: 'por-confirmar',
+        author: { ...dto.author, slug: 'por-confirmar' },
+      }),
+      ['author_slug'],
+      'autor no confirmado',
+    );
+    expectDiagnostic(
+      DomainSchema.PublicBuildSchema.safeParse({ ...dto, source_slugs: [], sources: [] }),
+      ['source_slugs'],
+      'fuente requerida',
+    );
+  });
+
+  it('reports each tier entry rule with its own path', () => {
+    expectDiagnostic(
+      TierEntrySchema.safeParse({ ...placeholderEntry(), tier: 'S' }),
+      ['tier'],
+      'placeholder sin tier',
+    );
+    expectDiagnostic(
+      TierEntrySchema.safeParse({ ...placeholderEntry(), content_status: 'verificado' }),
+      ['content_status'],
+      'placeholder requiere content_status=placeholder',
+    );
+    expectDiagnostic(
+      TierEntrySchema.safeParse({ ...placeholderEntry(), build_slug: 'guia-sintetica' }),
+      ['build_slug'],
+      'placeholder no referencia build',
+    );
+    expectDiagnostic(
+      TierEntrySchema.safeParse({
+        ...placeholderEntry(),
+        external_url: 'https://example.org/guia',
+      }),
+      ['external_url'],
+      'placeholder no lleva enlace',
+    );
+    expectDiagnostic(
+      TierEntrySchema.safeParse({ ...placeholderEntry(), display_name: null }),
+      ['display_name'],
+      'requiere build_slug o display_name',
+    );
+    for (const change of [{ source_slug: null }, { evaluated_on: null }]) {
+      expectDiagnostic(
+        TierEntrySchema.safeParse({ ...rankedEntry(), ...change }),
+        ['tier'],
+        'un tier real requiere source_slug y evaluated_on',
+      );
+    }
+    expectDiagnostic(
+      TierEntrySchema.safeParse({ ...linkEntry({ external_url: null }) }),
+      ['external_url'],
+      'enlace_externo requiere URL',
+    );
+    expectDiagnostic(
+      TierEntrySchema.safeParse({ ...linkEntry({ external_author: null }) }),
+      ['external_author'],
+      'requiere autor externo',
+    );
+    expectDiagnostic(
+      TierEntrySchema.safeParse({ ...linkEntry({ source_slug: null }) }),
+      ['source_slug'],
+      'enlace_externo requiere fuente',
+    );
+    expectDiagnostic(
+      TierEntrySchema.safeParse({ ...linkEntry({ rights_status: 'own_original' }) }),
+      ['rights_status'],
+      'enlace_externo requiere rights_status=link_only',
+    );
+    expectDiagnostic(
+      TierEntrySchema.safeParse({ ...linkEntry({ tier: 'A' }) }),
+      ['tier'],
+      'una tarjeta de enlace no lleva ranking derivado de la fuente',
+    );
+  });
+
+  it('reports a verified devotion step with an unnamed external mention', () => {
+    const document = draftBuild();
+    expectDiagnostic(
+      BuildSchema.safeParse({
+        ...document,
+        devotion_steps: [
+          {
+            ...document.devotion_steps[0],
+            verification: 'verificado',
+            bindings: [
+              { power_en: 'Reckless Tempest', skill_node_slug: 'golpe-primigenio' },
+              { power_en: 'Elemental Storm', skill_node_slug: null, skill_name_es: 'Tótem' },
+            ],
+          },
+        ],
+      }),
+      ['devotion_steps', 0, 'bindings'],
+      'una mención fuera del árbol requiere paso sin_verificar',
+    );
+  });
+
+  it('reports catalog integrity violations with their paths', () => {
+    const list = catalogFixture();
+    const source = draftBuild().sources[0]!;
+    expectDiagnostic(
+      DomainSchema.TierListSchema.safeParse({
+        ...list,
+        masteries: [list.masteries[0], list.masteries[0]],
+      }),
+      ['masteries'],
+      'maestrías duplicadas',
+    );
+    expectDiagnostic(
+      DomainSchema.TierListSchema.safeParse({
+        ...list,
+        combinations: [list.combinations[0], list.combinations[0]],
+      }),
+      ['combinations'],
+      'combinaciones duplicadas',
+    );
+    expectDiagnostic(
+      DomainSchema.TierListSchema.safeParse({ ...list, sources: [source, source] }),
+      ['sources'],
+      'fuentes duplicadas',
+    );
+    expectDiagnostic(
+      DomainSchema.TierListSchema.safeParse({
+        ...list,
+        combinations: [{ ...list.combinations[0], mastery_a_slug: 'fantasma' }],
+      }),
+      ['combinations', 0],
+      'maestría desconocida en combinación',
+    );
+    expectDiagnostic(
+      DomainSchema.TierListSchema.safeParse({
+        ...list,
+        entries: [{ ...list.entries[0], combination_slug: 'fantasma' }],
+      }),
+      ['entries', 0, 'combination_slug'],
+      'combinación desconocida',
+    );
+    expectDiagnostic(
+      DomainSchema.TierListSchema.safeParse({
+        ...list,
+        sources: [source],
+        entries: [{ ...list.entries[0], source_slug: 'fantasma' }],
+      }),
+      ['entries', 0, 'source_slug'],
+      'fuente desconocida',
+    );
+  });
+
+  it('reports public tier list requirements with their paths', () => {
+    const list = catalogFixture();
+    expectDiagnostic(
+      DomainSchema.PublicTierListSchema.safeParse({ ...list, review_state: 'borrador' }),
+      ['review_state'],
+      'lista pública requiere publicado',
+    );
+    expectDiagnostic(
+      DomainSchema.PublicTierListSchema.safeParse({
+        ...list,
+        entries: [{ ...list.entries[0], review_state: 'borrador' }],
+      }),
+      ['entries', 0],
+      'entrada no publicable',
+    );
+  });
+
+  it('reports the asset manifest rules with their paths', () => {
+    const pending = {
+      slug: 'icono-rayo',
+      status: 'pending',
+      file_path: 'public/assets/rayo.png',
+      origin_url: null,
+      rights_holder: null,
+      license_or_permission: null,
+      proof_ref: null,
+      recorded_on: '2026-11-08',
+      fallback_svg: 'src/assets/icons/rayo.svg',
+    };
+    expectDiagnostic(
+      AssetSchema.safeParse(pending),
+      ['file_path'],
+      'archivo requiere activo aprobado',
+    );
+    const approved = {
+      ...pending,
+      status: 'approved',
+      origin_url: 'https://example.org/rayo.png',
+      rights_holder: 'Titular',
+      license_or_permission: 'Permiso escrito',
+      proof_ref: 'proofs/rayo.pdf',
+    };
+    for (const field of [
+      'file_path',
+      'origin_url',
+      'rights_holder',
+      'license_or_permission',
+      'proof_ref',
+    ]) {
+      expectDiagnostic(
+        AssetSchema.safeParse({ ...approved, [field]: null }),
+        [field],
+        `asset aprobado requiere ${field}`,
+      );
+    }
+    expectDiagnostic(
+      AssetSchema.safeParse({ ...pending, slug: 'MAL', file_path: null }),
+      ['slug'],
+      'slug en minúsculas ASCII',
+    );
+  });
+
+  it('reports a combination that repeats the same mastery', () => {
+    expectDiagnostic(
+      DomainSchema.MasteryCombinationSchema.safeParse({
+        slug: 'combo',
+        mastery_a_slug: 'chaman',
+        mastery_b_slug: 'chaman',
+      }),
+      ['mastery_b_slug'],
+      'una combinación requiere maestrías distintas',
+    );
+  });
+
+  it('marks the domain diagnostics as custom issues', () => {
+    const result = BuildSchema.safeParse({ ...draftBuild(), title_b_mastery_slug: 'chaman' });
+    expect(result.success).toBe(false);
+    const issue = result.success
+      ? undefined
+      : result.error.issues.find((entry) => entry.path.join('.') === 'title_b_mastery_slug');
+    expect(issue?.code).toBe('custom');
+  });
+
+  it('requires node and edge geometry in a constellation layout', () => {
+    const document = draftBuild();
+    const constellation = document.constellations[0]!;
+    expect(
+      BuildSchema.safeParse({
+        ...document,
+        constellations: [{ ...constellation, layout: { nodes: [{}], edges: [] } }],
+      }).success,
+    ).toBe(false);
+    expect(
+      BuildSchema.safeParse({
+        ...document,
+        constellations: [{ ...constellation, layout: { nodes: [], edges: [{}] } }],
+      }).success,
+    ).toBe(false);
+    expect(
+      BuildSchema.safeParse({
+        ...document,
+        constellations: [
+          {
+            ...constellation,
+            layout: {
+              nodes: [{ id: 'nodo-a', x: 1, y: 2 }],
+              edges: [{ from: 'nodo-a', to: 'nodo-a' }],
+            },
+          },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('accepts a web link that carries an embedded http scheme', () => {
+    const source = draftBuild().sources[0]!;
+    expect(
+      DomainSchema.SourceSchema.safeParse({
+        ...source,
+        url: 'ftp://example.org/?next=https://example.org/a',
       }).success,
     ).toBe(false);
   });
