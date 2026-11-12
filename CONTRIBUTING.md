@@ -347,6 +347,38 @@ y completa cada punto, o márcalo como no aplicable con una justificación.
 - **DAST**: el escaneo dinámico (DAST) está pendiente de implementar en la tarea T-077.
   Hoy no existe ningún job de DAST en el CI; no lo des por cubierto.
 
+## Pull request labels
+
+Todo PR lleva labels: son la trazabilidad mínima para encontrarlo por tipo, área y
+spec. **Sin labels no se mergea**, aunque el CI esté en verde.
+
+- Al menos **un label de tipo**: `documentation`, `enhancement`, `bug` o
+  `accessibility`.
+- Al menos **un label de área**: `ci`, `dx` o `performance`.
+- Un label de **spec o procedencia** cuando aplique: `spec001` u `orquestacion`.
+
+| Label | Cuándo usarlo |
+| --- | --- |
+| `documentation` | Documentación: `README`, `docs/`, este `CONTRIBUTING.md` o artefactos SDD. |
+| `enhancement` | Funcionalidad nueva o ampliación de producto. |
+| `bug` | Corrige un defecto reproducible. |
+| `accessibility` | Afecta o mejora accesibilidad (WCAG, axe, teclado, foco). |
+| `ci` | Flujos de `.github/workflows/` y puertas de verificación. |
+| `dx` | Entorno local, scripts de desarrollo, herramientas y skills. |
+| `performance` | Presupuestos de bundle, Lighthouse, LCP/CLS/TBT. |
+| `spec001` | El cambio pertenece al MVP de la spec 001. |
+| `orquestacion` | Orquestación jerárquica, espacios de Herdr y agentes. |
+
+Se aplican al crear el PR o después, con `gh`:
+
+```bash
+gh pr create --label "documentation,spec001"
+gh pr edit <n> --add-label "documentation,ci,spec001"
+```
+
+Si un PR toca varias áreas, se ponen varios labels de área; el label de spec solo
+cuando el PR pertenezca a esa spec.
+
 ## Documentos SDD relacionados
 
 - [Constitución](.specify/memory/constitution.md): principios, restricciones y política de ramas.
