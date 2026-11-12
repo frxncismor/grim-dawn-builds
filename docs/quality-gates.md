@@ -1,5 +1,7 @@
 # Quality gates
 
+**English** · [Español](quality-gates.es.md)
+
 This matrix is derived from `scripts/verify-local.mjs` (the order of the local
 steps) and `.github/workflows/ci.yml` (the pull-request job `verify`); it does
 not replace either file, which remain the source of truth.
@@ -59,9 +61,10 @@ twice because both runners invoke the same script through different commands.
 
 - **Rule.** Public docs are English primary, with a Spanish counterpart named
   `*.es.md`.
-- **Current coverage.** Only `README.md` has a counterpart (`README.es.md`); the
-  pre-existing public docs under `docs/content/` are still Spanish and have no
-  English version, and `docs/quality-gates.md` itself ships English only.
+- **Current coverage.** `README.md` and this `docs/quality-gates.md` ship both
+  languages. Still Spanish-only, pending translation in T-158: `CONTRIBUTING.md`
+  and `docs/orchestration/*.md` (`herdr`, `hierarchy`, `modelos`, `remote-access`);
+  the docs under `docs/content/` are also Spanish-only.
 - **Internal SDD artifacts** (`specs/**`, `handoff.md`, `plan.md`, `tasks.md`):
   Spanish only, as the constitution allows; no parity required.
 - **What the automation checks.** `pnpm check:locale-parity` compares the Angular
