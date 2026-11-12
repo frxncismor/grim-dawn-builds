@@ -24,5 +24,5 @@ All budgets pass, and the before/after table is in the report.
 
 ## Never
 
-- Raise a budget or loosen an assertion to make a check pass. That needs an SDD task approved by Paco.
+- Raise a budget or loosen an assertion to make a check pass. That needs an SDD task approved by the user.
 - Measure only one locale when the change affects both: Lighthouse covers `/` and `/es` routes.
