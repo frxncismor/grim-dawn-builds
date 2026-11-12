@@ -41,6 +41,12 @@ const PUBLIC_RUNTIME_EXPORTS = [
   'isPermissionGranted',
   'isPublishableRightsStatus',
   'requiredEvidenceType',
+  'FR28_METADATA_FIELDS',
+  'LINK_ONLY_METADATA_FIELDS',
+  'PUBLICATION_GATE_CHECKLIST_POINTS',
+  'PUBLICATION_GATE_CODES',
+  'evaluatePublicationGate',
+  'toLinkOnlyMetadata',
 ];
 
 describe('@gd/domain public API', () => {
