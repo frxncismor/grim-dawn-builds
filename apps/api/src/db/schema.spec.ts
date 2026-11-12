@@ -47,10 +47,19 @@ const EXPECTED_TABLES = [
   'tier_lists',
   'tier_entries',
   'content_origin',
+  'source_rights_evidence',
+  'build_adaptations',
+  'permission_requests',
+  'takedown_events',
+  'source_change_events',
 ];
 
 const JOIN_TABLES = ['build_sources', 'build_masteries', 'build_constellations'];
-const ENTITY_TABLES = EXPECTED_TABLES.filter((n) => !JOIN_TABLES.includes(n));
+// build_adaptations is a 1:1 extension keyed by build_id, not an entity with its own uuid id.
+const KEYED_TABLES = ['build_adaptations'];
+const ENTITY_TABLES = EXPECTED_TABLES.filter(
+  (n) => !JOIN_TABLES.includes(n) && !KEYED_TABLES.includes(n),
+);
 
 describe('database schema: tables', () => {
   it('maps every core table of data-model.md', () => {
@@ -128,8 +137,42 @@ describe('database schema: enums', () => {
     ]);
     expect(enumValues('content_status')).toEqual(['verificado', 'sin_verificar', 'placeholder']);
     expect(enumValues('asset_status')).toEqual(['pending', 'approved', 'rejected']);
-    expect(enumValues('entry_kind')).toEqual(['placeholder', 'enlace_externo', 'build_propia']);
+    expect(enumValues('entry_kind')).toEqual([
+      'placeholder',
+      'enlace_externo',
+      'build_propia',
+      'build_adaptada',
+    ]);
     expect(enumValues('origin')).toEqual(['fixture', 'bootstrap', 'editor']);
+    expect(enumValues('evidence_type')).toEqual(['licencia_explicita', 'permiso_escrito']);
+    expect(enumValues('evidence_status')).toEqual(['vigente', 'caducada', 'revocada']);
+    expect(enumValues('adaptation_state')).toEqual([
+      'borrador',
+      'en_revision',
+      'publicado',
+      'revision_pendiente',
+      'retirada',
+    ]);
+    expect(enumValues('permission_request_status')).toEqual([
+      'enviada',
+      'concedida',
+      'denegada',
+      'limitada',
+      'sin_respuesta',
+    ]);
+    expect(enumValues('takedown_action')).toEqual(['link_only', 'retirada_total', 'rechazada']);
+    expect(enumValues('source_change_type')).toEqual([
+      'edicion',
+      'licencia',
+      'eliminacion',
+      'bloqueo',
+      'sin_cambios',
+    ]);
+    expect(enumValues('source_change_outcome')).toEqual([
+      'sin_accion',
+      'revision_abierta',
+      'retirada',
+    ]);
   });
 
   it('shares the enums that the domain contract already defines (no second model)', () => {
@@ -293,6 +336,96 @@ describe('database schema: references and uniqueness', () => {
       u.columns.map((c) => c.name).join(),
     );
     expect(pairs).toContain('mastery_id,slug');
+  });
+});
+
+describe('database schema: third-party adaptations (data-model rev. 6)', () => {
+  const fkTargets = (name: string) =>
+    configOf(name).foreignKeys.map((fk) => {
+      const ref = fk.reference();
+      return { column: ref.columns[0]?.name, target: getTableName(ref.foreignTable) };
+    });
+
+  it('keys build_adaptations by build_id and requires every FR-28 provenance field', () => {
+    expect(column('build_adaptations', 'build_id').primary).toBe(true);
+    for (const col of [
+      'source_id',
+      'evidence_id',
+      'source_url',
+      'original_title',
+      'original_author',
+      'original_site',
+      'retrieved_on',
+      'adaptation_editor',
+      'transformation_scope',
+      'transformation_notes',
+      'adaptation_version',
+      'last_reviewed_on',
+      'reviewed_by',
+      'change_log',
+      'attribution_text',
+      'adaptation_state',
+    ]) {
+      expect(column('build_adaptations', col).notNull, col).toBe(true);
+    }
+    expect(column('build_adaptations', 'source_revision_ref').notNull).toBe(false);
+    const scope = column('build_adaptations', 'transformation_scope');
+    expect(is(scope, PgArray)).toBe(true);
+    if (!is(scope, PgArray)) throw new Error('transformation_scope is not an array column');
+    expect(scope.baseColumn.columnType).toBe('PgText');
+  });
+
+  it('points each adaptation at its build, source and private evidence row', () => {
+    expect(fkTargets('build_adaptations')).toEqual(
+      expect.arrayContaining([
+        { column: 'build_id', target: 'builds' },
+        { column: 'source_id', target: 'sources' },
+        { column: 'evidence_id', target: 'source_rights_evidence' },
+      ]),
+    );
+    expect(fkTargets('source_rights_evidence')).toEqual(
+      expect.arrayContaining([{ column: 'source_id', target: 'sources' }]),
+    );
+  });
+
+  it('stores evidence coverage, validity and the independent verifier', () => {
+    for (const col of [
+      'evidence_type',
+      'evidence_ref',
+      'covers_adaptation',
+      'covers_translation',
+      'covers_images',
+      'scope_notes',
+      'granted_by',
+      'recorded_on',
+      'status',
+      'verified_by',
+      'verified_on',
+    ]) {
+      expect(column('source_rights_evidence', col).notNull, col).toBe(true);
+    }
+    expect(column('source_rights_evidence', 'covers_images').default).toBe(false);
+    expect(column('source_rights_evidence', 'license_name').notNull).toBe(false);
+    expect(column('source_rights_evidence', 'license_url').notNull).toBe(false);
+    expect(column('source_rights_evidence', 'valid_until').notNull).toBe(false);
+  });
+
+  it('keeps unresolved responses, execution and review fields nullable', () => {
+    for (const col of ['response_ref', 'responded_on']) {
+      expect(column('permission_requests', col).notNull, col).toBe(false);
+    }
+    for (const col of ['build_id', 'tier_entry_id', 'executed_on', 'executed_by']) {
+      expect(column('takedown_events', col).notNull, col).toBe(false);
+    }
+    for (const col of ['build_id', 'fingerprint', 'reviewed_by']) {
+      expect(column('source_change_events', col).notNull, col).toBe(false);
+    }
+    expect(fkTargets('takedown_events')).toEqual(
+      expect.arrayContaining([
+        { column: 'build_id', target: 'builds' },
+        { column: 'tier_entry_id', target: 'tier_entries' },
+      ]),
+    );
   });
 });
 

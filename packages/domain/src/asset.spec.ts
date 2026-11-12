@@ -57,4 +57,56 @@ describe('checkAssetManifest', () => {
     const issues = checkAssetManifest({ assets: [asset(), asset()] }, []);
     expect(issues.some((i) => i.message.includes('duplicado'))).toBe(true);
   });
+
+  it('reports one duplicate issue per extra entry and names the repeated slug', () => {
+    const issues = checkAssetManifest({ assets: [asset(), asset(), asset()] }, []);
+    expect(issues).toHaveLength(2);
+    expect(issues.every((issue) => issue.file === 'icono-rayo')).toBe(true);
+    expect(issues[0]?.message).toBe('slug duplicado: icono-rayo');
+  });
+
+  it('attributes every issue of an invalid entry to its slug and field path', () => {
+    const issues = checkAssetManifest({ assets: [{ slug: 'MAL', status: 'nope' }] }, []);
+    expect(issues.length).toBeGreaterThan(0);
+    expect(issues.every((issue) => issue.file === 'MAL')).toBe(true);
+    expect(issues.map((issue) => issue.path)).toContain('status');
+  });
+
+  it('reports every missing provenance field of an approved entry', () => {
+    const issues = checkAssetManifest({ assets: [{ ...asset(), status: 'approved' }] }, []);
+    expect(issues.map((issue) => issue.path).sort()).toEqual([
+      'file_path',
+      'license_or_permission',
+      'origin_url',
+      'proof_ref',
+      'rights_holder',
+    ]);
+  });
+
+  it('falls back to a placeholder label when the invalid entry has no usable slug', () => {
+    const raws: unknown[] = [null, undefined, 0, '', 'texto', {}, { slug: 7 }, { slug: null }];
+    for (const raw of raws) {
+      const issues = checkAssetManifest({ assets: [raw] }, []);
+      expect(issues.length).toBeGreaterThan(0);
+      expect(issues.every((issue) => issue.file === '(sin slug)')).toBe(true);
+    }
+  });
+
+  it('keeps scanning after an invalid entry', () => {
+    const issues = checkAssetManifest({ assets: [{ slug: 'MAL' }, approved()] }, [
+      'public/assets/official/rayo.png',
+    ]);
+    expect(issues.length).toBeGreaterThan(0);
+    expect(issues.every((issue) => issue.file === 'MAL')).toBe(true);
+  });
+
+  it('names the unapproved official file in its message', () => {
+    const issues = checkAssetManifest({ assets: [] }, ['public/assets/official/rayo.png']);
+    expect(issues).toEqual([
+      {
+        file: 'public/assets/official/rayo.png',
+        message: 'arte oficial sin entrada aprobada en el manifiesto',
+      },
+    ]);
+  });
 });

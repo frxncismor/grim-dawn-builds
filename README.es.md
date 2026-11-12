@@ -54,7 +54,7 @@ El proyecto no está afiliado con Crate Entertainment ni con GrimTools.
 
 ## Requisitos
 
-- Node.js 22.12.0 (ver `.nvmrc`).
+- Node.js 22.23.5 (ver `.nvmrc`).
 - pnpm 12.18.0, activado con Corepack: `corepack enable`.
 - Docker Desktop solo para el backend local y el build de release.
 

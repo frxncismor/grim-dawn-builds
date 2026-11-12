@@ -107,7 +107,7 @@ Until the maintainer configures them, these controls are pending.
 
 Requirements:
 
-- Node.js 22. CI uses version 22.12.0.
+- Node.js 22. CI uses version 22.23.5.
 - pnpm 12.18.0, the version pinned in the `packageManager` field of
   [`package.json`](package.json). Enable it with Corepack:
 

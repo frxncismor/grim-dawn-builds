@@ -93,7 +93,9 @@ export class ExternalAttribution {
     }
     @if (gameVersion()) {
       <p><span i18n="@@catalog.cardVersion">Version:</span> {{ gameVersion() }}</p>
-      <p>{{ tierLabel() }}</p>
+      @if (entry().entry_kind !== 'enlace_externo') {
+        <p>{{ tierLabel() }}</p>
+      }
       <p>
         @if (entry().evaluated_on; as date) {
           <span i18n="@@catalog.reviewDate">Last reviewed:</span>

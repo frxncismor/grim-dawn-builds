@@ -104,7 +104,7 @@ Hasta que el mantenedor los configure, estos controles están pendientes.
 
 Requisitos:
 
-- Node.js 22. El CI usa la versión 22.12.0.
+- Node.js 22. El CI usa la versión 22.23.5.
 - pnpm 12.18.0, la versión fijada en el campo `packageManager` de
   [`package.json`](package.json). Actívalo con Corepack:
 

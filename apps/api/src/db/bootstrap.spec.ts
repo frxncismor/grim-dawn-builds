@@ -36,7 +36,7 @@ describe('bootstrap boundary and payload', () => {
       bootstrapPayloadHash({ b: { d: 3, c: 2 }, a: 1 }),
     );
     expect(bootstrapPayloadHash([1, 2])).not.toBe(bootstrapPayloadHash([2, 1]));
-    expect(contentTableNames()).toHaveLength(22);
+    expect(contentTableNames()).toHaveLength(27);
     expect(contentTableNames()).not.toContain('content_origin');
   });
   it('validates before querying the database', async () => {

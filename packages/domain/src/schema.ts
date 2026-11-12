@@ -27,7 +27,12 @@ export const APPROVED_RIGHTS: readonly RightsStatus[] = [
   'permission_granted',
   'link_only',
 ];
-export const ENTRY_KINDS = ['placeholder', 'enlace_externo', 'build_propia'] as const;
+export const ENTRY_KINDS = [
+  'placeholder',
+  'enlace_externo',
+  'build_propia',
+  'build_adaptada',
+] as const;
 export const ASSET_STATUSES = ['pending', 'approved', 'rejected'] as const;
 
 export type ReviewState = (typeof REVIEW_STATES)[number];
@@ -444,10 +449,18 @@ export const TierEntrySchema = z
       if (entry.rights_status !== 'link_only') {
         fail(ctx, ['rights_status'], 'enlace_externo requiere rights_status=link_only');
       }
+      if (entry.tier !== 'sin_clasificar') {
+        fail(ctx, ['tier'], 'una tarjeta de enlace no lleva ranking derivado de la fuente');
+      }
     }
 
     if (entry.entry_kind === 'build_propia' && !entry.build_slug) {
       fail(ctx, ['build_slug'], 'build_propia requiere build_slug');
+    }
+
+    // T-108: an adapted third-party build is always a native build record.
+    if (entry.entry_kind === 'build_adaptada' && !entry.build_slug) {
+      fail(ctx, ['build_slug'], 'build_adaptada requiere build_slug');
     }
   });
 
