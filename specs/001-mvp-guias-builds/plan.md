@@ -3546,3 +3546,44 @@ servirla en ninguna red distinta de la local.
 
 **Consecuencia**: §11 conserva su redacción y remite a esta decisión; el estado
 definitivo del MVP es local y no queda ninguna tarea de hosting abierta.
+
+### 17.59 T-167: fachada con `lite-youtube-embed` bajo CSP
+
+**Origen**: MEDIUM-2 de la revisión de spec001. La CSP del repo no declaraba
+`frame-src`, de modo que el iframe de §17.40 caía bajo `default-src 'self'` y
+quedaba bloqueado; además la fachada se quedaba en `loading` si el iframe no
+cargaba.
+
+**Cambio de enfoque (sustituye lo descrito en §17.40 para el iframe)**: el
+`<iframe>` propio se sustituye por el custom element `lite-youtube` del paquete
+npm `lite-youtube-embed`, importado de forma diferida (`import()`) solo en
+navegador, tras la hidratación, para no subir el JS inicial. §17.40 mantiene
+vigentes la validación estricta de URL, la normalización a
+`youtube-nocookie.com/embed/<id>`, la ausencia de video, el reinicio por slug y la
+semántica; solo cambia el mecanismo de activación y de carga.
+
+- **Sin peticiones antes de activar**: póster local (sin petición a
+  `i.ytimg.com`) y sin cookies de terceros; el iframe solo se crea tras la
+  activación por clic o teclado.
+- **Sin YouTube IFrame API**: `needsYTApi=false`; el script de YouTube queda fuera
+  de la CSP.
+- **CSP**: `frame-src https://www.youtube-nocookie.com` en
+  `scripts/serve-artifact.mts` y en `infra/hosting/security-headers.conf`, en
+  sincronía (la prueba de sincronía existente debe pasar).
+- **Fallback**: estados `loading` → `loaded` al emitir `load` el iframe; →
+  `error` si no hay `load` en 10 s o si se dispara `securitypolicyviolation` de
+  `frame-src`. El enlace «Open on YouTube» se conserva siempre.
+- **Accesibilidad e i18n**: la activación del botón de `lite-youtube` tiene nombre
+  accesible localizado (`@@videoFacade.activate`); `@@videoFacade.playerTitle` se
+  retira si ya no se usa, con paridad de catálogos.
+- **Pruebas**: unitarias del componente, `scripts/serve-artifact.test.mts` y e2e de
+  la fachada **bajo la CSP real** del servidor de artefacto (0 violaciones, iframe
+  `youtube-nocookie.com/embed/<id>` interceptado con `page.route`, y caso de
+  fallback).
+
+**Archivos exactos**: `apps/web/package.json`, `pnpm-lock.yaml`
+(`lite-youtube-embed`), `apps/web/src/app/features/build/video-facade/**`
+(incluido `lite-youtube-embed.d.ts`), `scripts/serve-artifact.mts`,
+`scripts/serve-artifact.test.mts`, `infra/hosting/security-headers.conf`, `e2e/**`
+y los catálogos de `apps/web/src/locale/**` si aplica. Esto añade una dependencia
+que §17.40 excluía («sin dependencias nuevas»); la excepción es de T-167.
