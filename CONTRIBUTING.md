@@ -161,6 +161,32 @@ pnpm exec tsx infra/docker/init/provision-roles.mts
 The provisioner is idempotent and does not print passwords. The API reads only
 the public views; it does not receive migration or superuser credentials.
 
+## Continuing the work on another machine
+
+The repository is self-contained, but the orchestration that drives the agents is
+not: it lives in `~/.config/orquestacion` **on each machine** (`METODOLOGIA.md`, the
+`Start-*` launchers, `Orq-Worktree.ps1` and `proveedores.local.json` with that
+machine's model levels). Cloning this repository does not clone it.
+
+1. Install Node.js 22 (`.nvmrc` pins 22.23.5), pnpm 12.18.0 through Corepack,
+   Docker with Compose (API and PostgreSQL) and Chrome or Edge (`CHROME_PATH`) for
+   the Lighthouse gate.
+2. `git clone` the repository and run `pnpm install --frozen-lockfile`, then
+   `pnpm setup:gitleaks` and `pnpm setup:hooks`, which the local commits need.
+3. Copy `.env.example` to `.env` and fill the local values. The file is ignored and
+   no secret ever goes into the repository.
+4. Run `pnpm verify` to confirm the machine reproduces every gate; if it fails, fix
+   the first failing step before touching any task (see
+   [Verification commands](#verification-commands)).
+5. Authenticate GitHub CLI (`gh auth login`) if you are going to open or label pull
+   requests.
+6. Install the user-level orchestration on that machine (see
+   `~/.config/orquestacion/README.md`) and launch the agents from there: `AGENTS.md`,
+   `CLAUDE.md` and `.github/copilot-instructions.md` only point to it.
+
+The heavy setup is the same as in [Local environment](#local-environment); this
+section only adds what changes on a different machine.
+
 ## Verification commands
 
 `pnpm verify` runs the local checks in this order and stops at the first one that
