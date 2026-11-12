@@ -1,15 +1,17 @@
-# Jerarquía de orquestadores por dominio
+# Orchestrator hierarchy by domain
 
-Este documento describe la jerarquía de orquestación que usa el proyecto. Es un
-resumen operativo de `ORCHESTRATION.md` §12 (`C:/Users/paco_/.copilot/sdd/ORCHESTRATION.md`),
-que es la fuente de verdad. No añade niveles ni reglas nuevas: si algo difiere,
-manda la metodología.
+**English** · [Español](hierarchy.es.md)
 
-Origen: tarea T-139 del plan (`specs/001-mvp-guias-builds/plan.md`, §17.49). Las
-reglas de agente que lo aplican viven en `AGENTS.md` y en
+This document describes the orchestration hierarchy the project uses. It is an
+operational summary of `ORCHESTRATION.md` §12 (`C:/Users/paco_/.copilot/sdd/ORCHESTRATION.md`),
+which is the source of truth. It adds no levels and no new rules: if anything
+differs, the methodology wins.
+
+Origin: task T-139 of the plan (`specs/001-mvp-guias-builds/plan.md`, §17.49). The
+agent rules that apply it live in `AGENTS.md` and in
 `~/.copilot/agents/sdd-orchestrator-domain.agent.md`.
 
-## Forma
+## Shape
 
 ```text
 Orquestador de programa (nivel 0)
@@ -18,39 +20,39 @@ Orquestador de programa (nivel 0)
   └── Orquestador de dominio C  →  subagentes  →  tareas
 ```
 
-Solo hay dos niveles. Un orquestador de dominio no crea otro nivel debajo de sí:
-sus subagentes son ejecutores (`sdd-implement`, `sdd-ui`) o auxiliares
+There are only two levels. A domain orchestrator does not create another level
+below itself: its subagents are executors (`sdd-implement`, `sdd-ui`) or auxiliaries
 (`sdd-escalation`, `sdd-second-opinion`).
 
-## Nivel 0: orquestador de programa
+## Level 0: program orchestrator
 
-- Decide el alcance y reparte la tarea por dominio.
-- Arbitra los conflictos entre orquestadores de dominio.
-- Es el único que habla con el usuario.
-- **No ejecuta.** Si se le descubre implementando, ha fallado el estándar.
+- It decides the scope and splits the task by domain.
+- It arbitrates conflicts between domain orchestrators.
+- It is the only one that talks to the user.
+- **It does not execute.** If it is caught implementing, the standard has failed.
 
-## Orquestadores de dominio
+## Domain orchestrators
 
-- Ejecutan y verifican dentro de su dominio.
-- Descomponen su tarea en sub-tareas auto-contenidas y las despachan a **sus
-  propios subagentes**.
-- Tampoco implementan lo que puede delegarse.
+- They execute and verify within their domain.
+- They break their task into self-contained sub-tasks and dispatch them to **their
+  own subagents**.
+- They do not implement what can be delegated either.
 
-### Dominios por defecto
+### Default domains
 
-| Dominio                    | Trabajo típico                                                    |
-| -------------------------- | ----------------------------------------------------------------- |
-| UI                         | Componentes, páginas, accesibilidad y capturas (`sdd-ui`).        |
-| Tests y calidad            | Pruebas, propiedades, mutación y verificación de puertas.         |
-| Backend                    | Lógica de dominio, API y base de datos (`sdd-implement`).         |
-| Infraestructura y CI       | Pipelines, contenedores y secretos.                               |
-| Contenido y derechos       | Contenido editorial y reglas de publicación y derechos.           |
-| Herramienta y DX           | Herdr, Over9k y el flujo de trabajo del desarrollador.            |
-| Acceso remoto              | Acceso a máquinas y servicios fuera del equipo local.             |
+| Domain                    | Typical work                                                      |
+| ------------------------- | ----------------------------------------------------------------- |
+| UI                        | Components, pages, accessibility and screenshots (`sdd-ui`).      |
+| Tests and quality         | Tests, properties, mutation and gate verification.                |
+| Backend                   | Domain logic, API and database (`sdd-implement`).                 |
+| Infrastructure and CI     | Pipelines, containers and secrets.                                |
+| Content and rights        | Editorial content and publication and rights rules.               |
+| Tooling and DX            | Herdr, Over9k and the developer workflow.                         |
+| Remote access             | Access to machines and services outside the local machine.        |
 
-## Contrato de reporte
+## Report contract
 
-Todo agente devuelve **un** bloque con esta forma exacta y **máximo 12 líneas**
+Every agent returns **one** block with this exact shape and **at most 12 lines**
 (`ORCHESTRATION.md` §3):
 
 ```text
@@ -63,141 +65,148 @@ Bloqueos:     <ninguno | qué falta y de quién depende>
 Siguiente:    <acción concreta para el orquestador>
 ```
 
-Reglas:
+Rules:
 
-- `Verificación` cita **comandos ejecutados**, no intenciones. Si una comprobación
-  no se ejecutó, no existe.
-- `Desviaciones` compara lo ejecutado con lo planificado.
-- `Bloqueos` nombra el dueño del bloqueo: el usuario, el proveedor o el entorno.
+- `Verificación` cites **commands executed**, not intentions. If a check was not
+  executed, it does not exist.
+- `Desviaciones` compares what was executed with what was planned.
+- `Bloqueos` names the owner of the blocker: the user, the provider or the
+  environment.
 
-Un orquestador de dominio no reenvía el reporte de sus subagentes sin más. Lo
-**agrega por tarea** en otro bloque con la misma forma, cuyo estado propio es
-`OK`, `PARCIAL` o `BLOQUEADO`. Ese bloque agregado es el que recibe el nivel 0.
+A domain orchestrator does not forward its subagents' reports as they are. It
+**aggregates them per task** into another block with the same shape, whose own state
+is `OK`, `PARCIAL` or `BLOQUEADO`. That aggregated block is the one level 0
+receives.
 
-Un anuncio de despacho («he lanzado el agente») **no** acredita ejecución. Un
-«verde» sin salida citable tampoco. El reporte solo cuenta con comando y salida.
+A dispatch announcement (the agent has been launched) **does not** prove execution.
+Neither does a green result without quotable output. Only a report with a command
+and its output counts.
 
-## Propiedad de archivos y paralelismo
+## File ownership and parallelism
 
-- Solo se trabaja en paralelo con tareas `[P]` de `tasks.md` y con **archivos
-  disjuntos**.
-- Si dos dominios necesitan el mismo archivo (`package.json`, `angular.json`,
-  `tasks.md`, `handoff.md`), el nivel 0 **serializa** o asigna la edición a un solo
-  dominio. Nunca se edita en paralelo.
-- **Sin delegación cruzada**: un orquestador de dominio no despacha a otro dominio.
-  Si necesita algo de otro dominio, escala al nivel 0, que arbitra.
+- Work in parallel only with `[P]` tasks from `tasks.md` and with **disjoint
+  files**.
+- If two domains need the same file (`package.json`, `angular.json`, `tasks.md`,
+  `handoff.md`), level 0 **serialises** or assigns the edit to a single domain.
+  Never edit in parallel.
+- **No cross-delegation**: a domain orchestrator does not dispatch to another
+  domain. If it needs something from another domain, it escalates to level 0, which
+  arbitrates.
 
-## Ventanas de Herdr
+## Herdr windows
 
-- **Una ventana (espacio) por dominio y nunca una pestaña en la instancia del
-  nivel 0.** Cada orquestador de dominio se abre en un **espacio nuevo** llamado
-  `<proyecto>/<especialidad>` (minúsculas y guiones: `grim-dawn-builds/ui`,
-  `grim-dawn-builds/tests`), con su propio agente orquestador interactivo y el
-  prompt dentro de `argv`. La herramienta es `pnpm herdr:space` (ver
-  [herdr.md](./herdr.md)); `--print` muestra el comando sin lanzar nada.
-- **Máximo 2 terminales por espacio**. Un tercero abre otro espacio del mismo
-  dominio, no una pestaña más en el actual.
-- Cada terminal lleva **las dos etiquetas**: `herdr.space` y `herdr.tab`. Con solo
-  `herdr.space` el terminal no aparece en la app.
-- El harness debe ser **interactivo** (por ejemplo `opencode --auto --prompt "…"`).
-  Un modo no interactivo no se reconoce como agente.
-- Tras lanzar, `herdr-app ls` debe mostrar `app` y `status` **no nulos** para ese
-  terminal. Si `status` es `null`, no es un agente visible y hay que relanzarlo.
+- **One window (space) per domain, and never a tab in the level 0 instance.** Each
+  domain orchestrator opens in a **new space** named `<proyecto>/<especialidad>`
+  (lowercase and hyphens: `grim-dawn-builds/ui`, `grim-dawn-builds/tests`), with its
+  own interactive orchestrator agent and the prompt inside `argv`. The tool is
+  `pnpm herdr:space` (see [herdr.md](./herdr.md)); `--print` shows the command
+  without launching anything.
+- **At most 2 terminals per space**. A third one opens another space of the same
+  domain, not one more tab in the current one.
+- Each terminal carries **both labels**: `herdr.space` and `herdr.tab`. With only
+  `herdr.space` the terminal does not appear in the app.
+- The harness must be **interactive** (for example `opencode --auto --prompt "…"`).
+  A non-interactive mode is not recognised as an agent.
+- After launching, `herdr-app ls` must show `app` and `status` **non-null** for that
+  terminal. If `status` is `null`, it is not a visible agent and it has to be
+  relaunched.
 
-El uso de los comandos, los errores conocidos y la supervisión de bloqueos están en
-[herdr.md](./herdr.md).
+The use of the commands, the known errors and the supervision of blocked agents are
+in [herdr.md](./herdr.md).
 
-## Escalado al nivel 0
+## Escalation to level 0
 
-Un orquestador de dominio para y escala al nivel 0 cuando:
+A domain orchestrator stops and escalates to level 0 when:
 
-- La especificación es ambigua o dos artefactos SDD se contradicen.
-- La tarea exige tocar archivos que `tasks.md` no autoriza.
-- Cambia el alcance, el contrato o la constitución.
-- Hay una decisión de negocio o depende de un tercero.
-- La verificación exige credenciales, acceso o una máquina que no existe en el entorno.
-- Hay un riesgo que solo el nivel 0 puede aceptar.
+- The specification is ambiguous or two SDD artifacts contradict each other.
+- The task requires touching files that `tasks.md` does not authorise.
+- The scope, the contract or the constitution changes.
+- There is a business decision or it depends on a third party.
+- The verification requires credentials, access or a machine that does not exist in
+  the environment.
+- There is a risk that only level 0 can accept.
 
-Límites: máximo **5 intentos totales** por sub-tarea y **3 iteraciones** antes de
-escalar al usuario. El escalado lleva la lista exacta de lo que falta.
+Limits: at most **5 total attempts** per sub-task and **3 iterations** before
+escalating to the user. The escalation carries the exact list of what is missing.
 
-## Presupuesto de modelos
+## Model budget
 
-- Cada orquestador de dominio declara el modelo con el que trabaja.
-- El nivel 0 aplica la cadena de fallback de `AGENTS.md` cuando el primario falla.
-- El modelo **realmente usado** se consigna en `handoff.md`, no el planificado.
-- No se cambia el modelo del orquestador sin avisar; el cambio afecta a los
-  subagentes.
+- Each domain orchestrator declares the model it works with.
+- Level 0 applies the `AGENTS.md` fallback chain when the primary fails.
+- The model **actually used** is recorded in `handoff.md`, not the planned one.
+- The orchestrator's model is not changed without notice; the change affects the
+  subagents.
 
-## Registro
+## Record
 
-- `tasks.md` es la verdad de las tareas. Solo el nivel 0 o el orquestador que posea
-  ese archivo lo escribe.
-- El To-do de Over9k (`~/.local/share/over9k/todos/<slug>.md`) refleja lo mismo: una
-  tarea cerrada se marca `[x]` también ahí.
-- `handoff.md` registra el estado, los modelos usados y los límites del entorno.
+- `tasks.md` is the truth of the tasks. Only level 0 or the orchestrator that owns
+  that file writes it.
+- The Over9k to-do list (`~/.local/share/over9k/todos/<slug>.md`) reflects the same
+  thing: a closed task is marked `[x]` there too.
+- `handoff.md` records the state, the models used and the environment limits.
 
-## Prueba de que el estándar se cumple
+## Proof that the standard is met
 
-El nivel 0 demuestra el cumplimiento con tres hechos, no con intenciones:
+Level 0 proves compliance with three facts, not with intentions:
 
-1. Cada dominio activo tiene su propia ventana de Herdr y un orquestador
-   identificable.
-2. Cada orquestador de dominio despachó al menos una sub-tarea a un subagente
-   propio, con reporte.
-3. El nivel 0 verificó esos reportes con comandos y salida real.
+1. Each active domain has its own Herdr window and an identifiable orchestrator.
+2. Each domain orchestrator dispatched at least one sub-task to a subagent of its
+   own, with a report.
+3. Level 0 verified those reports with commands and real output.
 
-## Resumen: nivel 0 frente a orquestador de dominio
+## Summary: level 0 versus domain orchestrator
 
-| Aspecto                  | Nivel 0 (programa)                            | Orquestador de dominio                                                |
-| ------------------------ | --------------------------------------------- | --------------------------------------------------------------------- |
-| Decide / ejecuta         | Decide alcance y reparto. **No ejecuta.**     | Ejecuta y verifica su dominio. Tampoco implementa lo delegable.       |
-| Delega                   | Reparte por dominio.                          | Despacha sub-tareas auto-contenidas a **sus propios subagentes**.     |
-| Habla con el usuario     | Sí, es el único.                              | No. Escala al nivel 0.                                                |
-| Verifica                 | Los reportes agregados de cada dominio.       | Los reportes de sus subagentes, con comandos y salida.                |
-| Cierra la tarea en `tasks.md` | Sí, tras verificar el reporte agregado.  | No la marca en `tasks.md`; reporta al nivel 0.                        |
-| Modelo                   | Aplica la cadena de fallback de `AGENTS.md`.  | Declara el modelo con el que trabaja.                                 |
+| Aspect                       | Level 0 (program)                             | Domain orchestrator                                                   |
+| ---------------------------- | --------------------------------------------- | --------------------------------------------------------------------- |
+| Decides / executes           | Decides scope and split. **Does not execute.** | Executes and verifies its domain. Does not implement the delegable part either. |
+| Delegates                    | Splits by domain.                             | Dispatches self-contained sub-tasks to **its own subagents**.         |
+| Talks to the user            | Yes, it is the only one.                      | No. It escalates to level 0.                                          |
+| Verifies                     | The aggregated reports from each domain.      | Its subagents' reports, with commands and output.                     |
+| Closes the task in `tasks.md` | Yes, after verifying the aggregated report.  | It does not mark it in `tasks.md`; it reports to level 0.             |
+| Model                        | Applies the `AGENTS.md` fallback chain.       | Declares the model it works with.                                     |
 
-## Ensayo real con orquestadores de dominio (2026-11-11)
+## Real trial with domain orchestrators (2026-11-11)
 
-Esta sección registra el ensayo real que cumple la prueba de la sección
-[Prueba de que el estándar se cumple](#prueba-de-que-el-estándar-se-cumple). Corrió
-con cinco orquestadores de dominio en paralelo, en ventanas y sesiones distintas de
-Herdr, con archivos disjuntos:
+This section records the real trial that meets the test of the section
+[Proof that the standard is met](#proof-that-the-standard-is-met). It ran with five
+domain orchestrators in parallel, in separate Herdr windows and sessions, with
+disjoint files:
 
-| Dominio (ventana) | Archivos de su propiedad                                                                                       |
+| Domain (window)   | Files it owns                                                                                                  |
 | ----------------- | -------------------------------------------------------------------------------------------------------------- |
-| derechos2         | `packages/domain` (contratos de derechos/adaptaciones) y `scripts/check-scope.*`                               |
+| derechos2         | `packages/domain` (rights/adaptations contracts) and `scripts/check-scope.*`                                   |
 | calidad           | `packages/domain/src/*.property.spec.ts`, `docs/orchestration/**`, `specs/001-mvp-guias-builds/{quickstart,handoff,tasks}.md` |
-| i18n              | `angular.json` y `src/app/**`                                                                                  |
-| ci                | `.github/workflows/**` y `playwright.config.ts`                                                                |
-| rendimiento       | Cerrado con T-145 (puerta de rendimiento).                                                                     |
+| i18n              | `angular.json` and `src/app/**`                                                                                |
+| ci                | `.github/workflows/**` and `playwright.config.ts`                                                              |
+| rendimiento       | Closed with T-145 (performance gate).                                                                          |
 
-Hechos registrados:
+Facts recorded:
 
-1. **Contrato de reporte idéntico en los dos niveles.** El mismo bloque `[REPORTE]`
-   del §3 que devuelve un subagente es el que agrega el orquestador de dominio, con
-   su propio estado.
-2. **Dos serializaciones reales, arbitradas por el nivel 0:**
-   - `scripts/check-scope.mts` y `scripts/check-scope.test.mts`: la edición quedó
-     asignada a **derechos2**; el dominio de calidad/docs no los tocó.
-   - `package.json` (raíz): la edición quedó asignada a **ci**; calidad no lo tocó. La
-     dependencia de pruebas (`fast-check`) se declaró en `packages/domain/package.json`,
-     verificado con `git diff -- package.json` vacío.
-3. **Cero ediciones cruzadas.** El diff final del dominio de calidad no contiene
-   ningún archivo de `src/app`, `apps/api`, `.github`, `angular.json`,
-   `scripts/check-scope.*` ni de la puerta de rendimiento.
-4. **Verificación por el nivel 0.** La verificación la hizo el nivel 0 sobre los
-   reportes agregados, no sobre las afirmaciones de los agentes.
+1. **Identical report contract at both levels.** The same `[REPORTE]` block from §3
+   that a subagent returns is the one the domain orchestrator aggregates, with its
+   own state.
+2. **Two real serialisations, arbitrated by level 0:**
+   - `scripts/check-scope.mts` and `scripts/check-scope.test.mts`: the edit was
+     assigned to **derechos2**; the quality/docs domain did not touch them.
+   - `package.json` (root): the edit was assigned to **ci**; quality did not touch
+     it. The test dependency (`fast-check`) was declared in
+     `packages/domain/package.json`, verified with an empty
+     `git diff -- package.json`.
+3. **Zero cross edits.** The final diff of the quality domain contains no file from
+   `src/app`, `apps/api`, `.github`, `angular.json`, `scripts/check-scope.*` or the
+   performance gate.
+4. **Verification by level 0.** The verification was done by level 0 on the
+   aggregated reports, not on the agents' claims.
 
-Con estos tres hechos del §12 quedan cumplidos: cada dominio tiene su ventana y su
-orquestador, cada orquestador despachó a sus subagentes con reporte, y el nivel 0
-verificó esos reportes con salida real. Con esta evidencia, T-139 queda cerrada.
+With these three facts from §12 the standard is met: each domain has its window and
+its orchestrator, each orchestrator dispatched to its subagents with a report, and
+level 0 verified those reports with real output. With this evidence, T-139 is
+closed.
 
-## Referencias
+## References
 
 - Plan, §17.49 (T-139): `specs/001-mvp-guias-builds/plan.md`.
-- Metodología, §12 (estándar de delegación paralela): `C:/Users/paco_/.copilot/sdd/ORCHESTRATION.md`.
-- Reglas del repositorio: `AGENTS.md`, secciones «Orquestación y reporte al orquestador»,
-  «Correspondencia de modelos y cadena de fallback» y «Uso».
-- Operación de Herdr: [herdr.md](./herdr.md).
+- Methodology, §12 (parallel delegation standard): `C:/Users/paco_/.copilot/sdd/ORCHESTRATION.md`.
+- Repository rules: `AGENTS.md`, sections «Orquestación y reporte al orquestador»,
+  «Correspondencia de modelos y cadena de fallback» and «Uso».
+- Herdr operation: [herdr.md](./herdr.md).

@@ -1,49 +1,51 @@
-# Herdr: contexto operativo para el orquestador
+# Herdr: operational context for the orchestrator
 
-Herdr es el multiplexor de terminales que usa este proyecto para correr agentes
-en paralelo y supervisarlos. Esta nota existe porque el orquestador necesita
-contexto propio sobre la herramienta: sin él, un agente bloqueado se confunde con
-un agente lento y se pierden turnos.
+**English** · [Español](herdr.es.md)
 
-## Binario y comandos
+Herdr is the terminal multiplexer this project uses to run agents in parallel and
+supervise them. This note exists because the orchestrator needs its own context on
+the tool: without it, a blocked agent is mistaken for a slow agent and turns are
+lost.
+
+## Binary and commands
 
 ```text
 C:\Users\paco_\AppData\Local\Programs\herdr-core\hc.exe
 ```
 
-| Comando                     | Para qué sirve                                  |
+| Command                     | What it is for                                  |
 | --------------------------- | ----------------------------------------------- |
-| `hc run <cmd> [task]`       | lanza un programa o plantilla; `--bg` no espera |
-| `hc ls [--all]`             | lista terminales vivos (o todos)                |
-| `hc get <t>`                | estado de un terminal en JSON                   |
-| `hc read <t>`               | imprime pantalla e historial                    |
-| `hc send <t> <texto>`       | pega texto y pulsa enter                        |
-| `hc keys <t> <teclas>`      | teclas sueltas: `enter`, `esc`, `up`, `ctrl+c`  |
-| `hc wait <t>`               | espera a que deje de trabajar                   |
-| `hc interrupt <t>`          | pulsa la tecla de parada                        |
-| `hc attach <t>`             | toma el terminal (detach con `ctrl+\`)          |
-| `hc kill <t>` / `hc rm <t>` | termina / elimina                               |
-| `hc exec [--on m] <cmd>`    | ejecuta sin terminal y devuelve la salida       |
+| `hc run <cmd> [task]`       | launches a program or template; `--bg` does not wait |
+| `hc ls [--all]`             | lists live terminals (or all of them)           |
+| `hc get <t>`                | state of a terminal in JSON                     |
+| `hc read <t>`               | prints the screen and the history               |
+| `hc send <t> <texto>`       | pastes text and presses enter                   |
+| `hc keys <t> <teclas>`      | single keys: `enter`, `esc`, `up`, `ctrl+c`     |
+| `hc wait <t>`               | waits until it stops working                    |
+| `hc interrupt <t>`          | presses the stop key                            |
+| `hc attach <t>`             | takes over the terminal (detach with `ctrl+\`)  |
+| `hc kill <t>` / `hc rm <t>` | terminates / deletes                            |
+| `hc exec [--on m] <cmd>`    | runs without a terminal and returns the output  |
 
-## Conceptos
+## Concepts
 
-- **Dirección**: `t1`, `t2`… o un nombre (`--name`). Los terminales de otra máquina
-  se direccionan `machine/t7`.
-- **`space`**: agrupación lógica de terminales. Se fija con
-  `--label herdr.space=<id>`; es lo que hace que una instancia pertenezca al mismo
-  espacio de trabajo que la sesión orquestadora.
-- **`parent`**: terminal del que depende. Por defecto es el terminal desde el que
-  se lanza. `--outlive-parent` evita que muera al terminar el padre.
-- **`keep`**: si el programa muere, el terminal queda con un shell en su lugar. Por
-  eso un agente terminado aparece como `agent: pwsh.exe`, no como muerto.
-- **`blocked`**: el programa está esperando una respuesta en un diálogo. Es el
-  estado que más turnos cuesta si no se detecta.
+- **Address**: `t1`, `t2`… or a name (`--name`). Terminals on another machine are
+  addressed as `machine/t7`.
+- **`space`**: logical grouping of terminals. It is set with
+  `--label herdr.space=<id>`; it is what makes an instance belong to the same
+  workspace as the orchestrating session.
+- **`parent`**: the terminal it depends on. By default it is the terminal it is
+  launched from. `--outlive-parent` prevents it from dying when the parent ends.
+- **`keep`**: if the program dies, the terminal keeps a shell in its place. That
+  is why a finished agent shows up as `agent: pwsh.exe`, not as dead.
+- **`blocked`**: the program is waiting for an answer in a dialog. It is the state
+  that costs the most turns when it is not detected.
 
-## Lanzar un agente
+## Launching an agent
 
-Un agente lanzado en Herdr **debe verse en la app**, y un orquestador de dominio
-**nunca se abre como pestaña del espacio actual**: eso mezcla dominios en la misma
-instancia. Cada especialidad recibe un **espacio nuevo** llamado
+An agent launched in Herdr **must be visible in the app**, and a domain
+orchestrator **never opens as a tab of the current space**: that mixes domains in
+the same instance. Each specialty gets a **new space** named
 `<proyecto>/<especialidad>`.
 
 ```powershell
@@ -70,92 +72,92 @@ pnpm herdr:space --specialty ui --folder $repo --task "<tarea del orquestador>"
   }
 ```
 
-`--print` (o `pnpm herdr:space ... --print`) muestra el comando y el nombre del
-espacio sin lanzar nada. El prompt va **dentro de `argv`**: `space.new --task` y
-`tab.new --task` se añaden como argumento posicional y `opencode` lo interpreta
-como **directorio**.
+`--print` (or `pnpm herdr:space ... --print`) shows the command and the space name
+without launching anything. The prompt goes **inside `argv`**: `space.new --task`
+and `tab.new --task` are appended as a positional argument and `opencode`
+interprets it as a **directory**.
 
-### Errores que ya cometimos
+### Mistakes we have already made
 
-| Error                                              | Síntoma                                                                                                         | Corrección                                                  |
+| Error                                              | Symptom                                                                                                         | Fix                                                         |
 | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Abrir `tab.new` en el espacio actual               | Dos dominios comparten instancia, autoría y foco; el nivel 0 y el dominio se pisan                             | `space.new --name <proyecto>/<especialidad>`                 |
-| Nombrar el espacio solo con la especialidad        | No se sabe a qué proyecto pertenece                                                                             | `<proyecto>/<especialidad>` en minúsculas                    |
-| Omitir `--label herdr.tab=<id>`                    | El terminal sale en `hc ls` pero **no** en `herdr-app ls`: invisible en la app                                  | Pasar siempre las dos etiquetas                             |
-| Usar `opencode run` (no interactivo)               | `app` y `status` quedan `null`; Herdr no lo reconoce como agente                                                | Usar el harness interactivo: `opencode --auto --prompt "…"` |
-| Prompt con saltos de línea                         | `{"kind":"spawn_failed","message":"… is a batch file: it can't take an argument with a line break"}` en Windows | Unir el prompt en **una sola línea**                        |
-| Lanzar desde `~` con un harness que pide confianza | Pantalla vacía, `turn: 0`                                                                                       | Lanzar con `--cwd` en un directorio ya confiado             |
+| Opening `tab.new` in the current space             | Two domains share instance, authorship and focus; level 0 and the domain step on each other                     | `space.new --name <proyecto>/<especialidad>`                 |
+| Naming the space with only the specialty           | It is not clear which project it belongs to                                                                     | `<proyecto>/<especialidad>` in lowercase                     |
+| Omitting `--label herdr.tab=<id>`                  | The terminal shows up in `hc ls` but **not** in `herdr-app ls`: invisible in the app                            | Always pass both labels                                     |
+| Using `opencode run` (non-interactive)             | `app` and `status` stay `null`; Herdr does not recognise it as an agent                                         | Use the interactive harness: `opencode --auto --prompt "…"` |
+| Prompt with line breaks                            | `{"kind":"spawn_failed","message":"… is a batch file: it can't take an argument with a line break"}` on Windows | Join the prompt onto **a single line**                      |
+| Launching from `~` with a harness that asks for trust | Empty screen, `turn: 0`                                                                                    | Launch with `--cwd` in an already trusted directory         |
 
-### Adoptar un terminal ya lanzado
+### Adopting an already launched terminal
 
-Si un agente ya corre sin etiquetas, no hace falta matarlo:
+If an agent is already running without labels, there is no need to kill it:
 
 ```powershell
 & $hc label t11 "herdr.tab=<tab-id>"
 ```
 
-La adopción activa `keep` y lo mete en esa pestaña. Aun así, si el proceso es no
-interactivo seguirá sin `status`: eso solo lo arregla relanzarlo con el harness
-interactivo.
+Adoption turns on `keep` and puts it inside that tab. Even so, if the process is
+non-interactive it will still have no `status`: the only fix for that is to
+relaunch it with the interactive harness.
 
-## Supervisar un agente bloqueado
+## Supervising a blocked agent
 
-`hc send` **se niega** mientras el terminal está bloqueado:
+`hc send` **refuses** while the terminal is blocked:
 
 ```text
 {"error":{"kind":"blocked","message":"t7 is blocked (permission)"}}
 ```
 
-Secuencia correcta:
+Correct sequence:
 
-1. `hc read t7` → leer el diálogo y decidir.
-2. `hc send --force t7 "2"` → opción «no volver a preguntar» cuando el patrón se
-   repite dentro de la misma tarea.
-3. Registrar la aprobación. **Una aprobación no es un resultado.**
+1. `hc read t7` → read the dialog and decide.
+2. `hc send --force t7 "2"` → the option that stops asking again when the pattern
+   repeats within the same task.
+3. Record the approval. **An approval is not a result.**
 
-## Detectar un cuelgue
+## Detecting a hang
 
-Un agente puede quedarse esperando un proceso hijo que nunca termina. El síntoma es
-un log que deja de crecer y un `hc get` que sigue diciendo `working`.
+An agent can end up waiting for a child process that never finishes. The symptom is
+a log that stops growing and an `hc get` that keeps saying `working`.
 
 ```powershell
 Get-CimInstance Win32_Process -Filter "ProcessId=<pid>" | Select-Object ProcessId, CommandLine
 ```
 
-Regla: **identificar el PID y su línea de comandos antes de matarlo**. Nunca matar
-por nombre genérico (`node`, `python`): el servidor de OpenCode también es `node`.
+Rule: **identify the PID and its command line before killing it**. Never kill by
+generic name (`node`, `python`): the OpenCode server is also `node`.
 
-## Límites conocidos
+## Known limits
 
-- `hc read` muestra texto de pantalla, no eventos: no sirve para medir tiempos.
-- Los mensajes de nota que herdr escribe al padre pueden desactivarse con
-  `notes = false` en `~/.config/herdr-core/config.toml`.
-- Un terminal en `keep` que perdió su programa **no** reengancha el agente: hay que
-  relanzarlo.
-- La cuota del modelo es independiente de herdr: un agente puede estar `working`
-  mientras su proveedor devuelve 503 o 429.
-- **La app hereda el entorno del proceso que la lanza, no el del registro.** Si un
-  mod ejecuta programas del sistema (`ls`, `sh`, `git`, `python`), esos binarios
-  tienen que estar en el PATH **del proceso de la app**. Lanzarla con
-  `Start-Process` desde una terminal con PATH antiguo deja los mods ciegos aunque
-  el PATH del usuario ya esté corregido.
+- `hc read` shows screen text, not events: it is useless for measuring time.
+- The note messages herdr writes to the parent can be disabled with
+  `notes = false` in `~/.config/herdr-core/config.toml`.
+- A terminal in `keep` that lost its program **does not** reattach the agent: it
+  has to be relaunched.
+- The model quota is independent of herdr: an agent can be `working` while its
+  provider returns 503 or 429.
+- **The app inherits the environment of the process that launches it, not the one
+  in the registry.** If a mod runs system programs (`ls`, `sh`, `git`, `python`),
+  those binaries must be in the PATH **of the app process**. Launching it with
+  `Start-Process` from a terminal with an old PATH leaves the mods blind even if
+  the user's PATH is already fixed.
 
-## Mods que ejecutan programas
+## Mods that run programs
 
-Un mod de terceros puede depender de binarios POSIX. Over9k, por ejemplo, lista su
-carpeta de listas con `exec("ls", ["-1", …])` y lee listas remotas con `sh -c`.
-En Windows esto falla en silencio: el panel muestra «0 open» y no da error.
+A third-party mod may depend on POSIX binaries. Over9k, for example, lists its
+lists folder with `exec("ls", ["-1", …])` and reads remote lists with `sh -c`. On
+Windows this fails silently: the panel shows «0 open» and reports no error.
 
-Síntoma y comprobación:
+Symptom and check:
 
 ```powershell
 # El core sí puede; la app puede que no.
 & hc exec ls -1 "$env:USERPROFILE\.local\share\over9k\todos"
 ```
 
-Si el core lo resuelve y el mod no, es el PATH del proceso de la app.
+If the core resolves it and the mod does not, it is the PATH of the app process.
 
-Corrección (una vez, y después relanzar la app con el PATH fresco):
+Fix (once, and then relaunch the app with the fresh PATH):
 
 ```powershell
 $gitUsr = 'C:\Program Files\Git\usr\bin'
@@ -169,89 +171,91 @@ Stop-Process -Name herdr-app -Force
 Start-Process 'C:\Users\paco_\AppData\Local\Programs\herdr-app\herdr-app.exe'
 ```
 
-Regla: **al relanzar la app desde un agente o script, refresca primero `$env:PATH`
-desde el registro.** `Start-Process` no lee el registro.
+Rule: **when relaunching the app from an agent or a script, refresh `$env:PATH`
+from the registry first.** `Start-Process` does not read the registry.
 
-Verificación: `herdr-app shot <png>` y abrir la imagen. Un panel que debía tener
-datos y muestra vacío es un fallo del entorno, no del mod.
+Check: `herdr-app shot <png>` and open the image. A panel that should have data and
+shows empty is an environment failure, not a mod failure.
 
-## Dos programas, no uno
+## Two programs, not one
 
-Herdr son dos binarios con responsabilidades separadas:
+Herdr is two binaries with separate responsibilities:
 
-| Programa                | Qué controla                                                               | Cómo se usa                            |
-| ----------------------- | -------------------------------------------------------------------------- | -------------------------------------- |
-| **`herdr-app`**         | la **ventana**: espacios, pestañas, layouts, paneles y mods                | `herdr-app status`, `ls`, `do`, `shot` |
-| **`herdr-core` (`hc`)** | **ejecuta** cada terminal y cada agente; sobrevive al cierre de la ventana | `hc run`, `read`, `send`, `wait`       |
+| Program                 | What it controls                                                          | How it is used                        |
+| ----------------------- | ------------------------------------------------------------------------- | ------------------------------------- |
+| **`herdr-app`**         | the **window**: spaces, tabs, layouts, panels and mods                    | `herdr-app status`, `ls`, `do`, `shot` |
+| **`herdr-core` (`hc`)** | **runs** each terminal and each agent; survives closing the window        | `hc run`, `read`, `send`, `wait`       |
 
-Un agente sigue vivo cuando cierras la ventana: la ventana es un cliente más.
+An agent stays alive when you close the window: the window is just another client.
 
 ```text
 C:\Users\paco_\AppData\Local\Programs\herdr-app\herdr-app.exe
 ```
 
-## Inspeccionar la ventana
+## Inspecting the window
 
-| Comando                        | Devuelve                                                                                             |
+| Command                        | It returns                                                                                           |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `herdr-app status`             | layout mostrado, espacio y pestaña activos, pane enfocado, overlays y **errores de archivos o mods** |
-| `herdr-app ls`                 | espacios → pestañas → terminales, con estado de agente y subagentes                                  |
-| `herdr-app do <comando>`       | ejecuta un comando de la app y devuelve lo creado o `{error}`                                        |
-| `herdr-app shot [archivo.png]` | captura el fotograma renderizado; útil para depurar un panel                                         |
+| `herdr-app status`             | shown layout, active space and tab, focused pane, overlays and **file or mod errors**                |
+| `herdr-app ls`                 | spaces → tabs → terminals, with agent and subagent state                                             |
+| `herdr-app do <comando>`       | runs an app command and returns what was created or `{error}`                                        |
+| `herdr-app shot [archivo.png]` | captures the rendered frame; useful for debugging a panel                                            |
 
-`status` es la primera parada cuando algo “no se ve”: los errores de un layout o de
-un mod aparecen ahí, no en el terminal.
+`status` is the first stop when something does not show up: layout or mod errors
+appear there, not in the terminal.
 
-## Estados de agente
+## Agent states
 
-Un agente reporta por OSC 7501 y solo puede estar en cuatro estados:
+An agent reports over OSC 7501 and can only be in four states:
 
 ```text
 working  >  blocked  >  done  >  idle      (urgencia de un espacio o pestaña)
 ```
 
-- **`blocked`** exige al usuario: es el que interrumpe el trabajo.
-- **`done`** significa «terminó mientras no mirabas»; pasa a `idle` al mirarlo.
-- Un **subagente** es un terminal que el agente lanzó con `hc run`: el core registra
-  el `parent` y el panel de agentes lo muestra bajo su padre, sin panel propio.
+- **`blocked`** demands the user: it is the one that interrupts the work.
+- **`done`** means it finished while you were not looking; it turns into `idle`
+  when you look at it.
+- A **subagent** is a terminal the agent launched with `hc run`: the core records
+  the `parent` and the agents panel shows it under its parent, with no panel of
+  its own.
 
-Regla para el orquestador: **`blocked` se atiende; `working` se espera; `done` se
-lee; `idle` no requiere nada.** Confundir `blocked` con «lento» es el error que más
-turnos cuesta.
+Rule for the orchestrator: **`blocked` is attended to; `working` is waited on;
+`done` is read; `idle` requires nothing.** Confusing `blocked` with a slow agent
+is the mistake that costs the most turns.
 
-## La interfaz es archivos
+## The interface is files
 
-Todo lo que se ve en la ventana está descrito en
-`~/.config/herdr-app/` y se recarga en caliente:
+Everything visible in the window is described in `~/.config/herdr-app/` and
+reloaded live:
 
-| Archivo                 | Decide                                                         |
+| File                    | It decides                                                     |
 | ----------------------- | -------------------------------------------------------------- |
-| `layouts/<nombre>.json` | la ventana entera: bloques, tema, fuentes, marcos              |
-| `keys.json`             | qué hace cada tecla                                            |
-| `settings.json`         | zoom, sonidos, fuentes, contraste, telemetría                  |
-| `mods/<nombre>/`        | paneles: pequeños programas en gpui-kit (sin HTML, CSS ni DOM) |
-| `programs.json`         | nombres e iconos de los programas                              |
+| `layouts/<nombre>.json` | the whole window: blocks, theme, fonts, frames                 |
+| `keys.json`             | what each key does                                             |
+| `settings.json`         | zoom, sounds, fonts, contrast, telemetry                       |
+| `mods/<nombre>/`        | panels: small programs in gpui-kit (no HTML, CSS or DOM)       |
+| `programs.json`         | names and icons of the programs                                |
 
-Advertencias que importan:
+Warnings that matter:
 
-- `AGENTS.md` dentro de `~/.config/herdr-app/` **lo reescribe la app en cada
-  arranque**: no se edita.
-- Los layouts y mods que trae Herdr son de solo lectura. Para cambiar estructura o
-  código se **clona** (`layout.clone`, `mod.clone`).
-- Un archivo inválido no rompe la app: escribe `<nombre>.error` y conserva la última
-  versión buena. Hay que comprobar ese archivo tras cada edición.
-- `ctrl-alt-shift-escape` siempre funciona: aparta `keys.json` y el layout mostrado
-  y vuelve al layout `main`. Es la salida de emergencia.
+- `AGENTS.md` inside `~/.config/herdr-app/` **is rewritten by the app on every
+  start**: it is not edited.
+- The layouts and mods that Herdr ships with are read-only. To change structure or
+  code they are **cloned** (`layout.clone`, `mod.clone`).
+- An invalid file does not break the app: it writes `<nombre>.error` and keeps the
+  last good version. That file must be checked after every edit.
+- `ctrl-alt-shift-escape` always works: it sets aside `keys.json` and the shown
+  layout and returns to the `main` layout. It is the emergency exit.
 
-## Qué podría aportar a la orquestación
+## What it could contribute to orchestration
 
-Un panel propio (un _mod_) podría mostrar las tareas en curso, el estado de cada
-orquestador de dominio y el presupuesto de modelo consumido, leyendo `hc` y
-`herdr-app`. Está registrado como trabajo futuro en `T-139`; hoy la supervisión se
-hace con `hc read`, `hc get` y este documento.
+A panel of its own (a _mod_) could show the tasks in progress, the state of each
+domain orchestrator and the consumed model budget, reading `hc` and `herdr-app`.
+It is registered as future work in `T-139`; today supervision is done with
+`hc read`, `hc get` and this document.
 
-## Fuente de verdad
+## Source of truth
 
-`~/.config/herdr-app/AGENTS.md` documenta la app completa (layouts, mods, comandos,
-settings) y se regenera en cada arranque. Este documento es el resumen operativo
-para el orquestador; si algo difiere, manda el de la app.
+`~/.config/herdr-app/AGENTS.md` documents the whole app (layouts, mods, commands,
+settings) and is regenerated on every start. This document is the operational
+summary for the orchestrator; if anything differs, the app's one wins.
