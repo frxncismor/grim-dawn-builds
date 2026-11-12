@@ -454,6 +454,7 @@ export const TierEntrySchema = z
 const TierListContentSchema = z
   .object({
     slug,
+    locale: z.literal('es'),
     title: text,
     game_version: text,
     review_state: z.enum(REVIEW_STATES),

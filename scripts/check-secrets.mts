@@ -67,7 +67,10 @@ const PLACEHOLDER_WORDS = /^[a-z0-9]*[-_]?(password|passwd|secret|pass)\d*$/i;
 /** Patrones de credenciales de alta confianza (formatos de proveedor con prefijo fijo). */
 const HIGH_CONFIDENCE_PATTERNS: readonly { label: string; re: RegExp }[] = [
   { label: 'clave de acceso AWS', re: /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g },
-  { label: 'token de GitHub', re: /\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{22,})/g },
+  {
+    label: 'token de GitHub',
+    re: /\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{22,})/g,
+  },
   { label: 'token de Slack', re: /\bxox[abprs]-[A-Za-z0-9-]{10,}/g },
   { label: 'clave secreta de Stripe', re: /\b(?:sk|rk)_live_[A-Za-z0-9]{16,}/g },
   { label: 'clave de API de Google', re: /\bAIza[0-9A-Za-z_-]{35}\b/g },
@@ -80,10 +83,16 @@ const HIGH_CONFIDENCE_PATTERNS: readonly { label: string; re: RegExp }[] = [
 const CREDENTIAL_URL = /\b[a-z][a-z0-9+.-]*:\/\/[^\s:/@'"`<>{}()$]+:[^\s/?#@'"`<>{}()$]+@/gi;
 
 /** Asignación `NOMBRE_SECRETO = valor` (mayúsculas), con separador `:` o `=`. */
-const GENERIC_ASSIGNMENT = /\b((?:[A-Z][A-Z0-9]*_)*(?:PASSWORD|PASSWD|SECRET|TOKEN|KEY))["']?\s*[:=]\s*(["']?)([^\s"'`;,]+)/g;
+const GENERIC_ASSIGNMENT =
+  /\b((?:[A-Z][A-Z0-9]*_)*(?:PASSWORD|PASSWD|SECRET|TOKEN|KEY))["']?\s*[:=]\s*(["']?)([^\s"'`;,]+)/g;
 
 const MARKDOWN = /\.(?:md|markdown)$/i;
-const PATTERN_SKIP_NAMES = new Set(['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock', 'npm-shrinkwrap.json']);
+const PATTERN_SKIP_NAMES = new Set([
+  'pnpm-lock.yaml',
+  'package-lock.json',
+  'yarn.lock',
+  'npm-shrinkwrap.json',
+]);
 const PATTERN_SKIP_DIRS = new Set([
   'node_modules',
   'dist',
@@ -207,7 +216,8 @@ function dockerInstructions(text: string): DockerInstruction[] {
 /** Nombres que define una instrucción ARG o ENV (`K=V` o la forma legada `ENV K valor`). */
 function definedNames(keyword: 'ARG' | 'ENV', tokens: string[]): string[] {
   if (keyword === 'ARG') return tokens.map((t) => t.split('=')[0]);
-  if (tokens[0]?.includes('=')) return tokens.filter((t) => t.includes('=')).map((t) => t.split('=')[0]);
+  if (tokens[0]?.includes('='))
+    return tokens.filter((t) => t.includes('=')).map((t) => t.split('=')[0]);
   return tokens.slice(0, 1);
 }
 
@@ -254,7 +264,12 @@ function checkDockerfile(file: string, text: string): Finding[] {
 
 /** Un valor literal parece secreto: largo, mezcla letras y dígitos, y no es una referencia. */
 function isLikelySecretValue(value: string): boolean {
-  return value.length >= 16 && /[A-Za-z]/.test(value) && /\d/.test(value) && !/[\$\{\}<\(\[\.`]/.test(value);
+  return (
+    value.length >= 16 &&
+    /[A-Za-z]/.test(value) &&
+    /\d/.test(value) &&
+    !/[\$\{\}<\(\[\.`]/.test(value)
+  );
 }
 
 function checkPatterns(file: string, text: string): Finding[] {
@@ -276,7 +291,8 @@ function checkPatterns(file: string, text: string): Finding[] {
         file,
         line: lineNo,
         rule: 'credential-url',
-        message: 'URL con contraseña literal; use una referencia a variable o a un secreto de runtime',
+        message:
+          'URL con contraseña literal; use una referencia a variable o a un secreto de runtime',
       });
     }
     for (const match of line.matchAll(GENERIC_ASSIGNMENT)) {
@@ -306,7 +322,10 @@ function isPatternScanned(path: string): boolean {
  * Aplica todas las reglas a las rutas dadas. `readText` devuelve el contenido, o
  * `undefined` si no debe analizarse por contenido (binario o no disponible).
  */
-export function scanFiles(paths: readonly string[], readText: (path: string) => string | undefined): Finding[] {
+export function scanFiles(
+  paths: readonly string[],
+  readText: (path: string) => string | undefined,
+): Finding[] {
   const findings: Finding[] = [];
   for (const path of paths) {
     findings.push(...checkPathRules(path));
@@ -329,7 +348,10 @@ function normalizePath(path: string): string {
 }
 
 function runGit(root: string, args: string[]): string {
-  const result = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const result = spawnSync('git', ['-C', root, ...args], {
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  });
   if (result.error) throw result.error;
   if (result.status !== 0) {
     throw new Error(`git ${args[0]} falló (código ${result.status}): ${result.stderr.trim()}`);

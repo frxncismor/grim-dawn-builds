@@ -1,0 +1,103 @@
+@if (isVisible()) {
+  <section id="fuentes" aria-labelledby="fuentes-heading">
+    <h2 id="fuentes-heading" i18n="@@buildAttribution.heading">Author and sources</h2>
+
+    <div class="author" data-author>
+      <p class="label" i18n="@@buildAttribution.authorLabel">Author</p>
+      @if (authorHref(); as href) {
+        <a class="author__name author__link" [href]="href" data-author-link>{{
+          content().author.display_name
+        }}</a>
+      } @else {
+        <p class="author__name" data-author-name>{{ content().author.display_name }}</p>
+        <span
+          class="badge badge--pending"
+          role="note"
+          data-author-placeholder
+          aria-label="Author to be confirmed"
+          i18n="@@buildAttribution.authorPlaceholder"
+        >
+          Author to be confirmed
+        </span>
+      }
+      @if (content().author.bio; as bio) {
+        <p class="author__bio" data-author-bio>{{ bio }}</p>
+      }
+    </div>
+
+    <dl class="facts" data-meta>
+      <div class="facts__item">
+        <dt i18n="@@buildAttribution.gameVersion">Game version</dt>
+        <dd data-game-version>{{ content().game_version }}</dd>
+      </div>
+      <div class="facts__item">
+        <dt i18n="@@buildAttribution.published">Published</dt>
+        <dd data-published>
+          @if (content().published_at; as published) {
+            <time [attr.datetime]="published">{{ publishedLabel() }}</time>
+          } @else {
+            {{ publishedLabel() }}
+          }
+        </dd>
+      </div>
+      <div class="facts__item">
+        <dt i18n="@@buildAttribution.reviewState">Review state</dt>
+        <dd>
+          <span class="badge" data-review-state [attr.data-review-state]="reviewState()">{{
+            reviewLabel()
+          }}</span>
+        </dd>
+      </div>
+      <div class="facts__item">
+        <dt i18n="@@buildAttribution.contentStatus">Content status</dt>
+        <dd>
+          <span class="badge" data-content-status [attr.data-content-status]="contentState()">{{
+            contentStatusLabel()
+          }}</span>
+        </dd>
+      </div>
+    </dl>
+
+    <div class="sources" data-sources>
+      <h3 i18n="@@buildAttribution.sourcesHeading">Sources</h3>
+      @if (content().sources.length) {
+        <ul class="sources__list">
+          @for (source of content().sources; track source.slug) {
+            <li class="source" [attr.data-source]="source.slug" [attr.data-kind]="source.kind">
+              <p class="source__title" data-source-title>{{ source.title }}</p>
+              <p class="source__meta">
+                <span data-source-author>{{ source.author_name }}</span>
+                <span aria-hidden="true">·</span>
+                <span data-source-kind>{{ kindLabel(source.kind) }}</span>
+                <span aria-hidden="true">·</span>
+                <span data-source-date>{{ sourceDate(source.retrieved_on) }}</span>
+              </p>
+              <p class="source__license" data-source-license>{{ source.license_note }}</p>
+              @if (sourceUrl(source.url); as url) {
+                <p class="source__link">
+                  <a [href]="url.href" target="_blank" rel="noopener noreferrer" data-source-link>
+                    {{ source.title }}
+                    <span data-source-site>{{ url.host }}</span>
+                    <span i18n="@@buildAttribution.newTab">(opens in a new tab)</span>
+                  </a>
+                </p>
+              }
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="sources__empty" role="status" i18n="@@buildAttribution.noSources">
+          No sources recorded
+        </p>
+      }
+    </div>
+
+    <div class="disclaimer" data-disclaimer>
+      <h3 i18n="@@buildAttribution.disclaimerHeading">Disclaimer</h3>
+      @if (disclaimer().headline; as headline) {
+        <p class="disclaimer__headline" data-disclaimer-headline>{{ headline }}</p>
+      }
+      <p class="disclaimer__detail" data-disclaimer-detail>{{ disclaimer().detail }}</p>
+    </div>
+  </section>
+}

@@ -1,0 +1,215 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+
+section {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+h2 {
+  margin: 0 0 var(--space-3);
+  color: var(--color-storm);
+}
+
+h3 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-bone);
+  font-family: var(--font-display);
+  font-size: var(--text-large);
+}
+
+.author {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel);
+}
+
+.label {
+  margin: 0;
+  color: var(--color-ash);
+  font-size: var(--text-small);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.author__name {
+  margin: 0;
+  color: var(--color-bone);
+  font-family: var(--font-display);
+  font-size: var(--text-large);
+}
+
+.author__link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 24px;
+  color: var(--color-storm);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.author__link:hover {
+  color: var(--color-bone);
+}
+
+.author__bio {
+  margin: 0;
+  max-inline-size: var(--reading-measure);
+  color: var(--color-bone);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 24px;
+  inline-size: fit-content;
+  padding-inline: var(--space-2);
+  border: 1px solid var(--color-line);
+  background: var(--color-panel-2);
+  color: var(--color-bone);
+  font-size: var(--text-small);
+  line-height: var(--line-heading);
+}
+
+.badge--pending,
+.badge[data-content-status='placeholder'] {
+  border-color: var(--color-ember);
+  color: var(--color-ember);
+}
+
+.badge[data-review-state='borrador'],
+.badge[data-content-status='sin_verificar'] {
+  border-style: dashed;
+  color: var(--color-ash);
+}
+
+.badge[data-review-state='publicado'],
+.badge[data-content-status='verificado'] {
+  border-color: var(--color-storm);
+  color: var(--color-storm);
+}
+
+.facts {
+  display: grid;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-4) 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+
+.facts__item {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  padding-block-start: var(--space-2);
+  border-block-start: var(--frame-border);
+}
+
+.facts dt {
+  color: var(--color-ash);
+  font-size: var(--text-small);
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--color-bone);
+}
+
+.sources {
+  margin-block-start: var(--space-5);
+}
+
+.sources__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.source {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: var(--frame-border);
+  background: var(--color-panel-2);
+}
+
+.source__title {
+  margin: 0;
+  color: var(--color-bone);
+  font-weight: var(--weight-emphasis);
+}
+
+.source__meta,
+.source__license,
+.source__link {
+  margin: 0;
+}
+
+.source__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  color: var(--color-ash);
+  font-size: var(--text-small);
+}
+
+.source__license {
+  color: var(--color-bone);
+}
+
+.source__link a {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1);
+  min-block-size: 24px;
+  color: var(--color-storm);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.source__link a:hover {
+  color: var(--color-bone);
+}
+
+[data-source-site] {
+  color: var(--color-ash);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+}
+
+.sources__empty {
+  margin: 0;
+  color: var(--color-ash);
+}
+
+.disclaimer {
+  margin-block-start: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border: var(--frame-border);
+  border-inline-start: 3px solid var(--color-storm-dim);
+  background: var(--color-panel);
+  color: var(--color-ash);
+}
+
+.disclaimer__headline {
+  margin: 0 0 var(--space-1);
+  color: var(--color-bone);
+  font-weight: var(--weight-emphasis);
+}
+
+.disclaimer__detail {
+  margin: 0;
+  max-inline-size: var(--reading-measure);
+}
+
+:is(a):focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}

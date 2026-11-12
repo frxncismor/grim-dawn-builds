@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, RESPONSE_INIT } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SeoService } from '../../core/seo/seo.service';
 import { safeAuthorUrl, type AuthorPageData } from './author.state';
 
 @Component({
   selector: 'gd-author-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink],
   templateUrl: './author.page.html',
   styleUrl: '../static-pages/editorial.css',
 })
@@ -19,8 +20,8 @@ export class AuthorPage {
     if (!this.author) {
       if (response) response.status = 404;
       seo.setPage({
-        title: $localize`:@@author.notFound:Autor no encontrado`,
-        description: $localize`:@@author.notFoundDescription:Este perfil no está disponible públicamente.`,
+        title: $localize`:@@author.notFound:Author not found`,
+        description: $localize`:@@author.notFoundDescription:This profile is not publicly available.`,
         path: '/404',
         robots: 'noindex,nofollow',
       });
@@ -28,10 +29,10 @@ export class AuthorPage {
     }
     const profile = this.author.profile;
     seo.setPage({
-      title: $localize`:@@author.pageTitle:Perfil de ${profile.display_name}`,
+      title: $localize`:@@author.pageTitle:Profile of ${profile.display_name}`,
       description:
         profile.bio ??
-        $localize`:@@author.description:Perfil y guías publicadas de ${profile.display_name}.`,
+        $localize`:@@author.description:Profile and published guides of ${profile.display_name}.`,
       path: `/autores/${profile.slug}`,
       structuredData: [
         {

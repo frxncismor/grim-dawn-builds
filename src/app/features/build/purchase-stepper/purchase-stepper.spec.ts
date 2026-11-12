@@ -44,7 +44,7 @@ describe('gd-purchase-stepper', () => {
     const fixture = await render();
     const root = fixture.nativeElement as HTMLElement;
     const rows = Array.from(root.querySelectorAll('[data-step]'));
-    expect(root.querySelector('#orden h2')?.textContent?.trim()).toBe('Orden real de compra');
+    expect(root.querySelector('#orden h2')?.textContent?.trim()).toBe('Real purchase order');
     expect(root.textContent).toContain(
       original.introductions.find((item) => item.section === 'Orden real de compra')?.text,
     );
@@ -106,12 +106,12 @@ describe('gd-purchase-stepper', () => {
     };
     const fixture = await render(modified);
     const rows = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('[data-step]'));
-    expect(rows[0].querySelector('[data-highlight] .points')?.textContent).toContain('0 puntos');
+    expect(rows[0].querySelector('[data-highlight] .points')?.textContent).toContain('0 points');
     expect(rows[0].textContent).toContain('Thunderous Strike');
     expect(rows[0].textContent).toContain('Golpe Atronador (Thunderous Strike)');
     expect(rows.map((row) => (row as HTMLLIElement).value)).toEqual([4, 9]);
     expect(rows[1].querySelector('[data-highlight] .points')?.textContent).toContain(
-      'Objetivo sin cifra',
+      'No point value',
     );
     expect(rows[1].textContent).toContain('Torrent');
   });
@@ -129,7 +129,7 @@ describe('gd-purchase-stepper', () => {
     expect(
       Array.from(root.querySelectorAll('[data-title]')).map((node) => node.textContent?.trim()),
     ).toEqual(['Empate A', 'Empate B']);
-    expect(root.textContent?.toLowerCase()).toContain('inconsistentes');
+    expect(root.textContent?.toLowerCase()).toContain('inconsistent');
     expect(
       Array.from(root.querySelectorAll('button,input')).every(
         (item) => (item as HTMLButtonElement).disabled,
@@ -200,7 +200,7 @@ describe('gd-purchase-stepper', () => {
     expect(hidden.nativeElement.querySelector('#orden')).toBeNull();
 
     const empty = await render({ ...content, purchase_steps: [] });
-    expect(empty.nativeElement.textContent).toContain('Sin información disponible');
+    expect(empty.nativeElement.textContent).toContain('No information available');
     expect(
       empty.nativeElement.querySelector('[data-select-step],input[type="checkbox"]'),
     ).toBeNull();
@@ -225,7 +225,7 @@ describe('gd-purchase-stepper', () => {
     checkboxes[0].click();
     await fixture.whenStable();
     fixture.detectChanges();
-    expect(root.querySelector('[data-completed-label="1"]')?.textContent).toContain('Completado');
+    expect(root.querySelector('[data-completed-label="1"]')?.textContent).toContain('Completed');
     expect(root.querySelector('[data-select-step]')?.getAttribute('aria-pressed')).toBe('true');
     expect(window.localStorage.getItem(key)).toBeNull();
 
@@ -297,7 +297,7 @@ describe('gd-purchase-stepper', () => {
       const denied = await render();
       expect(
         (denied.nativeElement as HTMLElement).querySelector('[data-storage-message]')?.textContent,
-      ).toContain('no está disponible');
+      ).toContain('not available');
       expect(
         (denied.nativeElement as HTMLElement).querySelector('[data-select-step]'),
       ).not.toBeNull();
@@ -320,15 +320,13 @@ describe('gd-purchase-stepper', () => {
     try {
       const fixture = await render();
       const root = fixture.nativeElement as HTMLElement;
-      expect(root.querySelector('[data-storage-message]')?.textContent).toContain(
-        'no está disponible',
-      );
+      expect(root.querySelector('[data-storage-message]')?.textContent).toContain('not available');
       root.querySelector<HTMLInputElement>('[data-completed]')!.click();
       root.querySelector<HTMLInputElement>('[data-persist]')!.click();
       await fixture.whenStable();
       expect(deniedStorage.setItem).toHaveBeenCalledOnce();
-      expect(root.querySelector('[data-completed-label="1"]')?.textContent).toContain('Completado');
-      expect(root.textContent).toContain('El guardado no está disponible');
+      expect(root.querySelector('[data-completed-label="1"]')?.textContent).toContain('Completed');
+      expect(root.textContent).toContain('Saving is not available');
     } finally {
       restoreStorage();
     }
@@ -351,7 +349,7 @@ describe('gd-purchase-stepper', () => {
       fixture.detectChanges();
       expect(root.querySelector<HTMLInputElement>('[data-persist]')?.checked).toBe(false);
       expect(root.querySelector('[data-storage-message]')?.textContent).toContain(
-        'solo se borró en esta vista',
+        'only cleared in this view',
       );
       expect(deniedStorage.removeItem).toHaveBeenCalledOnce();
 
@@ -361,7 +359,7 @@ describe('gd-purchase-stepper', () => {
       root.querySelector<HTMLInputElement>('[data-persist]')!.click();
       fixture.detectChanges();
       expect(root.querySelector('[data-storage-message]')?.textContent).toContain(
-        'no se pudo eliminar el registro',
+        'could not be removed from the browser',
       );
       expect(deniedStorage.removeItem).toHaveBeenCalledTimes(2);
     } finally {

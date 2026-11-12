@@ -1,0 +1,14 @@
+<details class="toc" open>
+  <summary i18n="@@buildToc.summary">Contents</summary>
+  @if (entries().length) {
+    <nav aria-label="Guide contents" i18n-aria-label="@@buildToc.navLabel">
+      <ol class="toc__list">
+        @for (entry of entries(); track entry.id) {
+          <li>
+            <a [href]="href(entry.id)" [attr.data-section]="entry.id">{{ entry.label }}</a>
+          </li>
+        }
+      </ol>
+    </nav>
+  }
+</details>

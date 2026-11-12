@@ -83,8 +83,7 @@ export class VideoFacade {
     computation: (): PlaybackState => 'idle',
   });
   protected readonly frameTitle = computed(
-    () =>
-      $localize`:@@videoFacade.playerTitle:Reproductor de video de ${this.content().title}:title:`,
+    () => $localize`:@@videoFacade.playerTitle:Video player for ${this.content().title}:title:`,
   );
   private readonly trustedEmbedUrl = computed(() => {
     const url = this.embedUrl();

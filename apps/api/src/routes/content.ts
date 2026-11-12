@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { FastifyInstance } from 'fastify';
 import { PublicAuthorSchema, PublicBuildSchema, PublicTierListSchema } from '@gd/domain';
+import { PublicAssetDescriptorSchema } from '../content/map-content.js';
 import type { PublicContentRepository } from '../content/repository.js';
 
 export function registerContentRoutes(
@@ -38,6 +39,8 @@ export function registerContentRoutes(
   };
   route('/api/v1/builds', z.array(PublicBuildSchema), (repo) => repo.listBuilds());
   route('/api/v1/builds/:slug', PublicBuildSchema, (repo, slug) => repo.findBuild(slug), true);
+  // FR-16: read-only public descriptors of approved assets; never private provenance.
+  route('/api/v1/assets', z.array(PublicAssetDescriptorSchema), (repo) => repo.listAssets());
   route(
     '/api/v1/tier-lists/:slug',
     PublicTierListSchema,

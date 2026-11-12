@@ -1,27 +1,38 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { PublicBuild, PublicSource, TierEntry } from '@gd/domain';
 import type { ContentStatus } from '@gd/domain/vocabulary';
-import { Icon } from '../../shared/ui/icon/icon';
 import { EMPTY_FILTER, type TierFilter } from './filter';
 
 @Component({
   selector: 'gd-content-badge',
-  imports: [Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<span class="badge"
-    ><gd-icon [name]="icon()" /><span>{{ label() }}</span></span
+    ><img
+      class="badge-icon"
+      [src]="iconSrc()"
+      alt=""
+      aria-hidden="true"
+      (error)="imageFailed()"
+    /><span>{{ label() }}</span></span
   >`,
   styleUrl: './tier-components.css',
 })
 export class ContentBadge {
   readonly status = input.required<ContentStatus>();
-  readonly icon = computed(() => `status-${this.status().replace('_', '-')}`);
+  private readonly failed = signal(false);
+  imageFailed(): void {
+    this.failed.set(true);
+  }
+  readonly iconSrc = computed(() => {
+    if (this.failed()) return 'assets/icons/generic.svg';
+    return `assets/icons/status-${this.status().replace('_', '-')}.svg`;
+  });
   readonly label = computed(
     () =>
       ({
-        verificado: $localize`:@@catalog.verified:Verificado`,
-        sin_verificar: $localize`:@@catalog.unverified:Sin verificar`,
+        verificado: $localize`:@@catalog.verified:Verified`,
+        sin_verificar: $localize`:@@catalog.unverified:Unverified`,
         placeholder: $localize`:@@catalog.placeholder:Placeholder`,
       })[this.status()],
   );
@@ -31,17 +42,17 @@ export class ContentBadge {
   selector: 'gd-external-attribution',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<div class="attribution">
-    <p><span i18n="@@catalog.externalAuthor">Autoría original:</span> {{ author() }}</p>
+    <p><span i18n="@@catalog.externalAuthor">Original author:</span> {{ author() }}</p>
     @if (source(); as source) {
       <p>{{ source.title }} · {{ source.license_note }}</p>
     }
     @if (safeUrl(); as href) {
       <a [href]="href" target="_blank" rel="noopener noreferrer" i18n="@@catalog.externalLink"
-        >Consultar fuente externa (nueva pestaña)</a
+        >View external source (new tab)</a
       >
     }
     <p class="notice" i18n="@@catalog.externalWarning">
-      Enlace a un sitio de terceros. El contenido permanece en su fuente original.
+      Link to a third-party site. The content remains at its original source.
     </p>
   </div>`,
   styleUrl: './tier-components.css',
@@ -81,14 +92,14 @@ export class ExternalAttribution {
       <p class="combination">{{ combinationName() }}</p>
     }
     @if (gameVersion()) {
-      <p><span i18n="@@catalog.cardVersion">Versión:</span> {{ gameVersion() }}</p>
+      <p><span i18n="@@catalog.cardVersion">Version:</span> {{ gameVersion() }}</p>
       <p>{{ tierLabel() }}</p>
       <p>
         @if (entry().evaluated_on; as date) {
-          <span i18n="@@catalog.reviewDate">Última revisión:</span>
+          <span i18n="@@catalog.reviewDate">Last reviewed:</span>
           <time [attr.datetime]="date">{{ date }}</time>
         } @else {
-          <span i18n="@@catalog.noReviewDate">Revisión no informada</span>
+          <span i18n="@@catalog.noReviewDate">Review date not reported</span>
         }
       </p>
     }
@@ -99,7 +110,7 @@ export class ExternalAttribution {
         [source]="source()"
       />
     } @else if (!publicGuide()) {
-      <p class="notice" i18n="@@catalog.comingSoon">Guía próximamente</p>
+      <p class="notice" i18n="@@catalog.comingSoon">Guide coming soon</p>
     }
   </article>`,
   styleUrl: './tier-components.css',
@@ -108,7 +119,7 @@ export class TierCard {
   readonly gameVersion = input<string | null>(null);
   readonly tierLabel = computed(() =>
     this.entry().tier === 'sin_clasificar'
-      ? $localize`:@@catalog.unranked:Sin clasificar`
+      ? $localize`:@@catalog.unranked:Unranked`
       : $localize`:@@catalog.tier:Tier ${this.entry().tier}`,
   );
   readonly entry = input.required<TierEntry>();
@@ -185,7 +196,7 @@ export interface FilterGroup {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<div class="filters">
     <label class="search"
-      ><span i18n="@@catalog.search">Buscar builds</span
+      ><span i18n="@@catalog.search">Search builds</span
       ><input type="search" [value]="value().text" [disabled]="disabled()" (input)="search($event)"
     /></label>
     @for (group of groups(); track group.key) {
@@ -204,7 +215,7 @@ export interface FilterGroup {
       </fieldset>
     }
     <button type="button" [disabled]="disabled()" (click)="clear()" i18n="@@catalog.clear">
-      Limpiar filtros
+      Clear filters
     </button>
   </div>`,
   styleUrl: './tier-components.css',
@@ -244,12 +255,12 @@ export class FilterBar {
   selector: 'gd-empty-state',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<section class="empty">
-    <h2 i18n="@@catalog.emptyTitle">Sin resultados</h2>
+    <h2 i18n="@@catalog.emptyTitle">No results</h2>
     <p i18n="@@catalog.emptyDescription">
-      Ninguna build coincide con estos filtros. Prueba otra combinación o limpia la selección.
+      No build matches these filters. Try another combination or clear the selection.
     </p>
     <button type="button" (click)="filtersReset.emit()" i18n="@@catalog.clear">
-      Limpiar filtros
+      Clear filters
     </button>
   </section>`,
   styleUrl: './tier-components.css',

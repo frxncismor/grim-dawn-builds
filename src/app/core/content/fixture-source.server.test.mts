@@ -74,6 +74,7 @@ test('disk collections resolve normalized attribution and load tier lists as wel
     const { author, sources, ...build } = original;
     const tier = {
       slug: 'principal',
+      locale: 'es',
       title: 'Fixture local',
       game_version: 'test',
       review_state: 'borrador',

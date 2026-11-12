@@ -95,15 +95,15 @@ describe('gd-skill-tree', () => {
       .join(' ')
       .replace(/\s+/g, ' ');
     expect(labelledText).toContain('Viento Demoníaco');
-    expect(labelledText).toContain('Barra 10');
+    expect(labelledText).toContain('Bar 10');
     expect(wind.getAttribute('aria-pressed')).toBe('false');
     expect(wind.getAttribute('data-active-step')).toBe('true');
-    expect(labelledText).toContain('Paso activo');
+    expect(labelledText).toContain('Active step');
     const description = document.getElementById(wind.getAttribute('aria-describedby')!)!;
     expect(description.textContent).toContain('Wind Devil');
     expect(description.textContent).toContain('Meta');
     expect(description.textContent).toContain('Ayuda a reducir resistencias.');
-    expect(root.querySelector('.skill-tree__active-label')?.textContent).toContain('Paso activo');
+    expect(root.querySelector('.skill-tree__active-label')?.textContent).toContain('Active step');
     expect(
       root.querySelector('[data-skill-state="omitir"]')?.textContent?.replace(/\s+/g, ' '),
     ).toContain('Espíritu de Roble');
@@ -123,7 +123,7 @@ describe('gd-skill-tree', () => {
 
     expect(root.querySelector('[data-selected="true"]')).toBeNull();
     expect(primal.getAttribute('data-active-step')).toBe('true');
-    expect(root.textContent).not.toContain('Barra insuficiente');
+    expect(root.textContent).not.toContain('Bar too low');
     expect(wind.getAttribute('aria-disabled')).toBeNull();
     wind.dispatchEvent(new MouseEvent('mouseenter'));
     fixture.detectChanges();
@@ -132,11 +132,11 @@ describe('gd-skill-tree', () => {
 
     fixture.componentRef.setInput('currentBar', 1);
     await fixture.whenStable();
-    expect(root.textContent).toContain('Barra insuficiente');
+    expect(root.textContent).toContain('Bar too low');
     expect(wind.getAttribute('aria-disabled')).toBeNull();
     fixture.componentRef.setInput('currentBar', 10);
     await fixture.whenStable();
-    expect(root.textContent).not.toContain('Barra insuficiente');
+    expect(root.textContent).not.toContain('Bar too low');
   });
 
   it('uses roving focus for arrows and Home/End, opens with Enter/Space, and restores focus on Escape', async () => {
@@ -241,11 +241,11 @@ describe('gd-skill-tree', () => {
     expect(emptyRoot.querySelector<HTMLDetailsElement>('details.skill-tree__list')?.open).toBe(
       true,
     );
-    expect(emptyRoot.textContent).toContain('No hay habilidades');
+    expect(emptyRoot.textContent).toContain('There are no skills');
 
     const invalid = await render({ nodes: [nodes[0], { ...nodes[1], parent_slug: 'missing' }] });
     expect(invalid.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
-      'No se pudo dibujar',
+      'could not be drawn',
     );
     expect(invalid.nativeElement.querySelector('details.skill-tree__list li')).not.toBeNull();
   });

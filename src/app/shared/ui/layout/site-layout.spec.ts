@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -36,7 +36,7 @@ describe('SiteLayout', () => {
     expect(root.querySelector('main')?.getAttribute('id')).toBe('main');
     expect(root.querySelector('main')?.getAttribute('tabindex')).toBe('-1');
     expect(root.querySelector('a')?.getAttribute('href')).toBe('/#main');
-    expect(root.querySelector('a')?.textContent).toContain('Saltar al contenido');
+    expect(root.querySelector('a')?.textContent).toContain('Skip to content');
   });
 
   it('renders legal attribution and real href values for navigation without JavaScript', async () => {
@@ -44,11 +44,15 @@ describe('SiteLayout', () => {
     await fixture.whenStable();
     const root: HTMLElement = fixture.nativeElement;
     expect(root.querySelector('footer')?.textContent).toContain(
-      'No está afiliado a Crate Entertainment',
+      'Not affiliated with Crate Entertainment',
     );
     const hrefs = [...root.querySelectorAll('a')].map((link) => link.getAttribute('href'));
     for (const href of ['/', '/tier-list', '/acerca', '/legal']) expect(hrefs).toContain(href);
-    expect(root.querySelector('nav')?.getAttribute('aria-label')).toBe('Navegación principal');
+    expect(root.querySelector('nav')?.getAttribute('aria-label')).toBe('Main navigation');
+    expect(root.querySelector('.header-inner > .lang-switch')?.textContent).toContain('English');
+    expect(
+      root.querySelector('.header-inner > .lang-switch a[hreflang="es"]')?.getAttribute('href'),
+    ).toBe('/es/');
   });
   it('keeps the configured application base in the native skip target', async () => {
     TestBed.overrideProvider(APP_BASE_HREF, { useValue: '/project/' });
@@ -58,6 +62,46 @@ describe('SiteLayout', () => {
     expect(fixture.nativeElement.querySelector('.skip-link').getAttribute('href')).toBe(
       '/project/tier-list?d=rayo#main',
     );
+  });
+
+  it('preserves route and query in the locale links and excludes the fragment', async () => {
+    const fixture = TestBed.createComponent(HostFixture);
+    await TestBed.inject(Router).navigateByUrl('/tier-list?x=1#section');
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector('.lang-switch a[hreflang="en"]')?.getAttribute('href')).toBe(
+      '/tier-list?x=1',
+    );
+    expect(root.querySelector('.lang-switch a[hreflang="es"]')?.getAttribute('href')).toBe(
+      '/es/tier-list?x=1',
+    );
+    expect(root.querySelector('.lang-switch a[hreflang="en"]')?.getAttribute('aria-current')).toBe(
+      'true',
+    );
+    expect(root.querySelector('.lang-switch a[hreflang="es"]')?.hasAttribute('aria-current')).toBe(
+      false,
+    );
+  });
+
+  it('builds links from the Spanish base and marks Spanish as the active locale', async () => {
+    TestBed.overrideProvider(LOCALE_ID, { useValue: 'es' });
+    TestBed.overrideProvider(APP_BASE_HREF, { useValue: '/es/' });
+    const fixture = TestBed.createComponent(HostFixture);
+    await TestBed.inject(Router).navigateByUrl('/tier-list?x=1');
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector('.lang-switch a[hreflang="en"]')?.getAttribute('href')).toBe(
+      '/tier-list?x=1',
+    );
+    expect(root.querySelector('.lang-switch a[hreflang="es"]')?.getAttribute('href')).toBe(
+      '/es/tier-list?x=1',
+    );
+    expect(root.querySelector('.lang-switch a[hreflang="es"]')?.getAttribute('aria-current')).toBe(
+      'true',
+    );
+    expect(root.querySelector('.lang-switch a[lang="en"]')?.textContent?.trim()).toBe('English');
+    expect(root.querySelector('.lang-switch a[lang="es"]')?.textContent?.trim()).toBe('Español');
+    expect(root.querySelector('.lang-switch button, .lang-switch [onclick]')).toBeNull();
   });
 
   it('updates the active navigation link using aria-current on router navigation', async () => {

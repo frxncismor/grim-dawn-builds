@@ -11,6 +11,7 @@ import {
   collectInitialJs,
   measureInitialJs,
   measureInitialRoutes,
+  CATALOG_JS_LIMIT,
   INITIAL_JS_LIMIT,
 } from './check-initial-js.mts';
 
@@ -98,12 +99,12 @@ test('static Home does not exempt catalog scripts, real gzip or missing files', 
       await writeFile(join(root, 'browser', name), 'console.log(1)');
     let budgets = await measureInitialRoutes(root);
     assert.equal(budgets[0].totalGzipBytes, 0);
-    assert.equal(budgets[1].limitBytes, 110000);
+    assert.equal(budgets[1].limitBytes, CATALOG_JS_LIMIT);
     assert.ok(budgets[1].files.some((f) => f.file === 'tier.js'));
     assert.ok(budgets[1].files.some((f) => f.file === 'inline-script-1' && f.gzipBytes > 0));
     await writeFile(join(root, 'browser/shared.js'), randomBytes(160000));
     budgets = await measureInitialRoutes(root);
-    assert.ok(budgets[1].totalGzipBytes > 110000);
+    assert.ok(budgets[1].totalGzipBytes > CATALOG_JS_LIMIT);
     await rm(join(root, 'browser/tier-list/index.html'));
     await assert.rejects(measureInitialRoutes(root));
   } finally {

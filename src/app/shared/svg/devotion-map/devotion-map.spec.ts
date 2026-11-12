@@ -197,8 +197,8 @@ describe('gd-devotion-map', () => {
     const emptyAffinity = root.querySelector(
       '[data-list-constellation][data-constellation-id="aether"]',
     );
-    expect(emptyAffinity?.textContent).toContain('Sin datos');
-    expect(emptyAffinity?.textContent).toContain('Sin afinidad otorgada');
+    expect(emptyAffinity?.textContent).toContain('No data');
+    expect(emptyAffinity?.textContent).toContain('No affinity granted');
     expect(emptyAffinity?.textContent).not.toMatch(/\b0\b/);
     const explicitlyEmpty = [constellations[0], { ...constellations[1], affinity_required: {} }];
     const emptyFixture = await render({ constellations: explicitlyEmpty });
@@ -206,7 +206,7 @@ describe('gd-devotion-map', () => {
       emptyFixture.nativeElement.querySelector(
         '[data-list-constellation][data-constellation-id="aether"]',
       )?.textContent,
-    ).toContain('Sin requisitos documentados');
+    ).toContain('No documented requirements');
   });
 
   it('resolves real bindings, labels external mentions, and retains unbound route and cleanup steps', async () => {
@@ -224,14 +224,14 @@ describe('gd-devotion-map', () => {
     );
     expect(mention?.textContent).toContain('Unbound Spark');
     expect(mention?.textContent).toContain('Mención de prueba');
-    expect(mention?.textContent).toContain('Mención externa');
+    expect(mention?.textContent).toContain('External mention');
     expect(root.querySelector('[data-step-position="3"]')?.textContent).toContain(
       'Comprobar afinidad',
     );
     expect(root.querySelector('[data-step-position="4"]')?.textContent).toContain(
       'Limpiar puntos sobrantes',
     );
-    expect(root.textContent).toContain('verifica en GrimTools antes de gastar');
+    expect(root.textContent).toContain('verify in GrimTools before spending points');
   });
 
   it('keeps active route position separate from selected group detail and restores focus on Escape', async () => {
@@ -276,7 +276,7 @@ describe('gd-devotion-map', () => {
     expect(detail.textContent).toContain('Sample Discharge');
     expect(detail.textContent).toContain('Unbound Spark');
     expect(detail.textContent).toContain('Mención de prueba');
-    expect(detail.textContent).toContain('verifica en GrimTools antes de gastar');
+    expect(detail.textContent).toContain('verify in GrimTools before spending points');
   });
 
   it('exposes complete bilingual group and route content in the open native list', async () => {
@@ -288,9 +288,9 @@ describe('gd-devotion-map', () => {
     expect(list.querySelectorAll('[data-list-constellation]')).toHaveLength(2);
     expect(list.querySelectorAll('[data-step-position]')).toHaveLength(5);
     expect(list.textContent).toContain('Aether');
-    expect(list.textContent).toContain('Nombre en inglés');
+    expect(list.textContent).toContain('English name');
     expect(list.textContent).toContain('Limpiar puntos sobrantes');
-    expect(list.textContent).toContain('verifica en GrimTools antes de gastar');
+    expect(list.textContent).toContain('verify in GrimTools before spending points');
     expect(list.textContent).toContain('Mención de prueba');
   });
 
@@ -333,7 +333,7 @@ describe('gd-devotion-map', () => {
     for (const values of invalidCases) {
       const fixture = await render(values);
       const root = fixture.nativeElement as HTMLElement;
-      expect(root.querySelector('[role="alert"]')?.textContent).toContain('No se pudo dibujar');
+      expect(root.querySelector('[role="alert"]')?.textContent).toContain('could not be drawn');
       expect(root.querySelector('details.devotion-map__list li')).not.toBeNull();
       expect(root.textContent).toContain('Abrir la senda');
     }
@@ -342,7 +342,7 @@ describe('gd-devotion-map', () => {
   it('shows an honest empty state and keeps the native list present', async () => {
     const fixture = await render({ constellations: [], steps: [], skillNodes: [] });
     const root = fixture.nativeElement as HTMLElement;
-    expect(root.textContent).toContain('No hay constelaciones');
+    expect(root.textContent).toContain('No constellations');
     expect(root.querySelector<HTMLDetailsElement>('details.devotion-map__list')?.open).toBe(true);
   });
 

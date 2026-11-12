@@ -227,6 +227,46 @@ suite('HTTP content contract on real PostgreSQL public views (T-060)', () => {
     );
   });
 
+  it('FR-16: serves approved asset descriptors and never pending art or private evidence', async () => {
+    await factory([], { includeDrafts: false });
+    const current = resources.at(-1)!;
+    const writer = new pg.Client({
+      host: '127.0.0.1',
+      port,
+      user: 'importer',
+      database: current.database,
+    });
+    await writer.connect();
+    try {
+      await writer.query(
+        `INSERT INTO assets
+          (slug, file_path, origin_url, rights_holder, license_or_permission, proof_ref, recorded_on, status, fallback_svg)
+         VALUES
+          ('rayo-aprobado', 'public/assets/official/rayo.svg', 'https://example.test/fixture',
+           'Fixture propio', 'Solo prueba', 'PRIVATE-EVIDENCE-PROOF', '2026-11-09', 'approved',
+           'src/assets/icons/damage-rayo.svg'),
+          ('rayo-pendiente', NULL, NULL, NULL, NULL, NULL, '2026-11-09', 'pending',
+           'src/assets/icons/damage-rayo.svg'),
+          ('rayo-rechazado', NULL, NULL, NULL, NULL, NULL, '2026-11-09', 'rejected',
+           'src/assets/icons/damage-rayo.svg')`,
+      );
+      const response = await current.app.inject('/api/v1/assets');
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual([
+        {
+          slug: 'rayo-aprobado',
+          file_path: 'public/assets/official/rayo.svg',
+          fallback_svg: 'src/assets/icons/damage-rayo.svg',
+        },
+      ]);
+      expect(response.body).not.toMatch(
+        /PRIVATE-EVIDENCE|origin_url|rights_holder|license_or_permission|proof_ref|rayo-pendiente|rayo-rechazado/,
+      );
+    } finally {
+      await writer.end();
+    }
+  });
+
   it('withdraws content immediately and refuses reads after migration drift without breaking health', async () => {
     const document = contractDoc('withdrawal-guide', {
       review_state: 'publicado',

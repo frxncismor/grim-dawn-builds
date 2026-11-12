@@ -1,10 +1,20 @@
 import { readFile } from 'node:fs/promises';
-import { basename, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { assertStaticHome, STATIC_HOME_MARKER, inlineExecutableScripts } from './static-home.mts';
+import { readArtifactLocales } from './locales.mts';
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 export const INITIAL_JS_LIMIT = 90000;
+/** `/tier-list` budget. Raised from 110500 to 112000 on 2026-11-11 by explicit user
+ * decision (T-138): the localized build adds the i18n hydration support
+ * (`withI18nSupport()`, 1 225 B gzip) plus the language switcher, and the measured
+ * artifact closes at 111 949 B. The previous 110000 → 110500 exception is kept in
+ * plan §17.51 together with this one; T-144 remains open to recover real headroom
+ * and lower the ceiling again. */
+export const CATALOG_JS_LIMIT = 112000;
 interface Output {
   entryPoint?: string;
   imports: { path: string; kind: string; external?: boolean }[];
@@ -91,11 +101,15 @@ export function collectInitialJs(
   return [...visited].sort();
 }
 
-export async function measureInitialJs(root: string, route: 'home' | 'tier-list' = 'home') {
+export async function measureInitialJs(
+  root: string,
+  route: 'home' | 'tier-list' = 'home',
+  segments: readonly string[] = [],
+) {
   const [stats, html] = await Promise.all([
     readFile(join(root, 'stats.json'), 'utf8'),
     readFile(
-      join(root, route === 'home' ? 'browser/index.html' : 'browser/tier-list/index.html'),
+      join(root, 'browser', ...segments, route === 'home' ? 'index.html' : 'tier-list/index.html'),
       'utf8',
     ),
   ]);
@@ -117,28 +131,41 @@ export async function measureInitialJs(root: string, route: 'home' | 'tier-list'
   return {
     files,
     totalGzipBytes: files.reduce((sum, file) => sum + file.gzipBytes, 0),
-    limitBytes: route === 'home' ? INITIAL_JS_LIMIT : 110000,
+    limitBytes: route === 'home' ? INITIAL_JS_LIMIT : CATALOG_JS_LIMIT,
   };
 }
 
-/** Measure current interactive catalog as well as Home; legacy fixtures may contain Home only. */
-export async function measureInitialRoutes(root: string) {
-  const results = [{ route: '/', ...(await measureInitialJs(root)) }];
+/** Measure current interactive catalog as well as Home for every configured locale. */
+export async function measureInitialRoutes(
+  root: string,
+  locales: readonly (readonly string[])[] = [[]],
+) {
   const stats = JSON.parse(await readFile(join(root, 'stats.json'), 'utf8')) as {
     outputs: Record<string, { entryPoint?: string }>;
   };
-  let hasTier = Object.values(stats.outputs).some((o) =>
+  const hasTier = Object.values(stats.outputs).some((o) =>
     o.entryPoint?.replaceAll('\\', '/').endsWith('src/app/features/tier-list/tier-list.page.ts'),
   );
-  try {
-    await readFile(join(root, 'browser/tier-list/index.html'));
-    hasTier = true;
-  } catch (error) {
-    if (!(error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT'))
-      throw error;
+  const results = [];
+  for (const segments of locales) {
+    const prefix = segments.length === 0 ? '' : `/${segments.join('/')}`;
+    results.push({ route: prefix || '/', ...(await measureInitialJs(root, 'home', segments)) });
+    let tier = hasTier;
+    if (!tier) {
+      try {
+        await readFile(join(root, 'browser', ...segments, 'tier-list/index.html'));
+        tier = true;
+      } catch (error) {
+        if (!(error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT'))
+          throw error;
+      }
+    }
+    if (tier)
+      results.push({
+        route: `${prefix}/tier-list`,
+        ...(await measureInitialJs(root, 'tier-list', segments)),
+      });
   }
-  if (hasTier)
-    results.push({ route: '/tier-list', ...(await measureInitialJs(root, 'tier-list')) });
   return results;
 }
 
@@ -146,7 +173,18 @@ async function main(argv: string[]): Promise<number> {
   try {
     if (argv.length && (argv.length !== 2 || argv[0] !== '--dir'))
       throw new Error('Argumento inválido.');
-    const results = await measureInitialRoutes(resolve(argv[1] ?? 'dist/grim-dawn-builds'));
+    const root = resolve(argv[1] ?? 'dist/grim-dawn-builds');
+    const locales: (readonly string[])[] = [];
+    for (const locale of await readArtifactLocales(REPO_ROOT)) {
+      try {
+        await readFile(join(root, 'browser', ...locale.segments, 'index.html'));
+        locales.push(locale.segments);
+      } catch {
+        // Un idioma sin artefacto no se mide; emit-404 ya exige su 404 y static-home su HTML.
+      }
+    }
+    if (locales.length === 0) locales.push([]);
+    const results = await measureInitialRoutes(root, locales);
     let pass = true;
     for (const result of results) {
       for (const file of result.files)

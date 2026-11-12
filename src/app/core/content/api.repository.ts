@@ -1,10 +1,51 @@
 import { PublicAuthorSchema, PublicBuildSchema, PublicTierListSchema } from '@gd/domain';
+import {
+  resolvePublicAssets,
+  type PublicAssetDescriptor,
+  type ResolvedAssetIcon,
+} from '../../shared/ui/icon/resolve-icon.server';
 import type { ContentRepository } from './repository';
 
 interface Schema<T> {
   safeParse(value: unknown): { success: boolean; data?: T };
 }
 const unavailable = () => new Error('API de contenido no disponible o respuesta inválida.');
+
+const DESCRIPTOR_KEYS = new Set(['slug', 'file_path', 'fallback_svg', 'status']);
+const ASSET_STATUSES = ['pending', 'approved', 'rejected'];
+/**
+ * Public descriptor contract of `GET /api/v1/assets`. Unknown keys are rejected on purpose:
+ * a payload that tries to include private provenance fails closed instead of being ignored.
+ */
+const PublicAssetDescriptorList: Schema<PublicAssetDescriptor[]> = {
+  safeParse(value) {
+    if (!Array.isArray(value)) return { success: false };
+    const assets: PublicAssetDescriptor[] = [];
+    const seen = new Set<string>();
+    for (const item of value) {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) return { success: false };
+      const raw = item as Record<string, unknown>;
+      if (Object.keys(raw).some((key) => !DESCRIPTOR_KEYS.has(key))) return { success: false };
+      const { slug, file_path: filePath, fallback_svg: fallbackSvg, status } = raw;
+      if (typeof slug !== 'string' || !PublicBuildSchema.shape.slug.safeParse(slug).success)
+        return { success: false };
+      if (filePath !== null && (typeof filePath !== 'string' || !filePath.startsWith('public/')))
+        return { success: false };
+      if (typeof fallbackSvg !== 'string') return { success: false };
+      if (status !== undefined && !ASSET_STATUSES.includes(status as string))
+        return { success: false };
+      if (seen.has(slug)) return { success: false };
+      seen.add(slug);
+      assets.push({
+        slug,
+        file_path: (filePath as string | null) ?? null,
+        fallback_svg: fallbackSvg,
+        ...(status === undefined ? {} : { status: status as PublicAssetDescriptor['status'] }),
+      });
+    }
+    return { success: true, data: assets };
+  },
+};
 
 /** Server-only adapter. Import from server configuration, never browser providers. */
 export class ApiContentRepository implements ContentRepository {
@@ -92,5 +133,19 @@ export class ApiContentRepository implements ContentRepository {
     const slugs = (await this.read('api/v1/slugs', PublicBuildSchema.shape.slug.array()))!;
     if (new Set(slugs).size !== slugs.length) throw unavailable();
     return slugs.sort();
+  }
+
+  /**
+   * FR-16 consumer: fetches the public descriptors of approved assets and resolves them with
+   * `resolveIcon`, so a page only ever receives a validated, evidence-free icon.
+   */
+  async listAssets(): Promise<ResolvedAssetIcon[]> {
+    const descriptors = (await this.read('api/v1/assets', PublicAssetDescriptorList))!;
+    try {
+      return resolvePublicAssets(descriptors);
+    } catch {
+      // A hostile path or an inconsistent descriptor never reaches a view.
+      throw unavailable();
+    }
   }
 }

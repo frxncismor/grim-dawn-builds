@@ -264,12 +264,10 @@ describe('gd-build-sections', () => {
     ).toBeNull();
     const priorities = await render(empty, 'prioridades');
     expect((priorities.nativeElement as HTMLElement).textContent).toContain(
-      'Sin información disponible',
+      'No information available',
     );
     const notes = await render(empty, 'notas');
-    expect((notes.nativeElement as HTMLElement).textContent).toContain(
-      'Sin información disponible',
-    );
+    expect((notes.nativeElement as HTMLElement).textContent).toContain('No information available');
 
     const hostile = {
       ...fixture,

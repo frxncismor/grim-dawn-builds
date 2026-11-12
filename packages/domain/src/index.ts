@@ -28,8 +28,64 @@ export type {
   PublicTierList,
 } from './schema.js';
 export type { Asset, Build, BuildInput, ReviewState, RightsStatus, TierEntry } from './schema.js';
+export {
+  ADAPTATION_ENTRY_KIND,
+  ADAPTATION_STATES,
+  AdaptationPublicationSchema,
+  BuildAdaptationSchema,
+  EVIDENCE_REQUIREMENT_BY_RIGHTS,
+  EVIDENCE_STATUSES,
+  EVIDENCE_TYPES,
+  PERMISSION_REQUEST_STATUSES,
+  PermissionRequestSchema,
+  SOURCE_CHANGE_OUTCOMES,
+  SOURCE_CHANGE_TYPES,
+  SourceChangeEventSchema,
+  SourceRightsEvidenceSchema,
+  TAKEDOWN_ACTIONS,
+  TakedownEventSchema,
+  TRANSFORMATION_SCOPES,
+  isPermissionGranted,
+  isPublishableRightsStatus,
+  requiredEvidenceType,
+} from './adaptation.js';
+export type {
+  AdaptationEntryKind,
+  AdaptationPublication,
+  AdaptationState,
+  BuildAdaptation,
+  EvidenceStatus,
+  EvidenceType,
+  PermissionRequest,
+  PermissionRequestStatus,
+  SourceChangeEvent,
+  SourceChangeOutcome,
+  SourceChangeType,
+  SourceRightsEvidence,
+  TakedownAction,
+  TakedownEvent,
+  TransformationScope,
+} from './adaptation.js';
 export { CONTENT_STATUSES, TIERS } from './vocabulary.js';
 export type { ContentStatus, Tier } from './vocabulary.js';
+export {
+  FR28_METADATA_FIELDS,
+  LINK_ONLY_METADATA_FIELDS,
+  PUBLICATION_GATE_CHECKLIST_POINTS,
+  PUBLICATION_GATE_CODES,
+  evaluatePublicationGate,
+  toLinkOnlyMetadata,
+} from './publication-gate.js';
+export type {
+  LinkOnlyMetadata,
+  LinkOnlyMetadataField,
+  PublicationGateChecklistPoint,
+  PublicationGateCode,
+  PublicationGateFailure,
+  PublicationGateInput,
+  PublicationGateResult,
+  PublicationOutcome,
+} from './publication-gate.js';
 export { publicFilter } from './visibility.js';
 export { checkAssetManifest } from './asset.js';
 export type { AssetIssue } from './asset.js';

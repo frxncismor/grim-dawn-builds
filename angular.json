@@ -14,6 +14,18 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
+      "i18n": {
+        "sourceLocale": {
+          "code": "en",
+          "subPath": ""
+        },
+        "locales": {
+          "es": {
+            "translation": "src/locale/messages.es.xlf",
+            "subPath": "es"
+          }
+        }
+      },
       "architect": {
         "build": {
           "builder": "@angular/build:application",
@@ -44,8 +56,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "280kB",
-                  "maximumError": "300kB"
+                  "maximumWarning": "300kB",
+                  "maximumError": "320kB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -54,7 +66,9 @@
                 }
               ],
               "outputHashing": "all",
-              "statsJson": true
+              "statsJson": true,
+              "localize": ["en", "es"],
+              "i18nMissingTranslation": "error"
             },
             "development": {
               "optimization": false,
@@ -120,6 +134,36 @@
               "browser": "src/app/features/build/video-facade/preview.browser.ts",
               "server": "src/app/features/build/video-facade/preview.server.ts",
               "outputPath": "dist/video-facade-preview",
+              "optimization": true,
+              "outputHashing": "all",
+              "statsJson": true,
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ]
+            },
+            "build-meta-preview": {
+              "browser": "src/app/features/build/attribution/preview.browser.ts",
+              "server": "src/app/features/build/attribution/preview.server.ts",
+              "outputPath": "dist/build-meta-preview",
+              "optimization": true,
+              "outputHashing": "all",
+              "statsJson": true,
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ]
+            },
+            "build-page-preview": {
+              "browser": "src/app/features/build/preview.browser.ts",
+              "server": "src/app/features/build/preview.server.ts",
+              "outputPath": "dist/build-page-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true,

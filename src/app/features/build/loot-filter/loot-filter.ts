@@ -35,20 +35,20 @@ export class LootFilter {
   readonly copying = signal(false);
   readonly copyStatus = signal('');
   readonly text = {
-    empty: $localize`:@@lootFilter.empty:Sin información disponible`,
-    duplicatePositions: $localize`:@@lootFilter.duplicatePositions:Los datos de esta guía son inconsistentes porque contienen posiciones repetidas. El contenido sigue visible, pero no se puede copiar el resumen.`,
-    javascriptRequired: $localize`:@@lootFilter.javascriptRequired:Copiar requiere JavaScript; el resumen completo ya está visible en la página.`,
-    copy: $localize`:@@lootFilter.copy:Copiar resumen`,
-    copying: $localize`:@@lootFilter.copying:Copiando…`,
-    copySuccess: $localize`:@@lootFilter.copySuccess:Resumen copiado al portapapeles.`,
-    clipboardUnavailable: $localize`:@@lootFilter.clipboardUnavailable:El portapapeles no está disponible. Puedes seleccionar y copiar el resumen visible manualmente.`,
-    copyError: $localize`:@@lootFilter.copyError:No se pudo copiar el resumen. Puedes seleccionar y copiar el texto visible manualmente.`,
+    empty: $localize`:@@lootFilter.empty:No information available`,
+    duplicatePositions: $localize`:@@lootFilter.duplicatePositions:This guide's data is inconsistent because it contains repeated positions. The content remains visible, but the summary cannot be copied.`,
+    javascriptRequired: $localize`:@@lootFilter.javascriptRequired:Copying requires JavaScript; the full summary is already visible on the page.`,
+    copy: $localize`:@@lootFilter.copy:Copy summary`,
+    copying: $localize`:@@lootFilter.copying:Copying…`,
+    copySuccess: $localize`:@@lootFilter.copySuccess:Summary copied to the clipboard.`,
+    clipboardUnavailable: $localize`:@@lootFilter.clipboardUnavailable:The clipboard is not available. You can select and copy the visible summary manually.`,
+    copyError: $localize`:@@lootFilter.copyError:The summary could not be copied. You can select and copy the visible text manually.`,
   };
 
   private readonly actionLabels: Record<LootRule['action'], string> = {
-    marcar: $localize`:@@lootFilter.action.mark:Marcar`,
-    desmarcar: $localize`:@@lootFilter.action.unmark:Desmarcar`,
-    aviso: $localize`:@@lootFilter.action.notice:Aviso`,
+    marcar: $localize`:@@lootFilter.action.mark:Mark`,
+    desmarcar: $localize`:@@lootFilter.action.unmark:Unmark`,
+    aviso: $localize`:@@lootFilter.action.notice:Notice`,
   };
 
   readonly isVisible = computed(() => {
@@ -157,6 +157,6 @@ export class LootFilter {
   }
 
   private headingText(): string {
-    return $localize`:@@lootFilter.heading:Filtro de botín`;
+    return $localize`:@@lootFilter.heading:Loot filter`;
   }
 }

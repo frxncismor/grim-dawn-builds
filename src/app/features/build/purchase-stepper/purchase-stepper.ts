@@ -30,12 +30,12 @@ export interface PurchaseStepSelection {
   activeIds: string[];
 }
 
-const EMPTY_MESSAGE = $localize`:@@purchaseStepper.empty:Sin información disponible`;
-const NO_NUMBER_MESSAGE = $localize`:@@purchaseStepper.noNumber:Objetivo sin cifra`;
-const UNSUPPORTED_STORAGE_MESSAGE = $localize`:@@purchaseStepper.storageUnavailable:El guardado no está disponible en este navegador. El checklist seguirá funcionando en esta vista.`;
-const REMOVE_FAILED_MESSAGE = $localize`:@@purchaseStepper.removeFailed:No se pudo borrar el progreso guardado; solo se borró en esta vista.`;
-const OPT_OUT_REMOVE_FAILED_MESSAGE = $localize`:@@purchaseStepper.optOutRemoveFailed:El guardado se desactivó en esta vista, pero no se pudo eliminar el registro del navegador.`;
-const CLEARED_MESSAGE = $localize`:@@purchaseStepper.cleared:Progreso borrado en esta vista y en este navegador.`;
+const EMPTY_MESSAGE = $localize`:@@purchaseStepper.empty:No information available`;
+const NO_NUMBER_MESSAGE = $localize`:@@purchaseStepper.noNumber:No point value`;
+const UNSUPPORTED_STORAGE_MESSAGE = $localize`:@@purchaseStepper.storageUnavailable:Saving is not available in this browser. The checklist will keep working in this view.`;
+const REMOVE_FAILED_MESSAGE = $localize`:@@purchaseStepper.removeFailed:Saved progress could not be deleted; it was only cleared in this view.`;
+const OPT_OUT_REMOVE_FAILED_MESSAGE = $localize`:@@purchaseStepper.optOutRemoveFailed:Saving was turned off in this view, but the record could not be removed from the browser.`;
+const CLEARED_MESSAGE = $localize`:@@purchaseStepper.cleared:Progress cleared in this view and in this browser.`;
 
 @Component({
   selector: 'gd-purchase-stepper',
@@ -117,16 +117,16 @@ export class PurchaseStepper {
 
   pointsLabel(points: number | null): string {
     if (points === null) return this.noNumberMessage;
-    if (points === 1) return $localize`:@@purchaseStepper.onePoint:${points}:count: punto`;
-    return $localize`:@@purchaseStepper.points:${points}:count: puntos`;
+    if (points === 1) return $localize`:@@purchaseStepper.onePoint:${points}:count: point`;
+    return $localize`:@@purchaseStepper.points:${points}:count: points`;
   }
 
   selectLabel(step: PurchaseStepperContent['purchase_steps'][number]): string {
-    return $localize`:@@purchaseStepper.selectLabel:Ver habilidades del paso ${step.position}:position:, ${step.title}:title:, ${step.threshold_label}:threshold:`;
+    return $localize`:@@purchaseStepper.selectLabel:View skills for step ${step.position}:position:, ${step.title}:title:, ${step.threshold_label}:threshold:`;
   }
 
   completionLabel(step: PurchaseStepperContent['purchase_steps'][number]): string {
-    return $localize`:@@purchaseStepper.completionLabel:Marcar el paso ${step.position}:position:, ${step.title}:title: como completado`;
+    return $localize`:@@purchaseStepper.completionLabel:Mark step ${step.position}:position:, ${step.title}:title: as completed`;
   }
 
   isCompleted(position: number): boolean {

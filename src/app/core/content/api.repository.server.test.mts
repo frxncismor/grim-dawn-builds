@@ -67,6 +67,66 @@ test('HTTP adapter implements every port method with validated public DTOs', asy
   assert.equal(requests.length, 8);
 });
 
+test('FR-16: public asset descriptors are fetched and resolved without private evidence', async () => {
+  const payload = [
+    {
+      slug: 'rayo-oficial',
+      file_path: 'public/assets/official/rayo.svg',
+      fallback_svg: 'src/assets/icons/damage-rayo.svg',
+    },
+    {
+      slug: 'pendiente',
+      status: 'pending',
+      file_path: null,
+      fallback_svg: 'src/assets/icons/status-placeholder.svg',
+    },
+  ];
+  let requested = '';
+  const repository = new ApiContentRepository('http://localhost:3000/', async (url) => {
+    requested = new URL(String(url)).pathname;
+    return response(payload);
+  });
+
+  assert.deepEqual(await repository.listAssets(), [
+    {
+      slug: 'pendiente',
+      icon: {
+        id: 'status-placeholder',
+        src: 'assets/icons/status-placeholder.svg',
+        fallbackSrc: 'assets/icons/status-placeholder.svg',
+      },
+    },
+    {
+      slug: 'rayo-oficial',
+      icon: {
+        id: 'damage-rayo',
+        src: 'assets/official/rayo.svg',
+        fallbackSrc: 'assets/icons/damage-rayo.svg',
+      },
+    },
+  ]);
+  assert.equal(requested, '/api/v1/assets');
+
+  for (const hostile of [
+    [{ ...payload[0]!, proof_ref: 'PRIVATE-EVIDENCE' }],
+    [{ ...payload[0]!, origin_url: 'https://example.test/private' }],
+    [{ ...payload[0]!, file_path: 'https://example.test/rayo.svg' }],
+    [{ ...payload[0]!, file_path: 'public/assets/official/../private.svg' }],
+    [{ ...payload[0]!, fallback_svg: 'https://example.test/fallback.svg' }],
+    [{ ...payload[0]!, slug: 'bad/slug' }],
+    [{ slug: payload[0]!.slug }],
+  ]) {
+    const hostileRepository = new ApiContentRepository('http://localhost', async () =>
+      response(hostile),
+    );
+    await assert.rejects(hostileRepository.listAssets(), (error: Error) => {
+      assert.equal(error.message, 'API de contenido no disponible o respuesta inválida.');
+      assert.equal(error.cause, undefined);
+      return true;
+    });
+  }
+});
+
 test('rejects invalid configuration and slugs before issuing requests', async () => {
   const authenticated = new URL('http://localhost');
   authenticated.username = 'name';

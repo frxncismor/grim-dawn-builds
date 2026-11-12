@@ -80,7 +80,10 @@ export const ALLOWED_EDGES: Readonly<Record<Zone, readonly Zone[]>> = {
 };
 
 const EDGE_HINTS: ReadonlyMap<string, string> = new Map([
-  ['web>api', 'La web no importa la API: el acceso es solo HTTP desde el adaptador ApiContentRepository.'],
+  [
+    'web>api',
+    'La web no importa la API: el acceso es solo HTTP desde el adaptador ApiContentRepository.',
+  ],
   ['api>web', 'La API no importa la web: los contratos compartidos viven en packages/domain.'],
 ]);
 
@@ -120,12 +123,34 @@ const DOMAIN_FORBIDDEN: readonly ForbiddenGroup[] = [
   {
     rule: 'domain-network',
     label: 'módulo HTTP o de red',
-    patterns: ['http', 'https', 'http2', 'net', 'tls', 'dgram', 'dns', 'undici', 'node-fetch', 'axios', 'got'],
+    patterns: [
+      'http',
+      'https',
+      'http2',
+      'net',
+      'tls',
+      'dgram',
+      'dns',
+      'undici',
+      'node-fetch',
+      'axios',
+      'got',
+    ],
   },
   {
     rule: 'domain-io',
     label: 'E/S del sistema',
-    patterns: ['fs', 'path', 'child_process', 'os', 'process', 'worker_threads', 'cluster', 'readline', 'vm'],
+    patterns: [
+      'fs',
+      'path',
+      'child_process',
+      'os',
+      'process',
+      'worker_threads',
+      'cluster',
+      'readline',
+      'vm',
+    ],
   },
 ];
 
@@ -134,7 +159,14 @@ const NETWORK_CONSTRUCTORS: ReadonlySet<string> = new Set(['XMLHttpRequest', 'We
 const FETCH_RECEIVERS: ReadonlySet<string> = new Set(['globalThis', 'window', 'self']);
 
 /** Directorios ignorados en cualquier nivel de una zona. `fixtures` aloja casos a propósito inválidos. */
-const IGNORED_DIRS: ReadonlySet<string> = new Set(['node_modules', 'dist', 'coverage', '.angular', '.git', 'fixtures']);
+const IGNORED_DIRS: ReadonlySet<string> = new Set([
+  'node_modules',
+  'dist',
+  'coverage',
+  '.angular',
+  '.git',
+  'fixtures',
+]);
 const CODE_EXT = /\.[cm]?[jt]sx?$/;
 
 function normalizeRel(path: string): string {
@@ -203,7 +235,8 @@ function ioGlobalUse(node: ts.Node): string | undefined {
   if (ts.isPropertyAccessExpression(node) && node.name.text === 'env') {
     const target = node.expression;
     if (ts.isIdentifier(target) && target.text === 'process') return 'process.env';
-    if (ts.isPropertyAccessExpression(target) && target.name.text === 'process') return 'process.env';
+    if (ts.isPropertyAccessExpression(target) && target.name.text === 'process')
+      return 'process.env';
     if (ts.isMetaProperty(target)) return 'import.meta.env';
   }
   if (
@@ -216,7 +249,11 @@ function ioGlobalUse(node: ts.Node): string | undefined {
     return 'process.env';
   }
   if (ts.isCallExpression(node) && isGlobalFetch(node.expression)) return 'fetch()';
-  if (ts.isNewExpression(node) && ts.isIdentifier(node.expression) && NETWORK_CONSTRUCTORS.has(node.expression.text)) {
+  if (
+    ts.isNewExpression(node) &&
+    ts.isIdentifier(node.expression) &&
+    NETWORK_CONSTRUCTORS.has(node.expression.text)
+  ) {
     return `new ${node.expression.text}()`;
   }
   return undefined;
@@ -224,7 +261,10 @@ function ioGlobalUse(node: ts.Node): string | undefined {
 
 function isModuleCall(node: ts.CallExpression): boolean {
   const callee = node.expression;
-  return callee.kind === ts.SyntaxKind.ImportKeyword || (ts.isIdentifier(callee) && callee.text === 'require');
+  return (
+    callee.kind === ts.SyntaxKind.ImportKeyword ||
+    (ts.isIdentifier(callee) && callee.text === 'require')
+  );
 }
 
 function edgeMessage(spec: string, from: Zone, to: Zone): string {
@@ -246,16 +286,30 @@ export function checkSource(file: string, text: string): Issue[] {
   if (zone === undefined) return [];
 
   const relPath = normalizeRel(file);
-  const sourceFile = ts.createSourceFile(relPath, text, ts.ScriptTarget.Latest, true, scriptKindFor(relPath));
+  const sourceFile = ts.createSourceFile(
+    relPath,
+    text,
+    ts.ScriptTarget.Latest,
+    true,
+    scriptKindFor(relPath),
+  );
   const issues: Issue[] = [];
-  const lineOf = (node: ts.Node): number => sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
+  const lineOf = (node: ts.Node): number =>
+    sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
 
   const checkSpecifier = (spec: string, node: ts.Node): void => {
     const line = lineOf(node);
     const isRelative = spec.startsWith('.');
-    const target = isRelative ? zoneOf(posix.join(posix.dirname(relPath), spec)) : zoneOfPackage(spec);
+    const target = isRelative
+      ? zoneOf(posix.join(posix.dirname(relPath), spec))
+      : zoneOfPackage(spec);
     if (target !== undefined && target !== zone && !ALLOWED_EDGES[zone].includes(target)) {
-      issues.push({ file: relPath, line, rule: 'zone-edge', message: edgeMessage(spec, zone, target) });
+      issues.push({
+        file: relPath,
+        line,
+        rule: 'zone-edge',
+        message: edgeMessage(spec, zone, target),
+      });
     }
     if (zone !== 'domain') return;
     const group = forbiddenDomainGroup(spec);
@@ -287,7 +341,10 @@ export function checkSource(file: string, text: string): Issue[] {
       if (node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
         checkSpecifier(node.moduleSpecifier.text, node.moduleSpecifier);
       }
-    } else if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference)) {
+    } else if (
+      ts.isImportEqualsDeclaration(node) &&
+      ts.isExternalModuleReference(node.moduleReference)
+    ) {
       const expression = node.moduleReference.expression;
       if (ts.isStringLiteral(expression)) checkSpecifier(expression.text, expression);
     } else if (ts.isImportTypeNode(node)) {
@@ -365,7 +422,9 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     for (const issue of result.issues) {
       console.error(`${issue.file}:${issue.line} [${issue.rule}] ${issue.message}`);
     }
-    console.error(`\ncheck:boundaries FALLÓ (${result.issues.length} incidencia(s), ${result.scannedFiles} archivos revisados)`);
+    console.error(
+      `\ncheck:boundaries FALLÓ (${result.issues.length} incidencia(s), ${result.scannedFiles} archivos revisados)`,
+    );
     process.exit(1);
   }
   console.log(`check:boundaries OK (${result.scannedFiles} archivos revisados)`);

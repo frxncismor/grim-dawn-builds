@@ -1,0 +1,133 @@
+@if (content().draft) {
+  <p class="draft-banner" role="status" data-draft-banner i18n="@@buildPage.draftBanner">
+    Draft · not public
+  </p>
+}
+
+<div class="build-layout">
+  <aside class="build-aside">
+    <gd-build-toc [content]="content()" />
+  </aside>
+
+  <div class="build-content">
+    <gd-build-sections [content]="content()" section="resumen" />
+    @if (content().adaptation; as adaptation) {
+      <gd-source-attribution [attribution]="adaptation" />
+    }
+    <gd-build-sections [content]="content()" section="prioridades" />
+
+    <ng-template #skillsFallback>
+      <section class="build-block" id="habilidades" aria-labelledby="habilidades-title">
+        <h2 id="habilidades-title" i18n="@@buildPage.skills">Skills</h2>
+        @for (slot of treeSlots(); track slot.treeId) {
+          <section class="fallback-tree" [attr.aria-labelledby]="slot.treeId + '-fallback-title'">
+            <h3 [id]="slot.treeId + '-fallback-title'">
+              {{ slot.mastery.name_es }} <span lang="en">({{ slot.mastery.name_en }})</span>
+            </h3>
+            <p class="fallback-role">{{ slot.mastery.role_text }}</p>
+            @if (slot.nodes.length) {
+              <ol class="fallback-list">
+                @for (node of slot.nodes; track node.slug) {
+                  <li data-fallback-node>
+                    <strong>{{ node.name_es }}</strong>
+                    <span lang="en">({{ node.name_en }})</span>
+                    <span class="fallback-status">{{ nodeStatusLabel(node.status) }}</span>
+                    <span class="fallback-bar"
+                      ><span i18n="@@buildPage.bar">Bar</span> {{ node.bar_required }}</span
+                    >
+                    @if (node.tag) {
+                      <span class="fallback-tag">{{ node.tag }}</span>
+                    }
+                    <p>{{ node.rationale }}</p>
+                  </li>
+                }
+              </ol>
+            } @else {
+              <p role="status" i18n="@@buildPage.noSkills">There are no skills for this mastery.</p>
+            }
+          </section>
+        }
+        <div class="build-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+      </section>
+    </ng-template>
+
+    @defer (on viewport) {
+      <section class="build-block" id="habilidades" aria-labelledby="habilidades-title">
+        <h2 id="habilidades-title" i18n="@@buildPage.skills">Skills</h2>
+        @for (slot of treeSlots(); track slot.treeId) {
+          <gd-skill-tree
+            [treeId]="slot.treeId"
+            [mastery]="slot.mastery"
+            [nodes]="slot.nodes"
+            [activeIds]="activeIds()"
+          />
+        }
+      </section>
+    } @placeholder (minimum 500ms) {
+      <div class="defer-placeholder">
+        <ng-container *ngTemplateOutlet="skillsFallback" />
+      </div>
+    } @loading (minimum 500ms) {
+      <div class="defer-placeholder">
+        <ng-container *ngTemplateOutlet="skillsFallback" />
+      </div>
+    }
+
+    <gd-purchase-stepper [content]="content()" (selectionChange)="onSelectionChange($event)" />
+    <gd-build-sections [content]="content()" section="notas" />
+    <gd-loot-filter [content]="content()" />
+    <gd-build-sections [content]="content()" section="guia-espiritual" />
+
+    <ng-template #devotionsFallback>
+      <section class="build-block" id="devociones" aria-labelledby="devociones-heading">
+        <h2 id="devociones-heading" i18n="@@buildPage.devotions">Devotion path</h2>
+        @for (note of devotionIntroductions(); track note.position) {
+          <p class="fallback-role">{{ note.detail }}</p>
+        }
+        @if (orderedDevotionSteps().length) {
+          <ol class="fallback-list">
+            @for (step of orderedDevotionSteps(); track step.position) {
+              <li data-fallback-devotion-step>
+                <strong>{{ step.position }}. {{ step.label }}</strong>
+                @if (step.title_override !== null && step.title_override !== step.label) {
+                  <span class="fallback-tag">{{ '· ' + step.title_override }}</span>
+                }
+                <span class="fallback-status">{{ verificationLabel(step.verification) }}</span>
+                <p>{{ step.body }}</p>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p role="status" i18n="@@buildPage.noDevotions">No information available</p>
+        }
+        <div class="build-skeleton" aria-hidden="true"><span></span><span></span></div>
+      </section>
+    </ng-template>
+
+    @defer (on viewport) {
+      <gd-devotion-section
+        [content]="content()"
+        [mapId]="devotionMapId()"
+        [activeStepPosition]="activeStepPosition()"
+        (activeStepPositionChange)="onDevotionStepChange($event)"
+      />
+    } @placeholder (minimum 500ms) {
+      <div class="defer-placeholder">
+        <ng-container *ngTemplateOutlet="devotionsFallback" />
+      </div>
+    } @loading (minimum 500ms) {
+      <div class="defer-placeholder">
+        <ng-container *ngTemplateOutlet="devotionsFallback" />
+      </div>
+    }
+
+    @if (hasVideo()) {
+      <gd-video-facade [content]="content()" />
+    }
+
+    <gd-build-attribution
+      [content]="content()"
+      [authorPlaceholder]="content().authorIsPlaceholder"
+    />
+  </div>
+</div>

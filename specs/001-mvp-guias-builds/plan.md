@@ -148,7 +148,7 @@ Ver spec §7. Se reservan las abstracciones (repositorio, esquema, i18n) pero no
 ## 11. Local-first y portabilidad (decisión `hosting=local_first`)
 
 - **Ahora**: `ng serve`/`ng build` locales, `docker compose` local (PostgreSQL 17 + API Fastify), Playwright/axe/Lighthouse contra `http://localhost`, sin secretos con claves ni proveedor remoto. Sin Docker, `pnpm verify` usa fixtures (marcado `source=fixture`).
-- **Diferido (no implementar)**: proveedor de hosting, dominio, BD remota, secretos de despliegue, workflows de CI/**deploy**. (Los workflows de **verificación** en PR son admisibles, §12.8.)
+- **Diferido (no implementar)**: proveedor de hosting, dominio, BD remota, secretos de despliegue, workflows de CI/**deploy**. (Los workflows de **verificación** en PR son admisibles, §12.8.) **Decisión cerrada el 2026-11-11 (S11, §17.58): MVP local; el hosting queda fuera del MVP por decisión del usuario.**
 - **Portabilidad preservada**: salida estática independiente del host; `BASE_URL` configurable; repositorio de contenido tras interfaz; PostgreSQL estándar (sin APIs de proveedor); nada en el código asume un dominio.
 - **Reglas**: ningún secreto en el repositorio; `.env.example` solo con nombres de variables y valores por defecto seguros no secretos (rev. 5, ver §13.2).
 
@@ -246,14 +246,14 @@ Fases (cada una un PR): **M0** hoy: solo `fixture`. **M1** BD + API en dev, seed
 
 ### 12.9 Decisiones (rev. 4)
 
-| ID  | Decisión                                                               | Estado                                                                                          |
-| --- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| B-1 | Framework API                                                          | **Cerrada: Fastify**                                                                            |
-| B-2 | Acceso a datos/migraciones                                             | **Cerrada: Drizzle ORM + drizzle-kit** (SQL personalizado para puertas)                         |
-| B-3 | Versiones                                                              | **Cerrada: Node.js 22 LTS, PostgreSQL 17** (fijar tag/digest exacto al implementar T-054/T-056) |
-| B-4 | BD vs `content/`                                                       | **Cerrada: BD = fuente de verdad; `content/` = fixtures/importación**                           |
-| B-5 | CORS/orígenes                                                          | **Cerrada 2026-11-09**: solo `http://localhost:4200`; no wildcard ni `127.0.0.1:4200` |
-| B-6 | Consumo de la API desde la web                                         | **Cerrada por implicación**: el build de release lee la API (T-062/T-074)                       |
+| ID  | Decisión                                   | Estado                                                                                            |
+| --- | ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| B-1 | Framework API                              | **Cerrada: Fastify**                                                                              |
+| B-2 | Acceso a datos/migraciones                 | **Cerrada: Drizzle ORM + drizzle-kit** (SQL personalizado para puertas)                           |
+| B-3 | Versiones                                  | **Cerrada: Node.js 22 LTS, PostgreSQL 17** (fijar tag/digest exacto al implementar T-054/T-056)   |
+| B-4 | BD vs `content/`                           | **Cerrada: BD = fuente de verdad; `content/` = fixtures/importación**                             |
+| B-5 | CORS/orígenes                              | **Cerrada 2026-11-09**: solo `http://localhost:4200`; no wildcard ni `127.0.0.1:4200`             |
+| B-6 | Consumo de la API desde la web             | **Cerrada por implicación**: el build de release lee la API (T-062/T-074)                         |
 | B-7 | Vía de escritura editorial tras el cutover | **Cerrada 2026-11-09**: CLI local con rol `editor` y dominio; T-129 antes de T-072; sin API admin |
 
 ### 12.10 Integración web ↔ API
@@ -287,7 +287,7 @@ Fases (cada una un PR): **M0** hoy: solo `fixture`. **M1** BD + API en dev, seed
 | R-M8  | `drizzle-kit push` o edición manual de SQL rompe el historial                                      | Prohibido `push` fuera de BD desechable; CI de diff de generate                                                                      |
 | R-M9  | Secreto commiteado, filtrado en logs/imagen/bundle web o credencial compartida entre roles de BD   | §13 (capas, escaneo, roles separados, runbook), T-078–T-090                                                                          |
 | R-M10 | Ingesta futura copia contenido sin permiso o lo da por permitido implícitamente                    | §14: registro de fuentes, puerta de permiso por fuente, `borrador` obligatorio, link-only por defecto, T-091–T-100 diferidas, AC-19  |
-| R-M11 | Cutover antes de verificar la CLI editorial elegida | T-129 implementa B-7 antes de T-072; conserva derechos pending y controles BD |
+| R-M11 | Cutover antes de verificar la CLI editorial elegida                                                | T-129 implementa B-7 antes de T-072; conserva derechos pending y controles BD                                                        |
 | R-M12 | La config de markdownlint se relaja hasta no validar nada, o `--fix` altera el contenido semántico | §12.14: solo se desactivan MD013 (y MD060 si procede) con motivo escrito; `--fix` solo con reglas seguras y revisión del diff; T-123 |
 
 ### 12.14 Calidad de Markdown: markdownlint (rev. 8)
@@ -1534,9 +1534,11 @@ Ampliación confirmada por sdd-escalation antes de código: `features/author/*` 
 core/content/catalog.server.ts (extraer documentos/proyección sin cambiar wrapper
 loadCatalogData), core/content/author-pages.server.ts/.test.mts; package.json y
 quickstart.md. No cambios al contrato canónico/API/SQL ni dependencias nuevas.
-La página legal requiere canal real de contacto: pregunta async pendiente; no
-inventar correo, responsable, servicio ni SLA. Autor/acerca se implementan ahora,
-legal y cierre T-039 esperan ese dato. Guía→autor se verifica al existir T-037.
+La página legal usa el **canal de contacto decidido el 2026-11-10**: GitHub Issues
+del repositorio (`https://github.com/frxncismor/grim-dawn-builds/issues`), para
+retiradas y contacto general. No inventar correo, responsable, servicio ni SLA.
+Ese canal desbloquea `/legal` y `T-102`. Autor/acerca ya existen y verifican;
+`T-039` se cierra con la página legal y el enlace del pie.
 
 loadPublicSiteData comparte lecturas públicas tier/builds ya existentes; deriva
 perfiles desde PublicBuild.author y resuelve solo propietario de tier restante
@@ -2871,3 +2873,676 @@ la causa registrada.
 
 **Cierre**: marcar `T-136` solo con la revisión registrada. No sustituye a
 `T-013`/`T-014` de spec002 ni a `T-040`–`T-043`, `T-126` o `T-128`.
+
+### 17.45 T-138: inglés primario y español como configuración regional completa
+
+**Origen**: enmienda 1.9.0 del principio X y petición del usuario (2026-11-10): el
+proyecto es open source, así que el inglés es el idioma primario del sitio y el
+español una opción completa, no un añadido.
+
+**Alcance**: configuración regional en Angular. El sitio hoy usa `$localize` y
+declara `<html lang="es-419">` sin catálogos: hay una sola configuración regional
+implícita. Esta tarea la convierte en dos reales.
+
+**Archivos**: `angular.json` (configuraciones `en` y `es` con `localize` e
+`i18nMissingTranslation: error`), `src/index.html`, `src/locale/messages.en.xlf`,
+`src/locale/messages.es.xlf`, un conmutador de idioma accesible en el layout,
+`scripts/check-locale-parity.mts` y su prueba, `package.json`,
+`scripts/verify-local.mjs`, `specs/001-mvp-guias-builds/quickstart.md`.
+
+**Contrato**: `en` es la configuración regional por defecto y la que se sirve en la
+raíz; `es` se sirve bajo `/es` (o subdominio decidido en el plan de hosting, que
+sigue diferido). El conmutador es un enlace real navegable sin JavaScript que
+conserva ruta y query, nunca un botón con handler. Cada configuración regional
+prerenderiza las mismas rutas. `hreflang` recíproco y `canonical` propio por
+configuración regional. Los enlaces internos se generan con la configuración
+regional activa, sin perder `baseHref`.
+
+**Puerta de paridad**: `check:locale-parity.mts` compara los dos catálogos XLF y
+falla si una cadena existe en uno y no en el otro, o si alguna traducción está
+vacía. Con `i18nMissingTranslation: error`, una cadena sin traducir rompe el build
+en vez de publicarse en silencio. Las pruebas comprueban que ambas configuraciones
+renderizan el mismo conjunto de secciones y los mismos `id` de anclaje.
+
+**Contenido**: los textos editoriales llevan `locale`; el contenido sin traducción
+se muestra en su idioma original con `lang` explícito, nunca traducido por
+invención. Los nombres de juego ya se guardan en `es` y `en` (principio VI).
+
+**Límite**: no migra `spec.md`, `plan.md`, `tasks.md` ni la documentación
+operativa, que siguen en español hasta su propia tarea. No cambia el idioma de los
+mensajes de commit históricos.
+
+**Cierre**: marcar `T-138` solo con ambas configuraciones construidas, paridad en
+verde, axe sin violaciones en las dos y presupuestos de `plan.md` §6 conservados.
+
+### 17.46 T-021: sitemap y robots derivados de la fuente activa
+
+**Alcance previo a código**: FR-11/FR-13 y AC-09/AC-13; índice y descubrimiento
+públicos sin exponer contenido no publicable. Depende de T-020 (rutas y prerender
+reales), T-010/T-062 (fuente de contenido) y T-018 (URL base validada). No añade
+dependencias, no toca el backend y no publica la guía migrada.
+
+**Archivos exactos**: `scripts/gen-sitemap.mts`, `scripts/gen-sitemap.test.mts`,
+`public/robots.txt` (plantilla versionada), `.gitignore` (solo si el sitemap se
+genera y no se versiona), `package.json` (script `sitemap:generate` y su inclusión
+en `build`/`build:release`), `scripts/verify-local.mjs`,
+`specs/001-mvp-guias-builds/quickstart.md`.
+
+**Regla de oro**: el sitemap **se deriva de la fuente activa del build**, no de un
+archivo escrito a mano. Con `CONTENT_SOURCE=fixture` se genera para desarrollo y el
+artefacto queda marcado como no publicable; con `CONTENT_SOURCE=api` se genera desde
+la API. Nunca se versiona un `sitemap.xml` con contenido: se genera en `dist/`.
+
+**Entradas incluidas**: exactamente las rutas prerenderizadas que el build produjo,
+leídas del propio artefacto (no de una lista paralela que pueda divergir):
+
+- `/`, `/tier-list`, `/acerca`.
+- `/autores/:slug` solo para autores con contenido visible y sin `is_placeholder`.
+- `/builds/:slug` solo para builds con `review_state=publicado` y
+  `rights_status` aprobado.
+
+Si una ruta está en el sitemap y no existe en `dist/`, la tarea falla: es la forma
+de detectar que el filtro público y el prerender divergen.
+
+**Entradas excluidas, con prueba**: `borrador`, `en_revision`, `rights_status`
+`pending`/denegado/revocado, `link_only` sin cuerpo publicado, rutas de preview
+(`*-preview`), `404.html` y cualquier ruta con `noindex`.
+
+**robots.txt**: plantilla versionada en `public/robots.txt` con `User-agent: *`,
+`Allow: /` y la línea `Sitemap: <BASE_URL>/sitemap.xml` sustituida en build. El
+build **falla** si `BASE_URL` no es una URL absoluta válida, reutilizando el
+validador de `src/app/core/seo/site-url.ts` (misma regla, sin duplicarla). El build
+público no incluye `Disallow` hacia rutas inexistentes ni `noindex` global.
+
+**Determinismo**: orden estable por ruta, sin fechas del reloj de la máquina; si se
+incluye `lastmod`, se toma de la fecha pública del contenido
+(`published_at`/`updated_at` cuando exista), no de `Date.now()`. Dos ejecuciones
+seguidas sobre la misma fuente producen bytes idénticos (prueba de idempotencia).
+
+**Pruebas primero**: `gen-sitemap.test.mts` en rojo antes del script, con fixtures
+sintéticos propios:
+
+1. Incluye las rutas publicadas y excluye cada estado no publicable.
+2. Falla si una ruta del sitemap no existe en el artefacto de build.
+3. `robots.txt` recibe la `BASE_URL` absoluta; una URL relativa, con credenciales,
+   query o fragmento falla.
+4. Dos ejecuciones producen el mismo hash.
+5. El sitemap no contiene `*-preview`, `404` ni rutas con `noindex`.
+
+**Verificación**: `pnpm sitemap:generate` sobre el build de fixtures y sobre el
+build de release; inspección del `sitemap.xml` y del `robots.txt` resultantes;
+`check:public-build` confirma que el artefacto público no filtra rutas pendientes.
+Registrar comandos y artefactos en `quickstart.md`.
+
+**Cierre**: marcar `T-021` solo con la generación desde la fuente activa, las
+exclusiones probadas y el artefacto público verificado. No publica la guía
+`pending`, no cambia `T-044` y no sustituye a `T-040`/`T-041`/`T-126`.
+
+### 17.47 T-020a: remediación de T-020 (presupuesto, 404 real y FR-16)
+
+**Origen**: `T-020` se ejecutó y quedó **PARCIAL** (2026-11-10). No se marcó. Tres
+bloqueos verificados por el orquestador:
+
+1. `pnpm build` **falla**: `bundle initial exceeded maximum budget. Budget 300.00 kB
+was not met by 6.11 kB with a total of 306.11 kB` (log
+   `%TEMP%\gd-t020-verify-build.log`).
+2. Angular 21.2.29 **no emite `404.html`** con el catch-all del prerender.
+3. **FR-16 sigue abierto**: falta el endpoint de descriptores públicos de activos
+   aprobados y su consumidor con `resolveIcon`.
+
+**Causa del presupuesto**: `content.resolvers.ts` importa `CONTENT_REPOSITORY`
+desde `./repository` de forma **estática**. El resolver es estático por naturaleza
+(lo importa `app.routes.ts`), así que arrastra el repositorio y el dominio al chunk
+inicial. La base pasaba con 300 kB; el añadido son 6,11 kB.
+
+**Regla que no se puede romper**: los presupuestos de `plan.md` §6 **no se amplían
+para conseguir verde** (constitución IV y las tareas T-003/T-132/T-133). La solución
+es sacar el peso del chunk inicial, no subir el límite.
+
+**Archivos autorizados**: `src/app/core/content/content.resolvers.ts`,
+`content.resolvers.spec.ts`, `src/app/app.routes.server.ts`, `app.routes.spec.ts`,
+`src/app/features/build/build-route.page.ts`, `src/app/features/static-pages/not-found.page.ts`,
+`scripts/emit-404.mts`, `scripts/emit-404.test.mts`, `package.json`
+(encadenar el emisor en `build`/`build:release`), `apps/api/src/routes/content.ts`,
+`apps/api/src/content/map-content.ts`, `apps/api/test/content.int.spec.ts`,
+`src/app/core/content/api.repository.ts`, `src/app/shared/ui/icon/resolve-icon.server.ts`,
+`specs/001-mvp-guias-builds/quickstart.md`, `handoff.md`, `tasks.md`.
+
+**Arreglo 1 — presupuesto**: el resolver no debe importar el repositorio ni el
+dominio de forma estática. Solo `TransferState` en el navegador; en servidor, carga
+diferida (`await import(...)`) del repositorio y del validador. Criterio: `pnpm
+build` vuelve a verde **sin** tocar `angular.json`, `check:initial-js` vuelve a
+105 259/110 000 gzip en `/tier-list` y el chunk inicial queda bajo 300 kB.
+
+**Arreglo 2 — `404.html` real**: script de post-build
+`scripts/emit-404.mts` que toma el HTML del comodín prerenderizado y escribe
+`404.html` en la raíz del artefacto, con prueba que falla si el archivo no existe o
+si su contenido no es la página 404. Se encadena en `build` y `build:release`. No se
+inventa un 200 disfrazado: el archivo existe y el host lo sirve con su estado.
+
+**Arreglo 3 — FR-16**: endpoint de solo lectura que devuelve los descriptores
+públicos de activos `approved` (sin evidencia privada) y consumidor en la web que
+llama `resolveIcon`. Prueba de contrato: un activo `pending` produce fallback SVG y
+nunca el activo oficial; un `approved` completo produce el descriptor público.
+
+**Aceptación**: los tres arreglos verificados con evidencia; `pnpm verify` verde;
+build público sin la ruta de la guía `pending` y con `404.html`; build local con
+`INCLUDE_DRAFTS` con banner y `noindex`; presupuestos intactos.
+
+**Cierre**: `T-020` solo se marca **después** de que esta remediación pase. Mientras
+tanto sigue abierta, con su estado PARCIAL registrado en `handoff.md`.
+
+**Excepción autorizada de presupuesto (2026-11-10)**: el usuario autorizó subir el
+budget raw del bundle inicial de `280/300 kB` a `300/320 kB` en `angular.json` para
+desbloquear `T-020`, tras comprobar que el exceso de 6,23 kB viene de framework
+compartido con el chunk lazy de `BuildPage` y no de código propio evitable. Es una
+excepción **explícita y registrada**, no un relajamiento silencioso: los presupuestos
+gzip de §6 (`90 000` portada, `110 000` catálogo) **siguen intactos** y se miden
+después del arreglo. Cualquier nuevo exceso gzip se corrige recortando peso, no
+subiendo el límite.
+
+### 17.48 T-020b: devolver `/tier-list` a su presupuesto gzip sin tocar límites
+
+**Origen**: tras autorizar el budget raw a `300/320 kB`, `T-020` sigue fallando en la
+puerta gzip: `check:initial-js FALLÓ /tier-list (110 996/110 000 bytes gzip nivel 6)`.
+Antes de `T-020` la cifra era **105 259**. El exceso es de **996 bytes** y el
+crecimiento atribuible a `T-020` ronda **5,7 kB**.
+
+**Restricción**: el techo de `110 000` bytes gzip **no se toca**. Se recorta peso.
+
+**Diagnóstico verificado**: `/tier-list` precarga once chunks, entre ellos
+`chunk-XUCRLYTB.js` (64 648 gzip), `chunk-23EENDPT.js` (20 464 gzip) y
+`chunk-ZFVT2EQO.js` (6 468 gzip). El resolver de `/builds/:slug` se importa de forma
+estática desde `app.routes.ts`, así que su código entra en el grafo inicial y se
+precarga en todas las rutas, incluida `/tier-list`.
+
+**Objetivo**: identificar qué chunk creció por `T-020` y sacarlo del grafo inicial
+sin perder la ruta, el prerender ni el 404.
+
+**Archivos autorizados**: `src/app/app.routes.ts`, `src/app/core/content/content.resolvers.ts`,
+`src/app/features/static-pages/not-found.page.ts`, `src/app/core/seo/seo.service.ts`
+(solo si el peso viene de ahí), `scripts/check-initial-js.mts` (solo lectura; no
+relajar la medición), `specs/001-mvp-guias-builds/{quickstart,handoff}.md`.
+
+**Aceptación**: `pnpm build` en verde con `check:initial-js` mostrando
+`/tier-list` ≤ 110 000 gzip y `/` en 0; ningún cambio en `angular.json` ni en los
+umbrales de §6; la ruta `/builds/:slug` sigue prerenderizándose en modo borradores y
+sigue ausente del build público.
+
+**Cierre**: marcar `T-020` solo cuando esta tarea y `T-020a` estén verdes.
+
+### 17.49 Fase de calidad multiagente y orquestación jerárquica
+
+**Origen**: petición del usuario (2026-11-10): tests adversariales,
+property-based testing, mutation testing, contexto de herdr documentado y una
+jerarquía de orquestadores por dominio (UI, tests, backend, infraestructura).
+
+Estas tareas **no bloquean** el cierre del MVP; se ejecutan después del hito de
+cierre, salvo `T-143`, que ya está hecha.
+
+#### T-139 — Jerarquía de orquestadores por dominio
+
+**Problema**: hoy hay un único orquestador que despacha a todos los roles. Con más
+dominios (UI, tests, backend, infraestructura, contenido) eso produce dos fallos
+conocidos: el orquestador pierde contexto de dominio y verifica con menos criterio
+del que el dominio exige.
+
+**Diseño**: dos niveles.
+
+```text
+Orquestador de programa (nivel 0)
+  ├── Orquestador de UI          → sdd-ui
+  ├── Orquestador de tests       → pruebas, property-based, mutación
+  ├── Orquestador de backend     → sdd-implement + API/BD
+  └── Orquestador de infra/CI    → pipelines, contenedores, secretos
+```
+
+Reglas del modelo:
+
+1. **El nivel 0 no ejecuta**: decide alcance, reparte entre dominios, arbitra
+   conflictos entre orquestadores y es el único que habla con el usuario.
+2. **Cada orquestador de dominio** tiene: un conjunto de tareas, sus propias
+   puertas de verificación y sus propios agentes «empleados».
+3. **Contrato de reporte idéntico** al de `~/.copilot/sdd/ORCHESTRATION.md` §3. Un
+   orquestador de dominio devuelve el mismo bloque que un agente, agregando por
+   tarea.
+4. **Sin delegación cruzada**: un orquestador de dominio no despacha a otro
+   dominio; escala al nivel 0.
+5. **Propiedad de archivos**: si dos dominios necesitan el mismo archivo, el nivel 0
+   serializa. Nunca en paralelo.
+6. **Presupuesto de modelos**: cada orquestador declara el modelo con el que trabaja;
+   el nivel 0 aplica la cadena de fallback del `AGENTS.md`.
+
+**Entregables**: este diseño en `ORCHESTRATION.md` §12, una definición
+`sdd-orchestrator-domain` en `~/.copilot/agents/`, y un ensayo real con dos dominios
+(UI y tests) sobre una tarea pequeña.
+
+**Aceptación**: dos orquestadores de dominio trabajando en tareas disjuntas,
+reportes agregados correctamente por el nivel 0, y cero ediciones cruzadas.
+
+#### T-140 — Property-based testing
+
+**Objetivo**: cubrir las funciones puras del dominio con propiedades, no con casos.
+
+**Alcance**: `packages/domain` (`publicFilter`, reglas de derechos y publicación,
+filtros del catálogo, serialización de filtros a query). Biblioteca `fast-check`
+como dependencia de desarrollo, versión fijada y justificada.
+
+**Propiedades mínimas**:
+
+- `publicFilter` es idempotente y su resultado nunca contiene `borrador`,
+  `en_revision` ni derechos no aprobados.
+- La serialización de filtros hace round-trip exacto con la deserialización.
+- Cualquier build publicado satisface las mismas invariantes que el esquema Zod.
+- El orden de las colecciones es estable ante permutaciones de la entrada.
+
+**Aceptación**: `pnpm --filter @gd/domain test:properties` en verde, con semillas
+reportadas y sin falsos positivos; los contadores por propiedad quedan en el log.
+
+#### T-141 — Tests adversariales
+
+**Objetivo**: probar el sistema con entradas hostiles, no con las amables.
+
+**Alcance**:
+
+- Contenido: JSON con campos de más y de menos, tipos cambiados, `rights_status`
+  falsificado, referencias cruzadas rotas, ciclos de `parent`, textos con HTML/JS,
+  URLs con credenciales, Unicode RTL y homoglifos.
+- UI: payloads con HTML inyectado en cada campo interpolado, listas vacías, valores
+  `null` donde el esquema los permite, y números fuera de rango.
+- API: rutas con traversal, parámetros gigantes, cabeceras malformadas y métodos no
+  permitidos.
+
+**Regla**: cada caso adversario debe fallar **cerrado** (rechazo explícito o valor
+seguro), nunca degradar en silencio ni filtrar datos privados.
+
+**Aceptación**: suite adversarial en CI, con un caso por clase de ataque y evidencia
+de que cada uno falla cerrado.
+
+#### T-142 — Mutation testing
+
+**Objetivo**: medir si las pruebas detectan defectos reales, no solo si pasan.
+
+**Alcance**: `packages/domain` completo y las guardas de publicación/derechos.
+Herramienta Stryker, versión fijada, ejecución **no bloqueante en PR** y umbral
+inicial conservador.
+
+**Método**: línea base medida y registrada; el umbral sube solo cuando el número
+real lo justifica, nunca se declara por deseo.
+
+**Aceptación**: informe de mutantes con _score_ real, mutantes supervivientes
+listados con su ubicación, y una tarea de seguimiento por cada grupo de mutantes
+supervivientes que revele una prueba faltante.
+
+**Límite**: la mutación se mide en el dominio, no en la UI; un _score_ alto en
+plantillas no aporta.
+
+#### T-143 — Contexto de herdr para el orquestador (hecha)
+
+`docs/orchestration/herdr.md` documenta binario, comandos, conceptos (`space`,
+`parent`, `keep`, `blocked`), lanzamiento de agentes, supervisión de bloqueos,
+detección de cuelgues por PID y límites conocidos.
+
+**Aceptación**: cubierta por el documento; no requiere código.
+
+**Orden sugerido**: `T-143` (hecha) → `T-140` → `T-141` → `T-142` → `T-139`.
+La jerarquía va al final porque necesita que las suites de calidad existan para
+repartirlas entre orquestadores.
+
+### 17.50 Bloque documental de derechos y fuentes (T-091, T-101, T-102)
+
+**Origen**: tareas activas del MVP, sin sección de plan propia. Son documentales:
+no tocan código, no publican contenido y no habilitan ninguna fuente.
+
+**Archivos**: `docs/content/source-policy.md` (T-091),
+`docs/content/permission-request-template.md` (T-101) y
+`docs/content/takedown-runbook.md` (T-102). Sin dependencias ni cambios de código.
+
+**Reglas de contenido**, derivadas de la constitución I, II y VII:
+
+- Ninguna fuente se considera permitida por ser pública, por silencio del autor ni
+  por `robots.txt`. El permiso es explícito, por fuente y por alcance.
+- La atribución es obligatoria y **nunca sustituye** al permiso.
+- Sin derechos confirmados solo cabe la tarjeta _link-only_ con metadatos
+  factuales propios.
+- Prohibido eludir controles de acceso y raspar sitios que lo prohíban.
+- El canal de retirada es **GitHub Issues** del repositorio (decisión del
+  2026-11-10). No se inventa correo, responsable, servicio ni SLA.
+
+**T-091 — política de fuentes**: clases A–F con criterio de permiso, estado
+inicial `pending`, y flujo de solicitud. Debe ser operativa: para cada clase, quién
+puede aprobarla y qué evidencia se exige.
+
+**T-101 — plantilla de solicitud**: cubre alcance (adaptación, traducción,
+atribución, vigencia, retirada), exige respuesta explícita y registra la evidencia.
+Incluye un cuerpo en español y otro en inglés (idioma primario del repo).
+
+**T-102 — runbook de retirada**: pasos, plazos (≤ 72 h hasta la retirada efectiva),
+registro del evento, despublicación cautelar, canal por GitHub Issues y qué se
+conserva como evidencia. No promete plazos que el hosting no esté definido para
+cumplir: se declara el objetivo operativo, no una garantía legal.
+
+**Aceptación**: los tres documentos pasan `markdownlint`, no contienen correos ni
+datos personales inventados, citan la constitución y no afirman derechos que no
+existan.
+
+### 17.51 Excepción autorizada del techo gzip del catálogo (2026-11-11)
+
+`/tier-list` quedó en **110 011 B gzip** con techo `110 000` al añadir la ruta
+`/legal`, que aporta **21 B** a `main.js` (la página en sí es un chunk lazy de
+2,00 kB y no entra en el inicial). El margen previo era de **10 B**, así que
+cualquier ruta nueva rompía la puerta.
+
+El usuario **autorizó subir el techo a 110 500 B** (0,45 %) como excepción
+explícita. Se implementa como constante `CATALOG_JS_LIMIT` en
+`scripts/check-initial-js.mts`, con el motivo escrito junto a ella, para que el
+número no vuelva a estar disperso.
+
+Alcance de la excepción: **solo** el techo de `/tier-list`. La portada mantiene
+`INITIAL_JS_LIMIT = 90 000` y su regla de 0 B con contrato estático válido. `T-144`
+sigue abierta para recuperar holgura real; si se consigue, el techo se vuelve a
+bajar y esta excepción se retira.
+
+**Segunda excepción autorizada (2026-11-11, T-138)**: el sitio pasa a inglés
+primario con español regional y el grafo inicial gana el soporte de hidratación
+i18n (`withI18nSupport()`, 1 225 B gzip) más el conmutador de idioma. El artefacto
+medido cierra en **111 949 B** y el usuario autorizó subir el techo a
+**112 000 B** (1,36 % sobre 110 500). Se mantiene como constante
+`CATALOG_JS_LIMIT`; `T-144` sigue siendo la vía para recuperar margen y revertir
+las dos excepciones. La portada sigue en 0 B.
+
+### 17.52 Bloque de calidad E2E, axe y Lighthouse (T-040, T-041, T-042)
+
+**Estado de partida**: no existe `playwright.config.ts` ni `lighthouserc.json`. Solo
+hay `playwright.svg.config.ts` y `e2e/svg-responsive.spec.ts`, que cubren los SVG,
+no las rutas.
+
+**Rutas objeto**: `/`, `/tier-list`, `/acerca`, `/legal`, `/autores/:slug` y
+`/builds/:slug` en modo borradores (`INCLUDE_DRAFTS=true`), más el build público que
+**no** contiene la guía `pending`.
+
+**T-040 — E2E de recorrido**: `playwright.config.ts` con un `webServer` que sirve el
+artefacto prerenderizado, y `e2e/journeys.spec.ts` cubriendo navegación real entre
+portada → catálogo → guía → autor, filtros por URL con recarga e historial, ancla
+`#devociones`, y el mismo recorrido con `javaScriptEnabled: false` comprobando que el
+contenido esencial sigue en el HTML. Tres viewports (375/768/1280).
+
+**T-041 — axe**: `e2e/a11y.spec.ts` con `@axe-core/playwright` sobre las rutas
+anteriores en los tres anchos, en hidratado y con JS desactivado. Criterio: **cero
+violaciones** de impactos `critical` y `serious`; las moderadas se listan con
+justificación. No sustituye a la revisión manual de `T-043`.
+
+**T-042 — Lighthouse y presupuestos**: `lighthouserc.json` con configuración móvil,
+`scripts/check-performance.mts` y su prueba, midiendo LCP, CLS, TBT, JS/CSS/HTML y
+las puntuaciones de `plan.md` §6. Falla si se incumple cualquiera. Debe medir sobre
+el artefacto real, no sobre el servidor de desarrollo.
+
+**Regla común**: medir el artefacto, no la intención. Un informe sin cifras no
+acredita la puerta. Los tres integran en CI mediante `T-126`.
+
+**Aceptación**: los tres comandos existen, fallan con un fixture que viola el
+umbral y pasan con el artefacto actual; las cifras quedan registradas en
+`quickstart.md` con fecha y entorno.
+
+### 17.53 T-145: el TBT de las páginas estáticas y el gate de rendimiento
+
+`T-042` construyó el gate de Lighthouse y lo ejecutó sobre el artefacto real. Las
+cifras (Chrome 157.0.8103.39, Lighthouse 13.6.0, móvil, 1 pasada) dejan la puerta en
+rojo por tres rutas:
+
+| Ruta         | TBT        | Límite   | Resto                                                      |
+| ------------ | ---------- | -------- | ---------------------------------------------------------- |
+| `/`          | 12,9 ms    | ≤ 150 ms | LCP 906 ms, CLS 0,000, puntuaciones 1,000, JS 0 B          |
+| `/tier-list` | 15,5 ms    | ≤ 150 ms | JS 110 011/110 500, CSS 8 111/20 000, HTML 111 665/120 000 |
+| `/acerca`    | **260 ms** | ≤ 150 ms | LCP 790 ms, CLS 0,000, rendimiento 0,950                   |
+| `/autores`   | **230 ms** | ≤ 150 ms | LCP 787 ms                                                 |
+| `/legal`     | **171 ms** | ≤ 150 ms | —                                                          |
+
+La portada ya demuestra la solución: se emite sin bootstrap cliente y su JS inicial
+es 0 B. Las tres rutas lentas también son contenido estático y hoy hidratan el
+bundle completo, así que el TBT viene de la hidratación, no del contenido.
+
+**Decisión**: el límite **no se amplía**. Hasta que `T-145` corrija las páginas, el
+paso `performance` queda **fuera** de `scripts/verify-local.mjs` para que un fallo
+conocido no oculte regresiones nuevas; `pnpm check:performance` sigue disponible y
+es el comando que mide. Una prueba en `scripts/verify-local.test.mjs` afirma que el
+paso no está en `verify`, de modo que devolverlo exige borrar esa prueba a
+propósito.
+
+**Cierre de T-145**: las tres rutas bajo 150 ms de TBT, el paso `performance`
+devuelto a `verify-local.mjs` y la prueba de ausencia eliminada en el mismo cambio.
+
+**Estado 2026-11-11 (medición del orquestador de dominio de calidad)** — esta
+nota corrige lo que la medición posterior desmiente. El historial de arriba se
+conserva tal cual; lo que sigue es la lectura vigente.
+
+- **Las cifras de 171–260 ms de TBT no se reproducen.** Eran pasadas sueltas bajo
+  carga, y el TBT de Lighthouse depende de la contención de CPU del host. Con
+  **mediana de 5 pasadas manuales** por ruta, las cifras del 2026-11-11 son `/acerca`
+  44 ms, `/legal` 35 ms, `/autores` 26 ms y `/tier-list` 117,5 ms en la tanda
+  peor, con un máximo de 350 ms en una corrida suelta y 60–82 ms de mediana en
+  las demás tandas. Ninguna de las tres rutas «lentas» del diagnóstico original
+  supera el límite de 150 ms.
+- **La puerta decide por mediana de 3 (`numberOfRuns: 3`, valor rastreado en
+  `lighthouserc.json`) y los umbrales siguen intactos.** No se
+  amplió ningún límite de plan §6; la mediana es la que evita que un pico aislado
+  de CPU se lea como regresión (misma ruta y artefacto dieron 305,7 ms en una
+  pasada y 48 ms en otra).
+- **El paso `performance` sí está en `scripts/verify-local.mjs`** como último
+  paso, tras `build` y `public-build`, tal como exige T-042. La decisión anterior
+  de dejarlo fuera queda sustituida; la prueba que afirmaba su ausencia se
+  reemplazó por una positiva.
+- **T-145 queda cerrada**
+  (manda `tasks.md`, 2026-11-11): la emisión estática resolvió el TBT de las tres
+  rutas y el paso `performance` volvió a `verify`. El margen estrecho de
+  `/tier-list` queda como **observación**, sin tarea nueva y sin ampliar el
+  límite de TBT.
+
+La medición que acredita la puerta quedó en **47/47, exit 0** sobre el artefacto
+finalizado; la segunda (46/47) falló solo por `robots.txt` con `__BASE_URL__` sin
+sustituir en un artefacto transitorio de otro trabajo en curso. Evidencia
+completa, tablas y límites en `quickstart.md`, sección «Evidencia ejecutada -
+Rendimiento T-042 (2026-11-11)».
+
+### 17.54 T-146: el contenido editorial y su `locale` explícito
+
+**Origen**: contrato «Contenido» de T-138 (§17.45). La mecánica de idioma quedó
+cerrada, pero el catálogo sigue pintando `title` y `name_es` en ambos idiomas:
+la portada inglesa y la española muestran el mismo título de catálogo y las
+mismas etiquetas de maestría. La guía (`BuildContentSchema`) ya declara
+`locale: 'es'`; el catálogo no.
+
+**Alcance**: añadir `locale` al contenido del catálogo y elegir el nombre de
+maestría según la configuración regional activa (`name_en` en `en`, `name_es` en
+`es`). El texto editorial sin versión inglesa se muestra en su idioma original
+con `lang` explícito y nunca se traduce por invención. No cambia el esquema
+público de builds ni la puerta de derechos.
+
+**Archivos**: `packages/domain/src/schema.ts` y su prueba,
+`content/tier-lists/principal.json`, `src/app/features/tier-list/catalog.model.ts`
+y su prueba, `src/app/core/content/catalog.server.ts`,
+`src/app/core/content/catalog.resolver.ts`, migración y vistas públicas en
+`apps/api/drizzle/**`, `apps/api/test/schema-parity.spec.ts` y
+`specs/001-mvp-guias-builds/data-model.md`.
+
+**Aceptación**: esquema y migración en paridad; el catálogo inglés muestra
+`name_en` y el español `name_es`; el título sin traducción lleva `lang`; pruebas
+de dominio, API y UI en verde; sin cambios en los presupuestos de §6.
+
+**Cierre**: no reabre T-138. Se marca cuando la paridad de esquema y la UI de
+ambos idiomas lo acrediten.
+
+### 17.55 T-144: recuperar holgura real en el JS inicial de `/tier-list`
+
+**Origen**: T-138 dejó el catálogo en **111 955/112 000 B gzip** (45 B de
+margen) tras la segunda excepción de §17.51. Cualquier cadena nueva vuelve a
+romper la puerta. T-144 sigue abierta con el objetivo de ≥ 1 000 B de holgura sin
+tocar umbrales ni quitar `withEventReplay()`.
+
+**Diagnóstico** (stats de producción del artefacto del 2026-11-11): el grafo
+inicial de `/tier-list` está dominado por Angular (core `_debug_node` 119 442 B
+de salida, router 74 136 B, platform-browser 22 923 B); el código propio son
+~26 KB de salida repartidos en la página y componentes (15,5 KB), el modelo de
+catálogo y filtros (5,5 KB) y SEO (4,8 KB). El icono compartido
+(`icon.ts` 1 485 B + `registry.ts` 1 183 B) entra en el inicial solo por la
+insignia de estado del catálogo; el resto de páginas que lo usan son lazy o no
+lo usan.
+
+**Alcance**: sacar del grafo inicial el componente `gd-icon` y su registro en la
+insignia de estado, sustituyéndolo por una imagen con la misma ruta pública
+(`assets/icons/status-*.svg`), el mismo fallback (`generic`) y la misma
+semántica accesible (icono decorativo + texto). Si no basta para ≥ 1 000 B,
+evaluar en segundo lugar el JSON-LD (`catalogItemList`) en un módulo diferido
+solo de servidor, sin perder el `ItemList` del HTML prerenderizado.
+
+**Archivos**: `src/app/features/tier-list/tier-components.ts`,
+`src/app/features/tier-list/tier-components.css`,
+`src/app/features/tier-list/tier-components.spec.ts`,
+`scripts/check-initial-js.mts` (solo lectura/medición).
+
+**Aceptación**: `pnpm build` verde; `check:initial-js` con `/tier-list`
+≤ 111 000 B (≥ 1 000 B de holgura bajo 112 000) y `/` en 0 B; paridad visual y
+accesible de la insignia (texto + icono decorativo, fallback `generic`); pruebas
+de `tier-components` y `pnpm verify` en verde; sin cambiar umbrales ni
+`withEventReplay()`.
+
+**Estado 2026-11-11: hecha.** El artefacto cierra en **110 996/112 000 B**:
+**1 004 B de holgura** (antes 45 B). Cambios medidos: la insignia de estado del
+catálogo deja de importar `gd-icon` y su registro (1 485 + 1 183 B de salida) y
+pinta la misma ruta pública (`assets/icons/status-*.svg`) con el mismo fallback
+`generic`; `applyFilter` pasa a ser genérico y elimina el map/set intermedio de
+la página; el conmutador se integra en `SiteLayout`, que ya trackea la URL, y
+desaparece el componente extra. Sin tocar umbrales, `withEventReplay()` ni el
+contrato accesible de la insignia (texto + icono decorativo). Verificado con
+`pnpm verify` OK, `pnpm test` 297/297, `e2e:a11y` 51/51 y `e2e:journeys` 21/21.
+La excepción de 112 000 B se mantiene porque el coste estructural de i18n
+(1 225 B) impide bajar a 110 500: recuperar esa cifra exigiría otros ~500 B y
+queda como trabajo posterior, no como cambio de umbral.
+
+**Estado 2026-11-11: hecha.** `TierListContentSchema` y `PublicTierListSchema`
+declaran `locale: 'es'`; `CatalogInput` lo transporta y `buildCatalog(input,
+locale)` resuelve nombres de maestría y combinaciones según el idioma activo
+(`name_en` en inglés, `name_es` en español). El catálogo expone `contentLocale`
+para que el `<h1>` lleve `lang="es"` solo cuando el contenido no está en el
+idioma de la página. En base de datos, la migración `0006` añade `locale` a
+`tier_lists` (default `es`), `v_public_tier_lists` lo publica al final de la
+vista y `TIER_QUERY` lo proyecta; no se tocaron derechos, DTO privados ni
+presupuestos de §6. Evidencia: `content:validate`/`catalog:check` OK, dominio
+151/151 (2 `it.fails` preexistentes), API 257/257 (48 integraciones omitidas),
+app 299/299, `test:scripts` 440/442, `pnpm verify` OK, `e2e:a11y` 51/51 y
+`e2e:journeys` 21/21. JS inicial: **111 111/112 000 B** (889 B de holgura).
+
+### 17.56 T-147: espacios de Herdr por orquestador, nunca pestañas en la instancia actual
+
+**Origen**: corrección del usuario (2026-11-11). El procedimiento documentado
+creaba la pestaña con los ids del **espacio y pestaña activos** (`$s.space`,
+`$s.tab`), así que un orquestador de dominio acababa como pestaña dentro de la
+misma instancia del nivel 0, con dos autores sobre el mismo espacio y sin la
+separación que exige la jerarquía.
+
+**Contrato**: cada orquestador de dominio se abre en un **espacio nuevo** de
+Herdr. El nombre del espacio es `<proyecto>/<especialidad>` en minúsculas con
+guiones (`grim-dawn-builds/ui`, `grim-dawn-builds/tests`). El espacio arranca
+con un agente orquestador interactivo (`opencode --auto` con el prompt dentro de
+`argv`) que recibe la tarea y despacha sub-tareas a **sus propios subagentes**.
+El nivel 0 no crea pestañas de dominio en su propia instancia.
+
+**Herramienta**: `scripts/herdr-space.mts` construye y ejecuta
+`herdr-app do space.new --name <proyecto>/<especialidad> --folder <repo>
+--tab <especialidad> --argv '["opencode","--auto","--prompt","<una línea>"]'`.
+Valida el nombre (segmentos `[a-z0-9][a-z0-9-]*`), exige carpeta absoluta
+existente, une el prompt en una sola línea y falla cerrada. `--print` muestra el
+comando sin lanzar nada; la verificación de esta tarea usa `--print`, no abre
+ventanas.
+
+**Archivos**: `AGENTS.md`, `docs/orchestration/herdr.md`,
+`docs/orchestration/hierarchy.md`, `scripts/herdr-space.mts`,
+`scripts/herdr-space.test.mts`, `package.json` y el documento transversal
+`C:/Users/paco_/.copilot/sdd/ORCHESTRATION.md`.
+
+**Aceptación**: el procedimiento y las reglas compartidas prohíben la pestaña en
+la instancia actual; la herramienta produce el espacio `proyecto/especialidad`
+con el prompt en `argv` y falla con nombres o carpetas inválidos; pruebas de la
+herramienta y `markdownlint-cli2` en verde; ningún agente real lanzado durante
+la verificación.
+**Estado 2026-11-11: hecha.** La política de `AGENTS.md`, `herdr.md`,
+`hierarchy.md` y `~/.copilot/sdd/ORCHESTRATION.md` prohíbe abrir pestañas de
+dominio en la instancia actual y fija el nombre `<proyecto>/<especialidad>`.
+`scripts/herdr-space.mts` (+5 pruebas) construye el `space.new` con el prompt
+dentro de `argv`, valida nombre y carpeta absoluta y falla cerrada; `--print`
+muestra el comando sin lanzar nada. Ensayo `--print`: `space:
+"grim-dawn-builds/ui"`, sin `--task` posicional. Evidencia: 5/5 pruebas de la
+herramienta, `test:scripts` 445/447 (2 omitidos preexistentes), `lint:md` 0
+incidencias y `format:check` limpio. No se lanzaron agentes reales.
+
+### 17.57 T-148: este PC como host SSH para Herdr remoto
+
+**Origen**: petición del usuario (2026-11-11): conectar al Herdr de este equipo
+desde otra computadora y desde la app móvil.
+
+**Diagnóstico verificado**: `hc server status` muestra el core `mamalona` vivo
+(0.1.20, 1 terminal). OpenSSH Server está registrado (`sshd` Stopped/Manual,
+binario en `C:\Windows\System32\OpenSSH\sshd.exe`) pero **falta**
+`C:\ProgramData\ssh\sshd_config` y no hay claves de host, así que no puede
+aceptar conexiones. El usuario `paco_` está en Administradores y tiene
+contraseña; `%USERPROFILE%\.ssh\authorized_keys` ya tiene su clave. LAN
+`192.168.100.35`; firewall TCP 22 habilitado en los tres perfiles; sin
+Tailscale; NordVPN instalado con el servicio detenido.
+
+**Alcance**: documentar el procedimiento y dejar un script idempotente para
+PowerShell elevada (`scripts/setup-ssh-remote.ps1`) que instala/repara OpenSSH
+Server, crea `sshd_config` desde la plantilla de Windows, genera claves de host,
+arranca `sshd` al inicio, asegura la regla de firewall y autoriza claves
+públicas (archivo de administradores y del usuario, con ACL correcta). La otra
+computadora se empareja con `hc machine add paco_@192.168.100.35 --name
+mamalona --install`; el móvil usa el mismo host en LAN o una IP de malla
+(NordVPN Meshnet/Tailscale). Sin abrir el 22 a Internet.
+
+**Archivos**: `docs/orchestration/remote-access.md`,
+`scripts/setup-ssh-remote.ps1`, este plan y `tasks.md`.
+
+**Aceptación**: el documento y el script parsean; el paso elevado queda
+explícito; `sshd` escuchando en 22 tras ejecutarlo; desde el otro equipo
+`ssh paco_@192.168.100.35` y `hc machine ls` muestran `mamalona` alcanzable; la
+app móvil lista la máquina. **Estado 2026-11-11**: el host SSH está operativo. `sshd` quedó
+`Running/Automatic`, escuchando en `0.0.0.0:22` y `[::]:22`, con la clave del
+usuario autorizada y `ssh paco_@192.168.100.35 "echo hc-remote-ok"` respondiendo;
+`hc machine add paco_@127.0.0.1` identifica «este core», lo que valida el
+handshake de hc por SSH. El script restringe DACL y propietario de claves y
+configuración, y fue suficiente para arrancar el servicio. Queda emparejar la
+laptop y el móvil y verificar `hc machine ls` desde ellos. No se declara
+cerrada hasta entonces.
+
+### 17.58 S11: decisión de publicación del MVP — local (2026-11-11)
+
+**Origen**: hallazgo C3 del informe externo. El plan difería hosting, dominio,
+secretos y despliegue (§11) y el README lo confirmaba («Hosting is still deferred
+and out of scope», `README.md:175-179`). Existían un build de release
+(`pnpm build:release`, `pnpm check:release`) y una guarda del artefacto
+(`pnpm check:public-build`) sin destino ni runbook, y la decisión estaba abierta.
+
+**Decisión del usuario (2026-11-11)**: MVP local; el hosting queda fuera del MVP por
+decisión del usuario (2026-11-11). El entregable es el artefacto estático que hoy
+produce el build y se sirve en local. No hay proveedor, dominio, certificado,
+pipeline de publicación ni credenciales de despliegue, y ninguno se añade.
+
+**Tareas cerradas como fuera de alcance**: T-087 (almacén gestionado de secretos
+y _break-glass_), T-088 (OIDC de GitHub Actions hacia el proveedor), T-089
+(inyección de secretos en el orquestador de producción) y T-090 (calendario de
+rotación en producción) salen del MVP en `tasks.md`. Si algún día se decide
+publicar, continúan como backlog y se abren con su propio spec de despliegue:
+workflow `deploy.yml` disparado solo por tag `v*` en `main` que ejecute
+`build:release`, `check:release` y `check:public-build`; secretos únicamente en
+GitHub Environments con `scripts/check-ci-secrets.mts` vigente; y runbook
+`docs/release.md` con versionado, publicación, reversión y verificación posterior
+(`/` y `/es`, sitemap y 404).
+
+**Lo que no cambia**: T-126 (CI de calidad) y las tareas de verificación siguen
+vigentes: verifican el artefacto, no lo publican. Se conservan la salida estática
+independiente del host, `BASE_URL` configurable y la portabilidad de §11, de modo
+que publicar más adelante no exige rehacer el build. La API se consume solo en
+tiempo de build (`CONTENT_SOURCE=api`, §12.1), así que el MVP local no necesita
+servirla en ninguna red distinta de la local.
+
+**Consecuencia**: §11 conserva su redacción y remite a esta decisión; el estado
+definitivo del MVP es local y no queda ninguna tarea de hosting abierta.

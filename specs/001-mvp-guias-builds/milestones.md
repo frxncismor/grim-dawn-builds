@@ -84,24 +84,42 @@ No se abre hasta que las tareas de cierre estén verdes.
 
 ## Estado de publicación
 
-| Hito | Rama | PR | Estado |
-| --- | --- | --- | --- |
-| Base | `mvp/1` | — | publicado (rama de integración) |
-| 1 | `feature/hito-1-fundacion-dominio` | [#1](https://github.com/frxncismor/grim-dawn-builds/pull/1) | **publicado**, 81 archivos, pendiente de revisión |
-| 2 | `feature/hito-2-backend-contenido` | [#2](https://github.com/frxncismor/grim-dawn-builds/pull/2) | **publicado**, 76 archivos, apilado sobre el hito 1 |
-| 3 | `feature/hito-3-web-experiencia` | [#3](https://github.com/frxncismor/grim-dawn-builds/pull/3) | **publicado**, 183 archivos, apilado sobre el hito 2 |
-| 4 | — | — | pendiente de implementación |
+| Entrega                            | Rama                             | PR                                                          | Estado                          |
+| ---------------------------------- | -------------------------------- | ----------------------------------------------------------- | ------------------------------- |
+| Base                               | `mvp/1`                          | —                                                           | publicado (rama de integración) |
+| Aplicación completa (hitos 1–3)    | `feature/hito-3-web-experiencia` | [#3](https://github.com/frxncismor/grim-dawn-builds/pull/3) | publicado, **CI en verde**      |
+| Idioma (inglés primario + español) | `feature/i18n-bilingual-docs`    | [#4](https://github.com/frxncismor/grim-dawn-builds/pull/4) | publicado, **CI en verde**      |
+| Cierre de calidad (hito 4)         | —                                | —                                                           | pendiente de implementación     |
 
-Orden de fusión obligatorio: #1 → #2 → #3. GitHub reapunta el PR siguiente a
-`mvp/1` cuando se fusiona su base.
+### Por qué no se pudo entregar en tres capas
 
-### Verificación por hito
+Se intentó dividir en fundación/dominio, backend y web, y se comprobó que esa
+frontera **no es viable**:
 
-| Hito | Puertas en verde | Puertas pendientes |
-| --- | --- | --- |
-| 1 | dominio (97,33 % statements), `content:validate`, `check:scope`, `check:boundaries`, `check:secrets`, `lint:md` | `pnpm test` y `pnpm verify` completos, que dependen de la web |
-| 2 | `typecheck` de API, 253 pruebas de API, `check:*`, `check:secrets` | 47 pruebas de integración que exigen PostgreSQL real |
-| 3 | 247 pruebas de web, `build`, `check:initial-js`, `check:public-build`, `check:secrets`, `lint:md`, `check:contrast`, axe 375/768/1280 | `pnpm verify` completo, e2e global y Lighthouse |
+- El PR #1 (dominio) cerraba porque `apps/api/test/schema-parity.spec.ts` exige
+  paridad dominio ↔ API.
+- El PR #2 (dominio + backend) cerraba porque
+  `src/app/core/content/file.repository.spec.ts` ahora llama
+  `runContentRepositoryContract` con el nuevo argumento `capabilities` (T-063a), y
+  ese spec de la web quedó en su versión vieja.
+
+La causa es la misma en ambos casos: **los cambios de dominio (T-006/T-063a)
+acoplan al dominio con sus dos consumidores a la vez** (API y web), y la base
+`mvp/1` ya era un monorepo acoplado. Una rebanada que actualiza el dominio sin
+actualizar sus consumidores queda rota. Por eso la entrega se consolidó en un único
+PR de aplicación completa (#3), más el PR de idioma (#4) apilado encima.
+
+### Orden de fusión
+
+Fusión en orden: #3 → #4. Cada rama contiene a la anterior; al fusionar #3, el diff
+de #4 se reduce a su propio contenido (idioma y reglas).
+
+### Verificación por entrega
+
+| Entrega             | Puertas en verde                                                                                                                                                                                                                                                                    | Puertas pendientes                         |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Aplicación completa | `pnpm verify` en verde local (exit 0); dominio 97,33 %; 253 pruebas de API; 247 pruebas de web; `build`; `check:initial-js` (portada 0 bytes, catálogo 105 259/110 000 gzip); `check:public-build`; `check:secrets`; `lint:md`; `check:contrast` (mínimo 5,811:1); axe 375/768/1280 | e2e global, Lighthouse, puerta de revisión |
+| Idioma              | `lint:md` 45 archivos, `check:contrast`, constitución 1.9.0 y README bilingüe                                                                                                                                                                                                       | `T-138` (configuraciones regionales)       |
 
 ## Condiciones para publicar
 
@@ -113,7 +131,8 @@ Orden de fusión obligatorio: #1 → #2 → #3. GitHub reapunta el PR siguiente 
 
 ## Exclusiones explícitas
 
-- `T-036` (atribución, fuentes y TOC) **no** se publicó: tiene 6 fallos reales de
-  accesibilidad (ancla tapada por el TOC sticky sin JavaScript) y su bloque
-  `build-meta-preview` no está en `angular.json` de este hito.
 - La guía migrada no se publica: `borrador` con `rights_status: pending`.
+- Los PRs #1 y #2 quedaron **cerrados sin fusionar** por la dependencia del dominio
+  con sus consumidores (API y web) descrita arriba; su contenido vive en el #3.
+- `T-036` se corrigió (ancla tapada → `scroll-margin-block-start` estático en CSS,
+  sin depender de JavaScript) y se entrega en el #4, no en el #3.

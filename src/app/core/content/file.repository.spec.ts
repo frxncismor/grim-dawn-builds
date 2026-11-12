@@ -120,6 +120,7 @@ describe('FileContentRepository loading (adapter-specific)', () => {
     };
     const tier = {
       slug: 'principal',
+      locale: 'es',
       title: 'Catálogo sintético',
       game_version: 'test',
       review_state: 'publicado',

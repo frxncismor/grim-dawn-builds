@@ -34,7 +34,7 @@ describe('gd-devotion-section', () => {
     const fixture = await render();
     const root = fixture.nativeElement as HTMLElement;
     const rows = Array.from(root.querySelectorAll('[data-step-position]'));
-    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Ruta de devoción');
+    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Devotion path');
     expect(rows).toHaveLength(11);
     expect(rows.map((row) => Number(row.getAttribute('data-step-position')))).toEqual(
       content.devotion_steps.map((step) => step.position),
@@ -78,7 +78,7 @@ describe('gd-devotion-section', () => {
     expect(root.querySelectorAll('[data-list-constellation]')).toHaveLength(13);
     expect(root.querySelectorAll('p[data-binding-id]')).toHaveLength(5);
     expect(root.querySelectorAll('text[data-binding-id]')).toHaveLength(5);
-    expect(root.textContent).toContain('verifica en GrimTools antes de gastar');
+    expect(root.textContent).toContain('verify in GrimTools before spending points');
     expect(root.textContent).not.toContain('Introducción 1');
   });
 
@@ -184,7 +184,7 @@ describe('gd-devotion-section', () => {
       ),
     ).toBe(true);
     expect(root.querySelector('[data-inconsistent-data]')?.textContent?.toLowerCase()).toContain(
-      'inconsistentes',
+      'inconsistent',
     );
     expect(root.querySelector('[data-active-step="true"]')).toBeNull();
     const map = fixture.debugElement.query(By.directive(DevotionMap))
@@ -213,7 +213,7 @@ describe('gd-devotion-section', () => {
 
     const empty = await render({ ...content, devotion_steps: [] });
     const root = empty.nativeElement as HTMLElement;
-    expect(root.textContent).toContain('Sin información disponible');
+    expect(root.textContent).toContain('No information available');
     expect(root.querySelector('[data-select-position]')).toBeNull();
     expect(root.querySelectorAll('[data-list-constellation]')).toHaveLength(13);
     const map = empty.debugElement.query(By.directive(DevotionMap))

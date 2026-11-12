@@ -24,6 +24,7 @@ export const VERIFY_STEPS = [
   { name: 'check-scope', command: 'pnpm run check:scope' },
   { name: 'check-boundaries', command: 'pnpm run check:boundaries' },
   { name: 'check-secrets', command: 'pnpm run check:secrets' },
+  { name: 'check-ci-secrets', command: 'pnpm run check:ci-secrets' },
   { name: 'domain:build', command: 'pnpm --filter @gd/domain build' },
   { name: 'domain:typecheck', command: 'pnpm --filter @gd/domain typecheck' },
   { name: 'domain:lint', command: 'pnpm --filter @gd/domain lint' },
@@ -37,10 +38,18 @@ export const VERIFY_STEPS = [
   { name: 'format', command: 'pnpm format:check' },
   { name: 'test', command: 'pnpm test' },
   { name: 'test:scripts', command: 'pnpm test:scripts' },
+  // T-126: validan el fixture real del repositorio y la vigencia del catálogo
+  // generado; van después del build de dominio y antes del build de la web.
+  { name: 'content:validate', command: 'pnpm run content:validate -- --dir content' },
+  { name: 'catalog:check', command: 'pnpm run catalog:check' },
+  { name: 'check:locale-parity', command: 'pnpm run check:locale-parity' },
   { name: 'assets', command: 'pnpm assets:check' },
   { name: 'contrast', command: 'pnpm check:contrast' },
   { name: 'build', command: 'pnpm build' },
   { name: 'public-build', command: 'pnpm check:public-build' },
+  // Lighthouse mide el artefacto de `build` en dist/, nunca `ng serve`, y decide
+  // por la mediana de 3 corridas; por eso es el último paso, tras el build.
+  { name: 'performance', command: 'pnpm check:performance' },
 ];
 
 /** @param {{ command: string }} step @returns {Promise<number>} */

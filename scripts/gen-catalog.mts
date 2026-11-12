@@ -96,6 +96,7 @@ export function generateCatalog(input: CatalogInput): TierList {
   }
   return TierListSchema.parse({
     slug: 'principal',
+    locale: 'es',
     title: 'Catálogo de combinaciones de maestrías',
     game_version: input.gameVersion,
     review_state: 'publicado',

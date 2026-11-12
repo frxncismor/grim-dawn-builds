@@ -1,7 +1,11 @@
 @if (isVisible()) {
   <section class="loot-filter" [id]="sectionId()" [attr.aria-labelledby]="sectionId() + '-heading'">
-    <h2 class="loot-filter__heading" [id]="sectionId() + '-heading'" i18n="@@lootFilter.heading">
-      Filtro de botín
+    <h2
+      class="loot-filter__heading"
+      [id]="sectionId() + '-heading'"
+      i18n="@@lootFilter.sectionHeading"
+    >
+      Loot filter
     </h2>
 
     @for (introduction of introductions(); track $index) {

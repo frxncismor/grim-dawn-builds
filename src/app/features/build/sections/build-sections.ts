@@ -33,7 +33,7 @@ const RESERVED_NOTE_LABELS = new Set([
   'Qué tocar en cada árbol',
 ]);
 
-const EMPTY_MESSAGE = $localize`:@@buildSections.empty:Sin información disponible`;
+const EMPTY_MESSAGE = $localize`:@@buildSections.empty:No information available`;
 
 @Component({
   selector: 'gd-build-sections',

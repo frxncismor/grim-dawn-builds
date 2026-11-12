@@ -28,6 +28,7 @@ function repository(overrides: Partial<PublicContentRepository> = {}): PublicCon
     listSlugs: async () => [doc.slug],
     getAuthor: async (slug) => (slug === doc.author_slug ? doc.author : null),
     getTierList: async () => null,
+    listAssets: async () => [],
     ...overrides,
   };
 }
@@ -117,6 +118,59 @@ describe('public content HTTP routes', () => {
         expect((await app.inject({ method, url: '/api/v1/builds' })).statusCode).toBe(404);
     } finally {
       await app.close();
+    }
+  });
+  it('FR-16: serves only approved public asset descriptors, without private evidence', async () => {
+    const descriptor = {
+      slug: 'rayo-oficial',
+      file_path: 'public/assets/official/rayo.svg',
+      fallback_svg: 'src/assets/icons/damage-rayo.svg',
+    };
+    const app = buildApp(config(), {
+      content: repository({ listAssets: async () => [descriptor] }),
+      readiness: async () => true,
+    });
+    try {
+      const response = await app.inject('/api/v1/assets');
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual([descriptor]);
+      expect(response.body).not.toMatch(
+        /origin_url|rights_holder|license_or_permission|proof_ref|PRIVATE-/,
+      );
+      for (const method of ['POST', 'PUT', 'PATCH', 'DELETE'] as const)
+        expect((await app.inject({ method, url: '/api/v1/assets' })).statusCode).toBe(404);
+    } finally {
+      await app.close();
+    }
+  });
+  it('FR-16: fails closed without readiness or when a descriptor leaks private evidence', async () => {
+    const hostile = {
+      slug: 'rayo-oficial',
+      file_path: 'public/assets/official/rayo.svg',
+      fallback_svg: 'src/assets/icons/damage-rayo.svg',
+      proof_ref: 'PRIVATE-PROOF',
+    };
+    for (const options of [
+      { content: repository(), readiness: async () => false },
+      { content: repository({ listAssets: async () => [hostile] }), readiness: async () => true },
+      {
+        content: repository({
+          listAssets: async () => {
+            throw new Error('PRIVATE-SQL-CANARY');
+          },
+        }),
+        readiness: async () => true,
+      },
+    ]) {
+      const app = buildApp(config(), options);
+      try {
+        const response = await app.inject('/api/v1/assets');
+        expect(response.statusCode).toBe(503);
+        expect(response.json()).toEqual({ error: 'content_unavailable' });
+        expect(response.body).not.toMatch(/PRIVATE-|SELECT/);
+      } finally {
+        await app.close();
+      }
     }
   });
 });

@@ -48,9 +48,27 @@ El backend no es requisito para **desarrollar, probar y verificar en CI** la web
 
 Validación de esquema y lógica de dominio con pruebas unitarias; renderizado SVG con pruebas de componente; flujos críticos con e2e; accesibilidad y rendimiento automatizados en CI.
 
-### X. Español primero, preparado para i18n
+### X. Inglés primero, español como opción completa (rev. 1.9.0)
 
-Texto de interfaz y contenido en español (es-419 neutro). Las cadenas de UI pasan por el mecanismo de i18n de Angular desde el inicio; el contenido lleva `locale`.
+El proyecto apunta a ser open source, así que el **inglés es el idioma primario**
+del repositorio y del sitio: README principal, pull requests, mensajes de commit,
+nombres de archivos, documentación nueva y configuración regional por defecto
+(`en`). El **español es una opción de primera clase, no un añadido**: existe una
+versión completa del README (`README.es.md`) y una configuración regional `es` del
+sitio con paridad de contenido.
+
+Las cadenas de interfaz pasan por el mecanismo de i18n de Angular desde el inicio,
+con extracción a catálogos versionados; ninguna cadena nueva se publica sin entrada
+en ambos idiomas. El contenido editorial lleva `locale` y declara el idioma de cada
+texto. Una traducción incompleta se muestra en el idioma base y se registra como
+pendiente, nunca como texto inventado. Los nombres de juego se guardan en `es` y
+`en` (principio VI). La paridad entre configuraciones regionales se verifica en las
+pruebas: ambas deben renderizar el mismo conjunto de secciones.
+
+Los artefactos SDD existentes (`spec.md`, `plan.md`, `tasks.md`, constitución y
+documentación operativa) permanecen en español hasta una migración planificada
+propia; la regla de idioma primario aplica a lo nuevo y a lo publicado, no reescribe
+retroactivamente el histórico de planificación.
 
 ### XII. Gestión de secretos por capas (sin secretos en el repositorio)
 
@@ -72,4 +90,4 @@ Esta constitución prevalece sobre specs y planes. Enmiendas: PR con justificaci
 
 **Política de ramas y fusión (confirmada 2026-11-08; GitFlow)**: tras **cada especificación Spec Kit completada** se crean uno o más commits en la rama de integración **`mvp/1`**; `mvp/1` se fusiona en **`develop` mediante PR**; `develop` se promueve a **`main` mediante un PR de release**. Todo PR exige las puertas de calidad: pruebas, lint, DAST y revisión de Copilot (más los checks de verificación del plan §12.8). Los agentes de planificación no crean ramas, commits, PRs ni hacen push: esas acciones las ejecutan el usuario o agentes de implementación con autorización explícita. Esta política se documenta aquí; su automatización en CI es trabajo de tareas posteriores (T-064, T-076), y la protección de ramas es configuración manual del usuario.
 
-**Versión**: 1.8.0 | **Ratificada**: 2026-11-08 | **Última enmienda**: 2026-11-08 (1.8.0: Restricciones — markdownlint obligatorio para todo Markdown, `--fix` seguro como mecanismo de autocorrección, integrado en `pnpm verify` y CI de PR; Prettier complementario. 1.7.0: VIII — hoja de ruta documental de guías comunitarias, sin cuentas/editor/comentarios en el MVP, por etapas desde autores invitados. 1.6.0: I/II/VII — builds adaptadas de terceros solo con licencia/permiso que cubra adaptación; atribución obligatoria pero insuficiente; link-only como respaldo; takedown, detección de cambios, prohibido eludir accesos/scrapear sitios que lo prohíban; foro de Grim Dawn = fuente candidata por autor. 1.5.0: II declara la hoja de ruta de adquisición permitida (futura, sin permiso implícito). 1.4.0: nuevo principio XII, gestión de secretos por capas; precisa en XI que `.env.example` contiene nombres y valores seguros no secretos. 1.3.1: política de ramas `mvp/1` → `develop` → `main` y puertas de PR (pruebas, lint, DAST, Copilot). 1.3.0: PostgreSQL = única fuente de verdad de producción; `content/` = fixtures/seed; Fastify, Drizzle, Node 22 LTS, PostgreSQL 17 confirmados; builds de release solo desde la API; modifica VI, XI y restricciones. 1.2.0: VIII pasa a monorepo pnpm con backend Docker; nuevo XI backend opcional/seguro; CI de verificación permitido, despliegue diferido. 1.1.0: estado de derechos y `content_status` en I; puerta de activos oficiales en VII; local-first)
+**Versión**: 1.9.0 | **Ratificada**: 2026-11-08 | **Última enmienda**: 2026-11-10 (1.9.0: X — inglés como idioma primario del repositorio y del sitio por objetivo open source, con español como configuración regional completa y paridad verificada; los artefactos SDD históricos permanecen en español hasta su migración planificada. 1.8.0: Restricciones — markdownlint obligatorio para todo Markdown, `--fix` seguro como mecanismo de autocorrección, integrado en `pnpm verify` y CI de PR; Prettier complementario. 1.7.0: VIII — hoja de ruta documental de guías comunitarias, sin cuentas/editor/comentarios en el MVP, por etapas desde autores invitados. 1.6.0: I/II/VII — builds adaptadas de terceros solo con licencia/permiso que cubra adaptación; atribución obligatoria pero insuficiente; link-only como respaldo; takedown, detección de cambios, prohibido eludir accesos/scrapear sitios que lo prohíban; foro de Grim Dawn = fuente candidata por autor. 1.5.0: II declara la hoja de ruta de adquisición permitida (futura, sin permiso implícito). 1.4.0: nuevo principio XII, gestión de secretos por capas; precisa en XI que `.env.example` contiene nombres y valores seguros no secretos. 1.3.1: política de ramas `mvp/1` → `develop` → `main` y puertas de PR (pruebas, lint, DAST, Copilot). 1.3.0: PostgreSQL = única fuente de verdad de producción; `content/` = fixtures/seed; Fastify, Drizzle, Node 22 LTS, PostgreSQL 17 confirmados; builds de release solo desde la API; modifica VI, XI y restricciones. 1.2.0: VIII pasa a monorepo pnpm con backend Docker; nuevo XI backend opcional/seguro; CI de verificación permitido, despliegue diferido. 1.1.0: estado de derechos y `content_status` en I; puerta de activos oficiales en VII; local-first)

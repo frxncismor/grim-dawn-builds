@@ -6,9 +6,14 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  OUT_OF_SCOPE_ROUTE_RULES,
+  SOURCE_STATUSES,
   checkComposeFiles,
   checkManifestText,
+  checkSourceRegistryText,
   checkSourceText,
+  isSourceAccessScope,
+  outOfScopeRouteFor,
   parseComposeServices,
   scanRepository,
 } from './check-scope.mts';
@@ -68,11 +73,21 @@ describe('manifests (package.json)', () => {
     assert.equal(issues.length, 1);
     assert.equal(issues[0].rule, 'redis');
     assert.equal(issues[0].file, 'package.json');
-    assert.equal(issues[0].line, JSON.stringify(manifest, null, 2).split('\n').findIndex((l) => l.includes('"redis"')) + 1);
+    assert.equal(
+      issues[0].line,
+      JSON.stringify(manifest, null, 2)
+        .split('\n')
+        .findIndex((l) => l.includes('"redis"')) + 1,
+    );
   });
 
   it('flags forbidden packages in every dependency section', () => {
-    for (const section of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
+    for (const section of [
+      'dependencies',
+      'devDependencies',
+      'optionalDependencies',
+      'peerDependencies',
+    ]) {
       const text = JSON.stringify({ [section]: { bullmq: '^5.0.0' } });
       const issues = checkManifestText('package.json', text);
       assert.deepEqual(
@@ -101,13 +116,43 @@ describe('manifests (package.json)', () => {
       ['firebase-admin', 'external-auth'],
       ['@azure/msal-browser', 'external-auth'],
       ['@supabase/supabase-js', 'external-auth'],
+      // T-113: auth/sesión/credenciales propias de una cuenta (spec AC-24).
+      ['express-session', 'external-auth'],
+      ['cookie-session', 'external-auth'],
+      ['iron-session', 'external-auth'],
+      ['lucia', 'external-auth'],
+      ['better-auth', 'external-auth'],
+      ['bcrypt', 'external-auth'],
+      ['bcryptjs', 'external-auth'],
+      ['argon2', 'external-auth'],
+      ['@node-rs/argon2', 'external-auth'],
+      ['oauth', 'external-auth'],
+      ['simple-oauth2', 'external-auth'],
+      ['openid-client', 'external-auth'],
+      ['grant', 'external-auth'],
+      ['csurf', 'external-auth'],
+      ['remix-auth', 'external-auth'],
+      ['@hono/auth-js', 'external-auth'],
       ['@aws-sdk/client-s3', 'object-storage'],
       ['minio', 'object-storage'],
       ['@google-cloud/storage', 'object-storage'],
       ['@azure/storage-blob', 'object-storage'],
+      ['cheerio', 'scraping'],
+      ['crawlee', 'scraping'],
+      ['@crawlee/cheerio', 'scraping'],
+      ['puppeteer', 'scraping'],
+      ['puppeteer-core', 'scraping'],
+      ['puppeteer-extra', 'scraping'],
+      ['scrape-it', 'scraping'],
+      ['node-crawler', 'scraping'],
+      ['selenium-webdriver', 'scraping'],
+      ['webdriverio', 'scraping'],
     ];
     for (const [pkg, rule] of cases) {
-      const issues = checkManifestText('package.json', JSON.stringify({ devDependencies: { [pkg]: '1.0.0' } }));
+      const issues = checkManifestText(
+        'package.json',
+        JSON.stringify({ devDependencies: { [pkg]: '1.0.0' } }),
+      );
       assert.deepEqual(
         issues.map((i) => i.rule),
         [rule],
@@ -116,9 +161,56 @@ describe('manifests (package.json)', () => {
     }
   });
 
+  it('fails a manifest that adds passport, express-session or bcrypt (T-113)', () => {
+    const text = JSON.stringify({
+      dependencies: {
+        passport: '^0.7.0',
+        'express-session': '^1.18.0',
+        bcrypt: '^6.0.0',
+      },
+    });
+    const issues = checkManifestText('package.json', text);
+    assert.deepEqual(
+      issues.map((i) => i.rule),
+      ['external-auth', 'external-auth', 'external-auth'],
+    );
+    assert.deepEqual(
+      issues.map((i) => i.line),
+      ['"passport"', '"express-session"', '"bcrypt"'].map(
+        (key) => text.split('\n').findIndex((l) => l.includes(key)) + 1,
+      ),
+    );
+    for (const issue of issues) assert.match(issue.message, /principio VIII/);
+  });
+
+  it('keeps test tooling and utility packages out of the auth rule (T-113)', () => {
+    // Motivo: `playwright`, `@playwright/test` y `jsdom` son el banco de
+    // pruebas; `lighthouse` y `chrome-launcher` miden rendimiento/accesibilidad;
+    // `jsonwebtoken` y `p-queue` son utilidades que el test declara legítimas.
+    // Ninguna implementa una cuenta de usuario y marcarlas rompería el MVP.
+    const legit = {
+      devDependencies: {
+        playwright: '^1.65.0',
+        '@playwright/test': '^1.65.0',
+        jsdom: '^28.0.0',
+        lighthouse: '13.6.0',
+        'chrome-launcher': '1.2.3',
+        jsonwebtoken: '^9.0.0',
+        'p-queue': '^8.0.0',
+      },
+    };
+    assert.deepEqual(checkManifestText('package.json', JSON.stringify(legit)), []);
+  });
+
   it('does not flag legitimate tooling, app and test dependencies', () => {
     const legit = {
-      dependencies: { fastify: '^5.0.0', 'drizzle-orm': '^0.44.0', pg: '^8.16.0', zod: '^4.6.7', '@angular/core': '^21.2.0' },
+      dependencies: {
+        fastify: '^5.0.0',
+        'drizzle-orm': '^0.44.0',
+        pg: '^8.16.0',
+        zod: '^4.6.7',
+        '@angular/core': '^21.2.0',
+      },
       devDependencies: {
         vitest: '^4.0.8',
         jsdom: '^28.0.0',
@@ -127,6 +219,10 @@ describe('manifests (package.json)', () => {
         eslint: '^10.3.0',
         'markdownlint-cli2': '0.24.0',
         '@playwright/test': '^1.50.0',
+        playwright: '^1.65.0',
+        'chrome-launcher': '1.2.3',
+        lighthouse: '13.6.0',
+        jsdom: '^28.0.0',
         testcontainers: '^10.0.0',
         'p-queue': '^8.0.0',
         jsonwebtoken: '^9.0.0',
@@ -169,6 +265,24 @@ describe('source and configuration', () => {
     assert.equal(issues[0].line, 4);
   });
 
+  it('flags auth, session and credential imports in runtime code (T-113)', () => {
+    const cases: [string, string][] = [
+      ["import session from 'express-session';", 'external-auth'],
+      ["import cookieSession from 'cookie-session';", 'external-auth'],
+      ["import { betterAuth } from 'better-auth';", 'external-auth'],
+      ["const bcrypt = require('bcrypt');", 'external-auth'],
+      ["import argon2 from '@node-rs/argon2';", 'external-auth'],
+      ["export * from 'openid-client';", 'external-auth'],
+    ];
+    for (const [code, rule] of cases) {
+      assert.deepEqual(
+        checkSourceText('apps/api/src/x.ts', code, 'code').map((i) => i.rule),
+        [rule],
+        code,
+      );
+    }
+  });
+
   it('does not flag comments, relative paths, builtins or legitimate packages', () => {
     const code = [
       "// import { createClient } from 'redis';",
@@ -184,21 +298,383 @@ describe('source and configuration', () => {
 
   it('flags Redis and AMQP connection URLs in code and configuration', () => {
     assert.deepEqual(
-      checkSourceText('src/app/x.ts', "const url = 'redis://localhost:6379';", 'code').map((i) => i.rule),
+      checkSourceText('src/app/x.ts', "const url = 'redis://localhost:6379';", 'code').map(
+        (i) => i.rule,
+      ),
       ['redis'],
     );
     assert.deepEqual(
-      checkSourceText('.env.example', 'REDIS_URL=rediss://cache:6380\n', 'config').map((i) => i.rule),
+      checkSourceText('.env.example', 'REDIS_URL=rediss://cache:6380\n', 'config').map(
+        (i) => i.rule,
+      ),
       ['redis'],
     );
     assert.deepEqual(
-      checkSourceText('infra/config.json', '{ "broker": "amqp://guest@broker" }', 'config').map((i) => i.rule),
+      checkSourceText('infra/config.json', '{ "broker": "amqp://guest@broker" }', 'config').map(
+        (i) => i.rule,
+      ),
       ['queue-worker'],
     );
   });
 
+  it('flags scraping packages imported in runtime code', () => {
+    const cases: [string, string][] = [
+      ["import * as cheerio from 'cheerio';", 'scraping'],
+      ["const { PuppeteerCrawler } = require('crawlee');", 'scraping'],
+      ["export { default as P } from 'puppeteer-core';", 'scraping'],
+      ["const scraper = await import('scrape-it');", 'scraping'],
+    ];
+    for (const [code, rule] of cases) {
+      const issues = checkSourceText('src/app/x.ts', code, 'code');
+      assert.deepEqual(
+        issues.map((i) => i.rule),
+        [rule],
+        code,
+      );
+    }
+  });
+
+  it('flags comment and calculator screens as routes or absolute links', () => {
+    const cases: [string, SourceKind][] = [
+      ["const routes = [{ path: 'comentarios', component: Comentarios }];", 'code'],
+      ["const routes = [{ path: 'calculadora', component: Calculadora }];", 'code'],
+      ["const routes = [{ path: '/comments', component: Comentarios }];", 'code'],
+      ["const routes = [{ path: 'calculator', component: Calculadora }];", 'code'],
+      ['<a href="/comentarios">Comentarios</a>', 'config'],
+      ['<a [routerLink]="[\'/calculadora\']">Calculadora</a>', 'config'],
+    ];
+    for (const [text, kind] of cases) {
+      assert.deepEqual(
+        checkSourceText('src/app/x.ts', text, kind).map((i) => i.rule),
+        ['out-of-scope-route'],
+        text,
+      );
+    }
+  });
+
+  it('reports the line of a multi-line route definition', () => {
+    const code = "export const routes = [\n  {\n    path: 'calculadora',\n  },\n];\n";
+    const issues = checkSourceText('src/app/app.routes.ts', code, 'code');
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].rule, 'out-of-scope-route');
+    assert.equal(issues[0].line, 3);
+  });
+
+  it('does not flag legitimate routes, prose or test tooling', () => {
+    const code = [
+      "{ path: 'tier-list', component: TierList }",
+      "{ path: 'builds/:slug', component: BuildPage }",
+      "{ path: 'autores/:slug', component: AuthorPage }",
+      "{ path: '**', component: NotFound }",
+      "const aviso = 'El sitio no tiene cuentas, comentarios ni analítica de terceros.';",
+      "const nota = 'Pásala por la calculadora de devoción de grimtools.';",
+      "import { chromium } from 'playwright';",
+      "import { test, expect } from '@playwright/test';",
+      "import { JSDOM } from 'jsdom';",
+    ].join('\n');
+    assert.deepEqual(checkSourceText('src/app/x.ts', code, 'code'), []);
+    assert.deepEqual(
+      checkSourceText(
+        'src/app/legal.page.html',
+        '<p>Sin cuentas, comentarios ni calculadora.</p>',
+        'config',
+      ),
+      [],
+    );
+  });
+
   it('ignores URL-like text inside comment lines of configuration', () => {
-    assert.deepEqual(checkSourceText('infra/x.yaml', '# example: redis://localhost\n', 'config'), []);
+    assert.deepEqual(
+      checkSourceText('infra/x.yaml', '# example: redis://localhost\n', 'config'),
+      [],
+    );
+  });
+});
+
+describe('out-of-scope routes (T-113)', () => {
+  it('flags auth, registration, account and public-editing routes', () => {
+    const cases: [string, SourceKind, RegExp][] = [
+      ["const routes = [{ path: 'login', component: Login }];", 'code', /autenticación/],
+      ["const routes = [{ path: '/login', component: Login }];", 'code', /autenticación/],
+      ["const routes = [{ path: 'registro', component: Registro }];", 'code', /registro/],
+      ['<a routerLink="/cuenta">Mi cuenta</a>', 'config', /cuenta, administración/],
+      [`<a [routerLink]="['/registro']">Crear cuenta</a>`, 'config', /registro/],
+      ['<a href="/login">Entrar</a>', 'config', /autenticación/],
+      ["app.post('/register', handler);", 'code', /registro/],
+      ["fastify.get('/session', handler);", 'code', /autenticación/],
+      ["const routes = [{ path: 'editar/:slug', component: Editar }];", 'code', /edición pública/],
+      ["const route = { method: 'GET', url: '/admin' };", 'code', /edición pública/],
+    ];
+    for (const [text, kind, label] of cases) {
+      const file = kind === 'config' ? 'src/app/x.html' : 'src/app/x.ts';
+      const issues = checkSourceText(file, text, kind);
+      assert.equal(issues.length, 1, text);
+      assert.equal(issues[0].rule, 'out-of-scope-route', text);
+      assert.match(issues[0].message, label, text);
+    }
+  });
+
+  it('does not flag legitimate routes, roles, secret names, style URLs or prose', () => {
+    const code = [
+      "{ path: 'autores/:slug', component: AuthorPage }",
+      "{ path: 'builds/:slug', component: BuildPage }",
+      "{ path: 'tier-list', component: TierList }",
+      "{ path: '', component: Home }",
+      "{ path: '**', component: NotFound }",
+      "{ path: 'placeholder', component: Preview }",
+      "{ path: 'borrador', component: Draft }",
+      '<a href="/tier-list">Catálogo</a>',
+      `<a [routerLink]="['/builds', guide.slug]">Guía</a>`,
+      "app.get('/health', async () => ({ status: 'ok' }));",
+      "app.get('/ready', async () => true);",
+      "app.get('/api/v1/builds', handler);",
+      "const usuario = { user: 'editor' };",
+      "const cfg = { secretName: 'db_password_editor', styleUrl: './editorial.css', origin: 'editor' };",
+      "const aviso = 'El sitio no tiene cuentas, comentarios ni analítica de terceros.';",
+    ].join('\n');
+    assert.deepEqual(checkSourceText('src/app/app.routes.ts', code, 'code'), []);
+    assert.deepEqual(checkSourceText('src/app/app.routes.server.ts', code, 'code'), []);
+  });
+
+  it('reports the line of a multi-line auth route definition', () => {
+    const code = "export const routes = [\n  {\n    path: 'editar/:slug',\n  },\n];\n";
+    const issues = checkSourceText('src/app/app.routes.ts', code, 'code');
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].rule, 'out-of-scope-route');
+    assert.equal(issues[0].line, 3);
+  });
+
+  it('exposes the families and compares whole route segments only', () => {
+    assert.deepEqual(
+      OUT_OF_SCOPE_ROUTE_RULES.map((f) => f.id),
+      ['auth', 'registro', 'cuenta-y-edicion-publica'],
+    );
+    for (const family of OUT_OF_SCOPE_ROUTE_RULES) {
+      assert.ok(family.segments.length > 0, family.id);
+      assert.ok(family.label.length > 0, family.id);
+    }
+    for (const allowed of [
+      '/autores/:slug',
+      '/builds/:slug',
+      '/tier-list',
+      '/legal',
+      '/acerca',
+      '/404',
+      '/**',
+      '/',
+      '/api/v1/builds',
+      '/health',
+      '/og/site.png',
+    ]) {
+      assert.equal(outOfScopeRouteFor(allowed), undefined, allowed);
+    }
+    assert.equal(outOfScopeRouteFor('/login?next=/tier-list')?.id, 'auth');
+    assert.equal(outOfScopeRouteFor('/editar/:slug')?.id, 'cuenta-y-edicion-publica');
+    assert.equal(outOfScopeRouteFor('/mi-cuenta')?.id, 'cuenta-y-edicion-publica');
+  });
+});
+
+describe('external source access (T-109)', () => {
+  const FORO = 'https://foro.example.test/thread/1';
+
+  it('flags every HTTP client with a third-party host literal', () => {
+    const cases: [string, number][] = [
+      [`const data = await fetch('${FORO}');`, 1],
+      [`const data = await axios.get('${FORO}');`, 1],
+      [`const data = await got('${FORO}');`, 1],
+      [`await got.post('${FORO}', { json: {} });`, 1],
+      [`await undici.request('${FORO}');`, 1],
+      [`await undici.fetch('${FORO}');`, 1],
+      [`https.get('${FORO}', (res) => res.resume());`, 1],
+      [`const response = await http.request('${FORO}');`, 1],
+      [`const response = await https.request('${FORO}');`, 1],
+      [`await page.goto('${FORO}');`, 1],
+      [`const $ = cheerio.load('${FORO}');`, 1],
+      [`const response = await fetch(\n  '${FORO}',\n);\n`, 1],
+      [`const id = 7;\nawait fetch(\`https://foro.example.test/thread/\${id}\`);\n`, 2],
+    ];
+    for (const [code, line] of cases) {
+      const issues = checkSourceText('src/app/x.ts', code, 'code');
+      assert.deepEqual(
+        issues.map((i) => i.rule),
+        ['external-source-access'],
+        code,
+      );
+      assert.equal(issues[0].line, line, code);
+      assert.match(issues[0].message, /foro\.example\.test/, code);
+    }
+  });
+
+  it('reports one issue per call', () => {
+    const code = `await fetch('${FORO}');\nconst x = 1;\nawait axios('${FORO}');\n`;
+    const issues = checkSourceText('apps/api/src/ingest.ts', code, 'code');
+    assert.deepEqual(
+      issues.map((i) => i.rule),
+      ['external-source-access', 'external-source-access'],
+    );
+    assert.deepEqual(
+      issues.map((i) => i.line),
+      [1, 3],
+    );
+  });
+
+  it('does not flag own hosts, variable-built URLs, prose or out-of-scope code', () => {
+    const allowed = [
+      "fetch('http://127.0.0.1:3000/health')",
+      "fetch('http://localhost:4200/x')",
+      "fetch('http://[::1]:3000/x')",
+      'fetch(`${BASE_URL}/api/v1/builds`)',
+      "const link = 'https://foro.example.test/thread/1';",
+      "const nota = 'El foro de Grim Dawn se lee a mano; sin scraping.';",
+    ];
+    for (const code of allowed) {
+      assert.deepEqual(checkSourceText('src/app/x.ts', code, 'code'), [], code);
+    }
+    const tooling = `const bin = await fetch(
+  'https://github.com/gitleaks/gitleaks/releases/download/v8/gitleaks.tgz',
+);`;
+    assert.deepEqual(checkSourceText('scripts/setup-gitleaks.mts', tooling, 'code'), []);
+    assert.deepEqual(
+      checkSourceText('scripts/check-contrast.mts', `fetch('https://third.test/x')`, 'code'),
+      [],
+    );
+  });
+
+  it('honours the marker only on the same or previous line and with a reason', () => {
+    const url = `'${FORO}'`;
+    const reason = 'check-scope:external-http-ok descarga del binario fijado (T-083)';
+    const sameLine = `const r = await fetch(${url}); // ${reason}`;
+    assert.deepEqual(checkSourceText('scripts/fetch-tool.mts', sameLine, 'code'), []);
+    const previousLine = `// ${reason}\nconst r = await fetch(${url});`;
+    assert.deepEqual(checkSourceText('scripts/fetch-tool.mts', previousLine, 'code'), []);
+    const noReason = `const r = await fetch(${url}); // check-scope:external-http-ok`;
+    assert.deepEqual(
+      checkSourceText('scripts/fetch-tool.mts', noReason, 'code').map((i) => i.rule),
+      ['external-source-access'],
+    );
+    const shortReason = `// check-scope:external-http-ok corto\nconst r = await fetch(${url});`;
+    assert.equal(checkSourceText('scripts/fetch-tool.mts', shortReason, 'code').length, 1);
+    const farLine = `// ${reason}\n\nconst r = await fetch(${url});`;
+    assert.equal(checkSourceText('scripts/fetch-tool.mts', farLine, 'code').length, 1);
+  });
+
+  it('scopes automated access to app and ingestion code only', () => {
+    for (const file of [
+      'src/app/x.ts',
+      'src/locale/i18n.ts',
+      'apps/api/src/x.ts',
+      'scripts/ingest-source.mts',
+      'scripts/source-registry.mts',
+    ]) {
+      assert.equal(isSourceAccessScope(file), true, file);
+    }
+    for (const file of [
+      'scripts/setup-gitleaks.mts',
+      'scripts/rotate-secret.mts',
+      'scripts/check-contrast.mts',
+      'docs/example.ts',
+      'e2e/flow.ts',
+      'package.json',
+    ]) {
+      assert.equal(isSourceAccessScope(file), false, file);
+    }
+  });
+});
+
+describe('source rights gate (T-109)', () => {
+  const file = 'content/sources/foro.json';
+  const base = { slug: 'foro-grim-dawn', kind: 'comunidad', title: 'Foro de Grim Dawn' };
+  const fullEvidence = {
+    status: 'habilitada',
+    evidence_type: 'permiso_escrito',
+    evidence_ref: 'correo-2026-11-10-autor.md',
+    scope: 'adaptacion y traduccion',
+    recorded_on: '2026-11-10',
+    rights_status: 'permission_granted',
+  };
+  const check = (record: Record<string, unknown>) =>
+    checkSourceRegistryText(file, JSON.stringify({ ...base, ...record }, null, 2));
+
+  it('fails an enabled source without evidence', () => {
+    const issues = check({ status: 'habilitada' });
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].rule, 'source-rights-gate');
+    assert.match(issues[0].message, /foro-grim-dawn/);
+    assert.match(issues[0].message, /evidence_type/);
+    assert.equal(issues[0].line, 2);
+  });
+
+  it('passes an enabled source with complete evidence', () => {
+    assert.deepEqual(check(fullEvidence), []);
+  });
+
+  it('accepts evidence nested under rights_evidence', () => {
+    const nested = {
+      status: 'habilitada',
+      rights_evidence: {
+        evidence_type: 'permiso_escrito',
+        evidence_ref: 'correo-2026-11-10-autor.md',
+        scope: 'adaptacion',
+        recorded_on: '2026-11-10',
+        rights_status: 'permission_granted',
+      },
+    };
+    assert.deepEqual(check(nested), []);
+  });
+
+  it('does not flag pending, evaluating, revoked or prohibited sources', () => {
+    for (const status of ['pending', 'evaluando', 'revocada', 'prohibida']) {
+      assert.deepEqual(check({ status }), [], status);
+    }
+  });
+
+  it('requires a written condition for limited sources', () => {
+    const limited = { ...fullEvidence, status: 'limitada' };
+    const issues = check(limited);
+    assert.equal(issues.length, 1);
+    assert.match(issues[0].message, /condición escrita/);
+    assert.deepEqual(check({ ...limited, condition: 'solo adaptación, sin imágenes' }), []);
+  });
+
+  it('rejects an enabled source whose rights_status is not publishable', () => {
+    const issues = check({ ...fullEvidence, rights_status: 'pending' });
+    assert.equal(issues.length, 1);
+    assert.match(issues[0].message, /rights_status/);
+  });
+
+  it('treats a registry record without status as pending', () => {
+    assert.deepEqual(check({}), []);
+  });
+
+  it('fails closed on invalid JSON and on states outside the vocabulary', () => {
+    const invalid = checkSourceRegistryText(file, '{ "slug": ');
+    assert.deepEqual(
+      invalid.map((i) => i.rule),
+      ['invalid-input'],
+    );
+    const unknown = check({ status: 'enabled' });
+    assert.deepEqual(
+      unknown.map((i) => i.rule),
+      ['invalid-input'],
+    );
+  });
+
+  it('checks every record of a registry array', () => {
+    const good = { ...base, ...fullEvidence };
+    const bad = { slug: 'otra', kind: 'comunidad', title: 'Otra', status: 'habilitada' };
+    const issues = checkSourceRegistryText(file, JSON.stringify([good, bad], null, 2));
+    assert.deepEqual(
+      issues.map((i) => i.rule),
+      ['source-rights-gate'],
+    );
+    assert.match(issues[0].message, /otra/);
+  });
+
+  it('exposes the source policy vocabulary', () => {
+    assert.deepEqual(
+      [...SOURCE_STATUSES],
+      ['pending', 'evaluando', 'habilitada', 'limitada', 'revocada', 'prohibida'],
+    );
   });
 });
 
@@ -216,14 +692,23 @@ describe('compose', () => {
   });
 
   it('passes one application service, one database and the migrate job', () => {
-    assert.deepEqual(checkComposeFiles([{ file: 'infra/docker/compose.yaml', text: CLEAN_COMPOSE }]), []);
+    assert.deepEqual(
+      checkComposeFiles([{ file: 'infra/docker/compose.yaml', text: CLEAN_COMPOSE }]),
+      [],
+    );
   });
 
   it('fails a controlled fixture that adds a redis service', () => {
     const text = `${CLEAN_COMPOSE}  redis:\n    image: redis:7.4-alpine\n`;
     const issues = checkComposeFiles([{ file: 'infra/docker/compose.yaml', text }]);
-    assert.ok(issues.some((i) => i.rule === 'redis'), JSON.stringify(issues));
-    assert.equal(issues.find((i) => i.rule === 'redis')?.line, text.split('\n').findIndex((l) => l === '  redis:') + 1);
+    assert.ok(
+      issues.some((i) => i.rule === 'redis'),
+      JSON.stringify(issues),
+    );
+    assert.equal(
+      issues.find((i) => i.rule === 'redis')?.line,
+      text.split('\n').findIndex((l) => l === '  redis:') + 1,
+    );
   });
 
   it('fails a worker or queue service even without a known image', () => {
@@ -235,14 +720,20 @@ describe('compose', () => {
   it('fails when a second application service is added', () => {
     const text = `${CLEAN_COMPOSE}  web:\n    build: ../../\n`;
     const issues = checkComposeFiles([{ file: 'infra/docker/compose.yaml', text }]);
-    assert.deepEqual(issues.map((i) => i.rule), ['compose-topology']);
+    assert.deepEqual(
+      issues.map((i) => i.rule),
+      ['compose-topology'],
+    );
     assert.match(issues[0].message, /web/);
   });
 
   it('fails when a second database service is added', () => {
     const text = `${CLEAN_COMPOSE}  reports-db:\n    image: mysql:8.4\n`;
     const issues = checkComposeFiles([{ file: 'infra/docker/compose.yaml', text }]);
-    assert.deepEqual(issues.map((i) => i.rule), ['compose-topology']);
+    assert.deepEqual(
+      issues.map((i) => i.rule),
+      ['compose-topology'],
+    );
   });
 
   it('classifies database images with registry and digest correctly', () => {
@@ -310,7 +801,42 @@ describe('scanRepository', () => {
       'infra/docker/compose.yaml': `${CLEAN_COMPOSE}  redis:\n    image: redis:7\n`,
     });
     const result = scanRepository(root);
-    assert.ok(result.issues.some((i) => i.file === 'infra/docker/compose.yaml' && i.rule === 'redis'));
+    assert.ok(
+      result.issues.some((i) => i.file === 'infra/docker/compose.yaml' && i.rule === 'redis'),
+    );
+  });
+
+  it('reads content/sources registries without counting them as scanned source files (T-109)', () => {
+    const root = makeFixture({
+      'package.json': JSON.stringify({ dependencies: {} }),
+      'content/sources/foro.json': JSON.stringify({
+        slug: 'foro',
+        kind: 'comunidad',
+        title: 'Foro de Grim Dawn',
+        status: 'habilitada',
+      }),
+    });
+    const result = scanRepository(root);
+    assert.equal(result.scannedFiles, 1);
+    assert.deepEqual(
+      result.issues.map((i) => `${i.file}:${i.rule}`),
+      ['content/sources/foro.json:source-rights-gate'],
+    );
+  });
+
+  it('reads JSON under any directory named sources (T-109)', () => {
+    const root = makeFixture({
+      'data/sources/registry.json': JSON.stringify([
+        { slug: 'x', kind: 'comunidad', title: 'X', status: 'habilitada' },
+      ]),
+    });
+    const result = scanRepository(root);
+    assert.ok(
+      result.issues.some(
+        (i) => i.file === 'data/sources/registry.json' && i.rule === 'source-rights-gate',
+      ),
+      JSON.stringify(result.issues),
+    );
   });
 });
 
@@ -336,5 +862,50 @@ describe('check:scope CLI', () => {
     const result = run(root);
     assert.equal(result.status, 1, result.stderr || result.stdout);
     assert.match(result.stdout + result.stderr, /package\.json.*\[redis\]/);
+  });
+
+  it('exits 1 and names the file and rule for a fixture that adds passport (T-113)', () => {
+    const manifest = JSON.parse(REAL_MANIFEST);
+    manifest.dependencies.passport = '^0.7.0';
+    const root = makeFixture({ 'package.json': JSON.stringify(manifest, null, 2) });
+    const result = run(root);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stdout + result.stderr, /package\.json.*\[external-auth\]/);
+  });
+
+  it('exits 1 and names the rule and route for a fixture with a login route (T-113)', () => {
+    const root = makeFixture({
+      'package.json': JSON.stringify({ dependencies: {} }),
+      'src/app/routes.ts': "export const routes = [{ path: 'login', component: Login }];\n",
+    });
+    const result = run(root);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stdout + result.stderr, /\[out-of-scope-route\]/);
+    assert.match(result.stdout + result.stderr, /login/);
+  });
+
+  it('exits 1 and names [external-source-access] for automated third-party access (T-109)', () => {
+    const root = makeFixture({
+      'src/app/x.ts': "export const load = () => fetch('https://foro.example.test/thread/1');\n",
+    });
+    const result = run(root);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stdout + result.stderr, /\[external-source-access\]/);
+    assert.match(result.stdout + result.stderr, /foro\.example\.test/);
+  });
+
+  it('exits 1 and names [source-rights-gate] for an enabled source without evidence (T-109)', () => {
+    const root = makeFixture({
+      'content/sources/foro.json': JSON.stringify({
+        slug: 'foro',
+        kind: 'comunidad',
+        title: 'Foro de Grim Dawn',
+        status: 'habilitada',
+      }),
+    });
+    const result = run(root);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stdout + result.stderr, /\[source-rights-gate\]/);
+    assert.match(result.stdout + result.stderr, /foro/);
   });
 });

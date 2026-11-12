@@ -1,6 +1,6 @@
 @if (isVisible()) {
   <section [id]="sectionId()" [attr.aria-labelledby]="sectionId() + '-heading'">
-    <h2 [id]="sectionId() + '-heading'" i18n="@@devotionSection.heading">Ruta de devoción</h2>
+    <h2 [id]="sectionId() + '-heading'" i18n="@@devotionSection.heading">Devotion path</h2>
 
     @for (introduction of introductions(); track $index) {
       <p class="introduction" data-introduction>{{ introduction.detail }}</p>
@@ -15,10 +15,7 @@
     }
 
     <div class="step-selector" [id]="sectionId() + '-selector'">
-      <nav
-        aria-label="Seleccionar un paso de devoción"
-        i18n-aria-label="@@devotionSection.selectSteps"
-      >
+      <nav aria-label="Select a devotion step" i18n-aria-label="@@devotionSection.selectSteps">
         @if (hasDuplicatePositions()) {
           <p class="data-warning" data-inconsistent-data role="alert">
             {{ text.duplicatePositions }}

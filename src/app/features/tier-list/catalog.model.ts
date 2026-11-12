@@ -12,7 +12,9 @@ export interface CatalogGuide extends Pick<
   readonly content_tags: readonly string[];
   readonly playstyle: string;
 }
+export type CatalogLocale = 'en' | 'es';
 export interface CatalogInput {
+  readonly locale: CatalogLocale;
   readonly title: string;
   readonly gameVersion: string;
   readonly masteries: readonly {
@@ -36,13 +38,19 @@ export interface CatalogCard extends CatalogItem {
   source: Pick<PublicSource, 'title' | 'license_note'> | null;
 }
 export interface CatalogSnapshot {
+  /** Active UI locale this snapshot was built for. */
+  locale: CatalogLocale;
+  /** Language of the editorial content itself (currently always `es`). */
+  contentLocale: CatalogLocale;
   title: string;
   gameVersion: string;
   masteries: CatalogInput['masteries'];
   cards: readonly CatalogCard[];
 }
-export function buildCatalog(input: CatalogInput): CatalogSnapshot {
+export function buildCatalog(input: CatalogInput, locale: CatalogLocale = 'en'): CatalogSnapshot {
   const masteries = new Map(input.masteries.map((m) => [m.slug, m]));
+  const masteryName = (mastery: CatalogInput['masteries'][number]) =>
+    locale === 'en' ? mastery.name_en : mastery.name_es;
   const guides = new Map(input.guides.map((g) => [g.slug, g]));
   const sources = new Map(input.sources.map((s) => [s.slug, s]));
   const cards = input.combinations.flatMap((combination) => {
@@ -51,7 +59,7 @@ export function buildCatalog(input: CatalogInput): CatalogSnapshot {
     );
     const names = masterySlugs.map((slug) => masteries.get(slug));
     if (names.some((name) => !name)) throw new Error('Combinación de catálogo inválida.');
-    const combinationName = names.map((m) => m!.name_es).join(' + ');
+    const combinationName = names.map((m) => masteryName(m!)).join(' + ');
     let entries = input.entries.filter((entry) => entry.combination_slug === combination.slug);
     const concrete = entries.filter((e) => e.entry_kind !== 'placeholder');
     if (concrete.length) entries = concrete;
@@ -110,6 +118,8 @@ export function buildCatalog(input: CatalogInput): CatalogSnapshot {
       compare(a.id, b.id),
   );
   return {
+    locale,
+    contentLocale: input.locale,
     title: input.title,
     gameVersion: input.gameVersion,
     masteries: input.masteries.map((m) => ({ ...m })),
@@ -119,7 +129,10 @@ export function buildCatalog(input: CatalogInput): CatalogSnapshot {
 function compare(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
-export function catalogGroups(model: CatalogSnapshot): readonly FilterGroup[] {
+export function catalogGroups(
+  model: CatalogSnapshot,
+  locale: CatalogLocale = model.locale,
+): readonly FilterGroup[] {
   const group = (
     key: FilterGroup['key'],
     label: string,
@@ -128,39 +141,39 @@ export function catalogGroups(model: CatalogSnapshot): readonly FilterGroup[] {
   return [
     group(
       'masteries',
-      'Maestrías',
-      model.masteries.map((m) => [m.slug, m.name_es] as const),
+      $localize`:@@catalog.group.masteries:Masteries`,
+      model.masteries.map((m) => [m.slug, locale === 'en' ? m.name_en : m.name_es] as const),
     ),
-    group('damageTypes', 'Tipo de daño', [
-      ['fisico', 'Físico'],
-      ['fuego', 'Fuego'],
-      ['frio', 'Frío'],
-      ['rayo', 'Rayo'],
-      ['acido', 'Ácido'],
-      ['vitalidad', 'Vitalidad'],
-      ['caos', 'Caos'],
-      ['eter', 'Éter'],
-      ['elemental', 'Elemental'],
-      ['sangrado', 'Sangrado'],
-      ['mascotas', 'Mascotas'],
+    group('damageTypes', $localize`:@@catalog.group.damageTypes:Damage type`, [
+      ['fisico', $localize`:@@catalog.option.fisico:Physical`],
+      ['fuego', $localize`:@@catalog.option.fuego:Fire`],
+      ['frio', $localize`:@@catalog.option.frio:Cold`],
+      ['rayo', $localize`:@@catalog.option.rayo:Lightning`],
+      ['acido', $localize`:@@catalog.option.acido:Acid`],
+      ['vitalidad', $localize`:@@catalog.option.vitalidad:Vitality`],
+      ['caos', $localize`:@@catalog.option.caos:Chaos`],
+      ['eter', $localize`:@@catalog.option.eter:Aether`],
+      ['elemental', $localize`:@@catalog.option.elemental:Elemental`],
+      ['sangrado', $localize`:@@catalog.option.sangrado:Bleeding`],
+      ['mascotas', $localize`:@@catalog.option.mascotas:Minions`],
     ]),
-    group('contentTags', 'Contenido', [
-      ['campana', 'Campaña'],
-      ['shattered_realm', 'Shattered Realm'],
-      ['crucible', 'Crucible'],
-      ['jefes', 'Jefes'],
-      ['farmeo', 'Farmeo'],
+    group('contentTags', $localize`:@@catalog.group.contentTags:Content`, [
+      ['campana', $localize`:@@catalog.option.campana:Campaign`],
+      ['shattered_realm', $localize`:@@catalog.option.shattered_realm:Shattered Realm`],
+      ['crucible', $localize`:@@catalog.option.crucible:Crucible`],
+      ['jefes', $localize`:@@catalog.option.jefes:Bosses`],
+      ['farmeo', $localize`:@@catalog.option.farmeo:Farming`],
     ]),
-    group('playstyles', 'Estilo', [
-      ['melee', 'Cuerpo a cuerpo'],
-      ['rango', 'A distancia'],
-      ['mascotas', 'Mascotas'],
-      ['hibrido', 'Híbrido'],
+    group('playstyles', $localize`:@@catalog.group.playstyles:Style`, [
+      ['melee', $localize`:@@catalog.option.melee:Melee`],
+      ['rango', $localize`:@@catalog.option.rango:Ranged`],
+      ['mascotas', $localize`:@@catalog.option.mascotas:Minions`],
+      ['hibrido', $localize`:@@catalog.option.hibrido:Hybrid`],
     ]),
-    group('contentStatuses', 'Estado del contenido', [
-      ['verificado', 'Verificado'],
-      ['sin_verificar', 'Sin verificar'],
-      ['placeholder', 'Placeholder'],
+    group('contentStatuses', $localize`:@@catalog.group.contentStatuses:Content status`, [
+      ['verificado', $localize`:@@catalog.option.verificado:Verified`],
+      ['sin_verificar', $localize`:@@catalog.option.sin_verificar:Unverified`],
+      ['placeholder', $localize`:@@catalog.option.placeholder:Placeholder`],
     ]),
   ];
 }
