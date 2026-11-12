@@ -63,11 +63,11 @@ mediante comandos distintos.
 
 - **Regla.** Los documentos públicos son en inglés primario, con una contraparte en
   español llamada `*.es.md`.
-- **Cobertura actual.** `README.md`, `CONTRIBUTING.md` y este
-  `docs/quality-gates.es.md` se entregan en ambos idiomas. Siguen solo en español,
-  pendientes de traducción en T-158: `docs/orchestration/*.md` (`herdr`, `hierarchy`,
-  `modelos`, `remote-access`); los documentos bajo `docs/content/` también son solo
-  en español.
+- **Cobertura actual.** `README.md`, `CONTRIBUTING.md`, `docs/quality-gates.md` y
+  `docs/orchestration/{modelos,remote-access}.md` se entregan en ambos idiomas.
+  Siguen solo en español, pendientes de traducción en T-158:
+  `docs/orchestration/{herdr,hierarchy}.md`; los documentos bajo `docs/content/`
+  también son solo en español.
 - **Artefactos internos de SDD** (`specs/**`, `handoff.md`, `plan.md`, `tasks.md`):
   solo en español, como permite la constitución; no se exige paridad.
 - **Qué comprueba la automatización.** `pnpm check:locale-parity` compara los

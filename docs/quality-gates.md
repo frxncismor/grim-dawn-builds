@@ -61,11 +61,10 @@ twice because both runners invoke the same script through different commands.
 
 - **Rule.** Public docs are English primary, with a Spanish counterpart named
   `*.es.md`.
-- **Current coverage.** `README.md`, `CONTRIBUTING.md` and this
-  `docs/quality-gates.md` ship both languages. Still Spanish-only, pending
-  translation in T-158: `docs/orchestration/*.md` (`herdr`, `hierarchy`,
-  `modelos`, `remote-access`); the docs under `docs/content/` are also
-  Spanish-only.
+- **Current coverage.** `README.md`, `CONTRIBUTING.md`, `docs/quality-gates.md` and
+  `docs/orchestration/{modelos,remote-access}.md` ship both languages. Still
+  Spanish-only, pending translation in T-158: `docs/orchestration/{herdr,hierarchy}.md`;
+  the docs under `docs/content/` are also Spanish-only.
 - **Internal SDD artifacts** (`specs/**`, `handoff.md`, `plan.md`, `tasks.md`):
   Spanish only, as the constitution allows; no parity required.
 - **What the automation checks.** `pnpm check:locale-parity` compares the Angular
