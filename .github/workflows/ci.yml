@@ -385,13 +385,13 @@ jobs:
             DB_PASSWORD_MIGRATOR="$(cat "$RUNNER_TEMP/dast-db-password")" \
             node apps/api/dist/db/migrate.mjs
 
-      # Python's http.server is preinstalled on the runner and serves the built artifact
-      # as a generic static host would (no security headers are invented here: a
-      # functional CSP for the inline Angular bootstrap is a separate build task).
+      # T-166: the shared static server sends the artifact security headers (CSP with
+      # per-page hashes, anti-clickjacking, nosniff); DAST validates that surface.
+
       - name: Serve web artifact and start API (loopback only)
         run: |
           set -euo pipefail
-          python3 -m http.server 8081 --bind 127.0.0.1 --directory dist/grim-dawn-builds/browser > "$RUNNER_TEMP/dast-web.log" 2>&1 &
+          node --import tsx scripts/serve-artifact.mts --root dist/grim-dawn-builds/browser --port 8081 --host 127.0.0.1 > "$RUNNER_TEMP/dast-web.log" 2>&1 &
           DB_HOST=127.0.0.1 DB_PORT=5432 POSTGRES_DB=gd_dast DB_USER_API_RO=api_ro \
             DB_PASSWORD_API_RO="$(cat "$RUNNER_TEMP/dast-db-password")" \
             API_HOST=127.0.0.1 API_PORT=3000 \
