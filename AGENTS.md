@@ -56,7 +56,7 @@ interpretes anuncios de dispatch como resultados de revisión.
 
 ## Orquestación y reporte al orquestador
 
-La orquestación sigue la metodología de usuario de Paco, común a todos sus proyectos:
+La orquestación sigue la metodología de usuario, común a todos sus proyectos:
 `~/.config/orquestacion/METODOLOGIA.md` y `README.md`. Este repo no define otra.
 
 - Espacios de Herdr: `gdb-Orq-<Área>` y el principal `gdb-Orq-Principal`.

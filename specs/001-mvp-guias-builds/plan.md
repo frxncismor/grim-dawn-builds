@@ -148,7 +148,7 @@ Ver spec §7. Se reservan las abstracciones (repositorio, esquema, i18n) pero no
 ## 11. Local-first y portabilidad (decisión `hosting=local_first`)
 
 - **Ahora**: `ng serve`/`ng build` locales, `docker compose` local (PostgreSQL 17 + API Fastify), Playwright/axe/Lighthouse contra `http://localhost`, sin secretos con claves ni proveedor remoto. Sin Docker, `pnpm verify` usa fixtures (marcado `source=fixture`).
-- **Diferido (no implementar)**: proveedor de hosting, dominio, BD remota, secretos de despliegue, workflows de CI/**deploy**. (Los workflows de **verificación** en PR son admisibles, §12.8.) **Decisión cerrada el 2026-11-11 (S11, §17.58): MVP local; el hosting queda fuera del MVP por decisión de Paco.**
+- **Diferido (no implementar)**: proveedor de hosting, dominio, BD remota, secretos de despliegue, workflows de CI/**deploy**. (Los workflows de **verificación** en PR son admisibles, §12.8.) **Decisión cerrada el 2026-11-11 (S11, §17.58): MVP local; el hosting queda fuera del MVP por decisión del usuario.**
 - **Portabilidad preservada**: salida estática independiente del host; `BASE_URL` configurable; repositorio de contenido tras interfaz; PostgreSQL estándar (sin APIs de proveedor); nada en el código asume un dominio.
 - **Reglas**: ningún secreto en el repositorio; `.env.example` solo con nombres de variables y valores por defecto seguros no secretos (rev. 5, ver §13.2).
 
@@ -3521,8 +3521,8 @@ and out of scope», `README.md:175-179`). Existían un build de release
 (`pnpm build:release`, `pnpm check:release`) y una guarda del artefacto
 (`pnpm check:public-build`) sin destino ni runbook, y la decisión estaba abierta.
 
-**Decisión de Paco (2026-11-11)**: MVP local; el hosting queda fuera del MVP por
-decisión de Paco (2026-11-11). El entregable es el artefacto estático que hoy
+**Decisión del usuario (2026-11-11)**: MVP local; el hosting queda fuera del MVP por
+decisión del usuario (2026-11-11). El entregable es el artefacto estático que hoy
 produce el build y se sirve en local. No hay proveedor, dominio, certificado,
 pipeline de publicación ni credenciales de despliegue, y ninguno se añade.
 
