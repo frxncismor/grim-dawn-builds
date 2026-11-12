@@ -62,6 +62,30 @@ Sin los pasos 4 y 5, la fuente sigue en `evaluando` y no se publica nada derivad
 - **Revocación**: cualquier retirada se atiende con el
   [runbook](takedown-runbook.md) y tiene prioridad sobre cualquier otra tarea.
 
+## Procedencia interna de la guía publicada (T-044)
+
+La guía `chaman-demoledor-golpe-primigenio` es **contenido propio del sitio**,
+no una adaptación de una guía ajena ni una publicación de foro. La generó
+Claude Code para Grim Dawn Builds el 2026-11-12 y no tiene autor ni URL
+externos que atribuir, ni permiso de terceros que afirmar.
+
+- **Qué se transcribe**: solo datos factuales del build (maestrías, habilidades
+  y puntos, devociones y constelaciones, y reglas del filtro de botín/equipo).
+- **Qué no se reproduce**: texto editorial, prosa, imágenes, arte ni rankings
+  de terceros. Los campos editoriales de la ficha son texto propio y neutral.
+- **Registro de procedencia**: la fuente `guia-original` se reutiliza solo como
+  identificador interno de la tier list; su `kind` es `original`, su `url` es
+  nula y su `author_name` es «Grim Dawn Builds». No es una fuente externa.
+- **Derechos**: `rights_status=own_original`, confirmado por el titular del
+  sitio (Paco) el 2026-11-12, con `permission_ref` nulo. La ficha publica con
+  `content_status=sin_verificar`: los datos no se han comprobado todavía contra
+  el juego y la propia página lo declara.
+
+Los datos del juego (nombres de habilidades, maestrías y constelaciones) son
+hechos del videojuego; no se presentan como texto de Crate Entertainment ni se
+copian descripciones, arte ni rankings de sus guías. La atribución con enlace
+solo aplica a fuentes externas reales; aquí no existe ninguna.
+
 ## Guardia automática (`check-scope`, T-109)
 
 `pnpm check:scope` falla si el código de la aplicación o de la ingesta contiene

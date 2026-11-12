@@ -62,11 +62,11 @@ export function artifactLocales(config: unknown): ArtifactLocale[] {
   return fail('angular.json: ningún proyecto declara i18n.');
 }
 
-/** Lee `angular.json` desde la raíz del repositorio. */
+/** Lee el `angular.json` de la web (`apps/web`) desde la raíz del repositorio. */
 export async function readArtifactLocales(repoRoot: string): Promise<ArtifactLocale[]> {
   let raw: string;
   try {
-    raw = await readFile(join(repoRoot, 'angular.json'), 'utf8');
+    raw = await readFile(join(repoRoot, 'apps', 'web', 'angular.json'), 'utf8');
   } catch {
     return fail('angular.json no legible.');
   }

@@ -158,6 +158,33 @@ pnpm exec tsx infra/docker/init/provision-roles.mts
 El aprovisionador es idempotente y no imprime contraseñas. La API lee únicamente
 las vistas públicas; no recibe credenciales de migración ni de superusuario.
 
+## Continuar el trabajo en otra máquina
+
+El repositorio es autocontenido, pero la orquestación que dirige a los agentes no
+lo es: vive en `~/.config/orquestacion` **en cada máquina** (`METODOLOGIA.md`, los
+lanzadores `Start-*`, `Orq-Worktree.ps1` y `proveedores.local.json` con los niveles
+de modelo de esa máquina). Clonar este repositorio no la clona.
+
+1. Instala Node.js 22 (`.nvmrc` fija 22.23.5), pnpm 12.18.0 mediante Corepack,
+   Docker con Compose (API y PostgreSQL) y Chrome o Edge (`CHROME_PATH`) para la
+   puerta de Lighthouse.
+2. Clona el repositorio con `git clone` y ejecuta `pnpm install --frozen-lockfile`,
+   después `pnpm setup:gitleaks` y `pnpm setup:hooks`, que necesitan los commits
+   locales.
+3. Copia `.env.example` a `.env` y rellena los valores locales. El archivo está
+   ignorado y ningún secreto entra nunca en el repositorio.
+4. Ejecuta `pnpm verify` para confirmar que la máquina reproduce todas las puertas;
+   si falla, corrige el primer paso que falle antes de tocar ninguna tarea (ver
+   [Comandos de verificación](#comandos-de-verificación)).
+5. Autentica GitHub CLI (`gh auth login`) si vas a abrir pull requests o ponerles
+   labels.
+6. Instala la orquestación de usuario en esa máquina (ver
+   `~/.config/orquestacion/README.md`) y lanza los agentes desde ahí: `AGENTS.md`,
+   `CLAUDE.md` y `.github/copilot-instructions.md` solo remiten a ella.
+
+La preparación pesada es la misma que en [Entorno local](#entorno-local); esta
+sección solo añade lo que cambia en otra máquina.
+
 ## Comandos de verificación
 
 `pnpm verify` ejecuta las comprobaciones locales en este orden y se detiene en la

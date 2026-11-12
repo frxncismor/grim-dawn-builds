@@ -57,6 +57,13 @@
       "when": 1794455718186,
       "tag": "0007_third_party_adaptations",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794550000000,
+      "tag": "0008_public_asset_view",
+      "breakpoints": true
     }
   ]
 }

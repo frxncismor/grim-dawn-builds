@@ -8,6 +8,8 @@ export const ROBOTS_ARTIFACT = 'robots.txt';
 export const TEMPLATE_PATH = join(
   dirname(fileURLToPath(import.meta.url)),
   '..',
+  'apps',
+  'web',
   'public',
   ROBOTS_ARTIFACT,
 );
@@ -60,8 +62,17 @@ export function escapeXml(value: string): string {
     .replace(/'/g, '&apos;');
 }
 
+/**
+ * robots.txt is served byte for byte, so a CRLF checkout (`core.autocrlf=true`) must not change the
+ * artifact. `.gitattributes` keeps it LF; this keeps the output stable in any case.
+ */
+export function normalizeEol(text: string): string {
+  return text.replace(/\r\n?/g, '\n');
+}
+
 export function buildRobots(template: string, baseUrl: string): string {
   const origin = normalizeBaseUrl(baseUrl).replace(/\/$/, '');
+  template = normalizeEol(template);
   if (template.split(BASE_TOKEN).length - 1 !== 1)
     fail('robots.txt: el token __BASE_URL__ debe aparecer exactamente una vez.');
   if (!/^User-agent: \*$/m.test(template)) fail('robots.txt: falta User-agent: *.');
@@ -154,7 +165,7 @@ export async function generateSeoFiles(options: {
   if (locales.length === 0) fail('sin configuraciones regionales.');
   let template: string;
   try {
-    template = await readFile(options.templatePath, 'utf8');
+    template = normalizeEol(await readFile(options.templatePath, 'utf8'));
   } catch {
     return fail('robots.txt: plantilla no legible.');
   }

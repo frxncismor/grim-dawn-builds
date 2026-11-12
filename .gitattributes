@@ -3,4 +3,6 @@
 *.sql text eol=lf
 Dockerfile* text eol=lf
 *.yaml text eol=lf
+# Text assets are served verbatim, byte for byte: robots.txt must hash and compare the same on every OS.
+*.txt text eol=lf
 .githooks/pre-commit text eol=lf

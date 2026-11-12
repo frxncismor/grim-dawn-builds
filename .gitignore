@@ -4,10 +4,15 @@
 /dist
 /.tools/gitleaks/8.30.1/
 apps/api/dist/
+apps/web/dist/
 packages/domain/dist/
 /tmp
 /out-tsc
+apps/web/out-tsc/
 /bazel-out
+
+# Angular build cache of the web workspace (T-067 moved the app to apps/web)
+/apps/web/.angular/
 
 # Node (unanchored so workspace packages under packages/ are covered too)
 node_modules

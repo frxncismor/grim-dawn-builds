@@ -86,8 +86,9 @@ export function mapSlugs(rows: readonly unknown[]): string[] {
  */
 export function mapAsset(value: unknown): PublicAssetDescriptor | null {
   const raw = record(value);
-  const status = raw['status'];
-  if (status !== undefined && status !== 'approved') return null;
+  // Fail closed: only an explicit `approved` status may leave the database layer, so a
+  // descriptor that forgot the column can never widen the public projection.
+  if (raw['status'] !== 'approved') return null;
   return valid(PublicAssetDescriptorSchema, {
     slug: raw['slug'],
     file_path: raw['file_path'],

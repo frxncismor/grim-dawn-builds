@@ -19,8 +19,8 @@ import { fileURLToPath } from 'node:url';
  */
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const INDEX_HTML = resolve(ROOT, 'src', 'index.html');
-const FONTS_CSS = resolve(ROOT, 'src', 'styles', 'fonts.css');
+const INDEX_HTML = resolve(ROOT, 'apps', 'web', 'src', 'index.html');
+const FONTS_CSS = resolve(ROOT, 'apps', 'web', 'src', 'styles', 'fonts.css');
 
 /** Root-absolute, so the same href resolves identically under any `<base href>`. */
 const BASE_INDEPENDENT = /^\/(?!\/)[\w./-]+$/;

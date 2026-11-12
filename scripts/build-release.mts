@@ -46,14 +46,20 @@ export async function runRelease(
   const staging = await mkdtemp(join(dist, '.release-'));
   try {
     const childEnv = publicBuildEnv({ ...env, API_BASE_URL: base });
+    const webRoot = join(root, 'apps', 'web');
     const build =
       dependencies.build ??
       (async (output: string, environment: Record<string, string>) => {
         await new Promise<void>((resolveBuild, reject) => {
           const child = spawn(
             process.execPath,
-            [join(root, 'node_modules/@angular/cli/bin/ng.js'), 'build', '--output-path', output],
-            { cwd: root, env: environment, stdio: 'inherit', windowsHide: true, shell: false },
+            [
+              join(webRoot, 'node_modules/@angular/cli/bin/ng.js'),
+              'build',
+              '--output-path',
+              output,
+            ],
+            { cwd: webRoot, env: environment, stdio: 'inherit', windowsHide: true, shell: false },
           );
           child.once('error', () => reject(new Error('Build de release falló.')));
           child.once('exit', (code) =>

@@ -6,19 +6,18 @@ import { expect, test, type Page, type Response } from '@playwright/test';
  * Se mide lo que se publica, no `ng serve`. El artefacto público lo sirve
  * `playwright.config.ts` en `E2E_PORT` (4321 por defecto). Los casos de guía
  * usan además el artefacto local de borradores, que debe construirse aparte en
- * un directorio aislado:
+ * un directorio aislado; desde T-067 el CLI de Angular vive en `apps/web`:
  *
- *   $env:INCLUDE_DRAFTS='true'; npx ng build --output-path dist/e2e-drafts
+ *   $env:INCLUDE_DRAFTS='true'; pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts
  *
  * y se sirve en `E2E_DRAFTS_PORT` (4322) con `E2E_DRAFTS_ARTIFACT_DIR` opcional.
  * Sin ese artefacto los casos de guía fallan con el comando exacto: no se
  * saltan, para que nadie confunda una ausencia con un verde.
  *
- * Límite conocido y medido: la única guía del MVP sigue `review_state=borrador`
- * y `rights_status=pending` (T-044), así que el catálogo público (y también el
- * de borradores) no publica ningún enlace `/builds/:slug`. El paso de guía se
- * verifica de verdad sobre su URL prerenderizada y su TOC; si algún día existe
- * un enlace de guía en el catálogo, el recorrido lo sigue en vez de asumirlo.
+ * Límite conocido y medido: la guía del MVP se publica como contenido propio
+ * (`rights_status=own_original`, T-044), así que el artefacto público incluye
+ * `/builds/:slug` y el catálogo enlaza la guía. El recorrido comprueba la guía
+ * real y conserva un 404 genuino para un slug inexistente.
  */
 const PUBLIC_BASE_URL = (
   process.env['E2E_BASE_URL'] ??
@@ -30,7 +29,7 @@ const DRAFTS_BASE_URL = (process.env['E2E_DRAFTS_BASE_URL'] ?? 'http://127.0.0.1
   '',
 );
 const DRAFTS_BUILD_COMMAND =
-  "$env:INCLUDE_DRAFTS='true'; npx ng build --output-path dist/e2e-drafts";
+  "$env:INCLUDE_DRAFTS='true'; pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts";
 const GUIDE_PATH = '/builds/chaman-demoledor-golpe-primigenio';
 const GUIDE_TITLE = /Chamán \+ Demoledor/i;
 test.beforeEach(async ({ page }) => {
@@ -159,11 +158,12 @@ test.describe('@journeys artefacto público', () => {
     expect(await cards.count(), 'el catálogo debe listar combinaciones').toBeGreaterThan(0);
     await expect(page.locator('.result-count')).toContainText(/of \d+ entries/);
 
-    // La guía del MVP sigue pendiente de derechos, así que el catálogo no debe
-    // enlazar una ruta que el artefacto público no contiene. Si se publica, el
-    // recorrido la sigue y comprueba su h1 en vez de asumir el estado anterior.
+    // La guía del MVP ya está publicada como contenido propio: el catálogo
+    // debe enlazarla y el recorrido la sigue. Si algún día no hay enlace, se
+    // conserva la comprobación alternativa de ranuras pendientes.
     const guideLinks = page.locator('a[href^="/builds/"]');
     const guideCount = await guideLinks.count();
+    expect(guideCount, 'el catálogo debe enlazar la guía publicada').toBeGreaterThan(0);
     if (guideCount > 0) {
       const href = await guideLinks.first().getAttribute('href');
       await guideLinks.first().click();
@@ -248,16 +248,20 @@ test.describe('@journeys artefacto público', () => {
     expect(await resultCount(page), 'adelante debe reaplicar el filtro').toEqual(filtered);
   });
 
-  test('el build público no sirve la guía pendiente (404 real)', async ({ page }) => {
+  test('el build público sirve la guía publicada y mantiene un 404 real', async ({ page }) => {
     const response = await open(page, `${PUBLIC_BASE_URL}${GUIDE_PATH}`);
-    expect(response.status(), `GET ${GUIDE_PATH} en el artefacto público`).toBe(404);
+    expect(response.status(), `GET ${GUIDE_PATH} en el artefacto público`).toBe(200);
+    await expectSingleHeading(page, GUIDE_TITLE, 'guía pública');
+    await expect(page.locator('gd-build-toc')).toHaveCount(1);
+
+    const missing = await open(page, `${PUBLIC_BASE_URL}/builds/guia-inexistente`);
+    expect(missing.status(), 'GET /builds/guia-inexistente en el artefacto público').toBe(404);
     await expectSingleHeading(page, 'Page not found', '404 público');
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
     await expect(page.locator('gd-build-toc')).toHaveCount(0);
-    expect(
-      await page.getByText('Devotion path').count(),
-      'el 404 no debe contener la guía pendiente',
-    ).toBe(0);
+    expect(await page.getByText('Devotion path').count(), 'el 404 no debe contener la guía').toBe(
+      0,
+    );
   });
 });
 

@@ -1,0 +1,2435 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" target-language="es" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="seo.socialAlt" datatype="html">
+        <source>Grim Dawn Builds: English-language catalog, masteries and clear statuses.</source>
+        <target state="translated">Grim Dawn Builds: catálogo en español, maestrías y estados claros.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/seo/seo.service.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.site" datatype="html">
+        <source>Author&apos;s site (new tab)</source>
+        <target state="translated">Sitio del autor (nueva pestaña)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.html</context>
+          <context context-type="linenumber">9,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.catalogHeading" datatype="html">
+        <source>Catalog owner</source>
+        <target state="translated">Responsable del catálogo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.html</context>
+          <context context-type="linenumber">15,16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.catalogDescription" datatype="html">
+        <source> Maintains the catalog of combinations. Informational slots are not verified guides or rankings. </source>
+        <target state="translated"> Mantiene el catálogo de combinaciones. Las ranuras informativas no son guías ni rankings verificados. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.html</context>
+          <context context-type="linenumber">17,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.catalogLink" datatype="html">
+        <source>Browse the catalog</source>
+        <target state="translated">Consultar el catálogo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.html</context>
+          <context context-type="linenumber">20,23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.guides" datatype="html">
+        <source>Published guides</source>
+        <target state="translated">Guías publicadas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.html</context>
+          <context context-type="linenumber">24,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.version" datatype="html">
+        <source>Version:</source>
+        <target state="translated">Versión:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.published" datatype="html">
+        <source>Published on</source>
+        <target state="translated">Publicada el</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.html</context>
+          <context context-type="linenumber">35,36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.empty" datatype="html">
+        <source>This author does not have any published guides yet.</source>
+        <target state="translated">Este autor todavía no tiene guías publicadas.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.html</context>
+          <context context-type="linenumber">43,46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.notFound" datatype="html">
+        <source>Author not found</source>
+        <target state="translated">Autor no encontrado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.html</context>
+          <context context-type="linenumber">47,48</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.unavailable" datatype="html">
+        <source>This profile is not publicly available.</source>
+        <target state="translated">Este perfil no está disponible públicamente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.html</context>
+          <context context-type="linenumber">48,49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.backToCatalog" datatype="html">
+        <source>Back to the catalog</source>
+        <target state="translated">Volver al catálogo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.html</context>
+          <context context-type="linenumber">49,51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.notFoundDescription" datatype="html">
+        <source>This profile is not publicly available.</source>
+        <target state="translated">Este perfil no está disponible públicamente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.pageTitle" datatype="html">
+        <source>Profile of <x id="PH" equiv-text="profile.display_name"/></source>
+        <target state="translated">Perfil de <x id="PH" equiv-text="profile.display_name"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.ts</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="author.description" datatype="html">
+        <source>Profile and published guides of <x id="PH" equiv-text="profile.display_name"/>.</source>
+        <target state="translated">Perfil y guías publicadas de <x id="PH" equiv-text="profile.display_name"/>.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/author/author.page.ts</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.heading" datatype="html">
+        <source>Author and sources</source>
+        <target state="translated">Autor y fuentes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
+          <context context-type="linenumber">3,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.authorLabel" datatype="html">
+        <source>Author</source>
+        <target state="translated">Autor</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
+          <context context-type="linenumber">6,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.authorPlaceholder" datatype="html">
+        <source> Author to be confirmed </source>
+        <target state="translated"> Autor por confirmar </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
+          <context context-type="linenumber">20,23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.gameVersion" datatype="html">
+        <source>Game version</source>
+        <target state="translated">Versión del juego</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
+          <context context-type="linenumber">30,31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.published" datatype="html">
+        <source>Published</source>
+        <target state="translated">Publicado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
+          <context context-type="linenumber">34,36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.reviewState" datatype="html">
+        <source>Review state</source>
+        <target state="translated">Estado de revisión</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
+          <context context-type="linenumber">44,46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.contentStatus" datatype="html">
+        <source>Content status</source>
+        <target state="translated">Estado del contenido</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
+          <context context-type="linenumber">52,54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.sourcesHeading" datatype="html">
+        <source>Sources</source>
+        <target state="translated">Fuentes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
+          <context context-type="linenumber">62,64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.newTab" datatype="html">
+        <source>(opens in a new tab)</source>
+        <target state="translated">(abre en una pestaña nueva)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
+          <context context-type="linenumber">81,83</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.noSources" datatype="html">
+        <source> No sources recorded </source>
+        <target state="translated"> Sin fuentes registradas </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
+          <context context-type="linenumber">90,93</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.disclaimerHeading" datatype="html">
+        <source>Disclaimer</source>
+        <target state="translated">Descargo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
+          <context context-type="linenumber">96,97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.reviewDraft" datatype="html">
+        <source>Draft</source>
+        <target state="translated">Borrador</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.reviewInReview" datatype="html">
+        <source>In review</source>
+        <target state="translated">En revisión</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.reviewPublished" datatype="html">
+        <source>Published</source>
+        <target state="translated">Publicado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.contentVerified" datatype="html">
+        <source>Verified</source>
+        <target state="translated">Verificado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.contentUnverified" datatype="html">
+        <source>Unverified</source>
+        <target state="translated">Sin verificar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.contentPlaceholder" datatype="html">
+        <source>Placeholder</source>
+        <target state="translated">Placeholder</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.kindOriginal" datatype="html">
+        <source>Original</source>
+        <target state="translated">Original</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.kindCommunity" datatype="html">
+        <source>Community</source>
+        <target state="translated">Comunidad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.kindOfficial" datatype="html">
+        <source>Official</source>
+        <target state="translated">Oficial</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.kindVideo" datatype="html">
+        <source>Video</source>
+        <target state="translated">Video</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.kindExternalLink" datatype="html">
+        <source>External link</source>
+        <target state="translated">Enlace externo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildAttribution.noDate" datatype="html">
+        <source>No date</source>
+        <target state="translated">Sin fecha</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.ts</context>
+          <context context-type="linenumber">105</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.draftBanner" datatype="html">
+        <source> Draft · not public </source>
+        <target state="translated"> Borrador · no público </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.html</context>
+          <context context-type="linenumber">3,7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.skills" datatype="html">
+        <source>Skills</source>
+        <target state="translated">Habilidades</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.html</context>
+          <context context-type="linenumber">18,19</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.html</context>
+          <context context-type="linenumber">53,54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.bar" datatype="html">
+        <source>Bar</source>
+        <target state="translated">Barra</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.noSkills" datatype="html">
+        <source>There are no skills for this mastery.</source>
+        <target state="translated"> No hay habilidades para esta maestría. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.html</context>
+          <context context-type="linenumber">43,45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.devotions" datatype="html">
+        <source>Devotion path</source>
+        <target state="translated">Ruta de devoción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.html</context>
+          <context context-type="linenumber">80,81</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.noDevotions" datatype="html">
+        <source>No information available</source>
+        <target state="translated">Sin información disponible</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.html</context>
+          <context context-type="linenumber">98,100</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.breadcrumbHome" datatype="html">
+        <source>Home</source>
+        <target state="translated">Inicio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.ts</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.statusRecommended" datatype="html">
+        <source>Recommended</source>
+        <target state="translated">Recomendada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.ts</context>
+          <context context-type="linenumber">132</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.statusMeta" datatype="html">
+        <source>Meta</source>
+        <target state="translated">Meta</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.ts</context>
+          <context context-type="linenumber">134</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.statusSkip" datatype="html">
+        <source>Skip</source>
+        <target state="translated">Omitir</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.ts</context>
+          <context context-type="linenumber">136</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.verified" datatype="html">
+        <source>Verified</source>
+        <target state="translated">Verificado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.ts</context>
+          <context context-type="linenumber">142</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.unverified" datatype="html">
+        <source>Unverified</source>
+        <target state="translated">Sin verificar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.ts</context>
+          <context context-type="linenumber">143</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionSection.heading" datatype="html">
+        <source>Devotion path</source>
+        <target state="translated">Ruta de devoción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/devotion-section/devotion-section.html</context>
+          <context context-type="linenumber">3,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionSection.selectSteps" datatype="html">
+        <source>Select a devotion step</source>
+        <target state="translated">Seleccionar un paso de devoción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/devotion-section/devotion-section.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionSection.duplicatePositions" datatype="html">
+        <source>This guide&apos;s data is inconsistent because it contains repeated positions. A step cannot be selected.</source>
+        <target state="translated">Los datos de esta guía son inconsistentes porque contienen posiciones repetidas. No se puede seleccionar un paso.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/devotion-section/devotion-section.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionSection.empty" datatype="html">
+        <source>No information available</source>
+        <target state="translated">Sin información disponible</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/devotion-section/devotion-section.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionSection.javascriptRequired" datatype="html">
+        <source>Selecting a step requires JavaScript; the full path can be read further down this page.</source>
+        <target state="translated">Seleccionar un paso requiere JavaScript; la ruta completa se puede leer más abajo en esta página.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/devotion-section/devotion-section.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.sectionHeading" datatype="html">
+        <source> Loot filter </source>
+        <target state="translated">Filtro de botín</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.html</context>
+          <context context-type="linenumber">8,11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.empty" datatype="html">
+        <source>No information available</source>
+        <target state="translated">Sin información disponible</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.duplicatePositions" datatype="html">
+        <source>This guide&apos;s data is inconsistent because it contains repeated positions. The content remains visible, but the summary cannot be copied.</source>
+        <target state="translated">Los datos de esta guía son inconsistentes porque contienen posiciones repetidas. El contenido sigue visible, pero no se puede copiar el resumen.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.javascriptRequired" datatype="html">
+        <source>Copying requires JavaScript; the full summary is already visible on the page.</source>
+        <target state="translated">Copiar requiere JavaScript; el resumen completo ya está visible en la página.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.copy" datatype="html">
+        <source>Copy summary</source>
+        <target state="translated">Copiar resumen</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.copying" datatype="html">
+        <source>Copying…</source>
+        <target state="translated">Copiando…</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.copySuccess" datatype="html">
+        <source>Summary copied to the clipboard.</source>
+        <target state="translated">Resumen copiado al portapapeles.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.clipboardUnavailable" datatype="html">
+        <source>The clipboard is not available. You can select and copy the visible summary manually.</source>
+        <target state="translated">El portapapeles no está disponible. Puedes seleccionar y copiar el resumen visible manualmente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.copyError" datatype="html">
+        <source>The summary could not be copied. You can select and copy the visible text manually.</source>
+        <target state="translated">No se pudo copiar el resumen. Puedes seleccionar y copiar el texto visible manualmente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.action.mark" datatype="html">
+        <source>Mark</source>
+        <target state="translated">Marcar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.action.unmark" datatype="html">
+        <source>Unmark</source>
+        <target state="translated">Desmarcar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.action.notice" datatype="html">
+        <source>Notice</source>
+        <target state="translated">Aviso</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="lootFilter.heading" datatype="html">
+        <source>Loot filter</source>
+        <target state="translated"> Filtro de botín </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/loot-filter/loot-filter.ts</context>
+          <context context-type="linenumber">160</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.title" datatype="html">
+        <source>Real purchase order</source>
+        <target state="translated">Orden real de compra</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.html</context>
+          <context context-type="linenumber">3,4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.duplicatePositions" datatype="html">
+        <source> This guide&apos;s data is inconsistent because it has repeated positions. Selection and progress are disabled. </source>
+        <target state="translated"> Los datos de esta guía son inconsistentes porque tienen posiciones repetidas. La selección y el progreso están desactivados. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.html</context>
+          <context context-type="linenumber">10,15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.highlightsLabel" datatype="html">
+        <source>Skills in this step</source>
+        <target state="translated">Habilidades de este paso</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.html</context>
+          <context context-type="linenumber">28,29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.selectStep" datatype="html">
+        <source> View step skills </source>
+        <target state="translated"> Ver habilidades del paso </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.html</context>
+          <context context-type="linenumber">53,54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.markCompleted" datatype="html">
+        <source>Mark step as completed</source>
+        <target state="translated">Marcar paso como completado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.html</context>
+          <context context-type="linenumber">70,71</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.completed" datatype="html">
+        <source> Completed </source>
+        <target state="translated"> Completado </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.html</context>
+          <context context-type="linenumber">77,78</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.progressTitle" datatype="html">
+        <source> Progress checklist </source>
+        <target state="translated"> Checklist de progreso </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.html</context>
+          <context context-type="linenumber">89,91</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.persistenceOptIn" datatype="html">
+        <source>Save progress in this browser</source>
+        <target state="translated">Guardar progreso en este navegador</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.html</context>
+          <context context-type="linenumber">100,102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.privacyNote" datatype="html">
+        <source> Only saved in this browser; no account is required and nothing is synced. </source>
+        <target state="translated"> Solo se guarda en este navegador; no requiere cuenta ni se sincroniza. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.html</context>
+          <context context-type="linenumber">103,105</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.clearProgress" datatype="html">
+        <source> Clear progress </source>
+        <target state="translated"> Borrar progreso </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.html</context>
+          <context context-type="linenumber">112,114</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.javascriptRequired" datatype="html">
+        <source> Selection and saving controls are enabled when JavaScript is available. </source>
+        <target state="translated"> Los controles de selección y guardado se activan cuando JavaScript está disponible. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.html</context>
+          <context context-type="linenumber">126,131</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.empty" datatype="html">
+        <source>No information available</source>
+        <target state="translated">Sin información disponible</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.ts</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.noNumber" datatype="html">
+        <source>No point value</source>
+        <target state="translated">Objetivo sin cifra</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.ts</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.storageUnavailable" datatype="html">
+        <source>Saving is not available in this browser. The checklist will keep working in this view.</source>
+        <target state="translated">El guardado no está disponible en este navegador. El checklist seguirá funcionando en esta vista.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.ts</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.removeFailed" datatype="html">
+        <source>Saved progress could not be deleted; it was only cleared in this view.</source>
+        <target state="translated">No se pudo borrar el progreso guardado; solo se borró en esta vista.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.optOutRemoveFailed" datatype="html">
+        <source>Saving was turned off in this view, but the record could not be removed from the browser.</source>
+        <target state="translated">El guardado se desactivó en esta vista, pero no se pudo eliminar el registro del navegador.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.cleared" datatype="html">
+        <source>Progress cleared in this view and in this browser.</source>
+        <target state="translated">Progreso borrado en esta vista y en este navegador.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.onePoint" datatype="html">
+        <source><x id="count" equiv-text="points"/> point</source>
+        <target state="translated"><x id="count" equiv-text="points"/> punto</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.ts</context>
+          <context context-type="linenumber">120</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.points" datatype="html">
+        <source><x id="count" equiv-text="points"/> points</source>
+        <target state="translated"><x id="count" equiv-text="points"/> puntos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.ts</context>
+          <context context-type="linenumber">121</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.selectLabel" datatype="html">
+        <source>View step skills: step <x id="position" equiv-text="step.position"/>, <x id="title" equiv-text="step.title"/>, <x id="threshold" equiv-text="step.threshold_label"/></source>
+        <target state="translated">Ver habilidades del paso <x id="position" equiv-text="step.position"/>, <x id="title" equiv-text="step.title"/>, <x id="threshold" equiv-text="step.threshold_label"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.ts</context>
+          <context context-type="linenumber">125</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="purchaseStepper.completionLabel" datatype="html">
+        <source>Mark step <x id="position" equiv-text="step.position"/>, <x id="title" equiv-text="step.title"/> as completed</source>
+        <target state="translated">Marcar el paso <x id="position" equiv-text="step.position"/>, <x id="title" equiv-text="step.title"/> como completado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.ts</context>
+          <context context-type="linenumber">129</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildSections.priorities" datatype="html">
+        <source>Priorities</source>
+        <target state="translated">Prioridades</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/sections/build-sections.html</context>
+          <context context-type="linenumber">20,21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildSections.notes" datatype="html">
+        <source>Notes</source>
+        <target state="translated">Notas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/sections/build-sections.html</context>
+          <context context-type="linenumber">44,45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildSections.spiritualGuide" datatype="html">
+        <source>Spirit Guide</source>
+        <target state="translated">Guía Espiritual</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/sections/build-sections.html</context>
+          <context context-type="linenumber">62,63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildSections.empty" datatype="html">
+        <source>No information available</source>
+        <target state="translated">Sin información disponible</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/sections/build-sections.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.heading" datatype="html">
+        <source> This build was adapted from </source>
+        <target state="translated"> Esta build fue adaptada de </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">3,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.originalTitle" datatype="html">
+        <source>Original title</source>
+        <target state="translated">Título original</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.originalAuthor" datatype="html">
+        <source>Original author</source>
+        <target state="translated">Autor original</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">14,15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.originalSite" datatype="html">
+        <source>Original site</source>
+        <target state="translated">Sitio original</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">18,19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.retrievedOn" datatype="html">
+        <source>Retrieved on</source>
+        <target state="translated">Consultado el</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">22,24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.openOriginal" datatype="html">
+        <source>Open the original build</source>
+        <target state="translated">Abrir la build original</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">40,41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sourceAttribution.newTab" datatype="html">
+        <source>(opens in a new tab)</source>
+        <target state="translated">(se abre en una pestaña nueva)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/source-attribution/source-attribution.html</context>
+          <context context-type="linenumber">42,45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.summary" datatype="html">
+        <source>Contents</source>
+        <target state="translated">Contenido</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.html</context>
+          <context context-type="linenumber">2,3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.navLabel" datatype="html">
+        <source>Guide contents</source>
+        <target state="translated">Contenido de la guía</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.resumen" datatype="html">
+        <source>Overview</source>
+        <target state="translated">Resumen</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.ts</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.prioridades" datatype="html">
+        <source>Priorities</source>
+        <target state="translated">Prioridades</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.ts</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.habilidades" datatype="html">
+        <source>Skills</source>
+        <target state="translated">Habilidades</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.orden" datatype="html">
+        <source>Purchase order</source>
+        <target state="translated">Orden de compra</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.ts</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.notas" datatype="html">
+        <source>Notes</source>
+        <target state="translated">Notas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.lootFilter" datatype="html">
+        <source>Loot filter</source>
+        <target state="translated">Filtro de botín</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.ts</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.spiritualGuide" datatype="html">
+        <source>Spirit Guide</source>
+        <target state="translated">Guía Espiritual</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.devotions" datatype="html">
+        <source>Devotions</source>
+        <target state="translated">Devociones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.ts</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.video" datatype="html">
+        <source>Video</source>
+        <target state="translated">Video</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.ts</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.sources" datatype="html">
+        <source>Sources</source>
+        <target state="translated">Fuentes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.ts</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="videoFacade.heading" datatype="html">
+        <source>Video</source>
+        <target state="translated">Video</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/video-facade/video-facade.html</context>
+          <context context-type="linenumber">4,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="videoFacade.loading" datatype="html">
+        <source>Loading video…</source>
+        <target state="translated">Cargando video…</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/video-facade/video-facade.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="videoFacade.blocked" datatype="html">
+        <source> The player is blocked. You can open the video on YouTube. </source>
+        <target state="translated"> El reproductor está bloqueado. Puedes abrir el video en YouTube. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/video-facade/video-facade.html</context>
+          <context context-type="linenumber">29,31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="videoFacade.activate" datatype="html">
+        <source> Load video </source>
+        <target state="translated"> Cargar video </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/video-facade/video-facade.html</context>
+          <context context-type="linenumber">42,44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="videoFacade.fallback" datatype="html">
+        <source> Open on YouTube (new tab) </source>
+        <target state="translated"> Abrir en YouTube (nueva pestaña) </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/video-facade/video-facade.html</context>
+          <context context-type="linenumber">50,52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="videoFacade.javascript" datatype="html">
+        <source> Loading the player requires JavaScript. </source>
+        <target state="translated"> Cargar el reproductor requiere JavaScript. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/video-facade/video-facade.html</context>
+          <context context-type="linenumber">54,57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="videoFacade.unavailableHeading" datatype="html">
+        <source> Video unavailable </source>
+        <target state="translated"> Video no disponible </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/video-facade/video-facade.html</context>
+          <context context-type="linenumber">58,60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="videoFacade.invalid" datatype="html">
+        <source> The video address is not valid. </source>
+        <target state="translated"> La dirección del video no es válida. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/video-facade/video-facade.html</context>
+          <context context-type="linenumber">61,64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="videoFacade.playerTitle" datatype="html">
+        <source>Video player for <x id="title" equiv-text="this.content().title"/></source>
+        <target state="translated">Reproductor de video de <x id="title" equiv-text="this.content().title"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/video-facade/video-facade.ts</context>
+          <context context-type="linenumber">86</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.title" datatype="html">
+        <source> Grim Dawn guides,<x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span&gt;"/>with the status in plain sight.<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <target state="translated"> Guías de Grim Dawn,<x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span&gt;"/>con el estado a la vista.<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">3,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.intro" datatype="html">
+        <source> Browse mastery combinations and see what is verified, what still needs review and what is still awaiting a guide. </source>
+        <target state="translated"> Explora combinaciones de maestrías y consulta qué está verificado, qué falta revisar y qué sigue pendiente de guía. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">6,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.catalog" datatype="html">
+        <source>Browse the catalog</source>
+        <target state="translated">Explorar el catálogo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.criteriaLink" datatype="html">
+        <source>Our criteria</source>
+        <target state="translated">Nuestros criterios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">11,15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.latest" datatype="html">
+        <source>Latest publication</source>
+        <target state="translated">Publicación más reciente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">17,19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.version" datatype="html">
+        <source>Game version:</source>
+        <target state="translated">Versión del juego:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.publishedOn" datatype="html">
+        <source>Published on</source>
+        <target state="translated">Publicada el</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">24,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.guideAttribution" datatype="html">
+        <source> See the guide and its attribution. The publication date is not a power ranking. </source>
+        <target state="translated"> Consulta la guía y su atribución. La fecha de publicación no es una clasificación de poder. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">28,31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.noPublicGuides" datatype="html">
+        <source>No guides published yet</source>
+        <target state="translated">Todavía no hay guías publicadas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">32,33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.catalogAvailable" datatype="html">
+        <source> You can browse all combinations in the catalog. Slots without a guide appear as placeholders and do not receive a power ranking. </source>
+        <target state="translated"> Puedes consultar todas las combinaciones en el catálogo. Las ranuras sin guía aparecen como placeholder y no reciben una clasificación de poder. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">34,39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.criteriaTitle" datatype="html">
+        <source>What to expect from the content</source>
+        <target state="translated">Qué puedes esperar del contenido</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">41,44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.visibleStates" datatype="html">
+        <source>Visible statuses</source>
+        <target state="translated">Estados visibles</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">44,45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.visibleStatesDescription" datatype="html">
+        <source> Verified, unverified and placeholder mean different things. A pending slot is not presented as a recommendation. </source>
+        <target state="translated"> Verificado, sin verificar y placeholder significan cosas distintas. Una ranura pendiente no se presenta como una recomendación. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">46,50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.provenance" datatype="html">
+        <source>Authorship and provenance</source>
+        <target state="translated">Autoría y procedencia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">51,52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.provenanceDescription" datatype="html">
+        <source> Guides identify their author and sources. An external link keeps the attribution; it does not replace permission to republish content. </source>
+        <target state="translated"> Las guías identifican autor y fuentes. Un enlace externo conserva la atribución; no sustituye el permiso para republicar contenido. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">53,57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.rights" datatype="html">
+        <source>Publication with confirmed rights</source>
+        <target state="translated">Publicación con derechos confirmados</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">58,59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.rightsDescription" datatype="html">
+        <source> Content pending permissions is not part of the public guides. Attribution alone does not grant usage rights. </source>
+        <target state="translated"> El contenido pendiente de permisos no forma parte de las guías públicas. La atribución por sí sola no concede derechos de uso. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">60,63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.description" datatype="html">
+        <source>Browse Grim Dawn mastery combinations, with visible provenance and review statuses.</source>
+        <target state="translated">Explora las combinaciones de maestrías de Grim Dawn, con procedencia y estados de revisión visibles.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.title" datatype="html">
+        <source>About the project</source>
+        <target state="translated">Acerca del proyecto</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">1,2</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.purpose" datatype="html">
+        <source> Grim Dawn Builds is an independent project for browsing mastery combinations and guides with visible provenance. It is not affiliated with Crate Entertainment.
+</source>
+        <target state="translated"> Grim Dawn Builds es un proyecto independiente para consultar combinaciones de maestrías y guías con procedencia visible. No está afiliado a Crate Entertainment.
+</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">3,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.states" datatype="html">
+        <source>What the statuses mean</source>
+        <target state="translated">Qué significan los estados</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">7,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.verified" datatype="html">
+        <source> Verified: content reviewed under the editorial criteria and the indicated game version. </source>
+        <target state="translated"> Verificado: contenido revisado según los criterios editoriales y la versión del juego indicada. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">10,12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.unverified" datatype="html">
+        <source> Unverified: some data needs review. It is not presented with the same confidence as verified content. </source>
+        <target state="translated"> Sin verificar: hay datos que necesitan revisión. No se presentan con la misma confianza que los verificados. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">13,16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.placeholder" datatype="html">
+        <source> Placeholder: an informational slot without a catalogued guide. It is not a recommendation and has no power tier. </source>
+        <target state="translated"> Placeholder: ranura informativa sin una guía catalogada. No es una recomendación ni tiene un tier de poder. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">17,21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.review" datatype="html">
+        <source>Review and attribution</source>
+        <target state="translated">Revisión y atribución</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">23,24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.reviewDescription" datatype="html">
+        <source> Guides identify their author, sources and game version. Publication requires review and confirmed rights. An external link keeps the attribution, but it does not grant permission to copy or adapt a guide. </source>
+        <target state="translated"> Las guías identifican autor, fuentes y versión del juego. La publicación exige revisión y derechos confirmados. Un enlace externo conserva la atribución, pero no concede permiso para copiar o adaptar una guía. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">25,29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.tiers" datatype="html">
+        <source> Tiers require an editorial assessment with a source and a date. Anything without that assessment remains unranked. </source>
+        <target state="translated"> Los tiers necesitan una evaluación editorial con fuente y fecha. Lo que no tiene esa evaluación permanece sin clasificar. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">30,34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.rights" datatype="html">
+        <source>Content and assets</source>
+        <target state="translated">Contenido y activos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">35,36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.rightsDescription" datatype="html">
+        <source> We do not perform automatic scraping. Third-party content requires a license or permission that covers its use. Without one, only a link with permitted metadata is kept. Icons are our own while no authorization to use official art is registered. </source>
+        <target state="translated"> No hacemos scraping automático. El contenido de terceros requiere una licencia o permiso que cubra su uso. Sin ello, se conserva únicamente un enlace con metadatos permitidos. Los iconos son propios mientras no exista autorización registrada para utilizar arte oficial. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">37,42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.owner" datatype="html">
+        <source>Catalog owner</source>
+        <target state="translated">Responsable del catálogo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">43,45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.catalogLink" datatype="html">
+        <source>Browse the catalog</source>
+        <target state="translated">Explorar el catálogo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
+          <context context-type="linenumber">51,53</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.description" datatype="html">
+        <source>Editorial criteria, attribution and content statuses for Grim Dawn Builds.</source>
+        <target state="translated">Criterios editoriales, atribución y estados del contenido de Grim Dawn Builds.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/about.page.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.title" datatype="html">
+        <source>Legal notice</source>
+        <target state="translated">Aviso legal</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">1,2</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.intro" datatype="html">
+        <source> This page summarizes code ownership, content attribution, asset use, content takedown and privacy for the features available today.
+</source>
+        <target state="translated"> Esta página resume la titularidad del código, la atribución del contenido, el uso de activos, la retirada de contenido y la privacidad de las funciones disponibles hoy.
+</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">3,7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.ownership.title" datatype="html">
+        <source>Ownership and rights</source>
+        <target state="translated">Titularidad y derechos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">8,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.ownership.code" datatype="html">
+        <source> The code of this project is published without a declared license: all rights are reserved until the maintainer chooses one. </source>
+        <target state="translated"> El código de este proyecto se publica sin una licencia declarada: todos los derechos quedan reservados hasta que el mantenedor elija una. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">10,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.ownership.thirdParty" datatype="html">
+        <source> Third-party editorial content is governed by its own licenses and permissions, which are recorded in the repository&apos;s source register. </source>
+        <target state="translated"> El contenido editorial de terceros se rige por sus propias licencias y permisos, que se registran en el registro de fuentes del repositorio. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">14,19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.attribution.title" datatype="html">
+        <source>Attribution</source>
+        <target state="translated">Atribución</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">20,21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.attribution.metadata" datatype="html">
+        <source> Each guide shows its author, its sources and its review status, together with the game version it corresponds to. </source>
+        <target state="translated"> Cada guía muestra su autor, sus fuentes y su estado de revisión, junto con la versión del juego a la que corresponde. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">22,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.attribution.adaptation" datatype="html">
+        <source> A build adapted from an external source is only published when that source&apos;s license or a registered permission expressly covers the adaptation. Visible attribution is required, but it does not replace permission. </source>
+        <target state="translated"> Una build adaptada de una fuente externa solo se publica cuando la licencia de esa fuente o un permiso registrado cubre expresamente la adaptación. La atribución visible es obligatoria, pero no sustituye al permiso. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">26,32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.assets.title" datatype="html">
+        <source>Sources and assets</source>
+        <target state="translated">Fuentes y activos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">33,34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.assets.noScraping" datatype="html">
+        <source> No automatic scraping is performed, and no texts, images or assets from third-party guides are copied without explicit registered permission. Access controls are not bypassed either. </source>
+        <target state="translated"> No se hace scraping automático ni se copian textos, imágenes o activos de guías de terceros sin un permiso explícito registrado. Tampoco se eluden controles de acceso. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">35,38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.assets.official" datatype="html">
+        <source> Official Grim Dawn assets are only used when the asset manifest records their origin, owner, license or permission and proof, with approved status. Until that entry exists, our own SVG glyphs are used. </source>
+        <target state="translated"> Los activos oficiales de Grim Dawn solo se usan cuando el manifiesto de activos registra su origen, titular, licencia o permiso y prueba, con estado aprobado. Mientras no exista esa entrada se usan glifos SVG propios. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">39,45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.takedown.title" datatype="html">
+        <source>Content takedown</source>
+        <target state="translated">Retirada de contenido</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">46,47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.takedown.request" datatype="html">
+        <source> Any rights holder can request the takedown of content by opening an issue in the project channel. That same channel is also used for general contact. </source>
+        <target state="translated"> Cualquier titular de derechos puede solicitar la retirada de un contenido abriendo un issue en el canal del proyecto. Ese mismo canal sirve para el contacto general. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">48,52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.takedown.link" datatype="html">
+        <source>Open a takedown or contact issue on GitHub</source>
+        <target state="translated">Abrir un issue de retirada o de contacto en GitHub</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">53,56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.takedown.order" datatype="html">
+        <source> Content is unpublished first and the request is resolved afterwards. </source>
+        <target state="translated"> El contenido se despublica primero y la solicitud se resuelve después. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">57,61</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.privacy.title" datatype="html">
+        <source>Privacy</source>
+        <target state="translated">Privacidad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">62,63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.privacy.noAccounts" datatype="html">
+        <source> The site has no accounts, comments or third-party analytics. </source>
+        <target state="translated"> El sitio no tiene cuentas, comentarios ni analítica de terceros. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">64,66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.privacy.storage" datatype="html">
+        <source> The only local storage is the optional progress of the purchase checklist, which you can clear with the &quot;Clear progress&quot; button in the guide or by deleting the site data in your browser. </source>
+        <target state="translated"> El único almacenamiento local es el progreso opcional del checklist de compra, que puedes borrar con el botón «Borrar progreso» de la guía o borrando los datos del sitio en el navegador. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">67,72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.affiliation.title" datatype="html">
+        <source>No affiliation</source>
+        <target state="translated">No afiliación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">73,74</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.affiliation.body" datatype="html">
+        <source> This project is independent and is not affiliated with Crate Entertainment or GrimTools. </source>
+        <target state="translated"> Este proyecto es independiente y no está afiliado con Crate Entertainment ni con GrimTools. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.html</context>
+          <context context-type="linenumber">75,78</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="legal.description" datatype="html">
+        <source>Ownership, attribution, assets, content takedown and privacy for the Grim Dawn Builds project.</source>
+        <target state="translated">Titularidad, atribución, activos, retirada de contenido y privacidad del proyecto Grim Dawn Builds.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/legal.page.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="notFound.seoTitle" datatype="html">
+        <source>Page not found</source>
+        <target state="translated">Página no encontrada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/not-found.page.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="notFound.seoDescription" datatype="html">
+        <source>The requested address does not exist or is no longer available. Go back to the home page or check the tier list.</source>
+        <target state="translated">La dirección solicitada no existe o ya no está disponible. Vuelve al inicio o consulta la tier list.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/not-found.page.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="notFound.eyebrow" datatype="html">
+        <source>Error 404</source>
+        <target state="translated">Error 404</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/not-found.page.ts</context>
+          <context context-type="linenumber">18,19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="notFound.title" datatype="html">
+        <source>Page not found</source>
+        <target state="translated">Página no encontrada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/not-found.page.ts</context>
+          <context context-type="linenumber">19,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="notFound.body" datatype="html">
+        <source> The address you are looking for does not exist or is no longer available. </source>
+        <target state="translated">La dirección que buscas no existe o ya no está disponible.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/not-found.page.ts</context>
+          <context context-type="linenumber">21,23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="notFound.nav" datatype="html">
+        <source>Recovery links</source>
+        <target state="translated">Enlaces de recuperación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/not-found.page.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="notFound.home" datatype="html">
+        <source>Back to the home page</source>
+        <target state="translated">Volver al inicio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/not-found.page.ts</context>
+          <context context-type="linenumber">24,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="notFound.catalog" datatype="html">
+        <source>View the tier list</source>
+        <target state="translated">Ver la tier list</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/static-pages/not-found.page.ts</context>
+          <context context-type="linenumber">25,27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.verified" datatype="html">
+        <source>Verified</source>
+        <target state="translated">Verificado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.unverified" datatype="html">
+        <source>Unverified</source>
+        <target state="translated">Sin verificar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.placeholder" datatype="html">
+        <source>Placeholder</source>
+        <target state="translated">Placeholder</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.externalAuthor" datatype="html">
+        <source>Original author:</source>
+        <target state="translated">Autoría original:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">34,35</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.externalLink" datatype="html">
+        <source>View external source (new tab)</source>
+        <target state="translated">Consultar fuente externa (nueva pestaña)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">40,43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.externalWarning" datatype="html">
+        <source> Link to a third-party site. The content remains at its original source. </source>
+        <target state="translated"> Enlace a un sitio de terceros. El contenido permanece en su fuente original. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">44,47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.cardVersion" datatype="html">
+        <source>Version:</source>
+        <target state="translated">Versión:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">84,85</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.reviewDate" datatype="html">
+        <source>Last reviewed:</source>
+        <target state="translated">Última revisión:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">88,89</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.noReviewDate" datatype="html">
+        <source>Review date not reported</source>
+        <target state="translated">Revisión no informada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">91,94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.comingSoon" datatype="html">
+        <source>Guide coming soon</source>
+        <target state="translated">Guía próximamente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">102,105</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.unranked" datatype="html">
+        <source>Unranked</source>
+        <target state="translated">Sin clasificar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">111</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.tier" datatype="html">
+        <source>Tier <x id="PH" equiv-text="this.entry().tier"/></source>
+        <target state="translated">Tier <x id="PH" equiv-text="this.entry().tier"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">112</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.ts</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.search" datatype="html">
+        <source>Search builds</source>
+        <target state="translated">Buscar builds</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">188,189</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.clear" datatype="html">
+        <source> Clear filters </source>
+        <target state="translated"> Limpiar filtros </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">207,209</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">252,254</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.emptyTitle" datatype="html">
+        <source>No results</source>
+        <target state="translated">Sin resultados</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">247,248</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.emptyDescription" datatype="html">
+        <source> No build matches these filters. Try another combination or clear the selection. </source>
+        <target state="translated"> Ninguna build coincide con estos filtros. Prueba otra combinación o limpia la selección. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
+          <context context-type="linenumber">249,251</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.intro" datatype="html">
+        <source> All combinations, with their status in view. A slot without a guide is a placeholder: it is not a recommendation or a power ranking. </source>
+        <target state="translated"> Todas las combinaciones, con su estado a la vista. Una ranura sin guía es un placeholder: no es una recomendación ni una clasificación de poder. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.html</context>
+          <context context-type="linenumber">4,7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.version" datatype="html">
+        <source>Game version:</source>
+        <target state="translated">Versión del juego:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.filterHeading" datatype="html">
+        <source>Filter catalog</source>
+        <target state="translated">Filtrar catálogo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.filterHelp" datatype="html">
+        <source> Filter groups are combined. Within each group, one match is enough. Entries without damage or style data do not appear when filtering by that data. </source>
+        <target state="translated"> Se combinan los grupos de filtros. Dentro de cada grupo basta con una coincidencia. Las entradas sin datos de daño o estilo no aparecen al filtrar por esos datos. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.html</context>
+          <context context-type="linenumber">13,18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.resultCount" datatype="html">
+        <source> <x id="INTERPOLATION" equiv-text="{{ visible().length }}"/> of <x id="INTERPOLATION_1" equiv-text="{{ catalog.cards.length }}"/> entries
+</source>
+        <target state="translated"> <x id="INTERPOLATION" equiv-text="{{ visible().length }}"/> de <x id="INTERPOLATION_1" equiv-text="{{ catalog.cards.length }}"/> entradas
+</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.noScript" datatype="html">
+        <source> The full catalog can be read without JavaScript. Filters require JavaScript.
+</source>
+        <target state="translated"> El catálogo completo puede leerse sin JavaScript. Los filtros requieren JavaScript.
+</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.html</context>
+          <context context-type="linenumber">42,44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.description" datatype="html">
+        <source>Browse Grim Dawn mastery combinations. Filter by damage, style and content status, with visible attribution and review.</source>
+        <target state="translated">Explora las combinaciones de maestrías de Grim Dawn. Filtra por daño, estilo y estado del contenido, con atribución y revisión visibles.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.ts</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.unknown" datatype="html">
+        <source>No data</source>
+        <target state="translated">Sin datos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">107</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.heading" datatype="html">
+        <source>Devotion map</source>
+        <target state="translated">Mapa de devociones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">108</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.description" datatype="html">
+        <source>Editorial outline, not part of the game map. Arrows: documented affinity requirements; internal lines of each constellation.</source>
+        <target state="translated">Esquema editorial, ajeno al mapa del juego. Flechas: requisitos de afinidad documentados; líneas internas de cada constelación.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">109</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.invalid" datatype="html">
+        <source>The map could not be drawn. Check the data; see the list.</source>
+        <target state="translated">No se pudo dibujar el mapa. Revisa los datos; consulta la lista.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">110</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.empty" datatype="html">
+        <source>No constellations.</source>
+        <target state="translated">No hay constelaciones.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">111</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.scrollHelp" datatype="html">
+        <source>Scroll within the diagram to see it in full.</source>
+        <target state="translated">Desplázate dentro del diagrama para verlo completo.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">112</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.affinityRequired" datatype="html">
+        <source>Required affinity:</source>
+        <target state="translated">Afinidad requerida:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">113</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.affinityGranted" datatype="html">
+        <source>Granted affinity:</source>
+        <target state="translated">Afinidad otorgada:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">114</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.closeDetail" datatype="html">
+        <source>Close detail</source>
+        <target state="translated">Cerrar detalle</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">115</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.detailHint" datatype="html">
+        <source>Focus or hover over a constellation to see its data.</source>
+        <target state="translated">Enfoca o señala una constelación para ver sus datos.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.listSummary" datatype="html">
+        <source>Constellations and route</source>
+        <target state="translated">Constelaciones y ruta</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">117</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.constellations" datatype="html">
+        <source>Constellations</source>
+        <target state="translated">Constelaciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">118</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.route" datatype="html">
+        <source>Devotion route</source>
+        <target state="translated">Ruta de devoción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">119</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.emptyRoute" datatype="html">
+        <source>No devotion steps.</source>
+        <target state="translated">No hay pasos de devoción.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">120</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.noConstellation" datatype="html">
+        <source>Step without an associated constellation.</source>
+        <target state="translated">Paso sin constelación asociada.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">121</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.bindingError" datatype="html">
+        <source>Invalid reference</source>
+        <target state="translated">Referencia inválida</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">122</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.requirement" datatype="html">
+        <source>Requires</source>
+        <target state="translated">Requiere</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">124</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.positions" datatype="html">
+        <source>Steps</source>
+        <target state="translated">Pasos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">125</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.stepLabel" datatype="html">
+        <source>Step <x id="position" equiv-text="position"/> · <x id="label" equiv-text="label"/></source>
+        <target state="translated">Paso <x id="position" equiv-text="position"/> · <x id="label" equiv-text="label"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">308</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.kindRoute" datatype="html">
+        <source>Route</source>
+        <target state="translated">Ruta</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">314</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.kindVerification" datatype="html">
+        <source>Verification</source>
+        <target state="translated">Verificación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">316</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.kindCleanup" datatype="html">
+        <source>Cleanup</source>
+        <target state="translated">Limpieza</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">318</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.tier" datatype="html">
+        <source>Tier <x id="tier" equiv-text="constellation.tier_level"/></source>
+        <target state="translated">Tier <x id="tier" equiv-text="constellation.tier_level"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">325</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.englishName" datatype="html">
+        <source>English name: <x id="nameEn" equiv-text="constellation.name_en"/></source>
+        <target state="translated">Nombre en inglés: <x id="nameEn" equiv-text="constellation.name_en"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">330</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.activeStep" datatype="html">
+        <source>Active step</source>
+        <target state="translated">Paso activo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">338</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.noAffinityRequired" datatype="html">
+        <source>No documented requirements</source>
+        <target state="translated">Sin requisitos documentados</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">352</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.noneGranted" datatype="html">
+        <source>No affinity granted</source>
+        <target state="translated">Sin afinidad otorgada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">358</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.externalTarget" datatype="html">
+        <source>External mention: <x id="name" equiv-text="binding.binding.skill_name_es"/></source>
+        <target state="translated">Mención externa: <x id="name" equiv-text="binding.binding.skill_name_es"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">364</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.verified" datatype="html">
+        <source>Verified</source>
+        <target state="translated">Verificado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">443</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.unverified" datatype="html">
+        <source>Unverified</source>
+        <target state="translated">Sin verificar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">444</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="devotionMap.verifyWarning" datatype="html">
+        <source>verify in GrimTools before spending points</source>
+        <target state="translated">verifica en GrimTools antes de gastar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/devotion-map/devotion-map.ts</context>
+          <context context-type="linenumber">448</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.unknownBar" datatype="html">
+        <source>Unknown bar</source>
+        <target state="translated">Barra desconocida</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.currentBar" datatype="html">
+        <source>Bar</source>
+        <target state="translated">Barra</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">11,12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.invalidTree" datatype="html">
+        <source> This tree could not be drawn because its relationships contain an error. The list is still available. </source>
+        <target state="translated"> No se pudo dibujar este árbol porque sus relaciones tienen un error. La lista sigue disponible. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">18,21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.empty" datatype="html">
+        <source>There are no skills for this mastery.</source>
+        <target state="translated">No hay habilidades para esta maestría.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">22,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.canvasLabel" datatype="html">
+        <source>Skill tree; scroll within the diagram to browse it</source>
+        <target state="translated">Árbol de habilidades; desplázate dentro del diagrama para recorrerlo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">28,31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.svgDescription" datatype="html">
+        <source> Lines connect each skill to its preceding requirement. Use the arrow keys to move between nodes. </source>
+        <target state="translated"> Las líneas conectan cada habilidad con su requisito anterior. Usa las flechas para recorrer los nodos. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">40,42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.scrollHelp" datatype="html">
+        <source> If the tree is wider than the screen, scroll within the diagram to view it. </source>
+        <target state="translated"> Si el árbol excede el ancho, desplázate dentro del diagrama para consultarlo. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">142,146</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.requiredBarText" datatype="html">
+        <source>Requires bar</source>
+        <target state="translated">Requiere barra</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">162,163</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">204,205</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.maxPoints" datatype="html">
+        <source>Suggested maximum points:</source>
+        <target state="translated">Puntos máximos orientativos:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">168,169</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">216,217</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.barWarning" datatype="html">
+        <source> Bar too low to assign points now; you can still review this recommendation. </source>
+        <target state="translated"> Barra insuficiente para asignar puntos ahora; puedes consultar esta recomendación. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">174,177</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.closeDetail" datatype="html">
+        <source> Close detail </source>
+        <target state="translated"> Cerrar detalle </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">185,187</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.detailHint" datatype="html">
+        <source>Focus on or hover over a skill to see its details.</source>
+        <target state="translated"> Enfoca o pasa el cursor por una habilidad para consultar sus detalles. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">189,193</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.listSummary" datatype="html">
+        <source>Skill list and recommendations</source>
+        <target state="translated">Lista de habilidades y recomendaciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">194,195</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.emptyList" datatype="html">
+        <source>There are no skills to review.</source>
+        <target state="translated">No hay habilidades para consultar.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">196,199</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.barWarningShort" datatype="html">
+        <source>Bar too low</source>
+        <target state="translated">Barra insuficiente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">222,225</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.svgTitle" datatype="html">
+        <source>Skill tree of <x id="mastery" equiv-text="this.mastery().name_es"/></source>
+        <target state="translated">Árbol de <x id="mastery" equiv-text="this.mastery().name_es"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">163</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.status.recommended" datatype="html">
+        <source>Recommended</source>
+        <target state="translated">Recomendada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">230</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.status.meta" datatype="html">
+        <source>Meta</source>
+        <target state="translated">Meta</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">232</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.status.skip" datatype="html">
+        <source>Skip</source>
+        <target state="translated">Omitir</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">234</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.activeStep" datatype="html">
+        <source>Active step</source>
+        <target state="translated">Paso activo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">251</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.barLabel" datatype="html">
+        <source>Bar <x id="bar" equiv-text="bar"/></source>
+        <target state="translated">Barra <x id="bar" equiv-text="bar"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="layout.skip" datatype="html">
+        <source>Skip to content</source>
+        <target state="translated">Saltar al contenido</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
+          <context context-type="linenumber">1,3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="layout.brand" datatype="html">
+        <source>Grim Dawn <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span&gt;"/>Builds<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <target state="translated">Grim Dawn <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span&gt;"/>Builds<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="layout.primaryNav" datatype="html">
+        <source>Main navigation</source>
+        <target state="translated">Navegación principal</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="layout.home" datatype="html">
+        <source>Home</source>
+        <target state="translated">Inicio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
+          <context context-type="linenumber">9,11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="layout.catalog" datatype="html">
+        <source>Catalog</source>
+        <target state="translated">Catálogo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
+          <context context-type="linenumber">14,17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="layout.about" datatype="html">
+        <source>About</source>
+        <target state="translated">Acerca</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
+          <context context-type="linenumber">21,23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="layout.independent" datatype="html">
+        <source>Independent project. Not affiliated with Crate Entertainment.</source>
+        <target state="translated"> Proyecto independiente. No está afiliado a Crate Entertainment. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
+          <context context-type="linenumber">30,31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="layout.legalNav" datatype="html">
+        <source>Editorial and legal information</source>
+        <target state="translated">Información editorial y legal</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="layout.editorial" datatype="html">
+        <source>Editorial criteria</source>
+        <target state="translated">Criterios editoriales</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
+          <context context-type="linenumber">32,33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="layout.legal" datatype="html">
+        <source>Legal notice</source>
+        <target state="translated">Aviso legal</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
+          <context context-type="linenumber">33,36</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.group.masteries" datatype="html">
+        <source>Masteries</source>
+        <target state="translated">Maestrías</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">131</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.group.damageTypes" datatype="html">
+        <source>Damage type</source>
+        <target state="translated">Tipo de daño</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">134</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.fisico" datatype="html">
+        <source>Physical</source>
+        <target state="translated">Físico</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">135</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.fuego" datatype="html">
+        <source>Fire</source>
+        <target state="translated">Fuego</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">136</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.frio" datatype="html">
+        <source>Cold</source>
+        <target state="translated">Frío</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">137</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.rayo" datatype="html">
+        <source>Lightning</source>
+        <target state="translated">Rayo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">138</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.acido" datatype="html">
+        <source>Acid</source>
+        <target state="translated">Ácido</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">139</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.vitalidad" datatype="html">
+        <source>Vitality</source>
+        <target state="translated">Vitalidad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">140</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.caos" datatype="html">
+        <source>Chaos</source>
+        <target state="translated">Caos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">141</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.eter" datatype="html">
+        <source>Aether</source>
+        <target state="translated">Éter</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">142</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.elemental" datatype="html">
+        <source>Elemental</source>
+        <target state="translated">Elemental</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">143</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.sangrado" datatype="html">
+        <source>Bleeding</source>
+        <target state="translated">Sangrado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">144</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.mascotas" datatype="html">
+        <source>Minions</source>
+        <target state="translated">Mascotas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">145</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">157</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.group.contentTags" datatype="html">
+        <source>Content</source>
+        <target state="translated">Contenido</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">147</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.campana" datatype="html">
+        <source>Campaign</source>
+        <target state="translated">Campaña</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">148</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.shattered_realm" datatype="html">
+        <source>Shattered Realm</source>
+        <target state="translated">Shattered Realm</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">149</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.crucible" datatype="html">
+        <source>Crucible</source>
+        <target state="translated">Crucible</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">150</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.jefes" datatype="html">
+        <source>Bosses</source>
+        <target state="translated">Jefes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">151</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.farmeo" datatype="html">
+        <source>Farming</source>
+        <target state="translated">Farmeo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">152</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.group.playstyles" datatype="html">
+        <source>Style</source>
+        <target state="translated">Estilo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">154</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.melee" datatype="html">
+        <source>Melee</source>
+        <target state="translated">Cuerpo a cuerpo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">155</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.rango" datatype="html">
+        <source>Ranged</source>
+        <target state="translated">A distancia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">156</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.hibrido" datatype="html">
+        <source>Hybrid</source>
+        <target state="translated">Híbrido</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">158</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.group.contentStatuses" datatype="html">
+        <source>Content status</source>
+        <target state="translated">Estado del contenido</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">160</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.verificado" datatype="html">
+        <source>Verified</source>
+        <target state="translated">Verificado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">161</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.sin_verificar" datatype="html">
+        <source>Unverified</source>
+        <target state="translated">Sin verificar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">162</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="catalog.option.placeholder" datatype="html">
+        <source>Placeholder</source>
+        <target state="translated">Placeholder</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/catalog.model.ts</context>
+          <context context-type="linenumber">163</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="locale.navLabel" datatype="html">
+        <source>Language</source>
+        <target state="translated">Idioma</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/language-switcher.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="locale.english" datatype="html">
+        <source>English</source>
+        <target state="translated">English</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/language-switcher.html</context>
+          <context context-type="linenumber">8,11</context>
+        </context-group>
+      </trans-unit>
+<trans-unit id="locale.spanish" datatype="html">
+        <source>Español</source>
+        <target state="translated">Español</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/language-switcher.html</context>
+          <context context-type="linenumber">16,19</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

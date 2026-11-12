@@ -166,55 +166,16 @@ importers:
 
   .:
     dependencies:
-      '@angular/common':
-        specifier: ^21.2.0
-        version: 21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@gd/domain':
+        specifier: workspace:*
+        version: link:packages/domain
+    devDependencies:
       '@angular/compiler':
         specifier: ^21.2.0
         version: 21.2.26
       '@angular/core':
         specifier: ^21.2.0
         version: 21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)
-      '@angular/forms':
-        specifier: ^21.2.0
-        version: 21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-browser@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)))(rxjs@7.8.2)
-      '@angular/platform-browser':
-        specifier: ^21.2.0
-        version: 21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))
-      '@angular/platform-server':
-        specifier: ^21.2.0
-        version: 21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@21.2.26)(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-browser@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)))(rxjs@7.8.2)
-      '@angular/router':
-        specifier: ^21.2.0
-        version: 21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-browser@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)))(rxjs@7.8.2)
-      '@angular/ssr':
-        specifier: ^21.2.29
-        version: 21.2.29(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-server@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@21.2.26)(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-browser@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/router@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-browser@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)))(rxjs@7.8.2))
-      '@gd/domain':
-        specifier: workspace:*
-        version: link:packages/domain
-      rxjs:
-        specifier: ~7.8.0
-        version: 7.8.2
-      tslib:
-        specifier: ^2.3.0
-        version: 2.9.1
-    devDependencies:
-      '@angular/build':
-        specifier: ^21.2.29
-        version: 21.2.29(5d2b9c2b97d7b5c27390a9e00fbc3f45)
-      '@angular/cli':
-        specifier: ^21.2.29
-        version: 21.2.29(@types/node@20.19.43)(chokidar@5.0.0)(supports-color@7.2.0)
-      '@angular/compiler-cli':
-        specifier: ^21.2.0
-        version: 21.2.26(@angular/compiler@21.2.26)(supports-color@7.2.0)(typescript@5.9.3)
-      '@angular/localize':
-        specifier: ^21.2.26
-        version: 21.2.26(@angular/compiler-cli@21.2.26(@angular/compiler@21.2.26)(supports-color@7.2.0)(typescript@5.9.3))(@angular/compiler@21.2.26)(supports-color@7.2.0)
-      '@eslint/js':
-        specifier: ^10.0.1
-        version: 10.0.1(eslint@10.14.0(supports-color@7.2.0))
       '@lhci/cli':
         specifier: 0.16.0
         version: 0.16.0(@types/node@20.19.43)(rollup@4.68.0)(supports-color@7.2.0)
@@ -224,9 +185,6 @@ importers:
       '@types/node':
         specifier: ^20.17.19
         version: 20.19.43
-      angular-eslint:
-        specifier: 21.4.0
-        version: 21.4.0(@angular/cli@21.2.29(@types/node@20.19.43)(chokidar@5.0.0)(supports-color@7.2.0))(chokidar@5.0.0)(eslint@10.14.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript-eslint@8.59.2(eslint@10.14.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(typescript@5.9.3)
       axe-core:
         specifier: 4.14.0
         version: 4.14.0
@@ -236,9 +194,6 @@ importers:
       eslint:
         specifier: ^10.3.0
         version: 10.14.0(supports-color@7.2.0)
-      jsdom:
-        specifier: ^28.0.0
-        version: 28.1.0(supports-color@7.2.0)
       lighthouse:
         specifier: 13.6.0
         version: 13.6.0(proxy-agent@6.5.0(supports-color@7.2.0))(rollup@4.68.0)(supports-color@7.2.0)
@@ -254,9 +209,6 @@ importers:
       typescript:
         specifier: ~5.9.2
         version: 5.9.3
-      typescript-eslint:
-        specifier: 8.59.2
-        version: 8.59.2(eslint@10.14.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
       vitest:
         specifier: ^4.0.8
         version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@20.19.43)(@vitest/coverage-v8@4.1.12)(jsdom@28.1.0(supports-color@7.2.0))(vite@7.3.7(@types/node@20.19.43)(sass@1.97.3)(tsx@4.23.15))
@@ -294,6 +246,79 @@ importers:
       vitest:
         specifier: ^4.0.8
         version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(@vitest/coverage-v8@4.1.12)(jsdom@28.1.0(supports-color@7.2.0))(vite@7.3.7(@types/node@22.20.5)(sass@1.97.3)(tsx@4.23.15))
+
+  apps/web:
+    dependencies:
+      '@angular/common':
+        specifier: ^21.2.0
+        version: 21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@angular/compiler':
+        specifier: ^21.2.0
+        version: 21.2.26
+      '@angular/core':
+        specifier: ^21.2.0
+        version: 21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)
+      '@angular/forms':
+        specifier: ^21.2.0
+        version: 21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-browser@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@angular/platform-browser':
+        specifier: ^21.2.0
+        version: 21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))
+      '@angular/platform-server':
+        specifier: ^21.2.0
+        version: 21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@21.2.26)(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-browser@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@angular/router':
+        specifier: ^21.2.0
+        version: 21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-browser@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@angular/ssr':
+        specifier: ^21.2.29
+        version: 21.2.29(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-server@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@21.2.26)(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-browser@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/router@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(@angular/platform-browser@21.2.26(@angular/common@21.2.26(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.26(@angular/compiler@21.2.26)(rxjs@7.8.2)))(rxjs@7.8.2))
+      '@gd/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      rxjs:
+        specifier: ~7.8.0
+        version: 7.8.2
+      tslib:
+        specifier: ^2.3.0
+        version: 2.9.1
+    devDependencies:
+      '@angular/build':
+        specifier: ^21.2.29
+        version: 21.2.29(5d2b9c2b97d7b5c27390a9e00fbc3f45)
+      '@angular/cli':
+        specifier: ^21.2.29
+        version: 21.2.29(@types/node@20.19.43)(chokidar@5.0.0)(supports-color@7.2.0)
+      '@angular/compiler-cli':
+        specifier: ^21.2.0
+        version: 21.2.26(@angular/compiler@21.2.26)(supports-color@7.2.0)(typescript@5.9.3)
+      '@angular/localize':
+        specifier: ^21.2.26
+        version: 21.2.26(@angular/compiler-cli@21.2.26(@angular/compiler@21.2.26)(supports-color@7.2.0)(typescript@5.9.3))(@angular/compiler@21.2.26)(supports-color@7.2.0)
+      '@eslint/js':
+        specifier: ^10.0.1
+        version: 10.0.1(eslint@10.14.0(supports-color@7.2.0))
+      '@types/node':
+        specifier: ^20.17.19
+        version: 20.19.43
+      angular-eslint:
+        specifier: 21.4.0
+        version: 21.4.0(@angular/cli@21.2.29(@types/node@20.19.43)(chokidar@5.0.0)(supports-color@7.2.0))(chokidar@5.0.0)(eslint@10.14.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript-eslint@8.59.2(eslint@10.14.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(typescript@5.9.3)
+      eslint:
+        specifier: ^10.3.0
+        version: 10.14.0(supports-color@7.2.0)
+      jsdom:
+        specifier: ^28.0.0
+        version: 28.1.0(supports-color@7.2.0)
+      typescript:
+        specifier: ~5.9.2
+        version: 5.9.3
+      typescript-eslint:
+        specifier: 8.59.2
+        version: 8.59.2(eslint@10.14.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
+      vitest:
+        specifier: ^4.0.8
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@20.19.43)(@vitest/coverage-v8@4.1.12)(jsdom@28.1.0(supports-color@7.2.0))(vite@7.3.7(@types/node@20.19.43)(sass@1.97.3)(tsx@4.23.15))
 
   packages/domain:
     dependencies:
@@ -5526,6 +5551,7 @@ packages:
 
   tldts-core@7.4.20:
     resolution: {integrity: sha512-C630TWXZCZmLq0F2bW4QqwnaaxCQ/svpAqvJwnC4JvgEM5ohhBnGsEzTLSOXcN+xjz+kEaHS5uoWIw2klnqd0A==}
+    deprecated: Partial release, see https://github.com/remusao/tldts/issues/2735. Use >=7.4.22.
 
   tldts-icann@7.4.19:
     resolution: {integrity: sha512-lnGUR5BZm5UpNDYMBFGAr9pxS2RTUr/euXuJ9o1irR+zKhsBAFUn7quHoZt8UP/eIwykp4ye5f56bCjMBytbTg==}

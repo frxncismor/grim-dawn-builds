@@ -114,6 +114,7 @@ export async function runPublicBuildCheck(
     const source = createCanaryEnvironment(input);
     const watched = [...sensitiveValues(input), ...sensitiveValues(source)];
     const environment = createPublicBuildEnv(source, 'fixture');
+    const webRoot = join(root, 'apps', 'web');
     const build =
       dependencies.build ??
       (async (directory: string, env: Record<string, string>) => {
@@ -121,12 +122,12 @@ export async function runPublicBuildCheck(
           const child = spawn(
             process.execPath,
             [
-              join(root, 'node_modules/@angular/cli/bin/ng.js'),
+              join(webRoot, 'node_modules/@angular/cli/bin/ng.js'),
               'build',
               '--output-path',
               directory,
             ],
-            { cwd: root, env, stdio: 'ignore', windowsHide: true, shell: false },
+            { cwd: webRoot, env, stdio: 'ignore', windowsHide: true, shell: false },
           );
           child.once('error', () => reject(new PublicBuildError('build-failed')));
           child.once('exit', (code) =>

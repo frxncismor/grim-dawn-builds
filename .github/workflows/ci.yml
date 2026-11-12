@@ -187,10 +187,12 @@ jobs:
       # The local drafts artifact is built into its own directory
       # (dist/e2e-drafts) and never overwrites the public dist/grim-dawn-builds;
       # playwright.config.ts serves both on different ports (4321 and 4322).
+      # The Angular workspace lives in apps/web (T-067), so the CLI runs there and
+      # the output path is relative to apps/web.
       - name: Build drafts artifact (isolated directory, no overwrite)
         env:
           INCLUDE_DRAFTS: 'true'
-        run: pnpm exec ng build --output-path dist/e2e-drafts
+        run: pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts
 
       - name: Install Playwright Chromium (pinned by package.json)
         run: pnpm exec playwright install --with-deps chromium

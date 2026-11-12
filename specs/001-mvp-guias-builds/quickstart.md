@@ -3566,3 +3566,69 @@ llamado `<proyecto>/<especialidad>` (`grim-dawn-builds/ui`,
 | `pnpm lint:md`                                 | 55 archivos, 0 incidencias                                                |
 | `pnpm format:check`                            | `All matched files use Prettier code style!`                              |
 | `pnpm herdr:space ... --print`                 | `space: "grim-dawn-builds/ui"`; prompt en `argv`, sin `--task`            |
+
+## T-136: revisión final de código de la spec001 (2026-11-12)
+
+Puerta adicional de `plan.md` §17.44, distinta de la puerta de cuatro revisiones
+de spec002. Revisión independiente del implementador sobre el árbol limpio
+`orq/11111619-review` = `origin/mvp/1` (`f9360e0`).
+
+- **Modelo realmente usado**: `deepseek/deepseek-v4-pro#max` (proveedor
+  `deepseek`, de pago, clase pro). Antes se comprobaron los modelos de
+  `opencode-go/*` (`gemini-4-argon#high`, `kimi-k3.1-pro#high`,
+  `grok-4.7#xhigh`): los tres devolvieron `OpenCode Go weekly usage limit
+  reached`. `deepseek/deepseek-v4-pro#max` respondió y se usó. No se empleó un
+  modelo flash ni el ejecutor.
+- **Identificador de la revisión**: `gdb-review-2026-11-12T16:51Z`.
+- **Contrato**: `.agents/skills/review-code/SKILL.md` y
+  `specs/002-spec-completion-reviews/contracts/review-gate.md`.
+- **Alcance**: `src/app/**` (rutas, resolvers, SSR, features, SEO, compartidos),
+  `packages/domain/**`, `apps/api/**` (rutas, contenido, seguridad, migraciones y
+  vistas SQL), `scripts/**` (helper, servidor estático, verificaciones),
+  `infra/**` y `.github/workflows/**`; tests como evidencia. Fuera de alcance:
+  contenido editorial, texto de specs/docs y dependencias de terceros.
+- **Hallazgos**: 0 CRITICAL, 0 HIGH, 2 MEDIUM y 3 LOW.
+  - MEDIUM-1 `scripts/gen-sitemap.test.mts:304-306` con causa en
+    `.gitattributes:1-6`: `public/robots.txt` se extrae del índice (LF) al árbol
+    de trabajo como CRLF (`git ls-files --eol` → `i/lf w/crlf`) y la aserción de
+    bytes exactos falla en Windows; `pnpm test:scripts` queda en 546/550 y
+    `pnpm verify` no continúa. Corrección: forzar `eol=lf` para `*.txt`/`public/robots.txt`
+    y normalizar en `buildRobots`.
+  - MEDIUM-2 `scripts/serve-artifact.mts:150-171` e
+    `infra/hosting/security-headers.conf:35` (CSP con `default-src 'self'` sin
+    `frame-src`) frente a `src/app/features/build/video-facade/video-facade.ts:21,112-121`:
+    con las cabeceras que sirve el propio repo, el iframe de
+    `www.youtube-nocookie.com` no sale a la red y el evento
+    `securitypolicyviolation` no se despacha en el documento padre, así que la
+    fachada queda en `loading` en vez de pasar a `error`. Corrección: añadir
+    `frame-src https://www.youtube-nocookie.com` o deshabilitar la función por
+    contrato, y añadir un fallback `load`/`error` con timeout.
+  - LOW-1 `apps/api/src/content/map-content.ts:89-90`: `mapAsset` falla abierto
+    si el descriptor no trae `status`; hoy lo mitiga la vista pública. Corrección:
+    exigir `status === 'approved'`.
+  - LOW-2 `apps/api/drizzle/0002_public_content.sql:75-76` y
+    `0001_gates.sql:93`: `v_public_assets` conserva `origin_url`, `rights_holder`
+    y `license_or_permission` legibles por `api_ro`; el código no las proyecta,
+    pero la vista no es la frontera. Corrección: retirarlas de la vista pública.
+  - LOW-3 `angular.json:62-66`: `devotion-map.css` mide 4.58 kB y supera el
+    `maximumWarning` de 4 kB sin que ninguna puerta lo registre.
+- **Comprobaciones ejecutadas**: `spec-review prepare/check` sobre 001 →
+  `pending-tasks` por T-043; `check:secrets`, `check:scope`, `check:boundaries` y
+  `check:locale-parity` OK; dominio 100 % sentencias / 99,69 % ramas; API 301
+  pasan/68 omitidas/1 fallo esperado preexistente; web 378 pasan/2 fallos
+  esperados; `pnpm build` OK con 12 rutas prerenderizadas y presupuesto
+  `/tier-list` 111102/112000 B; `lint`, `format:check` y `lint:md` verdes; a11y
+  51 pasan; journeys 21 pasan; `check:performance` 65/65; sonda CSP con Chromium
+  headless. `pnpm test:scripts` 546 pasan/2 fallan (CRLF de MEDIUM-1 y
+  disponibilidad de `gitleaks` ambiental, que pasa tras `pnpm setup:gitleaks`).
+- **Limitaciones**: sin PostgreSQL real, sin Trivy/ZAP/DAST, sin runner de GitHub
+  (coincide con `handoff.md`); el fixture no tiene guías con `video_url`, así que
+  MEDIUM-2 se demuestra con una sonda sintética.
+- **Veredicto**: la revisión **no bloquea** el cierre por CRITICAL/HIGH. Los
+  dos MEDIUM y los tres LOW requieren disposición SDD (corrección planificada o
+  aplazamiento motivado) antes de declarar pasada la puerta. El cierre de spec001
+  sigue pendiente además por T-043, por la puerta de spec002 y porque no existe
+  una línea `T-136` en `tasks.md`: el requisito solo figura en `plan.md` §17.44 y
+  `milestones.md`.
+- Informe completo de la revisión: `runs\11111619\11111619-revisor-1.md` de la
+  corrida de orquestación; no forma parte del repositorio.

@@ -9,9 +9,10 @@
  * dependencias o rutas de auth, registro, cuenta y edición pública (spec AC-24).
  *
  * T-109 añade dos reglas estructurales de derechos y fuentes (spec AC-19/AC-23):
- * - `external-source-access`: en el código de la app y de la ingesta (`src/`,
- *   `apps/` y los scripts cuyo basename empieza por ingest|import|source|
- *   scrape|crawl|fetch) una llamada HTTP automatizada cuyo primer argumento
+ * - `external-source-access`: en el código de la app y de la ingesta (`apps/web/`,
+ *   `apps/`, `src/` histórico y los scripts cuyo basename empieza por
+ *   ingest|import|source|scrape|crawl|fetch) una llamada HTTP automatizada cuyo
+ *   primer argumento
  *   contiene un literal `http(s)://host/...` con host ajeno al proyecto falla.
  *   No hay lista de dominios: cualquier host externo es acceso a terceros.
  *   Hosts propios: localhost, 127.0.0.1, ::1, [::1], 0.0.0.0 y PROJECT_HOSTS.
@@ -373,7 +374,7 @@ const IGNORED_DIRS_ANY = new Set([
   'fixtures',
   'testing',
 ]);
-/** Directorios de documentación/specs ignorados solo en la raíz (src/app/core/content sí se escanea). */
+/** Directorios de documentación/specs ignorados solo en la raíz (apps/web/src/app/core/content sí se escanea). */
 const IGNORED_DIRS_ROOT = new Set(['specs', 'docs', '.specify', 'content']);
 const LOCKFILES = new Set(['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock']);
 
@@ -461,7 +462,7 @@ const MAX_ARGUMENT_WINDOW = 2000;
 
 /**
  * Ámbitos donde el acceso HTTP automatizado es ingesta de terceros (T-109):
- * código de `src/` y `apps/` a cualquier profundidad, y scripts cuyo basename
+ * código de `apps/web/` (y `src/` histórico) y `apps/` a cualquier profundidad, y scripts cuyo basename
  * empieza por ingest|import|source|scrape|crawl|fetch. El tooling de build
  * (`scripts/setup-gitleaks.mts`, `scripts/check-contrast.mts`, etc.) queda fuera.
  * Los archivos de prueba se excluyen aparte con `TEST_FILE`.
