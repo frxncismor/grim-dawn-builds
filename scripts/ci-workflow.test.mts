@@ -18,6 +18,10 @@ const REQUIRED_ACTIONS = ['actions/checkout', 'pnpm/action-setup', 'actions/setu
 export const TRIVY_IMAGE =
   'aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb';
 
+/** ZAP image pinned by tag and multi-arch index digest (T-077). */
+export const ZAP_IMAGE =
+  'ghcr.io/zaproxy/zaproxy:2.16.1@sha256:7840969c7c9fead565bf9734b12f49f6886db90b1d35b1f74d79710bbd081dab';
+
 /** Exact `run:` commands that the PR workflow must execute (T-064 list). */
 export const REQUIRED_RUN_COMMANDS = [
   'pnpm install --frozen-lockfile',
@@ -55,6 +59,9 @@ export const REQUIRED_RUN_COMMANDS = [
   'docker save --output "$RUNNER_TEMP/gd-api-ci-scan.tar" gd-api:ci-scan',
   `docker run --rm -v "$RUNNER_TEMP:/scan" ${TRIVY_IMAGE} image --input /scan/gd-api-ci-scan.tar --format json --output /scan/trivy-image.json --scanners vuln --severity MEDIUM,HIGH,CRITICAL`,
   'pnpm exec tsx scripts/check-container.mts --report "$RUNNER_TEMP/trivy-image.json"',
+  // T-077: DAST job builds the API, serves loopback targets and decides with check-dast.
+  'pnpm --filter @gd/api build',
+  'pnpm exec tsx scripts/check-dast.mts --report "$RUNNER_TEMP/zap/dast-web.json" --report "$RUNNER_TEMP/zap/dast-api-builds.json" --report "$RUNNER_TEMP/zap/dast-api-health.json"',
 ];
 
 const indentOf = (line: string): number => line.length - line.trimStart().length;
@@ -218,6 +225,41 @@ export function validateCiWorkflow(source: string): string[] {
     }
   }
 
+  // T-077: DAST runs the pinned ZAP image against loopback targets only, and never
+  // passes a rules file or an "ignore warnings" flag that could hide alerts.
+  // The ZAP command is a block scalar, so it is read from the raw lines, not `run:`.
+  for (const run of lines) {
+    if (!/\bzap-baseline\.py\b/.test(run)) continue;
+    const image = run.match(/\bghcr\.io\/zaproxy\/zaproxy:\S+/)?.[0].replace(/["']/g, '') ?? '';
+    if (!/^ghcr\.io\/zaproxy\/zaproxy:[\w.-]+@sha256:[0-9a-f]{64}$/.test(image)) {
+      problems.push(`ZAP image must be pinned by tag and digest: ${image || 'missing'}`);
+    }
+    const target = run.match(/(?:^|\s)-t\s+("[^"]*"|'[^']*'|\S+)/)?.[1].replace(/["']/g, '') ?? '';
+    if (!/^http:\/\/127\.0\.0\.1:\d{1,5}(?:[/?#]\S*)?$/.test(target)) {
+      problems.push(`ZAP target must be a loopback URL (127.0.0.1): ${target || 'missing'}`);
+    }
+    const flags = run.split(/\s+/);
+    for (const flag of ['-c', '-u', '-i', '-I', '-p', '--hook']) {
+      if (flags.includes(flag)) {
+        problems.push(`ZAP must not use ${flag} (a rules file or ignore flag can hide alerts)`);
+      }
+    }
+  }
+  for (const run of runs) {
+    if (!/scripts\/check-dast\.mts/.test(run)) continue;
+    if (/--severity|--allowlist|--threshold|--ignore\b/.test(run)) {
+      problems.push(`DAST threshold must not be configurable: ${run}`);
+    }
+    if (!run.includes('--report')) problems.push(`DAST must evaluate a ZAP report: ${run}`);
+  }
+  const dastIdx = lines.findIndex((line) => /^ {2}dast:\s*$/.test(line));
+  const verifyIdx = lines.findIndex((line) => /^ {2}verify:\s*$/.test(line));
+  if (dastIdx < 0) {
+    problems.push('missing dast job (T-077)');
+  } else if (verifyIdx >= 0 && dastIdx < verifyIdx) {
+    problems.push('dast job must be declared after verify');
+  }
+
   // T-126: quality gates measure the built artifact, not the dev server.
   if (/\bng serve\b/.test(text)) problems.push('runs the dev server instead of the built artifact');
 
@@ -236,6 +278,15 @@ export function validateCiWorkflow(source: string): string[] {
   } else if (Number(lines[timeoutIdx].match(/(\d+)/)?.[1] ?? 0) < 40) {
     problems.push(`timeout-minutes must be at least 40 (line ${timeoutIdx + 1})`);
   }
+  // T-077: a runaway job or an unbounded budget is rejected in every job.
+  lines.forEach((line, index) => {
+    const match = line.match(/^\s*timeout-minutes:\s*(\d+)\s*$/);
+    if (!match) return;
+    const minutes = Number(match[1]);
+    if (minutes < 10 || minutes > 60) {
+      problems.push(`timeout-minutes must be between 10 and 60 (line ${index + 1})`);
+    }
+  });
 
   // Minimal structural validation without a YAML parser: even indentation,
   // `steps:` entries starting with name/uses/run, and every job with `runs-on:`.
@@ -257,8 +308,13 @@ export function validateCiWorkflow(source: string): string[] {
       );
     if (jobHeaders.length === 0) problems.push('jobs: block declares no job');
     for (const job of jobHeaders) {
-      if (!blockAfter(lines, job.index).some((line) => /^\s*runs-on:/.test(line))) {
+      const jobBlock = blockAfter(lines, job.index);
+      if (!jobBlock.some((line) => /^\s*runs-on:/.test(line))) {
         problems.push(`job must declare runs-on: (line ${job.index + 1})`);
+      }
+      // T-077: every job (verify, container, dast) declares its own budget.
+      if (!jobBlock.some((line) => /^\s*timeout-minutes:\s*\d+\s*$/.test(line))) {
+        problems.push(`job must declare timeout-minutes: (line ${job.index + 1})`);
       }
     }
   }
@@ -373,6 +429,46 @@ describe('PR verification workflow (T-064)', () => {
     assert.ok(build < archive, 'the image must exist before it is exported');
     assert.ok(archive < scan, 'Trivy scans the exported archive');
     assert.ok(scan < evaluate, 'the JSON report is decided by check-container');
+  });
+
+  it('dast job builds, starts loopback targets, runs ZAP and applies the threshold (T-077)', () => {
+    const lines = real.split('\n');
+    const jobIndex = lines.findIndex((line) => /^ {2}dast:\s*$/.test(line));
+    assert.notEqual(jobIndex, -1, 'missing dast job');
+    const step = (name: string): number => {
+      const index = lines.findIndex((line, i) => i > jobIndex && line === `      - name: ${name}`);
+      assert.notEqual(index, -1, `missing dast step: ${name}`);
+      return index;
+    };
+
+    const checkout = step('Check out repository');
+    const install = step('Install dependencies (frozen lockfile)');
+    const domainBuild = step('Domain build');
+    const webBuild = step('Web build (fixture content)');
+    const apiBuild = step('API build');
+    const credentials = step('Generate ephemeral database credentials');
+    const database = step('Start PostgreSQL 17 (pinned, loopback only)');
+    const migrate = step('Apply migrations with the migrator role');
+    const serve = step('Serve web artifact and start API (loopback only)');
+    const zapWeb = step('ZAP baseline against the web artifact (loopback)');
+    const zapApi = step('ZAP baseline against the API (loopback)');
+    const evaluate = step('Evaluate ZAP reports (MEDIUM blocks)');
+
+    assert.ok(checkout < install, 'checkout goes first');
+    assert.ok(install < domainBuild, 'the domain builds before the web');
+    assert.ok(domainBuild < webBuild, 'the domain package is needed by the web build');
+    assert.ok(webBuild < apiBuild, 'both artifacts are built before the scan');
+    assert.ok(apiBuild < credentials, 'credentials are generated after the official build');
+    assert.ok(credentials < database, 'the database receives the ephemeral credential');
+    assert.ok(database < migrate, 'migrations need the database');
+    assert.ok(migrate < serve, 'the API needs the migrated schema');
+    assert.ok(serve < zapWeb, 'ZAP scans the served web artifact');
+    assert.ok(serve < zapApi, 'ZAP scans the live API');
+    assert.ok(zapWeb < evaluate && zapApi < evaluate, 'check-dast decides after both scans');
+
+    // The raw ZAP reports are never uploaded: only the redacted checker output is.
+    const dastBlock = lines.slice(jobIndex).join('\n');
+    assert.doesNotMatch(dastBlock, /upload-artifact/);
   });
 
   /** Applies one textual mutation and asserts it changed the workflow. */
@@ -525,6 +621,39 @@ describe('PR verification workflow (T-064)', () => {
         mutate(
           '--severity MEDIUM,HIGH,CRITICAL',
           '--severity MEDIUM,HIGH,CRITICAL --ignore-unfixed',
+        ),
+    ],
+    // T-077: the DAST job, its pinned scanner and the loopback-only threshold gate.
+    ['dast job removed', () => `${real.slice(0, real.indexOf('\n  dast:'))}\n`],
+    ['zap image floating', () => mutate(ZAP_IMAGE, 'ghcr.io/zaproxy/zaproxy:latest')],
+    [
+      'remote DAST target',
+      () => mutate('-t http://127.0.0.1:8081/', '-t https://dast.example.com/'),
+    ],
+    [
+      'zap rules file hides alerts',
+      () => mutate('zap-baseline.py -t', 'zap-baseline.py -c rules.tsv -t'),
+    ],
+    ['zap ignores warnings', () => mutate('zap-baseline.py -t', 'zap-baseline.py -I -t')],
+    [
+      'dast evaluation removed',
+      () =>
+        mutate(/\n {6}- name: Evaluate ZAP reports[^\n]*\n {8}run: [^\n]*check-dast[^\n]*\n/, '\n'),
+    ],
+    [
+      'dast threshold lowered by flag',
+      () => mutate('check-dast.mts --report', 'check-dast.mts --severity LOW --report'),
+    ],
+    [
+      'dast allowlist added',
+      () => mutate('check-dast.mts --report', 'check-dast.mts --allowlist 10038 --report'),
+    ],
+    [
+      'dast job without timeout',
+      () =>
+        mutate(
+          /\n {4}timeout-minutes: 40\n {4}permissions:\n {6}contents: read\n {4}env:\n {6}NG_CLI_ANALYTICS/,
+          '\n    permissions:\n      contents: read\n    env:\n      NG_CLI_ANALYTICS',
         ),
     ],
   ];

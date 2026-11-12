@@ -272,3 +272,179 @@ jobs:
       # malformed report instead of passing.
       - name: Evaluate Trivy report (MEDIUM blocks)
         run: pnpm exec tsx scripts/check-container.mts --report "$RUNNER_TEMP/trivy-image.json"
+
+  # T-077: dynamic application security testing (DAST) in PR. Free OWASP ZAP baseline
+  # against the web artifact and the API started on the runner, with an ephemeral
+  # PostgreSQL and loopback-only targets: no secrets, no remote targets, read-only
+  # token. The gate is scripts/check-dast.mts (MEDIUM blocks, no allowlist).
+  dast:
+    name: DAST baseline (ZAP, local web and API)
+    runs-on: ubuntu-24.04
+    # Install, build, ephemeral database, three ZAP baselines and the threshold check.
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    env:
+      NG_CLI_ANALYTICS: 'false'
+      CONTENT_SOURCE: fixture
+      # Loopback targets only; scripts/check-ci-secrets.mts verifies this statically.
+      DAST_WEB_URL: http://127.0.0.1:8081
+      DAST_API_URL: http://127.0.0.1:3000
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # pnpm version comes from the "packageManager" field in package.json.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.23.5
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Domain build
+        run: pnpm --filter @gd/domain build
+
+      # Same public artifact the verify job measures: fixture content, static files.
+      - name: Web build (fixture content)
+        run: pnpm run build
+
+      - name: API build
+        run: pnpm --filter @gd/api build
+
+      # Ephemeral, per-job credential: generated here, masked in the log and kept in
+      # $RUNNER_TEMP. It never reaches a remote service and is discarded with the runner.
+      - name: Generate ephemeral database credentials
+        run: |
+          set -euo pipefail
+          password="$(openssl rand -hex 24)"
+          umask 077
+          echo "::add-mask::${password}" && printf '%s' "$password" > "$RUNNER_TEMP/dast-db-password"
+
+      # The same pinned PostgreSQL 17 image the integration tests use. Published on
+      # loopback only; the database is discarded with the ephemeral container.
+      - name: Start PostgreSQL 17 (pinned, loopback only)
+        run: |
+          set -euo pipefail
+          image="$(sed -nE 's/^[[:space:]]+image:[[:space:]]+(postgres:[^[:space:]]+)$/\1/p' infra/docker/compose.yaml | head -n1)"
+          case "$image" in
+            *@sha256:*) ;;
+            *) echo "PostgreSQL image is not pinned by digest: $image"; exit 1 ;;
+          esac
+          docker run --detach --rm --name gd-dast-db \
+            --publish 127.0.0.1:5432:5432 \
+            --env POSTGRES_DB=gd_dast \
+            --env POSTGRES_USER=postgres \
+            --env POSTGRES_PASSWORD_FILE=/run/secrets/dast-db-password \
+            --tmpfs /var/lib/postgresql/data:rw,nosuid,nodev,noexec,size=256m \
+            --tmpfs /var/run/postgresql:rw,nosuid,nodev,noexec,size=16m \
+            --mount "type=bind,source=$RUNNER_TEMP/dast-db-password,target=/run/secrets/dast-db-password,readonly" \
+            "$image"
+          for attempt in $(seq 1 60); do
+            if docker exec gd-dast-db pg_isready --quiet --username postgres --dbname gd_dast; then
+              echo "PostgreSQL listo en loopback"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "PostgreSQL no arrancó en 120 s"
+          exit 1
+
+      # migrations/0001 creates missing roles, but that needs CREATEROLE: the four roles
+      # are provisioned first as the local superuser, exactly like Compose does. psql
+      # reads the password from the mounted secret file with `\set` backticks, so the
+      # value never appears in a command line or in this workflow.
+      - name: Provision restricted database roles
+        run: |
+          set -euo pipefail
+          printf '%s\n' \
+            'CREATE ROLE migrator NOLOGIN;' \
+            'CREATE ROLE importer NOLOGIN;' \
+            'CREATE ROLE editor NOLOGIN;' \
+            'CREATE ROLE api_ro NOLOGIN;' \
+            '\set migrator_password `cat /run/secrets/dast-db-password`' \
+            '\set api_ro_password `cat /run/secrets/dast-db-password`' \
+            "ALTER ROLE migrator LOGIN PASSWORD :'migrator_password';" \
+            "ALTER ROLE api_ro LOGIN PASSWORD :'api_ro_password';" \
+            'GRANT CREATE ON DATABASE gd_dast TO migrator;' \
+            'GRANT USAGE, CREATE ON SCHEMA public TO migrator;' \
+            | docker exec --interactive gd-dast-db psql --username postgres --dbname gd_dast --set ON_ERROR_STOP=1 --quiet
+
+      - name: Apply migrations with the migrator role
+        run: |
+          set -euo pipefail
+          DB_HOST=127.0.0.1 DB_PORT=5432 POSTGRES_DB=gd_dast DB_USER_MIGRATOR=migrator \
+            DB_PASSWORD_MIGRATOR="$(cat "$RUNNER_TEMP/dast-db-password")" \
+            node apps/api/dist/db/migrate.mjs
+
+      # Python's http.server is preinstalled on the runner and serves the built artifact
+      # as a generic static host would (no security headers are invented here: a
+      # functional CSP for the inline Angular bootstrap is a separate build task).
+      - name: Serve web artifact and start API (loopback only)
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8081 --bind 127.0.0.1 --directory dist/grim-dawn-builds/browser > "$RUNNER_TEMP/dast-web.log" 2>&1 &
+          DB_HOST=127.0.0.1 DB_PORT=5432 POSTGRES_DB=gd_dast DB_USER_API_RO=api_ro \
+            DB_PASSWORD_API_RO="$(cat "$RUNNER_TEMP/dast-db-password")" \
+            API_HOST=127.0.0.1 API_PORT=3000 \
+            node apps/api/dist/server.js > "$RUNNER_TEMP/dast-api.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl --silent --show-error --fail --output /dev/null http://127.0.0.1:8081/ &&
+              curl --silent --show-error --fail --output /dev/null http://127.0.0.1:3000/health &&
+              curl --silent --show-error --fail --output /dev/null http://127.0.0.1:3000/ready; then
+              echo "web y API listos en loopback"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "web o API no arrancaron en 120 s"
+          exit 1
+
+      # ZAP image pinned by version and multi-arch index digest (2026-11-11) so the
+      # scanner cannot change between runs. `--network host` lets the container reach the
+      # loopback targets; the image runs as the unprivileged `zap` user, so the report
+      # directory is world-writable. No -c/-u/-i/-I: a rules file could hide alerts.
+      - name: ZAP baseline against the web artifact (loopback)
+        run: |
+          set -euo pipefail
+          install -d -m 0777 "$RUNNER_TEMP/zap"
+          status=0
+          docker run --rm --network host --volume "$RUNNER_TEMP/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:2.16.1@sha256:7840969c7c9fead565bf9734b12f49f6886db90b1d35b1f74d79710bbd081dab zap-baseline.py -t http://127.0.0.1:8081/ -m 1 -P 8090 -J dast-web.json -r dast-web.html > "$RUNNER_TEMP/dast-zap-web.log" 2>&1 || status=$?
+          case "$status" in
+            0|1|2) echo "ZAP web terminó con estado $status; el umbral lo decide check-dast" ;;
+            *) echo "ZAP web falló con estado $status"; exit 1 ;;
+          esac
+
+      # Same baseline against the two API entry points: the public content endpoint and
+      # the liveness probe.
+      - name: ZAP baseline against the API (loopback)
+        run: |
+          set -euo pipefail
+          install -d -m 0777 "$RUNNER_TEMP/zap"
+          status=0
+          docker run --rm --network host --volume "$RUNNER_TEMP/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:2.16.1@sha256:7840969c7c9fead565bf9734b12f49f6886db90b1d35b1f74d79710bbd081dab zap-baseline.py -t http://127.0.0.1:3000/api/v1/builds -m 1 -P 8090 -J dast-api-builds.json -r dast-api-builds.html > "$RUNNER_TEMP/dast-zap-api-builds.log" 2>&1 || status=$?
+          case "$status" in
+            0|1|2) echo "ZAP API builds terminó con estado $status; el umbral lo decide check-dast" ;;
+            *) echo "ZAP API builds falló con estado $status"; exit 1 ;;
+          esac
+          status=0
+          docker run --rm --network host --volume "$RUNNER_TEMP/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:2.16.1@sha256:7840969c7c9fead565bf9734b12f49f6886db90b1d35b1f74d79710bbd081dab zap-baseline.py -t http://127.0.0.1:3000/health -m 1 -P 8090 -J dast-api-health.json -r dast-api-health.html > "$RUNNER_TEMP/dast-zap-api-health.log" 2>&1 || status=$?
+          case "$status" in
+            0|1|2) echo "ZAP API health terminó con estado $status; el umbral lo decide check-dast" ;;
+            *) echo "ZAP API health falló con estado $status"; exit 1 ;;
+          esac
+
+      # Single decision point: any MEDIUM/HIGH/CRITICAL alert fails the job; exit 2 (fail
+      # closed) on an empty or malformed report. Output names rule, risk, redacted URL and
+      # count only: no headers, bodies, cookies or target values. The raw ZAP reports stay
+      # in $RUNNER_TEMP and are never uploaded as artifacts.
+      - name: Evaluate ZAP reports (MEDIUM blocks)
+        run: pnpm exec tsx scripts/check-dast.mts --report "$RUNNER_TEMP/zap/dast-web.json" --report "$RUNNER_TEMP/zap/dast-api-builds.json" --report "$RUNNER_TEMP/zap/dast-api-health.json"
