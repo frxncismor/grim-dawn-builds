@@ -45,7 +45,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 22.12.0
+          node-version: 22.23.5
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
@@ -213,3 +213,62 @@ jobs:
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: pnpm run check:performance
+
+  # T-066b: container configuration and image scan. Own job id (`container`) so the DAST
+  # job added later keeps its own name and scope. No deployment, no secrets, read-only
+  # token and the built image is never pushed.
+  container:
+    name: Container configuration and image scan
+    runs-on: ubuntu-24.04
+    # Build, archive export and Trivy scan of the API image fit well within this budget.
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # pnpm version comes from the "packageManager" field in package.json.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.23.5
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      # Static rules (T-066b): final image USER non-root, no .env*/secrets/ copied, no
+      # literal secrets in ARG/ENV and no db ports in the default Compose.
+      - name: Container configuration check
+        run: pnpm run check-container
+
+      # The default Compose must resolve with the example env file (no real secrets).
+      - name: Compose configuration check (container job)
+        run: docker compose --env-file infra/docker/.env.example -f infra/docker/compose.yaml config --quiet
+
+      - name: Build API image for scanning (no push)
+        run: docker build --file apps/api/Dockerfile --tag gd-api:ci-scan .
+
+      # Trivy reads an image archive: the Docker socket is never mounted in this job.
+      - name: Export image archive for Trivy
+        run: docker save --output "$RUNNER_TEMP/gd-api-ci-scan.tar" gd-api:ci-scan
+
+      # Trivy pinned by version and multi-arch index digest (Docker Hub, 2026-11-11) so a
+      # mutable tag cannot change the gate between runs.
+      # Default exit code 0 so the JSON is always written; the MEDIUM threshold is decided
+      # by check-container below (single source of truth for the gate). No --ignore-unfixed
+      # and no allowlist: findings are never silently ignored.
+      - name: Scan image with Trivy (JSON export, no push)
+        run: docker run --rm -v "$RUNNER_TEMP:/scan" aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb image --input /scan/gd-api-ci-scan.tar --format json --output /scan/trivy-image.json --scanners vuln --severity MEDIUM,HIGH,CRITICAL
+
+      # Blocks on any MEDIUM/HIGH/CRITICAL finding; exits 2 (fail closed) on an empty or
+      # malformed report instead of passing.
+      - name: Evaluate Trivy report (MEDIUM blocks)
+        run: pnpm exec tsx scripts/check-container.mts --report "$RUNNER_TEMP/trivy-image.json"

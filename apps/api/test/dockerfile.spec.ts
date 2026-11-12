@@ -34,11 +34,15 @@ const instructions = (() => {
 const runtimeStage = instructions.slice(instructions.findIndex((l) => /AS runtime$/.test(l)));
 
 describe('apps/api/Dockerfile (T-054)', () => {
-  it('uses exactly two stages on node:22.12.0-slim pinned by digest (no latest, no floating tag)', () => {
+  it('uses exactly two stages on the .nvmrc Node version pinned by digest (no latest, no floating tag)', () => {
+    const nvmrc = readFileSync(new URL('../../../.nvmrc', import.meta.url), 'utf8').trim();
+    const expected = new RegExp(
+      `^FROM node:${nvmrc.replaceAll('.', '\\.')}-slim@sha256:[0-9a-f]{64} AS (build|runtime)$`,
+    );
     const froms = instructions.filter((line) => /^FROM /.test(line));
     expect(froms).toHaveLength(2);
     for (const from of froms) {
-      expect(from).toMatch(/^FROM node:22\.12\.0-slim@sha256:[0-9a-f]{64} AS (build|runtime)$/);
+      expect(from).toMatch(expected);
     }
     expect(dockerfile).not.toMatch(/latest/i);
   });
@@ -47,6 +51,13 @@ describe('apps/api/Dockerfile (T-054)', () => {
     expect(dockerfile).toContain('pnpm@12.18.0');
     expect(dockerfile).toContain('--frozen-lockfile');
     expect(dockerfile).toMatch(/pnpm --filter @gd\/api deploy --prod /);
+  });
+
+  it('drops the package managers from the runtime stage (T-066b scan surface)', () => {
+    const joined = runtimeStage.join('\n');
+    expect(joined).toMatch(/rm -rf \/usr\/local\/lib\/node_modules\/npm/);
+    expect(joined).toMatch(/rm -f \/usr\/local\/bin\/npm/);
+    expect(joined).toMatch(/corepack/);
   });
 
   it('passes no secrets through ARG or ENV (ENV only sets non-secret runtime config)', () => {

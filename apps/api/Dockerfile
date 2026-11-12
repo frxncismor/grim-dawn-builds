@@ -6,7 +6,7 @@
 #   docker build -f apps/api/Dockerfile -t gd-api .
 #
 # Pins:
-#   - Base: node:22.12.0-slim (same patch as .nvmrc and the CI node-version), pinned by digest.
+#   - Base: node:22.23.5-slim (same patch as .nvmrc and the CI node-version), pinned by digest.
 #     Digest resolved from the registry manifest on 2026-11-09 (docker-content-digest header).
 #   - pnpm: 12.18.0 (same as "packageManager" in the root package.json).
 #
@@ -16,7 +16,7 @@
 # ---------------------------------------------------------------------------
 # Stage 1: install, build and produce the production tree of @gd/api.
 # ---------------------------------------------------------------------------
-FROM node:22.12.0-slim@sha256:35531c52ce27b6575d69755c73e65d4468dba93a25644eed56dc12879cae9213 AS build
+FROM node:22.23.5-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee AS build
 
 RUN npm install --global --ignore-scripts pnpm@12.18.0 \
  && npm cache clean --force
@@ -40,7 +40,15 @@ RUN pnpm --filter @gd/api build \
 # ---------------------------------------------------------------------------
 # Stage 2: minimal runtime. Only compiled JS, package.json and prod node_modules.
 # ---------------------------------------------------------------------------
-FROM node:22.12.0-slim@sha256:35531c52ce27b6575d69755c73e65d4468dba93a25644eed56dc12879cae9213 AS runtime
+FROM node:22.23.5-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee AS runtime
+
+# T-066b: the runtime only needs the `node` binary. Removing the package managers
+# shipped in the base image (npm, npx, corepack, yarn) drops npm's bundled
+# dependencies from the scanned surface; they are never used at runtime and
+# Trivy reported fixable advisories inside them. Docker builds use their own
+# pnpm stage, so nothing here needs a package manager.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+ && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg
 
 # Fixed, non-root identity (UID/GID 10001). No login shell, no home directory.
 RUN groupadd --system --gid 10001 api \
