@@ -1,0 +1,54 @@
+{
+  "slug": "principal",
+  "locale": "es",
+  "title": "Catalogo adversarial sintetico",
+  "game_version": "1.2.x",
+  "review_state": "publicado",
+  "author_slug": "autor-sintetico",
+  "masteries": [
+    {
+      "slug": "chaman",
+      "name_es": "Chaman",
+      "name_en": "Shaman",
+      "accent_token": "storm",
+      "fallback_icon": "chaman",
+      "asset_slug": null
+    }
+  ],
+  "combinations": [
+    {
+      "slug": "chaman",
+      "mastery_a_slug": "chaman",
+      "mastery_b_slug": null
+    }
+  ],
+  "entries": [
+    {
+      "entry_kind": "enlace_externo",
+      "combination_slug": "chaman",
+      "display_name": "Enlace externo",
+      "build_slug": null,
+      "tier": "sin_clasificar",
+      "content_status": "sin_verificar",
+      "rights_status": "link_only",
+      "review_state": "publicado",
+      "external_url": null,
+      "external_author": "Autor externo",
+      "source_slug": "guia-original",
+      "evaluated_on": null
+    }
+  ],
+  "sources": [
+    {
+      "slug": "guia-original",
+      "kind": "comunidad",
+      "title": "Fuente sintetica",
+      "url": null,
+      "author_name": "Autor sintetico",
+      "license_note": "Derechos pendientes",
+      "permission_ref": null,
+      "retrieved_on": "2026-11-08",
+      "notes": "Uso interno de pruebas."
+    }
+  ]
+}

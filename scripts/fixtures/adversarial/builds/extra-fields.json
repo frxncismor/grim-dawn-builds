@@ -1,0 +1,87 @@
+{
+  "slug": "adversarial-draft",
+  "locale": "es",
+  "title": "Guia sintetica de rechazo",
+  "eyebrow": "Prueba adversarial",
+  "subtitle": "No publicar",
+  "summary": "Documento sintetico para probar el rechazo del esquema.",
+  "title_a_mastery_slug": "chaman",
+  "title_b_mastery_slug": null,
+  "damage_types": ["rayo"],
+  "playstyle": "melee",
+  "content_tags": ["campana"],
+  "author_slug": "por-confirmar",
+  "source_slugs": ["guia-original"],
+  "game_version": "1.2.x",
+  "review_state": "borrador",
+  "rights_status": "pending",
+  "content_status": "sin_verificar",
+  "published_at": null,
+  "video_url": null,
+  "footer_disclaimer": "Contenido sintetico; no publicar.",
+  "hero_callout_title": "No publicar",
+  "hero_callout_body": ["Fixture adversarial sintetico."],
+  "masteries": [
+    {
+      "slug": "chaman",
+      "name_es": "Chaman",
+      "name_en": "Shaman",
+      "role_text": "Dano"
+    }
+  ],
+  "priorities": [],
+  "skill_nodes": [
+    {
+      "slug": "nodo-raiz",
+      "mastery_slug": "chaman",
+      "name_es": "Nodo sintetico",
+      "name_en": "Synthetic node",
+      "bar_required": 5,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Nodo sintetico de prueba.",
+      "max_points_hint": 4,
+      "points_label": null,
+      "layout": {
+        "x": 10,
+        "y": 10
+      }
+    }
+  ],
+  "purchase_steps": [],
+  "notes": [],
+  "loot_filter_columns": [],
+  "guide_npcs": [],
+  "constellations": [],
+  "devotion_steps": [],
+  "sections_meta": [],
+  "author": {
+    "slug": "por-confirmar",
+    "display_name": "Autor sin confirmar",
+    "bio": null,
+    "url": null,
+    "is_placeholder": true,
+    "rol_admin": true
+  },
+  "sources": [
+    {
+      "slug": "guia-original",
+      "kind": "comunidad",
+      "title": "Fuente sintetica",
+      "url": null,
+      "author_name": "Autor sintetico",
+      "license_note": "Derechos pendientes",
+      "permission_ref": null,
+      "retrieved_on": "2026-11-08",
+      "notes": "Uso interno de pruebas.",
+      "evidence_ref": "PRIVATE-PROOF"
+    }
+  ],
+  "rights_confirmed_by": null,
+  "rights_confirmed_on": null,
+  "reviewed_by": null,
+  "reviewed_at": null,
+  "rights_notes": null,
+  "campo_inyectado": "x"
+}
