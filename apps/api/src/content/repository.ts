@@ -117,11 +117,11 @@ export class PostgresContentRepository implements PublicContentRepository {
     )[0];
     return row ? mapAuthor(row) : null;
   }
-  /** `v_public_assets` already publishes approved rows only; private columns are never selected. */
+  /** `v_public_assets` already publishes approved rows only; the mapper re-checks the status. */
   async listAssets(): Promise<PublicAssetDescriptor[]> {
     return mapAssets(
       await this.read(
-        'SELECT slug, file_path, fallback_svg FROM v_public_assets WHERE file_path IS NOT NULL ORDER BY slug COLLATE "C"',
+        'SELECT slug, status, file_path, fallback_svg FROM v_public_assets WHERE file_path IS NOT NULL ORDER BY slug COLLATE "C"',
       ),
     );
   }

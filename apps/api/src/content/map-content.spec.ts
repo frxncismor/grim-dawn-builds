@@ -127,6 +127,25 @@ describe('public database mappers', () => {
       expect(() => mapAsset({ ...approved, file_path })).toThrow('invalid_content');
     expect(() => mapAsset({ ...approved, fallback_svg: '' })).toThrow('invalid_content');
   });
+  it('LOW-1: fails closed when the asset descriptor lacks an approved status', () => {
+    const descriptor = {
+      slug: 'rayo-sin-estado',
+      file_path: 'public/assets/official/rayo.svg',
+      fallback_svg: 'src/assets/icons/damage-rayo.svg',
+    };
+    expect(mapAsset(descriptor)).toBeNull();
+    for (const status of [undefined, null, '', 'pending', 'rejected', 'approved '])
+      expect(mapAsset({ ...descriptor, status })).toBeNull();
+    expect(mapAssets([descriptor, { ...descriptor, slug: 'rayo-ok', status: 'approved' }])).toEqual(
+      [
+        {
+          slug: 'rayo-ok',
+          file_path: 'public/assets/official/rayo.svg',
+          fallback_svg: 'src/assets/icons/damage-rayo.svg',
+        },
+      ],
+    );
+  });
   it('FR-16: returns only approved descriptors, deduplicated and sorted by slug', () => {
     const row = (slug: string, status: string) => ({
       slug,
