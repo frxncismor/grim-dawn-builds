@@ -45,6 +45,7 @@
             ],
             "styles": ["src/styles.css"],
             "server": "src/main.server.ts",
+            "outputPath": "../../dist/grim-dawn-builds",
             "outputMode": "static",
             "security": {
               "allowedHosts": []
@@ -78,7 +79,7 @@
             "tier-preview": {
               "browser": "src/app/features/tier-list/tier-preview.browser.ts",
               "server": "src/app/features/tier-list/tier-preview.server.ts",
-              "outputPath": "dist/tier-preview",
+              "outputPath": "../../dist/tier-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true
@@ -86,7 +87,7 @@
             "skill-tree-preview": {
               "browser": "src/app/shared/svg/skill-tree/preview.browser.ts",
               "server": "src/app/shared/svg/skill-tree/preview.server.ts",
-              "outputPath": "dist/skill-tree-preview",
+              "outputPath": "../../dist/skill-tree-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true
@@ -94,7 +95,7 @@
             "devotion-map-preview": {
               "browser": "src/app/shared/svg/devotion-map/preview.browser.ts",
               "server": "src/app/shared/svg/devotion-map/preview.server.ts",
-              "outputPath": "dist/devotion-map-preview",
+              "outputPath": "../../dist/devotion-map-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true
@@ -102,7 +103,7 @@
             "purchase-stepper-preview": {
               "browser": "src/app/features/build/purchase-stepper/preview.browser.ts",
               "server": "src/app/features/build/purchase-stepper/preview.server.ts",
-              "outputPath": "dist/purchase-stepper-preview",
+              "outputPath": "../../dist/purchase-stepper-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true
@@ -110,7 +111,7 @@
             "devotion-section-preview": {
               "browser": "src/app/features/build/devotion-section/preview.browser.ts",
               "server": "src/app/features/build/devotion-section/preview.server.ts",
-              "outputPath": "dist/devotion-section-preview",
+              "outputPath": "../../dist/devotion-section-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true
@@ -118,7 +119,7 @@
             "loot-filter-preview": {
               "browser": "src/app/features/build/loot-filter/preview.browser.ts",
               "server": "src/app/features/build/loot-filter/preview.server.ts",
-              "outputPath": "dist/loot-filter-preview",
+              "outputPath": "../../dist/loot-filter-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true,
@@ -133,7 +134,7 @@
             "video-facade-preview": {
               "browser": "src/app/features/build/video-facade/preview.browser.ts",
               "server": "src/app/features/build/video-facade/preview.server.ts",
-              "outputPath": "dist/video-facade-preview",
+              "outputPath": "../../dist/video-facade-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true,
@@ -148,7 +149,7 @@
             "build-meta-preview": {
               "browser": "src/app/features/build/attribution/preview.browser.ts",
               "server": "src/app/features/build/attribution/preview.server.ts",
-              "outputPath": "dist/build-meta-preview",
+              "outputPath": "../../dist/build-meta-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true,
@@ -163,7 +164,7 @@
             "build-page-preview": {
               "browser": "src/app/features/build/preview.browser.ts",
               "server": "src/app/features/build/preview.server.ts",
-              "outputPath": "dist/build-page-preview",
+              "outputPath": "../../dist/build-page-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true,
@@ -178,7 +179,7 @@
             "build-sections-preview": {
               "browser": "src/app/features/build/sections/preview.browser.ts",
               "server": "src/app/features/build/sections/preview.server.ts",
-              "outputPath": "dist/build-sections-preview",
+              "outputPath": "../../dist/build-sections-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true
@@ -186,7 +187,7 @@
             "icon-preview": {
               "browser": "src/app/shared/ui/icon/preview.browser.ts",
               "server": "src/app/shared/ui/icon/preview.server.ts",
-              "outputPath": "dist/icon-preview",
+              "outputPath": "../../dist/icon-preview",
               "optimization": true,
               "outputHashing": "all",
               "statsJson": true,

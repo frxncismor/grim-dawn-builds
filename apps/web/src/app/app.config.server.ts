@@ -8,6 +8,7 @@ import {
   provideAppInitializer,
 } from '@angular/core';
 import { provideServerRendering, withRoutes } from '@angular/ssr';
+import { resolve } from 'node:path';
 import { appConfig } from './app.config';
 import { serverRoutes } from './app.routes.server';
 import { CONTENT_REPOSITORY } from './core/content/repository';
@@ -25,10 +26,19 @@ const CONTENT_SOURCE = new InjectionToken<ReturnType<typeof createContentSource>
   'SERVER_CONTENT_SOURCE',
 );
 
+/**
+ * T-067: the web app lives in `apps/web`, but the fixture content directory stays
+ * at the repository root (`content/`). The Angular build and `ng serve` run with
+ * `apps/web` as their working directory, so the fixture root is two levels up.
+ * `GD_CONTENT_ROOT` allows an explicit override without changing the default.
+ */
+const CONTENT_ROOT =
+  process.env['GD_CONTENT_ROOT'] ?? resolve(process.cwd(), '..', '..', 'content');
+
 const serverConfig: ApplicationConfig = {
   providers: [
     provideServerRendering(withRoutes(serverRoutes)),
-    { provide: CONTENT_SOURCE, useFactory: () => createContentSource('content', process.env) },
+    { provide: CONTENT_SOURCE, useFactory: () => createContentSource(CONTENT_ROOT, process.env) },
     {
       provide: PUBLIC_SITE_LOADER,
       useFactory: () => {

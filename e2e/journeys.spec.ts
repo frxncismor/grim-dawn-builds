@@ -6,9 +6,9 @@ import { expect, test, type Page, type Response } from '@playwright/test';
  * Se mide lo que se publica, no `ng serve`. El artefacto público lo sirve
  * `playwright.config.ts` en `E2E_PORT` (4321 por defecto). Los casos de guía
  * usan además el artefacto local de borradores, que debe construirse aparte en
- * un directorio aislado:
+ * un directorio aislado; desde T-067 el CLI de Angular vive en `apps/web`:
  *
- *   $env:INCLUDE_DRAFTS='true'; npx ng build --output-path dist/e2e-drafts
+ *   $env:INCLUDE_DRAFTS='true'; pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts
  *
  * y se sirve en `E2E_DRAFTS_PORT` (4322) con `E2E_DRAFTS_ARTIFACT_DIR` opcional.
  * Sin ese artefacto los casos de guía fallan con el comando exacto: no se
@@ -30,7 +30,7 @@ const DRAFTS_BASE_URL = (process.env['E2E_DRAFTS_BASE_URL'] ?? 'http://127.0.0.1
   '',
 );
 const DRAFTS_BUILD_COMMAND =
-  "$env:INCLUDE_DRAFTS='true'; npx ng build --output-path dist/e2e-drafts";
+  "$env:INCLUDE_DRAFTS='true'; pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts";
 const GUIDE_PATH = '/builds/chaman-demoledor-golpe-primigenio';
 const GUIDE_TITLE = /Chamán \+ Demoledor/i;
 test.beforeEach(async ({ page }) => {

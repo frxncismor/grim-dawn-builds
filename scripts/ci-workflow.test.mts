@@ -48,7 +48,7 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm run catalog:check',
   // T-150: the en/es catalogs must match in PR verification too.
   'pnpm run check:locale-parity',
-  'pnpm exec ng build --output-path dist/e2e-drafts',
+  'pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
   'pnpm exec playwright install --with-deps chromium',
   'pnpm run e2e:journeys',
   'pnpm run e2e:a11y',
@@ -204,10 +204,11 @@ export function validateCiWorkflow(source: string): string[] {
       problems.push(`pnpm install must use --frozen-lockfile: ${run}`);
     }
     // T-126: the drafts artifact needs its own directory, never the public one.
-    if (/\bng build\b/.test(run) && !run.includes('--output-path dist/e2e-drafts')) {
+    // T-067: the Angular CLI runs in apps/web, so the path is relative to it.
+    if (/\bng build\b/.test(run) && !run.includes('--output-path ../../dist/e2e-drafts')) {
       problems.push(`ng build must target the isolated drafts directory: ${run}`);
     }
-    if (run.includes('--output-path dist/grim-dawn-builds')) {
+    if (run.includes('--output-path ../../dist/grim-dawn-builds')) {
       problems.push(`build must not overwrite the public artifact: ${run}`);
     }
   }
@@ -380,7 +381,9 @@ describe('PR verification workflow (T-064)', () => {
     );
     const realContent = indexOf('pnpm run content:validate -- --dir content');
     const catalog = indexOf('pnpm run catalog:check');
-    const draftsBuild = indexOf('pnpm exec ng build --output-path dist/e2e-drafts');
+    const draftsBuild = indexOf(
+      'pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
+    );
     const journeys = indexOf('pnpm run e2e:journeys');
     const a11y = indexOf('pnpm run e2e:a11y');
     const apiTests = indexOf('pnpm --filter @gd/api test');
@@ -570,7 +573,8 @@ describe('PR verification workflow (T-064)', () => {
     ],
     [
       'drafts build overwrites the public artifact',
-      () => mutate('--output-path dist/e2e-drafts', '--output-path dist/grim-dawn-builds'),
+      () =>
+        mutate('--output-path ../../dist/e2e-drafts', '--output-path ../../dist/grim-dawn-builds'),
     ],
     [
       'drafts build without INCLUDE_DRAFTS',

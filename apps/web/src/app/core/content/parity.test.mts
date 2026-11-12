@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 import { BuildSchema, type Build } from '@gd/domain';
 import { createFixtureRepository } from './fixture-source.server.ts';
 
-const root = resolve(import.meta.dirname, '../../../..');
+const root = resolve(import.meta.dirname, '../../../../../../');
 // Golden data comes from the original HTML, independently of the imported build.
 const golden = JSON.parse(await readFile(resolve(root, 'e2e/fixtures/original-guide.json'), 'utf8')) as {
   schemaVersion: number;

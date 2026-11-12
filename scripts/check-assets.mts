@@ -3,16 +3,21 @@ import { join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { checkAssetManifest } from '@gd/domain';
 
-const OFFICIAL_DIR = 'public/assets';
+const WEB_PUBLIC_DIR = 'apps/web/public';
+const OFFICIAL_SUBDIR = 'assets';
 const MANIFEST = 'content/assets/manifest.json';
 
 /** Lists every file under the official-art folder, as repo-relative POSIX paths. */
 function listOfficialFiles(root: string): string[] {
-  const dir = join(root, OFFICIAL_DIR);
+  const publicRoot = join(root, WEB_PUBLIC_DIR);
+  const dir = join(publicRoot, OFFICIAL_SUBDIR);
   if (!existsSync(dir)) return [];
   return readdirSync(dir, { recursive: true, withFileTypes: true })
     .filter((entry) => entry.isFile())
-    .map((entry) => relative(root, join(entry.parentPath, entry.name)).split('\\').join('/'));
+    .map(
+      (entry) =>
+        `public/${relative(publicRoot, join(entry.parentPath, entry.name)).split('\\').join('/')}`,
+    );
 }
 
 function main(root: string): number {

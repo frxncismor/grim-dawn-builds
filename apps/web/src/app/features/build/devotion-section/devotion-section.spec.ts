@@ -2,8 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import draftFixture from '../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
-import originalGuide from '../../../../../e2e/fixtures/original-guide.json';
+import draftFixture from '../../../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
+import originalGuide from '../../../../../../../e2e/fixtures/original-guide.json';
 import { DevotionMap } from '../../../shared/svg/devotion-map/devotion-map';
 import { DevotionSection, type DevotionSectionContent } from './devotion-section';
 

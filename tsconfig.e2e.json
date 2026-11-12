@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./apps/web/tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
     "moduleResolution": "bundler",

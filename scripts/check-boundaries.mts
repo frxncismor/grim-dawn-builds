@@ -54,8 +54,9 @@ interface ZoneDef {
 }
 
 /**
- * Zonas del repositorio. `src/` es la web hoy; cuando T-067 mueva la web, `apps/web`
- * ya está cubierto. `apps/api` se añade con T-053 sin cambiar la regla.
+ * Zonas del repositorio. La web vive en `apps/web` desde T-067; `src/` se
+ * conserva por compatibilidad con fixtures/pruebas históricas. `apps/api` se
+ * añade con T-053 sin cambiar la regla.
  */
 export const ZONES: readonly ZoneDef[] = [
   { zone: 'web', roots: ['src', 'apps/web', 'e2e'] },

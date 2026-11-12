@@ -6,7 +6,7 @@ import { convertToParamMap, type ActivatedRouteSnapshot } from '@angular/router'
 import { contractDoc } from '@gd/domain/testing';
 import type { Build } from '@gd/domain';
 import { afterEach, describe, expect, it } from 'vitest';
-import draftFixture from '../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
+import draftFixture from '../../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
 import type { BuildPageContent } from '../../features/build/build.page';
 import { BUILD_PAGE_STATE, CONTENT_SOURCE_STATE, resolveBuildPage } from './content.resolvers';
 import { FileContentRepository, type RawContentSource } from './file.repository';

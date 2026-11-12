@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import draftFixture from '../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
-import originalGuide from '../../../../../e2e/fixtures/original-guide.json';
+import draftFixture from '../../../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
+import originalGuide from '../../../../../../../e2e/fixtures/original-guide.json';
 import { progressKey, progressRevision } from './progress';
 import { PurchaseStepper, type PurchaseStepperContent } from './purchase-stepper';
 
