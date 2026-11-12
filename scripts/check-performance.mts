@@ -63,7 +63,7 @@ export interface LighthouseBudgets {
   };
 }
 
-export type MetricUnit = 'ms' | 'score' | 'ratio' | 'bytes';
+export type MetricUnit = 'ms' | 'score' | 'ratio' | 'bytes' | 'count';
 
 export interface MetricResult {
   id: string;
@@ -652,6 +652,456 @@ export function evaluateJsBudgets(results: readonly JsMeasurement[]): MetricResu
   });
 }
 
+/**
+ * T-128: puerta de los presupuestos del backend (plan §12.12).
+ *
+ * El informe lo escribe `apps/api/test/performance.int.spec.ts` tras medir la API
+ * real sobre PostgreSQL 17 aislado con el catálogo completo; esta puerta solo lo
+ * valida y decide. No ejecuta Lighthouse ni duplica su motor: son presupuestos
+ * distintos (latencia p95, consultas SQL por petición, arranque en frío y tamaño
+ * del proceso), y los umbrales se contrastan contra `BACKEND_BUDGETS` para que
+ * relajar el informe no pueda aprobar la puerta.
+ *
+ * La memoria es un objetivo (plan §12.12: «imagen de runtime objetivo ≤ 200 MB»):
+ * se publica frente al objetivo y no bloquea por sí sola. Los presupuestos
+ * obligatorios son p95, consultas y arranque en frío.
+ */
+export const BACKEND_REPORT_KIND = 'backend-performance';
+export const BACKEND_REPORT_VERSION = 1;
+
+export interface BackendBudgets {
+  healthP95Ms: number;
+  readyP95Ms: number;
+  readsP95Ms: number;
+  maxQueriesPerRequest: number;
+  coldStartMs: number;
+  runtimeTargetBytes: number;
+  minSamples: number;
+}
+
+/** Copia tipada de plan §12.12; el informe declara la suya y la deriva falla. */
+export const BACKEND_BUDGETS: BackendBudgets = {
+  healthP95Ms: 50,
+  readyP95Ms: 200,
+  readsP95Ms: 150,
+  maxQueriesPerRequest: 6,
+  coldStartMs: 5000,
+  runtimeTargetBytes: 200 * 1024 * 1024,
+  minSamples: 30,
+};
+
+export type BackendRouteGroup = 'health' | 'ready' | 'read';
+
+export interface BackendRouteResult {
+  group: BackendRouteGroup;
+  route: string;
+  samples: number;
+  p95Ms: number;
+  maxMs: number;
+  sampleMs: readonly number[];
+  statuses: readonly number[];
+  maxQueriesPerRequest: number;
+}
+
+export interface BackendMemory {
+  rssBytes: number;
+  heapUsedBytes: number;
+  heapTotalBytes: number;
+}
+
+export interface BackendEnvironment {
+  node: string;
+  platform: string;
+  postgres: string;
+  image: string | null;
+  catalog: Readonly<Record<string, number>>;
+  warmupRequests: number;
+}
+
+export interface BackendReport {
+  kind: string;
+  version: number;
+  measuredAt: string;
+  environment: BackendEnvironment;
+  budgets: BackendBudgets;
+  results: {
+    coldStartMs: number;
+    memory: BackendMemory;
+    routes: readonly BackendRouteResult[];
+  };
+}
+
+export interface BackendGate {
+  readonly checks: MetricResult[];
+  readonly problems: readonly string[];
+  readonly budgetDrift: readonly BudgetDrift[];
+  readonly memory: BackendMemory;
+  readonly environment: BackendEnvironment;
+  readonly routes: readonly BackendRouteResult[];
+  readonly runtimeWithinTarget: boolean;
+}
+
+export function backendReportPath(repoRoot = REPO_ROOT): string {
+  return join(repoRoot, 'dist', 'performance', 'backend.json');
+}
+
+function backendRecord(value: unknown, field: string): Record<string, unknown> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value))
+    throw new Error(`El informe backend no declara ${field} como objeto.`);
+  return value as Record<string, unknown>;
+}
+
+function backendNumber(value: unknown, field: string): number {
+  if (typeof value !== 'number' || !Number.isFinite(value))
+    throw new Error(`El informe backend no declara ${field} como número finito.`);
+  return value;
+}
+
+function backendString(value: unknown, field: string): string {
+  if (typeof value !== 'string' || !value.trim())
+    throw new Error(`El informe backend no declara ${field} como texto.`);
+  return value;
+}
+
+function backendNumbers(value: unknown, field: string): number[] {
+  if (!Array.isArray(value)) throw new Error(`El informe backend no declara ${field} como lista.`);
+  return value.map((entry, index) => backendNumber(entry, `${field}[${index}]`));
+}
+
+function backendGroup(value: unknown, route: string): BackendRouteGroup {
+  if (value !== 'health' && value !== 'ready' && value !== 'read')
+    throw new Error(`El informe backend declara un grupo no medible en ${route}.`);
+  return value;
+}
+
+function parseBudgets(value: unknown): BackendBudgets {
+  const raw = backendRecord(value, 'budgets');
+  return {
+    healthP95Ms: backendNumber(raw['healthP95Ms'], 'budgets.healthP95Ms'),
+    readyP95Ms: backendNumber(raw['readyP95Ms'], 'budgets.readyP95Ms'),
+    readsP95Ms: backendNumber(raw['readsP95Ms'], 'budgets.readsP95Ms'),
+    maxQueriesPerRequest: backendNumber(
+      raw['maxQueriesPerRequest'],
+      'budgets.maxQueriesPerRequest',
+    ),
+    coldStartMs: backendNumber(raw['coldStartMs'], 'budgets.coldStartMs'),
+    runtimeTargetBytes: backendNumber(raw['runtimeTargetBytes'], 'budgets.runtimeTargetBytes'),
+    minSamples: backendNumber(raw['minSamples'], 'budgets.minSamples'),
+  };
+}
+
+function parseEnvironment(value: unknown): BackendEnvironment {
+  const raw = backendRecord(value, 'environment');
+  const catalog = backendRecord(raw['catalog'], 'environment.catalog');
+  const counts: Record<string, number> = {};
+  for (const [name, count] of Object.entries(catalog))
+    counts[name] = backendNumber(count, `environment.catalog.${name}`);
+  const image = raw['image'];
+  return {
+    node: backendString(raw['node'], 'environment.node'),
+    platform: backendString(raw['platform'], 'environment.platform'),
+    postgres: backendString(raw['postgres'], 'environment.postgres'),
+    image: image === null || image === undefined ? null : backendString(image, 'environment.image'),
+    catalog: counts,
+    warmupRequests: backendNumber(raw['warmupRequests'], 'environment.warmupRequests'),
+  };
+}
+
+function parseRoute(value: unknown, index: number): BackendRouteResult {
+  const raw = backendRecord(value, `results.routes[${index}]`);
+  const route = backendString(raw['route'], `results.routes[${index}].route`);
+  if (!route.startsWith('/'))
+    throw new Error(`El informe backend declara la ruta ${route} sin barra inicial.`);
+  const samples = backendNumber(raw['samples'], `results.routes[${index}].samples`);
+  if (!Number.isInteger(samples) || samples < 1)
+    throw new Error(`El informe backend declara muestras no enteras en ${route}.`);
+  const sampleMs = backendNumbers(raw['sampleMs'], `results.routes[${index}].sampleMs`);
+  const statuses = backendNumbers(raw['statuses'], `results.routes[${index}].statuses`);
+  if (sampleMs.length !== samples || statuses.length !== samples)
+    throw new Error(
+      `El informe backend de ${route} no publica una muestra por cada petición (${samples}).`,
+    );
+  const maxQueriesPerRequest = backendNumber(
+    raw['maxQueriesPerRequest'],
+    `results.routes[${index}].maxQueriesPerRequest`,
+  );
+  if (!Number.isInteger(maxQueriesPerRequest) || maxQueriesPerRequest < 0)
+    throw new Error(`El informe backend declara consultas no enteras en ${route}.`);
+  return {
+    group: backendGroup(raw['group'], route),
+    route,
+    samples,
+    p95Ms: backendNumber(raw['p95Ms'], `results.routes[${index}].p95Ms`),
+    maxMs: backendNumber(raw['maxMs'], `results.routes[${index}].maxMs`),
+    sampleMs,
+    statuses,
+    maxQueriesPerRequest,
+  };
+}
+
+/** Valida el informe completo; cualquier campo ausente o no numérico falla cerrado. */
+export function parseBackendReport(value: unknown): BackendReport {
+  const raw = backendRecord(value, 'el informe');
+  if (raw['kind'] !== BACKEND_REPORT_KIND)
+    throw new Error(
+      `El informe backend no declara kind=${BACKEND_REPORT_KIND} (recibido: ${String(raw['kind'])}).`,
+    );
+  if (raw['version'] !== BACKEND_REPORT_VERSION)
+    throw new Error(
+      `El informe backend declara una versión no soportada (recibido: ${String(raw['version'])}).`,
+    );
+  const results = backendRecord(raw['results'], 'results');
+  const routes = results['routes'];
+  if (!Array.isArray(routes) || !routes.length)
+    throw new Error('El informe backend no declara results.routes como lista con mediciones.');
+  return {
+    kind: BACKEND_REPORT_KIND,
+    version: BACKEND_REPORT_VERSION,
+    measuredAt: backendString(raw['measuredAt'], 'measuredAt'),
+    environment: parseEnvironment(raw['environment']),
+    budgets: parseBudgets(raw['budgets']),
+    results: {
+      coldStartMs: backendNumber(results['coldStartMs'], 'results.coldStartMs'),
+      memory: (() => {
+        const memory = backendRecord(results['memory'], 'results.memory');
+        return {
+          rssBytes: backendNumber(memory['rssBytes'], 'results.memory.rssBytes'),
+          heapUsedBytes: backendNumber(memory['heapUsedBytes'], 'results.memory.heapUsedBytes'),
+          heapTotalBytes: backendNumber(memory['heapTotalBytes'], 'results.memory.heapTotalBytes'),
+        };
+      })(),
+      routes: routes.map((route, index) => parseRoute(route, index)),
+    },
+  };
+}
+
+/** Deriva entre el informe y plan §12.12; vacío significa acuerdo. */
+export function backendBudgetDrift(budgets: BackendBudgets): BudgetDrift[] {
+  const pairs = [
+    {
+      metric: '/health p95 (ms)',
+      expected: BACKEND_BUDGETS.healthP95Ms,
+      actual: budgets.healthP95Ms,
+    },
+    {
+      metric: '/ready p95 (ms)',
+      expected: BACKEND_BUDGETS.readyP95Ms,
+      actual: budgets.readyP95Ms,
+    },
+    {
+      metric: 'lecturas p95 (ms)',
+      expected: BACKEND_BUDGETS.readsP95Ms,
+      actual: budgets.readsP95Ms,
+    },
+    {
+      metric: 'consultas por petición',
+      expected: BACKEND_BUDGETS.maxQueriesPerRequest,
+      actual: budgets.maxQueriesPerRequest,
+    },
+    {
+      metric: 'arranque en frío (ms)',
+      expected: BACKEND_BUDGETS.coldStartMs,
+      actual: budgets.coldStartMs,
+    },
+    {
+      metric: 'objetivo de memoria (bytes)',
+      expected: BACKEND_BUDGETS.runtimeTargetBytes,
+      actual: budgets.runtimeTargetBytes,
+    },
+    {
+      metric: 'muestras mínimas por ruta',
+      expected: BACKEND_BUDGETS.minSamples,
+      actual: budgets.minSamples,
+    },
+  ];
+  return pairs.filter((pair) => pair.expected !== pair.actual);
+}
+
+/**
+ * Decide los presupuestos obligatorios. Un informe sin /health, sin /ready, sin
+ * lecturas, con muestras insuficientes o con respuestas distintas de 200 no
+ * aprueba: la media de un error no es una latencia.
+ */
+export function evaluateBackendReport(report: BackendReport): BackendGate {
+  const problems: string[] = [];
+  const budgetDrift = backendBudgetDrift(report.budgets);
+  for (const drift of budgetDrift)
+    problems.push(
+      `deriva de presupuesto backend en ${drift.metric}: informe=${drift.actual}, plan §12.12=${drift.expected}`,
+    );
+
+  const checks: MetricResult[] = [
+    metric(
+      'backend:cold-start',
+      'Arranque en frío',
+      report.results.coldStartMs,
+      BACKEND_BUDGETS.coldStartMs,
+      'max',
+      'ms',
+    ),
+  ];
+  const groupCounts = new Map<BackendRouteGroup, number>();
+  for (const route of report.results.routes) {
+    groupCounts.set(route.group, (groupCounts.get(route.group) ?? 0) + 1);
+    if (route.samples < BACKEND_BUDGETS.minSamples)
+      problems.push(
+        `${route.route}: ${route.samples} muestras; el mínimo de ${BACKEND_BUDGETS.minSamples} muestras no permite un p95 fiable`,
+      );
+    const failedStatus = route.statuses.find((status) => status !== 200);
+    if (failedStatus !== undefined)
+      problems.push(
+        `${route.route} respondió ${failedStatus} en alguna muestra; solo 200 mide la ruta real`,
+      );
+    const limit =
+      route.group === 'health'
+        ? BACKEND_BUDGETS.healthP95Ms
+        : route.group === 'ready'
+          ? BACKEND_BUDGETS.readyP95Ms
+          : BACKEND_BUDGETS.readsP95Ms;
+    const id =
+      route.group === 'health'
+        ? 'backend:health'
+        : route.group === 'ready'
+          ? 'backend:ready'
+          : `backend:read:${route.route}`;
+    checks.push(metric(id, `${route.route} p95`, route.p95Ms, limit, 'max', 'ms'));
+    checks.push(
+      metric(
+        `backend:queries:${route.route}`,
+        `${route.route} consultas por petición`,
+        route.maxQueriesPerRequest,
+        BACKEND_BUDGETS.maxQueriesPerRequest,
+        'max',
+        'count',
+      ),
+    );
+    if (route.group !== 'health' && route.maxQueriesPerRequest < 1)
+      problems.push(`${route.route}: 0 consultas medidas; la lectura no llegó a la base de datos`);
+  }
+  if ((groupCounts.get('health') ?? 0) !== 1)
+    problems.push('el informe backend debe declarar exactamente una medición de /health');
+  if ((groupCounts.get('ready') ?? 0) !== 1)
+    problems.push('el informe backend debe declarar exactamente una medición de /ready');
+  if ((groupCounts.get('read') ?? 0) < 1)
+    problems.push('el informe backend no declara ninguna lectura de /api/v1');
+
+  if (budgetDrift.length)
+    for (const check of checks) {
+      check.measured = false;
+      check.pass = false;
+    }
+
+  return {
+    checks,
+    problems,
+    budgetDrift,
+    memory: report.results.memory,
+    environment: report.environment,
+    routes: report.results.routes,
+    runtimeWithinTarget: report.results.memory.rssBytes <= BACKEND_BUDGETS.runtimeTargetBytes,
+  };
+}
+
+function megabytes(bytes: number): string {
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/** `--backend [--report <archivo>]`: valida el informe y decide con exit code. */
+async function backendMain(argv: readonly string[]): Promise<number> {
+  let reportPath = backendReportPath();
+  const seen = new Set<string>();
+  for (let index = 0; index < argv.length; index += 2) {
+    const flag = argv[index];
+    const value = argv[index + 1];
+    if (flag !== '--report' || value === undefined || !value.trim() || seen.has(flag))
+      throw new Error('argumentos inválidos para la sección backend');
+    seen.add(flag);
+    reportPath = resolve(value);
+  }
+  if (!existsSync(reportPath)) {
+    console.error(`check:performance (backend) FALLÓ: falta el informe ${reportPath}.`);
+    console.error(
+      'Genera la medición con: RUN_DB_TESTS=1 pnpm --filter @gd/api test (PostgreSQL 17 aislado).',
+    );
+    return 1;
+  }
+  let report: BackendReport;
+  try {
+    report = parseBackendReport(JSON.parse(await readFile(reportPath, 'utf8')) as unknown);
+  } catch (error) {
+    console.error(`check:performance (backend) FALLÓ: ${describeError(error)}`);
+    return 1;
+  }
+  const gate = evaluateBackendReport(report);
+
+  console.log(
+    `\nPresupuestos backend (plan §12.12; muestras por ruta ≥ ${BACKEND_BUDGETS.minSamples}, calentadas antes)`,
+  );
+  printTable(
+    ['Ruta', 'Grupo', 'Muestras', 'p95', 'Máximo', 'Consultas/petición', 'Estado'],
+    gate.routes.map((route) => {
+      const check = gate.checks.find(
+        (entry) =>
+          entry.id ===
+          (route.group === 'health'
+            ? 'backend:health'
+            : route.group === 'ready'
+              ? 'backend:ready'
+              : `backend:read:${route.route}`),
+      );
+      const queries = gate.checks.find((entry) => entry.id === `backend:queries:${route.route}`);
+      const pass = (check?.pass ?? false) && (queries?.pass ?? false);
+      return [
+        route.route,
+        route.group,
+        String(route.samples),
+        check ? formatValue(check.value, check.unit) : 'no medible',
+        `${Math.round(route.maxMs * 10) / 10} ms`,
+        `máx ${route.maxQueriesPerRequest}`,
+        pass ? 'OK' : 'FALLA',
+      ];
+    }),
+  );
+  const coldStart = gate.checks.find((entry) => entry.id === 'backend:cold-start');
+  console.log(
+    `Arranque en frío: ${formatValue(coldStart?.value ?? null, 'ms')} (límite ≤ ${BACKEND_BUDGETS.coldStartMs} ms)`,
+  );
+
+  console.log('\nEntorno de la medición');
+  console.log(`  Node: ${gate.environment.node} (${gate.environment.platform})`);
+  console.log(`  PostgreSQL: ${gate.environment.postgres}`);
+  console.log(`  Imagen fijada: ${gate.environment.image ?? 'no declarada en el informe'}`);
+  console.log(
+    `  Catálogo sembrado: ${Object.entries(gate.environment.catalog)
+      .map(([name, count]) => `${name}=${count}`)
+      .join(', ')}`,
+  );
+  console.log(`  Peticiones de calentamiento por ruta: ${gate.environment.warmupRequests}`);
+  console.log(
+    `  Memoria en runtime (process.memoryUsage del proceso servidor): RSS ${megabytes(gate.memory.rssBytes)}, heap ${megabytes(gate.memory.heapUsedBytes)} usado de ${megabytes(gate.memory.heapTotalBytes)} · objetivo ≤ ${megabytes(BACKEND_BUDGETS.runtimeTargetBytes)}${gate.runtimeWithinTarget ? ' (dentro del objetivo)' : ' (excede el objetivo; registrado sin relajarlo)'}`,
+  );
+  console.log(`  Informe: ${reportPath}`);
+
+  const failures = [
+    ...gate.checks
+      .filter((check) => !check.pass)
+      .map(
+        (check) =>
+          `${check.label}: ${formatValue(check.value, check.unit)} (límite ${limitLabel(check.limit, check.direction, check.unit)})`,
+      ),
+    ...gate.problems,
+  ];
+  if (failures.length) {
+    console.error('\ncheck:performance (backend) FALLÓ:');
+    for (const failure of failures) console.error(`  - ${failure}`);
+    return 1;
+  }
+  console.log(
+    `\ncheck:performance (backend) OK (${gate.checks.length} comprobaciones; informe ${reportPath})`,
+  );
+  return 0;
+}
+
 /** Rutas de los navegadores que Lighthouse puede usar en esta máquina. */
 export function chromeCandidates(env: NodeJS.ProcessEnv = process.env): string[] {
   const candidates: string[] = [];
@@ -690,12 +1140,14 @@ function formatValue(value: number | null, unit: MetricUnit): string {
   if (value === null) return 'no medible';
   if (unit === 'score' || unit === 'ratio') return value.toFixed(3);
   if (unit === 'ms') return `${Math.round(value * 10) / 10} ms`;
+  if (unit === 'count') return String(value);
   return `${value} B`;
 }
 
 function compactValue(value: number | null, unit: MetricUnit): string {
   if (value === null) return 'no medible';
   if (unit === 'score' || unit === 'ratio') return value.toFixed(3);
+  if (unit === 'count') return String(value);
   return `${Math.round(value * 10) / 10}`;
 }
 
@@ -703,6 +1155,7 @@ function limitLabel(limit: number, direction: 'max' | 'min', unit: MetricUnit): 
   const symbol = direction === 'max' ? '≤' : '≥';
   if (unit === 'score' || unit === 'ratio') return `${symbol} ${limit}`;
   if (unit === 'ms') return `${symbol} ${limit} ms`;
+  if (unit === 'count') return `${symbol} ${limit}`;
   return `${symbol} ${limit} B`;
 }
 
@@ -935,6 +1388,17 @@ function parseArgs(argv: string[]): CliOptions {
 }
 
 async function main(argv: string[]): Promise<number> {
+  if (argv[0] === '--backend') {
+    try {
+      return await backendMain(argv.slice(1));
+    } catch (error) {
+      console.error(`check:performance (backend) FALLÓ: ${describeError(error)}.`);
+      console.error(
+        'Uso: tsx scripts/check-performance.mts --backend [--report <ruta del informe JSON>]',
+      );
+      return 1;
+    }
+  }
   let options: CliOptions;
   try {
     options = parseArgs(argv);

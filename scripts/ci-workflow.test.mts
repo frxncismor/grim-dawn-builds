@@ -53,6 +53,8 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm run e2e:journeys',
   'pnpm run e2e:a11y',
   'pnpm run check:performance',
+  // T-128: backend budgets consume the report produced by the API integration tests.
+  'pnpm exec tsx scripts/check-performance.mts --backend',
   // T-066b: static container rules and the Trivy image-scan gate.
   'pnpm run check-container',
   'docker build --file apps/api/Dockerfile --tag gd-api:ci-scan .',
@@ -381,6 +383,8 @@ describe('PR verification workflow (T-064)', () => {
     const draftsBuild = indexOf('pnpm exec ng build --output-path dist/e2e-drafts');
     const journeys = indexOf('pnpm run e2e:journeys');
     const a11y = indexOf('pnpm run e2e:a11y');
+    const apiTests = indexOf('pnpm --filter @gd/api test');
+    const backendPerformance = indexOf('pnpm exec tsx scripts/check-performance.mts --backend');
     const performance = indexOf('pnpm run check:performance');
 
     assert.ok(fixtureContent < realContent, 'real content validation goes after the fixture one');
@@ -390,6 +394,10 @@ describe('PR verification workflow (T-064)', () => {
     assert.ok(draftsBuild < a11y, 'axe runs on the built artifact');
     assert.ok(journeys < performance, 'performance measures the built artifact and runs last');
     assert.ok(a11y < performance, 'performance measures the built artifact and runs last');
+    // T-128: the backend gate consumes the report written by the API tests and
+    // never replaces the frontend Lighthouse gate.
+    assert.ok(apiTests < backendPerformance, 'the backend gate reads the API test report');
+    assert.ok(backendPerformance < performance, 'the frontend performance gate stays last');
 
     // T-066b adds a second job after `verify`; performance is still the last gate of the
     // verify job and must not move before the artifact it measures.
@@ -528,6 +536,15 @@ describe('PR verification workflow (T-064)', () => {
       () =>
         mutate(
           /\n {6}- name: Performance budgets[^\n]*\n {8}env:\n {10}CHROME_PATH: \/usr\/bin\/google-chrome\n {8}run: pnpm run check:performance\n/,
+          '\n',
+        ),
+    ],
+    // T-128: the backend budgets must keep failing the PR on a real breach.
+    [
+      'backend performance gate removed',
+      () =>
+        mutate(
+          /\n {6}- name: Backend performance budgets[^\n]*\n {8}run: pnpm exec tsx scripts\/check-performance\.mts --backend\n/,
           '\n',
         ),
     ],
