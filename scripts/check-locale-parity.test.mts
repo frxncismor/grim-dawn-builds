@@ -258,8 +258,11 @@ test('CLI passes on the real catalogs', () => {
     timeout: 10_000,
   });
   assert.match(output, /check:locale-parity OK/);
-  assert.match(output, /messages\.en\.xlf \(290 unidades\)/);
-  assert.match(output, /messages\.es\.xlf \(290 unidades\)/);
+  // Both catalogs must report the same unit count; the exact number grows with
+  // the product strings, so the intent is parity, never a frozen total.
+  const english = /messages\.en\.xlf \((\d+) unidades\)/.exec(output);
+  assert.ok(english, 'the CLI must report the English catalog unit count');
+  assert.match(output, new RegExp(`messages\\.es\\.xlf \\(${english[1]} unidades\\)`));
 });
 
 test('CLI exits 1 when --es points to a broken fixture', async () => {
