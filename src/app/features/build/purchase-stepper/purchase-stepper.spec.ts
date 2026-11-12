@@ -2,12 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import draftFixture from '../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
-import originalGuide from '../../../../../e2e/fixtures/original-guide.json';
 import { progressKey, progressRevision } from './progress';
 import { PurchaseStepper, type PurchaseStepperContent } from './purchase-stepper';
 
 const content = draftFixture as unknown as PurchaseStepperContent;
-const original = originalGuide;
 const key = progressKey(content.slug);
 
 function installStorage(storageGetter: () => Storage): () => void {
@@ -40,22 +38,22 @@ describe('gd-purchase-stepper', () => {
     return fixture;
   };
 
-  it('renders all six editorial steps and the ordered source introduction in SSR-readable text', async () => {
+  it('renders all six steps and the content introduction in SSR-readable text', async () => {
     const fixture = await render();
     const root = fixture.nativeElement as HTMLElement;
     const rows = Array.from(root.querySelectorAll('[data-step]'));
     expect(root.querySelector('#orden h2')?.textContent?.trim()).toBe('Real purchase order');
     expect(root.textContent).toContain(
-      original.introductions.find((item) => item.section === 'Orden real de compra')?.text,
+      content.notes.find((note) => note.label === 'Orden real de compra')?.detail,
     );
     expect(rows.map((row) => row.querySelector('[data-threshold]')?.textContent?.trim())).toEqual(
-      original.purchase_steps.map((step) => step.label),
+      content.purchase_steps.map((step) => step.threshold_label),
     );
     expect(rows.map((row) => row.querySelector('[data-title]')?.textContent?.trim())).toEqual(
-      original.purchase_steps.map((step) => step.title),
+      content.purchase_steps.map((step) => step.title),
     );
     expect(rows.map((row) => row.querySelector('[data-body]')?.textContent?.trim())).toEqual(
-      original.purchase_steps.map((step) => step.body),
+      content.purchase_steps.map((step) => step.body),
     );
     expect(rows[0].querySelectorAll('[data-highlight]')).toHaveLength(2);
     expect(root.textContent).not.toContain('Introducción 1');

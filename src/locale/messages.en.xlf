@@ -620,7 +620,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="purchaseStepper.selectLabel" datatype="html">
-        <source>View skills for step <x id="position" equiv-text="step.position"/>, <x id="title" equiv-text="step.title"/>, <x id="threshold" equiv-text="step.threshold_label"/></source>
+        <source>View step skills: step <x id="position" equiv-text="step.position"/>, <x id="title" equiv-text="step.title"/>, <x id="threshold" equiv-text="step.threshold_label"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/build/purchase-stepper/purchase-stepper.ts</context>
           <context context-type="linenumber">125</context>

@@ -95,13 +95,13 @@ test('generation is independent of input order and does not mutate its inputs', 
   );
 });
 
-test('the migrated guide keeps pending rights, draft state and its own source', () => {
+test('the published own guide keeps its provenance and source in the generated catalog', () => {
   const catalog = generateCatalog(input());
   const entry = catalog.entries.find((entry) => entry.build_slug === build.slug)!;
   assert.equal(catalog.entries.length, 46);
   assert.equal(entry.entry_kind, 'build_propia');
-  assert.equal(entry.review_state, 'borrador');
-  assert.equal(entry.rights_status, 'pending');
+  assert.equal(entry.review_state, 'publicado');
+  assert.equal(entry.rights_status, 'own_original');
   assert.equal(entry.content_status, 'sin_verificar');
   assert.equal(entry.tier, 'sin_clasificar');
   assert.equal(entry.source_slug, build.sources[0].slug);

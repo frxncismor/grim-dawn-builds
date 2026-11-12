@@ -6,7 +6,7 @@ test('local source defaults to fixture and reports only public source metadata',
   const selected = createContentSource('content', { PRIVATE_SENTINEL: 'do-not-transfer' });
   await selected.initialize();
   assert.deepEqual(selected.metadata, { source: 'fixture', includeDrafts: false });
-  assert.deepEqual(await selected.repository.listBuilds(), []);
+  assert.equal((await selected.repository.listBuilds()).length, 1);
   const local = createContentSource('content', { INCLUDE_DRAFTS: 'true' });
   assert.equal((await local.repository.listBuilds()).length, 1);
 });

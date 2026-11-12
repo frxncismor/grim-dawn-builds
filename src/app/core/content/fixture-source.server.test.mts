@@ -14,38 +14,36 @@ test('server loader reads real fixture files without publishing their draft cont
   assert.deepEqual(await createFixtureRepository(root, {}).listBuilds(), []);
 });
 
-test('real catalog has 45 public slots, with the pending guide appearing exclusively in local mode', async () => {
+test('real catalog has 46 public slots, including the published own guide', async () => {
   const root = join(import.meta.dirname, '../../../../content');
   const publicRepo = createFixtureRepository(root, {});
   const catalog = await publicRepo.getTierList('principal');
   assert.equal(PublicTierListSchema.safeParse(catalog).success, true);
   assert.equal(catalog?.masteries.length, 10);
   assert.equal(catalog?.combinations.length, 45);
-  assert.equal(catalog?.entries.length, 45);
+  assert.equal(catalog?.entries.length, 46);
+  const placeholders = catalog?.entries.filter((entry) => entry.entry_kind === 'placeholder');
+  assert.equal(placeholders?.length, 45);
   assert.ok(
-    catalog?.entries.every(
-      (entry) =>
-        entry.entry_kind === 'placeholder' &&
-        entry.build_slug === null &&
-        entry.tier === 'sin_clasificar',
-    ),
+    placeholders?.every((entry) => entry.build_slug === null && entry.tier === 'sin_clasificar'),
   );
   assert.deepEqual(
     catalog?.sources.map((source) => source.slug),
-    ['catalogo-maestrias'],
+    ['catalogo-maestrias', 'guia-original'],
   );
   assert.doesNotMatch(
     JSON.stringify(catalog),
-    /permission_ref|rights_confirmed_by|skill_nodes|guia-original|chaman-demoledor-golpe-primigenio/,
+    /permission_ref|rights_confirmed_by|rights_notes|reviewed_by|skill_nodes/,
   );
   assert.equal((await publicRepo.getAuthor('grim-dawn-builds'))?.display_name, 'Grim Dawn Builds');
   assert.equal(await publicRepo.getAuthor('por-confirmar'), null);
   const local = createFixtureRepository(root, { INCLUDE_DRAFTS: 'true' });
   const localCatalog = await local.getTierList('principal');
   assert.equal(localCatalog?.entries.length, 46);
-  const pending = localCatalog?.entries.find((entry) => entry.entry_kind === 'build_propia');
-  assert.equal(pending?.review_state, 'borrador');
-  assert.equal(pending?.rights_status, 'pending');
+  const guide = localCatalog?.entries.find((entry) => entry.entry_kind === 'build_propia');
+  assert.equal(guide?.review_state, 'publicado');
+  assert.equal(guide?.rights_status, 'own_original');
+  assert.equal(guide?.build_slug, 'chaman-demoledor-golpe-primigenio');
 });
 
 test('server configuration refuses release, unknown sources and accidental draft flag values', () => {

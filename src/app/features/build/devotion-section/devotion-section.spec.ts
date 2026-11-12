@@ -3,12 +3,10 @@ import { PLATFORM_ID } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import draftFixture from '../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
-import originalGuide from '../../../../../e2e/fixtures/original-guide.json';
 import { DevotionMap } from '../../../shared/svg/devotion-map/devotion-map';
 import { DevotionSection, type DevotionSectionContent } from './devotion-section';
 
 const content = draftFixture as unknown as DevotionSectionContent;
-const original = originalGuide;
 
 describe('gd-devotion-section', () => {
   beforeEach(() => TestBed.configureTestingModule({ imports: [DevotionSection] }));
@@ -42,11 +40,12 @@ describe('gd-devotion-section', () => {
     expect(rows.map((row) => row.getAttribute('data-verification'))).toEqual(
       content.devotion_steps.map((step) => step.verification),
     );
-    for (const [index, step] of content.devotion_steps.entries()) {
+    for (const step of content.devotion_steps) {
       const matchingRows = rows.filter((row) => row.textContent?.includes(step.body));
       expect(matchingRows).toHaveLength(1);
-      expect(matchingRows[0].textContent).toContain(original.devotion_steps[index].body);
-      expect(matchingRows[0].textContent).toContain(original.devotion_steps[index].title);
+      if (step.title_override) {
+        expect(matchingRows[0].textContent).toContain(step.title_override);
+      }
     }
     const controls = root.querySelector('#devociones-selector')!;
     for (const step of content.devotion_steps) {
@@ -103,7 +102,7 @@ describe('gd-devotion-section', () => {
       })),
     ).toEqual(expected.map(({ label, headline, detail }) => ({ label, headline, detail })));
     expect(root.textContent).toContain(
-      original.introductions.find((item) => item.section === 'Ruta de devoción')?.text,
+      content.notes.find((note) => note.label === 'Ruta de devoción')?.detail,
     );
   });
 

@@ -952,8 +952,8 @@
       "build_slug": "chaman-demoledor-golpe-primigenio",
       "tier": "sin_clasificar",
       "content_status": "sin_verificar",
-      "rights_status": "pending",
-      "review_state": "borrador",
+      "rights_status": "own_original",
+      "review_state": "publicado",
       "external_url": null,
       "external_author": null,
       "source_slug": "guia-original",
@@ -974,14 +974,14 @@
     },
     {
       "slug": "guia-original",
-      "kind": "comunidad",
-      "title": "HTML local: elementalista-golpe-primigenio.html",
+      "kind": "original",
+      "title": "Datos del build transcritos internamente",
       "url": null,
-      "author_name": "Por confirmar",
-      "license_note": "Derechos pendientes. Solo migración y revisión local; no publicar.",
+      "author_name": "Grim Dawn Builds",
+      "license_note": "Contenido propio del sitio; datos factuales del juego, sin permiso de terceros",
       "permission_ref": null,
-      "retrieved_on": "2026-11-09",
-      "notes": "El HTML proporcionado no registra autor, URL original, permiso, fecha ni versión del juego. La transcripción conserva afirmaciones sin verificarlas."
+      "retrieved_on": "2026-11-12",
+      "notes": "Contenido generado por Claude Code para Grim Dawn Builds el 2026-11-12. No hay fuente externa ni autor tercero que atribuir; los datos se transcribieron del build y no se han verificado contra el juego."
     }
   ]
 }

@@ -413,9 +413,9 @@ describe('gd-build-page', () => {
 
     const section = root.querySelector('#devociones');
     expect(section).not.toBeNull();
-    expect(section?.textContent).toContain('Anguila es Primordial de nivel 1.');
+    expect(section?.textContent).toContain(draftContent.devotion_steps[0]!.body);
     expect(section?.textContent).toContain('Unverified');
-    expect(section?.textContent).toContain('Cuando las constelaciones se sostengan solas');
+    expect(section?.textContent).toContain(draftContent.devotion_steps.at(-1)!.body);
     expect(section?.querySelectorAll('[data-fallback-devotion-step]')).toHaveLength(
       draftContent.devotion_steps.length,
     );

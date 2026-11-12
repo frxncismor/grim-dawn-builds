@@ -14,6 +14,27 @@ import { CONTENT_REPOSITORY, type ContentRepository } from './repository';
 
 const migratedSlug = 'chaman-demoledor-golpe-primigenio';
 
+/** A draft derived from the published fixture, used to exercise the banner and AC-09. */
+const pendingDraft = () => ({
+  ...draftFixture,
+  review_state: 'borrador',
+  rights_status: 'pending',
+  rights_confirmed_by: null,
+  rights_confirmed_on: null,
+  reviewed_by: null,
+  reviewed_at: null,
+  published_at: null,
+  author_slug: 'por-confirmar',
+  author: {
+    slug: 'por-confirmar',
+    display_name: 'Autor por confirmar',
+    bio: null,
+    url: null,
+    is_placeholder: true,
+  },
+  sources: draftFixture.sources.map((source) => ({ ...source, author_name: 'Por confirmar' })),
+});
+
 class StaticSource implements RawContentSource {
   constructor(private readonly docs: readonly unknown[]) {}
   async readBuilds(): Promise<unknown[]> {
@@ -121,16 +142,20 @@ describe('public build resolver', () => {
       expect(serialized).not.toContain(field);
   });
 
-  it('hides the migrated pending guide in the public build', async () => {
+  it('serves the published migrated guide in the public build', async () => {
     const repository = fixtureRepository(false);
     setup({ repository, includeDrafts: false });
 
-    expect(await repository.listSlugs()).toEqual([]);
-    expect(await resolve(migratedSlug)).toBeNull();
+    expect(await repository.listSlugs()).toEqual([migratedSlug]);
+    const page = await resolve(migratedSlug);
+    expect(page).not.toBeNull();
+    expect(page?.draft).toBe(false);
+    expect(page?.authorIsPlaceholder).toBe(false);
+    expect(page?.title).toBe('Chamán + Demoledor');
   });
 
-  it('renders the migrated draft as a local draft with banner data when INCLUDE_DRAFTS is enabled', async () => {
-    setup({ repository: fixtureRepository(true), includeDrafts: true });
+  it('renders a pending draft as a local draft with banner data when INCLUDE_DRAFTS is enabled', async () => {
+    setup({ repository: fixtureRepository(true, [pendingDraft()]), includeDrafts: true });
 
     const page = await resolve(migratedSlug);
 
@@ -144,7 +169,7 @@ describe('public build resolver', () => {
 
   it('defends AC-09 even if a repository leaks a non-approved guide without local drafts', async () => {
     setup({
-      repository: stubRepository(async () => draftFixture as unknown as Build),
+      repository: stubRepository(async () => pendingDraft() as unknown as Build),
       includeDrafts: false,
     });
 

@@ -22,10 +22,12 @@ const BLOCKING_IMPACTS = ['critical', 'serious'];
 const ROUTES = [
   { name: 'portada', path: '/' },
   { name: 'catálogo', path: '/tier-list' },
+  { name: 'guía', path: '/builds/chaman-demoledor-golpe-primigenio' },
   { name: 'acerca', path: '/acerca' },
   { name: 'legal', path: '/legal' },
   { name: 'portada es', path: '/es' },
   { name: 'catálogo es', path: '/es/tier-list' },
+  { name: 'guía es', path: '/es/builds/chaman-demoledor-golpe-primigenio' },
   { name: 'acerca es', path: '/es/acerca' },
   { name: 'legal es', path: '/es/legal' },
 ] as const;

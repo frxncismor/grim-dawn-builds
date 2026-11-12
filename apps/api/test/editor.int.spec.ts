@@ -137,7 +137,7 @@ suite('editor with real PostgreSQL and restricted roles after bootstrap (T-129)'
     if (container) docker(['rm', '--force', container]);
   });
 
-  it('edits the complete pending guide after bootstrap without publishing it or changing shared resources', async () => {
+  it('edits the complete published guide after bootstrap without unpublishing it or changing shared resources', async () => {
     const doc = structuredClone(data.builds[0]!);
     doc.title = 'Local editorial title';
     doc.summary = 'Local editorial summary';
@@ -156,7 +156,7 @@ suite('editor with real PostgreSQL and restricted roles after bootstrap (T-129)'
       title: doc.title,
       summary: doc.summary,
       origin: 'editor',
-      rights_status: 'pending',
+      rights_status: 'own_original',
     });
     expect(
       (await admin!.query('SELECT id,origin,display_name FROM authors ORDER BY slug')).rows,
@@ -189,7 +189,7 @@ suite('editor with real PostgreSQL and restricted roles after bootstrap (T-129)'
           doc.slug,
         ])
       ).rows[0].n,
-    ).toBe(0);
+    ).toBe(1);
   });
 
   it('edits a tier list using existing guide references without reimporting their bodies', async () => {
