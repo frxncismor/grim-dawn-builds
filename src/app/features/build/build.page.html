@@ -11,6 +11,9 @@
 
   <div class="build-content">
     <gd-build-sections [content]="content()" section="resumen" />
+    @if (content().adaptation; as adaptation) {
+      <gd-source-attribution [attribution]="adaptation" />
+    }
     <gd-build-sections [content]="content()" section="prioridades" />
 
     <ng-template #skillsFallback>
