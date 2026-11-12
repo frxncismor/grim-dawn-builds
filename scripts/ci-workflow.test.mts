@@ -14,6 +14,10 @@ const EXPECTED_BRANCHES = ['develop', 'main', 'mvp/1'];
 
 const REQUIRED_ACTIONS = ['actions/checkout', 'pnpm/action-setup', 'actions/setup-node'];
 
+/** Trivy image pinned by tag and multi-arch index digest (T-066b). */
+export const TRIVY_IMAGE =
+  'aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb';
+
 /** Exact `run:` commands that the PR workflow must execute (T-064 list). */
 export const REQUIRED_RUN_COMMANDS = [
   'pnpm install --frozen-lockfile',
@@ -45,6 +49,12 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm run e2e:journeys',
   'pnpm run e2e:a11y',
   'pnpm run check:performance',
+  // T-066b: static container rules and the Trivy image-scan gate.
+  'pnpm run check-container',
+  'docker build --file apps/api/Dockerfile --tag gd-api:ci-scan .',
+  'docker save --output "$RUNNER_TEMP/gd-api-ci-scan.tar" gd-api:ci-scan',
+  `docker run --rm -v "$RUNNER_TEMP:/scan" ${TRIVY_IMAGE} image --input /scan/gd-api-ci-scan.tar --format json --output /scan/trivy-image.json --scanners vuln --severity MEDIUM,HIGH,CRITICAL`,
+  'pnpm exec tsx scripts/check-container.mts --report "$RUNNER_TEMP/trivy-image.json"',
 ];
 
 const indentOf = (line: string): number => line.length - line.trimStart().length;
@@ -193,6 +203,21 @@ export function validateCiWorkflow(source: string): string[] {
     }
   }
 
+  // T-066b: the image scanner is pinned and the MEDIUM threshold is never relaxed.
+  for (const run of runs) {
+    if (!/\baquasec\/trivy:/.test(run)) continue;
+    const image = run.match(/\baquasec\/trivy:\S+/)?.[0].replace(/["']/g, '') ?? '';
+    if (!/^aquasec\/trivy:[\w.-]+@sha256:[0-9a-f]{64}$/.test(image)) {
+      problems.push(`Trivy image must be pinned by tag and digest: ${image || 'missing'}`);
+    }
+    if (!run.includes('--severity MEDIUM,HIGH,CRITICAL')) {
+      problems.push('Trivy scan must block from MEDIUM (--severity MEDIUM,HIGH,CRITICAL)');
+    }
+    if (/--ignore-unfixed|--ignorefile|--ignore-policy/.test(run)) {
+      problems.push('Trivy must not ignore findings (--ignore-unfixed/--ignorefile)');
+    }
+  }
+
   // T-126: quality gates measure the built artifact, not the dev server.
   if (/\bng serve\b/.test(text)) problems.push('runs the dev server instead of the built artifact');
 
@@ -238,10 +263,14 @@ export function validateCiWorkflow(source: string): string[] {
     }
   }
 
-  const stepsIdx = lines.findIndex((l) => /^\s*steps:\s*$/.test(l));
-  if (stepsIdx < 0) {
+  // Every job's `steps:` block must follow the same shape (T-066b added a second job).
+  const stepsIndexes = lines
+    .map((line, index) => (/^\s*steps:\s*$/.test(line) ? index : -1))
+    .filter((index) => index >= 0);
+  if (stepsIndexes.length === 0) {
     problems.push('missing steps: block');
-  } else {
+  }
+  for (const stepsIdx of stepsIndexes) {
     const items = blockAfter(lines, stepsIdx)
       .map((line, k) => ({ line, index: stepsIdx + 1 + k }))
       .filter(({ line }) => line.trim() !== '');
@@ -306,8 +335,44 @@ describe('PR verification workflow (T-064)', () => {
     assert.ok(journeys < performance, 'performance measures the built artifact and runs last');
     assert.ok(a11y < performance, 'performance measures the built artifact and runs last');
 
-    const lastRun = lines.filter((l) => /^\s*(?:-\s+)?run:\s*\S/.test(l)).at(-1);
-    assert.equal(lastRun?.trim(), 'run: pnpm run check:performance');
+    // T-066b adds a second job after `verify`; performance is still the last gate of the
+    // verify job and must not move before the artifact it measures.
+    const containerIdx = lines.findIndex((line) => /^ {2}container:\s*$/.test(line));
+    assert.notEqual(containerIdx, -1, 'missing container job');
+    const verifyRuns = lines
+      .slice(0, containerIdx)
+      .filter((line) => /^\s*(?:-\s+)?run:\s*\S/.test(line));
+    assert.equal(verifyRuns.at(-1)?.trim(), 'run: pnpm run check:performance');
+  });
+
+  it('container job checks statically, builds, scans and applies the Trivy threshold (T-066b)', () => {
+    const lines = real.split('\n');
+    const jobIndex = lines.findIndex((line) => /^ {2}container:\s*$/.test(line));
+    assert.notEqual(jobIndex, -1, 'missing container job');
+    const runLine = (command: string): number => lines.indexOf(`        run: ${command}`);
+    const indexOf = (command: string): number => {
+      const index = runLine(command);
+      assert.notEqual(index, -1, `missing run: ${command}`);
+      assert.ok(index > jobIndex, `run: ${command} must be inside the container job`);
+      return index;
+    };
+
+    const staticCheck = indexOf('pnpm run check-container');
+    const build = indexOf('docker build --file apps/api/Dockerfile --tag gd-api:ci-scan .');
+    const archive = indexOf(
+      'docker save --output "$RUNNER_TEMP/gd-api-ci-scan.tar" gd-api:ci-scan',
+    );
+    const scan = indexOf(
+      `docker run --rm -v "$RUNNER_TEMP:/scan" ${TRIVY_IMAGE} image --input /scan/gd-api-ci-scan.tar --format json --output /scan/trivy-image.json --scanners vuln --severity MEDIUM,HIGH,CRITICAL`,
+    );
+    const evaluate = indexOf(
+      'pnpm exec tsx scripts/check-container.mts --report "$RUNNER_TEMP/trivy-image.json"',
+    );
+
+    assert.ok(staticCheck < build, 'static rules run before the image build');
+    assert.ok(build < archive, 'the image must exist before it is exported');
+    assert.ok(archive < scan, 'Trivy scans the exported archive');
+    assert.ok(scan < evaluate, 'the JSON report is decided by check-container');
   });
 
   /** Applies one textual mutation and asserts it changed the workflow. */
@@ -351,7 +416,7 @@ describe('PR verification workflow (T-064)', () => {
     ['deploy step', () => mutate('pnpm run build', 'pnpm run build\n      - run: deploy-now')],
     [
       'checkout keeps credentials',
-      () => mutate('persist-credentials: false', 'persist-credentials: true'),
+      () => mutate(/persist-credentials: false/g, 'persist-credentials: true'),
     ],
     // T-126: each quality gate and content check must stay in the PR workflow.
     [
@@ -418,6 +483,49 @@ describe('PR verification workflow (T-064)', () => {
     [
       'e2e snapshots rewritten in CI',
       () => mutate('run: pnpm run e2e:journeys', 'run: pnpm run e2e:journeys --update-snapshots'),
+    ],
+    // T-066b: the container job and the Trivy threshold must stay enforced.
+    ['container job removed', () => `${real.slice(0, real.indexOf('\n  container:'))}\n`],
+    [
+      'container static check removed',
+      () =>
+        mutate(
+          /\n {6}- name: Container configuration check\n {8}run: pnpm run check-container\n/,
+          '\n',
+        ),
+    ],
+    [
+      'api image build removed',
+      () =>
+        mutate(
+          /\n {6}- name: Build API image for scanning[^\n]*\n {8}run: docker build[^\n]*\n/,
+          '\n',
+        ),
+    ],
+    [
+      'trivy scan removed',
+      () => mutate(/\n {6}- name: Scan image with Trivy[^\n]*\n {8}run: docker run[^\n]*\n/, '\n'),
+    ],
+    [
+      'trivy threshold relaxed',
+      () => mutate('--severity MEDIUM,HIGH,CRITICAL', '--severity HIGH,CRITICAL'),
+    ],
+    [
+      'trivy report not evaluated',
+      () =>
+        mutate(
+          /\n {6}- name: Evaluate Trivy report[^\n]*\n {8}run: [^\n]*check-container[^\n]*\n/,
+          '\n',
+        ),
+    ],
+    ['trivy image floating', () => mutate(TRIVY_IMAGE, 'aquasec/trivy:latest')],
+    [
+      'trivy ignores unfixed findings',
+      () =>
+        mutate(
+          '--severity MEDIUM,HIGH,CRITICAL',
+          '--severity MEDIUM,HIGH,CRITICAL --ignore-unfixed',
+        ),
     ],
   ];
 
