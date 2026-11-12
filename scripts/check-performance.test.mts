@@ -8,8 +8,10 @@ import { test } from 'node:test';
 import { gzipSync } from 'node:zlib';
 import { CATALOG_JS_LIMIT, INITIAL_JS_LIMIT, measureInitialRoutes } from './check-initial-js.mts';
 import {
+  BACKEND_BUDGETS,
   BUDGETS,
   budgetDrift,
+  evaluateBackendReport,
   evaluateJsBudgets,
   evaluateLighthouseReport,
   evaluateRouteSets,
@@ -19,10 +21,13 @@ import {
   measureHtml,
   median,
   normalizeRoute,
+  parseBackendReport,
   readLighthouseBudgets,
   readLighthouseConfig,
   reportRunDir,
   routeFilePath,
+  type BackendMemory,
+  type BackendRouteResult,
   type RouteRun,
 } from './check-performance.mts';
 
@@ -500,6 +505,284 @@ test('los presupuestos JS reutilizan los límites de check-initial-js.mts', asyn
     await writeFile(join(root, 'browser/shared.js'), randomBytes(130000));
     const exceeded = evaluateJsBudgets(await measureInitialRoutes(root));
     assert.equal(exceeded[0]?.pass, false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+/**
+ * T-128: informe backend sintético con la forma exacta que escribe
+ * `apps/api/test/performance.int.spec.ts`. Las rutas cubren los tres grupos.
+ */
+function backendRoute(overrides: Partial<BackendRouteResult> = {}): BackendRouteResult {
+  const samples = 40;
+  return {
+    group: 'read',
+    route: '/api/v1/builds',
+    samples,
+    p95Ms: 10,
+    maxMs: 12,
+    sampleMs: Array.from({ length: samples }, (_, index) => 1 + (index % 5)),
+    statuses: Array.from({ length: samples }, () => 200),
+    maxQueriesPerRequest: 3,
+    ...overrides,
+  };
+}
+
+function backendMemory(overrides: Partial<BackendMemory> = {}): BackendMemory {
+  return {
+    rssBytes: 120 * 1024 * 1024,
+    heapUsedBytes: 30 * 1024 * 1024,
+    heapTotalBytes: 40 * 1024 * 1024,
+    ...overrides,
+  };
+}
+
+function backendReport(
+  overrides: {
+    budgets?: Record<string, number>;
+    coldStartMs?: number;
+    memory?: BackendMemory;
+    routes?: BackendRouteResult[];
+  } = {},
+) {
+  return {
+    kind: 'backend-performance',
+    version: 1,
+    measuredAt: '2026-11-11T10:00:00.000Z',
+    environment: {
+      node: 'v22.12.0',
+      platform: 'linux-x64',
+      postgres: 'PostgreSQL 17.11',
+      image: 'postgres:17.11-trixie@sha256:' + 'a'.repeat(64),
+      catalog: {
+        builds: 2,
+        tier_lists: 1,
+        tier_entries: 45,
+        masteries: 7,
+        authors: 2,
+        sources: 2,
+        combinations: 45,
+      },
+      warmupRequests: 5,
+    },
+    budgets: { ...BACKEND_BUDGETS, ...overrides.budgets },
+    results: {
+      coldStartMs: overrides.coldStartMs ?? 1200,
+      memory: overrides.memory ?? backendMemory(),
+      routes: overrides.routes ?? [
+        backendRoute({ group: 'health', route: '/health', p95Ms: 2, maxQueriesPerRequest: 0 }),
+        backendRoute({ group: 'ready', route: '/ready', p95Ms: 40 }),
+        backendRoute(),
+      ],
+    },
+  };
+}
+
+const backendGate = (overrides: Parameters<typeof backendReport>[0] = {}) =>
+  evaluateBackendReport(parseBackendReport(backendReport(overrides)));
+
+test('T-128: el informe backend completo pasa y publica la memoria real', () => {
+  const gate = backendGate();
+  assert.deepEqual(gate.budgetDrift, []);
+  assert.deepEqual(gate.problems, []);
+  assert.deepEqual(gate.checks.map((check) => check.id).sort(), [
+    'backend:cold-start',
+    'backend:health',
+    'backend:queries:/api/v1/builds',
+    'backend:queries:/health',
+    'backend:queries:/ready',
+    'backend:read:/api/v1/builds',
+    'backend:ready',
+  ]);
+  assert.ok(gate.checks.every((check) => check.measured && check.pass));
+  assert.equal(gate.runtimeWithinTarget, true);
+  assert.equal(gate.memory.rssBytes, 120 * 1024 * 1024);
+  assert.equal(gate.environment.catalog['tier_entries'], 45);
+});
+
+test('T-128: p95, consultas y arranque por encima del presupuesto fallan', () => {
+  const gate = backendGate({
+    coldStartMs: BACKEND_BUDGETS.coldStartMs + 1,
+    routes: [
+      backendRoute({ group: 'health', route: '/health', p95Ms: 50.1, maxQueriesPerRequest: 0 }),
+      backendRoute({ group: 'ready', route: '/ready', p95Ms: 200.1 }),
+      backendRoute({ p95Ms: 150.1, maxQueriesPerRequest: 7 }),
+      backendRoute({
+        group: 'read',
+        route: '/api/v1/tier-lists/principal',
+        p95Ms: 20,
+        maxQueriesPerRequest: 6,
+      }),
+    ],
+  });
+  const failed = gate.checks
+    .filter((check) => !check.pass)
+    .map((check) => check.id)
+    .sort();
+  assert.deepEqual(failed, [
+    'backend:cold-start',
+    'backend:health',
+    'backend:queries:/api/v1/builds',
+    'backend:read:/api/v1/builds',
+    'backend:ready',
+  ]);
+});
+
+test('T-128: un límite exacto cumple y un byte de más en memoria solo avisa', () => {
+  const gate = backendGate({
+    coldStartMs: BACKEND_BUDGETS.coldStartMs,
+    routes: [
+      backendRoute({ group: 'health', route: '/health', p95Ms: 50, maxQueriesPerRequest: 0 }),
+      backendRoute({ group: 'ready', route: '/ready', p95Ms: 200 }),
+      backendRoute({ p95Ms: 150, maxQueriesPerRequest: 6 }),
+    ],
+    memory: backendMemory({ rssBytes: BACKEND_BUDGETS.runtimeTargetBytes + 1 }),
+  });
+  assert.ok(gate.checks.every((check) => check.pass));
+  assert.deepEqual(gate.problems, []);
+  assert.equal(gate.runtimeWithinTarget, false, 'la memoria se registra frente al objetivo');
+});
+
+test('T-128: relajar un presupuesto en el informe es deriva y falla', () => {
+  const gate = backendGate({ budgets: { healthP95Ms: 60 } });
+  assert.deepEqual(
+    gate.budgetDrift.map((drift) => drift.metric),
+    ['/health p95 (ms)'],
+  );
+  assert.ok(gate.problems.some((problem) => /deriva/i.test(problem)));
+  assert.ok(
+    gate.checks.every((check) => !check.pass),
+    'la deriva nunca aprueba',
+  );
+});
+
+test('T-128: muestras insuficientes, códigos no 200 o rutas ausentes fallan cerrado', () => {
+  const shortSamples = backendGate({
+    routes: [
+      backendRoute({ group: 'health', route: '/health', p95Ms: 2, maxQueriesPerRequest: 0 }),
+      backendRoute({ group: 'ready', route: '/ready', p95Ms: 40 }),
+      backendRoute({
+        samples: 10,
+        sampleMs: Array.from({ length: 10 }, () => 5),
+        statuses: Array.from({ length: 10 }, () => 200),
+      }),
+    ],
+  });
+  assert.ok(shortSamples.problems.some((problem) => /m[íi]nimo de 30 muestras/.test(problem)));
+
+  const failingStatus = backendGate({
+    routes: [
+      backendRoute({ group: 'health', route: '/health', p95Ms: 2, maxQueriesPerRequest: 0 }),
+      backendRoute({ group: 'ready', route: '/ready', p95Ms: 40 }),
+      backendRoute({
+        statuses: [200, 200, 503, ...Array.from({ length: 37 }, () => 200)],
+      }),
+    ],
+  });
+  assert.ok(failingStatus.problems.some((problem) => /respondió 503/.test(problem)));
+
+  const missingHealth = backendGate({ routes: [backendRoute()] });
+  assert.ok(missingHealth.problems.some((problem) => /\/health/.test(problem)));
+  assert.ok(missingHealth.problems.some((problem) => /\/ready/.test(problem)));
+});
+
+test('T-128: un informe malformado no se interpreta como aprobado', () => {
+  assert.throws(() => parseBackendReport(null));
+  assert.throws(() => parseBackendReport([]));
+  assert.throws(() => parseBackendReport({ ...backendReport(), kind: 'lighthouse' }));
+  assert.throws(() => parseBackendReport({ ...backendReport(), version: 2 }));
+  assert.throws(() =>
+    parseBackendReport({
+      ...backendReport(),
+      results: { ...backendReport().results, coldStartMs: Number.NaN },
+    }),
+  );
+  const withoutMemory = { ...backendReport().results } as Record<string, unknown>;
+  delete withoutMemory['memory'];
+  assert.throws(() => parseBackendReport({ ...backendReport(), results: withoutMemory }));
+  const badRoute = backendReport().results.routes.map((route, index) =>
+    index === 0 ? { ...route, p95Ms: 'rápido' } : route,
+  );
+  assert.throws(() =>
+    parseBackendReport({
+      ...backendReport(),
+      results: { ...backendReport().results, routes: badRoute },
+    }),
+  );
+});
+
+test('T-128: sin informe backend el comando falla cerrado en español', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gd-performance-backend-'));
+  try {
+    const missing = spawnSync(
+      process.execPath,
+      [
+        '--import',
+        'tsx',
+        join(import.meta.dirname, 'check-performance.mts'),
+        '--backend',
+        '--report',
+        join(root, 'no-existe.json'),
+      ],
+      { encoding: 'utf8' },
+    );
+    assert.equal(missing.status, 1);
+    assert.match(missing.stderr, /informe/i);
+    assert.match(missing.stderr, /RUN_DB_TESTS=1/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('T-128: el comando backend publica la tabla y decide con exit code', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gd-performance-backend-'));
+  try {
+    const file = join(root, 'backend.json');
+    await writeFile(file, JSON.stringify(backendReport()));
+    const passing = spawnSync(
+      process.execPath,
+      [
+        '--import',
+        'tsx',
+        join(import.meta.dirname, 'check-performance.mts'),
+        '--backend',
+        '--report',
+        file,
+      ],
+      { encoding: 'utf8' },
+    );
+    assert.equal(passing.status, 0, passing.stderr);
+    assert.match(passing.stdout, /\/health/);
+    assert.match(passing.stdout, /200\.0 MB/);
+    assert.match(passing.stdout, /check:performance \(backend\) OK/);
+
+    await writeFile(
+      file,
+      JSON.stringify(
+        backendReport({
+          routes: [
+            backendRoute({ group: 'health', route: '/health', p95Ms: 2, maxQueriesPerRequest: 0 }),
+            backendRoute({ group: 'ready', route: '/ready', p95Ms: 40 }),
+            backendRoute({ maxQueriesPerRequest: 7 }),
+          ],
+        }),
+      ),
+    );
+    const failing = spawnSync(
+      process.execPath,
+      [
+        '--import',
+        'tsx',
+        join(import.meta.dirname, 'check-performance.mts'),
+        '--backend',
+        '--report',
+        file,
+      ],
+      { encoding: 'utf8' },
+    );
+    assert.equal(failing.status, 1);
+    assert.match(failing.stderr, /check:performance \(backend\) FALLÓ/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

@@ -124,6 +124,14 @@ jobs:
       - name: API tests
         run: pnpm --filter @gd/api test
 
+      # T-128: the API integration suite above measured p95, SQL statements per
+      # request and cold start on the pinned PostgreSQL 17 (digest pulled above)
+      # and wrote the report to dist/performance/backend.json. This gate decides
+      # those mandatory budgets; the 200 MB runtime target is reported, not
+      # inferred from the image. Frontend budgets stay with check:performance.
+      - name: Backend performance budgets (p95, queries, cold start)
+        run: pnpm exec tsx scripts/check-performance.mts --backend
+
       # T-065: backend CI without deployment. Compose must resolve with the
       # example env file (no real secrets), and the image must build from the
       # monorepo root without being pushed anywhere.
