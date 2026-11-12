@@ -150,20 +150,24 @@ informe real. Cualquier hallazgo que exija cambios vuelve primero a SDD.
 - **Defecto real**: `prepare` → `ready` (snapshot `c2a6d686…dfd2`). Cuatro pases
   `completed` (code, architecture, security, best-practices; `self-review`,
   `delegationAvailable: false`, motivo de capacidad declarado). `check` →
-  `blocked` con 4 hallazgos CRITICAL/HIGH abiertos (CD-001 y SEC-001 CRITICAL:
-  fuga de contenido en revisión por identificador; AR-001 y AR-002 HIGH:
-  frontera web→internals y contradicción del plan) más un MEDIUM de cobertura de
-  pruebas. Ningún defecto se conocía de antemano.
+  `blocked` con 4 hallazgos CRITICAL/HIGH abiertos (2 CRITICAL: CD-001 y SEC-001,
+  fuga de contenido en revisión por identificador; 2 HIGH: AR-001 y AR-002,
+  frontera web→internals y contradicción del plan) más 2 MEDIUM (CD-002 y BP-001,
+  cobertura de pruebas). El extracto literal del fixture y el reparto exacto
+  están en [`reviews/t013-evidence.md`](reviews/t013-evidence.md) §3. Ningún
+  defecto se conocía de antemano.
 - **Cambio documental sin hallazgos**: `prepare` → `ready` (snapshot
   `3a7ffe4b…264f`). Cuatro pases `completed` y cero hallazgos, con cobertura
   explícita; `check` → `passed`, salida 0.
 - **Modo con delegación**: un revisor independiente distinto del implementador
   emitió los cuatro `Review` en `mode: independent` y un coordinador distinto
   consolidó el informe. `prepare` → `ready` (mismo snapshot `c2a6d686…dfd2`);
-  `check` → `blocked` con 3 hallazgos CRITICAL/HIGH abiertos. La delegación la
-  ejecutó el orquestador del área al lanzar al revisor separado, no un subagente
-  interno de la CLI: la metodología de este repositorio prohíbe esa delegación
-  interna. La limitación queda declarada junto al resultado.
+  `check` → `blocked` con 3 hallazgos CRITICAL/HIGH abiertos (2 CRITICAL + 1 HIGH;
+  más 1 MEDIUM de pruebas, véase [`reviews/t013-evidence.md`](reviews/t013-evidence.md)
+  §5). La delegación la ejecutó el orquestador del área al lanzar al revisor
+  separado, no un subagente interno de la CLI: la metodología de este repositorio
+  prohíbe esa delegación interna. La limitación queda declarada junto al
+  resultado.
 - **No mutación**: la única escritura fue
   `specs/<feature>/reviews/completion-review.json`; los hashes de `app/`,
   `tests/`, `docs/` y de los artefactos SDD no cambiaron y el snapshot fue
@@ -171,9 +175,12 @@ informe real. Cualquier hallazgo que exija cambios vuelve primero a SDD.
 - **Saneado**: sin secretos ni valores reales; todos los datos del fixture son
   sintéticos.
 
-El detalle literal de cada comando y salida está en los informes de la corrida
-de orquestación (`t013-evidence.md` y `t013-evidence-delegado.md`); no se
-reutilizó ningún fixture de tests como informe real.
+El detalle literal saneado de cada comando y salida está versionado en
+[`reviews/t013-evidence.md`](reviews/t013-evidence.md). Las rutas de la corrida
+(`t013-evidence.md` y `t013-evidence-delegado.md` en
+`C:\Users\paco_\.config\orquestacion\runs\11111619`) quedan como referencia
+secundaria no versionada. No se reutilizó ningún fixture de tests como informe
+real.
 
 ### T014: reejecución y evidencia final
 

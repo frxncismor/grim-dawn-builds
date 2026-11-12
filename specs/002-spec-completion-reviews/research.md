@@ -23,9 +23,10 @@ si todas las tareas están marcadas. No se edita el skill generado de implement.
 `c43849408ac0de2ca6a52f14eaae71449776057b`:
 `templates/commands/implement.md` exige invocar y esperar hooks obligatorios;
 `docs/extensions/api.md` sección Hook Configuration documenta registros y limita
-conditions. El skill instalado `.agents/skills/speckit-implement/SKILL.md`
-además indica conversión de puntos a guiones. Una condition no vacía puede
-ocasionar que los templates omitan el hook.
+conditions. El artefacto generado `.agents/skills/speckit-implement/SKILL.md`
+—ausente en este checkout e ignorado por Git— además indica conversión de puntos
+a guiones; su fuente upstream reproducible está en la sección siguiente. Una
+condition no vacía puede ocasionar que los templates omitan el hook.
 
 **Alternatives considered**: `auto_execute_hooks` está reservado y no garantiza
 ejecución; una condition `tasks_complete` inventada no está soportada. Una bandera
@@ -46,6 +47,60 @@ de `implement.md` y `docs/extensions/api.md` de Spec Kit, commit
 `c43849408ac0de2ca6a52f14eaae71449776057b`; los materiales de documentación de
 esa revisión no están presentes en el checkout local actual y no se vuelven a
 presentar como archivos inspeccionados en esta tarea.
+
+### Procedencia reproducible del hook (T017, 2026-11-12)
+
+**Fuente fijada**: repositorio oficial `github/spec-kit`, commit
+`c43849408ac0de2ca6a52f14eaae71449776057b`, versión del paquete
+`specify-cli 1.3.3.dev0`, la misma que registran
+`specs/001-mvp-guias-builds/tooling-provenance.md`, `.specify/integration.json`
+y `.specify/init-options.json`.
+
+**Rutas upstream exactas**:
+
+- `templates/commands/implement.md`, sección *Mandatory Post-Execution Hooks*.
+  Es la fuente del `SKILL.md` generado que se citó en T001; el archivo local
+  `.agents/skills/speckit-implement/SKILL.md` no existe en un checkout limpio y
+  está ignorado por `.gitignore` (patrón `/.agents/skills/speckit-implement/`).
+- `docs/extensions/api.md`, secciones *Hook System* y *Hook Configuration*. Es
+  el esquema oficial de los registros de `hooks.<evento>`.
+
+**Extracto literal de `templates/commands/implement.md`**:
+
+```text
+- If the hook has no `condition` field, or it is null/empty, treat the hook as executable
+- If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
+...
+- **Mandatory hook** (`optional: false`) — **You MUST emit `EXECUTE_COMMAND:` for each mandatory hook**:
+...
+After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing.
+```
+
+**Extracto literal de `docs/extensions/api.md`**:
+
+```yaml
+hooks:
+  after_implement:
+    - extension: my-extension
+      command: speckit.my-extension.verify
+      enabled: true
+      optional: false
+      priority: 5
+      description: "Run verification after implementation"
+```
+
+El mismo documento define `optional` como «If `false`, it is emitted as an
+automatic hook with `EXECUTE_COMMAND` markers» y `condition` como una expresión
+que los templates actuales no evalúan: omiten los hooks con condition no vacía.
+El registro de `.specify/extensions.yml` conserva la forma documentada:
+`extension`, `command`, `enabled: true`, `optional: false` y sin `condition`.
+
+**Límite declarado**: la estructura del registro es reproducible contra la
+fuente fijada, pero el **despacho automático no está verificado**. Ningún
+harness con router de comandos lo ha demostrado todavía; el flujo conserva el
+fallback explícito que carga
+`.agents/skills/speckit-review-complete/SKILL.md` cuando no existe router. Un
+`EXECUTE_COMMAND` o la mera presencia del YAML no acreditan ejecución.
 
 ## Decisión: huella y evaluación local mínima
 
