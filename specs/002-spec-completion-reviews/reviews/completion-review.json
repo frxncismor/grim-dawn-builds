@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "feature": "specs/002-spec-completion-reviews",
+  "snapshot": "05d84e20cdf217ec2935ad9048c1ff28b6d2072e1171c75436ca5d0092dae0b8",
+  "createdAt": "2026-11-12T17:03:01.316Z",
+  "implementationActor": "implementacion-spec002-sin-actor-registrado",
+  "delegationAvailable": true,
+  "reviews": [
+    {
+      "specialty": "code",
+      "reviewer": "11111619-revisor-3",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "scripts/spec-review.mjs: prepare, check, task parser, disposition parser, snapshot, report validation, finding validation",
+        "scripts/spec-review.test.mjs: the 16 tests and the fixture harness",
+        "specs/002-spec-completion-reviews/contracts/review-gate.md",
+        "specs/002-spec-completion-reviews/data-model.md",
+        "specs/002-spec-completion-reviews/plan.md (prepare/dispatch/evidence rules)",
+        "specs/002-spec-completion-reviews/tasks.md (T002, T010-T014 acceptance)",
+        "AGENTS.md review-gate section"
+      ],
+      "checks": [
+        {
+          "name": "node --test scripts/spec-review.test.mjs",
+          "result": "1..16; # tests 16; # pass 16; # fail 0; # skipped 0; exit 0"
+        },
+        {
+          "name": "node --check scripts/spec-review.mjs",
+          "result": "exit 0"
+        },
+        {
+          "name": "node --check scripts/spec-review.test.mjs",
+          "result": "exit 0"
+        },
+        {
+          "name": "node scripts/spec-review.mjs prepare --feature specs/002-spec-completion-reviews",
+          "result": "{\"status\":\"ready\",\"snapshot\":\"9df71b1d340ef3eb016b19427d9db126efc5a64091a27eec3394345b0c539cd5\"}; exit 0"
+        },
+        {
+          "name": "node scripts/spec-review.mjs check --feature specs/002-spec-completion-reviews",
+          "result": "{\"status\":\"pending-review\",\"reasons\":[\"completion review report is missing\"]}; exit 1 (no reviews/ directory exists yet)"
+        },
+        {
+          "name": "temp git repo probe: one task marked [REEMPLAZADA por T-999; no ejecutar], T-999 absent",
+          "result": "prepare returned ready, exit 0; four completed empty reviews then returned check passed, exit 0"
+        },
+        {
+          "name": "temp git repo probe: task-shaped line inside a fenced code block",
+          "result": "prepare counted the fenced '- [x] T-999 example from docs'; a HIGH finding with resolution 'Verified in T-999' made check return passed, exit 0"
+        },
+        {
+          "name": "temp git repo probe: alternate pending-task syntaxes",
+          "result": "'- [ ] [T-002]', '- [ ] (T-002)', backticked T-002 and '* [ ] T-002' were ignored; prepare returned ready, exit 0 while a pending-looking task existed"
+        },
+        {
+          "name": "temp git repo probe: nested feature specs/a/b",
+          "result": "prepare ready; writing specs/a/b/reviews/completion-review.json made check return pending-review 'report snapshot is stale', exit 1"
+        },
+        {
+          "name": "temp git repo probe: letter suffix in pendingTasks",
+          "result": "a task written '- [ ] T-066a' was reported as id T-066A"
+        }
+      ],
+      "limitations": [
+        "No LLM execution of the reviewer skills was attempted in this pass; the review is static plus executable temp-repo probes.",
+        "Probes ran on Windows with core.autocrlf=true; symlink/junction and line-ending behavior can differ on other hosts.",
+        "The orchestration run evidence for T013/T014 was not read (independence rule); only independently reproducible claims were used."
+      ],
+      "findings": [
+        {
+          "id": "C-1",
+          "severity": "HIGH",
+          "path": "scripts/spec-review.mjs",
+          "line": 178,
+          "evidence": "prepare removes tasks with a disposition from activeTasks and returns ready whenever pendingTasks is empty; there is no guard for activeTasks.length === 0. In a temp git repo with the single task '- [ ] T-001 replaced [REEMPLAZADA por T-999; no ejecutar]' (T-999 does not exist), prepare returned status ready exit 0 and check with four empty completed reviews returned status passed exit 0. Disposition targets are only format-checked at lines 102-107 and are never resolved against parsed task IDs.",
+          "impact": "plan.md lines 111-113 require prepare to demand at least one active task, and spec.md lists a no-task closure as invalid. The gate can declare a spec complete with zero verified implementation tasks and with invented replacement references, defeating the evidence requirement it exists to enforce.",
+          "recommendation": "Return invalid when activeTasks.length === 0. Validate each replacement/deferred/optional reference ID against the parsed tasks (and require the referenced task to be active or verified) before excluding the task. Add regression tests for both cases.",
+          "disposition": "open"
+        },
+        {
+          "id": "C-2",
+          "severity": "MEDIUM",
+          "path": "scripts/spec-review.mjs",
+          "line": 118,
+          "evidence": "parseTasks scans every line of tasks.md without tracking Markdown fenced code blocks or HTML comments. In a temp repo whose tasks.md contained a fenced 'text' block with '- [x] T-999 example from docs' plus a real '- [x] T-001', prepare returned ready and counted both ids as tasks; a HIGH finding whose resolution was 'Verified in T-999: docs example only' made check return passed exit 0.",
+          "impact": "A documentation example can become a verified SDD task and satisfy the resolved-finding evidence rule, so the gate can accept a resolved CRITICAL/HIGH that no real task fixed. It also creates duplicate-ID invalid states when the same id is also a real task.",
+          "recommendation": "Track fenced code blocks and HTML comments in parseTasks and ignore task-shaped lines inside them. Add a test with a checked example and a resolved finding that cites it, expecting check to stay pending-review.",
+          "disposition": "open"
+        },
+        {
+          "id": "C-3",
+          "severity": "MEDIUM",
+          "path": "scripts/spec-review.mjs",
+          "line": 126,
+          "evidence": "The fail-closed malformed detector only fires for '- ... T-...' lines that start with a hyphen bullet and are not already matched. In temp repos with '- [x] T001 done' plus a second pending task written as '- [ ] [T-002] pending', '- [ ] (T-002) pending', backticked T-002, or '* [ ] T-002 pending', prepare returned ready exit 0 and omitted the pending task.",
+          "impact": "The contract says malformed task lines must fail closed; these accepted-but-unrecognized decorations silently hide pending work, so the coordinator dispatches four reviews and can close while an implementation task remains unchecked.",
+          "recommendation": "Treat any checkbox bullet line that contains a T-NNN id but does not match a supported task format as malformed (including '*', '(', '[', '`' variants), or publish the closed set of accepted formats and reject everything else explicitly. Add one test per variant.",
+          "disposition": "open"
+        },
+        {
+          "id": "C-4",
+          "severity": "LOW",
+          "path": "scripts/spec-review.mjs",
+          "line": 88,
+          "evidence": "normalizeTaskId calls toUpperCase on the whole id, including letter suffixes. A temp repo task '- [ ] T-066a pending' produced pendingTasks id 'T-066A' even though tasks.md and the contract use the lowercase suffix.",
+          "impact": "Reported pending ids do not literally match tasks.md, which breaks copy/paste or automation that looks up the exact id. Matching itself is unaffected because both sides normalize.",
+          "recommendation": "Normalize only the numeric/prefix part for comparison and preserve the original suffix casing in pendingTasks/excludedTasks output.",
+          "disposition": "open"
+        }
+      ]
+    },
+    {
+      "specialty": "architecture",
+      "reviewer": "11111619-revisor-3",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "specs/002-spec-completion-reviews/plan.md and contract: prepare/dispatch/evidence boundaries",
+        "scripts/spec-review.mjs: snapshot scope, feature path rules, report location",
+        "The five .agents/skills SKILL.md files: canonical schema references and cross-feature portability",
+        ".specify/extensions.yml: after_implement registration",
+        "AGENTS.md, CONTRIBUTING.md and .github/copilot-instructions.md gate links",
+        "File inventory against plan.md Project Structure; no application or web/API/domain changes"
+      ],
+      "checks": [
+        {
+          "name": "git ls-files .agents .specify scripts (inventory vs plan.md Project Structure)",
+          "result": "all authorized spec002 files are tracked; no extra application file was added by the feature"
+        },
+        {
+          "name": "YAML parse of .specify/extensions.yml (PyYAML in the temp t014-py path)",
+          "result": "hooks.after_implement is a list with one entry: extension spec-review, command speckit.review.complete, enabled true, optional false; no condition"
+        },
+        {
+          "name": "relative link check for the five SKILL.md files, AGENTS.md, CONTRIBUTING.md and copilot-instructions.md",
+          "result": "all referenced data-model.md, review-gate.md and coordinator paths resolve inside the repository"
+        },
+        {
+          "name": "node scripts/spec-review.mjs prepare --feature specs/001-mvp-guias-builds",
+          "result": "pending-tasks, exit 1; pending T-043 line 75; legacy and replacement formats accepted, consistent with T014"
+        },
+        {
+          "name": "node scripts/spec-review.mjs prepare --feature specs/002-spec-completion-reviews",
+          "result": "ready, exit 0, snapshot 9df71b1d340ef3eb016b19427d9db126efc5a64091a27eec3394345b0c539cd5"
+        },
+        {
+          "name": "node scripts/spec-review.mjs check --feature specs/002-spec-completion-reviews",
+          "result": "pending-review, exit 1; reason 'completion review report is missing'"
+        },
+        {
+          "name": "git ls-files --eol on AGENTS.md, scripts/spec-review.mjs and specs/002-spec-completion-reviews/tasks.md",
+          "result": "i/lf w/crlf on all three (core.autocrlf=true on this host)"
+        },
+        {
+          "name": "temp git repo probe: nested feature specs/a/b",
+          "result": "prepare ready; writing the report under specs/a/b/reviews changed the snapshot, so check returned pending-review 'report snapshot is stale'"
+        }
+      ],
+      "limitations": [
+        "The locally generated Spec Kit skill that the plan names as the hook-format authority (.agents/skills/speckit-implement/SKILL.md) is absent from this checkout and gitignored, so the official hook schema could not be re-verified from a repository artifact.",
+        "No network access was used to fetch the pinned Spec Kit source.",
+        "No behavior of a real harness command router was exercised; this pass evaluated the registration and the fallback design, not dispatch on a specific provider."
+      ],
+      "findings": [
+        {
+          "id": "A-1",
+          "severity": "MEDIUM",
+          "path": "scripts/spec-review.mjs",
+          "line": 47,
+          "evidence": "excludedFromSnapshot matches only /^specs\\/[^/]+\\/reviews(?:\\/|$)/, while featurePath at lines 147-153 explicitly accepts nested feature paths such as specs/a/b. In a temp repo with feature specs/a/b, prepare returned ready; writing specs/a/b/reviews/completion-review.json then made check compare a snapshot that now included the report itself and return pending-review with reason 'report snapshot is stale'.",
+          "impact": "A feature layout the helper accepts can never pass its own gate: the mandated report path invalidates the snapshot it is supposed to preserve. The failure is safe (it does not pass), but it is misleading and makes the gate unusable for nested specs.",
+          "recommendation": "Exclude reviews directories with a pattern that covers any nested feature (for example /^specs\\/.+\\/reviews(?:\\/|$)/) or derive the exclusion from the resolved feature path. Add a nested-feature regression test that writes the report and expects check to evaluate it instead of reporting stale.",
+          "disposition": "open"
+        },
+        {
+          "id": "A-2",
+          "severity": "LOW",
+          "path": "specs/002-spec-completion-reviews/research.md",
+          "line": 26,
+          "evidence": "research.md and T001 say the hook format was verified by reading the installed .agents/skills/speckit-implement/SKILL.md, but that file is absent from the reviewed worktree and is explicitly gitignored at .gitignore:45; git ls-files does not list it. The only remaining local evidence is the research.md summary and the extensions.yml itself.",
+          "impact": "A fresh checkout cannot reproduce the claim that hooks.after_implement accepts this exact shape with optional:false and no condition, nor the dot-to-dash resolution to speckit-review-complete. If the format is wrong, automatic dispatch silently never happens; the explicit SKILL.md fallback limits the damage but the T001 evidence is not locally reproducible.",
+          "recommendation": "Record the pinned Spec Kit upstream file path and commit plus a short verbatim excerpt (or vendor the generated skill) so the hook contract is auditable from the repository, and label automatic dispatch as unverified until a harness with a command router proves it.",
+          "disposition": "open"
+        },
+        {
+          "id": "A-3",
+          "severity": "MEDIUM",
+          "path": "scripts/spec-review.mjs",
+          "line": 78,
+          "evidence": "The snapshot hashes raw worktree bytes (readFileSync + size at lines 78-82). On this host core.autocrlf=true and git ls-files --eol reports i/lf w/crlf for AGENTS.md, scripts/spec-review.mjs and specs/002-spec-completion-reviews/tasks.md. The same commit checked out with LF would produce a different SHA-256 for unchanged content.",
+          "impact": "The recorded snapshot is tied to the checkout's line endings. Review evidence committed from Windows becomes 'stale' on a Linux checkout (and vice versa), so the gate's recorded decision cannot be re-verified portably even though no relevant content changed. It fails closed, but it blocks legitimate closures and weakens FR-007's promise that the report identifies the reviewed state.",
+          "recommendation": "Hash normalized content (for example index blobs or text normalized to LF) or explicitly scope the gate to a single checkout, document that constraint in the contract, and require prepare/check to run on the same host as the reviewers. Record the chosen limitation in the evidence.",
+          "disposition": "open"
+        }
+      ]
+    },
+    {
+      "specialty": "security",
+      "reviewer": "11111619-revisor-3",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "scripts/spec-review.mjs: path containment, symlink rejection, git invocation, JSON error handling, report and finding validation, output construction",
+        "scripts/spec-review.test.mjs: traversal, symlink/junction, malformed JSON privacy, ignored-file and pointer exclusion cases",
+        "The five .agents/skills SKILL.md files: secret-handling and no-network instructions",
+        ".specify/extensions.yml hook registration",
+        "specs/002-spec-completion-reviews contract and data-model: evidence sanitization and dispositions"
+      ],
+      "checks": [
+        {
+          "name": "import/network scan of scripts/spec-review.mjs",
+          "result": "only node:crypto, node:child_process, node:fs, node:path and node:url; no fetch/http/net/dns usage"
+        },
+        {
+          "name": "secret-pattern scan over the helper, tests, five skills, extensions.yml and specs/002-spec-completion-reviews (AKIA keys, GitHub/OpenAI tokens, PEM private keys, password/DB URL assignments)",
+          "result": "0 matches; no secret value observed in the reviewed artifacts"
+        },
+        {
+          "name": "node --test scripts/spec-review.test.mjs",
+          "result": "16/16 pass exit 0, including path traversal, directory junction/symlink rejection, malformed-JSON non-echo and ignored-file/pointer exclusion"
+        },
+        {
+          "name": "manual review of safeRelativePath, inside and assertNoSymlinkPath",
+          "result": "rejects absolute, drive-qualified, NUL, empty, dot and dot-dot segments, checks every path segment with lstat and resolves the repository root with realpath; no path escape found"
+        },
+        {
+          "name": "manual review of safeError and check outputs",
+          "result": "JSON.parse SyntaxError is replaced by a fixed message; other errors are flattened and truncated; reasons contain fixed strings and counts, not report values or finding text"
+        },
+        {
+          "name": "manual review of validateReport/validateFinding secret handling",
+          "result": "evidence, impact, recommendation, resolution and deferReason are only required to be non-empty; there is no secret detection, redaction or entropy check before a report can pass"
+        }
+      ],
+      "limitations": [
+        "No DAST, dependency audit or real secret scanner was run; the secret search was a bounded regular-expression scan of the reviewed paths.",
+        "Deployment and CI secret configuration are outside this feature and were not reviewed.",
+        "No network or destructive tests were performed."
+      ],
+      "findings": [
+        {
+          "id": "S-1",
+          "severity": "MEDIUM",
+          "path": "scripts/spec-review.mjs",
+          "line": 233,
+          "evidence": "validateFinding only checks that evidence, impact and recommendation are non-empty (lines 233-235); resolution and deferReason are checked for a task reference only. Nothing scans or redacts their content. check then accepts a structurally valid report and writes/reads it at specs/<feature>/reviews/completion-review.json, a path excluded from the snapshot. The current artifacts contain no secret (my pattern scan found 0 matches), but the gate itself would pass a report that embedded a live credential.",
+          "impact": "FR-011 and constitution XII prohibit secret values in reports and records. The only current control is prose in the reviewer skills plus a coordinator sanitization step; a careless agent can commit a secret through the gate's own evidence file while check reports passed, and the snapshot exclusion means that file is not covered by the integrity check.",
+          "recommendation": "Scan evidence/resolution/deferReason for common secret patterns (and optionally high-entropy strings) and fail closed or require an explicit redaction marker. Have the coordinator run the repository's check:secrets/gitleaks over the report path as a recorded check. Document that the helper validates structure, not redaction.",
+          "disposition": "open"
+        }
+      ]
+    },
+    {
+      "specialty": "best-practices",
+      "reviewer": "11111619-revisor-3",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "scripts/spec-review.test.mjs: contract and regression coverage map",
+        "scripts/spec-review.mjs: proportional complexity, duplication and maintainability",
+        "The five .agents/skills SKILL.md files: validation status and link accuracy",
+        "specs/002-spec-completion-reviews/quickstart.md and tasks.md: evidence quality and internal consistency",
+        "AGENTS.md, CONTRIBUTING.md and .github/copilot-instructions.md integration text"
+      ],
+      "checks": [
+        {
+          "name": "node_modules/.bin/markdownlint-cli2.cmd on the five skills, specs/002-spec-completion-reviews/**/*.md, AGENTS.md, CONTRIBUTING.md and .github/copilot-instructions.md",
+          "result": "Linting: 74 files; Summary: 0 issues in 0 files; exit 0 (config globs expand to the repository Markdown)"
+        },
+        {
+          "name": "python quick_validate.py for review-code, review-architecture, review-security, review-best-practices and speckit-review-complete",
+          "result": "Skill is valid! for all five, exit 0 (PyYAML supplied from the temporary t014-py path; the system interpreter lacks PyYAML)"
+        },
+        {
+          "name": "node --test scripts/spec-review.test.mjs",
+          "result": "16/16 pass, exit 0; test names cover pending/ready, legacy formats, malformed lines, duplicates, four-review completeness, not-run/failed, identity/independence, CRITICAL/HIGH, MEDIUM/LOW, dispositions, stale snapshots, traversal, symlink and ignored files"
+        },
+        {
+          "name": "coverage map against the fail-open probes",
+          "result": "no test covers zero active tasks, task-shaped lines in fenced blocks, alternate bullet/id syntaxes or nested feature paths; all four probes still leave the suite 16/16 green"
+        },
+        {
+          "name": "read quickstart.md T013/T014 and tasks.md T013/T014 evidence",
+          "result": "the reported counts and the external-evidence references are internally inconsistent in one place and depend on files outside the repository in another"
+        },
+        {
+          "name": "node --check scripts/spec-review.mjs and scripts/spec-review.test.mjs",
+          "result": "exit 0 both"
+        }
+      ],
+      "limitations": [
+        "The T013 behavioral fixtures and their raw evidence live outside this repository; by the independence rule I did not read the orchestration run folder, so I could not re-run or verify those exact conversations.",
+        "Accessibility and rendering concerns do not apply to this feature; no web/API/domain code changed.",
+        "The quick_validate run depends on a temporary PyYAML copy; this is an environment limitation, not a skill defect."
+      ],
+      "findings": [
+        {
+          "id": "B-1",
+          "severity": "MEDIUM",
+          "path": "scripts/spec-review.test.mjs",
+          "line": 119,
+          "evidence": "The suite is solid on the contract's happy paths and several failure paths, but it has no test for: all tasks excluded/zero active tasks (C-1), task-shaped lines in fenced code blocks (C-2), alternate pending-task decorations such as '*', '(', '[', backticks (C-3), or nested feature paths (A-1). Each of those probes reproduced a fail-open or self-blocking behavior while the suite remained 16/16 green.",
+          "impact": "FR-012 asks for significant dispatch, pending-task, blocking, partial-evidence and invalidation scenarios. The most consequential divergences from plan.md are currently invisible to the test suite, so a future change can reintroduce them without a red build.",
+          "recommendation": "Add one regression test per issue: zero active tasks -> invalid; fenced/commented task line ignored; alternate syntax -> invalid; nested feature report -> check evaluates the report instead of reporting stale. Keep the existing temp-repo fixture style.",
+          "disposition": "open"
+        },
+        {
+          "id": "B-2",
+          "severity": "LOW",
+          "path": "specs/002-spec-completion-reviews/quickstart.md",
+          "line": 153,
+          "evidence": "The T013 entry says check returned blocked 'con 4 hallazgos CRITICAL/HIGH abiertos' and then lists three CRITICAL/HIGH items plus one item explicitly marked '(MEDIUM)'. tasks.md line 63 repeats the '4 CRITICAL/HIGH' count. The blocked verdict is still justified by the three high findings, but the count and the severity labels disagree.",
+          "impact": "A reader cannot tell whether the fourth finding was MEDIUM (in which case it would produce pending-review, not blocked, by itself) or whether a fourth high finding is missing from the summary. This weakens the auditability of the closure evidence.",
+          "recommendation": "Correct both places to '3 CRITICAL/HIGH + 1 MEDIUM' or attach the actual reasons/finding-severity excerpt from the fixture report. Keep the block justification tied to the high findings.",
+          "disposition": "open"
+        },
+        {
+          "id": "B-3",
+          "severity": "LOW",
+          "path": "specs/002-spec-completion-reviews/quickstart.md",
+          "line": 175,
+          "evidence": "The T013 section says the literal command/output detail is in t013-evidence.md and t013-evidence-delegado.md in the orchestration run folder. Those files are outside the repository and not versioned with the spec; only the summary in quickstart.md is durable.",
+          "impact": "A future maintainer auditing T013 cannot reproduce or inspect the raw evidence once the run folder is gone, and the quickstart's claims cannot be distinguished from summaries by a fresh checkout. The T013 evidence is therefore weaker than the helper tests, which are self-contained.",
+          "recommendation": "Store sanitized literal command/output excerpts (or a tracked evidence file under specs/002-spec-completion-reviews/) alongside the summary, and keep the run-folder paths as secondary references. This also makes the T014 re-run evidence independently checkable.",
+          "disposition": "open"
+        }
+      ]
+    }
+  ]
+}

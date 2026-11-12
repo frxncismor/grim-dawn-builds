@@ -128,3 +128,82 @@ automáticamente T012a, T013 ni T014.
 Tras terminar y verificar todas las tareas, ejecutar el coordinador desde el
 hook o su SKILL.md y esperar los pases. No reutilizar el fixture de tests como
 informe real. Cualquier hallazgo que exija cambios vuelve primero a SDD.
+
+## Evidencia de cierre T013-T014 (2026-11-12)
+
+### T013: validación conductual real
+
+- **Espacio temporal**: `%TEMP%\opencode\t013-fixture`, fuera del repositorio.
+  Tres raíces independientes (`feature-defecto`, `feature-documental`,
+  `feature-pendiente`) con copias SHA-256 idénticas de `scripts/spec-review.mjs`,
+  los cinco `SKILL.md`, el modelo/contrato canónicos y `.specify/extensions.yml`.
+- **Independencia**: el fixture lo construyó un agente y lo evaluó otro distinto,
+  sin recibir los defectos esperados. Ni el constructor ni el evaluador
+  compartieron contexto con el implementador.
+- **Hook**: `.specify/extensions.yml` registra `speckit.review.complete` con
+  `enabled: true` y `optional: false`. OpenCode no expone un router de comandos
+  (configuración sin comandos, sin `.opencode/`, catálogo de skills sin la
+  entrada), así que se cargó `SKILL.md` explícitamente y se registró el fallback;
+  la entrada YAML o un anuncio de despacho no se contaron como ejecución.
+- **Tarea pendiente**: `prepare` → `{"status":"pending-tasks","pendingTasks":[{"id":"T-002","line":5}]}`,
+  salida 1; no se despacharon revisiones ni se creó `reviews/`.
+- **Defecto real**: `prepare` → `ready` (snapshot `c2a6d686…dfd2`). Cuatro pases
+  `completed` (code, architecture, security, best-practices; `self-review`,
+  `delegationAvailable: false`, motivo de capacidad declarado). `check` →
+  `blocked` con 4 hallazgos CRITICAL/HIGH abiertos (CD-001 y SEC-001 CRITICAL:
+  fuga de contenido en revisión por identificador; AR-001 y AR-002 HIGH:
+  frontera web→internals y contradicción del plan) más un MEDIUM de cobertura de
+  pruebas. Ningún defecto se conocía de antemano.
+- **Cambio documental sin hallazgos**: `prepare` → `ready` (snapshot
+  `3a7ffe4b…264f`). Cuatro pases `completed` y cero hallazgos, con cobertura
+  explícita; `check` → `passed`, salida 0.
+- **Modo con delegación**: un revisor independiente distinto del implementador
+  emitió los cuatro `Review` en `mode: independent` y un coordinador distinto
+  consolidó el informe. `prepare` → `ready` (mismo snapshot `c2a6d686…dfd2`);
+  `check` → `blocked` con 3 hallazgos CRITICAL/HIGH abiertos. La delegación la
+  ejecutó el orquestador del área al lanzar al revisor separado, no un subagente
+  interno de la CLI: la metodología de este repositorio prohíbe esa delegación
+  interna. La limitación queda declarada junto al resultado.
+- **No mutación**: la única escritura fue
+  `specs/<feature>/reviews/completion-review.json`; los hashes de `app/`,
+  `tests/`, `docs/` y de los artefactos SDD no cambiaron y el snapshot fue
+  idéntico antes y después.
+- **Saneado**: sin secretos ni valores reales; todos los datos del fixture son
+  sintéticos.
+
+El detalle literal de cada comando y salida está en los informes de la corrida
+de orquestación (`t013-evidence.md` y `t013-evidence-delegado.md`); no se
+reutilizó ningún fixture de tests como informe real.
+
+### T014: reejecución y evidencia final
+
+Ejecutado en el worktree `orq/11111619-review` = `origin/mvp/1` (`f9360e0`):
+
+| Comprobación | Resultado |
+| --- | --- |
+| `node --test scripts/spec-review.test.mjs` | `# tests 16`, `# pass 16`, `# fail 0`, salida 0 |
+| `node --check scripts/spec-review.mjs` y `.test.mjs` | salida 0 en ambos |
+| markdownlint focalizado | 74 archivos, 0 problemas, salida 0 (la configuración añade `**/*.md`) |
+| `quick_validate.py` de los cinco skills | `Skill is valid!` en los cinco |
+
+`quick_validate.py` necesitó PyYAML en un directorio temporal
+(`%TEMP%\opencode\t014-py`) porque el intérprete de la máquina no lo tenía; es un
+fallo de entorno del validador, no de los skills. No se instaló nada en el
+repositorio ni en el entorno global.
+
+Cobertura FR/SC: FR-001, FR-004, FR-007, FR-008, FR-011 y SC-003 ya tenían
+evidencia de helper y contrato; T013 aporta la parte conductual de FR-002,
+FR-003, FR-005, FR-006, FR-009, FR-010, FR-012, SC-001, SC-002, SC-004 y SC-005
+(modos con delegación externa y sin subagentes, con independencia declarada).
+Todas quedan cubiertas con las limitaciones registradas.
+
+Diff permitido: además de esta evidencia y de `specs/001-mvp-guias-builds/quickstart.md`,
+solo cambian los marcadores de T013/T014 en `tasks.md` y el informe canónico
+`reviews/completion-review.json` que se genera después de este texto. Ninguna
+ruta de aplicación se toca.
+
+Al marcar T013 y T014, `prepare` sobre esta spec queda `ready` y se ejecuta la
+revisión real de cierre con cuatro pases y el coordinador; el veredicto lo deriva
+`check` del informe, no un campo de decisión. La evidencia de esa puerta vive en
+`reviews/completion-review.json` y no se reescribe en este documento para no
+invalidar su huella.
