@@ -109,9 +109,13 @@ describe('@gd/domain built output', () => {
       'EVIDENCE_REQUIREMENT_BY_RIGHTS',
       'EVIDENCE_STATUSES',
       'EVIDENCE_TYPES',
+      'FR28_METADATA_FIELDS',
+      'LINK_ONLY_METADATA_FIELDS',
       'MasteryCombinationSchema',
       'MasterySchema',
       'PERMISSION_REQUEST_STATUSES',
+      'PUBLICATION_GATE_CHECKLIST_POINTS',
+      'PUBLICATION_GATE_CODES',
       'PermissionRequestSchema',
       'PublicAuthorSchema',
       'PublicBuildSchema',
@@ -129,10 +133,12 @@ describe('@gd/domain built output', () => {
       'TierEntrySchema',
       'TierListSchema',
       'checkAssetManifest',
+      'evaluatePublicationGate',
       'isPermissionGranted',
       'isPublishableRightsStatus',
       'publicFilter',
       'requiredEvidenceType',
+      'toLinkOnlyMetadata',
     ]);
     assert.deepEqual(loaded.vocabulary, ['CONTENT_STATUSES', 'TIERS']);
     assert.ok(loaded.testing.length > 0);
