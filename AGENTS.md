@@ -71,6 +71,7 @@ La orquestación sigue la metodología de usuario de Paco, común a todos sus pr
   - El To-do de Over9k refleja el estado real de las tareas (`todo`).
   - Se consigna en `handoff.md` el modelo realmente usado.
 - Modelos preferidos por rol, fallback y manejo de errores del proveedor: `docs/orchestration/modelos.md`.
+- **Claude Code** carga `CLAUDE.md`, que remite a estas reglas y a la metodología de usuario y prohíbe delegar con `Task` o subagentes internos de la CLI.
 
 ## Uso
 
