@@ -1,7 +1,9 @@
 import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import type { AppConfig } from './config.js';
+import type { MasteryCatalogRepository } from './catalog/mastery-repository.js';
 import type { PublicContentRepository } from './content/repository.js';
 import { registerContentRoutes } from './routes/content.js';
+import { registerMasteryRoutes } from './routes/masteries.js';
 import { installHttpSecurity } from './security/http.js';
 
 /** Object paths whose values are censored in every structured log line. */
@@ -31,6 +33,8 @@ export interface BuildAppOptions {
   /** Public digest of shipped migrations; supplied by the executable server. */
   readonly migration?: () => string;
   readonly content?: PublicContentRepository;
+  /** Read-only mastery catalog (spec 003). Absent repository fails closed with 503. */
+  readonly masteries?: MasteryCatalogRepository;
 }
 
 /**
@@ -77,5 +81,6 @@ export function buildApp(config: AppConfig, options: BuildAppOptions = {}): Fast
   });
 
   registerContentRoutes(app, options.content, options.readiness);
+  registerMasteryRoutes(app, options.masteries, options.readiness);
   return app;
 }
