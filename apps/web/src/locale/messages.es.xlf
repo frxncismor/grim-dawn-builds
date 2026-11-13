@@ -2106,6 +2106,22 @@
           <context context-type="linenumber">285</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="skillTree.noRequirement" datatype="html">
+        <source>No requirement</source>
+        <target state="translated">Sin requisito</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.requiresParent" datatype="html">
+        <source>Requires <x id="parent" equiv-text="parent"/></source>
+        <target state="translated">Requiere <x id="parent" equiv-text="parent"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="skillTree.kind.active" datatype="html">
         <source>Active</source>
         <target state="translated">Activa</target>

@@ -72,7 +72,7 @@
                   [attr.data-selected]="item.selected ? 'true' : null"
                   [attr.id]="item.id"
                   [attr.transform]="'translate(' + item.x + ' ' + item.y + ')'"
-                  [attr.aria-labelledby]="catalogNodeLabelIds(item)"
+                  [attr.aria-label]="item.label"
                   [attr.aria-pressed]="item.selected"
                   [attr.aria-keyshortcuts]="'ArrowUp ArrowDown ArrowLeft ArrowRight Home End Enter Space Escape'"
                   role="button"
@@ -125,7 +125,7 @@
                   </g>
                   <text
                     class="skill-tree__name"
-                    [attr.id]="item.id + '-name'"
+                    aria-hidden="true"
                     text-anchor="middle"
                     [attr.y]="40"
                   >
@@ -137,7 +137,7 @@
                   </text>
                   <text
                     class="skill-tree__bar-required"
-                    [attr.id]="item.id + '-meta'"
+                    aria-hidden="true"
                     text-anchor="middle"
                     [attr.y]="68"
                   >
@@ -193,6 +193,24 @@
         <p i18n="@@skillTree.detailHint">Focus on or hover over a skill to see its details.</p>
       }
     </section>
+
+    <details class="skill-tree__list" open>
+      <summary i18n="@@skillTree.listSummary">Skill list and recommendations</summary>
+      <ol>
+        @for (node of catalogSource.nodes; track node.id) {
+          <li [attr.id]="catalogListItemId(node)" [attr.data-skill-kind]="node.kind">
+            <strong>{{ node.name.es }}</strong> <span lang="en">({{ node.name.en }})</span>
+            <span class="skill-tree__list-status">{{ kindLabel(node.kind) }}</span>
+            <span>{{ tierLabel(node.tier) }} · {{ barLabel(node.bar_required) }}</span>
+            <span>{{ maxPointsLabel(node) }}</span>
+            <span>{{ dependencyLabel(node, catalogNames()) }}</span>
+            @if (node.circular) {
+              <span>{{ circularLabel() }}</span>
+            }
+          </li>
+        }
+      </ol>
+    </details>
   </section>
 } @else {
   <section class="skill-tree" [attr.aria-labelledby]="headingId()">
