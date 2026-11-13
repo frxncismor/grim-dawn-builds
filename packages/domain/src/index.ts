@@ -89,3 +89,11 @@ export type {
 export { publicFilter } from './visibility.js';
 export { checkAssetManifest } from './asset.js';
 export type { AssetIssue } from './asset.js';
+export {
+  CatalogSkillNodeSchema,
+  MasteryTreeSchema,
+  SKILL_KINDS,
+  TIER_BAR_REQUIRED,
+  findDependencyCycle,
+} from './mastery-tree.js';
+export type { CatalogSkillNode, MasteryTree, SkillKind } from './mastery-tree.js';

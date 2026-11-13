@@ -47,6 +47,11 @@ const PUBLIC_RUNTIME_EXPORTS = [
   'PUBLICATION_GATE_CODES',
   'evaluatePublicationGate',
   'toLinkOnlyMetadata',
+  'CatalogSkillNodeSchema',
+  'MasteryTreeSchema',
+  'SKILL_KINDS',
+  'TIER_BAR_REQUIRED',
+  'findDependencyCycle',
 ];
 
 describe('@gd/domain public API', () => {
