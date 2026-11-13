@@ -13,7 +13,11 @@ accesibilidad).
   requiere spec propio); T-114..T-122 (identidad y comunidad, requiere spec propio);
   T-144 y T-146 (ver relevo anterior); puerta de cierre spec002 con las cuatro
   revisiones. Las 6 pruebas `@journeys` de `#devociones` y sin JS requieren construir
-  el artefacto de borradores (`dist/e2e-drafts`).
+  el artefacto de borradores (`dist/e2e-drafts`) y las 6 de la fachada de video, el de
+  `dist/video-facade-preview`.
+- **Orden local de artefactos (T-171)**: `pnpm --filter @gd/domain build` →
+  `pnpm build` → `pnpm e2e:drafts:build` → `pnpm e2e:video:build` → `pnpm e2e:journeys`
+  y `pnpm e2e:a11y`. La CI construye ambos artefactos antes de journeys.
 
 Sin PR. Las ramas de esta corrida están en el remoto.
 
@@ -783,8 +787,7 @@ artefacto de borradores (con recarga del enlace compartido); el mismo recorrido 
 ancla con `javaScriptEnabled: false`; y 404 real de la guía pendiente en el
 público.
 
-**Artefacto de borradores**: `$env:INCLUDE_DRAFTS='true'; npx ng build
---output-path dist/e2e-drafts` (aislado, no sobrescribe `dist/grim-dawn-builds`;
+**Artefacto de borradores**: `pnpm e2e:drafts:build` (aislado, no sobrescribe `dist/grim-dawn-builds`;
 7 rutas prerenderizadas). El servidor lo sirve en `E2E_DRAFTS_PORT` (4322) solo si
 existe; si falta, los casos de guía fallan con el comando exacto.
 

@@ -42,7 +42,8 @@ not replace either file, which remain the source of truth.
 | API image build (no push)                  | `docker build --file apps/api/Dockerfile --tag gd-api:ci .`                                       | no                    | yes     | yes      | T-065      |
 | API image runs as non-root                 | `test "$(docker run --rm gd-api:ci id -u)" != "0"`                                                | no                    | yes     | yes      | T-065      |
 | Content validation (fixture)               | `pnpm run content:validate -- --dir scripts/fixtures/content-valid`                               | no                    | yes     | yes      | T-064      |
-| Drafts artifact build (isolated)           | `pnpm exec ng build --output-path dist/e2e-drafts`                                                | no                    | yes     | yes      | T-126      |
+| Drafts artifact build (isolated)           | `pnpm e2e:drafts:build`                                                                           | no                    | yes     | yes      | T-126      |
+| Video facade preview build                 | `pnpm e2e:video:build`                                                                            | no                    | yes     | yes      | T-171      |
 | Playwright Chromium install                | `pnpm exec playwright install --with-deps chromium`                                               | no                    | yes     | yes      | T-126      |
 | E2E journeys                               | `pnpm run e2e:journeys`                                                                           | no                    | yes     | yes      | T-040      |
 | Accessibility gate (axe)                   | `pnpm run e2e:a11y`                                                                               | no                    | yes     | yes      | T-041      |
