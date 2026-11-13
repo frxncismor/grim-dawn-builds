@@ -160,6 +160,7 @@ export function contentSecurityPolicy(
     handlerDirective,
     directive('style-src', allow.styles),
     "img-src 'self'",
+    'frame-src https://www.youtube-nocookie.com',
     "font-src 'self'",
     "connect-src 'self'",
     "manifest-src 'self'",

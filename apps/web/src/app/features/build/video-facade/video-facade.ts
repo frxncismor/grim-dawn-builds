@@ -4,13 +4,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  effect,
+  ElementRef,
   inject,
+  Injector,
   input,
   linkedSignal,
   PLATFORM_ID,
   signal,
 } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
 import type { PublicBuild } from '@gd/domain';
 
 export type VideoFacadeContent = Pick<
@@ -52,6 +55,10 @@ export function normalizeYouTubeEmbedUrl(value: string): string | null {
 
 type PlaybackState = 'idle' | 'loading' | 'loaded' | 'error';
 
+const frameTimeoutMs = 10_000;
+// A local poster stops lite-youtube from requesting i.ytimg.com before the user asks for the video.
+const localPoster = 'linear-gradient(var(--color-panel), var(--color-panel))';
+
 @Component({
   selector: 'gd-video-facade',
   templateUrl: './video-facade.html',
@@ -60,7 +67,9 @@ type PlaybackState = 'idle' | 'loading' | 'loaded' | 'error';
   host: { '(document:securitypolicyviolation)': 'onPolicyViolation($event)' },
 })
 export class VideoFacade {
-  private readonly sanitizer = inject(DomSanitizer);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
+  private readonly root: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
 
   readonly content = input.required<VideoFacadeContent>();
@@ -80,38 +89,91 @@ export class VideoFacade {
   protected readonly ready = signal(false);
   protected readonly state = linkedSignal({
     source: () => [this.slug(), this.originalUrl(), this.isVisible()] as const,
-    computation: (): PlaybackState => 'idle',
+    computation: (): PlaybackState => {
+      clearTimeout(this.frameTimer);
+      return 'idle';
+    },
   });
-  protected readonly frameTitle = computed(
-    () => $localize`:@@videoFacade.playerTitle:Video player for ${this.content().title}:title:`,
-  );
-  private readonly trustedEmbedUrl = computed(() => {
-    const url = this.embedUrl();
-    // Angular requires a trusted resource URL. Only the reconstructed, allowlisted URL reaches it.
-    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
-  });
-  protected readonly frameSource = computed(() => {
-    const state = this.state();
-    return state === 'loading' || state === 'loaded' ? this.trustedEmbedUrl() : null;
-  });
+  private readonly failed = computed(() => this.state() === 'error');
+  private frameTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
-    afterNextRender(() => this.ready.set(this.browser));
+    afterNextRender(async () => {
+      if (!this.browser) return;
+      try {
+        await import('lite-youtube-embed');
+        // lite-youtube preconnects to Google origins on hover/focus; keep every request behind the click.
+        Reflect.set(customElements.get('lite-youtube') ?? {}, 'preconnected', true);
+        this.ready.set(true);
+      } catch {
+        this.state.set('error');
+      }
+    });
+
+    effect((onCleanup) => {
+      const url = this.embedUrl();
+      this.slug();
+      if (!url || !this.ready() || this.failed()) return;
+      let host: Element | null = null;
+      let stop: (() => void) | undefined;
+      // The player slot is rendered by this same pass, so it is looked up once rendering ends.
+      const scheduled = afterNextRender(
+        () => {
+          host = this.root.querySelector('.video-player');
+          if (host) stop = this.mountPlayer(host, url.slice(url.lastIndexOf('/') + 1));
+        },
+        { injector: this.injector },
+      );
+      onCleanup(() => {
+        scheduled.destroy();
+        stop?.();
+        host?.replaceChildren();
+      });
+    });
+
+    this.destroyRef.onDestroy(() => clearTimeout(this.frameTimer));
   }
 
-  protected activate(): void {
-    if (this.ready() && this.hasRenderableVideo() && this.state() === 'idle') {
-      this.state.set('loading');
-    }
+  private mountPlayer(host: Element, id: string): () => void {
+    const element = document.createElement('lite-youtube');
+    element.setAttribute('videoid', id);
+    element.setAttribute('title', this.content().title);
+    element.setAttribute('playlabel', $localize`:@@videoFacade.activate:Load video`);
+    element.style.backgroundImage = localPoster;
+    host.append(element);
+    // The YouTube IFrame API script is outside the CSP; the plain embed is used on every device.
+    Reflect.set(element, 'needsYTApi', false);
+
+    const observer = new MutationObserver(() => {
+      const frame = element.querySelector('iframe');
+      if (!frame || frame.dataset['gdWatched']) return;
+      frame.dataset['gdWatched'] = 'true';
+      frame.title = $localize`:@@videoFacade.playerTitle:Video player for ${this.content().title}:title:`;
+      frame.addEventListener('load', () => this.onFrameLoad());
+    });
+    observer.observe(element, { childList: true });
+
+    element.addEventListener('click', () => this.onActivate());
+    return () => observer.disconnect();
   }
 
-  protected onFrameLoad(): void {
-    if (this.state() === 'loading') this.state.set('loaded');
+  private onActivate(): void {
+    if (this.state() !== 'idle') return;
+    this.state.set('loading');
+    this.frameTimer = setTimeout(() => {
+      if (this.state() === 'loading') this.state.set('error');
+    }, frameTimeoutMs);
+  }
+
+  private onFrameLoad(): void {
+    if (this.state() !== 'loading') return;
+    clearTimeout(this.frameTimer);
+    this.state.set('loaded');
   }
 
   protected onPolicyViolation(event: SecurityPolicyViolationEvent): void {
     if (
-      this.frameSource() &&
+      this.state() === 'loading' &&
       event.disposition === 'enforce' &&
       event.effectiveDirective === 'frame-src' &&
       (event.blockedURI === embedOrigin || event.blockedURI === this.embedUrl())

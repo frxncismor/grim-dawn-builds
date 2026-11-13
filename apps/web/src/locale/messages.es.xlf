@@ -931,11 +931,11 @@
         </context-group>
       </trans-unit>
       <trans-unit id="videoFacade.activate" datatype="html">
-        <source> Load video </source>
-        <target state="translated"> Cargar video </target>
+        <source>Load video</source>
+        <target state="translated">Cargar video</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/build/video-facade/video-facade.html</context>
-          <context context-type="linenumber">42,44</context>
+          <context context-type="sourcefile">src/app/features/build/video-facade/video-facade.ts</context>
+          <context context-type="linenumber">105</context>
         </context-group>
       </trans-unit>
       <trans-unit id="videoFacade.fallback" datatype="html">

@@ -1,4 +1,25 @@
-# Relevo: T-138 cerrada; spec001 sigue abierta
+# Relevo: T-167 cerrada; T-043 lista para firma; spec001 sigue abierta
+
+## Estado actual (2026-11-13)
+
+Corrida de orquestación `11121451` (principal: sesión de Paco; áreas: implementación y
+accesibilidad).
+
+- **Hecha**: T-167 (fachada de video con `lite-youtube-embed`, `frame-src` en la CSP,
+  fallback con timeout, e2e bajo CSP). Evidencia en `tasks.md`.
+- **Preparada, sin firmar**: T-043. `checklists/a11y.md` (77 ítems, EN/ES, incluye la
+  fachada) está lista; falta la revisión manual con teclado y NVDA y la firma de Paco.
+- **Abiertas**: T-043 (firma); T-075 (opcional, no seleccionada); T-092..T-100 (ingesta,
+  requiere spec propio); T-114..T-122 (identidad y comunidad, requiere spec propio);
+  T-144 y T-146 (ver relevo anterior); puerta de cierre spec002 con las cuatro
+  revisiones. Las 6 pruebas `@journeys` de `#devociones` y sin JS requieren construir
+  el artefacto de borradores (`dist/e2e-drafts`).
+
+Sin PR. Las ramas de esta corrida están en el remoto.
+
+---
+
+## Relevo anterior: T-138 cerrada; spec001 sigue abierta
 
 ## Estado actual (2026-11-11, 12:30)
 

@@ -361,3 +361,90 @@ test.describe('@journeys sin JavaScript', () => {
     ).toMatch(/empty throne/i);
   });
 });
+
+/**
+ * T-167 - fachada de video bajo la CSP real del servidor de artefacto
+ * (plan §17.59). Se sirve la vista previa sintética `video-facade-preview`:
+ * ninguna guía publicada tiene video. YouTube se intercepta con `page.route`,
+ * así que la prueba no depende de la red externa.
+ */
+const VIDEO_PREVIEW_BASE_URL = (
+  process.env['E2E_VIDEO_PREVIEW_BASE_URL'] ?? 'http://127.0.0.1:4323'
+).replace(/\/+$/, '');
+const VIDEO_PREVIEW_BUILD_COMMAND =
+  'pnpm --filter @gd/web exec ng build --configuration video-facade-preview';
+
+interface CspProbe {
+  violations: string[];
+  external: string[];
+}
+
+async function openVideoPreview(page: Page): Promise<CspProbe> {
+  const probe: CspProbe = { violations: [], external: [] };
+  await page.exposeFunction('gdReportViolation', (directive: string, blocked: string) => {
+    probe.violations.push(`${directive} ${blocked}`);
+  });
+  await page.addInitScript(() => {
+    document.addEventListener('securitypolicyviolation', (event) => {
+      (
+        window as unknown as { gdReportViolation: (d: string, b: string) => void }
+      ).gdReportViolation(event.effectiveDirective, event.blockedURI);
+    });
+  });
+  page.on('request', (request) => {
+    if (!request.url().startsWith(VIDEO_PREVIEW_BASE_URL)) probe.external.push(request.url());
+  });
+  page.on('console', (message) => {
+    if (/Content Security Policy/i.test(message.text())) probe.violations.push(message.text());
+  });
+  const response = await open(page, `${VIDEO_PREVIEW_BASE_URL}/`);
+  if (response.status() !== 200) {
+    throw new Error(
+      `El artefacto de la fachada no sirve / en ${VIDEO_PREVIEW_BASE_URL} ` +
+        `(HTTP ${response.status()}). Constrúyelo con: ${VIDEO_PREVIEW_BUILD_COMMAND}`,
+    );
+  }
+  return probe;
+}
+
+test.describe('@journeys fachada de video bajo la CSP', () => {
+  test('activar crea el iframe de youtube-nocookie sin violaciones de CSP', async ({ page }) => {
+    await page.route('https://www.youtube-nocookie.com/**', (route) =>
+      route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>stub</title>' }),
+    );
+    const probe = await openVideoPreview(page);
+    const csp = (await page.request.get(`${VIDEO_PREVIEW_BASE_URL}/`)).headers()[
+      'content-security-policy'
+    ];
+    expect(csp, 'el servidor debe declarar frame-src para YouTube').toContain(
+      'frame-src https://www.youtube-nocookie.com',
+    );
+
+    const section = page.locator('#video-de-muestra');
+    await expect(section.locator('lite-youtube')).toBeVisible();
+    await expect(page.locator('iframe')).toHaveCount(0);
+    expect(probe.external, 'ninguna petición externa antes de activar').toEqual([]);
+
+    await section.locator('lite-youtube button').click();
+    await expect(section.locator('lite-youtube iframe')).toHaveAttribute(
+      'src',
+      /^https:\/\/www\.youtube-nocookie\.com\/embed\/SampleID_01\?/,
+    );
+    await page.waitForTimeout(500);
+    expect(probe.violations, 'la CSP no debe bloquear nada').toEqual([]);
+    expect(
+      probe.external.every((url) => url.startsWith('https://www.youtube-nocookie.com/')),
+      `solo se contacta youtube-nocookie.com: ${probe.external.join(', ')}`,
+    ).toBe(true);
+  });
+
+  test('un iframe que nunca carga termina en alerta y conserva el enlace', async ({ page }) => {
+    await page.route('https://www.youtube-nocookie.com/**', () => undefined);
+    await openVideoPreview(page);
+    const section = page.locator('#video-de-muestra');
+    await section.locator('lite-youtube button').click();
+    await expect(section.locator('[role="alert"]')).toBeVisible({ timeout: 14000 });
+    await expect(section.locator('lite-youtube')).toHaveCount(0);
+    await expect(section.locator('a[href="https://youtu.be/SampleID_01"]')).toBeVisible();
+  });
+});

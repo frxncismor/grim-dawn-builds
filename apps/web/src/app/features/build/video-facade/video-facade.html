@@ -4,17 +4,8 @@
       <h2 [id]="sectionId() + '-heading'" i18n="@@videoFacade.heading">Video</h2>
       <p class="video-title">{{ content().title }}</p>
       <div class="video-stage">
-        @if (frameSource(); as source) {
-          <iframe
-            [src]="source"
-            [title]="frameTitle()"
-            loading="lazy"
-            referrerpolicy="strict-origin-when-cross-origin"
-            sandbox="allow-scripts allow-same-origin allow-presentation"
-            allowfullscreen
-            (load)="onFrameLoad()"
-          ></iframe>
-        } @else if (state() !== 'error') {
+        <div class="video-player"></div>
+        @if (!ready() && state() !== 'error') {
           <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" width="48" height="48">
             <path fill="currentColor" d="M16 10v28l22-14z" />
           </svg>
@@ -31,16 +22,6 @@
         }
       </div>
       <div class="video-actions">
-        <button
-          type="button"
-          [disabled]="!ready()"
-          [attr.aria-disabled]="state() !== 'idle' ? 'true' : null"
-          [attr.aria-describedby]="sectionId() + '-note'"
-          (click)="activate()"
-          i18n="@@videoFacade.activate"
-        >
-          Load video
-        </button>
         <a
           [href]="originalUrl()"
           rel="noopener noreferrer"
@@ -50,9 +31,11 @@
           Open on YouTube (new tab)
         </a>
       </div>
-      <p class="video-note" [id]="sectionId() + '-note'" i18n="@@videoFacade.javascript">
-        Loading the player requires JavaScript.
-      </p>
+      @if (!ready()) {
+        <p class="video-note" i18n="@@videoFacade.javascript">
+          Loading the player requires JavaScript.
+        </p>
+      }
     } @else {
       <h2 [id]="sectionId() + '-heading'" i18n="@@videoFacade.unavailableHeading">
         Video unavailable

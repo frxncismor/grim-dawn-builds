@@ -60,6 +60,13 @@ La orquestación sigue la metodología de usuario, común a todos sus proyectos:
 `~/.config/orquestacion/METODOLOGIA.md` y `README.md`. Este repo no define otra.
 
 - Espacios de Herdr: `gdb-Orq-<Área>` y el principal `gdb-Orq-Principal`.
+- **Nombres identificativos y únicos**: el orquestador principal es la sesión que atiende
+  al usuario; no lanza otro «principal» (`Start-Orquestacion.ps1` solo si el usuario lo
+  pide) y reparte con `Start-Area.ps1`, un agente por área. Antes de lanzar, revisa
+  `herdr-app ls` y `hc ls --all` (incluidas otras máquinas): si ya existe un espacio o
+  agente con el mismo nombre, no lances. Tras lanzar, renombra el espacio para que
+  incluya la tarea (`gdb-Orq-<Área> <T-xxx corto>`, p. ej. `gdb-Orq-Implementación T-167
+  video`) y verifica que no haya dos con igual nombre. Al terminar, `hc kill`/`hc rm`.
 - Lanzamiento solo con `~/.config/orquestacion/scripts/Start-Agente.ps1`; los modelos por nivel están en
   `~/.config/orquestacion/proveedores.local.json` de cada máquina.
 - Reglas propias de este repo que siguen vigentes:

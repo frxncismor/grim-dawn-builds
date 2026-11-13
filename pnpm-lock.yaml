@@ -276,6 +276,9 @@ importers:
       '@gd/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      lite-youtube-embed:
+        specifier: ^0.3.4
+        version: 0.3.4
       rxjs:
         specifier: ~7.8.0
         version: 7.8.2
@@ -4415,6 +4418,9 @@ packages:
   listr2@9.0.5:
     resolution: {integrity: sha512-ME4Fb83LgEgwNw96RKNvKV4VTLuXfoKudAmm2lP8Kk87KaMK0/Xrx/aAkMWmT8mDb+3MlFDspfbCs7adjRxA2g==}
     engines: {node: '>=20.0.0'}
+
+  lite-youtube-embed@0.3.4:
+    resolution: {integrity: sha512-aXgxpwK7AIW58GEbRzA8EYaY4LWvF3FKak6B9OtSJmuNyLhX2ouD4cMTxz/yR5HFInhknaYd2jLWOTRTvT8oAw==}
 
   lmdb@3.5.1:
     resolution: {integrity: sha512-NYHA0MRPjvNX+vSw8Xxg6FLKxzAG+e7Pt8RqAQA/EehzHVXq9SxDqJIN3JL1hK0dweb884y8kIh6rkWvPyg9Wg==}
@@ -9993,6 +9999,8 @@ snapshots:
       log-update: 6.1.0
       rfdc: 1.4.1
       wrap-ansi: 9.0.2
+
+  lite-youtube-embed@0.3.4: {}
 
   lmdb@3.5.1:
     dependencies:

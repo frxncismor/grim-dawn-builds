@@ -127,6 +127,7 @@ test('serves the artifact HTML with the security headers and CSP hashes', async 
       "base-uri 'self'",
       "object-src 'none'",
       "form-action 'self'",
+      'frame-src https://www.youtube-nocookie.com;',
     ])
       assert.ok(policy.includes(expected), `falta ${expected} en: ${policy}`);
     assert.ok(!/unsafe-inline/.test(policy), `la CSP no puede permitir unsafe-inline: ${policy}`);

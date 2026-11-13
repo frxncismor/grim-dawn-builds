@@ -52,6 +52,20 @@ const webServers = [
   },
 ];
 
+/** T-167: vista previa sintética de la fachada de video, servida bajo la misma CSP. */
+const VIDEO_PREVIEW_PORT = Number(process.env['E2E_VIDEO_PREVIEW_PORT'] ?? 4323);
+const VIDEO_PREVIEW_ROOT = process.env['E2E_VIDEO_PREVIEW_ARTIFACT_DIR']
+  ? resolve(process.env['E2E_VIDEO_PREVIEW_ARTIFACT_DIR'])
+  : join(process.cwd(), 'dist', 'video-facade-preview', 'browser');
+if (existsSync(join(VIDEO_PREVIEW_ROOT, 'index.html'))) {
+  webServers.push({
+    command: `node --import tsx "${SERVER_SCRIPT}" "${VIDEO_PREVIEW_ROOT}" ${VIDEO_PREVIEW_PORT}`,
+    url: `http://127.0.0.1:${VIDEO_PREVIEW_PORT}/`,
+    reuseExistingServer: false,
+    timeout: 20000,
+  });
+}
+
 if (DRAFTS_AVAILABLE) {
   webServers.push({
     command: `node --import tsx "${SERVER_SCRIPT}" "${DRAFTS_ARTIFACT_ROOT}" ${DRAFTS_PORT}`,

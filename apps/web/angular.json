@@ -50,7 +50,8 @@
             "security": {
               "allowedHosts": []
             },
-            "polyfills": ["@angular/localize/init"]
+            "polyfills": ["@angular/localize/init"],
+            "allowedCommonJsDependencies": ["lite-youtube-embed"]
           },
           "configurations": {
             "production": {
