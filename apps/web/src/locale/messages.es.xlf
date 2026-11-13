@@ -2558,6 +2558,54 @@
           <context context-type="linenumber">43</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="masteryIndex.title" datatype="html">
+        <source>Mastery skill trees</source>
+        <target state="translated">Árboles de habilidades de las maestrías</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/index.page.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="masteryIndex.intro" datatype="html">
+        <source>Pick a mastery to open its full tree: every skill with its tier, requirements and ranks.</source>
+        <target state="translated">Elige una maestría para abrir su árbol completo: cada habilidad con su nivel, sus requisitos y sus rangos.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/index.page.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="masteryIndex.skills" datatype="html">
+        <source>skills</source>
+        <target state="translated">habilidades</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/index.page.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="masteryIndex.noData" datatype="html">
+        <source>No data</source>
+        <target state="translated">Sin datos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/index.page.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="masteryIndex.seoTitle" datatype="html">
+        <source>Mastery skill trees</source>
+        <target state="translated">Árboles de habilidades de las maestrías</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/index.page.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="masteryIndex.seoDescription" datatype="html">
+        <source>All <x id="count" equiv-text="count"/> Grim Dawn masteries with the real number of skills in each tree. Pick one to see every skill, its requirements and ranks.</source>
+        <target state="translated">Las <x id="count" equiv-text="count"/> maestrías de Grim Dawn con el número real de habilidades de cada árbol. Elige una para ver cada habilidad, sus requisitos y sus rangos.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/index.page.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
     </body>
   </file>
 </xliff>

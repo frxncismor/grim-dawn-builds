@@ -138,3 +138,77 @@ test('selection: local uses fixtures, release needs the API and never falls back
   await assert.rejects(api.listSlugs(), { message: unavailable });
   assert.deepEqual(requests, ['/api/v1/masteries']);
 });
+
+test('fixture catalog summarizes the six masteries with their real node counts (T014)', async () => {
+  const summaries = await new FixtureMasteryCatalog(ROOT).listSummaries();
+  assert.deepEqual(
+    summaries.map((item) => [item.slug, item.nodeCount]),
+    [
+      ['arcanist', 30],
+      ['demolition', 33],
+      ['nightblade', 31],
+      ['occult', 30],
+      ['shaman', 30],
+      ['soldier', 32],
+    ],
+  );
+  assert.deepEqual(summaries[1]?.name, { en: 'Demolitionist', es: 'Demoledor' });
+});
+
+test('fixture summaries mark a tree that does not load as no data instead of failing (US2 scenario 2)', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'gd-masteries-'));
+  await mkdir(join(dir, 'mastery-trees'));
+  const valid = await tree('soldier');
+  await writeFile(join(dir, 'mastery-trees', 'soldier.json'), JSON.stringify(valid));
+  await writeFile(join(dir, 'mastery-trees', 'broken.json'), '{ not json');
+  assert.deepEqual(await new FixtureMasteryCatalog(dir).listSummaries(), [
+    { slug: 'broken', name: null, nodeCount: 0 },
+    { slug: 'soldier', name: { en: 'Soldier', es: 'Soldado' }, nodeCount: valid.nodes.length },
+  ]);
+});
+
+test('API summaries come from the list endpoint with its node_count, sorted, in one request', async () => {
+  const requests: string[] = [];
+  const catalog = new ApiMasteryCatalog('http://localhost:3000/', async (url) => {
+    requests.push(new URL(String(url)).pathname);
+    return json([
+      { ...summary('soldier'), node_count: 32, name: { en: 'Soldier', es: 'Soldado' } },
+      { ...summary('arcanist'), node_count: 0, name: { en: 'Arcanist', es: 'Arcanista' } },
+    ]);
+  });
+  assert.deepEqual(await catalog.listSummaries(), [
+    { slug: 'arcanist', name: { en: 'Arcanist', es: 'Arcanista' }, nodeCount: 0 },
+    { slug: 'soldier', name: { en: 'Soldier', es: 'Soldado' }, nodeCount: 32 },
+  ]);
+  assert.deepEqual(requests, ['/api/v1/masteries']);
+});
+
+test('API summaries fail closed in release: 503, network, invalid item or duplicate (no fallback)', async () => {
+  const bad: [string, () => Promise<Response>][] = [
+    ['503', async () => json({ error: 'content_unavailable' }, 503)],
+    ['network', async () => Promise.reject(new Error('secret-host'))],
+    ['not a list', async () => json({})],
+    ['no name', async () => json([{ slug: 'soldier', node_count: 1 }])],
+    ['bad count', async () => json([{ ...summary('soldier'), node_count: -1 }])],
+    ['fractional count', async () => json([{ ...summary('soldier'), node_count: 1.5 }])],
+    ['duplicate', async () => json([summary('soldier'), summary('soldier')])],
+    ['empty', async () => json([])],
+  ];
+  for (const [name, respond] of bad)
+    await assert.rejects(
+      new ApiMasteryCatalog('http://localhost:3000/', respond).listSummaries(),
+      (error: Error) => error.message === unavailable && error.cause === undefined,
+      name,
+    );
+  const requests: string[] = [];
+  const release = createMasteryCatalog(
+    'does-not-exist',
+    { BUILD_MODE: 'release', CONTENT_SOURCE: 'api', API_BASE_URL: 'http://localhost:3000' },
+    async (url) => {
+      requests.push(new URL(String(url)).pathname);
+      return json({}, 503);
+    },
+  );
+  await assert.rejects(release.listSummaries(), { message: unavailable });
+  assert.deepEqual(requests, ['/api/v1/masteries']);
+});

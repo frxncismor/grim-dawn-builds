@@ -3,6 +3,7 @@ import { Routes, type ActivatedRouteSnapshot } from '@angular/router';
 import { resolveCatalog } from './core/content/catalog.resolver';
 import type { AuthorPageData } from './features/author/author.state';
 import type { MasteryTree } from '@gd/domain';
+import type { MasterySummary } from './core/content/masteries';
 import type { BuildPageContent } from './features/build/build.page';
 
 /**
@@ -30,6 +31,9 @@ const resolveAuthor = lazyResolver<AuthorPageData | null>(() =>
 const resolveMasteryTree = lazyResolver<MasteryTree | null>(() =>
   import('./core/content/mastery.resolver').then((module) => module.resolveMastery),
 );
+const resolveMasteryIndexPage = lazyResolver<readonly MasterySummary[]>(() =>
+  import('./core/content/mastery-index.resolver').then((module) => module.resolveMasteryIndex),
+);
 
 export const routes: Routes = [
   {
@@ -54,6 +58,11 @@ export const routes: Routes = [
     path: 'builds/:slug',
     loadComponent: () => import('./features/build/build-route.page').then((m) => m.BuildRoutePage),
     resolve: { content: resolveBuildPage },
+  },
+  {
+    path: 'maestrias',
+    loadComponent: () => import('./features/masteries/index.page').then((m) => m.MasteryIndexPage),
+    resolve: { masteries: resolveMasteryIndexPage },
   },
   {
     path: 'maestrias/:slug',

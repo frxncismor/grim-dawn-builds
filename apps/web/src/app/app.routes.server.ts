@@ -30,6 +30,11 @@ export const serverRoutes: ServerRoute[] = [
     getPrerenderParams: buildPrerenderParams,
   },
   {
+    // Index of the mastery trees (T014): static path, its rows come from the catalog resolver.
+    path: 'maestrias',
+    renderMode: RenderMode.Prerender,
+  },
+  {
     // Catalog of mastery trees: one prerendered page per mastery, listed by the catalog itself.
     path: 'maestrias/:slug',
     renderMode: RenderMode.Prerender,
