@@ -5,7 +5,7 @@ export { CONTENT_STATUSES, TIERS } from './vocabulary.js';
 export type { ContentStatus, Tier } from './vocabulary.js';
 
 /**
- * Content contract for `content/` JSON files.
+ * Content contract for `fixtures/content/` JSON files.
  * Framework-independent: no Angular imports, so the same rules run in scripts and in the app.
  * Shapes and enums follow specs/001-mvp-guias-builds/data-model.md.
  */

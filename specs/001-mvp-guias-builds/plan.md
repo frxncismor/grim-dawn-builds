@@ -168,7 +168,7 @@ apps/api/            Fastify + Drizzle + Dockerfile
   src/db/{migrate,seed}.mts   migrador one-shot y seed (guardado por APP_ENV)
 packages/domain/     Zod + tipos + reglas puras (publicFilter, rights, assets, tier checks), sin Angular/Fastify/Drizzle/E-S
 infra/docker/        compose.yaml, compose.debug.yaml, .env.example
-content/             FIXTURES de pruebas/desarrollo y material de importación (no fuente de producción; renombrable a fixtures/content, T-075 opcional)
+fixtures/content/    FIXTURES de pruebas/desarrollo y material de importación (no fuente de producción; reubicado desde `content/` por T-075, seleccionada 2026-11-13)
 scripts/             validate-content, check-assets, gen-*, verify-local, check-release (importan de @gd/domain)
 pnpm-workspace.yaml  packages: [apps/*, packages/*]  (conservar allowBuilds)
 ```
@@ -474,7 +474,7 @@ Componente `SourceAttribution` (bloque «Esta build fue adaptada de: …») usan
 
 Revisada Constitución v1.8.0, sin enmiendas. I/II/VII: guía pendiente como fixture local, permisos no supuestos, fallback propio, adaptaciones sintéticas para checks. III: HTML prerender y SEO, borradores locales noindex aislados del release. IV/IX: T-003/T-040–T-042/T-126/T-128 verifican rendimiento, e2e y accesibilidad local y en CI; quedan corregidas las menciones anteriores de CI de rendimiento diferida. V/X: WCAG 2.2 AA, teclado/NVDA y español/i18n. VI/XI: dominio completo, BD única producción, API solo vistas, release fail-closed. VIII: raíz Angular conservada y sin nuevos servicios/auth. XII: credenciales por rol/archivo, sin secretos en repo/build/logs. La revisión posterior al diseño no encuentra excepción constitucional autorizada ni necesaria.
 
-El cierre exige requisitos activos completos, incluidos UI y fase 8; `pnpm verify` actual o T-057 aislada no bastan. T-044/T-110 conservan bloqueos externos de publicación y aceptan borrador/link-only; no impiden entregar el resto verificado. T-067/T-075 siguen opcionales; hosting/ingesta/comunidad permanecen diferidos. La implementación trabaja una tarea por vez; los controles finales se registran con evidencia de ejecución, no por mera presencia de archivos o checks históricos.
+El cierre exige requisitos activos completos, incluidos UI y fase 8; `pnpm verify` actual o T-057 aislada no bastan. T-044/T-110 conservan bloqueos externos de publicación y aceptan borrador/link-only; no impiden entregar el resto verificado. T-067 sigue opcional (T-075 fue seleccionada por el usuario el 2026-11-13, ya no es opcional); hosting/ingesta/comunidad permanecen diferidos. La implementación trabaja una tarea por vez; los controles finales se registran con evidencia de ejecución, no por mera presencia de archivos o checks históricos.
 
 ### 17.2 Contrato, dependencias y decisiones cerradas
 

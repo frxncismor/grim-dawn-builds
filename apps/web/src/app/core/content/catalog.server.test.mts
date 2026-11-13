@@ -6,7 +6,9 @@ import { resolve } from 'node:path';
 import { BuildSchema } from '@gd/domain';
 
 test('real fixtures produce only public catalog metadata, including the published guide card', async () => {
-  const repository = createFixtureRepository(resolve('content'), { INCLUDE_DRAFTS: 'true' });
+  const repository = createFixtureRepository(resolve('fixtures/content'), {
+    INCLUDE_DRAFTS: 'true',
+  });
   const model = await loadCatalogSnapshot(repository);
   assert.equal(model.cards.length, 45);
   const guides = model.cards.filter((card) => card.guide);
@@ -29,7 +31,7 @@ test('real fixtures produce only public catalog metadata, including the publishe
     assert.ok(!output.includes(key));
 });
 test('missing catalog and source failure are sanitized and never fall back', async () => {
-  const repository = createFixtureRepository(resolve('content'), {});
+  const repository = createFixtureRepository(resolve('fixtures/content'), {});
   for (const getTierList of [
     async () => null,
     async () => {
@@ -51,7 +53,9 @@ test('missing catalog and source failure are sanitized and never fall back', asy
 });
 
 test('synthetic own publication projects filters and excludes every private canary and guide body', async () => {
-  const repository = createFixtureRepository(resolve('content'), { INCLUDE_DRAFTS: 'true' });
+  const repository = createFixtureRepository(resolve('fixtures/content'), {
+    INCLUDE_DRAFTS: 'true',
+  });
   const original = (await repository.listBuilds())[0];
   const guide = BuildSchema.parse({
     ...original,
@@ -120,7 +124,7 @@ test('synthetic own publication projects filters and excludes every private cana
 });
 
 test('credential-bearing external URL never enters transfer state or structured data', async () => {
-  const repository = createFixtureRepository(resolve('content'), {});
+  const repository = createFixtureRepository(resolve('fixtures/content'), {});
   const tier = structuredClone((await repository.getTierList('principal'))!);
   const url = new URL('https://example.org/');
   url.username = 'synthetic-user';

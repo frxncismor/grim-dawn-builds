@@ -34,7 +34,7 @@ reutilizable, y el permiso de un autor no cubre a otro.
 
 ## Flujo de solicitud
 
-1. Registrar la fuente en `content/sources/` con estado `pending` y la URL exacta.
+1. Registrar la fuente en `fixtures/content/sources/` con estado `pending` y la URL exacta.
 2. Evaluar términos de uso y `robots.txt`. Si prohíben el uso, la fuente pasa a
    `prohibida` y se detiene aquí.
 3. Enviar la solicitud con la plantilla
@@ -90,7 +90,7 @@ solo aplica a fuentes externas reales; aquí no existe ninguna.
 
 `pnpm check:scope` falla si el código de la aplicación o de la ingesta contiene
 una llamada HTTP automatizada a un host que no sea el propio del proyecto
-(`external-source-access`), y si un registro de `content/sources/` figura
+(`external-source-access`), y si un registro de `fixtures/content/sources/` figura
 `habilitada` o `limitada` sin evidencia completa (`source-rights-gate`). Un
 registro sin `status` se trata como `pending` y no se marca.
 

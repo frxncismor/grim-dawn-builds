@@ -1,6 +1,6 @@
 ---
 name: add-build-content
-description: Add or validate a community build or guide in content/ with authorship, sources, provenance and rights. Use when asked to "add a build", "add a guide", "validate this content" or "publish this build".
+description: Add or validate a community build or guide in fixtures/content/ with authorship, sources, provenance and rights. Use when asked to "add a build", "add a guide", "validate this content" or "publish this build".
 ---
 
 # Add build content
@@ -12,12 +12,12 @@ plan it (SDD).
 ## Steps
 
 1. Work only in your own worktree (`Orq-Worktree.ps1 -Accion nuevo -Agente <you>`), never in the main checkout.
-2. Copy the closest existing file in `content/builds/` as a template; keep its field order.
-3. Fill authorship (`content/authors/`), every source (`content/sources/`) and the rights or adaptation
+2. Copy the closest existing file in `fixtures/content/builds/` as a template; keep its field order.
+3. Fill authorship (`fixtures/content/authors/`), every source (`fixtures/content/sources/`) and the rights or adaptation
    evidence. If a right is unknown, mark it as pending exactly as the schema allows; never invent approvals.
 4. Add both locales when the schema asks for them (English primary, Spanish complete).
 5. Run, in order, and keep the real output:
-   - `pnpm content:validate -- --dir content`
+   - `pnpm content:validate -- --dir fixtures/content`
    - `pnpm assets:check`
    - `pnpm catalog:generate` and then `pnpm catalog:check`
 6. Report the files touched, the three outputs and any pending right as a blocker.

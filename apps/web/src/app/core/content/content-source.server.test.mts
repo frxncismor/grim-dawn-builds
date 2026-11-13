@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { createContentSource } from './content-source.server.ts';
 
 test('local source defaults to fixture and reports only public source metadata', async () => {
-  const selected = createContentSource('content', { PRIVATE_SENTINEL: 'do-not-transfer' });
+  const selected = createContentSource('fixtures/content', { PRIVATE_SENTINEL: 'do-not-transfer' });
   await selected.initialize();
   assert.deepEqual(selected.metadata, { source: 'fixture', includeDrafts: false });
   assert.equal((await selected.repository.listBuilds()).length, 1);
-  const local = createContentSource('content', { INCLUDE_DRAFTS: 'true' });
+  const local = createContentSource('fixtures/content', { INCLUDE_DRAFTS: 'true' });
   assert.equal((await local.repository.listBuilds()).length, 1);
 });
 
@@ -20,7 +20,7 @@ test('selection refuses invalid modes, implicit release, fixture release and API
     { CONTENT_SOURCE: 'api', INCLUDE_DRAFTS: 'true' },
     { CONTENT_SOURCE: 'api', INCLUDE_DRAFTS: '1' },
   ])
-    assert.throws(() => createContentSource('content', env));
+    assert.throws(() => createContentSource('fixtures/content', env));
 });
 
 test('API initialization eagerly checks readiness and slugs, and never falls back to files', async () => {
@@ -39,7 +39,7 @@ test('API initialization eagerly checks readiness and slugs, and never falls bac
   assert.deepEqual(source.metadata, { source: 'api', includeDrafts: false });
   for (const failedPath of ['/ready', '/api/v1/slugs']) {
     const down = createContentSource(
-      'content',
+      'fixtures/content',
       { CONTENT_SOURCE: 'api' },
       async (url) =>
         new Response(JSON.stringify({ status: 'ready' }), {

@@ -18,7 +18,7 @@
  *   Hosts propios: localhost, 127.0.0.1, ::1, [::1], 0.0.0.0 y PROJECT_HOSTS.
  *   Un literal construido desde variables (`fetch(`${BASE_URL}/...`)`) no lleva
  *   host literal y no se marca; tampoco una URL suelta en prosa o comentario.
- * - `source-rights-gate`: un registro JSON de `content/sources/` (o de
+ * - `source-rights-gate`: un registro JSON de `fixtures/content/sources/` (o de
  *   cualquier carpeta `sources/`) en estado `habilitada` o `limitada` exige
  *   evidencia completa (tipo, referencia, alcance, fecha) y un `rights_status`
  *   publicable. Sin `status` el registro es `pending` y no se marca.
@@ -375,7 +375,7 @@ const IGNORED_DIRS_ANY = new Set([
   'testing',
 ]);
 /** Directorios de documentación/specs ignorados solo en la raíz (apps/web/src/app/core/content sí se escanea). */
-const IGNORED_DIRS_ROOT = new Set(['specs', 'docs', '.specify', 'content']);
+const IGNORED_DIRS_ROOT = new Set(['specs', 'docs', '.specify', 'fixtures']);
 const LOCKFILES = new Set(['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock']);
 
 const IMPORT_PATTERNS: readonly RegExp[] = [
@@ -1076,13 +1076,13 @@ function listJsonFiles(root: string, dirRel: string, out: string[] = []): string
 }
 
 /**
- * Registros de fuentes (T-109): los JSON de `content/sources/` y cualquier `*.json`
- * bajo un directorio llamado `sources`. `content` está ignorado por el walker
+ * Registros de fuentes (T-109): los JSON de `fixtures/content/sources/` y cualquier `*.json`
+ * bajo un directorio llamado `sources`. `fixtures` está ignorado por el walker
  * general (son datos, no código), por eso se recogen aparte y no cuentan en
  * `scannedFiles`.
  */
 export function collectSourceRegistryFiles(root: string): string[] {
-  const found = new Set<string>(listJsonFiles(root, 'content/sources'));
+  const found = new Set<string>(listJsonFiles(root, 'fixtures/content/sources'));
   const visit = (dirRel: string): void => {
     const absolute = join(root, dirRel);
     if (!existsSync(absolute)) return;

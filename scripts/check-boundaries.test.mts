@@ -39,7 +39,7 @@ describe('zoneOf', () => {
   });
 
   it('leaves unowned paths out of the zone graph', () => {
-    assert.equal(zoneOf('content/builds/a.json'), undefined);
+    assert.equal(zoneOf('fixtures/content/builds/a.json'), undefined);
     assert.equal(zoneOf('srcx/app.ts'), undefined, 'prefix must match whole segments');
     assert.equal(zoneOf('apps/apix/a.ts'), undefined, 'prefix must match whole segments');
     assert.equal(zoneOf('../outside.ts'), undefined);
@@ -126,7 +126,7 @@ describe('allowed dependency graph (plan §12.4)', () => {
   });
 
   it('ignores imports from files that belong to no zone', () => {
-    assert.deepEqual(rulesOf('content/x.ts', "import { x } from '@gd/api';"), []);
+    assert.deepEqual(rulesOf('fixtures/content/x.ts', "import { x } from '@gd/api';"), []);
   });
 });
 

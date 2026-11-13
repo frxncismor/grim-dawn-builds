@@ -2,7 +2,7 @@ import type { LinkOnlyMetadata } from '@gd/domain';
 
 /**
  * Synthetic adaptation metadata used only by the specs (plan §15.1, T-105).
- * It deliberately does not come from `content/`: no real guide, forum or author
+ * It deliberately does not come from `fixtures/content/`: no real guide, forum or author
  * is reproduced, and the gate is not bypassed because this is not stored data.
  */
 export const sampleAdaptation: LinkOnlyMetadata = Object.freeze({

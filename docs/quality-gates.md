@@ -25,7 +25,7 @@ not replace either file, which remain the source of truth.
 | Format check                               | `pnpm format:check`                                                                               | yes                   | yes     | yes      | T-002      |
 | Web unit tests                             | `pnpm test`                                                                                       | yes                   | yes     | yes      | T-002      |
 | Script tests                               | `pnpm test:scripts`                                                                               | yes                   | yes     | yes      | T-004      |
-| Content validation (repository content)    | `pnpm run content:validate -- --dir content`                                                      | yes                   | yes     | yes      | T-009      |
+| Content validation (repository content)    | `pnpm run content:validate -- --dir fixtures/content`                                             | yes                   | yes     | yes      | T-009      |
 | Catalog check                              | `pnpm run catalog:check`                                                                          | yes                   | yes     | yes      | T-016      |
 | Locale parity                              | `pnpm run check:locale-parity`                                                                    | yes                   | yes     | yes      | T-138      |
 | Assets manifest                            | `pnpm assets:check`                                                                               | yes                   | yes     | yes      | T-047      |

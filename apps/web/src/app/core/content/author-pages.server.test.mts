@@ -5,7 +5,7 @@ import { loadCatalogData } from './catalog.server.ts';
 import { loadPublicSiteData } from './author-pages.server.ts';
 import { BuildSchema } from '@gd/domain';
 import type { ContentRepository } from './repository';
-const base = () => createFixtureRepository('content', { INCLUDE_DRAFTS: 'true' });
+const base = () => createFixtureRepository('fixtures/content', { INCLUDE_DRAFTS: 'true' });
 test('site loader reads catalog once and only its public owner; legacy wrapper keeps two calls', async () => {
   const source = base(),
     counts = { tier: 0, builds: 0, author: 0 };

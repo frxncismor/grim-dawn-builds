@@ -108,7 +108,7 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', () => {
       connectionTimeoutMillis: 5000,
     });
     await importer.connect();
-    data = await readSeedFixtures(join(root, 'content'));
+    data = await readSeedFixtures(join(root, 'fixtures/content'));
   }, 90000);
   afterAll(async () => {
     await importer?.end().catch(() => undefined);

@@ -44,7 +44,7 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm run assets:check',
   'pnpm run build',
   // T-126: real fixture content, catalog freshness and the quality gates.
-  'pnpm run content:validate -- --dir content',
+  'pnpm run content:validate -- --dir fixtures/content',
   'pnpm run catalog:check',
   // T-150: the en/es catalogs must match in PR verification too.
   'pnpm run check:locale-parity',
@@ -379,7 +379,7 @@ describe('PR verification workflow (T-064)', () => {
     const fixtureContent = indexOf(
       'pnpm run content:validate -- --dir scripts/fixtures/content-valid',
     );
-    const realContent = indexOf('pnpm run content:validate -- --dir content');
+    const realContent = indexOf('pnpm run content:validate -- --dir fixtures/content');
     const catalog = indexOf('pnpm run catalog:check');
     const draftsBuild = indexOf(
       'pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
@@ -567,7 +567,7 @@ describe('PR verification workflow (T-064)', () => {
       'real content validation removed',
       () =>
         mutate(
-          /\n {6}- name: Content validation \(real fixture content\)\n {8}run: pnpm run content:validate -- --dir content\n/,
+          /\n {6}- name: Content validation \(real fixture content\)\n {8}run: pnpm run content:validate -- --dir fixtures\/content\n/,
           '\n',
         ),
     ],
