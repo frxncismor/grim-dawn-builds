@@ -140,7 +140,76 @@ _Pendiente (T002, depende de T001)._
 
 ## T003 — Decisión de parser (propio mínimo vs librería)
 
-_Pendiente (T003)._
+Decisión tomada el 2026-11-13. Fuentes consultadas por lectura web; no se descargó nada al repo.
+
+### Formato `.arz` (según `gd-utility/gd_arc_browser/docs/ARZ.md`)
+
+- Cabecera de 24 bytes sin magic (`u16` desconocido = 2, `u16` versión = 3, inicio y tamaño de la
+  tabla de registros, nº de registros, inicio y tamaño de la tabla de cadenas); pie de 16 bytes sin
+  significado conocido; sin checksums documentados.
+- Tabla de registros de longitud variable (índice de nombre, clase, offset, `compressedSize`,
+  `decompressedSize`, `FILETIME`) y tabla de cadenas (`u32` cuenta + cadenas con prefijo de longitud).
+- **Compresión: LZ4 en bloque, sin cabecera de frame, un bloque por registro** (no zlib; zlib era el
+  formato de versiones antiguas según el foro de Crate, lo que explica que `ArchiveTool.exe` pida
+  `zlibwapi.dll`).
+- Carga útil descomprimida: lista plana de campos `u16 tipo, u16 count, u32 índice-de-nombre, u32[count]`
+  (0 = int, 1 = float, 2 = índice de cadena, 3 = bool); los campos deben cubrir la carga exacta, lo que
+  sirve de autovalidación.
+- **Node 22 no trae LZ4**: `node:zlib` ofrece deflate/gzip/brotli y zstd (22.15, experimental), no LZ4
+  ([docs](https://nodejs.org/docs/latest-v22.x/api/zlib.html)). Un descompresor LZ4 de bloque son
+  ~30 líneas de TypeScript. Contraste con el juego real: lo valida T001.
+
+### Comparativa
+
+| Opción                                                                      | Licencia (verificada)                                                                                                                                                                                               | Lenguaje                | Mantenimiento                                                                 | Tamaño                                                      | Deps.                                | ¿Utilizable desde Node?                                                          |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------- |
+| **Parser propio mínimo**                                                    | del repo (el parser es código propio)                                                                                                                                                                               | TypeScript              | el nuestro                                                                    | estimado ~150–250 líneas (cabecera + tablas + LZ4 + campos) | ninguna (`node:fs`)                  | Sí, sin dependencia nueva                                                        |
+| [`R-Hidayatullah/gd-utility`](https://github.com/R-Hidayatullah/gd-utility) | MIT, [LICENSE](https://raw.githubusercontent.com/R-Hidayatullah/gd-utility/master/LICENSE) («Copyright (c) 2026 Ridwan Hidayatullah»), commit `1d468f5`, leído 2026-11-13                                           | C++20 (CMake)           | último push 2026-08-30; repo de 2,6 MB, un solo commit visible de importación | ~2,6 MB (incluye investigación de ingeniería inversa)       | compilador C++20                     | No hay paquete npm: solo sirve como **especificación** (`docs/ARZ.md`, `DBR.md`) |
+| [`xaviershay/gd-explorer`](https://github.com/xaviershay/gd-explorer)       | BSD-3-Clause, [LICENSE](https://raw.githubusercontent.com/xaviershay/gd-explorer/main/LICENSE) (texto BSD-3 con el titular **sin rellenar**: «Copyright 2026 Author name here»), commit `e18991e`, leído 2026-11-13 | Haskell (Stack)         | último push 2026-07-06; el README dice «probably out of date»                 | 453 KB                                                      | toolchain Haskell + paquetes Hackage | No; ni siquiera confirmado que cubra la versión actual                           |
+| [`gregates/gddb`](https://github.com/gregates/gddb)                         | GPL-3.0 (README/metadatos de GitHub; no se leyó el archivo LICENSE)                                                                                                                                                 | Rust                    | no determinado                                                                | no medido                                                   | crates Rust                          | Descartada por licencia copyleft                                                 |
+| [`atom0s/grimarz`](https://gitlab.com/atom0s/grimarz)                       | no verificada (GitLab devolvió 403)                                                                                                                                                                                 | n/d                     | n/d                                                                           | n/d                                                         | n/d                                  | No evaluable                                                                     |
+| `ArchiveTool.exe` (Crate)                                                   | Sin licencia publicada para la herramienta; términos en el EULA/Modding Guide de Crate (**no verificados**: el PDF no se pudo leer, `pdftoppm` ausente; la búsqueda web no halló el texto del EULA)                 | binario Windows cerrado | lo distribuye el juego                                                        | n/d                                                         | `zlibwapi.dll`                       | Solo como CLI local                                                              |
+
+No se encontró ningún paquete npm mantenido que lea `.arz` (búsqueda web 2026-11-13, sin resultados
+relevantes); los lectores conocidos son C++, Haskell, Rust y Go (`arc0`).
+
+### Decisión
+
+**Parser propio mínimo en TypeScript con builtins de Node (`node:fs`, `node:crypto` para el sha256)
+y un descompresor LZ4 de bloque propio**, dentro de `scripts/extract-mastery-trees.mts`.
+
+- **Tamaño (Constitución IV)**: cero dependencias nuevas y cero bytes en el bundle de producto (el
+  script no se despliega). Cualquier librería añadiría un toolchain (C++/Haskell/Rust) o un paquete
+  sin mantener a cambio de ~200 líneas.
+- **Licencia**: nada ajeno entra en el repo. MIT/BSD-3 permitirían reutilizar código, pero las dos
+  únicas con licencia permisiva no están en un lenguaje que Node pueda consumir; usamos `gd-utility`
+  solo como especificación del formato (hechos, no código copiado), citada en la fuente.
+- **Verificabilidad**: la propia estructura (`recordTableStart + recordTableSize == stringTableStart`,
+  campos que cubren la carga exacta) permite probar el parser y fallar de forma explícita ante cambios
+  de formato.
+
+### Alternativa descartada
+
+**Librería comunitaria (`gd-utility` MIT / `gd-explorer` BSD-3)**: descartada porque ninguna es
+utilizable desde Node sin compilar un toolchain ajeno (C++20/Haskell) ni dar un paquete instalable;
+`gd-explorer` además admite estar desactualizada y su LICENSE no identifica al titular. `gddb` queda
+fuera por GPL-3.0. **`ArchiveTool.exe`** se descarta como solución del repo: es un binario cerrado de
+Crate sin licencia de redistribución verificada, solo Windows y con el juego instalado, por lo que no
+puede ir al repo (VII) ni a CI (no hay juego en CI); queda como **fallback manual local** para extraer
+`.dbr` a una carpeta fuera del repo y contrastar el resultado del parser.
+
+### Riesgos
+
+- El formato no es oficial y está documentado por ingeniería inversa de terceros: un parche del juego
+  puede cambiarlo. Mitigación: validar estructura y fallar con mensaje claro; registrar `game_version`
+  y sha256 del `.arz` (T006).
+- Descompresor LZ4 propio: riesgo de bug en casos límite. Mitigación: contrastar con `ArchiveTool`
+  sobre una muestra (T001) y pruebas con vectores LZ4 pequeños.
+- Términos de Crate sin verificar (EULA/Modding Guide): pendiente de lectura humana; el diseño no
+  versiona ningún archivo del juego, solo valores factuales (VII).
+- `gd-utility` se lee como referencia de formato; si en el futuro se copia código, hay que conservar
+  su aviso MIT.
+- Hechos a confirmar con el juego real (T001): LZ4 y tamaño de cabecera en la versión instalada.
 
 <!-- ===================================================================== -->
 
