@@ -212,7 +212,10 @@ editorial.
 - **Q1** Licencia de la wiki: el cuerpo dice **CC BY-SA 3.0**, el pie de página **CC BY-SA
   4.0**. ¿Aplicamos la 3.0 (la del cuerpo, más restrictiva y explícita) y no copiamos nada
   hasta confirmarlo? Bloquea FR-007 y la copia de coordenadas desde la wiki; **no** bloquea
-  derivar desde los `.dbr`.
+  derivar desde los `.dbr`. **Cita verificada** (2026-11-13): cuerpo CC BY-SA 3.0 y pie CC BY-SA
+  4.0 en `https://grimdawn.miraheze.org/wiki/Project:Copyrights?oldid=82` (revisión de
+  2020-05-21, `Rostiger Bot`); detalle en `research.md` §T004. Estado: pendiente de
+  confirmación escrita de Paco; decisión provisional aplicada: CC BY-SA 3.0, sin copia.
 - **Q2** ¿El catálogo incluye solo las diez maestrías del juego base y DLC actual, o también
   maestrías de mods (que no tendrían posición oficial)? Propuesta: solo el juego oficial en
   v1, con hueco declarado para mods.
