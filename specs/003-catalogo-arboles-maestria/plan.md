@@ -102,6 +102,12 @@ src/app/
    `fallback_svg` presente; build falla cerrado si falta.
 6. **Wiki**: no es fuente por defecto (Q1 resuelta: CC BY-SA 4.0, decisión de Paco,
    2026-11-13); si se usa, artefacto derivado CC BY-SA 4.0 con atribución y aviso de licencia en la propia página/JSON.
+7. **Nombres localizados desde los `.arc` de texto (T022).** El script lee también
+   `resources/Text_EN.arc` y `resources/Text_ES.arc` (`.arc` v3, mismo LZ4 de bloque que el `.arz`,
+   solo builtins de `node:`) y resuelve `skillDisplayName` a `name.en`/`name.es` con el esquema
+   `localizedName {en, es}` de T005 sin cambios. Falta en ES ⇒ texto EN y aviso con conteo; falta en
+   EN ⇒ error. `--no-localize` mantiene los tags de T006. Los hashes de los dos `.arc` se añaden a
+   `source.sha256[]`. Formato y evidencia en [`research.md#t022--textos-de-localización-arc`](research.md#t022--textos-de-localización-arc).
 
 ## Riesgos
 

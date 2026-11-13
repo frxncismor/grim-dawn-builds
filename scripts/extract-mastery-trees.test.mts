@@ -10,12 +10,17 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
+  Arc,
   Arz,
   buildCatalog,
   type CatalogTree,
+  cleanText,
+  createLocalizer,
   extractFromGameDir,
   kindOf,
+  loadTags,
   lz4Block,
+  parseTags,
   serializeCatalog,
 } from './extract-mastery-trees.mts';
 
@@ -469,23 +474,243 @@ test('extractFromGameDir: lee database.arz, hash sha256 y versión del appmanife
       join(root, 'steamapps', 'appmanifest_219990.acf'),
       '"AppState"\n{\n\t"appid"\t\t"219990"\n\t"buildid"\t\t"25813250"\n}\n',
     );
-    const out = extractFromGameDir(gameDir, { masteries: ['class01'] });
+    const out = extractFromGameDir(gameDir, { masteries: ['class01'], localize: false });
     const json = JSON.parse(out);
     assert.deepEqual(json[0].source, {
       game_version: 'steam-build-25813250',
       sha256: [createHash('sha256').update(arzBuf).digest('hex')],
     });
-    assert.equal(out, extractFromGameDir(gameDir, { masteries: ['class01'] }));
+    assert.equal(out, extractFromGameDir(gameDir, { masteries: ['class01'], localize: false }));
     // `gameVersion` explícito tiene prioridad; sin manifest ni valor explícito, error
     assert.equal(
-      JSON.parse(extractFromGameDir(gameDir, { masteries: ['class01'], gameVersion: 'x' }))[0]
-        .game_version,
+      JSON.parse(
+        extractFromGameDir(gameDir, { masteries: ['class01'], gameVersion: 'x', localize: false }),
+      )[0].game_version,
       'x',
     );
     const lone = join(root, 'solo');
     await mkdir(join(lone, 'database'), { recursive: true });
     await writeFile(join(lone, 'database', 'database.arz'), arzBuf);
-    assert.throws(() => extractFromGameDir(lone, { masteries: ['class01'] }), /versi/);
+    assert.throws(
+      () => extractFromGameDir(lone, { masteries: ['class01'], localize: false }),
+      /versi/,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+// ---------------------------------------------------------------------------------------------
+// T022: textos de localización (.arc). Todo sintético: ningún texto real del juego.
+// ---------------------------------------------------------------------------------------------
+
+/** Escribe un `.arc` v3 mínimo (cabecera, partes LZ4 de literales, cadenas y registros de 44 bytes). */
+function buildArc(files: readonly { name: string; content: string; stored?: boolean }[]): Buffer {
+  const header = Buffer.alloc(2048); // los datos empiezan en 2048, como en el juego
+  const blocks: Buffer[] = [];
+  const parts: Buffer[] = [];
+  const recs: Buffer[] = [];
+  let names = '';
+  let offset = 2048;
+  for (const [i, f] of files.entries()) {
+    const plain = Buffer.from(f.content, 'utf8');
+    const comp = f.stored ? plain : lz4Literals(plain);
+    blocks.push(comp);
+    const part = Buffer.alloc(12);
+    part.writeUInt32LE(offset, 0);
+    part.writeUInt32LE(comp.length, 4);
+    part.writeUInt32LE(plain.length, 8);
+    parts.push(part);
+    const r = Buffer.alloc(44);
+    r.writeUInt32LE(f.stored ? 1 : 3, 0);
+    r.writeUInt32LE(offset, 4);
+    r.writeUInt32LE(comp.length, 8);
+    r.writeUInt32LE(plain.length, 12);
+    r.writeUInt32LE(1, 28); // nº de partes
+    r.writeUInt32LE(i, 32); // primera parte
+    r.writeUInt32LE(f.name.length, 36);
+    r.writeUInt32LE(names.length, 40);
+    names += f.name;
+    recs.push(r);
+    offset += comp.length;
+  }
+  const partTable = Buffer.concat(parts);
+  header.write('ARC\0', 0, 'latin1');
+  header.writeUInt32LE(3, 4);
+  header.writeUInt32LE(files.length, 8);
+  header.writeUInt32LE(files.length, 12);
+  header.writeUInt32LE(partTable.length, 16);
+  header.writeUInt32LE(names.length, 20);
+  header.writeUInt32LE(offset, 24);
+  return Buffer.concat([header, ...blocks, partTable, Buffer.from(names, 'latin1'), ...recs]);
+}
+
+const crlf = (lines: readonly string[]): string => lines.join('\r\n') + '\r\n';
+const TAGS_EN = crlf([
+  '#Default',
+  'tagClass01SkillName00A=Alpha Class',
+  'tagClass01SkillName01A=First Skill',
+  'tagClass01SkillName01B=Second {^g}Skill{^-}',
+  'tagClass01SkillName01C=Third = Skill',
+  'tagClass01SkillName02A=Fourth',
+  'tagClass01SkillName03A=Fifth',
+  'tagClass01SkillName03B=Sixth',
+  'tagClass01SkillName04A=Seventh',
+  'tagClass01SkillName05A=Eighth',
+  'tagClass01SkillName05B=Ninth',
+  'tagClass02SkillName00A=Beta Class',
+  'tagClass02SkillName01A=Tenth',
+]);
+const TAGS_ES = crlf([
+  '// comentario',
+  'tagClass01SkillName00A=Clase Alfa',
+  'tagClass01SkillName01A=Primera Habilidad',
+  'tagClass01SkillName01B=Segunda [ms]Táctico[fs]Táctica',
+  'tagClass01SkillName01C=Tercera',
+  'tagClass01SkillName02A=Cuarta',
+  'tagClass01SkillName03A=Quinta',
+  'tagClass01SkillName03B=Sexta',
+  'tagClass01SkillName04A=Séptima',
+  'tagClass01SkillName05A=Octava',
+  'tagClass01SkillName05B=Novena',
+  'tagClass02SkillName00A=Clase Beta',
+  // `tagClass02SkillName01A` falta a propósito: fallback ES -> EN
+]);
+const arcOf = (tags: string): Buffer =>
+  buildArc([
+    { name: 'credits', content: 'sin tags\r\n' },
+    { name: 'tags_skills.txt', content: tags },
+  ]);
+
+test('Arc: lee cabecera, índice y archivos LZ4 y almacenados del .arc sintético', () => {
+  const arc = new Arc(
+    buildArc([
+      { name: 'a.txt', content: 'hola\r\n' },
+      { name: 'dir/b.txt', content: 'adiós', stored: true },
+    ]),
+  );
+  assert.deepEqual([...arc.files.keys()], ['a.txt', 'dir/b.txt']);
+  assert.equal(arc.read('a.txt').toString('utf8'), 'hola\r\n');
+  assert.equal(arc.read('dir/b.txt').toString('utf8'), 'adiós');
+  assert.throws(() => arc.read('nada.txt'), /nada\.txt/);
+  assert.throws(() => new Arc(Buffer.alloc(64)), /\.arc/);
+  const v2 = buildArc([{ name: 'a.txt', content: 'x' }]);
+  v2.writeUInt32LE(2, 4);
+  assert.throws(() => new Arc(v2), /\.arc/);
+});
+
+test('parseTags/cleanText: comentarios, primer "=", CRLF/LF y códigos de formato', () => {
+  const m = parseTags('#c\r\n// c\r\n\r\na=1 = 2\nb=Hola {^g}mundo{^-}\r\nsin igual\r\nc=\r\n');
+  assert.deepEqual(
+    [...m],
+    [
+      ['a', '1 = 2'],
+      ['b', 'Hola mundo'],
+      ['c', ''],
+    ],
+  );
+  assert.equal(cleanText('{^s}Iron{^-} {%t0} bits'), 'Iron bits');
+  assert.equal(cleanText('[ms]Táctico[fs]Táctica'), 'Táctico');
+  assert.equal(cleanText('[fs]Táctica'), 'Táctica');
+  assert.equal(cleanText('  sin cambios  '), 'sin cambios');
+});
+
+test('loadTags: solo tags_skills.txt; falla con el archivo ausente', () => {
+  assert.equal(loadTags(new Arc(arcOf(TAGS_EN))).get('tagClass01SkillName00A'), 'Alpha Class');
+  assert.throws(
+    () => loadTags(new Arc(buildArc([{ name: 'x.txt', content: 'a=b' }]))),
+    /tags_skills/,
+  );
+});
+
+const localizer = () =>
+  createLocalizer(loadTags(new Arc(arcOf(TAGS_EN))), loadTags(new Arc(arcOf(TAGS_ES))));
+
+test('createLocalizer: resuelve EN/ES; ES ausente cae a EN y se cuenta; EN ausente falla', () => {
+  const l = localizer();
+  assert.deepEqual(l.resolve('tagClass01SkillName01A'), {
+    en: 'First Skill',
+    es: 'Primera Habilidad',
+  });
+  assert.deepEqual(l.resolve('tagClass02SkillName01A'), { en: 'Tenth', es: 'Tenth' });
+  l.resolve('tagClass02SkillName01A'); // repetido: cuenta una sola vez
+  assert.deepEqual([...l.fallbacks], ['tagClass02SkillName01A']);
+  assert.throws(() => l.resolve('tagClassXXSkillName99Z'), /tagClassXXSkillName99Z/);
+  assert.deepEqual(l.resolve('tagClass01SkillName01B'), {
+    en: 'Second Skill',
+    es: 'Segunda Táctico',
+  });
+});
+
+test('buildCatalog + localizer: maestrías y nodos salen del texto, no del tag', () => {
+  const l = localizer();
+  const trees = buildCatalog(new Arz(synthetic()), {
+    ...OPTS,
+    masteries: ['class01', 'class02'],
+    localizer: l,
+  });
+  const t = trees.find((x) => x.mastery.id === 'class01')!;
+  assert.deepEqual(t.mastery.name, { en: 'Alpha Class', es: 'Clase Alfa' });
+  const n = byId(t);
+  assert.deepEqual(n['class01/cadence1']!.name, { en: 'First Skill', es: 'Primera Habilidad' });
+  assert.equal(n['class01/stanceoffensive']!.name.es, 'Séptima');
+  // petmodifier: el nombre resuelto sale de la cadena petSkillName -> buffSkillName
+  assert.equal(n['class01/summon_raven2_petmodifier']!.name.en, 'Sixth');
+  for (const nd of trees.flatMap((x) => x.nodes)) {
+    assert.doesNotMatch(nd.name.en, /^tag/);
+    assert.doesNotMatch(nd.name.es, /^tag/);
+  }
+  // class02 tiene un nodo (blitz1) con el tag ausente en ES: fallback
+  assert.deepEqual(trees.find((x) => x.mastery.id === 'class02')!.nodes[0]!.name, {
+    en: 'Tenth',
+    es: 'Tenth',
+  });
+  assert.equal(l.fallbacks.size, 1);
+  // sin localizer se conserva T006 (tags)
+  assert.equal(catalogOf(synthetic(), ['class01'])[0]!.mastery.name.en, 'tagClass01SkillName00A');
+});
+
+test('extractFromGameDir: resuelve nombres, añade sha256 de los .arc, avisa del fallback y es determinista', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gdb-t022-'));
+  try {
+    const dir = join(root, 'Grim Dawn');
+    await mkdir(join(dir, 'database'), { recursive: true });
+    await mkdir(join(dir, 'resources'), { recursive: true });
+    const arz = synthetic();
+    const en = arcOf(TAGS_EN);
+    const es = arcOf(TAGS_ES);
+    await writeFile(join(dir, 'database', 'database.arz'), arz);
+    await writeFile(join(dir, 'resources', 'Text_EN.arc'), en);
+    await writeFile(join(dir, 'resources', 'Text_ES.arc'), es);
+    const warnings: string[] = [];
+    const base = {
+      gameVersion: 'v1',
+      masteries: ['class01', 'class02'],
+      warn: (m: string) => warnings.push(m),
+    };
+    const out = extractFromGameDir(dir, base);
+    const j = JSON.parse(out) as CatalogTree[];
+    const sha = (b: Buffer) => createHash('sha256').update(b).digest('hex');
+    assert.deepEqual(j[0]!.source.sha256, [sha(arz), sha(en), sha(es)]);
+    assert.equal(j[0]!.mastery.name.es, 'Clase Alfa');
+    assert.equal(j[1]!.mastery.name.en, 'Beta Class');
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0]!, /1 .*ES.*EN/);
+    assert.equal(out, extractFromGameDir(dir, { ...base, warn: () => undefined }));
+    // --no-localize: tags y un solo hash, sin leer los .arc
+    const raw = JSON.parse(extractFromGameDir(dir, { ...base, localize: false })) as CatalogTree[];
+    assert.equal(raw[0]!.mastery.name.en, 'tagClass01SkillName00A');
+    assert.deepEqual(raw[0]!.source.sha256, [sha(arz)]);
+    // .arc ausente: error claro que sugiere --no-localize
+    await rm(join(dir, 'resources', 'Text_ES.arc'));
+    assert.throws(() => extractFromGameDir(dir, base), /Text_ES\.arc.*--no-localize/);
+    // tag ausente en EN: falla con el tag concreto
+    await writeFile(join(dir, 'resources', 'Text_ES.arc'), es);
+    await writeFile(
+      join(dir, 'resources', 'Text_EN.arc'),
+      arcOf(TAGS_EN.replace('tagClass01SkillName02A=Fourth\r\n', '')),
+    );
+    assert.throws(() => extractFromGameDir(dir, base), /tagClass01SkillName02A/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -498,15 +723,21 @@ test(
   'juego instalado (opcional): 6 maestrías, determinista y con padre en todo hijo',
   { skip: existsSync(join(REAL, 'database', 'database.arz')) ? false : 'juego no instalado' },
   () => {
-    const a = extractFromGameDir(REAL);
-    assert.equal(a, extractFromGameDir(REAL));
+    const a = extractFromGameDir(REAL, { warn: () => undefined });
+    assert.equal(a, extractFromGameDir(REAL, { warn: () => undefined }));
     const j = JSON.parse(a);
     assert.deepEqual(
       j.map((t: { mastery: { id: string } }) => t.mastery.id),
       ['class01', 'class02', 'class03', 'class04', 'class05', 'class06'],
     );
-    for (const t of j)
-      for (const nd of t.nodes)
+    for (const t of j) {
+      assert.doesNotMatch(t.mastery.name.en, /^tag/);
+      assert.doesNotMatch(t.mastery.name.es, /^tag/);
+      for (const nd of t.nodes) {
         assert.equal(nd.kind === 'modifier' || nd.kind === 'transmuter', nd.parent_id !== null);
+        assert.doesNotMatch(nd.name.en, /^tag/);
+        assert.doesNotMatch(nd.name.es, /^tag/);
+      }
+    }
   },
 );

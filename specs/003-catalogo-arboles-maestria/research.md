@@ -456,3 +456,73 @@ _Lo anterior queda **superado** por la decisión final de abajo; se conserva com
 Licencia de la wiki = **CC BY-SA 4.0** (sustituye la decisión provisional 3.0). Obras derivadas
 de la wiki bajo CC BY-SA 4.0 con atribución y share-alike. La wiki sigue sin ser fuente por
 defecto: la licencia queda resuelta, no autoriza scraping.
+
+## T022 — Textos de localización (.arc)
+
+Investigado el 2026-11-13 sobre la instalación local (build Steam 25813250). Solo se citan nombres de
+tag y unos valores como dato factual; ningún `.arc` ni volcado de textos entra en el repo.
+
+### Contenedor `.arc` (versión 3, little-endian)
+
+`resources/Text_EN.arc` (471 531 bytes) y `resources/Text_ES.arc` (2 447 988 bytes); hay más idiomas
+(`Text_CS`, `_DE`, `_FR`, … `_ZH`), fuera de alcance. Estructura verificada con ambos archivos:
+
+- **Cabecera (28 bytes, datos desde 2048)**: `"ARC\0"`, `u32` versión (= 3), `u32` nº de archivos,
+  `u32` nº de partes, `u32` tamaño de la tabla de partes, `u32` tamaño de la tabla de cadenas, `u32`
+  offset del índice (tabla de partes). En EN: `0x435241 3 0xb 0xb 0x84 0xb8 0x72ecb`.
+- **Índice (al final del archivo)**: tabla de partes (`nPartes × 12` bytes: `u32` offset de datos, `u32`
+  tamaño comprimido, `u32` tamaño real), a continuación la tabla de cadenas (nombres de archivo
+  concatenados, sin separador) y, hasta el final del archivo, `nArchivos × 44` bytes de registros. En EN
+  `índice + 132 + 184 + 11×44 = 471 531` (tamaño exacto del archivo): autovalidación del formato.
+- **Registro de archivo (44 bytes)**: `u32` modo de almacenamiento (3 = LZ4), `u32` offset, `u32`
+  tamaño comprimido, `u32` tamaño real, `u32` checksum, `u64` marca de tiempo (FILETIME), `u32` nº de partes,
+  `u32` índice de la primera parte, `u32` longitud del nombre, `u32` offset del nombre en la tabla de cadenas.
+- **Compresión**: cada parte es un bloque LZ4 sin cabecera de frame (el mismo que el `.arz`); el
+  archivo es la concatenación de sus partes descomprimidas. Una parte con tamaño comprimido = real se
+  trata como almacenada sin comprimir. En ambos archivos todos los archivos tienen 1 parte, modo 3.
+- `Text_EN.arc` contiene 11 archivos planos; `Text_ES.arc`, 1 161 (incluye subcarpetas como `aom/`).
+
+### Archivos de etiquetas y dónde están los nombres
+
+Salida real (recortada) de listar `Text_EN.arc` por el lector de la investigación:
+
+```text
+credits  tags_achievements.txt  tags_console.txt  tags_creatures.txt  tags_items.txt
+tags_mutators.txt  tags_skills.txt  tags_storyelements.txt  tags_tutorial.txt  tags_ui.txt  tags_uimain.txt
+```
+
+Los nombres de maestrías y habilidades están **solo en `tags_skills.txt`** (EN y ES; 2 175 / 2 197
+etiquetas, sin duplicados). Los 192 tags que usa el catálogo (6 maestrías + 186 nodos) existen en
+ambos idiomas (0 ausentes en EN y en ES):
+
+```text
+EN: tagClass01SkillName00A=Soldier   tagClass02SkillName00A=Demolitionist   tagClass01SkillName01A=Cadence   tagClass01SkillName01B=Fighting Form
+ES: tagClass01SkillName00A=Soldado   tagClass02SkillName00A=Demoledor       tagClass01SkillName01A=Cadencia  tagClass01SkillName01B=Forma de Combate
+```
+
+(`tagClass03SkillName00` va sin letra: el Ocultista se llama «Ocultista» en ES.)
+
+### Formato del `.txt`
+
+- Líneas `tag=valor` (se parte por el **primer** `=`); finales `CRLF` y `LF` mezclados; sin BOM.
+- Codificación: **ASCII** en EN y **UTF-8** en ES (p. ej. «Chamán», «Táctico»); se decodifica como UTF-8.
+- Comentarios: líneas que empiezan por `#` (`#Default`, `#Class01`, …); líneas vacías ignoradas.
+- Códigos de formato (recuento en `tags_skills.txt`, idénticos en EN y ES): `{^s}`, `{^g}`, `{^r}`, `{^-}`
+  (color), `{%t0}`, `{%t1}`, `{%d0}`, `{%d1}` (marcadores de sustitución); en ES además marcas de
+  género `[ms]`/`[fs]` (19 cada una; p. ej. `[ms]Táctico[fs]Táctica`). **Ninguno aparece** en los 192
+  nombres del catálogo; el extractor los limpia igualmente (`{^…}` se elimina; `{%…}` se elimina; en una
+  cadena con `[ms]…[fs]…` se toma la variante masculina) por si un parche los añade.
+
+### Hashes (para `source.sha256[]`)
+
+```text
+Text_EN.arc  82defd8a0fddf71e8491b7494fada51b034b1af14ffc0a6cf9c8aabdf8700c25
+Text_ES.arc  e6f785d155d0791b3100092762111f59a06faa9e1a86d91898ec98317e395752
+```
+
+### Decisiones
+
+- Lector `.arc` mínimo propio en `scripts/extract-mastery-trees.mts` (solo `node:`), reutiliza `lz4Block`.
+  Carga solo `tags_skills.txt` de cada idioma (único archivo con estos tags).
+- ES ausente ⇒ valor EN y aviso por stderr con el conteo; EN ausente ⇒ error con el tag.
+- `--no-localize` deja `name.en = name.es = tag` (comportamiento de T006) y no toca los `.arc`.

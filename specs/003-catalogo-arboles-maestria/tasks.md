@@ -77,9 +77,16 @@ teclado, con y sin JS.
 
 ---
 
+## Ampliaciones
+
+- [x] **T022** Resolver nombres de localización (`Text_EN.arc`/`Text_ES.arc`) en el extractor — `scripts/extract-mastery-trees.mts`, `scripts/extract-mastery-trees.test.mts`, `specs/003-catalogo-arboles-maestria/research.md` (§T022) — Aceptación: `name.en`/`name.es` de las 6 maestrías y sus 186 nodos dejan de ser tags (`tag…`) y salen del texto del juego; si falta el tag en ES se usa el de EN con aviso por stderr y conteo, si falta en EN falla con el tag concreto; se limpian los códigos de formato del juego; `--no-localize` conserva el comportamiento de T006; `source.sha256[]` añade los hashes de `Text_EN.arc` y `Text_ES.arc` sin cambiar `MasteryTreeSchema`; dos ejecuciones con diff vacío (SC-002); salida validada 6/6 con `MasteryTreeSchema`; pruebas con un `.arc` sintético (sin textos reales del juego). Aprobada por Paco, 2026-11-13; depende de T006.
+
+---
+
 ## Dependencias
 
 - Fase 0 → Fase 1 → (US1 ∥ US2) → US3 → Fase 5.
+- T022 amplía T006 (solo toca el script y su prueba); no bloquea T007–T009.
 - T004 (licencia) bloquea T015 y cualquier copia de la wiki; **no** bloquea el resto.
 - Q3 (retratos) bloquea T015; el catálogo funciona sin ella con iconografía propia.
 - Todo lo que toque arte del juego requiere la enmienda 1.10.0 aprobada.
