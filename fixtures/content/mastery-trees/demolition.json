@@ -3,21 +3,25 @@
     "id": "class02",
     "slug": "demolition",
     "name": {
-      "en": "tagClass02SkillName00A",
-      "es": "tagClass02SkillName00A"
+      "en": "Demolitionist",
+      "es": "Demoledor"
     }
   },
   "game_version": "steam-build-25813250",
   "source": {
     "game_version": "steam-build-25813250",
-    "sha256": ["9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603"]
+    "sha256": [
+      "9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603",
+      "82defd8a0fddf71e8491b7494fada51b034b1af14ffc0a6cf9c8aabdf8700c25",
+      "e6f785d155d0791b3100092762111f59a06faa9e1a86d91898ec98317e395752"
+    ]
   },
   "nodes": [
     {
       "id": "class02/flamestrike1",
       "name": {
-        "en": "tagClass02SkillName03A",
-        "es": "tagClass02SkillName03A"
+        "en": "Fire Strike",
+        "es": "Golpe de Fuego"
       },
       "kind": "active",
       "circular": false,
@@ -35,8 +39,8 @@
     {
       "id": "class02/stunjacks1",
       "name": {
-        "en": "tagClass02SkillName09A",
-        "es": "tagClass02SkillName09A"
+        "en": "Stun Jacks",
+        "es": "Canicas Aturdidoras"
       },
       "kind": "active",
       "circular": false,
@@ -54,8 +58,8 @@
     {
       "id": "class02/flashbang1",
       "name": {
-        "en": "tagClass02SkillName02A",
-        "es": "tagClass02SkillName02A"
+        "en": "Flashbang",
+        "es": "Granada Cegadora"
       },
       "kind": "active",
       "circular": false,
@@ -73,8 +77,8 @@
     {
       "id": "class02/blastshield1",
       "name": {
-        "en": "tagClass02SkillName12A",
-        "es": "tagClass02SkillName12A"
+        "en": "Flame Touched",
+        "es": "Tocado por las Llamas"
       },
       "kind": "active",
       "circular": false,
@@ -92,8 +96,8 @@
     {
       "id": "class02/blackwater1",
       "name": {
-        "en": "tagClass02SkillName08A",
-        "es": "tagClass02SkillName08A"
+        "en": "Blackwater Cocktail",
+        "es": "Cóctel de Agua Negra"
       },
       "kind": "active",
       "circular": false,
@@ -111,8 +115,8 @@
     {
       "id": "class02/stunjacks1b",
       "name": {
-        "en": "tagClass02SkillName09C",
-        "es": "tagClass02SkillName09C"
+        "en": "Quick Jacks",
+        "es": "Canicas Rápidas"
       },
       "kind": "transmuter",
       "circular": true,
@@ -129,8 +133,8 @@
     {
       "id": "class02/flamestrike2",
       "name": {
-        "en": "tagClass02SkillName03B",
-        "es": "tagClass02SkillName03B"
+        "en": "Explosive Strike",
+        "es": "Golpe Explosivo"
       },
       "kind": "modifier",
       "circular": true,
@@ -148,8 +152,8 @@
     {
       "id": "class02/blackwater1b",
       "name": {
-        "en": "tagClass02SkillName08D",
-        "es": "tagClass02SkillName08D"
+        "en": "High Potency",
+        "es": "Potencia Máxima"
       },
       "kind": "transmuter",
       "circular": true,
@@ -166,8 +170,8 @@
     {
       "id": "class02/flashbang2",
       "name": {
-        "en": "tagClass02SkillName02B",
-        "es": "tagClass02SkillName02B"
+        "en": "Searing Light",
+        "es": "Luz abrasadora"
       },
       "kind": "modifier",
       "circular": true,
@@ -185,8 +189,8 @@
     {
       "id": "class02/vindictiveflame1",
       "name": {
-        "en": "tagClass02SkillName13A",
-        "es": "tagClass02SkillName13A"
+        "en": "Vindictive Flame",
+        "es": "Llama Vengativa"
       },
       "kind": "active",
       "circular": false,
@@ -204,8 +208,8 @@
     {
       "id": "class02/flamestrike2c",
       "name": {
-        "en": "tagClass02SkillName03F",
-        "es": "tagClass02SkillName03F"
+        "en": "Searing Might",
+        "es": "Luz Abrasadora"
       },
       "kind": "transmuter",
       "circular": true,
@@ -223,8 +227,8 @@
     {
       "id": "class02/flamestrike2b",
       "name": {
-        "en": "tagClass02SkillName03E",
-        "es": "tagClass02SkillName03E"
+        "en": "Searing Strike",
+        "es": "Golpe Abrasador"
       },
       "kind": "transmuter",
       "circular": true,
@@ -242,8 +246,8 @@
     {
       "id": "class02/stunjacks2",
       "name": {
-        "en": "tagClass02SkillName09B",
-        "es": "tagClass02SkillName09B"
+        "en": "Full Spread",
+        "es": "Difusión completa"
       },
       "kind": "modifier",
       "circular": true,
@@ -261,8 +265,8 @@
     {
       "id": "class02/grenado1",
       "name": {
-        "en": "tagClass02SkillName01A",
-        "es": "tagClass02SkillName01A"
+        "en": "Grenado",
+        "es": "Granada"
       },
       "kind": "active",
       "circular": false,
@@ -280,8 +284,8 @@
     {
       "id": "class02/blastshield2",
       "name": {
-        "en": "tagClass02SkillName12B",
-        "es": "tagClass02SkillName12B"
+        "en": "Temper",
+        "es": "Templar"
       },
       "kind": "modifier",
       "circular": true,
@@ -299,8 +303,8 @@
     {
       "id": "class02/blackwater2",
       "name": {
-        "en": "tagClass02SkillName08B",
-        "es": "tagClass02SkillName08B"
+        "en": "Demon Fire",
+        "es": "Demonio de Fuego"
       },
       "kind": "modifier",
       "circular": true,
@@ -318,8 +322,8 @@
     {
       "id": "class02/canisterbomb1",
       "name": {
-        "en": "tagClass02SkillName04A",
-        "es": "tagClass02SkillName04A"
+        "en": "Canister Bomb",
+        "es": "Lata Bomba"
       },
       "kind": "active",
       "circular": false,
@@ -337,8 +341,8 @@
     {
       "id": "class02/grenado1b",
       "name": {
-        "en": "tagClass02SkillName01C",
-        "es": "tagClass02SkillName01C"
+        "en": "Skyfire Grenado",
+        "es": "Granada de Fuego Celeste"
       },
       "kind": "transmuter",
       "circular": true,
@@ -356,8 +360,8 @@
     {
       "id": "class02/vindictiveflame2",
       "name": {
-        "en": "tagClass02SkillName13B",
-        "es": "tagClass02SkillName13B"
+        "en": "Ulzuin's Wrath",
+        "es": "Ira de Ulzuin"
       },
       "kind": "modifier",
       "circular": true,
@@ -375,8 +379,8 @@
     {
       "id": "class02/flamestrike3",
       "name": {
-        "en": "tagClass02SkillName03C",
-        "es": "tagClass02SkillName03C"
+        "en": "Static Strike",
+        "es": "Golpe Estático"
       },
       "kind": "modifier",
       "circular": true,
@@ -394,8 +398,8 @@
     {
       "id": "class02/canisterbomb1b",
       "name": {
-        "en": "tagClass02SkillName04C",
-        "es": "tagClass02SkillName04C"
+        "en": "Concussive Bomb",
+        "es": "Bomba de Conmoción"
       },
       "kind": "transmuter",
       "circular": true,
@@ -413,8 +417,8 @@
     {
       "id": "class02/grenado2",
       "name": {
-        "en": "tagClass02SkillName01B",
-        "es": "tagClass02SkillName01B"
+        "en": "High Impact",
+        "es": "Gran Impacto"
       },
       "kind": "modifier",
       "circular": true,
@@ -432,8 +436,8 @@
     {
       "id": "class02/mortartrap1",
       "name": {
-        "en": "tagClass02SkillName05A",
-        "es": "tagClass02SkillName05A"
+        "en": "Mortar Trap",
+        "es": "Trampa de Mortero"
       },
       "kind": "active",
       "circular": false,
@@ -451,8 +455,8 @@
     {
       "id": "class02/passive1",
       "name": {
-        "en": "tagClass02SkillName07A",
-        "es": "tagClass02SkillName07A"
+        "en": "Blast Shield",
+        "es": "Escudo Explosivo"
       },
       "kind": "passive",
       "circular": true,
@@ -470,8 +474,8 @@
     {
       "id": "class02/thermitemines1",
       "name": {
-        "en": "tagClass02SkillName06A",
-        "es": "tagClass02SkillName06A"
+        "en": "Thermite Mine",
+        "es": "Mina de Termita"
       },
       "kind": "active",
       "circular": false,
@@ -489,8 +493,8 @@
     {
       "id": "class02/mortartrap2_petmod",
       "name": {
-        "en": "tagClass02SkillName05B",
-        "es": "tagClass02SkillName05B"
+        "en": "Heavy Ordnance",
+        "es": "Artillería Pesada"
       },
       "kind": "modifier",
       "circular": true,
@@ -508,8 +512,8 @@
     {
       "id": "class02/blackwater3",
       "name": {
-        "en": "tagClass02SkillName08C",
-        "es": "tagClass02SkillName08C"
+        "en": "Agonizing Flames",
+        "es": "Llamas Agonizantes"
       },
       "kind": "modifier",
       "circular": true,
@@ -527,8 +531,8 @@
     {
       "id": "class02/canisterbomb2",
       "name": {
-        "en": "tagClass02SkillName04B",
-        "es": "tagClass02SkillName04B"
+        "en": "Improved Casing",
+        "es": "Carcasa Mejorada"
       },
       "kind": "modifier",
       "circular": true,
@@ -546,8 +550,8 @@
     {
       "id": "class02/grenado3",
       "name": {
-        "en": "tagClass02SkillName01D",
-        "es": "tagClass02SkillName01D"
+        "en": "Shattering Blast",
+        "es": "Explosión Aplastante"
       },
       "kind": "modifier",
       "circular": true,
@@ -565,8 +569,8 @@
     {
       "id": "class02/flamestrike4",
       "name": {
-        "en": "tagClass02SkillName03D",
-        "es": "tagClass02SkillName03D"
+        "en": "Brimstone",
+        "es": "Azufre"
       },
       "kind": "modifier",
       "circular": true,
@@ -584,8 +588,8 @@
     {
       "id": "class02/passive2",
       "name": {
-        "en": "tagClass02SkillName07B",
-        "es": "tagClass02SkillName07B"
+        "en": "Ulzuin's Chosen",
+        "es": "Elegido de Ulzuin"
       },
       "kind": "modifier",
       "circular": true,
@@ -603,8 +607,8 @@
     {
       "id": "class02/thermitemines2_petmod",
       "name": {
-        "en": "tagClass02SkillName06B",
-        "es": "tagClass02SkillName06B"
+        "en": "Hellfire Mine",
+        "es": "Mina de Fuego Infernal"
       },
       "kind": "modifier",
       "circular": true,
@@ -622,8 +626,8 @@
     {
       "id": "class02/mortartrap3_petmod",
       "name": {
-        "en": "tagClass02SkillName05C",
-        "es": "tagClass02SkillName05C"
+        "en": "\"The Big One\"",
+        "es": "\"El Grande\""
       },
       "kind": "modifier",
       "circular": true,
