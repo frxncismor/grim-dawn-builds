@@ -70,11 +70,54 @@ after(() => {
 const GITLEAKS = findGitleaks(REPO_ROOT);
 const AVAILABLE = Boolean(GITLEAKS);
 const SKIP_REASON = 'setup:gitleaks required; availability gate fails closed';
-const GIT = (process.env['PATH'] ?? process.env['Path'] ?? '')
-  .split(delimiter)
-  .map((folder) => resolve(folder, process.platform === 'win32' ? 'git.exe' : 'git'))
+const WIN = process.platform === 'win32';
+const PATH_FOLDERS = (process.env['PATH'] ?? process.env['Path'] ?? '').split(delimiter);
+const GIT_FALLBACKS = WIN
+  ? [
+      process.env['ProgramFiles'],
+      process.env['ProgramFiles(x86)'],
+      process.env['LOCALAPPDATA'] && join(process.env['LOCALAPPDATA'], 'Programs'),
+    ]
+      .filter((folder): folder is string => Boolean(folder))
+      .map((folder) => join(folder, 'Git', 'cmd'))
+  : [];
+// Independent of the terminal PATH: fall back to the standard Git for Windows folders.
+const GIT = [...PATH_FOLDERS, ...GIT_FALLBACKS]
+  .filter(Boolean)
+  .map((folder) => resolve(folder, WIN ? 'git.exe' : 'git'))
   .find((file) => existsSync(file));
 if (!GIT) throw new Error('Git executable unavailable');
+
+/**
+ * Git for Windows launches `.githooks/pre-commit` with an `sh` found on PATH, so a reduced
+ * terminal PATH breaks the hook. Resolve the `sh` bundled with the located git.exe and
+ * prepend its folder to the env of every git spawn. Elsewhere `sh` is a system binary.
+ */
+function findBundledShDir(git: string): string | undefined {
+  let root = dirname(git);
+  for (let depth = 0; depth < 4; depth += 1) {
+    for (const sub of ['usr/bin', 'bin']) {
+      if (existsSync(join(root, sub, 'sh.exe'))) return join(root, sub);
+    }
+    root = dirname(root);
+  }
+  return undefined;
+}
+const SH_DIR = WIN ? findBundledShDir(GIT) : undefined;
+const GIT_ENV: NodeJS.ProcessEnv = (() => {
+  const env: NodeJS.ProcessEnv = { ...process.env };
+  if (!SH_DIR) return env;
+  // gitleaks itself shells out to `git`, so git's folder must be reachable too.
+  const current = process.env['PATH'] ?? process.env['Path'] ?? '';
+  for (const key of Object.keys(env)) if (key.toLowerCase() === 'path') delete env[key];
+  env['PATH'] = [dirname(GIT!), SH_DIR].join(delimiter) + (current ? delimiter + current : '');
+  return env;
+})();
+// Windows outside CI may lack `sh`; CI and Linux never skip (the case fails instead).
+const NO_SH_SKIP =
+  WIN && !SH_DIR && process.env['CI'] !== 'true'
+    ? 'Git for Windows sh.exe not found; hook cannot be launched'
+    : undefined;
 
 describe('gitleaks config (.gitleaks.toml)', () => {
   const text = read(CONFIG);
@@ -224,6 +267,7 @@ describe('gitleaks CLI availability', () => {
 function git(root: string, args: string[]): string {
   const result = spawnSync(GIT!, ['-C', root, '-c', 'commit.gpgsign=false', ...args], {
     encoding: 'utf8',
+    env: GIT_ENV,
   });
   assert.equal(result.status, 0, result.stderr);
   return result.stdout.trim();
@@ -273,7 +317,7 @@ function scanHistory(root: string, logOpts?: string) {
   ];
   if (logOpts !== undefined) args.push(`--log-opts=${logOpts}`);
   args.push(root);
-  const result = spawnSync(GITLEAKS!, args, { encoding: 'utf8' });
+  const result = spawnSync(GITLEAKS!, args, { encoding: 'utf8', env: GIT_ENV });
   const report = (() => {
     try {
       return readFileSync(reportPath, 'utf8');
@@ -344,7 +388,7 @@ describe(
       writeFile(root, '.gitignore', '/.tools/gitleaks/8.30.1/\n');
       git(root, ['config', 'core.hooksPath', '.githooks']);
     };
-    const commit = (root: string, env = process.env) =>
+    const commit = (root: string, env: NodeJS.ProcessEnv = GIT_ENV) =>
       spawnSync(
         GIT!,
         ['-C', root, '-c', 'commit.gpgsign=false', 'commit', '-q', '-m', 'hook fixture'],
@@ -370,22 +414,27 @@ describe(
       assert.notEqual(blocked.status, 0, 'hook must block the actual commit');
       assert.ok(!(blocked.stdout + blocked.stderr).includes(SYN_GH_PAT));
     });
-    it('blocks a commit when the tool is absent without relying on the host PATH', () => {
-      const root = newTempRepo();
-      prepareHook(root);
-      const bin = join(root, 'only-git');
-      mkdirSync(bin);
-      const quotedGit = "'" + GIT!.replaceAll("'", "'\\''") + "'";
-      writeFile(root, 'only-git/git', '#!/bin/sh\nexec ' + quotedGit + ' "$@"\n');
-      chmodSync(join(bin, 'git'), 0o755);
-      writeFile(root, 'src/app.ts', CLEAN_FILE);
-      git(root, ['add', '-A']);
-      const env = { ...process.env, PATH: bin };
-      if (process.platform === 'win32') delete (env as Record<string, string | undefined>)['Path'];
-      const blocked = commit(root, env);
-      assert.notEqual(blocked.status, 0);
-      assert.match(blocked.stdout + blocked.stderr, /pnpm setup:gitleaks/);
-    });
+    it(
+      'blocks a commit when the tool is absent without relying on the host PATH',
+      { skip: NO_SH_SKIP },
+      () => {
+        const root = newTempRepo();
+        prepareHook(root);
+        const bin = join(root, 'only-git');
+        mkdirSync(bin);
+        const quotedGit = "'" + GIT!.replaceAll("'", "'\\''") + "'";
+        writeFile(root, 'only-git/git', '#!/bin/sh\nexec ' + quotedGit + ' "$@"\n');
+        chmodSync(join(bin, 'git'), 0o755);
+        writeFile(root, 'src/app.ts', CLEAN_FILE);
+        git(root, ['add', '-A']);
+        // Only the git shim plus git's own sh (needed to launch the hook): gitleaks stays unreachable.
+        const env: NodeJS.ProcessEnv = { PATH: SH_DIR ? bin + delimiter + SH_DIR : bin };
+        if (WIN && process.env['SystemRoot']) env['SystemRoot'] = process.env['SystemRoot'];
+        const blocked = commit(root, env);
+        assert.notEqual(blocked.status, 0);
+        assert.match(blocked.stdout + blocked.stderr, /pnpm setup:gitleaks/);
+      },
+    );
     it('blocks a tool reporting a different version before scanning a commit', () => {
       const root = newTempRepo();
       prepareHook(root);
@@ -394,7 +443,7 @@ describe(
       chmodSync(file, 0o755);
       writeFile(root, 'src/app.ts', CLEAN_FILE);
       git(root, ['add', '-A']);
-      const blocked = commit(root, { ...process.env, OS: 'Linux' });
+      const blocked = commit(root, { ...GIT_ENV, OS: 'Linux' });
       assert.notEqual(blocked.status, 0);
       assert.match(blocked.stdout + blocked.stderr, /versión de gitleaks inválida/);
     });

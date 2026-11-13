@@ -3618,3 +3618,18 @@ vive ahora en `apps/web/src/app/core/content/api.repository.ts`.
 `apps/web`). No hay otras rutas obsoletas que afecten a `test:api-adapter`.
 
 **Aceptación**: ver T-174 en `tasks.md`.
+
+### 17.62 T-175: secret-scan independiente del PATH
+
+**Problema**: `scripts/secret-scan.test.mts` resuelve `git` solo desde el PATH y
+git (Windows) necesita `sh` en el PATH para lanzar `.githooks/pre-commit`; con un
+PATH reducido la suite falla al cargar o el caso de la herramienta ausente
+cambia de resultado.
+
+**Decisión**: localizar `git.exe` en el PATH o, si falta, en las rutas estándar de
+Git for Windows; resolver el `sh.exe` de ese Git (`usr/bin` o `bin`) y anteponerlo
+al PATH de los `spawnSync` de git. En el caso «tool absent» el PATH es solo el
+shim de git más ese `sh`, de modo que gitleaks sigue inalcanzable. Si falta `sh`
+en Windows fuera de CI, el caso se omite con motivo; en CI o Linux no se omite.
+
+**Aceptación**: ver T-175 en `tasks.md`.
