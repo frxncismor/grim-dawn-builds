@@ -130,7 +130,158 @@ Solo lectura sobre la instalación; el script no escribe ningún archivo.
 
 ## T002 — Tabla `tier → bar_required` y mapa de campos
 
-_Pendiente (T002, depende de T001)._
+Versión del juego: la de T001 (`buildid` 25813250). Solo lectura sobre `database.arz`; no se
+modificó `scripts/extract-mastery-trees.mts` (no hizo falta ningún flag nuevo). Los volcados
+masivos (186 nodos de UI de las seis maestrías con árbol) se hicieron con scripts
+desechables que importan `Arz` del script del repo y escriben en `%TEMP%\gdb-t002\` (fuera del
+repo); aquí solo se citan nombres de campo y valores factuales.
+
+### 1. `tier → bar_required`
+
+Fuente: registro del motor, un único campo con los umbrales (`records/game/gameengine.dbr`):
+
+```text
+> node --experimental-strip-types --no-warnings scripts/extract-mastery-trees.mts --game-dir "<juego>" --record records/game/gameengine.dbr | grep -E "^##|skillMasteryTierLevel"
+## records/game/gameengine.dbr  []
+skillMasteryTierLevel = 1, 5, 10, 15, 20, 25, 32, 40, 50
+```
+
+Es el único campo de la BD con ese nombre entre las ramas `records/game/`, `records/ui/` y
+`records/skills/` (búsqueda por nombre de campo `tier|MasteryLevel|Requirement`). El índice _i_
+(1-based) del array corresponde al `skillTier` _i_:
+
+| `skillTier`    | 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   |
+| -------------- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `bar_required` | 1   | 5   | 10  | 15  | 20  | 25  | 32  | 40  | 50  |
+
+- **Coincide exactamente con los hitos del plan** (1/5/10/15/20/25/32/40/50): sin diferencias.
+- Tier 1 exige **1** punto de maestría (no 0). El máximo, 50, coincide con
+  `skillMaxLevel = 50` del registro `Skill_Mastery` (T001).
+- **Inferencia (no demostrada por un campo)**: que el tier _i_ se desbloquea con
+  `bar_required[i]` puntos _asignados en esa maestría_ es la lectura natural del nombre
+  `skillMasteryTierLevel` y de los valores, pero la BD no trae la regla de evaluación (vive en
+  el ejecutable). No se consultó la wiki (no hacía falta y Q1 sigue sin confirmar).
+- `skillMasteryLevelRequired` de cada habilidad vale **0** (o está ausente) en los 186 nodos de
+  UI: no sirve como fuente del umbral.
+- **Modificadores y transmutadores**: tienen su propio `skillTier`, siempre en una columna
+  _posterior_ a la de su habilidad base (97 de 97, ver §3); nunca comparten tier con su padre.
+- Tiers vacíos: ninguno; las seis maestrías con árbol ocupan los 9 tiers.
+
+### 2. Tier frente a la posición en la UI
+
+Cada nodo de `records/ui/skills/classNN/skillMM.dbr` da `bitmapPositionX/Y` y `skillName`
+(registro de la habilidad). En las seis maestrías con UI (`class01`–`class06`) las columnas X son
+**las mismas nueve**, con paso constante de 80 px:
+
+| X (`bitmapPositionX`) | 246 | 326 | 406 | 486 | 566 | 646 | 726 | 806 | 886 |
+| --------------------- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `skillTier` observado | 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   |
+
+`tier = (X − 246) / 80 + 1`. Resultado sobre los 186 nodos: **0 nodos con tier ≠ columna**
+(donde el tier se pudo leer). `class01` (Soldier) y `class06` (Shaman) cumplen la tabla
+íntegra; en `class01`, por ejemplo, `weaponpool1`/`shieldhammer1`/`cadence1` están en X=246 con
+`skillTier = 1` y `stanceoffensive`/`stancedefensive` en X=886 con `skillTier = 9`.
+`bitmapPositionY` toma valores no uniformes (39, 71, 109, 142, 179, 211, 249, 281, 319, 351,
+389, 459…): es la fila visual, sin relación con el tier; las filas «intermedias» las ocupan
+los transmutadores, desplazados ~32–38 px de su habilidad.
+
+Desajustes de **datos** (no de tier/columna):
+
+- **Nodos sin `skillTier` en su propio registro** (envoltorios): la habilidad de UI es un
+  registro `Skill*`/`SkillSecondary_*` casi vacío que apunta a otro con `buffSkillName` (p. ej.
+  `fieldcommand1` → `fieldcommand1buff.dbr`, `skillTier = 5`, `skillMaxLevel = 12`) o
+  `petSkillName` (`mortartrap2_petmod` → `mortartrap2.dbr`, tipo `Skill_Modifier`). Seguir ese
+  puntero resuelve el tier salvo en los cinco casos siguientes.
+- **5 nodos `SkillSecondary_PetModifier` sin tier ni rangos** (`petSkillName` apunta a
+  `pets/petskill_*`, tipo `Skill_BuffOther`, sin `skillTier`/`skillMaxLevel`): `class03`
+  `summon_raven2_petmodifier`, `summon_raven3_petmodifier`, `summon_hellhound3_petmodifier`;
+  `class06` `totem2_petmodifier`, `summon_briarthorn3_petmodifier`. El tier solo sale de la
+  **columna X**; `max_rank`/`ultimate_rank` no están en la BD para ellos.
+- **3 nodos de UI con `skillName` colgante** (el registro no existe en `database.arz`):
+  `class03/skill31` → `bloodofdreeg1b.dbr`, `class05/skill27` → `mindovermatter1b.dbr`,
+  `class06/skill23` → `devouringswarm1b.dbr`; tampoco aparecen en `_classtree_classNN.dbr`.
+  Se comprobaron todos los nodos de `records/ui/skills/class0[1-6]/`. El catálogo debe
+  **excluirlos** (probables transmutadores retirados; el dato solo prueba que no existen).
+- Los `skillName1..N` de `_classtree_classNN.dbr` coinciden con los nodos de UI salvo la propia
+  maestría (`_classtraining_classNN.dbr`), que figura en el árbol (`class01`: 33 entradas = 32
+  nodos + maestría).
+
+Nodos de UI por maestría (tier leído en el propio registro + vía envoltorio + sin tier):
+`class01` 32 (30 + 2 + 0), `class02` 33 (29 + 4 + 0), `class03` 30 (21 + 6 + 3), `class04` 31
+(28 + 3 + 0), `class05` 30 (28 + 2 + 0), `class06` 30 (23 + 5 + 2) = **186 nodos** (los 3 de
+`class03` y los 2 de `class06` sin tier son los petmods anteriores).
+
+### 3. Mapa de campos (para T005/T006)
+
+| Campo del catálogo | Origen (registro → campo)                                                           | Tipo                | Regla de derivación                                                                                                                                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mastery`          | `_classtraining_classNN.dbr` → `MasteryEnumeration` (`SkillClassNN`)                | string              | `NN` de la ruta; `FileDescription` solo existe en 01–06                                                                                                                                                                |
+| `mastery.name`     | `_classtraining_classNN.dbr` → `skillDisplayName` (p. ej. `tagClass01SkillName00A`) | tag de localización | tal cual (resolver el texto es otra tarea)                                                                                                                                                                             |
+| `id`               | nombre del registro de la habilidad sin `.dbr` (`willtolive1`)                      | string              | único dentro de la maestría; prefijo `classNN/` en el id global                                                                                                                                                        |
+| `name`             | habilidad → `skillDisplayName` (tag)                                                | tag                 | si el registro es envoltorio, el del destino (`buffSkillName`/`petSkillName`) cuando exista                                                                                                                            |
+| `description`      | habilidad → `skillBaseDescription` (tag)                                            | tag                 | ídem                                                                                                                                                                                                                   |
+| `tier`             | habilidad (o destino del envoltorio) → `skillTier`                                  | int 1–9             | si falta (5 petmods): `(bitmapPositionX − 246) / 80 + 1`                                                                                                                                                               |
+| `bar_required`     | `records/game/gameengine.dbr` → `skillMasteryTierLevel[tier − 1]`                   | int                 | tabla de §1                                                                                                                                                                                                            |
+| `max_rank`         | habilidad (o destino) → `skillMaxLevel`                                             | int                 | observados: base 16/12/10/8; modificador 12/10/8; transmutador 3 ó 1                                                                                                                                                   |
+| `ultimate_rank`    | habilidad (o destino) → `skillUltimateLevel`                                        | int                 | observado `max + 10` en base y modificador, igual a `max` en transmutadores; ausente en 2 transmutadores y 5 petmods                                                                                                   |
+| `grid.col`         | nodo de UI → `bitmapPositionX`                                                      | int                 | `(X − 246) / 80 + 1` (= `tier`, 0 discrepancias)                                                                                                                                                                       |
+| `grid.row`         | nodo de UI → `bitmapPositionY`                                                      | int                 | valor crudo; la rejilla de filas se declara en T005 (alturas no uniformes, §2)                                                                                                                                         |
+| `kind`             | habilidad → `Class` (tipo del registro)                                             | enum                | `Skill_Modifier`, `Skill_ProjectileModifier`, `SkillSecondary_*` → modificador; `Skill_Transmuter`, `Skill_ProjectileTransmuter` → transmutador; `Skill_Passive*` → pasiva; resto → activa; `Skill_Mastery` → maestría |
+| `parent`           | (derivado; no existe campo)                                                         | id                  | ver regla más abajo                                                                                                                                                                                                    |
+| `icon` (opc.)      | habilidad → `skillUpBitmapName`                                                     | ruta `.tex`         | solo el nombre; no se versiona el arte                                                                                                                                                                                 |
+
+Campos que **no existen** en `class01`–`class06`: `skillDependancy*`, `skillBaseName`. Los
+registros de modificador/transmutador no llevan ningún puntero al padre.
+
+**Regla `parent` (verificada)**: para un nodo cuyo `Class` es modificador, transmutador o
+`SkillSecondary_*`, el padre es el nodo **no hijo** de la misma maestría cuya _familia_ coincide
+y cuya columna es la más cercana por la izquierda. Familia = id sin el sufijo
+`_petmodifier`/`_petmod`, sin `_modN`, sin dígitos finales y sin una `b`/`c` final
+(`bladearc1b` → `bladearc`, `ringofsteel_mod0` → `ringofsteel`, `shieldhammer3` →
+`shieldhammer`). Una excepción de datos: `natureblessing1` (raíz) frente a `naturesblessing2/3`
+(hijos) en `class06`, con una `s` de más; se resuelve con un alias explícito.
+
+Verificación sobre las seis maestrías: **97 hijos** (modificador/transmutador/secundario); la
+regla asigna padre a los **97** y en los 97 la columna del padre es **estrictamente menor** que
+la del hijo. Comparada con una regla geométrica independiente (raíz más cercana por la izquierda
+con |ΔY| ≤ 40) coinciden 89 de 97; en 7 de las 8 discrepancias son transmutadores colocados en
+una fila intermedia (`bladearc1b`, `canisterbomb1b`, `flamestrike2c`, `witchfire1b`, `pox1b`,
+`ringofsteel_mod0`, `aetherray1b`), donde falla la geometría, y la restante es
+`class02/passive2` (abajo). Para **`class01`: 32 nodos = 19 raíces + 13 hijos; los 13 hijos se
+resuelven por nombre y 0 quedan ambiguos**:
+
+```text
+cadence2<-cadence1 cadence3<-cadence1 shieldhammer2<-shieldhammer1 shieldhammer3<-shieldhammer1
+blitz2<-blitz1 bladearc2<-bladearc1 fieldcommand2<-fieldcommand1 warcry2<-warcry1
+cadence1b<-cadence1 bladearc1b<-bladearc1 warcry1b<-warcry1 shieldhammer1b<-shieldhammer1
+overguard1b<-overguard1
+```
+
+Ambiguos en todo el conjunto: **1** — `class02/passive2` (`Skill_Modifier`, columna 9, fila 249)
+resuelve por nombre a `passive1` (columna 7, fila 39), pero la geometría apunta a otro nodo;
+requiere decisión en T005. Las demás `passiveN` son raíces independientes.
+
+Descartado como regla de `parent`: el array `skillConnectionOn/Off` de cada habilidad (lista
+de texturas de conector, solo en habilidades con descendientes). Describe el dibujo, pero su
+longitud no es función fiable de la distancia al hijo más lejano (`shieldhammer1`: 6 elementos
+y hijo más lejano a 5 columnas; `blitz1`: 4 y a 4; `overguard1`: 1 y a 1), así que no se usa.
+
+### 4. Cobertura
+
+- Registros `records/skills/playerclassNN/_classtraining_classNN.dbr`: **9** (`NN` = 01–09); el
+  selector de clases de la UI tiene 9 botones (`skills_classselectionbutton01..09.dbr`).
+- Solo **01–06** tienen árbol real: 30–33 nodos de UI cada una y 35–38 archivos de habilidad.
+- **07, 08 y 09 son esqueletos**: `records/skills/playerclassNN/` solo contiene
+  `_classtraining_classNN.dbr` y `_classtree_classNN.dbr`; el árbol lista un único `skillName1`
+  (la maestría), y **no existe** `records/ui/skills/classNN/` ni habilidades. Sus
+  `skillDisplayName`/`skillBaseDescription` son `TagClassNNSkillName00`/`…Description00`
+  (capitalización distinta de las de 01–06) y no tienen `FileDescription`.
+- Por tanto esta instalación permite catalogar **6 maestrías con árbol**, no diez; la BD no
+  permite extraer los árboles de 07–09. T001 ya registró que no hay expansiones instaladas
+  (`database\` solo contiene `database.arz` y `templates.arc`). Los datos no dicen a qué
+  maestrías de la spec corresponden `class07`–`class09`, y no se especula aquí. Para T005/T006:
+  el catálogo cubre las maestrías con nodos de UI y la spec debe reconciliar «diez maestrías»
+  con lo extraíble.
 
 <!-- ===================================================================== -->
 
