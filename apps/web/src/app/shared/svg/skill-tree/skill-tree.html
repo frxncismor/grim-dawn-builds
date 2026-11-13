@@ -141,11 +141,8 @@
                     text-anchor="middle"
                     [attr.y]="68"
                   >
-                    <tspan [attr.x]="0">
-                      {{
-                        ' ' + kindLabel(item.node.kind) + ' · ' + maxPointsLabel(item.node) + ' '
-                      }}
-                    </tspan>
+                    <tspan [attr.x]="0">{{ ' ' + kindLabel(item.node.kind) + ' ' }}</tspan>
+                    <tspan [attr.x]="0" dy="14">{{ ' ' + maxPointsLabel(item.node) + ' ' }}</tspan>
                     @if (item.node.circular) {
                       <tspan [attr.x]="0" dy="14">{{ ' ' + circularLabel() + ' ' }}</tspan>
                     }

@@ -21,13 +21,16 @@ interface FocusTarget {
 const EMPTY_MASTERY: Mastery = { slug: '', name_es: '', name_en: '', role_text: '' };
 
 /** Catalog grid geometry (px in SVG user units). Columns are tiers; rows are compacted ranks. */
-const CATALOG_COL_WIDTH = 176;
+/** Column step; labels use at most `step - CATALOG_MIN_COLUMN_GAP` so neighbours never touch. */
+export const CATALOG_COLUMN_STEP = 192;
+export const CATALOG_MIN_COLUMN_GAP = 16;
+const CATALOG_COL_WIDTH = CATALOG_COLUMN_STEP;
 /**
  * Vertical step between compact rows. It must hold the tallest node: ring above the centre, then
- * the label block (two name lines, "kind · max" and "Circular") below it, plus a margin.
+ * the label block (two name lines, kind, "Max n (u)" and "Circular", one per line) below it, plus a margin.
  */
 const CATALOG_RING_RADIUS = 28;
-const CATALOG_LABEL_BOTTOM = 86; // last baseline (circular line at y=82) + descent
+const CATALOG_LABEL_BOTTOM = 100; // last baseline (circular line at y=96) + descent
 const CATALOG_ROW_MARGIN = 8;
 export const CATALOG_MIN_ROW_STEP = CATALOG_RING_RADIUS + CATALOG_LABEL_BOTTOM + CATALOG_ROW_MARGIN;
 const CATALOG_ROW_HEIGHT = CATALOG_MIN_ROW_STEP;
@@ -141,7 +144,7 @@ export class SkillTree {
     const currentFocus = this.focusedId();
     const rovingId = known.has(currentFocus ?? '') ? currentFocus! : (ordered[0]?.id ?? null);
     const selectedId = this.selectedId();
-    const maxLabelChars = Math.floor(CATALOG_COL_WIDTH / 8);
+    const maxLabelChars = Math.floor((CATALOG_COL_WIDTH - CATALOG_MIN_COLUMN_GAP) / 8);
     const nameById = new Map(source.map((node) => [node.id, node.name[this.nameLang]]));
     const positions = new Map(source.map((node) => [node.id, point(node)]));
     const tierBars = new Map(source.map((node) => [node.tier, node.bar_required]));
