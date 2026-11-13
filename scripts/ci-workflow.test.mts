@@ -49,6 +49,8 @@ export const REQUIRED_RUN_COMMANDS = [
   // T-150: the en/es catalogs must match in PR verification too.
   'pnpm run check:locale-parity',
   'pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
+  // T-171: the video facade preview artifact must exist before the journeys run.
+  'pnpm run e2e:video:build',
   'pnpm exec playwright install --with-deps chromium',
   'pnpm run e2e:journeys',
   'pnpm run e2e:a11y',
@@ -384,6 +386,7 @@ describe('PR verification workflow (T-064)', () => {
     const draftsBuild = indexOf(
       'pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
     );
+    const videoBuild = indexOf('pnpm run e2e:video:build');
     const journeys = indexOf('pnpm run e2e:journeys');
     const a11y = indexOf('pnpm run e2e:a11y');
     const apiTests = indexOf('pnpm --filter @gd/api test');
@@ -394,6 +397,7 @@ describe('PR verification workflow (T-064)', () => {
     assert.ok(realContent < catalog, 'catalog:check goes after the content validation');
     assert.ok(catalog < draftsBuild, 'the drafts build needs the validated content');
     assert.ok(draftsBuild < journeys, 'journeys need the drafts artifact');
+    assert.ok(videoBuild < journeys, 'journeys need the video facade preview artifact (T-171)');
     assert.ok(draftsBuild < a11y, 'axe runs on the built artifact');
     assert.ok(journeys < performance, 'performance measures the built artifact and runs last');
     assert.ok(a11y < performance, 'performance measures the built artifact and runs last');
@@ -575,6 +579,14 @@ describe('PR verification workflow (T-064)', () => {
       'drafts build overwrites the public artifact',
       () =>
         mutate('--output-path ../../dist/e2e-drafts', '--output-path ../../dist/grim-dawn-builds'),
+    ],
+    [
+      'video facade preview build removed (T-171)',
+      () =>
+        mutate(
+          /\n {6}- name: Build video facade preview artifact\n {8}run: pnpm run e2e:video:build\n/,
+          '\n',
+        ),
     ],
     [
       'drafts build without INCLUDE_DRAFTS',

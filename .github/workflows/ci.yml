@@ -194,6 +194,10 @@ jobs:
           INCLUDE_DRAFTS: 'true'
         run: pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts
 
+      # T-171: the video facade e2e (T-167) serves dist/video-facade-preview on 4323.
+      - name: Build video facade preview artifact
+        run: pnpm run e2e:video:build
+
       - name: Install Playwright Chromium (pinned by package.json)
         run: pnpm exec playwright install --with-deps chromium
 

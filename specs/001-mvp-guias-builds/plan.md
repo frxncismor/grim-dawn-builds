@@ -3587,3 +3587,21 @@ semántica; solo cambia el mecanismo de activación y de carga.
 `scripts/serve-artifact.test.mts`, `infra/hosting/security-headers.conf`, `e2e/**`
 y los catálogos de `apps/web/src/locale/**` si aplica. Esto añade una dependencia
 que §17.40 excluía («sin dependencias nuevas»); la excepción es de T-167.
+
+### 17.60 T-171: artefactos e2e locales y en CI
+
+**Problema**: sin artefactos, `pnpm e2e:journeys` falla 12 pruebas (6 por
+`dist/e2e-drafts`, 6 por `dist/video-facade-preview`, T-167). El comando
+documentado `pnpm exec ng build --output-path dist/e2e-drafts` falla desde la raíz
+(`not available ... outside a workspace`: el workspace Angular vive en `apps/web`,
+T-067), y la CI no construye `video-facade-preview`, por lo que su paso de journeys
+fallaría en las 6 pruebas de la fachada.
+
+**Decisión**: scripts `e2e:drafts:build` (con `INCLUDE_DRAFTS=true` mediante un
+pequeño `scripts/build-e2e-drafts.mts` portable, sin dependencias nuevas) y
+`e2e:video:build`; la CI añade un paso que ejecuta `pnpm run e2e:video:build` tras
+«Build drafts artifact» y antes de journeys; `ci-workflow.test.mts` lo comprueba con
+su caso de mutación; docs y relevo corrigen el comando y fijan el orden local
+(`@gd/domain build` → `build` → `e2e:drafts:build` → `e2e:video:build` → e2e).
+
+**Aceptación**: ver T-171 en `tasks.md`.

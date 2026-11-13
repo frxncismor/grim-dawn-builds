@@ -41,6 +41,8 @@
     "sitemap:generate": "tsx scripts/gen-sitemap.mts",
     "setup:gitleaks": "tsx scripts/setup-gitleaks.mts",
     "e2e:svg": "tsx scripts/run-svg-e2e.mts",
+    "e2e:drafts:build": "tsx scripts/build-e2e-drafts.mts",
+    "e2e:video:build": "pnpm --filter @gd/web exec ng build --configuration video-facade-preview",
     "e2e:a11y": "playwright test --config playwright.config.ts --grep \"@a11y\"",
     "e2e:journeys": "playwright test --config playwright.config.ts --grep \"@journeys\"",
     "typecheck:e2e": "tsc -p tsconfig.e2e.json",

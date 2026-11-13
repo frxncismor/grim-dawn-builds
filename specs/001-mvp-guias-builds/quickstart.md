@@ -1358,7 +1358,7 @@ del componente/comportamiento; después implementar únicamente T-031. Ejecutar:
 ```powershell
 pnpm exec ng test --watch=false --include=src/app/features/build/sections/build-sections.spec.ts
 pnpm --filter @gd/domain build
-pnpm exec ng build --configuration build-sections-preview
+pnpm --filter @gd/web exec ng build --configuration build-sections-preview
 pnpm lint
 pnpm lint:md
 pnpm build
@@ -1415,7 +1415,7 @@ con introducciones, Coste/Aviso y withI18nSupport para hidratar i18n.
 
 Reproducción: `pnpm --filter @gd/domain build`,
 `pnpm exec ng test --watch=false --include=src/app/features/build/sections/build-sections.spec.ts`
-y `pnpm exec ng build --configuration build-sections-preview`. Servir únicamente
+y `pnpm --filter @gd/web exec ng build --configuration build-sections-preview`. Servir únicamente
 dist/build-sections-preview/browser en127.0.0.1:4304 para la inspección local.
 No usar ese preview como artefacto de release.
 
@@ -1455,7 +1455,7 @@ por falta del comportamiento. Después implementar únicamente archivos de §17.
 pnpm exec ng test --watch=false --include=src/app/features/build/purchase-stepper/*.spec.ts
 pnpm exec ng test --watch=false --include=src/app/shared/svg/skill-tree/skill-tree.spec.ts
 pnpm --filter @gd/domain build
-pnpm exec ng build --configuration purchase-stepper-preview
+pnpm --filter @gd/web exec ng build --configuration purchase-stepper-preview
 pnpm lint
 pnpm lint:md
 pnpm build
@@ -1499,7 +1499,7 @@ del helper está en `TEMP/gd-t032-progress-red.log`. La suite Angular acotada pa
 `src/app/shared/svg/skill-tree/skill-tree.spec.ts` pasa 8 pruebas en
 `TEMP/gd-t032-skill-tree.log`.
 
-`pnpm --filter @gd/domain build` pasa. `pnpm exec ng build --configuration
+`pnpm --filter @gd/domain build` pasa. `pnpm --filter @gd/web exec ng build --configuration
 purchase-stepper-preview` genera una ruta prerenderizada en
 `dist/purchase-stepper-preview`; log `TEMP/gd-t032-preview-build.log`. El preview
 usa tres pasos y dos árboles propios sintéticos; incluye controles diagnósticos
@@ -1678,7 +1678,7 @@ Comandos de validación previstos para `T-135` (estética Grim Dawn):
 pnpm check:contrast
 node --import tsx --test src/app/shared/ui/icon/resolve-icon.server.test.mts
 pnpm test --watch=false
-pnpm exec ng build --configuration build-sections-preview
+pnpm --filter @gd/web exec ng build --configuration build-sections-preview
 pnpm lint
 pnpm lint:md
 pnpm build
@@ -1691,7 +1691,7 @@ Comandos de validación previstos para `T-034` (`gd-loot-filter`, tras `T-135`):
 ```powershell
 pnpm exec ng test --watch=false --include=src/app/features/build/loot-filter/loot-filter.spec.ts
 pnpm --filter @gd/domain build
-pnpm exec ng build --configuration loot-filter-preview
+pnpm --filter @gd/web exec ng build --configuration loot-filter-preview
 pnpm lint
 pnpm lint:md
 pnpm build
@@ -1759,7 +1759,7 @@ a ambos fixtures locales, resumen de texto exacto y determinista, orden sin muta
 visibilidad/vacío, `<details open>`, duplicados, IDs aislados, escape, SSR, y copia
 exitosa, rechazada o sin Clipboard API.
 
-`pnpm --filter @gd/domain build` y `pnpm ng build --configuration
+`pnpm --filter @gd/domain build` y `pnpm --filter @gd/web exec ng build --configuration
 loot-filter-preview` pasan. El preview usa solo contenido sintético propio,
 prerenderiza una ruta y no importa la guía pendiente. El presupuesto de componente
 4 kB se añadió a esa configuración; el CSS de `loot-filter` no genera advertencia
@@ -2449,7 +2449,7 @@ tocar `dist/grim-dawn-builds`:
 $env:PATH=(Join-Path $env:TEMP 'gd-t057-tools')+';'+$env:PATH
 $env:NG_BUILD_MAX_WORKERS='2'
 $env:INCLUDE_DRAFTS='true'
-npx ng build --output-path dist/e2e-drafts
+pnpm e2e:drafts:build
 ```
 
 Salida 0 y **7 rutas prerenderizadas**, incluida
@@ -3352,7 +3352,7 @@ sobre el artefacto construido y nunca sobre `ng serve`:
 | ----------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Content validation (real fixture content)       | `pnpm run content:validate -- --dir content`                            | El fixture real del repositorio valida con el esquema de dominio, además del fixture sintético de `scripts/fixtures/content-valid`.                       |
 | Catalog check                                   | `pnpm run catalog:check`                                                | El catálogo generado no deriva de su fuente (10 maestrías, 45 pares).                                                                                     |
-| Build drafts artifact                           | `pnpm exec ng build --output-path dist/e2e-drafts` con `INCLUDE_DRAFTS` | Artefacto local de borradores en un directorio propio; no sobrescribe `dist/grim-dawn-builds` (puertos 4321/4322 en `playwright.config.ts`).              |
+| Build drafts artifact                           | `pnpm e2e:drafts:build` (`INCLUDE_DRAFTS=true`, `ng build` en `apps/web`) | Artefacto local de borradores en un directorio propio; no sobrescribe `dist/grim-dawn-builds` (puertos 4321/4322 en `playwright.config.ts`).              |
 | Install Playwright Chromium                     | `pnpm exec playwright install --with-deps chromium`                     | Navegador fijado por `package.json` (Playwright 1.65.0).                                                                                                  |
 | E2E journeys                                    | `pnpm run e2e:journeys`                                                 | T-040: recorridos reales y HTML sin JavaScript en 3 viewports, sobre el artefacto público y el de borradores.                                             |
 | Accessibility gate                              | `pnpm run e2e:a11y`                                                     | T-041: axe WCAG 2.1/2.2 en 4 rutas × 3 viewports × 2 pases (app activa y HTML sin scripts) más el fixture negativo.                                       |
@@ -3397,7 +3397,7 @@ desincroniza.
 | `pnpm run content:validate -- --dir content`                        | 0    | `content:validate OK (1 builds)`                                                |
 | `pnpm run content:validate -- --dir scripts/fixtures/content-valid` | 0    | `content:validate OK (1 builds)`                                                |
 | `pnpm run catalog:check`                                            | 0    | `gen-catalog OK (10 maestrías, 45 pares; comprobación)`                         |
-| `pnpm exec ng build --output-path dist/e2e-drafts`                  | 0    | `Prerendered 7 static routes.`; borradores con la guía y el público sin ella    |
+| `pnpm e2e:drafts:build`                                              | 0    | `Prerendered 7 static routes.`; borradores con la guía y el público sin ella    |
 | `pnpm exec playwright install chromium`                             | 0    | `Chrome Headless Shell 158.0.8127.18`                                           |
 | `pnpm run e2e:a11y`                                                 | 0    | `27 passed`; 0 violaciones; fixture negativo `image-alt (critical)`             |
 | `python -c "import yaml; yaml.safe_load(...)"` sobre el workflow    | 0    | `yaml OK jobs= ['verify'] steps= 37`                                            |
