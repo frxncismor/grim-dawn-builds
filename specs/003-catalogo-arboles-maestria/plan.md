@@ -8,7 +8,7 @@
 ## Summary
 
 Derivar de los `.dbr` de la copia legal del juego un **catálogo canónico de árboles de
-maestría** (10 maestrías), validarlo con reglas propias y renderizarlo con **SVG propio**
+maestría** (6 maestrías base en v1, decisión de Paco, 2026-11-13), validarlo con reglas propias y renderizarlo con **SVG propio**
 accesible, prerenderizado en EN/ES. Las guías dejan de dibujar «su» esquema y pasan a
 asignar puntos sobre el árbol canónico. Los iconos/retratos del juego quedan detrás de la
 excepción de la constitución (§VII, enmienda 1.10.0 pendiente de aprobación) y **siempre**
@@ -24,23 +24,23 @@ con fallback propio conmutable.
 **Project Type**: monorepo pnpm (`apps/api`, `packages/domain`, web en raíz).
 **Performance Goals**: sin ampliar presupuestos de `plan.md` §6 (JS inicial por ruta, gzip, TBT, CLS); la ruta de árbol debe caber en el presupuesto de su ruta.
 **Constraints**: WCAG 2.2 AA; sin dependencias nuevas sin justificación escrita (Constitución IV); inglés primario, español completo (X); nada de arte del juego fuera de §VII y con fallback.
-**Scale/Scope**: 10 maestrías × ~25-30 nodos; 2 idiomas; 1 componente de árbol reutilizado por índice, maestría y guía.
+**Scale/Scope**: 6 maestrías base (v1) × ~25-30 nodos; 2 idiomas; 1 componente de árbol reutilizado por índice, maestría y guía.
 
 ## Constitution Check
 
 _GATE: previo a la Fase 0 y re-comprobado tras el diseño._
 
-| Principio                            | Relevancia             | Cómo lo cumple                                                                                                                 |
-| ------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| I. Contenido verificable y atribuido | Alta                   | Datos del juego con `game_version` y hash de fuente; verificación editorial del catálogo                                       |
-| II. Sin scraping                     | Alta                   | La extracción es **local desde la copia legal**; sin descargas de web; la wiki solo si Q1 confirma licencia y con share-alike  |
-| III. SEO primero                     | Alta                   | Prerender EN/ES, canonical, `hreflang`, sitemap (FR-010)                                                                       |
-| IV. Rendimiento y SVG                | Alta                   | SVG propio, sin raster, presupuesto intacto (FR-017)                                                                           |
-| V. Accesibilidad AA                  | Alta                   | Un elemento enfocable por nodo, nombres/estado por texto, contraste, prefer-reduced-motion (FR-009)                            |
-| VI. Datos tipados y única fuente     | Alta                   | Esquema Zod en `packages/domain`, PostgreSQL como fuente de verdad, sin duplicar reglas                                        |
-| VII. Legalidad y activos             | **Bloqueante parcial** | Iconos/retratos solo por enmienda 1.10.0 + manifest `approved` + fallback; datos del juego como hechos; **nada** de Grim Tools |
-| XI. Backend seguro                   | Media                  | Vistas públicas de solo lectura; `api_ro` sin tablas base                                                                      |
-| X. Idioma                            | Alta                   | EN/ES de nombres desde los `.dbr`; sin invención de traducciones                                                               |
+| Principio                            | Relevancia             | Cómo lo cumple                                                                                                                   |
+| ------------------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| I. Contenido verificable y atribuido | Alta                   | Datos del juego con `game_version` y hash de fuente; verificación editorial del catálogo                                         |
+| II. Sin scraping                     | Alta                   | La extracción es **local desde la copia legal**; sin descargas de web; la wiki solo con CC BY-SA 4.0 (Q1 resuelta) y share-alike |
+| III. SEO primero                     | Alta                   | Prerender EN/ES, canonical, `hreflang`, sitemap (FR-010)                                                                         |
+| IV. Rendimiento y SVG                | Alta                   | SVG propio, sin raster, presupuesto intacto (FR-017)                                                                             |
+| V. Accesibilidad AA                  | Alta                   | Un elemento enfocable por nodo, nombres/estado por texto, contraste, prefer-reduced-motion (FR-009)                              |
+| VI. Datos tipados y única fuente     | Alta                   | Esquema Zod en `packages/domain`, PostgreSQL como fuente de verdad, sin duplicar reglas                                          |
+| VII. Legalidad y activos             | **Bloqueante parcial** | Iconos/retratos solo por enmienda 1.10.0 + manifest `approved` + fallback; datos del juego como hechos; **nada** de Grim Tools   |
+| XI. Backend seguro                   | Media                  | Vistas públicas de solo lectura; `api_ro` sin tablas base                                                                        |
+| X. Idioma                            | Alta                   | EN/ES de nombres desde los `.dbr`; sin invención de traducciones                                                                 |
 
 **Desviación declarada**: la enmienda 1.10.0 (arte del juego bajo tolerancia de facto, sin
 permiso escrito) **no está aprobada**; hasta que lo esté, US1/US2 se entregan con
@@ -94,25 +94,25 @@ src/app/
    La extracción corre en la máquina del usuario; el repo guarda el resultado, no el input.
 3. **Rejilla canónica = `bitmapPositionX` (tier/columna) e `bitmapPositionY` (fila)**,
    mapeada a una cuadrícula declarada `grid {col,row}`; `tier → bar_required` con los hitos
-   1/5/10/15/20/25/32/40/50 y contrastado con la wiki **si** Q1 lo autoriza.
+   1/5/10/15/20/25/32/40/50 y contrastado con la wiki **si** se usa (CC BY-SA 4.0, Q1 resuelta).
 4. **Un solo componente de árbol** con dos modos (`catálogo` completo / `asignación` de
    guía), accesible por teclado y con estado por texto, no solo color.
 5. **Iconos**: `ASSET_SOURCE=own|game` (enmienda §VII), default `own`; con `game` exige
    entradas `approved` cuyo `license_or_permission = tolerancia_de_facto_sin_permiso` y
    `fallback_svg` presente; build falla cerrado si falta.
-6. **Wiki**: no se usa como fuente salvo Q1; si se usa, artefacto derivado CC BY-SA 3.0
-   con atribución y aviso de licencia en la propia página/JSON.
+6. **Wiki**: no es fuente por defecto (Q1 resuelta: CC BY-SA 4.0, decisión de Paco,
+   2026-11-13); si se usa, artefacto derivado CC BY-SA 4.0 con atribución y aviso de licencia en la propia página/JSON.
 
 ## Riesgos
 
 | Riesgo                                        | Prob. | Impacto | Mitigación                                                                                                          |
 | --------------------------------------------- | ----- | ------- | ------------------------------------------------------------------------------------------------------------------- |
 | Parser `.dbr`/`.arz` no estable en 1.3.1.0    | Media | Alto    | Fase 0: prueba de extracción real antes de comprometer el formato; fallback a herramienta oficial de Crate en local |
-| Mapeo `tier → bar_required` ambiguo           | Media | Medio   | Contrastar con wiki (si Q1) y con la UI del juego; registrar tabla en `research.md`                                 |
+| Mapeo `tier → bar_required` ambiguo           | Media | Medio   | Contrastar con wiki (CC BY-SA 4.0) y con la UI del juego; registrar tabla en `research.md`                          |
 | Presupuesto de JS por el árbol completo       | Media | Alto    | Render estático + islas; medir con `check:initial-js` antes de integrar la ruta                                     |
 | Derechos de arte                              | Alta  | Alto    | Fallback propio obligatorio; enmienda aparte; nada de Grim Tools                                                    |
 | Divergencia entre catálogo y guías existentes | Media | Medio   | Validador cruzado y prueba de migración con la guía actual                                                          |
-| Licencia de la wiki (3.0 vs 4.0)              | Alta  | Medio   | Q1 escrita antes de usar                                                                                            |
+| Licencia de la wiki (3.0 vs 4.0)              | Baja  | Bajo    | Q1 resuelta: CC BY-SA 4.0 (Paco, 2026-11-13)                                                                        |
 
 ## Fuera de alcance
 
@@ -121,6 +121,7 @@ src/app/
 - Iconos/retratos sin la enmienda 1.10.0 aprobada.
 - Cualquier ingestión automatizada del foro, de Grim Tools o de la wiki.
 - Nuevos hosting/publicación (sigue MVP local).
+- Maestrías de expansiones (AoM, FG, FoA) y mods: después de v1 (decisión de Paco, 2026-11-13).
 
 ## Fases
 

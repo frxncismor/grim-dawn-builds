@@ -5,7 +5,7 @@ description: 'Tareas de implementación del catálogo propio de árboles de maes
 # Tasks: Catálogo propio de árboles de maestría
 
 **Input**: `specs/003-catalogo-arboles-maestria/{spec.md,plan.md}`
-**Prerequisites**: spec.md y plan.md aprobados; Q1 (licencia de la wiki) respondida antes de T005
+**Prerequisites**: spec.md y plan.md aprobados; Q1 (licencia de la wiki) respondida: CC BY-SA 4.0 (2026-11-13), antes de T005
 **Tests**: Sí, exigidos por FR-004, FR-005, FR-016 y SC-002 a SC-004: primero en rojo, después implementación.
 
 **Formato**: `[ID] [P?] [US?] [UI?] descripción` — `[P]` = archivos disjuntos, paralelizable.
@@ -56,7 +56,7 @@ teclado, con y sin JS.
 
 ## Fase 3 — US2 (P2): índice de maestrías
 
-- [ ] **T014** [P] [US2] Página `/maestrias` desde el catálogo — `src/app/features/masteries/index*` — Aceptación: diez tarjetas con conteo real; una maestría sin datos aparece como «sin datos» sin romper (escenario 2 de US2).
+- [ ] **T014** [P] [US2] Página `/maestrias` desde el catálogo — `src/app/features/masteries/index*` — Aceptación: seis tarjetas (v1) con conteo real; una maestría sin datos aparece como «sin datos» sin romper (escenario 2 de US2).
 - [ ] **T015** [US2] Presentación de retrato con fallback — según Q3 y enmienda §VII — Aceptación: con `ASSET_SOURCE=own` se usa iconografía propia; con `game` solo entradas `approved` con `license_or_permission = tolerancia_de_facto_sin_permiso`; build falla cerrado si falta (FR-014, §VII).
 
 ---
