@@ -3606,7 +3606,7 @@ su caso de mutación; docs y relevo corrigen el comando y fijan el orden local
 
 **Aceptación**: ver T-171 en `tasks.md`.
 
-### 17.61 T-173: import del adaptador API tras T-067
+### 17.61 T-172: import del adaptador API tras T-067
 
 **Problema**: `pnpm test:api-adapter` falla al cargar
 `tests/integration/api-content.int.spec.ts`: importa
@@ -3617,4 +3617,4 @@ vive ahora en `apps/web/src/app/core/content/api.repository.ts`.
 (cambio mínimo; la prueba sigue siendo de integración en la raíz y no se mueve a
 `apps/web`). No hay otras rutas obsoletas que afecten a `test:api-adapter`.
 
-**Aceptación**: ver T-173 en `tasks.md`.
+**Aceptación**: ver T-172 en `tasks.md`.
