@@ -1,0 +1,606 @@
+{
+  "mastery": {
+    "id": "class04",
+    "slug": "nightblade",
+    "name": {
+      "en": "tagClass04SkillName00",
+      "es": "tagClass04SkillName00"
+    }
+  },
+  "game_version": "steam-build-25813250",
+  "source": {
+    "game_version": "steam-build-25813250",
+    "sha256": ["9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603"]
+  },
+  "nodes": [
+    {
+      "id": "class04/wpattack0",
+      "name": {
+        "en": "tagClass04SkillName05A",
+        "es": "tagClass04SkillName05A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 39
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_dualblades1up.tex"
+    },
+    {
+      "id": "class04/eviscerate1",
+      "name": {
+        "en": "tagClass04SkillName14A",
+        "es": "tagClass04SkillName14A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 179
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_lethalgambit1up.tex"
+    },
+    {
+      "id": "class04/veilofshadows1",
+      "name": {
+        "en": "tagClass04SkillName07A",
+        "es": "tagClass04SkillName07A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 389
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_veilofshadows1up.tex"
+    },
+    {
+      "id": "class04/wpattack1",
+      "name": {
+        "en": "tagClass04SkillName05B",
+        "es": "tagClass04SkillName05B"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 39
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_dualblades2up.tex"
+    },
+    {
+      "id": "class04/phantomblade",
+      "name": {
+        "en": "tagClass04SkillName01A",
+        "es": "tagClass04SkillName01A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 109
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_phantomblades1up.tex"
+    },
+    {
+      "id": "class04/nightbladeenchant1",
+      "name": {
+        "en": "tagClass04SkillName06A",
+        "es": "tagClass04SkillName06A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant1up.tex"
+    },
+    {
+      "id": "class04/wpattack4",
+      "name": {
+        "en": "tagClass04SkillName05E",
+        "es": "tagClass04SkillName05E"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 39
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": "class04/wpattack1",
+      "icon": "ui/skills/icons/class04/skillicon_dualblades5up.tex"
+    },
+    {
+      "id": "class04/phantomblade_mod0",
+      "name": {
+        "en": "tagClass04SkillName01D",
+        "es": "tagClass04SkillName01D"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 142
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class04/phantomblade",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class04/shadowstrike",
+      "name": {
+        "en": "tagClass04SkillName02A",
+        "es": "tagClass04SkillName02A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 249
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_shadowstrike1up.tex"
+    },
+    {
+      "id": "class04/nightbladeenchant1b",
+      "name": {
+        "en": "tagClass04SkillName06D",
+        "es": "tagClass04SkillName06D"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 351
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class04/nightbladeenchant1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class04/passive1",
+      "name": {
+        "en": "tagClass04SkillName13A",
+        "es": "tagClass04SkillName13A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_passive1up.tex"
+    },
+    {
+      "id": "class04/wpattack2",
+      "name": {
+        "en": "tagClass04SkillName05C",
+        "es": "tagClass04SkillName05C"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 39
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_dualblades3up.tex"
+    },
+    {
+      "id": "class04/phantomblade_mod1",
+      "name": {
+        "en": "tagClass04SkillName01B",
+        "es": "tagClass04SkillName01B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/phantomblade",
+      "icon": "ui/skills/icons/class04/skillicon_phantomblades2up.tex"
+    },
+    {
+      "id": "class04/eviscerate2",
+      "name": {
+        "en": "tagClass04SkillName14B",
+        "es": "tagClass04SkillName14B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/eviscerate1",
+      "icon": "ui/skills/icons/class04/skillicon_lethalgambit2up.tex"
+    },
+    {
+      "id": "class04/nightbladeenchant2",
+      "name": {
+        "en": "tagClass04SkillName06B",
+        "es": "tagClass04SkillName06B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/nightbladeenchant1",
+      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant2up.tex"
+    },
+    {
+      "id": "class04/veilofshadows2",
+      "name": {
+        "en": "tagClass04SkillName07B",
+        "es": "tagClass04SkillName07B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 389
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": "class04/veilofshadows1",
+      "icon": "ui/skills/icons/class04/skillicon_veilofshadows2up.tex"
+    },
+    {
+      "id": "class04/ringofsteel",
+      "name": {
+        "en": "tagClass04SkillName04A",
+        "es": "tagClass04SkillName04A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 179
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_ringofsteel1up.tex"
+    },
+    {
+      "id": "class04/bladebarrier1",
+      "name": {
+        "en": "tagClass04SkillName03A",
+        "es": "tagClass04SkillName03A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_bladebarrier1up.tex"
+    },
+    {
+      "id": "class04/passive2",
+      "name": {
+        "en": "tagClass04SkillName13B",
+        "es": "tagClass04SkillName13B"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_passive2up.tex"
+    },
+    {
+      "id": "class04/wpattack3",
+      "name": {
+        "en": "tagClass04SkillName05D",
+        "es": "tagClass04SkillName05D"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 39
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_dualblades4up.tex"
+    },
+    {
+      "id": "class04/ringofsteel_mod0",
+      "name": {
+        "en": "tagClass04SkillName04C",
+        "es": "tagClass04SkillName04C"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 141
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class04/ringofsteel",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class04/shadowstrike_mod1",
+      "name": {
+        "en": "tagClass04SkillName02B",
+        "es": "tagClass04SkillName02B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/shadowstrike",
+      "icon": "ui/skills/icons/class04/skillicon_shadowstrike2up.tex"
+    },
+    {
+      "id": "class04/bladetrap1",
+      "name": {
+        "en": "tagClass04SkillName11A",
+        "es": "tagClass04SkillName11A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_bladetrap1up.tex"
+    },
+    {
+      "id": "class04/phantomblade_mod2",
+      "name": {
+        "en": "tagClass04SkillName01C",
+        "es": "tagClass04SkillName01C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/phantomblade",
+      "icon": "ui/skills/icons/class04/skillicon_phantomblades3up.tex"
+    },
+    {
+      "id": "class04/nightbladeenchant3",
+      "name": {
+        "en": "tagClass04SkillName06C",
+        "es": "tagClass04SkillName06C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/nightbladeenchant1",
+      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant3up.tex"
+    },
+    {
+      "id": "class04/passive3",
+      "name": {
+        "en": "tagClass04SkillName13C",
+        "es": "tagClass04SkillName13C"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_passive3up.tex"
+    },
+    {
+      "id": "class04/ringofsteel_mod1",
+      "name": {
+        "en": "tagClass04SkillName04B",
+        "es": "tagClass04SkillName04B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/ringofsteel",
+      "icon": "ui/skills/icons/class04/skillicon_ringofsteel2up.tex"
+    },
+    {
+      "id": "class04/bladetrap2",
+      "name": {
+        "en": "tagClass04SkillName11B",
+        "es": "tagClass04SkillName11B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/bladetrap1",
+      "icon": "ui/skills/icons/class04/skillicon_bladetrap2up.tex"
+    },
+    {
+      "id": "class04/wpattack5",
+      "name": {
+        "en": "tagClass04SkillName05F",
+        "es": "tagClass04SkillName05F"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 39
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_dualblades6up.tex"
+    },
+    {
+      "id": "class04/summon_bladespirit",
+      "name": {
+        "en": "tagClass04SkillName08A",
+        "es": "tagClass04SkillName08A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 109
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_bladespirit1up.tex"
+    },
+    {
+      "id": "class04/shadowstrike_mod2",
+      "name": {
+        "en": "tagClass04SkillName02C",
+        "es": "tagClass04SkillName02C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/shadowstrike",
+      "icon": "ui/skills/icons/class04/skillicon_shadowstrike3up.tex"
+    }
+  ]
+}

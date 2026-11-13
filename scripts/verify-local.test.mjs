@@ -27,6 +27,15 @@ test('verify validates the real fixture content and the generated catalog before
   assert.equal(names.at(-1), 'performance', 'performance must remain the last step');
 });
 
+test('verify validates the mastery-tree catalog after catalog:check and before the web build (spec 003 T007)', () => {
+  const names = VERIFY_STEPS.map((step) => step.name);
+  const index = names.indexOf('catalog:nodes');
+  assert.notEqual(index, -1, 'catalog:nodes step missing');
+  assert.equal(VERIFY_STEPS[index].command, 'pnpm run catalog:nodes');
+  assert.ok(names.indexOf('catalog:check') < index, 'catalog:nodes goes after catalog:check');
+  assert.ok(index < names.indexOf('build'), 'catalog:nodes must run before the web build');
+});
+
 test('verify runs the performance gate last, after build and public-build (T-145)', () => {
   const names = VERIFY_STEPS.map((step) => step.name);
   const index = names.indexOf('performance');

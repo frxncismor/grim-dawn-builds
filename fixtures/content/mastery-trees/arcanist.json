@@ -1,0 +1,587 @@
+{
+  "mastery": {
+    "id": "class05",
+    "slug": "arcanist",
+    "name": {
+      "en": "tagClass05SkillName00",
+      "es": "tagClass05SkillName00"
+    }
+  },
+  "game_version": "steam-build-25813250",
+  "source": {
+    "game_version": "steam-build-25813250",
+    "sha256": ["9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603"]
+  },
+  "nodes": [
+    {
+      "id": "class05/elementalinfusion1",
+      "name": {
+        "en": "tagClass05SkillName02A",
+        "es": "tagClass05SkillName02A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_elementalinfusion1up.tex"
+    },
+    {
+      "id": "class05/arcanemissile",
+      "name": {
+        "en": "tagClass05SkillName01A",
+        "es": "tagClass05SkillName01A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 249
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_arcanemissile1_up.tex"
+    },
+    {
+      "id": "class05/passive01",
+      "name": {
+        "en": "tagClass05SkillName09A",
+        "es": "tagClass05SkillName09A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_passive01up.tex"
+    },
+    {
+      "id": "class05/elementalinfusion1b",
+      "name": {
+        "en": "tagClass05SkillName02D",
+        "es": "tagClass05SkillName02D"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 71
+      },
+      "max_points": 3,
+      "ultimate_points": 3,
+      "parent_id": "class05/elementalinfusion1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class05/razorwind1",
+      "name": {
+        "en": "tagClass05SkillName04A",
+        "es": "tagClass05SkillName04A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 179
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_arcanetempest1up.tex"
+    },
+    {
+      "id": "class05/chillingsurge",
+      "name": {
+        "en": "tagClass05SkillName16A",
+        "es": "tagClass05SkillName16A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_chillingsurge_up.tex"
+    },
+    {
+      "id": "class05/elementalinfusion2",
+      "name": {
+        "en": "tagClass05SkillName02B",
+        "es": "tagClass05SkillName02B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class05/elementalinfusion1",
+      "icon": "ui/skills/icons/class05/skillicon_elementalinfusion2up.tex"
+    },
+    {
+      "id": "class05/arcaneshield",
+      "name": {
+        "en": "tagClass05SkillName14A",
+        "es": "tagClass05SkillName14A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_arcaneshield1up.tex"
+    },
+    {
+      "id": "class05/razorwind1b",
+      "name": {
+        "en": "tagClass05SkillName04C",
+        "es": "tagClass05SkillName04C"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 211
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class05/razorwind1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class05/skyshard1",
+      "name": {
+        "en": "tagClass05SkillName03A",
+        "es": "tagClass05SkillName03A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 389
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_skyshard1up.tex"
+    },
+    {
+      "id": "class05/sphereofprotection1",
+      "name": {
+        "en": "tagClass05SkillName05A",
+        "es": "tagClass05SkillName05A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_sphereofprotection1up.tex"
+    },
+    {
+      "id": "class05/arcanemissile2",
+      "name": {
+        "en": "tagClass05SkillName01B",
+        "es": "tagClass05SkillName01B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class05/arcanemissile",
+      "icon": "ui/skills/icons/class05/skillicon_arcanemissile2up.tex"
+    },
+    {
+      "id": "class05/passive02",
+      "name": {
+        "en": "tagClass05SkillName10A",
+        "es": "tagClass05SkillName10A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 459
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_passive02up.tex"
+    },
+    {
+      "id": "class05/razorwind2",
+      "name": {
+        "en": "tagClass05SkillName04B",
+        "es": "tagClass05SkillName04B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class05/razorwind1",
+      "icon": "ui/skills/icons/class05/skillicon_arcanetempest2up.tex"
+    },
+    {
+      "id": "class05/chillingsurge2",
+      "name": {
+        "en": "tagClass05SkillName16B",
+        "es": "tagClass05SkillName16B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class05/chillingsurge",
+      "icon": "ui/skills/icons/class05/skillicon_chillingsurge2up.tex"
+    },
+    {
+      "id": "class05/skyshard2",
+      "name": {
+        "en": "tagClass05SkillName03B",
+        "es": "tagClass05SkillName03B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class05/skyshard1",
+      "icon": "ui/skills/icons/class05/skillicon_skyshard2up.tex"
+    },
+    {
+      "id": "class05/nullification",
+      "name": {
+        "en": "tagClass05SkillName07A",
+        "es": "tagClass05SkillName07A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 459
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_nullification1up.tex"
+    },
+    {
+      "id": "class05/elementalinfusion3",
+      "name": {
+        "en": "tagClass05SkillName02C",
+        "es": "tagClass05SkillName02C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class05/elementalinfusion1",
+      "icon": "ui/skills/icons/class05/skillicon_elementalinfusion3up.tex"
+    },
+    {
+      "id": "class05/arcanemissile3",
+      "name": {
+        "en": "tagClass05SkillName01C",
+        "es": "tagClass05SkillName01C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class05/arcanemissile",
+      "icon": "ui/skills/icons/class05/skillicon_arcanemissile3up.tex"
+    },
+    {
+      "id": "class05/aetherray1",
+      "name": {
+        "en": "tagClass05SkillName06A",
+        "es": "tagClass05SkillName06A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 319
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_aetherray1up.tex"
+    },
+    {
+      "id": "class05/sphereofprotection2",
+      "name": {
+        "en": "tagClass05SkillName05B",
+        "es": "tagClass05SkillName05B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 109
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": "class05/sphereofprotection1",
+      "icon": "ui/skills/icons/class05/skillicon_sphereofprotection2up.tex"
+    },
+    {
+      "id": "class05/aetherray1b",
+      "name": {
+        "en": "tagClass05SkillName06C",
+        "es": "tagClass05SkillName06C"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 281
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class05/aetherray1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class05/passive03",
+      "name": {
+        "en": "tagClass05SkillName11A",
+        "es": "tagClass05SkillName11A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 459
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_passive03up.tex"
+    },
+    {
+      "id": "class05/arcanemissile4",
+      "name": {
+        "en": "tagClass05SkillName01D",
+        "es": "tagClass05SkillName01D"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class05/arcanemissile",
+      "icon": "ui/skills/icons/class05/skillicon_arcanemissile4up.tex"
+    },
+    {
+      "id": "class05/skyshard3",
+      "name": {
+        "en": "tagClass05SkillName03C",
+        "es": "tagClass05SkillName03C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class05/skyshard1",
+      "icon": "ui/skills/icons/class05/skillicon_skyshard3up.tex"
+    },
+    {
+      "id": "class05/passive04",
+      "name": {
+        "en": "tagClass05SkillName12A",
+        "es": "tagClass05SkillName12A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_passive04up.tex"
+    },
+    {
+      "id": "class05/mindovermatter1",
+      "name": {
+        "en": "tagClass05SkillName15A",
+        "es": "tagClass05SkillName15A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_mindovermatter1up.tex"
+    },
+    {
+      "id": "class05/devastation",
+      "name": {
+        "en": "tagClass05SkillName08A",
+        "es": "tagClass05SkillName08A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 249
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_devastation1up.tex"
+    },
+    {
+      "id": "class05/aetherray2",
+      "name": {
+        "en": "tagClass05SkillName06B",
+        "es": "tagClass05SkillName06B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class05/aetherray1",
+      "icon": "ui/skills/icons/class05/skillicon_aetherray2up.tex"
+    },
+    {
+      "id": "class05/mindovermatter2",
+      "name": {
+        "en": "tagClass05SkillName15B",
+        "es": "tagClass05SkillName15B"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class05/skillicon_mindovermatter2up.tex"
+    }
+  ]
+}

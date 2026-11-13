@@ -1,0 +1,642 @@
+{
+  "mastery": {
+    "id": "class02",
+    "slug": "demolition",
+    "name": {
+      "en": "tagClass02SkillName00A",
+      "es": "tagClass02SkillName00A"
+    }
+  },
+  "game_version": "steam-build-25813250",
+  "source": {
+    "game_version": "steam-build-25813250",
+    "sha256": ["9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603"]
+  },
+  "nodes": [
+    {
+      "id": "class02/flamestrike1",
+      "name": {
+        "en": "tagClass02SkillName03A",
+        "es": "tagClass02SkillName03A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class02/skillicon_firestrike1_up.tex"
+    },
+    {
+      "id": "class02/stunjacks1",
+      "name": {
+        "en": "tagClass02SkillName09A",
+        "es": "tagClass02SkillName09A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 249
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class02/skillicon_stunjacks1_up.tex"
+    },
+    {
+      "id": "class02/flashbang1",
+      "name": {
+        "en": "tagClass02SkillName02A",
+        "es": "tagClass02SkillName02A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class02/skillicon_flashbang1_up.tex"
+    },
+    {
+      "id": "class02/blastshield1",
+      "name": {
+        "en": "tagClass02SkillName12A",
+        "es": "tagClass02SkillName12A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class02/skillicon_flametouched1_up.tex"
+    },
+    {
+      "id": "class02/blackwater1",
+      "name": {
+        "en": "tagClass02SkillName08A",
+        "es": "tagClass02SkillName08A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class02/skillicon_molotov1_up.tex"
+    },
+    {
+      "id": "class02/stunjacks1b",
+      "name": {
+        "en": "tagClass02SkillName09C",
+        "es": "tagClass02SkillName09C"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 281
+      },
+      "max_points": 3,
+      "parent_id": "class02/stunjacks1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class02/flamestrike2",
+      "name": {
+        "en": "tagClass02SkillName03B",
+        "es": "tagClass02SkillName03B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/flamestrike1",
+      "icon": "ui/skills/icons/class02/skillicon_firestrike2_up.tex"
+    },
+    {
+      "id": "class02/blackwater1b",
+      "name": {
+        "en": "tagClass02SkillName08D",
+        "es": "tagClass02SkillName08D"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 211
+      },
+      "max_points": 1,
+      "parent_id": "class02/blackwater1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class02/flashbang2",
+      "name": {
+        "en": "tagClass02SkillName02B",
+        "es": "tagClass02SkillName02B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 389
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": "class02/flashbang1",
+      "icon": "ui/skills/icons/class02/skillicon_flashbang2_up.tex"
+    },
+    {
+      "id": "class02/vindictiveflame1",
+      "name": {
+        "en": "tagClass02SkillName13A",
+        "es": "tagClass02SkillName13A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 459
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class02/skillicon_vindictiveflame1_up.tex"
+    },
+    {
+      "id": "class02/flamestrike2c",
+      "name": {
+        "en": "tagClass02SkillName03F",
+        "es": "tagClass02SkillName03F"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 71
+      },
+      "max_points": 3,
+      "ultimate_points": 3,
+      "parent_id": "class02/flamestrike1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class02/flamestrike2b",
+      "name": {
+        "en": "tagClass02SkillName03E",
+        "es": "tagClass02SkillName03E"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 142
+      },
+      "max_points": 3,
+      "ultimate_points": 3,
+      "parent_id": "class02/flamestrike1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class02/stunjacks2",
+      "name": {
+        "en": "tagClass02SkillName09B",
+        "es": "tagClass02SkillName09B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/stunjacks1",
+      "icon": "ui/skills/icons/class02/skillicon_stunjacks2_up.tex"
+    },
+    {
+      "id": "class02/grenado1",
+      "name": {
+        "en": "tagClass02SkillName01A",
+        "es": "tagClass02SkillName01A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 389
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class02/skillicon_grenado1_up.tex"
+    },
+    {
+      "id": "class02/blastshield2",
+      "name": {
+        "en": "tagClass02SkillName12B",
+        "es": "tagClass02SkillName12B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/blastshield1",
+      "icon": "ui/skills/icons/class02/skillicon_flametouched2_up.tex"
+    },
+    {
+      "id": "class02/blackwater2",
+      "name": {
+        "en": "tagClass02SkillName08B",
+        "es": "tagClass02SkillName08B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/blackwater1",
+      "icon": "ui/skills/icons/class02/skillicon_molotov2_up.tex"
+    },
+    {
+      "id": "class02/canisterbomb1",
+      "name": {
+        "en": "tagClass02SkillName04A",
+        "es": "tagClass02SkillName04A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class02/skillicon_canisterbomb1_up.tex"
+    },
+    {
+      "id": "class02/grenado1b",
+      "name": {
+        "en": "tagClass02SkillName01C",
+        "es": "tagClass02SkillName01C"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 351
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class02/grenado1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class02/vindictiveflame2",
+      "name": {
+        "en": "tagClass02SkillName13B",
+        "es": "tagClass02SkillName13B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/vindictiveflame1",
+      "icon": "ui/skills/icons/class02/skillicon_vindictiveflame2_up.tex"
+    },
+    {
+      "id": "class02/flamestrike3",
+      "name": {
+        "en": "tagClass02SkillName03C",
+        "es": "tagClass02SkillName03C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/flamestrike1",
+      "icon": "ui/skills/icons/class02/skillicon_firestrike3_up.tex"
+    },
+    {
+      "id": "class02/canisterbomb1b",
+      "name": {
+        "en": "tagClass02SkillName04C",
+        "es": "tagClass02SkillName04C"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 211
+      },
+      "max_points": 3,
+      "ultimate_points": 3,
+      "parent_id": "class02/canisterbomb1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class02/grenado2",
+      "name": {
+        "en": "tagClass02SkillName01B",
+        "es": "tagClass02SkillName01B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/grenado1",
+      "icon": "ui/skills/icons/class02/skillicon_grenado2_up.tex"
+    },
+    {
+      "id": "class02/mortartrap1",
+      "name": {
+        "en": "tagClass02SkillName05A",
+        "es": "tagClass02SkillName05A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 459
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class02/skillicon_mortartrap1_up.tex"
+    },
+    {
+      "id": "class02/passive1",
+      "name": {
+        "en": "tagClass02SkillName07A",
+        "es": "tagClass02SkillName07A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class02/skillicon_blastshield2up.tex"
+    },
+    {
+      "id": "class02/thermitemines1",
+      "name": {
+        "en": "tagClass02SkillName06A",
+        "es": "tagClass02SkillName06A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 319
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class02/skillicon_flaremine1_up.tex"
+    },
+    {
+      "id": "class02/mortartrap2_petmod",
+      "name": {
+        "en": "tagClass02SkillName05B",
+        "es": "tagClass02SkillName05B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/mortartrap1",
+      "icon": "ui/skills/icons/class02/skillicon_mortartrap2_up.tex"
+    },
+    {
+      "id": "class02/blackwater3",
+      "name": {
+        "en": "tagClass02SkillName08C",
+        "es": "tagClass02SkillName08C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/blackwater1",
+      "icon": "ui/skills/icons/class02/skillicon_molotov3_up.tex"
+    },
+    {
+      "id": "class02/canisterbomb2",
+      "name": {
+        "en": "tagClass02SkillName04B",
+        "es": "tagClass02SkillName04B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 249
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": "class02/canisterbomb1",
+      "icon": "ui/skills/icons/class02/skillicon_canisterbomb2_up.tex"
+    },
+    {
+      "id": "class02/grenado3",
+      "name": {
+        "en": "tagClass02SkillName01D",
+        "es": "tagClass02SkillName01D"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/grenado1",
+      "icon": "ui/skills/icons/class02/skillicon_grenado3orange_up.tex"
+    },
+    {
+      "id": "class02/flamestrike4",
+      "name": {
+        "en": "tagClass02SkillName03D",
+        "es": "tagClass02SkillName03D"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/flamestrike1",
+      "icon": "ui/skills/icons/class02/skillicon_firestrike4_up.tex"
+    },
+    {
+      "id": "class02/passive2",
+      "name": {
+        "en": "tagClass02SkillName07B",
+        "es": "tagClass02SkillName07B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 249
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": "class02/passive1",
+      "icon": "ui/skills/icons/class02/skillicon_pyrotechnics1_up.tex"
+    },
+    {
+      "id": "class02/thermitemines2_petmod",
+      "name": {
+        "en": "tagClass02SkillName06B",
+        "es": "tagClass02SkillName06B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/thermitemines1",
+      "icon": "ui/skills/icons/class02/skillicon_flaremine2_up.tex"
+    },
+    {
+      "id": "class02/mortartrap3_petmod",
+      "name": {
+        "en": "tagClass02SkillName05C",
+        "es": "tagClass02SkillName05C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class02/mortartrap1",
+      "icon": "ui/skills/icons/class02/skillicon_mortartrap3_up.tex"
+    }
+  ]
+}

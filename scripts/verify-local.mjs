@@ -42,6 +42,8 @@ export const VERIFY_STEPS = [
   // generado; van después del build de dominio y antes del build de la web.
   { name: 'content:validate', command: 'pnpm run content:validate -- --dir fixtures/content' },
   { name: 'catalog:check', command: 'pnpm run catalog:check' },
+  // T-007 (spec 003): valida el catálogo versionado de árboles de maestría.
+  { name: 'catalog:nodes', command: 'pnpm run catalog:nodes' },
   { name: 'check:locale-parity', command: 'pnpm run check:locale-parity' },
   { name: 'assets', command: 'pnpm assets:check' },
   { name: 'contrast', command: 'pnpm check:contrast' },

@@ -1,0 +1,625 @@
+{
+  "mastery": {
+    "id": "class01",
+    "slug": "soldier",
+    "name": {
+      "en": "tagClass01SkillName00A",
+      "es": "tagClass01SkillName00A"
+    }
+  },
+  "game_version": "steam-build-25813250",
+  "source": {
+    "game_version": "steam-build-25813250",
+    "sha256": ["9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603"]
+  },
+  "nodes": [
+    {
+      "id": "class01/weaponpool1",
+      "name": {
+        "en": "tagClass01SkillName06A",
+        "es": "tagClass01SkillName06A"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_weaponpool1up.tex"
+    },
+    {
+      "id": "class01/shieldhammer1",
+      "name": {
+        "en": "tagClass01SkillName02A",
+        "es": "tagClass01SkillName02A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 179
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_shieldhammer1up.tex"
+    },
+    {
+      "id": "class01/cadence1",
+      "name": {
+        "en": "tagClass01SkillName01A",
+        "es": "tagClass01SkillName01A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 319
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_cadence1_up.tex"
+    },
+    {
+      "id": "class01/fightingspirit1",
+      "name": {
+        "en": "tagClass01SkillName07A",
+        "es": "tagClass01SkillName07A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_fightingspirit1_up.tex"
+    },
+    {
+      "id": "class01/shieldhammer1b",
+      "name": {
+        "en": "tagClass01SkillName02D",
+        "es": "tagClass01SkillName02D"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 211
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class01/shieldhammer1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class01/cadence1b",
+      "name": {
+        "en": "tagClass01SkillName01D",
+        "es": "tagClass01SkillName01D"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 281
+      },
+      "max_points": 3,
+      "ultimate_points": 3,
+      "parent_id": "class01/cadence1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class01/willtolive1",
+      "name": {
+        "en": "tagClass01SkillName08A",
+        "es": "tagClass01SkillName08A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 389
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_willtolive1_up.tex"
+    },
+    {
+      "id": "class01/passive1",
+      "name": {
+        "en": "tagClass01SkillName10A",
+        "es": "tagClass01SkillName10A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 459
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_militaryconditioning1_up.tex"
+    },
+    {
+      "id": "class01/weaponpool2",
+      "name": {
+        "en": "tagClass01SkillName06B",
+        "es": "tagClass01SkillName06B"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_weaponpool2up.tex"
+    },
+    {
+      "id": "class01/bladearc1",
+      "name": {
+        "en": "tagClass01SkillName05A",
+        "es": "tagClass01SkillName05A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 109
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_bladearc1up.tex"
+    },
+    {
+      "id": "class01/blitz1",
+      "name": {
+        "en": "tagClass01SkillName03A",
+        "es": "tagClass01SkillName03A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 249
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_blitz1_up.tex"
+    },
+    {
+      "id": "class01/overguard1",
+      "name": {
+        "en": "tagClass01SkillName15A",
+        "es": "tagClass01SkillName15A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_overguard1_up.tex"
+    },
+    {
+      "id": "class01/passiveshield",
+      "name": {
+        "en": "tagClass01SkillName18",
+        "es": "tagClass01SkillName18"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 459
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_passiveshield1up.tex"
+    },
+    {
+      "id": "class01/bladearc1b",
+      "name": {
+        "en": "tagClass01SkillName05C",
+        "es": "tagClass01SkillName05C"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 71
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class01/bladearc1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class01/shieldhammer2",
+      "name": {
+        "en": "tagClass01SkillName02B",
+        "es": "tagClass01SkillName02B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class01/shieldhammer1",
+      "icon": "ui/skills/icons/class01/skillicon_shieldhammer2up.tex"
+    },
+    {
+      "id": "class01/cadence2",
+      "name": {
+        "en": "tagClass01SkillName01B",
+        "es": "tagClass01SkillName01B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class01/cadence1",
+      "icon": "ui/skills/icons/class01/skillicon_cadence2_up.tex"
+    },
+    {
+      "id": "class01/overguard1b",
+      "name": {
+        "en": "tagClass01SkillName15B",
+        "es": "tagClass01SkillName15B"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 389
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class01/overguard1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class01/passive2",
+      "name": {
+        "en": "tagClass01SkillName11A",
+        "es": "tagClass01SkillName11A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 459
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_veterancy1_up.tex"
+    },
+    {
+      "id": "class01/warcry1",
+      "name": {
+        "en": "tagClass01SkillName04A",
+        "es": "tagClass01SkillName04A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_battlefury_up.tex"
+    },
+    {
+      "id": "class01/fieldcommand1",
+      "name": {
+        "en": "tagClass01SkillName09A",
+        "es": "tagClass01SkillName09A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_fieldcommand1_up.tex"
+    },
+    {
+      "id": "class01/warcry1b",
+      "name": {
+        "en": "tagClass01SkillName04C",
+        "es": "tagClass01SkillName04C"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 71
+      },
+      "max_points": 3,
+      "ultimate_points": 3,
+      "parent_id": "class01/warcry1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class01/shieldhammer3",
+      "name": {
+        "en": "tagClass01SkillName02C",
+        "es": "tagClass01SkillName02C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class01/shieldhammer1",
+      "icon": "ui/skills/icons/class01/skillicon_shieldhammer3up.tex"
+    },
+    {
+      "id": "class01/passive3",
+      "name": {
+        "en": "tagClass01SkillName12A",
+        "es": "tagClass01SkillName12A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 459
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_decoratedsoldier1_up.tex"
+    },
+    {
+      "id": "class01/bladearc2",
+      "name": {
+        "en": "tagClass01SkillName05B",
+        "es": "tagClass01SkillName05B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class01/bladearc1",
+      "icon": "ui/skills/icons/class01/skillicon_bladearc2up.tex"
+    },
+    {
+      "id": "class01/blitz2",
+      "name": {
+        "en": "tagClass01SkillName03B",
+        "es": "tagClass01SkillName03B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class01/blitz1",
+      "icon": "ui/skills/icons/class01/skillicon_blitz2_up.tex"
+    },
+    {
+      "id": "class01/fieldcommand2",
+      "name": {
+        "en": "tagClass01SkillName09B",
+        "es": "tagClass01SkillName09B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class01/fieldcommand1",
+      "icon": "ui/skills/icons/class01/skillicon_fieldcommand2up.tex"
+    },
+    {
+      "id": "class01/warcry2",
+      "name": {
+        "en": "tagClass01SkillName04B",
+        "es": "tagClass01SkillName04B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class01/warcry1",
+      "icon": "ui/skills/icons/class01/skillicon_battlefury2_up.tex"
+    },
+    {
+      "id": "class01/counterstrike1",
+      "name": {
+        "en": "tagClass01SkillName17",
+        "es": "tagClass01SkillName17"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 249
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_counterstrike1up.tex"
+    },
+    {
+      "id": "class01/cadence3",
+      "name": {
+        "en": "tagClass01SkillName01C",
+        "es": "tagClass01SkillName01C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class01/cadence1",
+      "icon": "ui/skills/icons/class01/skillicon_cadence3_up.tex"
+    },
+    {
+      "id": "class01/passive4",
+      "name": {
+        "en": "tagClass01SkillName16",
+        "es": "tagClass01SkillName16"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 459
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_scarsofbattle1_up.tex"
+    },
+    {
+      "id": "class01/stanceoffensive",
+      "name": {
+        "en": "tagClass01SkillName14A",
+        "es": "tagClass01SkillName14A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_stanceoffensive1up.tex"
+    },
+    {
+      "id": "class01/stancedefensive",
+      "name": {
+        "en": "tagClass01SkillName13A",
+        "es": "tagClass01SkillName13A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class01/skillicon_stancedefensive1up.tex"
+    }
+  ]
+}
