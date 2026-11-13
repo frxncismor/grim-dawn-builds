@@ -6,7 +6,12 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { gzipSync } from 'node:zlib';
-import { CATALOG_JS_LIMIT, INITIAL_JS_LIMIT, measureInitialRoutes } from './check-initial-js.mts';
+import {
+  CATALOG_JS_LIMIT,
+  INITIAL_JS_LIMIT,
+  MASTERY_JS_LIMIT,
+  measureInitialRoutes,
+} from './check-initial-js.mts';
 
 /**
  * Puerta de rendimiento de T-042 (plan §6 y §17.52).
@@ -48,6 +53,7 @@ export const BUDGETS = {
   jsBytes: {
     home: INITIAL_JS_LIMIT,
     tierList: CATALOG_JS_LIMIT,
+    mastery: MASTERY_JS_LIMIT,
   },
 } as const;
 
@@ -636,7 +642,9 @@ export function evaluateJsBudgets(results: readonly JsMeasurement[]): MetricResu
         ? BUDGETS.jsBytes.home
         : result.route === '/tier-list'
           ? BUDGETS.jsBytes.tierList
-          : null;
+          : /^(\/es)?\/maestrias\/[a-z0-9-]+$/.test(result.route)
+            ? BUDGETS.jsBytes.mastery
+            : null;
     if (expected !== null && expected !== result.limitBytes)
       throw new Error(
         `El límite JS de ${result.route} no coincide con plan §6 (${expected} B gzip).`,

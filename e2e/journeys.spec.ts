@@ -363,6 +363,83 @@ test.describe('@journeys sin JavaScript', () => {
 });
 
 /**
+ * T013 (spec 003, SC-003): el árbol de maestría se lee sin JavaScript. El HTML prerenderizado
+ * ya contiene el h1, los 33 nodos de Demoledor y la lista textual completa y abierta.
+ */
+test.describe('@journeys árbol de maestría sin JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  for (const [path, heading, listHint] of [
+    ['/maestrias/demolition', 'Demolitionist', /No requirement/],
+    ['/es/maestrias/demolition', 'Demoledor', /Sin requisito/],
+  ] as const) {
+    test(`${path}: h1, 33 nodos y lista textual completa en el HTML`, async ({ page }) => {
+      const response = await open(page, `${PUBLIC_BASE_URL}${path}`);
+      expect(response.status(), `${path} debe existir en el artefacto prerenderizado`).toBe(200);
+      await expectSingleHeading(page, heading, `${path} sin JavaScript`);
+      await expect(page.locator('[data-skill-id]')).toHaveCount(33);
+      const items = page.locator('details.skill-tree__list li');
+      await expect(items, 'la lista textual debe incluir todos los nodos').toHaveCount(33);
+      await expect(page.locator('details.skill-tree__list')).toHaveAttribute('open', '');
+      await expect(items.first()).toBeVisible();
+      expect(await page.locator('details.skill-tree__list').innerText()).toMatch(listHint);
+    });
+  }
+});
+
+/**
+ * T026 (spec 003): el snapshot global de catálogo y autores solo viaja en las páginas que lo
+ * leen. Las de maestría no lo llevan en `ng-state` (presupuesto de HTML) y, al navegar desde ellas
+ * al catálogo, el guard carga el documento prerenderizado en vez de fallar.
+ */
+test.describe('@journeys snapshot de catálogo solo donde se lee', () => {
+  const SNAPSHOT_KEYS = ['gd-public-catalog', 'gd-public-authors'];
+  const transferKeys = async (page: Page, path: string): Promise<string[]> => {
+    const response = await page.request.get(`${PUBLIC_BASE_URL}${path}`);
+    expect(response.status(), `${path} debe existir`).toBe(200);
+    const match = (await response.text()).match(
+      /<script[^>]*id=["']ng-state["'][^>]*>([\s\S]*?)<\/script>/i,
+    );
+    return match ? Object.keys(JSON.parse(match[1]!) as Record<string, unknown>) : [];
+  };
+
+  for (const path of [
+    '/maestrias/soldier',
+    '/maestrias/demolition',
+    '/es/maestrias/soldier',
+    '/es/maestrias/demolition',
+  ])
+    test(`${path}: sin snapshot de catálogo ni autores en ng-state`, async ({ page }) => {
+      const keys = await transferKeys(page, path);
+      for (const key of SNAPSHOT_KEYS)
+        expect(keys, `${path} no debe llevar ${key}`).not.toContain(key);
+    });
+
+  for (const path of ['/tier-list', '/es/tier-list'])
+    test(`${path}: conserva el snapshot completo (catálogo y autores) en ng-state`, async ({
+      page,
+    }) => {
+      const keys = await transferKeys(page, path);
+      for (const key of SNAPSHOT_KEYS) expect(keys, `${path} debe llevar ${key}`).toContain(key);
+    });
+
+  for (const [path, link, listUrl] of [
+    ['/maestrias/demolition', 'Browse the build catalog', /\/tier-list$/],
+    ['/es/maestrias/demolition', 'Explorar el catálogo de builds', /\/es\/tier-list$/],
+  ] as const)
+    test(`${path}: el enlace al catálogo funciona sin snapshot en la página de origen`, async ({
+      page,
+    }) => {
+      await open(page, `${PUBLIC_BASE_URL}${path}`);
+      await page.getByRole('link', { name: link, exact: true }).click();
+      await page.waitForURL(listUrl);
+      await expect(page.locator('h1')).toHaveCount(1);
+      await expect(page.locator('h1')).toHaveText(/Catálogo de combinaciones de maestrías/i);
+      expect(await page.locator('gd-tier-card').count()).toBeGreaterThan(0);
+    });
+});
+
+/**
  * T-167 - fachada de video bajo la CSP real del servidor de artefacto
  * (plan §17.59). Se sirve la vista previa sintética `video-facade-preview`:
  * ninguna guía publicada tiene video. YouTube se intercepta con `page.route`,

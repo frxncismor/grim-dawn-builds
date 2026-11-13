@@ -30,6 +30,10 @@ const ROUTES = [
   { name: 'guía es', path: '/es/builds/chaman-demoledor-golpe-primigenio' },
   { name: 'acerca es', path: '/es/acerca' },
   { name: 'legal es', path: '/es/legal' },
+  { name: 'árbol soldier', path: '/maestrias/soldier' },
+  { name: 'árbol demolition', path: '/maestrias/demolition' },
+  { name: 'árbol soldier es', path: '/es/maestrias/soldier' },
+  { name: 'árbol demolition es', path: '/es/maestrias/demolition' },
 ] as const;
 type RouteDefinition = (typeof ROUTES)[number];
 
@@ -288,3 +292,117 @@ test.describe('@a11y prueba negativa del detector', () => {
     expect(() => expectGate('fixture sin alt', result)).toThrow(/image-alt/);
   });
 });
+
+/** Luminancia relativa y razón de contraste WCAG 2.x entre dos colores `rgb()/rgba()`. */
+function channels(color: string): [number, number, number] {
+  const match = color.match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+  if (!match) throw new Error(`Color no interpretable: ${color}`);
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+function luminance(color: string): number {
+  const [r, g, b] = channels(color).map((value) => {
+    const c = value / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  }) as [number, number, number];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function contrast(a: string, b: string): number {
+  const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
+  return (light + 0.05) / (dark + 0.05);
+}
+
+/** T013 (spec 003, SC-004): teclado, foco visible y axe con un nodo del árbol enfocado. */
+const TREE_ROUTES = ROUTES.filter((route) => route.path.includes('/maestrias/demolition'));
+for (const route of TREE_ROUTES) {
+  test.describe(`@a11y árbol de maestría con teclado (${route.path})`, () => {
+    const activeNode = (page: Page) =>
+      page.evaluate(() => {
+        const element = document.activeElement;
+        return {
+          id: element?.getAttribute('data-skill-id') ?? null,
+          tag: element?.tagName.toLowerCase() ?? null,
+          canvas: element?.classList.contains('skill-tree__canvas') ?? false,
+        };
+      });
+
+    async function focusFirstNode(page: Page): Promise<void> {
+      await openRoute(page, route);
+      await expectAppBundles(page, route.path);
+      await settle(page);
+      await page
+        .locator('h1')
+        .focus({ timeout: 100 })
+        .catch(() => undefined);
+      await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      // Tab hasta el contenedor desplazable del diagrama y una más hasta el nodo itinerante.
+      let reachedCanvas = false;
+      for (let presses = 0; presses < 60 && !reachedCanvas; presses++) {
+        await page.keyboard.press('Tab');
+        reachedCanvas = (await activeNode(page)).canvas;
+      }
+      expect(reachedCanvas, 'Tab debe alcanzar el diagrama del árbol').toBe(true);
+      await page.keyboard.press('Tab');
+      const node = await activeNode(page);
+      expect(node.id, 'el siguiente Tab debe caer en un nodo del árbol').not.toBeNull();
+    }
+
+    test('Tab llega al árbol y el indicador de foco del nodo tiene contraste ≥ 3:1', async ({
+      page,
+    }) => {
+      await focusFirstNode(page);
+      const focus = await page.evaluate(() => {
+        const element = document.activeElement as Element;
+        const style = getComputedStyle(element);
+        const canvas = document.querySelector('.skill-tree__canvas') as Element;
+        return {
+          outlineStyle: style.outlineStyle,
+          outlineWidth: Number.parseFloat(style.outlineWidth),
+          outlineColor: style.outlineColor,
+          background: getComputedStyle(canvas).backgroundColor,
+        };
+      });
+      expect(focus.outlineStyle, 'el nodo enfocado debe dibujar un contorno').not.toBe('none');
+      expect(focus.outlineWidth).toBeGreaterThanOrEqual(2);
+      expect(
+        contrast(focus.outlineColor, focus.background),
+        `contraste del indicador de foco (${focus.outlineColor} sobre ${focus.background})`,
+      ).toBeGreaterThanOrEqual(3);
+    });
+
+    test('axe sin violaciones critical/serious con un nodo enfocado', async ({ page }) => {
+      await focusFirstNode(page);
+      expectGate(`${route.path} · nodo enfocado`, await audit(page));
+    });
+
+    test('flechas mueven el foco, Enter abre el detalle y Escape lo cierra devolviendo el foco', async ({
+      page,
+    }) => {
+      await focusFirstNode(page);
+      const first = (await activeNode(page)).id!;
+      await page.keyboard.press('End');
+      const last = (await activeNode(page)).id!;
+      expect(last, 'End debe mover el foco al último nodo').not.toBe(first);
+      await page.keyboard.press('Home');
+      expect((await activeNode(page)).id, 'Home vuelve al primer nodo').toBe(first);
+      let moved = false;
+      for (const key of ['ArrowRight', 'ArrowDown']) {
+        await page.keyboard.press(key);
+        if ((await activeNode(page)).id !== first) {
+          moved = true;
+          break;
+        }
+      }
+      expect(moved, 'alguna flecha debe mover el foco a otro nodo').toBe(true);
+      await page.keyboard.press('Home');
+
+      const close = page.locator('[data-close-detail]');
+      await expect(close).toHaveCount(0);
+      await page.keyboard.press('Enter');
+      await expect(close, 'Enter abre el detalle con su botón de cierre').toHaveCount(1);
+      await expect(page.locator('[data-detail-panel] h3')).not.toHaveText('');
+      await page.keyboard.press('Escape');
+      await expect(close, 'Escape cierra el detalle').toHaveCount(0);
+      expect((await activeNode(page)).id, 'el foco vuelve al nodo').toBe(first);
+    });
+  });
+}

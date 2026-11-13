@@ -91,4 +91,20 @@ describe('gd-skill-tree catalog labels vs column step (T012 polish)', () => {
         CATALOG_COLUMN_STEP - CATALOG_MIN_COLUMN_GAP,
       );
   });
+
+  /** WCAG 2.5.3 (axe `label-content-name-mismatch`): the accessible name contains the visible text. */
+  const normalize = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+  for (const tree of trees)
+    for (const locale of ['en', 'es'] as const)
+      it(`${tree.mastery.slug} (${locale}): every node's aria-label contains its visible text in order`, async () => {
+        const fixture = await render(tree, locale);
+        const root: HTMLElement = fixture.nativeElement;
+        for (const node of root.querySelectorAll('[data-skill-id]')) {
+          const visible = normalize(
+            `${node.querySelector('.skill-tree__name')!.textContent} ${node.querySelector('.skill-tree__bar-required')!.textContent}`,
+          );
+          const label = normalize(node.getAttribute('aria-label')!);
+          expect(label, node.getAttribute('data-skill-id')!).toContain(visible);
+        }
+      });
 });

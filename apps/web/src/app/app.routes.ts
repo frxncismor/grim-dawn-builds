@@ -1,5 +1,5 @@
 import { inject, Injector, runInInjectionContext } from '@angular/core';
-import { Routes, type ActivatedRouteSnapshot } from '@angular/router';
+import { Routes, type ActivatedRouteSnapshot, type CanActivateFn } from '@angular/router';
 import { resolveCatalog } from './core/content/catalog.resolver';
 import type { AuthorPageData } from './features/author/author.state';
 import type { MasteryTree } from '@gd/domain';
@@ -21,6 +21,14 @@ function lazyResolver<Result>(
   };
 }
 
+/** Same lazy loading for a guard: the snapshot loader is not part of the initial bundle. */
+const ensurePublicSite: CanActivateFn = (route, state) => {
+  const injector = inject(Injector);
+  return import('./core/content/public-site.guard').then((module) =>
+    runInInjectionContext(injector, () => module.ensurePublicSite(route, state)),
+  );
+};
+
 const resolveBuildPage = lazyResolver<BuildPageContent | null>(() =>
   import('./core/content/content.resolvers').then((module) => module.resolveBuildPage),
 );
@@ -34,6 +42,7 @@ const resolveMasteryTree = lazyResolver<MasteryTree | null>(() =>
 export const routes: Routes = [
   {
     path: 'acerca',
+    canActivate: [ensurePublicSite],
     loadComponent: () => import('./features/static-pages/about.page').then((m) => m.AboutPage),
   },
   {
@@ -42,11 +51,13 @@ export const routes: Routes = [
   },
   {
     path: 'autores/:slug',
+    canActivate: [ensurePublicSite],
     loadComponent: () => import('./features/author/author.page').then((m) => m.AuthorPage),
     resolve: { author: resolveAuthor },
   },
   {
     path: 'tier-list',
+    canActivate: [ensurePublicSite],
     loadComponent: () => import('./features/tier-list/tier-list.page').then((m) => m.TierListPage),
     resolve: { catalog: resolveCatalog },
   },
@@ -62,6 +73,7 @@ export const routes: Routes = [
   },
   {
     path: '',
+    canActivate: [ensurePublicSite],
     loadComponent: () => import('./features/home/home.page').then((m) => m.HomePage),
   },
   {
