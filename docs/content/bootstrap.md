@@ -54,9 +54,24 @@ bootstrap y todo DML de importer sobre contenido se rechazan, incluso si intenta
 cambiar `origin` o borrar hijos. El editor puede actualizar contenido permitido
 sin modificar el marcador ni reabrir las importaciones.
 
+## Catálogo de árboles de maestría (spec 003)
+
+`db:seed` carga también el catálogo derivado del juego: lee `fixtures/content/mastery-trees/*.json`,
+valida cada archivo con `MasteryTreeSchema` (si uno falla, aborta con `invalid-content` sin tocar la
+base) y lo escribe con el rol `importer` en la misma transacción que el contenido editorial. Es
+idempotente: upsert por `id` y borrado de los nodos que ya no están en el fixture de esa maestría,
+así que regenerar fixtures y repetir `db:seed` deja el mismo estado. No incluye archivos del juego.
+
+El catálogo es dato de referencia y no editorial (queda fuera del corte de bootstrap, migración
+0009), pero `db:seed` completo sigue rechazado una vez registrado el marcador de bootstrap para no
+debilitar la protección del contenido editorial. Para refrescar solo el catálogo tras el bootstrap
+existe `seedCatalog` (`apps/api/src/db/seed.mts`): transacción propia, mismo rol `importer`
+restringido y sin tocar contenido editorial. Aún no tiene comando CLI; se añadirá cuando haya un
+flujo de refresco por build del juego.
+
 ## Diagnóstico
 
-La salida de éxito contiene solo cantidades de guías/listas. Los errores contienen
+La salida de éxito contiene solo cantidades (guías, listas, maestrías y nodos). Los errores contienen
 códigos fijos, nunca contenido, SQL ni credenciales:
 
 - `invalid-content`: corregir el material inicial, sin inventar derechos o firmantes.

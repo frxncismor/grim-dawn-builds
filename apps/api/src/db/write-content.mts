@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { BuildDocument } from '@gd/domain';
+import type { BuildDocument, MasteryTree } from '@gd/domain';
 import type { SeedData } from './seed.mjs';
 
 export class SeedError extends Error {
@@ -336,6 +336,65 @@ export async function writeContentRows(
         position: index + 1,
         origin: policy?.origin ?? 'fixture',
       });
+    }
+  }
+}
+
+/**
+ * Game-derived mastery catalog (spec 003). Idempotent refresh per mastery: upsert by id, then drop the
+ * nodes no longer in the fixture. Parent links are cleared first so stale parents can be deleted and
+ * re-pointed without tripping the composite FK; nodes are then upserted parents-first (tier order).
+ * All values go through pg parameters; table/column names are constants.
+ */
+export async function writeCatalogRows(
+  client: SeedClient,
+  catalog: readonly MasteryTree[],
+): Promise<void> {
+  for (const tree of catalog) {
+    const m = tree.mastery;
+    await client.query(
+      `INSERT INTO mastery_trees (id, slug, name_en, name_es, game_version, source_sha256)
+       VALUES ($1,$2,$3,$4,$5,$6)
+       ON CONFLICT (id) DO UPDATE SET slug=EXCLUDED.slug, name_en=EXCLUDED.name_en,
+         name_es=EXCLUDED.name_es, game_version=EXCLUDED.game_version,
+         source_sha256=EXCLUDED.source_sha256, updated_at=now()`,
+      [m.id, m.slug, m.name.en, m.name.es, tree.game_version, tree.source.sha256],
+    );
+    await client.query(
+      'UPDATE catalog_skill_nodes SET parent_id = NULL WHERE mastery_id = $1 AND parent_id IS NOT NULL',
+      [m.id],
+    );
+    await client.query(
+      'DELETE FROM catalog_skill_nodes WHERE mastery_id = $1 AND id <> ALL($2::text[])',
+      [m.id, tree.nodes.map((n) => n.id)],
+    );
+    for (const n of [...tree.nodes].sort((a, b) => a.tier - b.tier)) {
+      await client.query(
+        `INSERT INTO catalog_skill_nodes (id, mastery_id, name_en, name_es, kind, circular, tier,
+           bar_required, grid_col, grid_row, max_points, ultimate_points, parent_id, icon)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+         ON CONFLICT (id) DO UPDATE SET name_en=EXCLUDED.name_en, name_es=EXCLUDED.name_es,
+           kind=EXCLUDED.kind, circular=EXCLUDED.circular, tier=EXCLUDED.tier,
+           bar_required=EXCLUDED.bar_required, grid_col=EXCLUDED.grid_col, grid_row=EXCLUDED.grid_row,
+           max_points=EXCLUDED.max_points, ultimate_points=EXCLUDED.ultimate_points,
+           parent_id=EXCLUDED.parent_id, icon=EXCLUDED.icon, updated_at=now()`,
+        [
+          n.id,
+          m.id,
+          n.name.en,
+          n.name.es,
+          n.kind,
+          n.circular,
+          n.tier,
+          n.bar_required,
+          n.grid.col,
+          n.grid.row,
+          n.max_points,
+          n.ultimate_points ?? null,
+          n.parent_id,
+          n.icon ?? null,
+        ],
+      );
     }
   }
 }

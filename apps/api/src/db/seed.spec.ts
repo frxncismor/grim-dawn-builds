@@ -1,6 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { contractDoc } from '@gd/domain/testing';
-import { prepareSeed, runSeeder, seedData, SeedError, type SeedInput } from './seed.mjs';
+import {
+  prepareSeed,
+  readSeedFixtures,
+  runSeeder,
+  seedCatalog,
+  seedData,
+  SeedError,
+  type SeedInput,
+} from './seed.mjs';
 
 const raw = (): SeedInput => ({
   builds: [contractDoc('seed-guide')],
@@ -113,5 +121,69 @@ describe('local fixture seeder', () => {
       expect(String(error)).not.toContain('PRIVATE-DATABASE-CANARY');
     }
     expect(commands.at(-1)).toBe('ROLLBACK');
+  });
+});
+
+describe('mastery catalog seed (spec 003 T024)', () => {
+  const tree = (slug = 'soldier', id = 'class01') => ({
+    mastery: { id, slug, name: { en: 'Soldier', es: 'Soldado' } },
+    game_version: '1.2.1.0',
+    source: { game_version: '1.2.1.0', sha256: ['a'.repeat(64)] },
+    nodes: [
+      {
+        id: `${id}/root`,
+        name: { en: 'Root', es: 'Raíz' },
+        kind: 'active',
+        circular: false,
+        tier: 1,
+        bar_required: 1,
+        max_points: 5,
+        grid: { col: 1, row: 0 },
+        parent_id: null,
+      },
+    ],
+  });
+
+  it('validates the catalog and fails closed on an invalid tree', () => {
+    const ok = prepareSeed({ ...raw(), catalog: [tree()] });
+    expect(ok.catalog).toHaveLength(1);
+    expect(prepareSeed(raw()).catalog).toEqual([]);
+    const bad = { ...tree(), nodes: [] };
+    expect(() => prepareSeed({ ...raw(), catalog: [bad] })).toThrow('invalid-content');
+    expect(() => prepareSeed({ ...raw(), catalog: [tree(), tree()] })).toThrow('duplicate');
+  });
+
+  it('reads and validates mastery-trees from a fixtures root', async () => {
+    const { mkdtemp, mkdir, writeFile, cp } = await import('node:fs/promises');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const { fileURLToPath } = await import('node:url');
+    const real = fileURLToPath(new URL('../../../../fixtures/content/', import.meta.url));
+    const dir = await mkdtemp(join(tmpdir(), 'gd-seed-'));
+    await cp(real, dir, { recursive: true });
+    const data = await readSeedFixtures(dir);
+    expect(data.catalog).toHaveLength(6);
+    expect(data.catalog.reduce((n, t) => n + t.nodes.length, 0)).toBe(186);
+    await mkdir(join(dir, 'mastery-trees'), { recursive: true });
+    await writeFile(join(dir, 'mastery-trees', 'broken.json'), '{"mastery":1}');
+    await expect(readSeedFixtures(dir)).rejects.toThrow('invalid-content');
+  });
+
+  it('writes the catalog in one transaction, stale nodes removed, parents first', async () => {
+    const commands: string[] = [];
+    const client = {
+      query: async (sql: string) => {
+        commands.push(sql);
+        if (sql.includes('current_user'))
+          return { rows: [{ role: 'importer', privileged: false }] };
+        if (sql.includes('EXISTS')) return { rows: [{ bootstrapped: false }] };
+        return { rows: [] };
+      },
+    };
+    await seedCatalog(client, prepareSeed({ ...raw(), catalog: [tree()] }).catalog);
+    expect(commands[0]).toBe('BEGIN');
+    expect(commands.at(-1)).toBe('COMMIT');
+    expect(commands.some((s) => s.includes('INSERT INTO mastery_trees'))).toBe(true);
+    expect(commands.some((s) => s.includes('DELETE FROM catalog_skill_nodes'))).toBe(true);
   });
 });

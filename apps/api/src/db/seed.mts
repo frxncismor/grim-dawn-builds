@@ -1,4 +1,9 @@
-import { SeedError, writeContentRows, type SeedClient } from './write-content.mjs';
+import {
+  SeedError,
+  writeCatalogRows,
+  writeContentRows,
+  type SeedClient,
+} from './write-content.mjs';
 export { SeedError, type SeedClient } from './write-content.mjs';
 import { readdir, readFile, realpath } from 'node:fs/promises';
 import { isDeepStrictEqual } from 'node:util';
@@ -10,12 +15,14 @@ import {
   AuthorSchema,
   BuildDocumentSchema,
   MasterySchema,
+  MasteryTreeSchema,
   SourceSchema,
   TierListSchema,
   type Asset,
   type Author,
   type BuildDocument,
   type Mastery,
+  type MasteryTree,
   type Source,
   type TierList,
 } from '@gd/domain';
@@ -29,6 +36,7 @@ export interface SeedInput {
   builds: unknown[];
   tierLists: unknown[];
   assets: unknown[];
+  catalog?: unknown[];
 }
 export interface SeedData {
   authors: Author[];
@@ -37,6 +45,7 @@ export interface SeedData {
   builds: BuildDocument[];
   tierLists: TierList[];
   assets: Asset[];
+  catalog: MasteryTree[];
 }
 function valid<T>(
   schema: { safeParse(value: unknown): { success: true; data: T } | { success: false } },
@@ -139,7 +148,15 @@ export function prepareSeed(input: SeedInput): SeedData {
       if (entry.build_slug && !buildBySlug.has(entry.build_slug)) throw new SeedError('reference');
     for (const source of tier.sources) merge(sources, source);
   }
+  const catalog = (input.catalog ?? []).map((raw) => valid(MasteryTreeSchema, raw));
+  if (
+    new Set(catalog.map((t) => t.mastery.slug)).size !== catalog.length ||
+    new Set(catalog.map((t) => t.mastery.id)).size !== catalog.length
+  )
+    throw new SeedError('duplicate');
+  catalog.sort((a, b) => (a.mastery.id < b.mastery.id ? -1 : a.mastery.id > b.mastery.id ? 1 : 0));
   return {
+    catalog,
     authors: unique([...authors.values()]),
     sources: unique([...sources.values()]),
     masteries,
@@ -173,41 +190,82 @@ export async function readSeedFixtures(
       throw new SeedError('fixture-read');
     return Promise.all(files.map((e) => json(join(root, name, e.name))));
   };
-  const [authors, sources, builds, tierLists, rawMasteries, manifest] = await Promise.all([
+  const [authors, sources, builds, tierLists, catalog, rawMasteries, manifest] = await Promise.all([
     collection('authors'),
     collection('sources'),
     collection('builds'),
     collection('tier-lists'),
+    collection('mastery-trees'),
     json(join(root, 'masteries.json')),
     json(join(root, 'assets/manifest.json')),
   ]);
   const assets = object(manifest)['assets'];
   if (!Array.isArray(rawMasteries) || !Array.isArray(assets))
     throw new SeedError('invalid-content');
-  return prepareSeed({ authors, sources, builds, tierLists, masteries: rawMasteries, assets });
+  return prepareSeed({
+    authors,
+    sources,
+    builds,
+    tierLists,
+    catalog,
+    masteries: rawMasteries,
+    assets,
+  });
+}
+
+async function requireImporter(client: SeedClient): Promise<void> {
+  const role = (
+    await client.query(`SELECT current_user AS role,
+      (rolsuper OR rolcreaterole OR rolcreatedb OR rolreplication OR rolbypassrls) AS privileged
+      FROM pg_roles WHERE rolname = current_user`)
+  ).rows[0];
+  if (role?.['role'] !== 'importer' || role['privileged'] !== false) throw new SeedError('role');
+}
+
+/**
+ * Refresh only the game-derived mastery catalog (reference data, never editorial) in its own
+ * transaction. It is not blocked by the editorial bootstrap marker: T008 left the catalog out of the
+ * cutover gate so a new game build can refresh it. Same restricted `importer` role check as the seed.
+ */
+export async function seedCatalog(
+  client: SeedClient,
+  catalog: readonly MasteryTree[],
+): Promise<{ masteries: number; nodes: number }> {
+  await client.query('BEGIN');
+  try {
+    await requireImporter(client);
+    await writeCatalogRows(client, catalog);
+    await client.query('COMMIT');
+    return { masteries: catalog.length, nodes: catalog.reduce((n, t) => n + t.nodes.length, 0) };
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+    if (error instanceof SeedError) throw error;
+    throw new SeedError('database-failed');
+  }
 }
 
 /** Caller owns connection lifetime. No DDL, role changes, migration or production bootstrap. */
 export async function seedData(
   client: SeedClient,
   data: SeedData,
-): Promise<{ builds: number; tierLists: number }> {
+): Promise<{ builds: number; tierLists: number; masteries: number; nodes: number }> {
   await client.query('BEGIN');
   try {
-    const role = (
-      await client.query(`SELECT current_user AS role,
-      (rolsuper OR rolcreaterole OR rolcreatedb OR rolreplication OR rolbypassrls) AS privileged
-      FROM pg_roles WHERE rolname = current_user`)
-    ).rows[0];
-    if (role?.['role'] !== 'importer' || role['privileged'] !== false) throw new SeedError('role');
+    await requireImporter(client);
     await client.query('LOCK TABLE content_origin IN SHARE ROW EXCLUSIVE MODE');
     const marker = await client.query(
       'SELECT EXISTS (SELECT 1 FROM content_origin) AS bootstrapped',
     );
     if (marker.rows[0]?.['bootstrapped'] !== false) throw new SeedError('bootstrapped');
     await writeContentRows(client, data);
+    await writeCatalogRows(client, data.catalog);
     await client.query('COMMIT');
-    return { builds: data.builds.length, tierLists: data.tierLists.length };
+    return {
+      builds: data.builds.length,
+      tierLists: data.tierLists.length,
+      masteries: data.catalog.length,
+      nodes: data.catalog.reduce((n, t) => n + t.nodes.length, 0),
+    };
   } catch (error) {
     await client.query('ROLLBACK').catch(() => undefined);
     if (error instanceof SeedError) throw error;
@@ -271,7 +329,9 @@ export async function runSeeder(
     });
     await client.connect();
     const result = await seedData(client, data);
-    write.out(`seed complete: ${result.builds} builds, ${result.tierLists} tier lists`);
+    write.out(
+      `seed complete: ${result.builds} builds, ${result.tierLists} tier lists, ${result.masteries} masteries, ${result.nodes} nodes`,
+    );
     return 0;
   } catch (error) {
     write.err(
