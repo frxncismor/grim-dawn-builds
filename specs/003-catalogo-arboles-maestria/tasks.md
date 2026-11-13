@@ -19,7 +19,7 @@ Cada tarea declara archivos, aceptación y evidencia. Nada se marca `[x]` sin sa
 
 ## Fase 0 — Investigación de formato (bloquea todo lo demás)
 
-- [ ] **T001** Probar la extracción real de `.arz`/`.dbr` en la versión instalada — `scripts/extract-mastery-trees.mts` (esqueleto), `specs/003-catalogo-arboles-maestria/research.md` — Aceptación: lee al menos una habilidad y un `.dbr` de `records/ui/skills/classXX` y escribe sus campos a stdout; si falla, se documenta el bloqueo y se elige herramienta oficial de Crate en local. Evidencia: salida real y versión del juego.
+- [x] **T001** Probar la extracción real de `.arz`/`.dbr` en la versión instalada — `scripts/extract-mastery-trees.mts` (esqueleto), `specs/003-catalogo-arboles-maestria/research.md` — Aceptación: lee al menos una habilidad y un `.dbr` de `records/ui/skills/classXX` y escribe sus campos a stdout; si falla, se documenta el bloqueo y se elige herramienta oficial de Crate en local. Evidencia: salida real y versión del juego.
 - [ ] **T002** Fijar la tabla `tier → bar_required` (hitos 1/5/10/15/20/25/32/40/50) y el mapa de campos — `research.md` — Aceptación: tabla citada con su origen; conflicto con la UI del juego documentado. Depende de T001.
 - [ ] **T003** [P] Decidir parser (propio mínimo vs librería MIT/BSD) con justificación de tamaño y licencia — `research.md`, `plan.md` (Technical Context) — Aceptación: elección escrita con alternativa descartada (Constitución IV).
 - [x] **T004** [P] Verificar la licencia de la wiki y citarla (Q1) — `research.md`, `specs/003-catalogo-arboles-maestria/spec.md` §6 — Aceptación: URL de `Project:Copyrights` con revisión `oldid`, contradicción 3.0/4.0 y decisión aplicada registrada (SC-006).
