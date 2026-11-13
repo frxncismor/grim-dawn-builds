@@ -11,6 +11,8 @@ import { provideServerRendering, withRoutes } from '@angular/ssr';
 import { resolve } from 'node:path';
 import { appConfig } from './app.config';
 import { serverRoutes } from './app.routes.server';
+import { MASTERY_CATALOG } from './core/content/masteries';
+import { createMasteryCatalog } from './core/content/masteries.server';
 import { CONTENT_REPOSITORY } from './core/content/repository';
 import { createContentSource } from './core/content/content-source.server';
 import { SITE_BASE_URL, transferSiteUrl } from './core/seo/site-url';
@@ -39,6 +41,10 @@ const serverConfig: ApplicationConfig = {
   providers: [
     provideServerRendering(withRoutes(serverRoutes)),
     { provide: CONTENT_SOURCE, useFactory: () => createContentSource(CONTENT_ROOT, process.env) },
+    {
+      provide: MASTERY_CATALOG,
+      useFactory: () => createMasteryCatalog(CONTENT_ROOT, process.env),
+    },
     {
       provide: PUBLIC_SITE_LOADER,
       useFactory: () => {

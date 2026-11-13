@@ -56,7 +56,7 @@ compatibilidad.
 
 ### US1 (P1) — Ver el árbol completo de una maestría
 
-Como jugador, abro `/maestrias/soldado` y veo el árbol entero del Soldado con todas sus
+Como jugador, abro `/maestrias/soldier` y veo el árbol entero del Soldado con todas sus
 habilidades, en la rejilla del juego, con su tier y su rango máximo, sin depender de una
 guía concreta, también sin JavaScript.
 
@@ -70,7 +70,7 @@ nodos sin ejecutar JavaScript.
 
 **Escenarios**:
 
-1. **Dado** que abro `/maestrias/soldado` con JS y sin JS, **cuando** carga, **entonces** veo
+1. **Dado** que abro `/maestrias/soldier` con JS y sin JS, **cuando** carga, **entonces** veo
    el árbol completo de la maestría con sus nodos posicionados en la rejilla y navego con
    teclado por todos ellos.
 2. **Dado** un nodo, **cuando** lo enfoco o lo leo con lector de pantalla, **entonces**
@@ -223,3 +223,6 @@ editorial.
 - **Q3** ¿Se permiten retratos de maestría como arte del juego (lo pediste en tu último
   mensaje) bajo la enmienda §VII, o esperamos a aprobarla? Bloquea la presentación del
   índice, no los datos.
+
+> Nota (2026-11-13): slug del catálogo en inglés en ambos idiomas (decisión de Paco, 2026-11-13):
+> `/maestrias/soldier` y `/es/maestrias/soldier`; el ejemplo anterior `soldado` queda corregido.

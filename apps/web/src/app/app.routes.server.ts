@@ -1,5 +1,6 @@
 import { RenderMode, ServerRoute, PrerenderFallback } from '@angular/ssr';
 import { inject } from '@angular/core';
+import { MASTERY_CATALOG } from './core/content/masteries';
 import { CONTENT_REPOSITORY } from './core/content/repository';
 import { PUBLIC_SITE_LOADER } from './features/author/author.state';
 
@@ -27,6 +28,15 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender,
     fallback: PrerenderFallback.None,
     getPrerenderParams: buildPrerenderParams,
+  },
+  {
+    // Catalog of mastery trees: one prerendered page per mastery, listed by the catalog itself.
+    path: 'maestrias/:slug',
+    renderMode: RenderMode.Prerender,
+    fallback: PrerenderFallback.None,
+    async getPrerenderParams() {
+      return (await inject(MASTERY_CATALOG).listSlugs()).map((slug) => ({ slug }));
+    },
   },
   {
     // Static notice with no data dependency; prerendered as its own artifact.

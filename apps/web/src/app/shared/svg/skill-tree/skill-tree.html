@@ -2,8 +2,8 @@
   <section class="skill-tree skill-tree--catalog" [attr.aria-labelledby]="headingId()">
     <header class="skill-tree__header">
       <h2 [id]="headingId()">
-        {{ catalogSource.mastery.name.es }}
-        <span lang="en">({{ catalogSource.mastery.name.en }})</span>
+        {{ catalogSource.mastery.name[nameLang] }}
+        <span [attr.lang]="otherLang">({{ catalogSource.mastery.name[otherLang] }})</span>
       </h2>
     </header>
 
@@ -170,7 +170,8 @@
     >
       @if (catalogDetailNode(); as node) {
         <h3>
-          {{ node.name.es }} <span lang="en">({{ node.name.en }})</span>
+          {{ node.name[nameLang] }}
+          <span [attr.lang]="otherLang">({{ node.name[otherLang] }})</span>
         </h3>
         <p class="skill-tree__detail-status">{{ kindLabel(node.kind) }}</p>
         <p>{{ tierLabel(node.tier) }} · {{ barLabel(node.bar_required) }}</p>
@@ -199,7 +200,8 @@
       <ol>
         @for (node of catalogSource.nodes; track node.id) {
           <li [attr.id]="catalogListItemId(node)" [attr.data-skill-kind]="node.kind">
-            <strong>{{ node.name.es }}</strong> <span lang="en">({{ node.name.en }})</span>
+            <strong>{{ node.name[nameLang] }}</strong>
+            <span [attr.lang]="otherLang">({{ node.name[otherLang] }})</span>
             <span class="skill-tree__list-status">{{ kindLabel(node.kind) }}</span>
             <span>{{ tierLabel(node.tier) }} · {{ barLabel(node.bar_required) }}</span>
             <span>{{ maxPointsLabel(node) }}</span>
