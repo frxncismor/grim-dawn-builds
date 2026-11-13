@@ -268,7 +268,7 @@ ni comentarios.
 ## 10. Base constitucional y documentos relacionados
 
 Este documento se apoya en la constitución
-([`.specify/memory/constitution.md`](../../.specify/memory/constitution.md), v1.9.0):
+([`.specify/memory/constitution.md`](../../.specify/memory/constitution.md), v1.9.1):
 
 - **Principio I**: contenido verificable y atribuido; todo tiene autor, fuente, estado de
   revisión y estado de derechos. Nunca se publica con derechos `pending`.
