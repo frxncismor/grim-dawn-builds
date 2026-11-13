@@ -76,7 +76,7 @@ scripts/
 
 fixtures/content/mastery-trees/       # fixtures generados (JSON), versionados
 apps/api/drizzle/            # migración nueva: tablas + v_public_mastery_trees, v_public_skill_nodes
-apps/api/src/                # repositorio de catálogo (lectura) + pruebas
+apps/api/src/                # repositorio de catálogo (lectura) + pruebas; rutas GET /api/v1/masteries y /api/v1/masteries/:slug (T023)
 src/app/
 ├── features/masteries/      # índice y página por maestría (nuevo; lazy + prerender)
 └── shared/svg/skill-tree/   # componente de árbol reutilizado (modificado, no reescrito)

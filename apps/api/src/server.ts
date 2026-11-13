@@ -23,6 +23,7 @@ async function main(): Promise<void> {
     readiness: () => checkDatabaseReadiness(process.env),
     migration: migrationFingerprint,
     content: content.repository,
+    masteries: content.masteries,
   });
   app.addHook('onClose', async () => {
     await content.close();
