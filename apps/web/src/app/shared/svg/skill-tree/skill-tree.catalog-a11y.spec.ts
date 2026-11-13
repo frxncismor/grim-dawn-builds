@@ -8,7 +8,8 @@ import demolition from '../../../../../../../fixtures/content/mastery-trees/demo
 import { SkillTree } from './skill-tree';
 
 const tree: MasteryTree = MasteryTreeSchema.parse(demolition);
-const nameOf = new Map(tree.nodes.map((node) => [node.id, node.name.es]));
+// The test locale is English: the main name of every label is `name.en`.
+const nameOf = new Map(tree.nodes.map((node) => [node.id, node.name.en]));
 
 describe('gd-skill-tree catalog accessibility (T011)', () => {
   afterEach(() => TestBed.resetTestingModule());
@@ -30,7 +31,7 @@ describe('gd-skill-tree catalog accessibility (T011)', () => {
     for (const node of tree.nodes) {
       const el = root.querySelector<SVGGElement>(`[data-skill-id="${node.id}"]`)!;
       const label = el.getAttribute('aria-label') ?? '';
-      expect(label, node.id).toContain(node.name.es);
+      expect(label, node.id).toContain(node.name.en);
       expect(label).toContain(`Tier ${node.tier}`);
       expect(label).toContain(`Bar ${node.bar_required}`);
       expect(label).toContain(`Max ${node.max_points}`);
@@ -105,7 +106,7 @@ describe('gd-skill-tree catalog accessibility (T011)', () => {
     expect(items).toHaveLength(tree.nodes.length);
     const text = list.textContent!.replace(/\s+/g, ' ');
     for (const node of tree.nodes) {
-      expect(text).toContain(`${node.name.es}`);
+      expect(text).toContain(`${node.name.en}`);
       if (node.parent_id) expect(text).toContain(`Requires ${nameOf.get(node.parent_id)}`);
     }
     expect(text).toContain('No requirement');

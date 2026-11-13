@@ -3,21 +3,25 @@
     "id": "class03",
     "slug": "occult",
     "name": {
-      "en": "tagClass03SkillName00",
-      "es": "tagClass03SkillName00"
+      "en": "Occultist",
+      "es": "Ocultista"
     }
   },
   "game_version": "steam-build-25813250",
   "source": {
     "game_version": "steam-build-25813250",
-    "sha256": ["9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603"]
+    "sha256": [
+      "9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603",
+      "82defd8a0fddf71e8491b7494fada51b034b1af14ffc0a6cf9c8aabdf8700c25",
+      "e6f785d155d0791b3100092762111f59a06faa9e1a86d91898ec98317e395752"
+    ]
   },
   "nodes": [
     {
       "id": "class03/evileye1",
       "name": {
-        "en": "tagClass03SkillName11A",
-        "es": "tagClass03SkillName11A"
+        "en": "Dreeg's Evil Eye",
+        "es": "El Ojo Malvado de Dreeg"
       },
       "kind": "active",
       "circular": false,
@@ -35,8 +39,8 @@
     {
       "id": "class03/curse1",
       "name": {
-        "en": "tagClass03SkillName06A",
-        "es": "tagClass03SkillName06A"
+        "en": "Curse of Frailty",
+        "es": "Maldición de Debilidad"
       },
       "kind": "active",
       "circular": false,
@@ -54,8 +58,8 @@
     {
       "id": "class03/summon_raven1",
       "name": {
-        "en": "tagClass03SkillName01A",
-        "es": "tagClass03SkillName01A"
+        "en": "Summon Familiar",
+        "es": "Invocar Familiar"
       },
       "kind": "active",
       "circular": false,
@@ -73,8 +77,8 @@
     {
       "id": "class03/witchfire1",
       "name": {
-        "en": "tagClass03SkillName05A",
-        "es": "tagClass03SkillName05A"
+        "en": "Solael's Witchfire",
+        "es": "Fuego de Brujas de Solael"
       },
       "kind": "active",
       "circular": false,
@@ -92,8 +96,8 @@
     {
       "id": "class03/evileye2",
       "name": {
-        "en": "tagClass03SkillName11B",
-        "es": "tagClass03SkillName11B"
+        "en": "Blood Burst",
+        "es": "Explosión de Sangre"
       },
       "kind": "modifier",
       "circular": true,
@@ -111,8 +115,8 @@
     {
       "id": "class03/pox1",
       "name": {
-        "en": "tagClass03SkillName13A",
-        "es": "tagClass03SkillName13A"
+        "en": "Bloody Pox",
+        "es": "Plaga Sangrienta"
       },
       "kind": "active",
       "circular": false,
@@ -130,8 +134,8 @@
     {
       "id": "class03/summon_raven2_petmodifier",
       "name": {
-        "en": "tagClass03SkillName01C",
-        "es": "tagClass03SkillName01C"
+        "en": "Mend Flesh",
+        "es": "Aliviar Carne"
       },
       "kind": "modifier",
       "circular": true,
@@ -149,8 +153,8 @@
     {
       "id": "class03/sigilofdestruction1",
       "name": {
-        "en": "tagClass03SkillName10A",
-        "es": "tagClass03SkillName10A"
+        "en": "Sigil of Consumption",
+        "es": "Sello de Consumo"
       },
       "kind": "active",
       "circular": false,
@@ -168,8 +172,8 @@
     {
       "id": "class03/evileye1b",
       "name": {
-        "en": "tagClass03SkillName11E",
-        "es": "tagClass03SkillName11E"
+        "en": "Focused Gaze",
+        "es": "Mirada Concentrada"
       },
       "kind": "transmuter",
       "circular": true,
@@ -187,8 +191,8 @@
     {
       "id": "class03/curse2",
       "name": {
-        "en": "tagClass03SkillName06B",
-        "es": "tagClass03SkillName06B"
+        "en": "Vulnerability",
+        "es": "Vulnerabilidad"
       },
       "kind": "modifier",
       "circular": true,
@@ -206,8 +210,8 @@
     {
       "id": "class03/summon_hellhound1",
       "name": {
-        "en": "tagClass03SkillName02A",
-        "es": "tagClass03SkillName02A"
+        "en": "Summon Hellhound",
+        "es": "Invocar Sabueso Infernal"
       },
       "kind": "active",
       "circular": false,
@@ -225,8 +229,8 @@
     {
       "id": "class03/witchfire1b",
       "name": {
-        "en": "tagClass03SkillName05C",
-        "es": "tagClass03SkillName05C"
+        "en": "Consecrated Blade",
+        "es": "Hoja Consagrada"
       },
       "kind": "transmuter",
       "circular": true,
@@ -244,8 +248,8 @@
     {
       "id": "class03/pox1b",
       "name": {
-        "en": "tagClass03SkillName13D",
-        "es": "tagClass03SkillName13D"
+        "en": "Fevered Rage",
+        "es": "Furia Febril"
       },
       "kind": "transmuter",
       "circular": true,
@@ -263,8 +267,8 @@
     {
       "id": "class03/bloodofdreeg1",
       "name": {
-        "en": "tagClass03SkillName04A",
-        "es": "tagClass03SkillName04A"
+        "en": "Blood of Dreeg",
+        "es": "Sangre de Dreeg"
       },
       "kind": "active",
       "circular": false,
@@ -282,8 +286,8 @@
     {
       "id": "class03/summon_raven3_petmodifier",
       "name": {
-        "en": "tagClass03SkillName01D",
-        "es": "tagClass03SkillName01D"
+        "en": "Storm Spirit",
+        "es": "Tormenta Espiritual"
       },
       "kind": "modifier",
       "circular": true,
@@ -301,8 +305,8 @@
     {
       "id": "class03/evileye3",
       "name": {
-        "en": "tagClass03SkillName11C",
-        "es": "tagClass03SkillName11C"
+        "en": "Terrifying Gaze",
+        "es": "Mirada Aterradora"
       },
       "kind": "modifier",
       "circular": true,
@@ -320,8 +324,8 @@
     {
       "id": "class03/pox2",
       "name": {
-        "en": "tagClass03SkillName13B",
-        "es": "tagClass03SkillName13B"
+        "en": "Wasting",
+        "es": "Debilitación"
       },
       "kind": "modifier",
       "circular": true,
@@ -339,8 +343,8 @@
     {
       "id": "class03/summon_hellhound2_petmodifier",
       "name": {
-        "en": "tagClass03SkillName02B",
-        "es": "tagClass03SkillName02B"
+        "en": "Ember Claw",
+        "es": "Garra de Ascuas"
       },
       "kind": "modifier",
       "circular": true,
@@ -358,8 +362,8 @@
     {
       "id": "class03/sigilofdestruction2",
       "name": {
-        "en": "tagClass03SkillName10B",
-        "es": "tagClass03SkillName10B"
+        "en": "Destruction",
+        "es": "Destrucción"
       },
       "kind": "modifier",
       "circular": true,
@@ -377,8 +381,8 @@
     {
       "id": "class03/witchfire2",
       "name": {
-        "en": "tagClass03SkillName05B",
-        "es": "tagClass03SkillName05B"
+        "en": "Second Rite",
+        "es": "Segundo Rito"
       },
       "kind": "modifier",
       "circular": true,
@@ -396,8 +400,8 @@
     {
       "id": "class03/summon_raven4_petmodifier",
       "name": {
-        "en": "tagClass03SkillName01E",
-        "es": "tagClass03SkillName01E"
+        "en": "Lightning Strike",
+        "es": "Golpe de Relámpagos"
       },
       "kind": "modifier",
       "circular": true,
@@ -415,8 +419,8 @@
     {
       "id": "class03/bloodofdreeg2",
       "name": {
-        "en": "tagClass03SkillName04B",
-        "es": "tagClass03SkillName04B"
+        "en": "Aspect of the Guardian",
+        "es": "Aspecto del Guardián"
       },
       "kind": "modifier",
       "circular": true,
@@ -434,8 +438,8 @@
     {
       "id": "class03/bondsofbysmiel1",
       "name": {
-        "en": "tagClass03SkillName03A",
-        "es": "tagClass03SkillName03A"
+        "en": "Bonds of Bysmiel",
+        "es": "Grilletes de Bysmiel"
       },
       "kind": "active",
       "circular": false,
@@ -453,8 +457,8 @@
     {
       "id": "class03/summon_hellhound3_petmodifier",
       "name": {
-        "en": "tagClass03SkillName02C",
-        "es": "tagClass03SkillName02C"
+        "en": "Hellfire",
+        "es": "Fuego Infernal"
       },
       "kind": "modifier",
       "circular": true,
@@ -472,8 +476,8 @@
     {
       "id": "class03/doombolt1",
       "name": {
-        "en": "tagClass03SkillName14A",
-        "es": "tagClass03SkillName14A"
+        "en": "Doom Bolt",
+        "es": "Rayo de la Muerte"
       },
       "kind": "active",
       "circular": false,
@@ -491,8 +495,8 @@
     {
       "id": "class03/evileye4",
       "name": {
-        "en": "tagClass03SkillName11D",
-        "es": "tagClass03SkillName11D"
+        "en": "Vile Eruption",
+        "es": "Erupción Vil"
       },
       "kind": "modifier",
       "circular": true,
@@ -510,8 +514,8 @@
     {
       "id": "class03/pox3",
       "name": {
-        "en": "tagClass03SkillName13C",
-        "es": "tagClass03SkillName13C"
+        "en": "Black Death",
+        "es": "Muerte Negra"
       },
       "kind": "modifier",
       "circular": true,
@@ -529,8 +533,8 @@
     {
       "id": "class03/possession1",
       "name": {
-        "en": "tagClass03SkillName12A",
-        "es": "tagClass03SkillName12A"
+        "en": "Possession",
+        "es": "Posesión"
       },
       "kind": "active",
       "circular": false,
@@ -548,8 +552,8 @@
     {
       "id": "class03/bondsofbysmiel2",
       "name": {
-        "en": "tagClass03SkillName03B",
-        "es": "tagClass03SkillName03B"
+        "en": "Manipulation",
+        "es": "Manipulación"
       },
       "kind": "modifier",
       "circular": true,
@@ -567,8 +571,8 @@
     {
       "id": "class03/summon_hellhound4_petmodifier",
       "name": {
-        "en": "tagClass03SkillName02D",
-        "es": "tagClass03SkillName02D"
+        "en": "Infernal Breath",
+        "es": "Aliento Infernal"
       },
       "kind": "modifier",
       "circular": true,

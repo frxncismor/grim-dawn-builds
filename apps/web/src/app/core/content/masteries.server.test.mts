@@ -112,7 +112,10 @@ test('API catalog turns 503, network errors, invalid bodies and slug mismatches 
 });
 
 test('API catalog rejects unsafe base URLs', () => {
-  for (const url of ['ftp://x/', 'http://u:p@x/', 'http://x/?q=1', 'nope'])
+  const authenticated = new URL('http://x/');
+  authenticated.username = 'name';
+  authenticated.password = 'sentinel';
+  for (const url of ['ftp://x/', authenticated.href, 'http://x/?q=1', 'nope'])
     assert.throws(() => new ApiMasteryCatalog(url), { message: 'API_BASE_URL inválida.' });
 });
 
