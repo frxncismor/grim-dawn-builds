@@ -52,11 +52,13 @@ const EXPECTED_TABLES = [
   'permission_requests',
   'takedown_events',
   'source_change_events',
+  'mastery_trees',
+  'catalog_skill_nodes',
 ];
 
 const JOIN_TABLES = ['build_sources', 'build_masteries', 'build_constellations'];
-// build_adaptations is a 1:1 extension keyed by build_id, not an entity with its own uuid id.
-const KEYED_TABLES = ['build_adaptations'];
+// build_adaptations is a 1:1 extension keyed by build_id; the catalog tables use the game's text ids.
+const KEYED_TABLES = ['build_adaptations', 'mastery_trees', 'catalog_skill_nodes'];
 const ENTITY_TABLES = EXPECTED_TABLES.filter(
   (n) => !JOIN_TABLES.includes(n) && !KEYED_TABLES.includes(n),
 );
@@ -450,7 +452,9 @@ describe('database schema: indexes', () => {
 
 describe('database schema: scope boundaries', () => {
   it('declares no publication, asset or tier-entry CHECK gates (those are T-055)', () => {
-    for (const name of EXPECTED_TABLES.filter((n) => n !== 'mastery_combinations')) {
+    // The mastery catalog (spec 003, T008) declares its structural CHECKs; see schema-parity.spec.ts.
+    const CATALOG_TABLES = ['mastery_combinations', 'mastery_trees', 'catalog_skill_nodes'];
+    for (const name of EXPECTED_TABLES.filter((n) => !CATALOG_TABLES.includes(n))) {
       expect(
         configOf(name).checks.map((c) => c.name),
         name,

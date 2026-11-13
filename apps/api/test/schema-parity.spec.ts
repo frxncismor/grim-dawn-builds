@@ -17,11 +17,13 @@ import {
   AdaptationPublicationSchema,
   AssetSchema,
   BuildSchema,
+  CatalogSkillNodeSchema,
   CONTENT_STATUSES,
   EVIDENCE_STATUSES,
   EVIDENCE_TYPES,
   PERMISSION_REQUEST_STATUSES,
   PermissionRequestSchema,
+  SKILL_KINDS,
   SOURCE_CHANGE_OUTCOMES,
   SOURCE_CHANGE_TYPES,
   SourceChangeEventSchema,
@@ -30,6 +32,7 @@ import {
   TakedownEventSchema,
   TIERS,
   TierEntrySchema,
+  TIER_BAR_REQUIRED,
   type BuildAdaptation,
   type SourceRightsEvidence,
 } from '@gd/domain';
@@ -48,6 +51,12 @@ const adaptationsSql = readFileSync(
 // T-169 custom SQL: the public asset view stops publishing provenance (LOW-2).
 const assetViewSql = readFileSync(
   fileURLToPath(new URL('../drizzle/0008_public_asset_view.sql', import.meta.url)),
+  'utf8',
+);
+
+// T008 (spec 003) custom SQL: mastery catalog tables, CHECKs and public views.
+const masteryCatalogSql = readFileSync(
+  fileURLToPath(new URL('../drizzle/0009_mastery_catalog.sql', import.meta.url)),
   'utf8',
 );
 
@@ -147,6 +156,11 @@ describe('parity: enums (Drizzle pgEnum ↔ domain Zod options)', () => {
     {
       column: [db.sourceChangeEvents, 'outcome'],
       domain: [SOURCE_CHANGE_OUTCOMES],
+    },
+    // T008 (spec 003): mastery catalog node kind.
+    {
+      column: [db.catalogSkillNodes, 'kind'],
+      domain: [SKILL_KINDS, CatalogSkillNodeSchema.shape.kind.options],
     },
   ];
 
@@ -699,5 +713,130 @@ describe('parity: adaptation publication gate (0007 SQL ↔ AdaptationPublicatio
       expect(adaptationsSql, constraint).toMatch(sqlTerm);
       expect(adaptationsSql, constraint).toContain(`CONSTRAINT ${constraint}`);
     }
+  });
+});
+
+describe('parity: mastery catalog (0009 SQL + Drizzle ↔ CatalogSkillNodeSchema, T008)', () => {
+  const nodeCols = configOf(db.catalogSkillNodes).columns.map((c) => c.name);
+  const sqlOfView = (name: string): string => {
+    const start = masteryCatalogSql.indexOf(`CREATE VIEW ${name}`);
+    const end = masteryCatalogSql.indexOf(';', start);
+    return start > -1 && end > start ? masteryCatalogSql.slice(start, end) : '';
+  };
+
+  it('models the contract columns with the domain nullability', () => {
+    expect(configOf(db.masteryTrees).columns.map((c) => c.name)).toEqual(
+      expect.arrayContaining(['id', 'slug', 'name_en', 'name_es', 'game_version', 'source_sha256']),
+    );
+    expect(nodeCols).toEqual(
+      expect.arrayContaining([
+        'id',
+        'mastery_id',
+        'name_en',
+        'name_es',
+        'kind',
+        'circular',
+        'tier',
+        'bar_required',
+        'grid_col',
+        'grid_row',
+        'max_points',
+        'ultimate_points',
+        'parent_id',
+        'icon',
+      ]),
+    );
+    const shape = CatalogSkillNodeSchema.shape;
+    expect(columnOf(db.catalogSkillNodes, 'ultimate_points').notNull).toBe(
+      !shape.ultimate_points.safeParse(undefined).success,
+    );
+    expect(columnOf(db.catalogSkillNodes, 'icon').notNull).toBe(
+      !shape.icon.safeParse(undefined).success,
+    );
+    expect(columnOf(db.catalogSkillNodes, 'parent_id').notNull).toBe(
+      !nullableInZod(shape.parent_id),
+    );
+    for (const required of ['kind', 'circular', 'tier', 'bar_required', 'max_points', 'name_en']) {
+      expect(columnOf(db.catalogSkillNodes, required).notNull, required).toBe(true);
+    }
+    expect(columnOf(db.masteryTrees, 'slug').isUnique).toBe(true);
+  });
+
+  it('declares the SQL CHECKs that mirror the domain refinements', () => {
+    const checks = configOf(db.catalogSkillNodes).checks.map((c) => c.name);
+    expect(checks.sort()).toEqual(
+      [
+        'catalog_skill_nodes_bar_required_ck',
+        'catalog_skill_nodes_grid_col_ck',
+        'catalog_skill_nodes_grid_row_ck',
+        'catalog_skill_nodes_id_ck',
+        'catalog_skill_nodes_max_points_ck',
+        'catalog_skill_nodes_no_self_parent_ck',
+        'catalog_skill_nodes_tier_ck',
+        'catalog_skill_nodes_ultimate_ck',
+      ].sort(),
+    );
+    for (const ck of checks) {
+      expect(masteryCatalogSql, ck).toContain(`CONSTRAINT "${ck}" CHECK`);
+    }
+    expect(masteryCatalogSql).toMatch(/CONSTRAINT "mastery_trees_id_ck" CHECK/);
+    expect(masteryCatalogSql).toMatch(/CONSTRAINT "catalog_skill_nodes_grid_cell_uq" UNIQUE/);
+  });
+
+  it('keeps the SQL tier → bar_required table equal to TIER_BAR_REQUIRED', () => {
+    const barCk = masteryCatalogSql.slice(
+      masteryCatalogSql.indexOf('catalog_skill_nodes_bar_required_ck'),
+    );
+    for (const [i, bar] of TIER_BAR_REQUIRED.entries()) {
+      expect(barCk, `tier ${i + 1}`).toMatch(
+        new RegExp(`"tier" = ${i + 1} AND "bar_required" = ${bar}`),
+      );
+    }
+  });
+
+  it('rejects in the domain what the SQL rejects (tier, ultimate, self parent)', () => {
+    const node = {
+      id: 'class01/a',
+      name: { en: 'A', es: 'A' },
+      kind: 'active',
+      circular: false,
+      tier: 1,
+      bar_required: 1,
+      max_points: 5,
+      grid: { col: 1, row: 0 },
+      parent_id: null,
+    };
+    expect(CatalogSkillNodeSchema.safeParse(node).success).toBe(true);
+    expect(CatalogSkillNodeSchema.safeParse({ ...node, tier: 10 }).success).toBe(false);
+    expect(CatalogSkillNodeSchema.safeParse({ ...node, ultimate_points: 4 }).success).toBe(false);
+    expect(CatalogSkillNodeSchema.safeParse({ ...node, parent_id: node.id }).success).toBe(false);
+  });
+
+  it('publishes read-only views without audit timestamps', () => {
+    const trees = sqlOfView('v_public_mastery_trees');
+    const nodes = sqlOfView('v_public_skill_nodes');
+    expect(trees).toContain('FROM mastery_trees');
+    expect(nodes).toContain('FROM catalog_skill_nodes');
+    for (const field of ['created_at', 'updated_at']) {
+      expect(trees, field).not.toContain(field);
+      expect(nodes, field).not.toContain(field);
+    }
+    expect(masteryCatalogSql).toMatch(
+      /GRANT SELECT ON v_public_mastery_trees, v_public_skill_nodes TO api_ro;/,
+    );
+  });
+
+  it('never grants the base tables to api_ro or any write on the views', () => {
+    expect(masteryCatalogSql).not.toMatch(
+      /GRANT [^;]* ON (mastery_trees|catalog_skill_nodes)[^;]* TO api_ro/,
+    );
+    expect(masteryCatalogSql).not.toMatch(/GRANT (INSERT|UPDATE|DELETE|ALL)[^;]* TO api_ro/);
+  });
+
+  it('grants DML on the base tables to importer only; editor gets nothing (derived data)', () => {
+    expect(masteryCatalogSql).toMatch(
+      /GRANT SELECT, INSERT, UPDATE, DELETE ON mastery_trees, catalog_skill_nodes TO importer;/,
+    );
+    expect(masteryCatalogSql).not.toMatch(/ TO editor/);
   });
 });

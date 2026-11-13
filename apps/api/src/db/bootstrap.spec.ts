@@ -38,6 +38,9 @@ describe('bootstrap boundary and payload', () => {
     expect(bootstrapPayloadHash([1, 2])).not.toBe(bootstrapPayloadHash([2, 1]));
     expect(contentTableNames()).toHaveLength(27);
     expect(contentTableNames()).not.toContain('content_origin');
+    // Game-derived catalog (spec 003): not editorial, so it neither blocks nor is locked by bootstrap.
+    expect(contentTableNames()).not.toContain('mastery_trees');
+    expect(contentTableNames()).not.toContain('catalog_skill_nodes');
   });
   it('validates before querying the database', async () => {
     const query = vi.fn();

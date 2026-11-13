@@ -25,10 +25,15 @@ export class BootstrapError extends Error {
     this.name = 'BootstrapError';
   }
 }
+/**
+ * Tables outside the editorial bootstrap: the provenance marker itself and the game-derived mastery
+ * catalog (spec 003), which is refreshed by the importer on every game build and is never editorial.
+ */
+const NON_EDITORIAL_TABLES = new Set(['content_origin', 'mastery_trees', 'catalog_skill_nodes']);
 export function contentTableNames(): string[] {
   return Object.values(schema)
     .flatMap((value) => (is(value, PgTable) ? [getTableName(value)] : []))
-    .filter((name) => name !== 'content_origin')
+    .filter((name) => !NON_EDITORIAL_TABLES.has(name))
     .sort();
 }
 const quote = (name: string) => {

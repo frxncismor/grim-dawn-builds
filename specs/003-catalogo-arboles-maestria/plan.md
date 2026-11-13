@@ -18,7 +18,7 @@ con fallback propio conmutable.
 
 **Language/Version**: TypeScript 5.x sobre Node 22 LTS; Angular 21 (SSG con `@angular/localize`); Drizzle + PostgreSQL 17.
 **Primary Dependencies**: ninguna nueva de producto. Script de extracción: Node 22 + `zod` (ya presentes). Lectura de `.arz/.dbr`: **parser propio mínimo en TypeScript con builtins de Node y descompresor LZ4 de bloque propio** (sin librería; `ArchiveTool.exe` solo como contraste manual local, fuera del repo y de CI); `gd-utility` (MIT) solo como especificación del formato. Tamaño, licencia y alternativa descartada en [`research.md#t003`](research.md#t003--decisión-de-parser-propio-mínimo-vs-librería).
-**Storage**: PostgreSQL = fuente de verdad (`mastery_trees`, `skill_nodes_catalog`, vistas `v_public_*`); fixtures JSON generados para desarrollo/tests (`fixtures/content/mastery-trees/*.json`), nunca `.dbr`.
+**Storage**: PostgreSQL = fuente de verdad (`mastery_trees`, `catalog_skill_nodes`, vistas `v_public_*`); fixtures JSON generados para desarrollo/tests (`fixtures/content/mastery-trees/*.json`), nunca `.dbr`.
 **Testing**: Vitest/Jest del repo (dominio + API), `node --test` para scripts, Playwright + axe para UI, Lighthouse para presupuesto.
 **Target Platform**: web estática prerenderizada servida local (MVP local, §17.58) con API en Docker.
 **Project Type**: monorepo pnpm (`apps/api`, `packages/domain`, web en raíz).
