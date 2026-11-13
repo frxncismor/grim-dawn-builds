@@ -160,16 +160,16 @@ jobs:
       - name: Script tests
         run: pnpm run test:scripts
 
-      # Fixture dataset only: content/builds is not populated yet (T-014).
+      # Fixture dataset only: fixtures/content/builds is not populated yet (T-014).
       # The invalid fixture is covered by the script tests above.
       - name: Content validation (fixture)
         run: pnpm run content:validate -- --dir scripts/fixtures/content-valid
 
-      # `content/` is the repository's real fixture content (content/builds is
+      # `fixtures/content/` is the repository's real fixture content (fixtures/content/builds is
       # still empty until T-014). `catalog:check` fails if the generated catalog
       # drifts from the content it is generated from.
       - name: Content validation (real fixture content)
-        run: pnpm run content:validate -- --dir content
+        run: pnpm run content:validate -- --dir fixtures/content
 
       - name: Catalog check (generated catalog is current)
         run: pnpm run catalog:check

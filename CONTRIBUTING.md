@@ -220,7 +220,7 @@ pull request.
 
 The pull request CI runs the same checks, except `pnpm verify` itself. It also
 runs `pnpm content:validate -- --dir scripts/fixtures/content-valid`, which
-validates only the fixture, because `content/builds` does not have content yet
+validates only the fixture, because `fixtures/content/builds` does not have content yet
 (T-014). CI runs `lint:md` only in check mode; it never applies `--fix`.
 
 Gate matrix and language policy: see [docs/quality-gates.md](docs/quality-gates.md).
@@ -290,7 +290,7 @@ docker compose -f infra/docker/compose.yaml up -d --no-deps db
 Principle XII of the constitution and plan §13.
 
 - **Never** commit secrets: not in code, Dockerfiles, image `ARG`/`ENV`,
-  `package.json` scripts, `content/` fixtures, `.env.example`, frontend builds,
+  `package.json` scripts, `fixtures/content/` fixtures, `.env.example`, frontend builds,
   logs or CI artifacts.
 - Local `.env` files (except `.env.example`) and `secrets/` folders are ignored
   by git. Do not force them with `git add -f`.
@@ -333,13 +333,13 @@ FR-31 of the specification.
   metadata is possible.
 - The project is not affiliated with Crate Entertainment or GrimTools. Keep the
   non-affiliation notice.
-- The files in `content/` are development fixtures and import material, not a
+- The files in `fixtures/content/` are development fixtures and import material, not a
   production source (principle VI).
 
 ## Official Grim Dawn assets
 
 - Icons, textures and official art are only included if the assets manifest
-  (`content/assets/manifest.json`) records their exact origin, owner, license or
+  (`fixtures/content/assets/manifest.json`) records their exact origin, owner, license or
   permission and proof, with `approved` status.
 - As long as that entry does not exist, own or generic art is used: the fallback
   SVG glyphs.

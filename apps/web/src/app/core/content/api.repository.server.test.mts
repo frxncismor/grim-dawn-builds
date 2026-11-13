@@ -5,7 +5,7 @@ import { createServer } from 'node:http';
 import { ApiContentRepository } from './api.repository.ts';
 import { createFixtureRepository } from './fixture-source.server.ts';
 
-const fixture = createFixtureRepository('content', {});
+const fixture = createFixtureRepository('fixtures/content', {});
 const response = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status });
 
 test('native HTTP refuses redirects and aborts a stalled response without retaining network details', async () => {

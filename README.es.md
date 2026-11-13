@@ -161,7 +161,7 @@ queda fuera del sitemap y nunca forma parte de un build público ni de release.
 
 ### Flujo editorial
 
-`content/` contiene los fixtures de desarrollo y el material de importación. La
+`fixtures/content/` contiene los fixtures de desarrollo y el material de importación. La
 CLI editorial edita documentos canónicos con el rol PostgreSQL `editor`, sin
 cuentas ni endpoints de escritura:
 
@@ -190,7 +190,7 @@ explícita.
 apps/api/         API Fastify + Drizzle (solo lectura pública)
 packages/domain/  Esquema Zod, tipos y reglas puras compartidas
 src/              Aplicación Angular (web)
-content/          Fixtures de desarrollo y material de importación
+fixtures/content/          Fixtures de desarrollo y material de importación
 infra/docker/     Compose, secretos locales y aprovisionamiento de roles
 scripts/          Validadores, generadores y puertas de verificación
 e2e/              Pruebas Playwright
@@ -252,4 +252,4 @@ Angular para que ambas configuraciones permanezcan completas.
 
 El código se distribuye sin licencia declarada por ahora: todos los derechos
 reservados hasta que el mantenedor elija una. El contenido editorial de terceros
-se rige por sus propias licencias y permisos registrados en `content/sources/`.
+se rige por sus propias licencias y permisos registrados en `fixtures/content/sources/`.

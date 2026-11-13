@@ -315,7 +315,10 @@ function isPatternScanned(path: string): boolean {
   const segments = path.split('/');
   const name = segments[segments.length - 1];
   if (MARKDOWN.test(name) || PATTERN_SKIP_NAMES.has(name)) return false;
-  return !segments.slice(0, -1).some((s) => PATTERN_SKIP_DIRS.has(s));
+  // `fixtures/content/` is the repository's editorial content (T-075): it was scanned
+  // as `content/` and keeps being scanned; other fixture folders stay excluded.
+  const dirs = path.startsWith('fixtures/content/') ? segments.slice(2, -1) : segments.slice(0, -1);
+  return !dirs.some((s) => PATTERN_SKIP_DIRS.has(s));
 }
 
 /**

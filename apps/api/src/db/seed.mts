@@ -150,7 +150,7 @@ export function prepareSeed(input: SeedInput): SeedData {
 }
 
 export async function readSeedFixtures(
-  root = fileURLToPath(new URL('../../../../content/', import.meta.url)),
+  root = fileURLToPath(new URL('../../../../fixtures/content/', import.meta.url)),
 ): Promise<SeedData> {
   const json = async (path: string): Promise<unknown> => {
     try {

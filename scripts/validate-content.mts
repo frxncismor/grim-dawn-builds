@@ -47,7 +47,7 @@ function readBuildFiles(buildsDir: string): ContentFile[] {
 
 function parseDirArg(argv: readonly string[]): string {
   const index = argv.indexOf('--dir');
-  return index >= 0 && argv[index + 1] ? argv[index + 1] : 'content';
+  return index >= 0 && argv[index + 1] ? argv[index + 1] : 'fixtures/content';
 }
 
 function main(argv: readonly string[]): number {

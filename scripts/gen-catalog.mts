@@ -114,7 +114,7 @@ async function readJson(file: string): Promise<unknown> {
 
 async function main(argv: string[]): Promise<number> {
   try {
-    let dir = 'content';
+    let dir = 'fixtures/content';
     let check = false;
     for (let index = 0; index < argv.length; index++) {
       if (argv[index] === '--check') check = true;

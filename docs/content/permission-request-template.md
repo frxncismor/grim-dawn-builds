@@ -8,7 +8,7 @@ Contexto y reglas: [`source-policy.md`](source-policy.md).
 
 ## Antes de enviar
 
-- [ ] La fuente está registrada en `content/sources/` con estado `pending`.
+- [ ] La fuente está registrada en `fixtures/content/sources/` con estado `pending`.
 - [ ] Se revisaron sus términos de uso y `robots.txt`.
 - [ ] Se identificó al titular real (autor de la guía, no solo del sitio).
 - [ ] El mantenedor autorizó el envío.

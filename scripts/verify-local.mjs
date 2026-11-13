@@ -40,7 +40,7 @@ export const VERIFY_STEPS = [
   { name: 'test:scripts', command: 'pnpm test:scripts' },
   // T-126: validan el fixture real del repositorio y la vigencia del catálogo
   // generado; van después del build de dominio y antes del build de la web.
-  { name: 'content:validate', command: 'pnpm run content:validate -- --dir content' },
+  { name: 'content:validate', command: 'pnpm run content:validate -- --dir fixtures/content' },
   { name: 'catalog:check', command: 'pnpm run catalog:check' },
   { name: 'check:locale-parity', command: 'pnpm run check:locale-parity' },
   { name: 'assets', command: 'pnpm assets:check' },

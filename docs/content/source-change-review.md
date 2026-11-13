@@ -73,7 +73,7 @@ registra con estos campos mínimos:
 | Campo          | Contenido                                                               |
 | -------------- | ----------------------------------------------------------------------- |
 | `observado_el` | Fecha y hora de la observación                                          |
-| `fuente`       | Identificador de la fuente en `content/sources/` y URL exacta           |
+| `fuente`       | Identificador de la fuente en `fixtures/content/sources/` y URL exacta  |
 | `huella`       | Fecha de edición visible y/o datos factuales observados (sin contenido) |
 | `tipo`         | `edicion`, `licencia`, `eliminacion` o `bloqueo`                        |
 | `observador`   | Persona que observó (nombre o alias del editor)                         |
@@ -133,7 +133,7 @@ Los estados `habilitada` y `limitada` siguen la definición de
 - [ ] Si hubo comprobación HTTP: términos y `robots.txt` la permiten, sin login ni muros.
 - [ ] Huella registrada (fecha visible y datos factuales), sin copiar contenido.
 - [ ] Evento registrado en `source_change_events` (o su expediente en el MVP) con todos los campos.
-- [ ] Estado de la fuente actualizado en `content/sources/`.
+- [ ] Estado de la fuente actualizado en `fixtures/content/sources/`.
 - [ ] Si hay cambio: revisión editorial abierta y lo publicado sin cambios automáticos.
 - [ ] Si hay eliminación, prohibición o cambio de licencia: runbook de retirada aplicado.
 - [ ] Observador distinto del aprobador, y revisor de derechos distinto del editor.

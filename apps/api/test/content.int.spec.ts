@@ -206,7 +206,7 @@ suite('HTTP content contract on real PostgreSQL public views (T-060)', () => {
   runContentRepositoryContract('PostgreSQL/api_ro over HTTP', factory, { localDrafts: false });
 
   it('serves the complete real catalog with its published own guide', async () => {
-    const input = await readSeedFixtures(join(root, 'content'));
+    const input = await readSeedFixtures(join(root, 'fixtures/content'));
     const repo = await factory(
       input.builds,
       { includeDrafts: false },

@@ -5,7 +5,7 @@ import { checkAssetManifest } from '@gd/domain';
 
 const WEB_PUBLIC_DIR = 'apps/web/public';
 const OFFICIAL_SUBDIR = 'assets';
-const MANIFEST = 'content/assets/manifest.json';
+const MANIFEST = 'fixtures/content/assets/manifest.json';
 
 /** Lists every file under the official-art folder, as repo-relative POSIX paths. */
 function listOfficialFiles(root: string): string[] {

@@ -15,7 +15,7 @@ test('verify validates the real fixture content and the generated catalog before
   const catalogIndex = names.indexOf('catalog:check');
   assert.notEqual(contentIndex, -1, 'content:validate step missing');
   assert.notEqual(catalogIndex, -1, 'catalog:check step missing');
-  assert.equal(commands[contentIndex], 'pnpm run content:validate -- --dir content');
+  assert.equal(commands[contentIndex], 'pnpm run content:validate -- --dir fixtures/content');
   assert.equal(commands[catalogIndex], 'pnpm run catalog:check');
   const domainBuild = commands.indexOf('pnpm --filter @gd/domain build');
   const webBuild = commands.indexOf('pnpm build');

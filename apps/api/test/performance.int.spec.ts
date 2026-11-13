@@ -22,7 +22,7 @@ import { prepareContractContent } from './content-fixture.js';
  * Presupuestos del backend (plan §12.12, T-128).
  *
  * Se miden sobre la API real en `127.0.0.1` con PostgreSQL 17 aislado (imagen
- * fijada por digest en Compose) y el catálogo completo de `content/` sembrado,
+ * fijada por digest en Compose) y el catálogo completo de `fixtures/content/` sembrado,
  * más una build publicada sintética para medir la lectura de detalle (el
  * fixture real no tiene ninguna build publicada). La puerta que decide en CI es
  * `scripts/check-performance.mts --backend`: consume el informe JSON que este
@@ -406,7 +406,7 @@ suite('presupuestos backend medibles sobre PostgreSQL 17 real (T-128)', () => {
       await template.end();
     }
 
-    const fixtures = await readSeedFixtures(join(ROOT, 'content'));
+    const fixtures = await readSeedFixtures(join(ROOT, 'fixtures/content'));
     const published = contractDoc(PUBLISHED_SLUG, {
       review_state: 'publicado',
       rights_status: 'licensed',

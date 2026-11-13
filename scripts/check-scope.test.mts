@@ -582,7 +582,7 @@ describe('external source access (T-109)', () => {
 });
 
 describe('source rights gate (T-109)', () => {
-  const file = 'content/sources/foro.json';
+  const file = 'fixtures/content/sources/foro.json';
   const base = { slug: 'foro-grim-dawn', kind: 'comunidad', title: 'Foro de Grim Dawn' };
   const fullEvidence = {
     status: 'habilitada',
@@ -780,7 +780,7 @@ describe('scanRepository', () => {
       'specs/001/plan.md': 'Redis, BullMQ and Keycloak are forbidden.',
       'specs/001/compose.yaml': CLEAN_COMPOSE + '  redis:\n    image: redis:7\n',
       'docs/example.ts': "import { createClient } from 'redis';\n",
-      'content/builds/x.json': '{ "url": "redis://example" }',
+      'fixtures/content/builds/x.json': '{ "url": "redis://example" }',
       'src/app/x.spec.ts': "import { createClient } from 'ioredis';\n",
       'e2e/flow.ts': "import { createClient } from 'redis';\n",
       'scripts/fixtures/a.ts': "import { createClient } from 'redis';\n",
@@ -806,10 +806,10 @@ describe('scanRepository', () => {
     );
   });
 
-  it('reads content/sources registries without counting them as scanned source files (T-109)', () => {
+  it('reads fixtures/content/sources registries without counting them as scanned source files (T-109)', () => {
     const root = makeFixture({
       'package.json': JSON.stringify({ dependencies: {} }),
-      'content/sources/foro.json': JSON.stringify({
+      'fixtures/content/sources/foro.json': JSON.stringify({
         slug: 'foro',
         kind: 'comunidad',
         title: 'Foro de Grim Dawn',
@@ -820,7 +820,7 @@ describe('scanRepository', () => {
     assert.equal(result.scannedFiles, 1);
     assert.deepEqual(
       result.issues.map((i) => `${i.file}:${i.rule}`),
-      ['content/sources/foro.json:source-rights-gate'],
+      ['fixtures/content/sources/foro.json:source-rights-gate'],
     );
   });
 
@@ -896,7 +896,7 @@ describe('check:scope CLI', () => {
 
   it('exits 1 and names [source-rights-gate] for an enabled source without evidence (T-109)', () => {
     const root = makeFixture({
-      'content/sources/foro.json': JSON.stringify({
+      'fixtures/content/sources/foro.json': JSON.stringify({
         slug: 'foro',
         kind: 'comunidad',
         title: 'Foro de Grim Dawn',

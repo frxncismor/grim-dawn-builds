@@ -157,7 +157,7 @@ the sitemap and is never part of a public or release build.
 
 ### Editorial flow
 
-`content/` holds development fixtures and import material. The editorial CLI
+`fixtures/content/` holds development fixtures and import material. The editorial CLI
 edits canonical documents through the PostgreSQL `editor` role, with no accounts
 or write endpoints:
 
@@ -185,7 +185,7 @@ unconfigured until the maintainer makes an explicit decision.
 apps/api/         Fastify + Drizzle API (public read-only)
 packages/domain/  Zod schema, types and shared pure rules
 src/              Angular application (web)
-content/          Development fixtures and import material
+fixtures/content/          Development fixtures and import material
 infra/docker/     Compose, local secrets and role provisioning
 scripts/          Validators, generators and verification gates
 e2e/              Playwright tests
@@ -244,4 +244,4 @@ strings go through Angular i18n so both locales stay complete.
 
 The code currently ships without a declared license: all rights reserved until the
 maintainer chooses one. Third-party editorial content is governed by its own
-licenses and permissions recorded in `content/sources/`.
+licenses and permissions recorded in `fixtures/content/sources/`.

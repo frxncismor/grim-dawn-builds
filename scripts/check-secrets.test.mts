@@ -244,7 +244,7 @@ describe('high-confidence secret patterns', () => {
 
   it('fails URLs with a literal password in content and package scripts', () => {
     assert.deepEqual(
-      rules(scanText({ 'content/builds/x.json': `{"url":"${SYN_URL(SYN_PW)}"}\n` })),
+      rules(scanText({ 'fixtures/content/builds/x.json': `{"url":"${SYN_URL(SYN_PW)}"}\n` })),
       ['credential-url'],
     );
     const manifest = JSON.stringify({ scripts: { db: `psql ${SYN_URL(SYN_PW)}` } });
@@ -296,7 +296,7 @@ describe('redaction', () => {
     const findings = scanText({
       'src/a.ts': `const t = '${SYN_GH}';\nconst id = '${SYN_AWS}';\n`,
       'infra/key.conf': `${SYN_PEM}\n`,
-      'content/x.json': `{"url":"${SYN_URL(SYN_PW)}"}\n`,
+      'fixtures/content/x.json': `{"url":"${SYN_URL(SYN_PW)}"}\n`,
       'infra/docker/compose.yaml': `DB_PASSWORD: ${SYN_PW}\n`,
       '.env.example': `DB_PASSWORD_API_RO=${SYN_PW}\n`,
     });

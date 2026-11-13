@@ -218,7 +218,7 @@ request.
 
 El CI de pull request ejecuta los mismos controles, excepto `pnpm verify` en sí. Además
 ejecuta `pnpm content:validate -- --dir scripts/fixtures/content-valid`, que valida
-solo el fixture, porque `content/builds` aún no tiene contenido (T-014). El CI
+solo el fixture, porque `fixtures/content/builds` aún no tiene contenido (T-014). El CI
 ejecuta `lint:md` solo en modo comprobación; nunca aplica `--fix`.
 
 Gate matrix and language policy: see [docs/quality-gates.md](docs/quality-gates.md).
@@ -287,7 +287,7 @@ docker compose -f infra/docker/compose.yaml up -d --no-deps db
 Principio XII de la constitución y plan §13.
 
 - **Nunca** commitees secretos: ni en código, Dockerfiles, `ARG`/`ENV` de imagen,
-  scripts de `package.json`, fixtures de `content/`, `.env.example`, builds del
+  scripts de `package.json`, fixtures de `fixtures/content/`, `.env.example`, builds del
   frontend, logs ni artefactos de CI.
 - Los archivos `.env` locales (salvo `.env.example`) y las carpetas `secrets/` están
   ignorados por git. No los fuerces con `git add -f`.
@@ -329,13 +329,13 @@ especificación.
   una tarjeta de enlace (_link-only_) con metadatos factuales propios.
 - El proyecto no está afiliado con Crate Entertainment ni con GrimTools. Mantén el
   aviso de no afiliación.
-- Los archivos de `content/` son fixtures de desarrollo y material de importación, no
+- Los archivos de `fixtures/content/` son fixtures de desarrollo y material de importación, no
   una fuente de producción (principio VI).
 
 ## Activos oficiales de Grim Dawn
 
 - Iconos, texturas y arte oficial solo se incluyen si el manifiesto de activos
-  (`content/assets/manifest.json`) registra su origen exacto, titular, licencia o permiso
+  (`fixtures/content/assets/manifest.json`) registra su origen exacto, titular, licencia o permiso
   y prueba, con estado `approved`.
 - Mientras no exista esa entrada, se usa arte propio o genérico: los glifos SVG de
   respaldo.

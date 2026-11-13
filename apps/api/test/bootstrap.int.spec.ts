@@ -111,7 +111,7 @@ suite('atomic bootstrap on real PostgreSQL (T-072)', () => {
     await admin.end();
     admin = new pg.Client({ host: '127.0.0.1', port, user: 'postgres', database: 'postgres' });
     await admin.connect();
-    data = await readSeedFixtures(join(root, 'content'));
+    data = await readSeedFixtures(join(root, 'fixtures/content'));
   }, 90000);
   afterAll(async () => {
     await admin?.end().catch(() => undefined);

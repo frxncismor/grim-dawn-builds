@@ -15,7 +15,7 @@ test('server loader reads real fixture files without publishing their draft cont
 });
 
 test('real catalog has 46 public slots, including the published own guide', async () => {
-  const root = join(import.meta.dirname, '../../../../../../content');
+  const root = join(import.meta.dirname, '../../../../../../fixtures/content');
   const publicRepo = createFixtureRepository(root, {});
   const catalog = await publicRepo.getTierList('principal');
   assert.equal(PublicTierListSchema.safeParse(catalog).success, true);
@@ -53,7 +53,7 @@ test('server configuration refuses release, unknown sources and accidental draft
     { INCLUDE_DRAFTS: '1' },
     { BUILD_MODE: 'typo' },
   ]) {
-    assert.throws(() => createFixtureRepository('content', env));
+    assert.throws(() => createFixtureRepository('fixtures/content', env));
   }
 });
 

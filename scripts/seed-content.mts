@@ -64,7 +64,7 @@ export function contentContainerArguments(
     '--env',
     'DB_PASSWORD_IMPORTER_FILE=/run/secrets/db_password_importer',
     '--mount',
-    `type=bind,source=${join(root, 'content')},target=/content,readonly`,
+    `type=bind,source=${join(root, 'fixtures/content')},target=/content,readonly`,
     '--mount',
     `type=bind,source=${join(root, 'infra/docker/secrets/db_password_importer.txt')},target=/run/secrets/db_password_importer,readonly`,
     'gd-api:local',
@@ -114,7 +114,7 @@ export function launchContentImport(
     });
   try {
     if (
-      !validPath(join(root, 'content'), 'directory') ||
+      !validPath(join(root, 'fixtures/content'), 'directory') ||
       !validPath(join(root, 'infra/docker/secrets/db_password_importer.txt'), 'file')
     )
       throw new Error('Seed input unavailable');

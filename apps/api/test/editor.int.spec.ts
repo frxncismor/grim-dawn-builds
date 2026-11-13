@@ -111,7 +111,7 @@ suite('editor with real PostgreSQL and restricted roles after bootstrap (T-129)'
       connectionTimeoutMillis: 5000,
     });
     await importer.connect();
-    data = await readSeedFixtures(join(root, 'content'));
+    data = await readSeedFixtures(join(root, 'fixtures/content'));
     await seedData(importer!, data);
     const synthetic = contractDoc('editor-public', {
       review_state: 'publicado',

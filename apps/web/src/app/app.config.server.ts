@@ -28,12 +28,12 @@ const CONTENT_SOURCE = new InjectionToken<ReturnType<typeof createContentSource>
 
 /**
  * T-067: the web app lives in `apps/web`, but the fixture content directory stays
- * at the repository root (`content/`). The Angular build and `ng serve` run with
+ * at the repository root (`fixtures/content/`). The Angular build and `ng serve` run with
  * `apps/web` as their working directory, so the fixture root is two levels up.
  * `GD_CONTENT_ROOT` allows an explicit override without changing the default.
  */
 const CONTENT_ROOT =
-  process.env['GD_CONTENT_ROOT'] ?? resolve(process.cwd(), '..', '..', 'content');
+  process.env['GD_CONTENT_ROOT'] ?? resolve(process.cwd(), '..', '..', 'fixtures', 'content');
 
 const serverConfig: ApplicationConfig = {
   providers: [
