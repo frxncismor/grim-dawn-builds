@@ -1,7 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { MasteryTreeSchema, type MasteryTree } from '@gd/domain';
-import type { MasteryCatalog } from './masteries';
+import type { MasteryCatalog, MasterySummary } from './masteries';
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const unavailable = () => new Error('Catálogo de maestrías no disponible o respuesta inválida.');
@@ -33,6 +33,21 @@ export class FixtureMasteryCatalog implements MasteryCatalog {
     } catch {
       throw unavailable();
     }
+  }
+
+  async listSummaries(): Promise<MasterySummary[]> {
+    const slugs = await this.listSlugs();
+    return Promise.all(
+      slugs.map(async (slug): Promise<MasterySummary> => {
+        try {
+          const tree = await this.get(slug);
+          if (!tree) throw new Error();
+          return { slug, name: tree.mastery.name, nodeCount: tree.nodes.length };
+        } catch {
+          return { slug, name: null, nodeCount: 0 };
+        }
+      }),
+    );
   }
 
   async get(slug: string): Promise<MasteryTree | null> {
@@ -113,6 +128,33 @@ export class ApiMasteryCatalog implements MasteryCatalog {
     });
     if (slugs.length === 0 || new Set(slugs).size !== slugs.length) throw unavailable();
     return slugs.sort();
+  }
+
+  async listSummaries(): Promise<MasterySummary[]> {
+    const body = await this.read('api/v1/masteries', false);
+    if (!Array.isArray(body)) throw unavailable();
+    const summaries = body.map((item: unknown): MasterySummary => {
+      const record = item && typeof item === 'object' ? (item as Record<string, unknown>) : {};
+      const { slug, name, node_count: count } = record;
+      const names = name && typeof name === 'object' ? (name as Record<string, unknown>) : {};
+      if (
+        typeof slug !== 'string' ||
+        !validSlug(slug) ||
+        typeof names['en'] !== 'string' ||
+        typeof names['es'] !== 'string' ||
+        typeof count !== 'number' ||
+        !Number.isInteger(count) ||
+        count < 0
+      )
+        throw unavailable();
+      return { slug, name: { en: names['en'], es: names['es'] }, nodeCount: count };
+    });
+    if (
+      summaries.length === 0 ||
+      new Set(summaries.map((item) => item.slug)).size !== summaries.length
+    )
+      throw unavailable();
+    return summaries.sort((a, b) => (a.slug < b.slug ? -1 : 1));
   }
 
   async get(slug: string): Promise<MasteryTree | null> {

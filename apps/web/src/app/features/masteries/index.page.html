@@ -1,0 +1,29 @@
+<section class="masteries" aria-labelledby="masteries-title">
+  <header class="masteries__header">
+    <h1 id="masteries-title" i18n="@@masteryIndex.title">Mastery skill trees</h1>
+    <p i18n="@@masteryIndex.intro">
+      Pick a mastery to open its full tree: every skill with its tier, requirements and ranks.
+    </p>
+  </header>
+  <ul class="masteries__list">
+    @for (row of rows; track row.slug) {
+      <li class="mastery-row" [attr.data-mastery]="row.slug">
+        @if (row.hasData) {
+          <a class="mastery-row__name" [routerLink]="['/maestrias', row.slug]">{{ row.name }}</a>
+          <span class="mastery-row__meta" data-count>
+            <span class="mastery-row__number">{{ row.nodeCount }}</span>
+            <span i18n="@@masteryIndex.skills">skills</span>
+          </span>
+        } @else {
+          <span class="mastery-row__name mastery-row__name--muted">{{ row.name }}</span>
+          <span
+            class="mastery-row__meta mastery-row__meta--empty"
+            data-empty
+            i18n="@@masteryIndex.noData"
+            >No data</span
+          >
+        }
+      </li>
+    }
+  </ul>
+</section>

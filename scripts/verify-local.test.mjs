@@ -144,3 +144,12 @@ test('stops at the first failing step and reports it', async () => {
   assert.equal(result.failedStep, 'lint');
   assert.equal(result.exitCode, 1);
 });
+
+test('every path listed in test:scripts exists on disk (a missing space glued two paths together)', async () => {
+  const { readFileSync, existsSync } = await import('node:fs');
+  const script = JSON.parse(readFileSync('package.json', 'utf8')).scripts['test:scripts'];
+  const paths = script.split(/\s+/).filter((token) => /\.(mts|mjs|ts|js)$/.test(token));
+  assert.ok(paths.length > 10, 'test:scripts should list its test files');
+  const missing = paths.filter((path) => !existsSync(path));
+  assert.deepEqual(missing, []);
+});
