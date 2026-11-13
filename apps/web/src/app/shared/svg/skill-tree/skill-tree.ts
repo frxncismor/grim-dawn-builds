@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
-import type { PublicBuild } from '@gd/domain';
+import type { CatalogSkillNode, MasteryTree, PublicBuild, SkillKind } from '@gd/domain';
 import { createKeyboardNav } from '../keyboard-nav';
 import { layoutForest } from '../layout';
 
@@ -8,6 +8,36 @@ type SkillNode = PublicBuild['skill_nodes'][number];
 
 interface FocusTarget {
   focus(): void;
+}
+
+const EMPTY_MASTERY: Mastery = { slug: '', name_es: '', name_en: '', role_text: '' };
+
+/** Catalog grid geometry (px in SVG user units). Columns are tiers; rows are compacted ranks. */
+const CATALOG_COL_WIDTH = 176;
+const CATALOG_ROW_HEIGHT = 104;
+const CATALOG_MARGIN_X = 96;
+const CATALOG_HEADER_HEIGHT = 56;
+const CATALOG_MARGIN_BOTTOM = 96;
+const CATALOG_MAX_NODES = 400;
+
+interface CatalogRenderNode {
+  node: CatalogSkillNode;
+  id: string;
+  labelLines: string[];
+  x: number;
+  y: number;
+  selected: boolean;
+  focused: boolean;
+}
+
+interface CatalogModel {
+  nodes: CatalogRenderNode[];
+  edges: { id: string; from: string; to: string; d: string }[];
+  tiers: { tier: number; barRequired: number; x: number }[];
+  error: boolean;
+  width: number;
+  height: number;
+  moveFocus?: (focusedId: string, key: string) => string | null;
 }
 
 interface RenderNode {
@@ -48,8 +78,11 @@ interface TreeModel {
 })
 export class SkillTree {
   readonly treeId = input.required<string>();
-  readonly mastery = input.required<Mastery>();
-  readonly nodes = input.required<readonly SkillNode[]>();
+  /** Guide mode: mastery and nodes of a published build (editorial `layout`). */
+  readonly mastery = input<Mastery>(EMPTY_MASTERY);
+  readonly nodes = input<readonly SkillNode[]>([]);
+  /** Catalog mode: a full canonical tree drawn from its `grid`; guide inputs are ignored. */
+  readonly catalogTree = input<MasteryTree | undefined>(undefined);
   readonly activeIds = input<readonly string[]>([]);
   readonly currentBar = input<number | undefined>(undefined);
 
@@ -59,6 +92,96 @@ export class SkillTree {
   readonly detailDismissed = signal(false);
   private focusOrigin: FocusTarget | null = null;
   private restoringFocus = false;
+
+  readonly scopeSlug = computed(() => this.catalogTree()?.mastery.slug ?? this.mastery().slug);
+
+  readonly catalog = computed<CatalogModel | null>(() => {
+    const catalogTree = this.catalogTree();
+    if (!catalogTree) return null;
+    const source = catalogTree.nodes;
+    if (source.length > CATALOG_MAX_NODES)
+      return { nodes: [], edges: [], tiers: [], error: true, width: 0, height: 0 };
+    const rowRank = new Map(
+      [...new Set(source.map((node) => node.grid.row))]
+        .sort((a, b) => a - b)
+        .map((row, rank) => [row, rank]),
+    );
+    const point = (node: CatalogSkillNode) => ({
+      x: CATALOG_MARGIN_X + (node.grid.col - 1) * CATALOG_COL_WIDTH,
+      y:
+        CATALOG_HEADER_HEIGHT +
+        CATALOG_ROW_HEIGHT / 2 +
+        rowRank.get(node.grid.row)! * CATALOG_ROW_HEIGHT,
+    });
+    const ordered = [...source].sort(
+      (a, b) => a.grid.col - b.grid.col || a.grid.row - b.grid.row || a.id.localeCompare(b.id),
+    );
+    const known = new Set(source.map((node) => node.id));
+    const currentFocus = this.focusedId();
+    const rovingId = known.has(currentFocus ?? '') ? currentFocus! : (ordered[0]?.id ?? null);
+    const selectedId = this.selectedId();
+    const maxLabelChars = Math.floor(CATALOG_COL_WIDTH / 8);
+    const positions = new Map(source.map((node) => [node.id, point(node)]));
+    const tierBars = new Map(source.map((node) => [node.tier, node.bar_required]));
+    const maxCol = Math.max(...source.map((node) => node.grid.col));
+    const maxRank = Math.max(...rowRank.values());
+    const renderNodes = ordered.map((node): CatalogRenderNode => {
+      const at = positions.get(node.id)!;
+      return {
+        node,
+        id: this.nodeId(node.id),
+        labelLines: this.visibleNameLines(node.name.es, maxLabelChars),
+        ...at,
+        selected: selectedId === node.id,
+        focused: rovingId === node.id,
+      };
+    });
+    const edges = ordered
+      .filter((node) => node.parent_id !== null && positions.has(node.parent_id))
+      .map((node, order) => {
+        const from = positions.get(node.parent_id!)!;
+        const to = positions.get(node.id)!;
+        const midX = (from.x + to.x) / 2;
+        return {
+          id: `${this.treeId()}-${catalogTree.mastery.slug}-edge-${order}`,
+          from: node.parent_id!,
+          to: node.id,
+          d: `M${from.x} ${from.y} H${midX} V${to.y} H${to.x}`,
+        };
+      });
+    const keyboardLayout = {
+      nodes: ordered.map((node, row) => ({
+        id: node.id,
+        parentId: node.parent_id,
+        level: node.grid.col,
+        row,
+        ...positions.get(node.id)!,
+      })),
+      edges: edges.map(({ from, to }) => ({ from, to })),
+    };
+    return {
+      nodes: renderNodes,
+      edges,
+      tiers: [...tierBars.entries()]
+        .sort(([a], [b]) => a - b)
+        .map(([tier, barRequired]) => ({
+          tier,
+          barRequired,
+          x: CATALOG_MARGIN_X + (tier - 1) * CATALOG_COL_WIDTH,
+        })),
+      error: false,
+      width: CATALOG_MARGIN_X * 2 + (maxCol - 1) * CATALOG_COL_WIDTH,
+      height: CATALOG_HEADER_HEIGHT + (maxRank + 1) * CATALOG_ROW_HEIGHT + CATALOG_MARGIN_BOTTOM,
+      moveFocus: createKeyboardNav(keyboardLayout),
+    };
+  });
+
+  readonly catalogDetailNode = computed(() => {
+    const catalogTree = this.catalogTree();
+    if (!catalogTree || this.detailDismissed()) return null;
+    const id = this.selectedId() ?? this.hoveredId() ?? this.focusedId();
+    return catalogTree.nodes.find((node) => node.id === id) ?? null;
+  });
 
   readonly masteryNodes = computed(() =>
     this.nodes().filter((node) => node.mastery_slug === this.mastery().slug),
@@ -132,7 +255,7 @@ export class SkillTree {
         nodes: renderNodes,
         edges: layout.edges.map((edge, order) => ({
           ...edge,
-          id: `${this.treeId()}-${this.mastery().slug}-edge-${order}`,
+          id: `${this.treeId()}-${this.scopeSlug()}-edge-${order}`,
           x1: positions.get(edge.from)!.x,
           y1: positions.get(edge.from)!.y,
           x2: positions.get(edge.to)!.x,
@@ -153,18 +276,21 @@ export class SkillTree {
     const id = this.selectedId() ?? this.hoveredId() ?? this.focusedId();
     return this.masteryNodes().find((node) => node.slug === id) ?? null;
   });
-  readonly headingId = computed(() => `${this.treeId()}-${this.mastery().slug}-heading`);
-  readonly svgTitleId = computed(() => `${this.treeId()}-${this.mastery().slug}-svg-title`);
+  readonly headingId = computed(() => `${this.treeId()}-${this.scopeSlug()}-heading`);
+  readonly svgTitleId = computed(() => `${this.treeId()}-${this.scopeSlug()}-svg-title`);
   readonly svgDescriptionId = computed(
-    () => `${this.treeId()}-${this.mastery().slug}-svg-description`,
+    () => `${this.treeId()}-${this.scopeSlug()}-svg-description`,
   );
-  readonly detailId = computed(() => `${this.treeId()}-${this.mastery().slug}-detail`);
+  readonly detailId = computed(() => `${this.treeId()}-${this.scopeSlug()}-detail`);
+  readonly masteryName = computed(
+    () => this.catalogTree()?.mastery.name.es ?? this.mastery().name_es,
+  );
   readonly svgTitle = computed(
-    () => $localize`:@@skillTree.svgTitle:Skill tree of ${this.mastery().name_es}:mastery:`,
+    () => $localize`:@@skillTree.svgTitle:Skill tree of ${this.masteryName()}:mastery:`,
   );
 
   nodeId(slug: string): string {
-    return `${this.treeId()}-${this.mastery().slug}-${slug}`;
+    return `${this.treeId()}-${this.scopeSlug()}-${slug}`;
   }
 
   setRovingFocus(slug: string): void {
@@ -216,7 +342,7 @@ export class SkillTree {
       this.selectNode(slug, event.currentTarget as HTMLElement);
       return;
     }
-    const next = this.tree().moveFocus?.(slug, event.key) ?? null;
+    const next = (this.catalog() ?? this.tree()).moveFocus?.(slug, event.key) ?? null;
     if (next) {
       event.preventDefault();
       this.focusedId.set(next);
@@ -244,7 +370,7 @@ export class SkillTree {
   }
 
   listItemId(node: SkillNode): string {
-    return `${this.treeId()}-${this.mastery().slug}-${node.slug}-listitem`;
+    return `${this.treeId()}-${this.scopeSlug()}-${node.slug}-listitem`;
   }
 
   activeStepLabel(): string {
@@ -279,6 +405,37 @@ export class SkillTree {
       lines[lines.length - 1] = `${last.slice(0, Math.max(1, maxChars - 1)).trimEnd()}…`;
     }
     return lines.slice(0, 2);
+  }
+
+  kindLabel(kind: SkillKind): string {
+    switch (kind) {
+      case 'active':
+        return $localize`:@@skillTree.kind.active:Active`;
+      case 'passive':
+        return $localize`:@@skillTree.kind.passive:Passive`;
+      case 'modifier':
+        return $localize`:@@skillTree.kind.modifier:Modifier`;
+      case 'transmuter':
+        return $localize`:@@skillTree.kind.transmuter:Transmuter`;
+    }
+  }
+
+  tierLabel(tier: number): string {
+    return $localize`:@@skillTree.tierLabel:Tier ${tier}:tier:`;
+  }
+
+  maxPointsLabel(node: CatalogSkillNode): string {
+    return node.ultimate_points === undefined
+      ? $localize`:@@skillTree.catalogMax:Max ${node.max_points}:max:`
+      : $localize`:@@skillTree.catalogMaxUltimate:Max ${node.max_points}:max: (${node.ultimate_points}:ultimate:)`;
+  }
+
+  circularLabel(): string {
+    return $localize`:@@skillTree.circular:Circular`;
+  }
+
+  catalogNodeLabelIds(item: CatalogRenderNode): string {
+    return `${item.id}-name ${item.id}-meta`;
   }
 
   barLabel(bar: number): string {

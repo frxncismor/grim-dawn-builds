@@ -2106,6 +2106,70 @@
           <context context-type="linenumber">285</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="skillTree.kind.active" datatype="html">
+        <source>Active</source>
+        <target state="translated">Activa</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.kind.passive" datatype="html">
+        <source>Passive</source>
+        <target state="translated">Pasiva</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.kind.modifier" datatype="html">
+        <source>Modifier</source>
+        <target state="translated">Modificador</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.kind.transmuter" datatype="html">
+        <source>Transmuter</source>
+        <target state="translated">Transmutador</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.tierLabel" datatype="html">
+        <source>Tier <x id="tier" equiv-text="tier"/></source>
+        <target state="translated">Nivel <x id="tier" equiv-text="tier"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.catalogMax" datatype="html">
+        <source>Max <x id="max" equiv-text="node.max_points"/></source>
+        <target state="translated">Máx. <x id="max" equiv-text="node.max_points"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.catalogMaxUltimate" datatype="html">
+        <source>Max <x id="max" equiv-text="node.max_points"/> (<x id="ultimate" equiv-text="node.ultimate_points"/>)</source>
+        <target state="translated">Máx. <x id="max" equiv-text="node.max_points"/> (<x id="ultimate" equiv-text="node.ultimate_points"/>)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="skillTree.circular" datatype="html">
+        <source>Circular</source>
+        <target state="translated">De tipo circular</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="layout.skip" datatype="html">
         <source>Skip to content</source>
         <target state="translated">Saltar al contenido</target>

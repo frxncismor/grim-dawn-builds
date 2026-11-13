@@ -79,6 +79,49 @@
   vector-effect: non-scaling-stroke;
 }
 
+.skill-tree__edges path {
+  fill: none;
+  stroke: var(--color-ash);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.skill-tree__tier {
+  fill: var(--color-storm);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.skill-tree__ring {
+  fill: none;
+  stroke: var(--color-bone);
+  stroke-width: 2;
+  stroke-dasharray: 2 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.skill-tree__node--kind-active .skill-tree__shape {
+  fill: var(--color-storm-dim);
+  stroke: var(--color-storm);
+}
+
+.skill-tree__node--kind-passive .skill-tree__shape {
+  fill: var(--color-panel-2);
+  stroke: var(--color-bone);
+}
+
+.skill-tree__node--kind-modifier .skill-tree__shape {
+  fill: var(--color-ember-dim);
+  stroke: var(--color-ember);
+}
+
+.skill-tree__node--kind-transmuter .skill-tree__shape {
+  fill: var(--color-panel-2);
+  stroke: var(--color-ash);
+  stroke-dasharray: 4 3;
+}
+
 .skill-tree__node {
   cursor: pointer;
   outline: none;
