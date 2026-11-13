@@ -66,7 +66,7 @@ La orquestación sigue la metodología de usuario, común a todos sus proyectos:
   `herdr-app ls` y `hc ls --all` (incluidas otras máquinas): si ya existe un espacio o
   agente con el mismo nombre, no lances. Tras lanzar, renombra el espacio para que
   incluya la tarea (`gdb-Orq-<Área> <T-xxx corto>`, p. ej. `gdb-Orq-Implementación T-167
-  video`) y verifica que no haya dos con igual nombre. Al terminar, `hc kill`/`hc rm`.
+video`) y verifica que no haya dos con igual nombre. Al terminar, `hc kill`/`hc rm`.
 - Lanzamiento solo con `~/.config/orquestacion/scripts/Start-Agente.ps1`; los modelos por nivel están en
   `~/.config/orquestacion/proveedores.local.json` de cada máquina.
 - Reglas propias de este repo que siguen vigentes:
