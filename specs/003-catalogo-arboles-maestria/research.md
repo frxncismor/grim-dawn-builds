@@ -283,6 +283,9 @@ y hijo más lejano a 5 columnas; `blitz1`: 4 y a 4; `overguard1`: 1 y a 1), así
   el catálogo cubre las maestrías con nodos de UI y la spec debe reconciliar «diez maestrías»
   con lo extraíble.
 
+**Decisión (decisión de Paco, 2026-11-13)**: v1 = `class01`–`class06` (las 6 maestrías base);
+expansiones fuera de v1.
+
 <!-- ===================================================================== -->
 
 <!-- separador T002/T003: no editar -->
@@ -445,3 +448,11 @@ carácter **provisional**:
 3. El catálogo derivado de los `.dbr` no depende de esta licencia (FR-002–FR-006).
 
 Estado: pendiente de confirmación escrita de Paco.
+
+_Lo anterior queda **superado** por la decisión final de abajo; se conserva como histórico._
+
+#### Decisión final (decisión de Paco, 2026-11-13)
+
+Licencia de la wiki = **CC BY-SA 4.0** (sustituye la decisión provisional 3.0). Obras derivadas
+de la wiki bajo CC BY-SA 4.0 con atribución y share-alike. La wiki sigue sin ser fuente por
+defecto: la licencia queda resuelta, no autoriza scraping.
