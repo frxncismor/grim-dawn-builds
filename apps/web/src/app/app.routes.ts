@@ -2,6 +2,7 @@ import { inject, Injector, runInInjectionContext } from '@angular/core';
 import { Routes, type ActivatedRouteSnapshot } from '@angular/router';
 import { resolveCatalog } from './core/content/catalog.resolver';
 import type { AuthorPageData } from './features/author/author.state';
+import type { MasteryTree } from '@gd/domain';
 import type { BuildPageContent } from './features/build/build.page';
 
 /**
@@ -25,6 +26,9 @@ const resolveBuildPage = lazyResolver<BuildPageContent | null>(() =>
 );
 const resolveAuthor = lazyResolver<AuthorPageData | null>(() =>
   import('./features/author/author.state').then((module) => module.resolveAuthor),
+);
+const resolveMasteryTree = lazyResolver<MasteryTree | null>(() =>
+  import('./core/content/mastery.resolver').then((module) => module.resolveMastery),
 );
 
 export const routes: Routes = [
@@ -50,6 +54,11 @@ export const routes: Routes = [
     path: 'builds/:slug',
     loadComponent: () => import('./features/build/build-route.page').then((m) => m.BuildRoutePage),
     resolve: { content: resolveBuildPage },
+  },
+  {
+    path: 'maestrias/:slug',
+    loadComponent: () => import('./features/masteries/mastery.page').then((m) => m.MasteryPage),
+    resolve: { mastery: resolveMasteryTree },
   },
   {
     path: '',

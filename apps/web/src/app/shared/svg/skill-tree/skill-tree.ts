@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  LOCALE_ID,
+  signal,
+} from '@angular/core';
 import type { CatalogSkillNode, MasteryTree, PublicBuild, SkillKind } from '@gd/domain';
 import { createKeyboardNav } from '../keyboard-nav';
 import { layoutForest } from '../layout';
@@ -14,7 +22,15 @@ const EMPTY_MASTERY: Mastery = { slug: '', name_es: '', name_en: '', role_text: 
 
 /** Catalog grid geometry (px in SVG user units). Columns are tiers; rows are compacted ranks. */
 const CATALOG_COL_WIDTH = 176;
-const CATALOG_ROW_HEIGHT = 104;
+/**
+ * Vertical step between compact rows. It must hold the tallest node: ring above the centre, then
+ * the label block (two name lines, "kind · max" and "Circular") below it, plus a margin.
+ */
+const CATALOG_RING_RADIUS = 28;
+const CATALOG_LABEL_BOTTOM = 86; // last baseline (circular line at y=82) + descent
+const CATALOG_ROW_MARGIN = 8;
+export const CATALOG_MIN_ROW_STEP = CATALOG_RING_RADIUS + CATALOG_LABEL_BOTTOM + CATALOG_ROW_MARGIN;
+const CATALOG_ROW_HEIGHT = CATALOG_MIN_ROW_STEP;
 const CATALOG_MARGIN_X = 96;
 const CATALOG_HEADER_HEIGHT = 56;
 const CATALOG_MARGIN_BOTTOM = 96;
@@ -87,6 +103,10 @@ export class SkillTree {
   readonly activeIds = input<readonly string[]>([]);
   readonly currentBar = input<number | undefined>(undefined);
 
+  /** Active language: main name of every catalog label; the other one is secondary. */
+  readonly nameLang: 'en' | 'es' = inject(LOCALE_ID).toLowerCase().startsWith('es') ? 'es' : 'en';
+  readonly otherLang: 'en' | 'es' = this.nameLang === 'es' ? 'en' : 'es';
+
   readonly focusedId = signal<string | null>(null);
   readonly hoveredId = signal<string | null>(null);
   readonly selectedId = signal<string | null>(null);
@@ -122,7 +142,7 @@ export class SkillTree {
     const rovingId = known.has(currentFocus ?? '') ? currentFocus! : (ordered[0]?.id ?? null);
     const selectedId = this.selectedId();
     const maxLabelChars = Math.floor(CATALOG_COL_WIDTH / 8);
-    const nameById = new Map(source.map((node) => [node.id, node.name.es]));
+    const nameById = new Map(source.map((node) => [node.id, node.name[this.nameLang]]));
     const positions = new Map(source.map((node) => [node.id, point(node)]));
     const tierBars = new Map(source.map((node) => [node.tier, node.bar_required]));
     const maxCol = Math.max(...source.map((node) => node.grid.col));
@@ -132,7 +152,7 @@ export class SkillTree {
       return {
         node,
         id: this.nodeId(node.id),
-        labelLines: this.visibleNameLines(node.name.es, maxLabelChars),
+        labelLines: this.visibleNameLines(node.name[this.nameLang], maxLabelChars),
         label: this.catalogNodeLabel(node, nameById),
         ...at,
         selected: selectedId === node.id,
@@ -286,7 +306,7 @@ export class SkillTree {
   );
   readonly detailId = computed(() => `${this.treeId()}-${this.scopeSlug()}-detail`);
   readonly masteryName = computed(
-    () => this.catalogTree()?.mastery.name.es ?? this.mastery().name_es,
+    () => this.catalogTree()?.mastery.name[this.nameLang] ?? this.mastery().name_es,
   );
   readonly svgTitle = computed(
     () => $localize`:@@skillTree.svgTitle:Skill tree of ${this.masteryName()}:mastery:`,
@@ -440,7 +460,7 @@ export class SkillTree {
   /** Full textual equivalent of a catalog node: name, tier, bar, kind, range and dependency. */
   catalogNodeLabel(node: CatalogSkillNode, nameById: ReadonlyMap<string, string>): string {
     const parts = [
-      node.name.es,
+      node.name[this.nameLang],
       this.tierLabel(node.tier),
       this.barLabel(node.bar_required),
       this.kindLabel(node.kind),
@@ -458,7 +478,8 @@ export class SkillTree {
   }
 
   readonly catalogNames = computed(
-    () => new Map((this.catalogTree()?.nodes ?? []).map((node) => [node.id, node.name.es])),
+    () =>
+      new Map((this.catalogTree()?.nodes ?? []).map((node) => [node.id, node.name[this.nameLang]])),
   );
 
   catalogListItemId(node: CatalogSkillNode): string {

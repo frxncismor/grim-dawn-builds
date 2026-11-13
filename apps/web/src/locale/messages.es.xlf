@@ -2510,6 +2510,54 @@
           <context context-type="linenumber">16,19</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="mastery.eyebrow" datatype="html">
+        <source>Mastery skill tree</source>
+        <target state="translated">Árbol de habilidades de maestría</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/mastery.page.html</context>
+          <context context-type="linenumber">4,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="mastery.summary" datatype="html">
+        <source> <x id="INTERPOLATION" equiv-text="{{ nodeCount }}"/> skills across nine tiers. Each skill shows its tier, the mastery bar points it needs, its ranks and the skill it requires. </source>
+        <target state="translated"> <x id="INTERPOLATION" equiv-text="{{ nodeCount }}"/> habilidades en nueve niveles. Cada habilidad indica su nivel, los puntos de barra de maestría que necesita, sus rangos y la habilidad que requiere. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/mastery.page.html</context>
+          <context context-type="linenumber">7,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="mastery.version" datatype="html">
+        <source>Game version:</source>
+        <target state="translated">Versión del juego:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/mastery.page.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="mastery.backToCatalog" datatype="html">
+        <source>Browse the build catalog</source>
+        <target state="translated">Explorar el catálogo de builds</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/mastery.page.html</context>
+          <context context-type="linenumber">16,19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="mastery.seoTitle" datatype="html">
+        <source><x id="name" equiv-text="name"/> skill tree</source>
+        <target state="translated">Árbol de habilidades de <x id="name" equiv-text="name"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/mastery.page.ts</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="mastery.seoDescription" datatype="html">
+        <source>Every skill of the <x id="name" equiv-text="name"/> mastery in Grim Dawn: <x id="count" equiv-text="count"/> skills across nine tiers, with their requirements and ranks.</source>
+        <target state="translated">Todas las habilidades de la maestría <x id="name" equiv-text="name"/> de Grim Dawn: <x id="count" equiv-text="count"/> habilidades en nueve niveles, con sus requisitos y rangos.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/masteries/mastery.page.ts</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+      </trans-unit>
     </body>
   </file>
 </xliff>

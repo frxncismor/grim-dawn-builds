@@ -495,3 +495,29 @@ test('CLI failure reports no BASE_URL secret and writes no files', async () => {
     await cleanup(root);
   }
 });
+
+test('mastery tree pages enter the sitemap from the catalog, not from a hand-written list (spec 003 T012)', async () => {
+  const slugs = (await readdir(join('fixtures', 'content', 'mastery-trees')))
+    .filter((name) => name.endsWith('.json'))
+    .map((name) => name.slice(0, -'.json'.length));
+  assert.equal(slugs.length, 6);
+  const masteryRoutes = slugs.map((slug) => `/maestrias/${slug}`);
+  const site = fullSite();
+  for (const route of masteryRoutes) {
+    site.routes[route] = {};
+    site.pages[route] = indexable(route);
+  }
+  const { root, templatePath } = await artifact(site.routes, site.pages);
+  try {
+    const { sitemap, routes } = await generateSeoFiles({
+      distRoot: root,
+      baseUrl: BASE,
+      templatePath,
+    });
+    for (const route of masteryRoutes) assert.ok(routes.includes(route), route);
+    const locs = [...sitemap.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1]);
+    for (const route of masteryRoutes) assert.ok(locs.includes(`${BASE}${route.slice(1)}`), route);
+  } finally {
+    await cleanup(root);
+  }
+});

@@ -1,0 +1,32 @@
+.mastery {
+  display: grid;
+  gap: var(--space-6, 1.5rem);
+  min-width: 0;
+}
+.mastery__header {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+  max-width: 48rem;
+}
+.mastery__eyebrow {
+  margin: 0;
+  color: var(--color-ember, #e07845);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.mastery h1 {
+  margin: 0;
+  color: var(--color-bone, #eadfca);
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.1;
+}
+.mastery__summary,
+.mastery__version {
+  margin: 0;
+  color: var(--color-ash, #a3947a);
+}
+.mastery a {
+  color: var(--color-storm, #d8b15a);
+}
