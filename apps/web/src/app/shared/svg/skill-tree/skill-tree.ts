@@ -152,11 +152,12 @@ export class SkillTree {
     const maxRank = Math.max(...rowRank.values());
     const renderNodes = ordered.map((node): CatalogRenderNode => {
       const at = positions.get(node.id)!;
+      const labelLines = this.visibleNameLines(node.name[this.nameLang], maxLabelChars);
       return {
         node,
         id: this.nodeId(node.id),
-        labelLines: this.visibleNameLines(node.name[this.nameLang], maxLabelChars),
-        label: this.catalogNodeLabel(node, nameById),
+        labelLines,
+        label: this.catalogNodeLabel(node, nameById, labelLines.join(' ')),
         ...at,
         selected: selectedId === node.id,
         focused: rovingId === node.id,
@@ -460,17 +461,25 @@ export class SkillTree {
     return $localize`:@@skillTree.circular:Circular`;
   }
 
-  /** Full textual equivalent of a catalog node: name, tier, bar, kind, range and dependency. */
-  catalogNodeLabel(node: CatalogSkillNode, nameById: ReadonlyMap<string, string>): string {
-    const parts = [
-      node.name[this.nameLang],
+  /**
+   * Full textual equivalent of a catalog node. It opens with the visible text in its visible order
+   * (name, kind, range, "Circular") so the accessible name contains it (WCAG 2.5.3 Label in Name);
+   * tier, bar and dependency follow. A name shortened on screen is repeated in full afterwards.
+   */
+  catalogNodeLabel(
+    node: CatalogSkillNode,
+    nameById: ReadonlyMap<string, string>,
+    visibleName: string = node.name[this.nameLang],
+  ): string {
+    const name = node.name[this.nameLang];
+    const parts = [visibleName, this.kindLabel(node.kind), this.maxPointsLabel(node)];
+    if (node.circular) parts.push(this.circularLabel());
+    if (visibleName !== name) parts.push(name);
+    parts.push(
       this.tierLabel(node.tier),
       this.barLabel(node.bar_required),
-      this.kindLabel(node.kind),
-      this.maxPointsLabel(node),
       this.dependencyLabel(node, nameById),
-    ];
-    if (node.circular) parts.push(this.circularLabel());
+    );
     return parts.join('. ');
   }
 

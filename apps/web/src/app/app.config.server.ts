@@ -17,12 +17,7 @@ import { CONTENT_REPOSITORY } from './core/content/repository';
 import { createContentSource } from './core/content/content-source.server';
 import { SITE_BASE_URL, transferSiteUrl } from './core/seo/site-url';
 import { loadPublicSiteData } from './core/content/author-pages.server';
-import {
-  AUTHORS_STATE,
-  PUBLIC_SITE_LOADER,
-  type PublicSiteData,
-} from './features/author/author.state';
-import { CATALOG_STATE } from './core/content/catalog.resolver';
+import { PUBLIC_SITE_LOADER, type PublicSiteData } from './features/author/author.state';
 
 const CONTENT_SOURCE = new InjectionToken<ReturnType<typeof createContentSource>>(
   'SERVER_CONTENT_SOURCE',
@@ -59,9 +54,9 @@ const serverConfig: ApplicationConfig = {
       const load = inject(PUBLIC_SITE_LOADER);
       await selected.initialize();
       state.set(makeStateKey<typeof selected.metadata>('gd-content-source'), selected.metadata);
-      const data = await load();
-      state.set(CATALOG_STATE, data.catalog);
-      state.set(AUTHORS_STATE, data.authors);
+      // Fail fast on invalid content. The snapshot itself is written into `TransferState` only by
+      // the routes that read it (`ensurePublicSite`), so other pages do not carry it (T026).
+      await load();
     }),
     {
       provide: SITE_BASE_URL,

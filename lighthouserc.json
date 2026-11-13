@@ -9,7 +9,11 @@
         "http://localhost/legal/index.html",
         "http://localhost/autores/grim-dawn-builds/index.html",
         "http://localhost/es/index.html",
-        "http://localhost/es/tier-list/index.html"
+        "http://localhost/es/tier-list/index.html",
+        "http://localhost/maestrias/soldier/index.html",
+        "http://localhost/maestrias/demolition/index.html",
+        "http://localhost/es/maestrias/soldier/index.html",
+        "http://localhost/es/maestrias/demolition/index.html"
       ],
       "numberOfRuns": 3,
       "settings": {
