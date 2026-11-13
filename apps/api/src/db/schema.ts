@@ -16,6 +16,10 @@
  *   permission_request_status, takedown_action, source_change_type, source_change_outcome.
  *   They are not in `@gd/domain` and must not be duplicated there silently; the adaptation
  *   enums are compared with the `@gd/domain` constants of `adaptation.ts` by the parity test.
+ * - Mastery catalog (spec 003, T008): `mastery_trees` and `catalog_skill_nodes` hold the game-derived
+ *   tree catalog with text keys (`classNN`, `classNN/<registro>`), not uuids, because the ids are the
+ *   stable game identifiers that guides reference. They are read through `v_public_mastery_trees`
+ *   and `v_public_skill_nodes` only; their CHECKs mirror `CatalogSkillNodeSchema` (mastery-tree.ts).
  * - `origin` ('fixture' | 'bootstrap' | 'editor') and `content_origin` are database-only provenance.
  *
  * Scope: this file declares structure only. Publication gates, asset gates, tier-entry CHECKs,
@@ -28,6 +32,7 @@ import {
   boolean,
   check,
   date,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -148,6 +153,9 @@ export const sourceChangeOutcomeEnum = pgEnum('source_change_outcome', [
   'revision_abierta',
   'retirada',
 ]);
+// Mastery catalog (spec 003). Same values as SKILL_KINDS in @gd/domain (mastery-tree.ts);
+// schema-parity.spec.ts fails when they drift.
+export const skillKindEnum = pgEnum('skill_kind', ['active', 'passive', 'modifier', 'transmuter']);
 
 // ---------------------------------------------------------------------------
 // Shared column helpers
@@ -651,3 +659,85 @@ export const sourceChangeEvents = pgTable('source_change_events', {
   outcome: sourceChangeOutcomeEnum('outcome').notNull(),
   ...timestamps(),
 });
+
+// ---------------------------------------------------------------------------
+// Mastery catalog (spec 003, T008): derived from the game, never edited by hand
+// ---------------------------------------------------------------------------
+
+/** Mastery bar points required per tier; must equal TIER_BAR_REQUIRED in @gd/domain (parity test). */
+const TIER_BAR_REQUIRED_SQL = [1, 5, 10, 15, 20, 25, 32, 40, 50];
+
+export const masteryTrees = pgTable(
+  'mastery_trees',
+  {
+    id: text('id').primaryKey(),
+    slug: text('slug').notNull().unique(),
+    name_en: text('name_en').notNull(),
+    name_es: text('name_es').notNull(),
+    game_version: text('game_version').notNull(),
+    source_sha256: text('source_sha256').array().notNull(),
+    ...timestamps(),
+  },
+  (t) => [
+    check('mastery_trees_id_ck', sql`${t.id} ~ '^class[0-9]{2}$'`),
+    check('mastery_trees_slug_ck', sql`${t.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$'`),
+    check('mastery_trees_source_sha256_ck', sql`cardinality(${t.source_sha256}) >= 1`),
+  ],
+);
+
+export const catalogSkillNodes = pgTable(
+  'catalog_skill_nodes',
+  {
+    id: text('id').primaryKey(),
+    mastery_id: text('mastery_id')
+      .notNull()
+      .references(() => masteryTrees.id),
+    name_en: text('name_en').notNull(),
+    name_es: text('name_es').notNull(),
+    kind: skillKindEnum('kind').notNull(),
+    circular: boolean('circular').notNull().default(false),
+    tier: integer('tier').notNull(),
+    bar_required: integer('bar_required').notNull(),
+    grid_col: integer('grid_col').notNull(),
+    grid_row: integer('grid_row').notNull(),
+    max_points: integer('max_points').notNull(),
+    ultimate_points: integer('ultimate_points'),
+    parent_id: text('parent_id'),
+    icon: text('icon'),
+    ...timestamps(),
+  },
+  (t) => [
+    unique('catalog_skill_nodes_grid_cell_uq').on(t.mastery_id, t.grid_col, t.grid_row),
+    // Target of the composite parent FK: a parent must belong to the same mastery.
+    unique('catalog_skill_nodes_mastery_node_uq').on(t.mastery_id, t.id),
+    foreignKey({
+      name: 'catalog_skill_nodes_parent_fk',
+      columns: [t.mastery_id, t.parent_id],
+      foreignColumns: [t.mastery_id, t.id],
+    }),
+    check(
+      'catalog_skill_nodes_id_ck',
+      sql`${t.id} ~ '^class[0-9]{2}/[a-z0-9]+([_-][a-z0-9]+)*$' AND split_part(${t.id}, '/', 1) = ${t.mastery_id}`,
+    ),
+    check('catalog_skill_nodes_tier_ck', sql`${t.tier} BETWEEN 1 AND 9`),
+    check(
+      'catalog_skill_nodes_bar_required_ck',
+      sql.raw(
+        TIER_BAR_REQUIRED_SQL.map(
+          (bar, i) => `("tier" = ${i + 1} AND "bar_required" = ${bar})`,
+        ).join(' OR '),
+      ),
+    ),
+    check('catalog_skill_nodes_grid_col_ck', sql`${t.grid_col} = ${t.tier}`),
+    check('catalog_skill_nodes_grid_row_ck', sql`${t.grid_row} >= 0`),
+    check('catalog_skill_nodes_max_points_ck', sql`${t.max_points} > 0`),
+    check(
+      'catalog_skill_nodes_ultimate_ck',
+      sql`${t.ultimate_points} IS NULL OR ${t.ultimate_points} >= ${t.max_points}`,
+    ),
+    check(
+      'catalog_skill_nodes_no_self_parent_ck',
+      sql`${t.parent_id} IS NULL OR ${t.parent_id} <> ${t.id}`,
+    ),
+  ],
+);
