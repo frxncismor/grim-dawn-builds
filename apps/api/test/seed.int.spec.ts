@@ -8,7 +8,13 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PublicAuthorSchema, PublicBuildSchema, PublicSourceSchema } from '@gd/domain';
 import { contractDoc } from '@gd/domain/testing';
-import { prepareSeed, readSeedFixtures, seedData, type SeedData } from '../src/db/seed.mjs';
+import {
+  prepareSeed,
+  readSeedFixtures,
+  seedCatalog,
+  seedData,
+  type SeedData,
+} from '../src/db/seed.mjs';
 
 const root = join(import.meta.dirname, '../../..');
 const image = /^\s+image:\s+(postgres:[^\s]+)$/m.exec(
@@ -117,7 +123,7 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', () => {
   });
 
   it('loads real fixtures twice without duplicating roots or child collections', async () => {
-    const expected = { builds: 1, tierLists: 1 };
+    const expected = { builds: 1, tierLists: 1, masteries: 6, nodes: 186 };
     expect(await seedData(importer!, data)).toEqual(expected);
     const counts = async () =>
       (
@@ -244,5 +250,63 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', () => {
     );
     await expect(seedData(importer!, data)).rejects.toThrow('bootstrapped');
     expect((await admin!.query('SELECT count(*)::int AS count FROM builds')).rows[0].count).toBe(2);
+  });
+
+  describe('mastery catalog (spec 003 T024)', () => {
+    const snapshot = async () =>
+      (
+        await admin!.query(`SELECT
+        (SELECT json_agg(t ORDER BY id) FROM (SELECT id, slug, name_en, name_es, game_version, source_sha256, created_at FROM mastery_trees) t) AS trees,
+        (SELECT json_agg(n ORDER BY id) FROM (SELECT id, mastery_id, name_en, name_es, kind, circular, tier, bar_required, grid_col, grid_row, max_points, ultimate_points, parent_id, icon, created_at FROM catalog_skill_nodes) n) AS nodes`)
+      ).rows[0];
+    const asApiRo = async (sql: string) => {
+      await admin!.query('SET ROLE api_ro');
+      try {
+        return (await admin!.query(sql)).rows[0];
+      } finally {
+        await admin!.query('RESET ROLE');
+      }
+    };
+
+    it('api_ro sees 6 masteries and 186 nodes after seeding, and a second run keeps the same state', async () => {
+      await seedCatalog(importer!, data.catalog);
+      expect(
+        await asApiRo(
+          'SELECT (SELECT count(*) FROM v_public_mastery_trees)::int AS m, (SELECT count(*) FROM v_public_skill_nodes)::int AS n',
+        ),
+      ).toEqual({ m: 6, n: 186 });
+      const first = await snapshot();
+      await seedCatalog(importer!, data.catalog);
+      expect(await snapshot()).toEqual(first);
+    });
+
+    it('reflects a fixture regenerated with one node fewer (stale node and re-pointed child)', async () => {
+      const modified = structuredClone(data);
+      const tree = modified.catalog[0]!;
+      const victim = tree.nodes.find((n) => n.parent_id !== null && n.tier >= 3)!;
+      const kids = tree.nodes.filter((n) => n.parent_id === victim.id);
+      for (const k of kids) k.parent_id = victim.parent_id; // keep schema-valid parent chain
+      tree.nodes = tree.nodes.filter((n) => n.id !== victim.id);
+      await seedCatalog(importer!, modified.catalog);
+      const rows = await admin!.query('SELECT count(*)::int AS n FROM catalog_skill_nodes');
+      expect(rows.rows[0].n).toBe(185);
+      expect(
+        (await admin!.query('SELECT 1 FROM catalog_skill_nodes WHERE id=$1', [victim.id])).rowCount,
+      ).toBe(0);
+      await seedCatalog(importer!, data.catalog);
+      expect(
+        (await admin!.query('SELECT count(*)::int AS n FROM catalog_skill_nodes')).rows[0].n,
+      ).toBe(186);
+    });
+
+    it('rolls the whole catalog back if one tree cannot be written', async () => {
+      const before = await snapshot();
+      const modified = structuredClone(data.catalog);
+      modified[5]!.nodes[0]!.name.en = 'Must roll back';
+      modified[5]!.nodes[1]!.grid.row = modified[5]!.nodes[2]!.grid.row;
+      modified[5]!.nodes[1]!.grid.col = modified[5]!.nodes[2]!.grid.col;
+      await expect(seedCatalog(importer!, modified)).rejects.toThrow('database-failed');
+      expect(await snapshot()).toEqual(before);
+    });
   });
 });
