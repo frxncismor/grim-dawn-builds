@@ -53,7 +53,9 @@ describe('gd-skill-tree catalog layout (T012)', () => {
     const lineStep = 14;
     const descent = 4;
     expect(metaY).toBeGreaterThan(nameY + lineStep); // two name lines end above the meta line
-    const labelBottom = metaY + lineStep /* Circular */ + descent;
+    const metaLines = meta.querySelectorAll('tspan').length; // kind, max, circular (3 for a circular node)
+    expect(metaLines).toBeGreaterThanOrEqual(2);
+    const labelBottom = metaY + lineStep * 2 /* max + Circular */ + descent;
     const ring = Number(root.querySelector('.skill-tree__ring')!.getAttribute('r'));
     expect(CATALOG_MIN_ROW_STEP).toBeGreaterThanOrEqual(ring + labelBottom + 8);
   });
