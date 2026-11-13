@@ -46,6 +46,8 @@ export const REQUIRED_RUN_COMMANDS = [
   // T-126: real fixture content, catalog freshness and the quality gates.
   'pnpm run content:validate -- --dir fixtures/content',
   'pnpm run catalog:check',
+  // Spec 003 T007: mastery-tree catalog validator.
+  'pnpm run catalog:nodes',
   // T-150: the en/es catalogs must match in PR verification too.
   'pnpm run check:locale-parity',
   'pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',

@@ -1,0 +1,587 @@
+{
+  "mastery": {
+    "id": "class03",
+    "slug": "occult",
+    "name": {
+      "en": "tagClass03SkillName00",
+      "es": "tagClass03SkillName00"
+    }
+  },
+  "game_version": "steam-build-25813250",
+  "source": {
+    "game_version": "steam-build-25813250",
+    "sha256": ["9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603"]
+  },
+  "nodes": [
+    {
+      "id": "class03/evileye1",
+      "name": {
+        "en": "tagClass03SkillName11A",
+        "es": "tagClass03SkillName11A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_evileye1up.tex"
+    },
+    {
+      "id": "class03/curse1",
+      "name": {
+        "en": "tagClass03SkillName06A",
+        "es": "tagClass03SkillName06A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 319
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_curse1up.tex"
+    },
+    {
+      "id": "class03/summon_raven1",
+      "name": {
+        "en": "tagClass03SkillName01A",
+        "es": "tagClass03SkillName01A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 389
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon1up.tex"
+    },
+    {
+      "id": "class03/witchfire1",
+      "name": {
+        "en": "tagClass03SkillName05A",
+        "es": "tagClass03SkillName05A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_witchfireenchantment1up.tex"
+    },
+    {
+      "id": "class03/evileye2",
+      "name": {
+        "en": "tagClass03SkillName11B",
+        "es": "tagClass03SkillName11B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/evileye1",
+      "icon": "ui/skills/icons/class03/skillicon_evileye2up.tex"
+    },
+    {
+      "id": "class03/pox1",
+      "name": {
+        "en": "tagClass03SkillName13A",
+        "es": "tagClass03SkillName13A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_pox1up.tex"
+    },
+    {
+      "id": "class03/summon_raven2_petmodifier",
+      "name": {
+        "en": "tagClass03SkillName01C",
+        "es": "tagClass03SkillName01C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 389
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": "class03/summon_raven1",
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon2up.tex"
+    },
+    {
+      "id": "class03/sigilofdestruction1",
+      "name": {
+        "en": "tagClass03SkillName10A",
+        "es": "tagClass03SkillName10A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_sigilofdestruction1up.tex"
+    },
+    {
+      "id": "class03/evileye1b",
+      "name": {
+        "en": "tagClass03SkillName11E",
+        "es": "tagClass03SkillName11E"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 211
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class03/evileye1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class03/curse2",
+      "name": {
+        "en": "tagClass03SkillName06B",
+        "es": "tagClass03SkillName06B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 319
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": "class03/curse1",
+      "icon": "ui/skills/icons/class03/skillicon_curse2up.tex"
+    },
+    {
+      "id": "class03/summon_hellhound1",
+      "name": {
+        "en": "tagClass03SkillName02A",
+        "es": "tagClass03SkillName02A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 459
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon1up.tex"
+    },
+    {
+      "id": "class03/witchfire1b",
+      "name": {
+        "en": "tagClass03SkillName05C",
+        "es": "tagClass03SkillName05C"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 71
+      },
+      "max_points": 3,
+      "ultimate_points": 3,
+      "parent_id": "class03/witchfire1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class03/pox1b",
+      "name": {
+        "en": "tagClass03SkillName13D",
+        "es": "tagClass03SkillName13D"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 211
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class03/pox1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class03/bloodofdreeg1",
+      "name": {
+        "en": "tagClass03SkillName04A",
+        "es": "tagClass03SkillName04A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 319
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_bloodofdreeg1up.tex"
+    },
+    {
+      "id": "class03/summon_raven3_petmodifier",
+      "name": {
+        "en": "tagClass03SkillName01D",
+        "es": "tagClass03SkillName01D"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/summon_raven1",
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon3up.tex"
+    },
+    {
+      "id": "class03/evileye3",
+      "name": {
+        "en": "tagClass03SkillName11C",
+        "es": "tagClass03SkillName11C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/evileye1",
+      "icon": "ui/skills/icons/class03/skillicon_evileye3up.tex"
+    },
+    {
+      "id": "class03/pox2",
+      "name": {
+        "en": "tagClass03SkillName13B",
+        "es": "tagClass03SkillName13B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/pox1",
+      "icon": "ui/skills/icons/class03/skillicon_pox2up.tex"
+    },
+    {
+      "id": "class03/summon_hellhound2_petmodifier",
+      "name": {
+        "en": "tagClass03SkillName02B",
+        "es": "tagClass03SkillName02B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/summon_hellhound1",
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon2up.tex"
+    },
+    {
+      "id": "class03/sigilofdestruction2",
+      "name": {
+        "en": "tagClass03SkillName10B",
+        "es": "tagClass03SkillName10B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/sigilofdestruction1",
+      "icon": "ui/skills/icons/class03/skillicon_sigilofdestruction2up.tex"
+    },
+    {
+      "id": "class03/witchfire2",
+      "name": {
+        "en": "tagClass03SkillName05B",
+        "es": "tagClass03SkillName05B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/witchfire1",
+      "icon": "ui/skills/icons/class03/skillicon_witchfireenchantment2up.tex"
+    },
+    {
+      "id": "class03/summon_raven4_petmodifier",
+      "name": {
+        "en": "tagClass03SkillName01E",
+        "es": "tagClass03SkillName01E"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/summon_raven1",
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon4up.tex"
+    },
+    {
+      "id": "class03/bloodofdreeg2",
+      "name": {
+        "en": "tagClass03SkillName04B",
+        "es": "tagClass03SkillName04B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/bloodofdreeg1",
+      "icon": "ui/skills/icons/class03/skillicon_bloodofdreeg2up.tex"
+    },
+    {
+      "id": "class03/bondsofbysmiel1",
+      "name": {
+        "en": "tagClass03SkillName03A",
+        "es": "tagClass03SkillName03A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_bondsofbysmiel1up.tex"
+    },
+    {
+      "id": "class03/summon_hellhound3_petmodifier",
+      "name": {
+        "en": "tagClass03SkillName02C",
+        "es": "tagClass03SkillName02C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/summon_hellhound1",
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon3up.tex"
+    },
+    {
+      "id": "class03/doombolt1",
+      "name": {
+        "en": "tagClass03SkillName14A",
+        "es": "tagClass03SkillName14A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_doombolt1up.tex"
+    },
+    {
+      "id": "class03/evileye4",
+      "name": {
+        "en": "tagClass03SkillName11D",
+        "es": "tagClass03SkillName11D"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/evileye1",
+      "icon": "ui/skills/icons/class03/skillicon_evileye4up.tex"
+    },
+    {
+      "id": "class03/pox3",
+      "name": {
+        "en": "tagClass03SkillName13C",
+        "es": "tagClass03SkillName13C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/pox1",
+      "icon": "ui/skills/icons/class03/skillicon_pox3up.tex"
+    },
+    {
+      "id": "class03/possession1",
+      "name": {
+        "en": "tagClass03SkillName12A",
+        "es": "tagClass03SkillName12A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_possession1up.tex"
+    },
+    {
+      "id": "class03/bondsofbysmiel2",
+      "name": {
+        "en": "tagClass03SkillName03B",
+        "es": "tagClass03SkillName03B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/bondsofbysmiel1",
+      "icon": "ui/skills/icons/class03/skillicon_bondsofbysmiel2up.tex"
+    },
+    {
+      "id": "class03/summon_hellhound4_petmodifier",
+      "name": {
+        "en": "tagClass03SkillName02D",
+        "es": "tagClass03SkillName02D"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/summon_hellhound1",
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon4up.tex"
+    }
+  ]
+}

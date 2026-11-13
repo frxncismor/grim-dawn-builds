@@ -1,0 +1,587 @@
+{
+  "mastery": {
+    "id": "class06",
+    "slug": "shaman",
+    "name": {
+      "en": "tagClass06SkillName00",
+      "es": "tagClass06SkillName00"
+    }
+  },
+  "game_version": "steam-build-25813250",
+  "source": {
+    "game_version": "steam-build-25813250",
+    "sha256": ["9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603"]
+  },
+  "nodes": [
+    {
+      "id": "class06/passive01",
+      "name": {
+        "en": "tagClass06SkillName10A",
+        "es": "tagClass06SkillName10A"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_passive01up.tex"
+    },
+    {
+      "id": "class06/savagery1",
+      "name": {
+        "en": "tagClass06SkillName01A",
+        "es": "tagClass06SkillName01A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 179
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_savagery1up.tex"
+    },
+    {
+      "id": "class06/devouringswarm1",
+      "name": {
+        "en": "tagClass06SkillName15A",
+        "es": "tagClass06SkillName15A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 319
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_devouringswarm1up.tex"
+    },
+    {
+      "id": "class06/savagestrike1",
+      "name": {
+        "en": "tagClass06SkillName02A",
+        "es": "tagClass06SkillName02A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 109
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_wildstrike1_up.tex"
+    },
+    {
+      "id": "class06/savagery1b",
+      "name": {
+        "en": "tagClass06SkillName01D",
+        "es": "tagClass06SkillName01D"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 211
+      },
+      "max_points": 3,
+      "ultimate_points": 3,
+      "parent_id": "class06/savagery1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class06/graspingvines1",
+      "name": {
+        "en": "tagClass06SkillName17A",
+        "es": "tagClass06SkillName17A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_graspingvines1up.tex"
+    },
+    {
+      "id": "class06/natureblessing1",
+      "name": {
+        "en": "tagClass06SkillName05A",
+        "es": "tagClass06SkillName05A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_natureblessing1up.tex"
+    },
+    {
+      "id": "class06/weaponpool01",
+      "name": {
+        "en": "tagClass06SkillName07A",
+        "es": "tagClass06SkillName07A"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 39
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_weaponpool1up.tex"
+    },
+    {
+      "id": "class06/savagestrike1b",
+      "name": {
+        "en": "tagClass06SkillName02D",
+        "es": "tagClass06SkillName02D"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 141
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class06/savagestrike1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class06/squall1",
+      "name": {
+        "en": "tagClass06SkillName04A",
+        "es": "tagClass06SkillName04A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 249
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_stormcloud1up.tex"
+    },
+    {
+      "id": "class06/summon_briarthorn1",
+      "name": {
+        "en": "tagClass06SkillName06A",
+        "es": "tagClass06SkillName06A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 389
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_thornedhorrorsummon1up.tex"
+    },
+    {
+      "id": "class06/weaponpool02",
+      "name": {
+        "en": "tagClass06SkillName14A",
+        "es": "tagClass06SkillName14A"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 39
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_weaponpool2up.tex"
+    },
+    {
+      "id": "class06/savagestrike2",
+      "name": {
+        "en": "tagClass06SkillName02C",
+        "es": "tagClass06SkillName02C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class06/savagestrike1",
+      "icon": "ui/skills/icons/class06/skillicon_wildstrike3up.tex"
+    },
+    {
+      "id": "class06/savagery2",
+      "name": {
+        "en": "tagClass06SkillName01B",
+        "es": "tagClass06SkillName01B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class06/savagery1",
+      "icon": "ui/skills/icons/class06/skillicon_savagery2up.tex"
+    },
+    {
+      "id": "class06/naturesblessing2",
+      "name": {
+        "en": "tagClass06SkillName05C",
+        "es": "tagClass06SkillName05C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 459
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": "class06/natureblessing1",
+      "icon": "ui/skills/icons/class06/skillicon_natureblessing3up.tex"
+    },
+    {
+      "id": "class06/totem1",
+      "name": {
+        "en": "tagClass06SkillName03A",
+        "es": "tagClass06SkillName03A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_totem1up.tex"
+    },
+    {
+      "id": "class06/squall2",
+      "name": {
+        "en": "tagClass06SkillName04B",
+        "es": "tagClass06SkillName04B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class06/squall1",
+      "icon": "ui/skills/icons/class06/skillicon_stormcloud3up.tex"
+    },
+    {
+      "id": "class06/summon_briarthorn2_petmodifier",
+      "name": {
+        "en": "tagClass06SkillName06C",
+        "es": "tagClass06SkillName06C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class06/summon_briarthorn1",
+      "icon": "ui/skills/icons/class06/skillicon_thornedhorrorsummon3up.tex"
+    },
+    {
+      "id": "class06/savagestrike3",
+      "name": {
+        "en": "tagClass06SkillName02B",
+        "es": "tagClass06SkillName02B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class06/savagestrike1",
+      "icon": "ui/skills/icons/class06/skillicon_wildstrike2up.tex"
+    },
+    {
+      "id": "class06/graspingvines2",
+      "name": {
+        "en": "tagClass06SkillName17B",
+        "es": "tagClass06SkillName17B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class06/graspingvines1",
+      "icon": "ui/skills/icons/class06/skillicon_graspingvines2up.tex"
+    },
+    {
+      "id": "class06/naturesblessing3",
+      "name": {
+        "en": "tagClass06SkillName05B",
+        "es": "tagClass06SkillName05B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 459
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": "class06/natureblessing1",
+      "icon": "ui/skills/icons/class06/skillicon_natureblessing2up.tex"
+    },
+    {
+      "id": "class06/stormtotem01",
+      "name": {
+        "en": "tagClass06SkillName16A",
+        "es": "tagClass06SkillName16A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 109
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_stormtotem1up.tex"
+    },
+    {
+      "id": "class06/savagery3",
+      "name": {
+        "en": "tagClass06SkillName01C",
+        "es": "tagClass06SkillName01C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class06/savagery1",
+      "icon": "ui/skills/icons/class06/skillicon_savagery3up.tex"
+    },
+    {
+      "id": "class06/totem2_petmodifier",
+      "name": {
+        "en": "tagClass06SkillName03B",
+        "es": "tagClass06SkillName03B"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class06/totem1",
+      "icon": "ui/skills/icons/class06/skillicon_totem2up.tex"
+    },
+    {
+      "id": "class06/stormtotem01b_petmodifier",
+      "name": {
+        "en": "tagClass06SkillName16B",
+        "es": "tagClass06SkillName16B"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 141
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class06/stormtotem01",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+    },
+    {
+      "id": "class06/squall3",
+      "name": {
+        "en": "tagClass06SkillName04C",
+        "es": "tagClass06SkillName04C"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class06/squall1",
+      "icon": "ui/skills/icons/class06/skillicon_stormcloud2up.tex"
+    },
+    {
+      "id": "class06/summon_briarthorn3_petmodifier",
+      "name": {
+        "en": "tagClass06SkillName06D",
+        "es": "tagClass06SkillName06D"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class06/summon_briarthorn1",
+      "icon": "ui/skills/icons/class06/skillicon_thornedhorrorsummon4up.tex"
+    },
+    {
+      "id": "class06/stormcaller1",
+      "name": {
+        "en": "tagClass06SkillName08A",
+        "es": "tagClass06SkillName08A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_stormcaller1up.tex"
+    },
+    {
+      "id": "class06/summon_manticore1",
+      "name": {
+        "en": "tagClass06SkillName09A",
+        "es": "tagClass06SkillName09A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_manticoresummon1up.tex"
+    },
+    {
+      "id": "class06/primalbond01",
+      "name": {
+        "en": "tagClass06SkillName13A",
+        "es": "tagClass06SkillName13A"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class06/skillicon_primalbond01up.tex"
+    }
+  ]
+}
