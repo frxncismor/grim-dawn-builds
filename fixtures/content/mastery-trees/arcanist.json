@@ -3,21 +3,25 @@
     "id": "class05",
     "slug": "arcanist",
     "name": {
-      "en": "tagClass05SkillName00",
-      "es": "tagClass05SkillName00"
+      "en": "Arcanist",
+      "es": "Arcanista"
     }
   },
   "game_version": "steam-build-25813250",
   "source": {
     "game_version": "steam-build-25813250",
-    "sha256": ["9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603"]
+    "sha256": [
+      "9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603",
+      "82defd8a0fddf71e8491b7494fada51b034b1af14ffc0a6cf9c8aabdf8700c25",
+      "e6f785d155d0791b3100092762111f59a06faa9e1a86d91898ec98317e395752"
+    ]
   },
   "nodes": [
     {
       "id": "class05/elementalinfusion1",
       "name": {
-        "en": "tagClass05SkillName02A",
-        "es": "tagClass05SkillName02A"
+        "en": "Iskandra's Elemental Exchange",
+        "es": "Intercambio Elemental de Iskandra"
       },
       "kind": "active",
       "circular": false,
@@ -35,8 +39,8 @@
     {
       "id": "class05/arcanemissile",
       "name": {
-        "en": "tagClass05SkillName01A",
-        "es": "tagClass05SkillName01A"
+        "en": "Panetti's Replicating Missile",
+        "es": "Misil Replicador de Panetti"
       },
       "kind": "active",
       "circular": false,
@@ -54,8 +58,8 @@
     {
       "id": "class05/passive01",
       "name": {
-        "en": "tagClass05SkillName09A",
-        "es": "tagClass05SkillName09A"
+        "en": "Inner Focus",
+        "es": "Enfoque Interno"
       },
       "kind": "passive",
       "circular": true,
@@ -73,8 +77,8 @@
     {
       "id": "class05/elementalinfusion1b",
       "name": {
-        "en": "tagClass05SkillName02D",
-        "es": "tagClass05SkillName02D"
+        "en": "Manifestation",
+        "es": "Manifestación"
       },
       "kind": "transmuter",
       "circular": true,
@@ -92,8 +96,8 @@
     {
       "id": "class05/razorwind1",
       "name": {
-        "en": "tagClass05SkillName04A",
-        "es": "tagClass05SkillName04A"
+        "en": "Callidor's Tempest",
+        "es": "Tempestad de Callidor"
       },
       "kind": "active",
       "circular": false,
@@ -111,8 +115,8 @@
     {
       "id": "class05/chillingsurge",
       "name": {
-        "en": "tagClass05SkillName16A",
-        "es": "tagClass05SkillName16A"
+        "en": "Olexra's Flash Freeze",
+        "es": "Congelación de Olexra"
       },
       "kind": "active",
       "circular": false,
@@ -130,8 +134,8 @@
     {
       "id": "class05/elementalinfusion2",
       "name": {
-        "en": "tagClass05SkillName02B",
-        "es": "tagClass05SkillName02B"
+        "en": "Overload",
+        "es": "Sobrecarga"
       },
       "kind": "modifier",
       "circular": true,
@@ -149,8 +153,8 @@
     {
       "id": "class05/arcaneshield",
       "name": {
-        "en": "tagClass05SkillName14A",
-        "es": "tagClass05SkillName14A"
+        "en": "Mirror of Ereoctes",
+        "es": "Espejo de Ereoctes"
       },
       "kind": "active",
       "circular": false,
@@ -168,8 +172,8 @@
     {
       "id": "class05/razorwind1b",
       "name": {
-        "en": "tagClass05SkillName04C",
-        "es": "tagClass05SkillName04C"
+        "en": "Wrath of Agrivix",
+        "es": "Ira de Agrivix"
       },
       "kind": "transmuter",
       "circular": true,
@@ -187,8 +191,8 @@
     {
       "id": "class05/skyshard1",
       "name": {
-        "en": "tagClass05SkillName03A",
-        "es": "tagClass05SkillName03A"
+        "en": "Trozan's Sky Shard",
+        "es": "Fragmento de Cielo de Trozan"
       },
       "kind": "active",
       "circular": false,
@@ -206,8 +210,8 @@
     {
       "id": "class05/sphereofprotection1",
       "name": {
-        "en": "tagClass05SkillName05A",
-        "es": "tagClass05SkillName05A"
+        "en": "Maiven's Sphere of Protection",
+        "es": "Esfera de Protección de Maiven"
       },
       "kind": "active",
       "circular": false,
@@ -225,8 +229,8 @@
     {
       "id": "class05/arcanemissile2",
       "name": {
-        "en": "tagClass05SkillName01B",
-        "es": "tagClass05SkillName01B"
+        "en": "Distortion",
+        "es": "Distorsión"
       },
       "kind": "modifier",
       "circular": true,
@@ -244,8 +248,8 @@
     {
       "id": "class05/passive02",
       "name": {
-        "en": "tagClass05SkillName10A",
-        "es": "tagClass05SkillName10A"
+        "en": "Arcane Will",
+        "es": "Voluntad Arcana"
       },
       "kind": "passive",
       "circular": true,
@@ -263,8 +267,8 @@
     {
       "id": "class05/razorwind2",
       "name": {
-        "en": "tagClass05SkillName04B",
-        "es": "tagClass05SkillName04B"
+        "en": "Inferno",
+        "es": "Inferno"
       },
       "kind": "modifier",
       "circular": true,
@@ -282,8 +286,8 @@
     {
       "id": "class05/chillingsurge2",
       "name": {
-        "en": "tagClass05SkillName16B",
-        "es": "tagClass05SkillName16B"
+        "en": "Absolute Zero",
+        "es": "Cero Absoluto"
       },
       "kind": "modifier",
       "circular": true,
@@ -301,8 +305,8 @@
     {
       "id": "class05/skyshard2",
       "name": {
-        "en": "tagClass05SkillName03B",
-        "es": "tagClass05SkillName03B"
+        "en": "Frozen Core",
+        "es": "Núcleo Congelado"
       },
       "kind": "modifier",
       "circular": true,
@@ -320,8 +324,8 @@
     {
       "id": "class05/nullification",
       "name": {
-        "en": "tagClass05SkillName07A",
-        "es": "tagClass05SkillName07A"
+        "en": "Nullification",
+        "es": "Anulación"
       },
       "kind": "active",
       "circular": false,
@@ -339,8 +343,8 @@
     {
       "id": "class05/elementalinfusion3",
       "name": {
-        "en": "tagClass05SkillName02C",
-        "es": "tagClass05SkillName02C"
+        "en": "Elemental Balance",
+        "es": "Equilibrio Elemental"
       },
       "kind": "modifier",
       "circular": true,
@@ -358,8 +362,8 @@
     {
       "id": "class05/arcanemissile3",
       "name": {
-        "en": "tagClass05SkillName01C",
-        "es": "tagClass05SkillName01C"
+        "en": "Supercharged",
+        "es": "Sobrecargado"
       },
       "kind": "modifier",
       "circular": true,
@@ -377,8 +381,8 @@
     {
       "id": "class05/aetherray1",
       "name": {
-        "en": "tagClass05SkillName06A",
-        "es": "tagClass05SkillName06A"
+        "en": "Albrecht's Aether Ray",
+        "es": "Rayo Etéreo de Albrecht"
       },
       "kind": "active",
       "circular": false,
@@ -396,8 +400,8 @@
     {
       "id": "class05/sphereofprotection2",
       "name": {
-        "en": "tagClass05SkillName05B",
-        "es": "tagClass05SkillName05B"
+        "en": "Conversion",
+        "es": "Conversión"
       },
       "kind": "modifier",
       "circular": true,
@@ -415,8 +419,8 @@
     {
       "id": "class05/aetherray1b",
       "name": {
-        "en": "tagClass05SkillName06C",
-        "es": "tagClass05SkillName06C"
+        "en": "Tainted Power",
+        "es": "Poder Contaminado"
       },
       "kind": "transmuter",
       "circular": true,
@@ -434,8 +438,8 @@
     {
       "id": "class05/passive03",
       "name": {
-        "en": "tagClass05SkillName11A",
-        "es": "tagClass05SkillName11A"
+        "en": "Mental Alacrity",
+        "es": "Presteza Mental"
       },
       "kind": "passive",
       "circular": true,
@@ -453,8 +457,8 @@
     {
       "id": "class05/arcanemissile4",
       "name": {
-        "en": "tagClass05SkillName01D",
-        "es": "tagClass05SkillName01D"
+        "en": "Proliferation",
+        "es": "Proliferación"
       },
       "kind": "modifier",
       "circular": true,
@@ -472,8 +476,8 @@
     {
       "id": "class05/skyshard3",
       "name": {
-        "en": "tagClass05SkillName03C",
-        "es": "tagClass05SkillName03C"
+        "en": "Shattered Star",
+        "es": "Estrella Devastada"
       },
       "kind": "modifier",
       "circular": true,
@@ -491,8 +495,8 @@
     {
       "id": "class05/passive04",
       "name": {
-        "en": "tagClass05SkillName12A",
-        "es": "tagClass05SkillName12A"
+        "en": "Fabric of Reality",
+        "es": "Tela de Realidad"
       },
       "kind": "passive",
       "circular": true,
@@ -510,8 +514,8 @@
     {
       "id": "class05/mindovermatter1",
       "name": {
-        "en": "tagClass05SkillName15A",
-        "es": "tagClass05SkillName15A"
+        "en": "Reckless Power",
+        "es": "Poder Temerario"
       },
       "kind": "active",
       "circular": false,
@@ -529,8 +533,8 @@
     {
       "id": "class05/devastation",
       "name": {
-        "en": "tagClass05SkillName08A",
-        "es": "tagClass05SkillName08A"
+        "en": "Devastation",
+        "es": "Devastación"
       },
       "kind": "active",
       "circular": false,
@@ -548,8 +552,8 @@
     {
       "id": "class05/aetherray2",
       "name": {
-        "en": "tagClass05SkillName06B",
-        "es": "tagClass05SkillName06B"
+        "en": "Disintegration",
+        "es": "Desintegración"
       },
       "kind": "modifier",
       "circular": true,
@@ -567,8 +571,8 @@
     {
       "id": "class05/mindovermatter2",
       "name": {
-        "en": "tagClass05SkillName15B",
-        "es": "tagClass05SkillName15B"
+        "en": "Star Pact",
+        "es": "Pacto Estelar"
       },
       "kind": "active",
       "circular": false,
