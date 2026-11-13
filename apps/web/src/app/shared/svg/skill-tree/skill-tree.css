@@ -162,6 +162,11 @@
   stroke-width: 4;
 }
 
+.skill-tree__node--catalog:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 4px;
+}
+
 .skill-tree__node:hover .skill-tree__shape,
 .skill-tree__node:focus-visible .skill-tree__shape {
   fill: var(--color-panel-2);
@@ -309,7 +314,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skill-tree__shape {
+  .skill-tree__shape,
+  .skill-tree__node,
+  .skill-tree__edges path,
+  .skill-tree__edges line {
     transition: none;
+    animation: none;
   }
 }

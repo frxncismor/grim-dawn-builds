@@ -142,7 +142,7 @@ describe('gd-skill-tree catalog mode', () => {
     const root: HTMLElement = fixture.nativeElement;
     const nodes = Array.from(root.querySelectorAll<SVGGElement>('[data-skill-id]'));
     expect(nodes.filter((n) => n.getAttribute('tabindex') === '0')).toHaveLength(1);
-    expect(nodes.every((n) => n.hasAttribute('aria-labelledby'))).toBe(true);
+    expect(nodes.every((n) => n.hasAttribute('aria-label'))).toBe(true);
     const first = nodes.find((n) => n.getAttribute('tabindex') === '0')!;
     first.focus();
     first.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));

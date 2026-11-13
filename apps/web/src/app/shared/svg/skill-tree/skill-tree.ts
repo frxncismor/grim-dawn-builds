@@ -24,6 +24,7 @@ interface CatalogRenderNode {
   node: CatalogSkillNode;
   id: string;
   labelLines: string[];
+  label: string;
   x: number;
   y: number;
   selected: boolean;
@@ -121,6 +122,7 @@ export class SkillTree {
     const rovingId = known.has(currentFocus ?? '') ? currentFocus! : (ordered[0]?.id ?? null);
     const selectedId = this.selectedId();
     const maxLabelChars = Math.floor(CATALOG_COL_WIDTH / 8);
+    const nameById = new Map(source.map((node) => [node.id, node.name.es]));
     const positions = new Map(source.map((node) => [node.id, point(node)]));
     const tierBars = new Map(source.map((node) => [node.tier, node.bar_required]));
     const maxCol = Math.max(...source.map((node) => node.grid.col));
@@ -131,6 +133,7 @@ export class SkillTree {
         node,
         id: this.nodeId(node.id),
         labelLines: this.visibleNameLines(node.name.es, maxLabelChars),
+        label: this.catalogNodeLabel(node, nameById),
         ...at,
         selected: selectedId === node.id,
         focused: rovingId === node.id,
@@ -434,8 +437,32 @@ export class SkillTree {
     return $localize`:@@skillTree.circular:Circular`;
   }
 
-  catalogNodeLabelIds(item: CatalogRenderNode): string {
-    return `${item.id}-name ${item.id}-meta`;
+  /** Full textual equivalent of a catalog node: name, tier, bar, kind, range and dependency. */
+  catalogNodeLabel(node: CatalogSkillNode, nameById: ReadonlyMap<string, string>): string {
+    const parts = [
+      node.name.es,
+      this.tierLabel(node.tier),
+      this.barLabel(node.bar_required),
+      this.kindLabel(node.kind),
+      this.maxPointsLabel(node),
+      this.dependencyLabel(node, nameById),
+    ];
+    if (node.circular) parts.push(this.circularLabel());
+    return parts.join('. ');
+  }
+
+  dependencyLabel(node: CatalogSkillNode, nameById: ReadonlyMap<string, string>): string {
+    if (node.parent_id === null) return $localize`:@@skillTree.noRequirement:No requirement`;
+    const parent = nameById.get(node.parent_id) ?? node.parent_id;
+    return $localize`:@@skillTree.requiresParent:Requires ${parent}:parent:`;
+  }
+
+  readonly catalogNames = computed(
+    () => new Map((this.catalogTree()?.nodes ?? []).map((node) => [node.id, node.name.es])),
+  );
+
+  catalogListItemId(node: CatalogSkillNode): string {
+    return `${this.treeId()}-${this.scopeSlug()}-${node.id}-listitem`;
   }
 
   barLabel(bar: number): string {
