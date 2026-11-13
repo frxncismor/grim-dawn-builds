@@ -49,7 +49,8 @@ describe('TIER_BAR_REQUIRED', () => {
 describe('CatalogSkillNodeSchema', () => {
   it('accepts a valid node and optional ultimate_points/icon', () => {
     expect(CatalogSkillNodeSchema.safeParse(node()).success).toBe(true);
-    const { ultimate_points: _u, ...noUltimate } = node();
+    const noUltimate: Record<string, unknown> = { ...node() };
+    delete noUltimate['ultimate_points'];
     expect(CatalogSkillNodeSchema.safeParse(noUltimate).success).toBe(true);
     expect(CatalogSkillNodeSchema.safeParse(node({ icon: 'skills/x.tex' })).success).toBe(true);
   });
@@ -115,7 +116,8 @@ describe('MasteryTreeSchema', () => {
       expect(MasteryTreeSchema.safeParse({ ...t, mastery: { ...t.mastery, slug } }).success).toBe(
         false,
       );
-    const { slug: _s, ...noSlug } = t.mastery;
+    const noSlug: Record<string, unknown> = { ...t.mastery };
+    delete noSlug['slug'];
     expect(MasteryTreeSchema.safeParse({ ...t, mastery: noSlug }).success).toBe(false);
   });
 
