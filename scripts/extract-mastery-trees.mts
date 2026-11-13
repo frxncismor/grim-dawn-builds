@@ -1,10 +1,13 @@
-// T001/T006 (spec 003): extracción reproducible de los árboles de maestría desde el
+// T001/T006/T022 (spec 003): extracción reproducible de los árboles de maestría desde el
 // `database.arz` instalado de Grim Dawn. Solo lectura, solo `node:` builtins.
 //
 // Uso:
 //   pnpm catalog:extract --game-dir <ruta> [--out <archivo>]   (o env GRIMDAWN_DIR)
 //   ... --game-version <texto>    fuerza `source.game_version` (por defecto: buildid de Steam)
+//   ... --no-localize             conserva los tags de localización (sin leer los `.arc` de texto)
 //   ... --record <ruta-registro>  (depuración, repetible) vuelca campos de un registro a stdout
+//
+// Por defecto resuelve `name.en`/`name.es` desde `resources/Text_EN.arc` y `Text_ES.arc` (T022).
 //
 // Sin `--out` el JSON va a stdout. Con `--out` se escribe SOLO ese archivo: usa una ruta fuera
 // del repo o ignorada (`tmp/`); los datos extraídos del juego no se versionan.
@@ -138,6 +141,122 @@ export class Arz {
 }
 
 // ---------------------------------------------------------------------------------------------
+// T022: contenedor `.arc` (v3) de textos de localización (research.md §T022)
+// ---------------------------------------------------------------------------------------------
+
+interface ArcFile {
+  readonly name: string;
+  readonly firstPart: number;
+  readonly partCount: number;
+}
+
+/** Lector mínimo de `.arc` v3: tabla de partes, cadenas y registros de 44 bytes (solo lectura). */
+export class Arc {
+  readonly files = new Map<string, ArcFile>();
+  private readonly parts: { offset: number; compressed: number; size: number }[] = [];
+  private readonly buf: Buffer;
+
+  constructor(buf: Buffer) {
+    this.buf = buf;
+    if (buf.length < 28 || buf.toString('latin1', 0, 4) !== 'ARC\0' || buf.readUInt32LE(4) !== 3)
+      throw new Error('cabecera .arc no soportada (se esperaba "ARC", versión 3)');
+    const nFiles = buf.readUInt32LE(8);
+    const nParts = buf.readUInt32LE(12);
+    const partBytes = buf.readUInt32LE(16);
+    const strBytes = buf.readUInt32LE(20);
+    const tocOffset = buf.readUInt32LE(24);
+    const strOffset = tocOffset + partBytes;
+    const recOffset = strOffset + strBytes;
+    if (partBytes !== nParts * 12 || recOffset + nFiles * 44 !== buf.length)
+      throw new Error('índice .arc inconsistente con el tamaño del archivo');
+    for (let n = 0; n < nParts; n++) {
+      const p = tocOffset + n * 12;
+      this.parts.push({
+        offset: buf.readUInt32LE(p),
+        compressed: buf.readUInt32LE(p + 4),
+        size: buf.readUInt32LE(p + 8),
+      });
+    }
+    const names = buf.toString('latin1', strOffset, recOffset);
+    for (let n = 0; n < nFiles; n++) {
+      const p = recOffset + n * 44;
+      const nameLen = buf.readUInt32LE(p + 36);
+      const nameOff = buf.readUInt32LE(p + 40);
+      const name = names.slice(nameOff, nameOff + nameLen);
+      const firstPart = buf.readUInt32LE(p + 32);
+      const partCount = buf.readUInt32LE(p + 28);
+      if (firstPart + partCount > nParts) throw new Error(`.arc: partes fuera de rango en ${name}`);
+      this.files.set(name, { name, firstPart, partCount });
+    }
+  }
+
+  /** Contenido descomprimido de un archivo (concatenación de sus partes). */
+  read(name: string): Buffer {
+    const f = this.files.get(name);
+    if (!f) throw new Error(`archivo inexistente en el .arc: ${name}`);
+    const chunks: Buffer[] = [];
+    for (const part of this.parts.slice(f.firstPart, f.firstPart + f.partCount)) {
+      const raw = this.buf.subarray(part.offset, part.offset + part.compressed);
+      chunks.push(part.compressed === part.size ? raw : Buffer.from(lz4Block(raw, part.size)));
+    }
+    return Buffer.concat(chunks);
+  }
+}
+
+/** Códigos de formato del juego: `{^x}`/`{%x}` se eliminan; `[ms]A[fs]B` se queda con la variante masculina. */
+export function cleanText(raw: string): string {
+  return raw
+    .replace(/\{[\^%][^}]*\}/g, '')
+    .replace(/\[ms\]([^[]*)(?:\[[a-z]{2}\][^[]*)*/g, '$1')
+    .replace(/\[[a-z]{2}\]/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+/** `tag=valor` (primer `=`); ignora vacías y comentarios (`#`, `//`); acepta CRLF y LF. */
+export function parseTags(text: string): Map<string, string> {
+  const tags = new Map<string, string>();
+  for (const line of text.split(/\r?\n/)) {
+    if (line === '' || line.startsWith('#') || line.startsWith('//')) continue;
+    const eq = line.indexOf('=');
+    if (eq <= 0) continue;
+    tags.set(line.slice(0, eq).trim(), cleanText(line.slice(eq + 1)));
+  }
+  return tags;
+}
+
+const TAGS_FILE = 'tags_skills.txt';
+/** Etiquetas de `tags_skills.txt` (UTF-8; ASCII en EN), donde están los nombres de maestrías y habilidades. */
+export function loadTags(arc: Arc): Map<string, string> {
+  if (!arc.files.has(TAGS_FILE)) throw new Error(`el .arc no contiene ${TAGS_FILE}`);
+  return parseTags(arc.read(TAGS_FILE).toString('utf8'));
+}
+
+export interface Localizer {
+  resolve(tag: string): LocalizedName;
+  /** Tags sin texto ES (se usó el EN), sin repetidos. */
+  readonly fallbacks: Set<string>;
+}
+
+/** EN ausente => error con el tag; ES ausente => texto EN y registro en `fallbacks`. */
+export function createLocalizer(
+  en: ReadonlyMap<string, string>,
+  es: ReadonlyMap<string, string>,
+): Localizer {
+  const fallbacks = new Set<string>();
+  return {
+    fallbacks,
+    resolve(tag) {
+      const e = en.get(tag);
+      if (!e) throw new Error(`falta el tag de localización en EN: ${tag}`);
+      const s = es.get(tag);
+      if (!s) fallbacks.add(tag);
+      return { en: e, es: s || e };
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
 // T006: catálogo de árboles (mapa de campos de research.md T002 §3)
 // ---------------------------------------------------------------------------------------------
 
@@ -172,6 +291,8 @@ export interface BuildOptions {
   readonly gameVersion: string;
   readonly sha256: readonly string[];
   readonly masteries?: readonly string[];
+  /** T022: resuelve `name`; sin él, `name.en = name.es = tag` (comportamiento de T006). */
+  readonly localizer?: Localizer;
 }
 
 /** v1 (decisión de Paco, 2026-11-13): las 6 maestrías base. */
@@ -220,8 +341,10 @@ function readMastery(
   arz: Arz,
   tiers: readonly number[],
   nn: string,
-  meta: { game_version: string; sha256: readonly string[] },
+  meta: { game_version: string; sha256: readonly string[]; localizer?: Localizer | undefined },
 ): CatalogTree {
+  const nameOf = (tag: string): LocalizedName =>
+    meta.localizer ? meta.localizer.resolve(tag) : { en: tag, es: tag };
   const id = `class${nn}`;
   const mPath = `records/skills/playerclass${nn}/_classtraining_class${nn}.dbr`;
   if (!arz.entries.has(mPath)) throw new Error(`maestría ${id}: falta el registro ${mPath}`);
@@ -273,7 +396,7 @@ function readMastery(
     const icon = str(pick('skillUpBitmapName'));
     nodes.push({
       id: `class${nn}/${skillId(skillPath)}`,
-      name: { en: tag, es: tag },
+      name: nameOf(tag),
       kind: kindOf(rec.type),
       circular: first(uiRec, 'isCircular') === true,
       tier,
@@ -315,7 +438,7 @@ function readMastery(
   const name = str(first(m, 'skillDisplayName'));
   if (!name) throw new Error(`${id}: sin skillDisplayName`);
   return {
-    mastery: { id, slug, name: { en: name, es: name } },
+    mastery: { id, slug, name: nameOf(name) },
     game_version: meta.game_version,
     source: { game_version: meta.game_version, sha256: [...meta.sha256] },
     nodes,
@@ -329,7 +452,11 @@ export function buildCatalog(arz: Arz, opts: BuildOptions): CatalogTree[] {
   );
   if (tiers.length === 0) throw new Error(`${ENGINE_RECORD}: sin skillMasteryTierLevel`);
   const ids = [...new Set(opts.masteries ?? BASE_MASTERIES)].sort();
-  const meta = { game_version: opts.gameVersion, sha256: opts.sha256 };
+  const meta = {
+    game_version: opts.gameVersion,
+    sha256: opts.sha256,
+    localizer: opts.localizer,
+  };
   return ids.map((id) => {
     const m = /^class(\d\d)$/.exec(id);
     if (!m) throw new Error(`id de maestría inválido: ${id}`);
@@ -357,22 +484,53 @@ function steamVersion(gameDir: string): string | null {
 export interface ExtractOptions {
   readonly gameVersion?: string;
   readonly masteries?: readonly string[];
+  /** T022: `false` (`--no-localize`) deja los tags y no lee los `.arc`. */
+  readonly localize?: boolean;
+  /** Aviso (por defecto stderr), p. ej. el conteo de fallbacks ES -> EN. */
+  readonly warn?: (message: string) => void;
 }
 
-/** Lee `<gameDir>/database/database.arz` (solo lectura) y devuelve el JSON del catálogo. */
+function readText(gameDir: string, file: string): Buffer {
+  try {
+    return readFileSync(join(gameDir, 'resources', file));
+  } catch {
+    throw new Error(
+      `no se pudo leer resources/${file}: instala el juego completo o usa --no-localize`,
+    );
+  }
+}
+
+/** Lee `<gameDir>/database/database.arz` y `resources/Text_{EN,ES}.arc` (solo lectura) y devuelve el JSON. */
 export function extractFromGameDir(gameDir: string, opts: ExtractOptions = {}): string {
   const buf = readFileSync(join(gameDir, 'database', 'database.arz'));
   const gameVersion = opts.gameVersion ?? steamVersion(gameDir);
   if (!gameVersion)
     throw new Error('no se pudo determinar la versión del juego: usa --game-version <texto>');
-  const sha256 = createHash('sha256').update(buf).digest('hex');
-  return serializeCatalog(
+  const sha = (b: Buffer): string => createHash('sha256').update(b).digest('hex');
+  const sha256 = [sha(buf)];
+  let localizer: Localizer | undefined;
+  if (opts.localize !== false) {
+    const en = readText(gameDir, 'Text_EN.arc');
+    const es = readText(gameDir, 'Text_ES.arc');
+    sha256.push(sha(en), sha(es));
+    localizer = createLocalizer(loadTags(new Arc(en)), loadTags(new Arc(es)));
+  }
+  const json = serializeCatalog(
     buildCatalog(new Arz(buf), {
       gameVersion,
-      sha256: [sha256],
+      sha256,
       ...(opts.masteries ? { masteries: opts.masteries } : {}),
+      ...(localizer ? { localizer } : {}),
     }),
   );
+  if (localizer && localizer.fallbacks.size > 0) {
+    const tags = [...localizer.fallbacks].sort();
+    const shown = tags.slice(0, 10).join(', ') + (tags.length > 10 ? ', …' : '');
+    (opts.warn ?? ((m: string) => console.error(m)))(
+      `aviso: ${tags.length} etiqueta(s) sin texto en ES; se usa el de EN (${shown})`,
+    );
+  }
+  return json;
 }
 
 function dump(r: ArzRecord): void {
@@ -390,6 +548,7 @@ function main(): void {
   if (!gameDir) {
     console.error(
       'uso: extract-mastery-trees.mts --game-dir <ruta> [--out <archivo>] [--game-version <texto>]\n' +
+        '     [--no-localize]\n' +
         '     (o variable GRIMDAWN_DIR); --record <ruta-registro> para depurar',
     );
     process.exit(2);
@@ -401,7 +560,10 @@ function main(): void {
     return;
   }
   const gameVersion = opt('--game-version');
-  const json = extractFromGameDir(gameDir, gameVersion ? { gameVersion } : {});
+  const json = extractFromGameDir(gameDir, {
+    ...(gameVersion ? { gameVersion } : {}),
+    ...(args.includes('--no-localize') ? { localize: false } : {}),
+  });
   const out = opt('--out');
   if (out) writeFileSync(out, json);
   else process.stdout.write(json);
