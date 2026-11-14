@@ -74,8 +74,8 @@ teclado, con y sin JS.
 
 ## Fase 5 — Cierre
 
-- [ ] **T019** [P] Documentación: `docs/content/mastery-catalog.md` (origen, licencia, atribución, retirada) — aceptación: fuente, hash y `game_version` citados; aviso de no afiliación.
-- [ ] **T020** [P] `*.es.md` de la página y de la documentación nueva — aceptación: paridad de secciones verificada.
+- [x] **T019** [P] Documentación: `docs/content/mastery-catalog.md` (origen, licencia, atribución, retirada) — aceptación: fuente, hash y `game_version` citados; aviso de no afiliación. **Estado 2026-11-14:** `docs/content/mastery-catalog.md` (EN, 7 secciones: propósito y alcance, origen de los datos, qué se versiona, licencia y atribución, `ASSET_SOURCE`, retirada, regeneración). Cita `game_version` `steam-build-25813250`, los sha256 de origen de `database.arz` (`9e353225…0603`), `Text_EN.arc` y `Text_ES.arc`, la base «tolerancia de facto sin permiso escrito» (research §T029), CC BY-SA 4.0 de la wiki sin autorizar scraping (§T004), el aviso de no afiliación y la retirada enlazando `takedown-runbook.md`. Datos contrastados con `fixtures/content/**` y la constitución 1.10.0; `markdownlint-cli2` 0 issues y `prettier --check` OK. Pendiente de aceptación del principal.
+- [x] **T020** [P] `*.es.md` de la página y de la documentación nueva — aceptación: paridad de secciones verificada. **Estado 2026-11-14:** `docs/content/mastery-catalog.es.md`, traducción con las mismas 7 secciones en el mismo orden y enlace cruzado `**English** · [Español]` como `README.md`/`README.es.md`. Paridad: `grep -c '^# '` 1/1, `grep -c '^## '` 7/7, `grep -c '^### '` 0/0, bloques de código y filas de tabla iguales. Los demás documentos nuevos de spec003 fuera de `specs/` ya son bilingües (`NOTICE.md` de `fixtures/content/mastery-trees` y `assets`); no hay más. Pendiente de aceptación del principal.
 - [ ] **T021** `pnpm verify` completo, `speckit-analyze` y puerta spec002 + T-136 sobre la huella nueva — aceptación: salidas reales registradas en `quickstart.md`; sin huecos.
 
 ---
