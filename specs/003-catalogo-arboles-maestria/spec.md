@@ -31,10 +31,12 @@ ser fuente por defecto** (plan §6 / Constitución II): la licencia queda resuel
 autoriza scraping.
 
 > **Constancia de derechos**: el arte del juego (iconos, retratos, fondos) es de Crate
-> Entertainment y **no** está incluido en esta spec salvo lo que decida la enmienda 1.10.0
-> (§VII) sobre iconos de habilidad y retratos de maestría, que el usuario ha pedido
-> extender a los retratos en su último mensaje. Lo que sea dato factual del juego (nombre,
-> tier, fila, padre, puntos máximos) se usa como hecho con atribución; **no** se versionan
+> Entertainment. Esta spec solo admite lo que la enmienda 1.10.0 (§VII, aprobada por Paco,
+> 2026-11-13) permite: **retratos de maestría** derivados, versionados y servidos por el
+> sitio, y los iconos de habilidad (solo uso local por ahora). **No existe permiso escrito
+> de Crate**: la base es tolerancia de facto asumida como riesgo por el dueño, y la
+> atribución no sustituye al permiso. Lo que sea dato factual del juego (nombre, tier,
+> fila, padre, puntos máximos) se usa como hecho con atribución; **no** se versionan
 > `.dbr`, `.arc` ni traducciones del juego.
 
 ## 1. Resumen y valor
@@ -166,8 +168,13 @@ editorial.
   transcripción; sin permiso queda como tarjeta _link-only_ con metadatos factuales.
 - **FR-013** **NO** se copia ni se consume la base de datos de Grim Tools (sus términos lo
   prohíben); solo se enlaza.
-- **FR-014** **NO** se versionan `.dbr`, `.arc`, textos de localización ni iconos del juego
-  en el repositorio; solo el JSON derivado y los hashes de procedencia.
+- **FR-014** **NO** se versionan `.dbr`, `.arc`, textos de localización, iconos de habilidad
+  ni fondos del juego en el repositorio; solo el JSON derivado y los hashes de procedencia.
+  **Única excepción** (enmienda 1.10.0, Q3): **retratos de maestría derivados** (PNG/WebP)
+  versionados y servidos por el sitio, solo con entrada `approved` en el manifiesto
+  (`license_or_permission = tolerancia_de_facto_sin_permiso`), atribución visible a Crate,
+  aviso de no afiliación, fallback propio (`ASSET_SOURCE=own|game`) y retirada inmediata si
+  Crate lo pide.
 - **FR-015** La migración **DEBE** mantener compatibles las guías existentes: los
   `skill_nodes` conservan sus campos y ganan una referencia opcional al nodo del catálogo;
   ninguna guía publicada cambia de contenido al migrar.
@@ -178,7 +185,7 @@ editorial.
 
 ### Entidades clave
 
-- **MasteryTree**: maestría con `slug`, nombres EN/ES, retrato (según enmienda §VII),
+- **MasteryTree**: maestría con `slug`, nombres EN/ES, retrato opcional (activo del manifiesto, §VII 1.10.0; sin él, glifo propio),
   `game_version`, y su lista de nodos.
 - **SkillNode** (catálogo): `id` estable, `name_en`, `name_es`, `tier`, `grid {col,row}`,
   `max_points`, `parent_id`, `kind` (habilidad/modificador/transmuter/circular).
@@ -207,9 +214,8 @@ editorial.
 - El usuario tiene el juego instalado y puede ejecutar el script de extracción en local.
 - La API/PostgreSQL siguen siendo la fuente de verdad de producción; el catálogo se sirve
   por la misma vía que el resto del contenido (vistas públicas), no por un camino paralelo.
-- Lo que decida la enmienda §VII sobre iconos/retratos aplica a la presentación; **si la
-  enmienda no se aprueba**, el catálogo se publica con iconografía propia y sigue siendo
-  válido (el fallback es requisito).
+- La enmienda §VII 1.10.0 (aprobada, 2026-11-13) aplica a la presentación; el catálogo es
+  válido con iconografía propia (`ASSET_SOURCE=own`, por defecto) y el fallback es requisito.
 
 ## 6. Preguntas abiertas (bloquean solo lo que indican)
 
@@ -220,9 +226,10 @@ editorial.
   `Rostiger Bot`); detalle en `research.md` §T004.
 - **Q2** — **Resuelta** (decisión de Paco, 2026-11-13): solo el juego oficial; v1 = **6
   maestrías base** (`class01`–`class06`). Expansiones (AoM, FG, FoA) y mods fuera de v1.
-- **Q3** ¿Se permiten retratos de maestría como arte del juego (lo pediste en tu último
-  mensaje) bajo la enmienda §VII, o esperamos a aprobarla? Bloquea la presentación del
-  índice, no los datos.
+- **Q3** — **Resuelta** (decisión de Paco, 2026-11-13, opción B): los retratos de maestría
+  se **versionan y publican** por el sitio bajo la enmienda §VII 1.10.0 (T029), con
+  manifiesto, atribución, fallback y retirada. Desbloquea T015; riesgo asumido sin permiso
+  escrito de Crate. Análisis en `research.md` §T029.
 
 > Nota (2026-11-13): slug del catálogo en inglés en ambos idiomas (decisión de Paco, 2026-11-13):
 > `/maestrias/soldier` y `/es/maestrias/soldier`; el ejemplo anterior `soldado` queda corregido.
