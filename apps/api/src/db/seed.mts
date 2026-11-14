@@ -257,8 +257,9 @@ export async function seedData(
       'SELECT EXISTS (SELECT 1 FROM content_origin) AS bootstrapped',
     );
     if (marker.rows[0]?.['bootstrapped'] !== false) throw new SeedError('bootstrapped');
-    await writeContentRows(client, data);
+    // Catalog first: guide nodes reference it through `skill_node_id` (T031).
     await writeCatalogRows(client, data.catalog);
+    await writeContentRows(client, data);
     await client.query('COMMIT');
     return {
       builds: data.builds.length,

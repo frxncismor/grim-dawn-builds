@@ -232,6 +232,7 @@ export async function writeContentRows(
         id,
         build_id,
         skill_id: ref(skills, node.slug),
+        skill_node_id: node.skill_node_id ?? null,
         status: node.status,
         tag: node.tag,
         rationale: node.rationale,
