@@ -18,6 +18,7 @@ import {
   AssetSchema,
   BuildSchema,
   CatalogSkillNodeSchema,
+  BuildDocumentSchema,
   CONTENT_STATUSES,
   EVIDENCE_STATUSES,
   EVIDENCE_TYPES,
@@ -51,6 +52,12 @@ const adaptationsSql = readFileSync(
 // T-169 custom SQL: the public asset view stops publishing provenance (LOW-2).
 const assetViewSql = readFileSync(
   fileURLToPath(new URL('../drizzle/0008_public_asset_view.sql', import.meta.url)),
+  'utf8',
+);
+
+// T031 (spec 003) migration: build_skill_nodes.skill_node_id, same-mastery trigger and public view.
+const skillNodeIdSql = readFileSync(
+  fileURLToPath(new URL('../drizzle/0010_skill_node_id.sql', import.meta.url)),
   'utf8',
 );
 
@@ -838,5 +845,40 @@ describe('parity: mastery catalog (0009 SQL + Drizzle ↔ CatalogSkillNodeSchema
       /GRANT SELECT, INSERT, UPDATE, DELETE ON mastery_trees, catalog_skill_nodes TO importer;/,
     );
     expect(masteryCatalogSql).not.toMatch(/ TO editor/);
+  });
+});
+
+describe('parity: guide skill_node_id (0010 SQL + Drizzle ↔ SkillNodeSchema, T031)', () => {
+  const cols = getTableConfig(db.buildSkillNodes);
+
+  it('has a nullable text column, optional in the domain schema too', () => {
+    const column = cols.columns.find((c) => c.name === 'skill_node_id');
+    expect(column?.notNull).toBe(false);
+    expect(column?.getSQLType()).toBe('text');
+    const doc = contractDoc('skill-node-id-parity');
+    expect(BuildDocumentSchema.safeParse(doc).success).toBe(true);
+    doc.skill_nodes[0]!.skill_node_id = 'class06/savagestrike1';
+    expect(BuildDocumentSchema.safeParse(doc).success).toBe(true);
+  });
+
+  it('references the catalog node with ON DELETE RESTRICT (a stale catalog node fails closed)', () => {
+    const fk = cols.foreignKeys.find((f) => f.reference().columns[0]?.name === 'skill_node_id');
+    expect(getTableConfig(fk!.reference().foreignTable).name).toBe('catalog_skill_nodes');
+    expect(fk!.onDelete).toBe('restrict');
+    expect(skillNodeIdSql).toMatch(/ADD COLUMN "skill_node_id" text;/);
+    expect(skillNodeIdSql).toMatch(/ON DELETE restrict/);
+  });
+
+  it('checks the mastery in the database and serves the field in the public view', () => {
+    expect(skillNodeIdSql).toMatch(
+      /CREATE TRIGGER build_skill_nodes_catalog_mastery BEFORE INSERT OR UPDATE/,
+    );
+    expect(skillNodeIdSql).toMatch(/SECURITY DEFINER SET search_path = pg_catalog, public/);
+    expect(skillNodeIdSql).toMatch(/CREATE OR REPLACE VIEW v_public_build_documents/);
+    expect(skillNodeIdSql).toMatch(/jsonb_build_object\('skill_node_id', n\.skill_node_id\)/);
+  });
+
+  it('adds no new grants: importer/editor already hold DML on build_skill_nodes, api_ro sees views only', () => {
+    expect(skillNodeIdSql).not.toMatch(/GRANT /);
   });
 });

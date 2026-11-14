@@ -49,6 +49,40 @@ export function checkAssets(root: string): { count: number; issues: AssetIssue[]
   };
 }
 
+/**
+ * Gate for `ASSET_SOURCE=game` (release, CI): the manifest must pass `checkAssets` and every
+ * mastery of the catalog must have an `approved` portrait under `tolerancia_de_facto_sin_permiso`.
+ * Throws with the reasons; never reads the game.
+ */
+export function assertGameAssets(root: string): void {
+  const { issues } = checkAssets(root);
+  const problems = issues.map((i) => `${i.file ?? MANIFEST}: ${i.message}`);
+  const trees = join(root, 'fixtures/content/mastery-trees');
+  const slugs = existsSync(trees)
+    ? readdirSync(trees)
+        .filter((name) => name.endsWith('.json'))
+        .map((name) => name.slice(0, -'.json'.length))
+    : [];
+  if (slugs.length === 0) problems.push('sin maestrías en el catálogo');
+  let entries: { slug?: unknown; status?: unknown; license_or_permission?: unknown }[] = [];
+  try {
+    const manifest = JSON.parse(readFileSync(join(root, MANIFEST), 'utf8'));
+    if (Array.isArray(manifest.assets)) entries = manifest.assets;
+  } catch {
+    // checkAssets already reported the unreadable manifest.
+  }
+  for (const slug of slugs) {
+    const entry = entries.find((item) => item?.slug === `mastery-${slug}`);
+    if (
+      entry?.status !== 'approved' ||
+      entry.license_or_permission !== 'tolerancia_de_facto_sin_permiso'
+    )
+      problems.push(`mastery-${slug}: sin retrato aprobado (tolerancia_de_facto_sin_permiso)`);
+  }
+  if (problems.length > 0)
+    throw new Error(`ASSET_SOURCE=game no permitido: ${problems.join('; ')}`);
+}
+
 function main(root: string): number {
   const { count, issues } = checkAssets(root);
   if (issues.length === 0) {

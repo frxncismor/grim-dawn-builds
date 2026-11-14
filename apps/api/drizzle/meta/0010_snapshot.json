@@ -1,5 +1,5 @@
 {
-  "id": "92c1d400-ec67-47b3-8217-9bfe0b899ead",
+  "id": "70309885-4b86-4ee8-a55f-e737b0866b7d",
   "prevId": "7c1486a3-294a-437f-9d7c-b99d8ed8f608",
   "version": "7",
   "dialect": "postgresql",
@@ -1086,6 +1086,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "skill_node_id": {
+          "name": "skill_node_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "status": {
           "name": "status",
           "type": "node_status",
@@ -1176,6 +1182,19 @@
             "id"
           ],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "build_skill_nodes_skill_node_id_catalog_skill_nodes_id_fk": {
+          "name": "build_skill_nodes_skill_node_id_catalog_skill_nodes_id_fk",
+          "tableFrom": "build_skill_nodes",
+          "tableTo": "catalog_skill_nodes",
+          "columnsFrom": [
+            "skill_node_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
           "onUpdate": "no action"
         }
       },
@@ -3352,8 +3371,7 @@
       "values": [
         "pending",
         "approved",
-        "rejected",
-        "withdrawn"
+        "rejected"
       ]
     },
     "public.build_source_role": {

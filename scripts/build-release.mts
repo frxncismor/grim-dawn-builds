@@ -1,3 +1,4 @@
+import { assertGameAssets } from './check-assets.mts';
 import { createPublicBuildEnv } from './public-build-env.mts';
 import { assertPublicBuild, sensitiveValues } from './check-public-build.mts';
 import { spawn } from 'node:child_process';
@@ -46,6 +47,8 @@ export async function runRelease(
   const staging = await mkdtemp(join(dist, '.release-'));
   try {
     const childEnv = publicBuildEnv({ ...env, API_BASE_URL: base });
+    // Fail closed before building: game art needs a valid manifest and every portrait approved.
+    if (childEnv['ASSET_SOURCE'] === 'game') assertGameAssets(root);
     const webRoot = join(root, 'apps', 'web');
     const build =
       dependencies.build ??

@@ -665,3 +665,8 @@ src/assets/icons/mastery-<id>.svg` (iconos propios ya existentes).
 - **Formato**: PNG (decisión del área); ~18 KB por imagen, 6 imágenes; el presupuesto de JS inicial
   no cambia (las imágenes no son JS). Las dos primeras filas cargan sin `loading`, el resto `lazy`.
 - **API**: el enum `asset_status` de PostgreSQL sigue al dominio (`schema.spec` lo exige): migración `0010_asset_withdrawn.sql` (`ALTER TYPE … ADD VALUE 'withdrawn'`) generada con `drizzle-kit`.
+- **Release y CI con `game` (Paco, 2026-11-13)**: `createPublicBuildEnv(…, 'release')` fija `ASSET_SOURCE=game`
+  (solo admite `game` u `own` explícito, este último es la vía de retirada); `build:release` ejecuta
+  `assertGameAssets` (manifiesto válido con hashes y las seis maestrías `approved` con
+  `tolerancia_de_facto_sin_permiso`) antes de construir y no arranca el build si falla. Los jobs `verify` y
+  `dast` de CI exportan `ASSET_SOURCE=game`. Los iconos de habilidad siguen con fallback propio.

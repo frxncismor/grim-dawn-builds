@@ -295,6 +295,7 @@ describe('database schema: references and uniqueness', () => {
       expect.arrayContaining([
         { column: 'build_id', target: 'builds' },
         { column: 'skill_id', target: 'skills' },
+        { column: 'skill_node_id', target: 'catalog_skill_nodes' },
       ]),
     );
     expect(fkTargets('skills')).toEqual(

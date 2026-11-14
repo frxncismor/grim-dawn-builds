@@ -369,6 +369,11 @@ export const buildSkillNodes = pgTable('build_skill_nodes', {
   skill_id: uuid('skill_id')
     .notNull()
     .references(() => skills.id),
+  // Spec 003 T031. Optional link to the game-derived catalog. RESTRICT: `seedCatalog` must not
+  // silently drop a node a guide still points at. Same-mastery is enforced by a trigger (0010).
+  skill_node_id: text('skill_node_id').references(() => catalogSkillNodes.id, {
+    onDelete: 'restrict',
+  }),
   status: nodeStatusEnum('status').notNull(),
   tag: text('tag'),
   rationale: text('rationale').notNull(),

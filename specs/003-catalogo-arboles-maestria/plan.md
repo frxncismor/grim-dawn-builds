@@ -90,6 +90,9 @@ src/app/
 1. **Catálogo separado del documento de guía.** `MasteryTree` vive en su propia entidad y
    se sirve por vista pública; la guía referencia `skill_node_id`. Esto rompe la
    duplicación actual sin migración destructiva (FR-015).
+   En BD (T031) la referencia es `build_skill_nodes.skill_node_id` (nullable, FK al nodo del
+   catálogo con `ON DELETE RESTRICT` y comprobación de maestría) y `v_public_build_documents`
+   la sirve en `skill_nodes[]`; `db:seed` carga el catálogo antes que las guías.
 2. **Derivación reproducible.** El script lee solo lo necesario y emite JSON con claves
    ordenadas y `source {game_version, sha256[]}`; dos ejecuciones ⇒ mismo byte (SC-002).
    La extracción corre en la máquina del usuario; el repo guarda el resultado, no el input.
@@ -106,7 +109,7 @@ src/app/
    `proof_ref = specs/003-catalogo-arboles-maestria/research.md#t029`). Su atribución
    vive en `fixtures/content/assets/NOTICE.md` (fuera de `public/` para no servirse como activo
    sin manifiesto). La retirada pone `status: withdrawn` (`ASSET_STATUSES` ya lo incluye, T015;
-   la regla de `approved` no cambia). «Retrato» = botón de maestría del juego 197×41, en PNG.
+   la regla de `approved` no cambia). «Retrato» = botón de maestría del juego 197×41, en PNG. Release y CI usan `ASSET_SOURCE=game` (decisión de Paco, 2026-11-13); el build local, `own`.
 6. **Wiki**: no es fuente por defecto (Q1 resuelta: CC BY-SA 4.0, decisión de Paco,
    2026-11-13); si se usa, artefacto derivado CC BY-SA 4.0 con atribución y aviso de licencia en la propia página/JSON.
 7. **Nombres localizados desde los `.arc` de texto (T022).** El script lee también

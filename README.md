@@ -114,6 +114,14 @@ pnpm build:release
 pnpm check:release
 ```
 
+`build:release` and the CI jobs that build the measured artifact use
+`ASSET_SOURCE=game`: the six mastery buttons of Grim Dawn (© Crate Entertainment,
+no written permission; see `fixtures/content/assets/NOTICE.md`) are served on
+`/maestrias`. The release fails closed before building if the asset manifest does not
+approve all six. Skill icons always use the project's own icons. The default local
+build stays on `ASSET_SOURCE=own`. To withdraw the art, set the manifest entries to
+`withdrawn`, delete the PNGs and release with `ASSET_SOURCE=own`.
+
 ## Static artifact preview and editorial flow
 
 `pnpm build` writes the deployable static artifact to
@@ -141,11 +149,12 @@ command. [`.env.example`](.env.example) lists the public names and safe defaults
 as a reference; real secrets live in git-ignored files only, as documented in
 [secret management](docs/security/secrets.md).
 
-| Variable         | Accepted values                                               | Effect on the build and the preview                                                                                              |
-| ---------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `BASE_URL`       | absolute `http(s)` URL without credentials, query or fragment | Fixes the absolute canonical and Open Graph URLs, `sitemap.xml` and `robots.txt`. Defaults to `http://localhost:4200/`.          |
-| `INCLUDE_DRAFTS` | `true` or `false`                                             | Adds the local `borrador` guide when `true`. Public and release builds force it to `false`.                                      |
-| `CONTENT_SOURCE` | `fixture` or `api`                                            | Selects fixtures (development, tests, CI without Docker) or the public API (release). `api` never degrades silently to fixtures. |
+| Variable         | Accepted values                                               | Effect on the build and the preview                                                                                                      |
+| ---------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `BASE_URL`       | absolute `http(s)` URL without credentials, query or fragment | Fixes the absolute canonical and Open Graph URLs, `sitemap.xml` and `robots.txt`. Defaults to `http://localhost:4200/`.                  |
+| `INCLUDE_DRAFTS` | `true` or `false`                                             | Adds the local `borrador` guide when `true`. Public and release builds force it to `false`.                                              |
+| `CONTENT_SOURCE` | `fixture` or `api`                                            | Selects fixtures (development, tests, CI without Docker) or the public API (release). `api` never degrades silently to fixtures.         |
+| `ASSET_SOURCE`   | `own` or `game`                                               | Mastery art on `/maestrias`: own icons (default) or the game's buttons. Release and CI default to `game`; invalid values fail the build. |
 
 An invalid `BASE_URL` fails the sitemap and robots generation with a fixed
 message that does not echo credentials. `INCLUDE_DRAFTS` only accepts `true` or
