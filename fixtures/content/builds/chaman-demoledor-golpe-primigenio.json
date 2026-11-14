@@ -67,6 +67,7 @@
     {
       "slug": "golpe-primigenio",
       "mastery_slug": "chaman",
+      "skill_node_id": "class06/savagestrike1",
       "name_es": "Golpe Primigenio",
       "name_en": "Primal Strike",
       "bar_required": 5,
@@ -84,6 +85,7 @@
     {
       "slug": "golpe-atronador",
       "mastery_slug": "chaman",
+      "skill_node_id": "class06/savagestrike1b",
       "name_es": "Golpe Atronador",
       "name_en": "Thunderous Strike",
       "bar_required": 10,
@@ -101,6 +103,7 @@
     {
       "slug": "torrente",
       "mastery_slug": "chaman",
+      "skill_node_id": "class06/savagestrike2",
       "name_es": "Torrente",
       "name_en": "Torrent",
       "bar_required": 15,
@@ -118,6 +121,7 @@
     {
       "slug": "corriente-de-tormenta",
       "mastery_slug": "chaman",
+      "skill_node_id": "class06/savagestrike3",
       "name_es": "Corriente de Tormenta",
       "name_en": "Storm Surge",
       "bar_required": 25,
@@ -135,6 +139,7 @@
     {
       "slug": "viento-demoniaco",
       "mastery_slug": "chaman",
+      "skill_node_id": "class06/squall1",
       "name_es": "Viento Demoníaco",
       "name_en": "Wind Devil",
       "bar_required": 10,
@@ -152,6 +157,7 @@
     {
       "slug": "tempestad-furiosa",
       "mastery_slug": "chaman",
+      "skill_node_id": "class06/squall2",
       "name_es": "Tempestad Furiosa",
       "name_en": "Raging Tempest",
       "bar_required": 20,
@@ -169,6 +175,7 @@
     {
       "slug": "totem-wendigo",
       "mastery_slug": "chaman",
+      "skill_node_id": "class06/totem1",
       "name_es": "Tótem Wendigo",
       "name_en": "Wendigo Totem",
       "bar_required": 20,
@@ -186,6 +193,7 @@
     {
       "slug": "pacto-de-mogdrogen",
       "mastery_slug": "chaman",
+      "skill_node_id": "class06/natureblessing1",
       "name_es": "Pacto de Mogdrogen",
       "name_en": "Mogdrogen's Pact",
       "bar_required": 5,
@@ -203,6 +211,7 @@
     {
       "slug": "pacto-de-clamatormentas",
       "mastery_slug": "chaman",
+      "skill_node_id": "class06/stormcaller1",
       "name_es": "Pacto de Clamatormentas",
       "name_en": "Stormcaller's Pact",
       "bar_required": 50,
@@ -220,6 +229,7 @@
     {
       "slug": "tocado-por-las-llamas",
       "mastery_slug": "demoledor",
+      "skill_node_id": "class02/blastshield1",
       "name_es": "Tocado por las Llamas",
       "name_en": "Flame Touched",
       "bar_required": 5,
@@ -237,6 +247,7 @@
     {
       "slug": "llama-vengativa",
       "mastery_slug": "demoledor",
+      "skill_node_id": "class02/vindictiveflame1",
       "name_es": "Llama Vengativa",
       "name_en": "Vindictive Flame",
       "bar_required": 10,
@@ -254,6 +265,7 @@
     {
       "slug": "granada-cegadora",
       "mastery_slug": "demoledor",
+      "skill_node_id": "class02/flashbang1",
       "name_es": "Granada Cegadora",
       "name_en": "Flashbang",
       "bar_required": 1,
@@ -271,6 +283,7 @@
     {
       "slug": "escudo-explosivo",
       "mastery_slug": "demoledor",
+      "skill_node_id": "class02/passive1",
       "name_es": "Escudo Explosivo",
       "name_en": "Blast Shield",
       "bar_required": 32,
@@ -288,6 +301,7 @@
     {
       "slug": "mina-de-termita",
       "mastery_slug": "demoledor",
+      "skill_node_id": "class02/thermitemines1",
       "name_es": "Mina de Termita",
       "name_en": "Thermite Mine",
       "bar_required": 32,
