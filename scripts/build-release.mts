@@ -1,4 +1,4 @@
-import { assertGameAssets } from './check-assets.mts';
+import { assertGameAssets, assertNoGamePortraits } from './check-assets.mts';
 import { createPublicBuildEnv } from './public-build-env.mts';
 import { assertPublicBuild, sensitiveValues } from './check-public-build.mts';
 import { spawn } from 'node:child_process';
@@ -100,6 +100,8 @@ export async function runRelease(
       });
     // Before the public-build scan and the fingerprint, so the trees are verified and hashed.
     await emitTrees(staging, childEnv);
+    // S-001: an `own` artifact never carries the game's portraits, whatever the build copied.
+    assertNoGamePortraits(staging, childEnv['ASSET_SOURCE'] ?? '');
     await assertPublicBuild(staging, sensitiveValues(env));
     await finalizeStaticHome(staging);
     const budgets = await measureInitialRoutes(staging);

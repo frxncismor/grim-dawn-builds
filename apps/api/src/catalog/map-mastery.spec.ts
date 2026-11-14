@@ -30,7 +30,6 @@ const nodeRow = (over: Partial<SkillNodeRow> = {}): SkillNodeRow => ({
   max_points: 12,
   ultimate_points: 22,
   parent_id: null,
-  icon: 'ui/icon.tex',
   ...over,
 });
 
@@ -59,18 +58,23 @@ describe('mapMasteryTree', () => {
           ultimate_points: 22,
           grid: { col: 1, row: 4 },
           parent_id: null,
-          icon: 'ui/icon.tex',
         },
         expect.objectContaining({ id: 'class01/child', parent_id: 'class01/root' }),
       ],
     });
   });
 
-  it('omits ultimate_points and icon when the view returns NULL', () => {
-    const [n] = mapMasteryTree(treeRow, [nodeRow({ ultimate_points: null, icon: null })]).nodes;
+  it('omits ultimate_points when the view returns NULL', () => {
+    const [n] = mapMasteryTree(treeRow, [nodeRow({ ultimate_points: null })]).nodes;
     expect(n).toBeDefined();
     expect(Object.keys(n!)).not.toContain('ultimate_points');
-    expect(Object.keys(n!)).not.toContain('icon');
+  });
+
+  it('never exposes the game texture path, even if a row carries it (S-004)', () => {
+    const dirty = { ...nodeRow(), icon: 'ui/skills/secret.tex' };
+    const tree = mapMasteryTree(treeRow, [dirty]);
+    expect(Object.keys(tree.nodes[0]!)).not.toContain('icon');
+    expect(JSON.stringify(tree)).not.toMatch(/icon|secret.tex/);
   });
 
   it('never leaks internal columns', () => {

@@ -10,7 +10,7 @@ import pg from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { MasteryTreeSchema, type MasteryTree } from '@gd/domain';
+import { MasteryTreeSchema, PublicMasteryTreeSchema, type MasteryTree } from '@gd/domain';
 import {
   CatalogUnavailableError,
   PostgresMasteryRepository,
@@ -24,6 +24,16 @@ const enabled = process.env['RUN_DB_TESTS'] === '1' || process.env['CI'] === 'tr
 const suite = enabled ? describe : describe.skip;
 const DB = 'gd_mastery_repo_test';
 const fixtureDir = join(root, 'fixtures/content/mastery-trees');
+/** Public contract (S-004): the source fixture minus the game's texture path. */
+const publicOf = (tree: MasteryTree): unknown => ({
+  ...tree,
+  nodes: tree.nodes.map((node) => {
+    const copy: Record<string, unknown> = { ...node };
+    delete copy['icon'];
+    return copy;
+  }),
+});
+
 const fixtures: MasteryTree[] = readdirSync(fixtureDir)
   .filter((f) => f.endsWith('.json'))
   .sort()
@@ -161,11 +171,12 @@ suite('mastery catalog repository on real PostgreSQL (spec 003 T009)', () => {
   });
 
   it.each(fixtures.map((t) => [t.mastery.slug, t] as const))(
-    'returns %s deeply equal to its versioned fixture',
+    'returns %s equal to its versioned fixture without the game texture path',
     async (slug, expected) => {
       const tree = await repo.findTree(slug);
-      expect(tree).toEqual(expected);
-      expect(MasteryTreeSchema.safeParse(tree).success).toBe(true);
+      expect(tree).toEqual(publicOf(expected));
+      expect(PublicMasteryTreeSchema.safeParse(tree).success).toBe(true);
+      expect(JSON.stringify(tree)).not.toContain('icon');
     },
   );
 
@@ -188,7 +199,6 @@ suite('mastery catalog repository on real PostgreSQL (spec 003 T009)', () => {
       'ultimate_points',
       'grid',
       'parent_id',
-      'icon',
     ]);
     for (const n of tree.nodes) for (const k of Object.keys(n)) expect(allowed.has(k)).toBe(true);
     expect(JSON.stringify(tree)).not.toMatch(/created_at|updated_at|mastery_id|grid_col/);

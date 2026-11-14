@@ -18,6 +18,7 @@ import {
   AssetSchema,
   BuildSchema,
   CatalogSkillNodeSchema,
+  PublicSkillNodeSchema,
   BuildDocumentSchema,
   CONTENT_STATUSES,
   EVIDENCE_STATUSES,
@@ -72,6 +73,12 @@ const skillNodeIdUniqueSql = readFileSync(
 // T008 (spec 003) custom SQL: mastery catalog tables, CHECKs and public views.
 const masteryCatalogSql = readFileSync(
   fileURLToPath(new URL('../drizzle/0009_mastery_catalog.sql', import.meta.url)),
+  'utf8',
+);
+
+// T036 (S-004) custom SQL: the public node view is recreated without `icon`.
+const publicNodesSql = readFileSync(
+  fileURLToPath(new URL('../drizzle/0013_public_skill_nodes_without_icon.sql', import.meta.url)),
   'utf8',
 );
 
@@ -829,7 +836,10 @@ describe('parity: mastery catalog (0009 SQL + Drizzle ↔ CatalogSkillNodeSchema
 
   it('publishes read-only views without audit timestamps', () => {
     const trees = sqlOfView('v_public_mastery_trees');
-    const nodes = sqlOfView('v_public_skill_nodes');
+    const nodes = publicNodesSql.slice(
+      publicNodesSql.indexOf('CREATE VIEW v_public_skill_nodes'),
+      publicNodesSql.lastIndexOf('GRANT'),
+    );
     expect(trees).toContain('FROM mastery_trees');
     expect(nodes).toContain('FROM catalog_skill_nodes');
     for (const field of ['created_at', 'updated_at']) {
@@ -839,6 +849,28 @@ describe('parity: mastery catalog (0009 SQL + Drizzle ↔ CatalogSkillNodeSchema
     expect(masteryCatalogSql).toMatch(
       /GRANT SELECT ON v_public_mastery_trees, v_public_skill_nodes TO api_ro;/,
     );
+  });
+
+  it('keeps the game texture path out of the public node view (S-004)', () => {
+    const nodes = publicNodesSql.slice(
+      publicNodesSql.indexOf('CREATE VIEW v_public_skill_nodes'),
+      publicNodesSql.lastIndexOf('GRANT'),
+    );
+    expect(nodes).not.toMatch(/icon/);
+    const columns = nodes
+      .slice(nodes.indexOf('SELECT') + 'SELECT'.length, nodes.indexOf('FROM'))
+      .split(',')
+      .map((c) => c.trim());
+    // Every public column is a column of the base table and of the public contract; icon stays private.
+    expect(columns).toEqual(
+      expect.arrayContaining(['id', 'mastery_id', 'name_en', 'tier', 'grid_col', 'parent_id']),
+    );
+    expect(columns.every((c) => nodeCols.includes(c))).toBe(true);
+    expect(nodeCols).toContain('icon');
+    expect(PublicSkillNodeSchema.safeParse({ icon: 'x' }).success).toBe(false);
+    expect(publicNodesSql).toMatch(/DROP VIEW v_public_skill_nodes;/);
+    expect(publicNodesSql).toMatch(/GRANT SELECT ON v_public_skill_nodes TO api_ro;/);
+    expect(publicNodesSql).not.toMatch(/GRANT [^;]* ON catalog_skill_nodes/);
   });
 
   it('never grants the base tables to api_ro or any write on the views', () => {

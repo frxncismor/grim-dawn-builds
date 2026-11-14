@@ -53,8 +53,9 @@ async function seedGameAssets(root: string, over: Record<string, unknown> = {}):
   );
 }
 
-test('release defaults to ASSET_SOURCE=game; only an explicit own (withdrawal) overrides it', () => {
-  assert.equal(publicBuildEnv({ CONTENT_SOURCE: 'api' })['ASSET_SOURCE'], 'game');
+test('release requires an explicit ASSET_SOURCE (game or own) and never guesses one (S-003)', () => {
+  assert.throws(() => publicBuildEnv({ CONTENT_SOURCE: 'api' }), /invalid-environment/);
+  assert.throws(() => publicBuildEnv({ CONTENT_SOURCE: 'api', ASSET_SOURCE: '' }));
   assert.equal(
     publicBuildEnv({ CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game' })['ASSET_SOURCE'],
     'game',
@@ -72,7 +73,10 @@ test('release builds with ASSET_SOURCE=game and fails closed when the manifest d
       seen.push(env);
       throw new Error('stop after recording the build environment');
     };
-  const run = async (prepare: (root: string) => Promise<void>, env = {}) => {
+  const run = async (
+    prepare: (root: string) => Promise<void>,
+    env: Record<string, string> = { ASSET_SOURCE: 'game' },
+  ) => {
     const root = await mkdtemp(join(tmpdir(), 'gd-release-assets-'));
     const seen: Record<string, string>[] = [];
     try {
@@ -130,6 +134,7 @@ test('release builds with ASSET_SOURCE=game and fails closed when the manifest d
 test('release environment permits public configuration and excludes private and executable overrides', () => {
   const env = publicBuildEnv({
     CONTENT_SOURCE: 'api',
+    ASSET_SOURCE: 'own',
     BASE_URL: 'https://example.test',
     PRIVATE_CANARY: 'private',
     DB_PASSWORD_API_RO: 'private',
@@ -139,6 +144,7 @@ test('release environment permits public configuration and excludes private and 
   });
   assert.equal(env['CONTENT_SOURCE'], 'api');
   assert.equal(env['BUILD_MODE'], 'release');
+  assert.equal(env['ASSET_SOURCE'], 'own');
   assert.equal(env['NG_BUILD_MAX_WORKERS'], '2');
   assert.equal(env['PATH'], 'runtime-path');
   for (const key of ['PRIVATE_CANARY', 'DB_PASSWORD_API_RO', 'NODE_OPTIONS'])
@@ -189,13 +195,17 @@ test('release invalidates prior report, stages build, verifies twice and reports
     for (const env of [
       {},
       { CONTENT_SOURCE: 'fixture' },
-      { CONTENT_SOURCE: 'api', INCLUDE_DRAFTS: 'true' },
+      { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game', INCLUDE_DRAFTS: 'true' },
     ]) {
       await assert.rejects(release(root, env, { build, request }));
       await assert.rejects(access(report));
     }
     assert.equal(builds, 0);
-    const info = await release(root, { CONTENT_SOURCE: 'api' }, { build, request });
+    const info = await release(
+      root,
+      { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game' },
+      { build, request },
+    );
     assert.equal(info.source, 'api');
     assert.equal(probes, 2);
     assert.deepEqual(JSON.parse(await readFile(report, 'utf8')), info);
@@ -206,7 +216,7 @@ test('release invalidates prior report, stages build, verifies twice and reports
     await assert.rejects(
       release(
         root,
-        { CONTENT_SOURCE: 'api', CI_TOKEN: sentinel },
+        { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game', CI_TOKEN: sentinel },
         {
           request,
           build: async (output) => {
@@ -225,7 +235,7 @@ test('release invalidates prior report, stages build, verifies twice and reports
     await assert.rejects(
       release(
         root,
-        { CONTENT_SOURCE: 'api', CI_TOKEN: sentinel },
+        { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game', CI_TOKEN: sentinel },
         {
           request,
           build: async (output) => {
@@ -244,7 +254,7 @@ test('release invalidates prior report, stages build, verifies twice and reports
     await assert.rejects(
       release(
         root,
-        { CONTENT_SOURCE: 'api' },
+        { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game' },
         {
           build,
           request: async () =>
@@ -261,7 +271,7 @@ test('release invalidates prior report, stages build, verifies twice and reports
     await assert.rejects(
       release(
         root,
-        { CONTENT_SOURCE: 'api' },
+        { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game' },
         {
           build: async () => {
             throw new Error('private build details');
@@ -274,7 +284,7 @@ test('release invalidates prior report, stages build, verifies twice and reports
     await assert.rejects(
       release(
         root,
-        { CONTENT_SOURCE: 'api' },
+        { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game' },
         {
           build,
           request: async () => {
@@ -329,7 +339,7 @@ test('release emits the mastery trees into the staging before the fingerprint an
       await mkdir(join(output, 'browser/assets/mastery-trees'), { recursive: true });
       await writeFile(join(output, 'browser/assets/mastery-trees/index.json'), '{"a":"b"}');
     };
-    const env = { CONTENT_SOURCE: 'api' };
+    const env = { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'own' };
     const first = await runRelease(root, env, { build, request, emitTrees });
     assert.equal(seen.length, 1);
     assert.equal(seen[0].env['CONTENT_SOURCE'], 'api');
@@ -387,4 +397,73 @@ test('the default static-assets emitter exists and local build and release both 
     string
   >;
   assert.match(scripts['build'] ?? '', /emit-static-assets\.mts/);
+});
+
+test('S-001: with ASSET_SOURCE=own an artifact with game portraits is rejected; with game they ship', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gd-release-portraits-'));
+  try {
+    const folder = join(root, 'apps/api/drizzle/meta');
+    await mkdir(folder, { recursive: true });
+    await writeFile(
+      join(folder, '_journal.json'),
+      JSON.stringify({ entries: [{ idx: 0, tag: '0000_first' }] }),
+    );
+    await writeFile(join(folder, '../0000_first.sql'), 'SELECT 1;');
+    await seedGameAssets(root);
+    const migration = await expectedMigration(root);
+    const request: typeof fetch = async () =>
+      new Response('{"status":"ready"}', { headers: { 'X-Content-Migration': migration } });
+    const build = (locales: string[]) => async (output: string) => {
+      await mkdir(join(output, 'browser'), { recursive: true });
+      await writeFile(
+        join(output, 'browser/index.html'),
+        await readFile(new URL('./fixtures/static-home.html', import.meta.url), 'utf8'),
+      );
+      for (const name of ['main.js', 'home.js'])
+        await writeFile(join(output, 'browser', name), 'console.log(1);');
+      await writeFile(
+        join(output, 'stats.json'),
+        JSON.stringify({
+          outputs: {
+            'main.js': { imports: [] },
+            'home.js': { imports: [], entryPoint: 'src/app/features/home/home.page.ts' },
+          },
+        }),
+      );
+      for (const locale of locales) {
+        await mkdir(join(output, 'browser', locale, 'assets/portraits'), { recursive: true });
+        await writeFile(join(output, 'browser', locale, 'assets/portraits/soldier.png'), 'png');
+      }
+    };
+    const own = { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'own' };
+    for (const locales of [[''], ['es'], ['', 'es']])
+      await assert.rejects(
+        release(root, own, { build: build(locales), request }),
+        undefined,
+        locales.join(),
+      );
+    await assert.rejects(access(join(root, 'dist/grim-dawn-builds')));
+    await assert.rejects(access(join(root, 'dist/build-info.json')));
+    // The same artifact without portraits passes with own; game keeps the files it emitted.
+    await release(root, own, { build: build([]), request });
+    await assert.rejects(access(join(root, 'dist/grim-dawn-builds/browser/assets/portraits')));
+    const game = { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game' };
+    await release(root, game, {
+      build: build([]),
+      request,
+      emitTrees: async (output) => {
+        await mkdir(join(output, 'browser/assets/portraits'), { recursive: true });
+        await writeFile(join(output, 'browser/assets/portraits/soldier.png'), 'png');
+      },
+    });
+    assert.equal(
+      await readFile(
+        join(root, 'dist/grim-dawn-builds/browser/assets/portraits/soldier.png'),
+        'utf8',
+      ),
+      'png',
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

@@ -13,6 +13,8 @@ const PUBLIC_RUNTIME_EXPORTS = [
   'MasteryCombinationSchema',
   'BuildDocumentSchema',
   'PublicBuildSchema',
+  'PublicMasteryTreeSchema',
+  'PublicSkillNodeSchema',
   'TierListSchema',
   'PublicTierListSchema',
   'AssetSchema',

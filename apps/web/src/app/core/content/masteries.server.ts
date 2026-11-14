@@ -1,18 +1,35 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { MasteryTreeSchema, type MasteryTree } from '@gd/domain';
+import { PublicMasteryTreeSchema, type MasteryTree } from '@gd/domain';
 import type { MasteryCatalog, MasterySummary } from './masteries';
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const unavailable = () => new Error('Catálogo de maestrías no disponible o respuesta inválida.');
 
+/** Source fixtures keep `icon` for the extractor; the public view of them never does (S-004). */
+function withoutIcons(value: unknown): unknown {
+  if (!value || typeof value !== 'object' || !('nodes' in value) || !Array.isArray(value.nodes))
+    return value;
+  return {
+    ...value,
+    nodes: value.nodes.map((node: unknown) => {
+      if (!node || typeof node !== 'object') return node;
+      return Object.fromEntries(Object.entries(node).filter(([key]) => key !== 'icon'));
+    }),
+  };
+}
+
 function validSlug(slug: string): boolean {
   return SLUG.test(slug);
 }
 
-/** Validates a tree and its identity: the document must describe the slug that was asked for. */
-function parseTree(value: unknown, slug: string): MasteryTree {
-  const parsed = MasteryTreeSchema.safeParse(value);
+/**
+ * Validates a tree and its identity: the document must describe the slug that was asked for. The
+ * public tree has no `icon` (the game's texture path, S-004): the API must not send it (strict
+ * schema, fail closed) and the fixture source drops it before validating (`dropIcons`).
+ */
+function parseTree(value: unknown, slug: string, dropIcons = false): MasteryTree {
+  const parsed = PublicMasteryTreeSchema.safeParse(dropIcons ? withoutIcons(value) : value);
   if (!parsed.success || parsed.data.mastery.slug !== slug) throw unavailable();
   return parsed.data;
 }
@@ -61,7 +78,7 @@ export class FixtureMasteryCatalog implements MasteryCatalog {
       throw unavailable();
     }
     try {
-      return parseTree(JSON.parse(raw), slug);
+      return parseTree(JSON.parse(raw), slug, true);
     } catch {
       // JSON.parse and the schema may quote file contents: do not retain their cause.
       throw unavailable();

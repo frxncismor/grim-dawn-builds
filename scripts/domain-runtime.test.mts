@@ -121,6 +121,8 @@ describe('@gd/domain built output', () => {
       'PermissionRequestSchema',
       'PublicAuthorSchema',
       'PublicBuildSchema',
+      'PublicMasteryTreeSchema',
+      'PublicSkillNodeSchema',
       'PublicSourceSchema',
       'PublicTierListSchema',
       'SKILL_KINDS',

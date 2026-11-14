@@ -92,6 +92,13 @@
       "when": 1794678677846,
       "tag": "0012_skill_node_id_unique_and_revalidation",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794681186836,
+      "tag": "0013_public_skill_nodes_without_icon",
+      "breakpoints": true
     }
   ]
 }

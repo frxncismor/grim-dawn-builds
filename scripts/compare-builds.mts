@@ -418,7 +418,12 @@ async function buildArtifact(
   options: Options,
 ): Promise<void> {
   const env = createPublicBuildEnv(
-    { BASE_URL: options.baseUrl, API_BASE_URL: options.apiBaseUrl },
+    {
+      BASE_URL: options.baseUrl,
+      API_BASE_URL: options.apiBaseUrl,
+      // Release needs it explicit (S-003); `own` is also what the fixture build uses, so both compare.
+      ...(mode === 'release' ? { ASSET_SOURCE: 'own' } : {}),
+    },
     mode,
   );
   await runNgBuild(output, env);

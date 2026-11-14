@@ -31,7 +31,7 @@ test('public modes reject executable/private overrides and preserve only public 
   assert.ok(sensitiveValues(env).includes(privateValue));
   assert.ok(sensitiveValues(env).includes('/private/local/file'));
   for (const mode of ['fixture', 'release'] as const) {
-    const child = createPublicBuildEnv(env, mode);
+    const child = createPublicBuildEnv({ ...env, ASSET_SOURCE: 'own' }, mode);
     assert.equal(child['CONTENT_SOURCE'], mode === 'fixture' ? 'fixture' : 'api');
     assert.equal(child['BUILD_MODE'], mode === 'fixture' ? 'local' : 'release');
     assert.equal(child['INCLUDE_DRAFTS'], 'false');
@@ -43,6 +43,12 @@ test('public modes reject executable/private overrides and preserve only public 
       }
     assert.equal(child['NODE_OPTIONS'], undefined);
   }
+  // S-003: release does not guess `ASSET_SOURCE`; a missing or invalid one fails closed.
+  assert.throws(() => createPublicBuildEnv(env, 'release'), /invalid-environment/);
+  assert.throws(
+    () => createPublicBuildEnv({ ...env, ASSET_SOURCE: '' }, 'release'),
+    /invalid-environment/,
+  );
   assert.throws(() => createPublicBuildEnv({ BASE_URL: 'file:///private' }, 'fixture'));
 });
 

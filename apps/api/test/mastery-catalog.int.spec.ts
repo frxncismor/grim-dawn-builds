@@ -267,6 +267,8 @@ databaseSuite('mastery catalog migration (spec 003 T008)', () => {
       expect(nodes.output, field).toContain(field);
     }
     expect(nodes.output).not.toMatch(/created_at|updated_at/);
+    // S-004: the base table keeps `icon`, the public view does not.
+    expect(nodes.output).not.toContain('icon');
     const count = psql('SELECT count(*) FROM v_public_skill_nodes', { user: 'api_ro', tcp: true });
     expect(count.output.trim()).toBe('3');
   });

@@ -92,10 +92,18 @@ export type { AssetIssue } from './asset.js';
 export {
   CatalogSkillNodeSchema,
   MasteryTreeSchema,
+  PublicMasteryTreeSchema,
+  PublicSkillNodeSchema,
   SKILL_KINDS,
   TIER_BAR_REQUIRED,
   findDependencyCycle,
 } from './mastery-tree.js';
-export type { CatalogSkillNode, MasteryTree, SkillKind } from './mastery-tree.js';
+export type {
+  CatalogSkillNode,
+  MasteryTree,
+  PublicMasteryTree,
+  PublicSkillNode,
+  SkillKind,
+} from './mastery-tree.js';
 export { validateSkillNodeRefs } from './skill-node-refs.js';
 export type { SkillNodeRefIssue } from './skill-node-refs.js';
