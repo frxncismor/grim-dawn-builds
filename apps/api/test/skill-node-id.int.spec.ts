@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import pg from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { loadConfig } from '../src/config.js';
 import { createDatabaseContentRepository } from '../src/content/repository.js';
@@ -268,16 +268,90 @@ suite('guide skill_node_id from fixture to API on real PostgreSQL (spec 003 T031
         `UPDATE catalog_skill_nodes SET mastery_id = 'class02', parent_id = NULL
          WHERE id = (SELECT skill_node_id FROM build_skill_nodes WHERE skill_node_id LIKE 'class06/%' LIMIT 1)`,
       );
+      // Rejected at once by catalog_skill_nodes_id_ck, not by the deferred trigger (see the trigger case below).
       expect(['23514', '23503']).toContain(node.code);
     });
 
-    it('renaming both sides together in one transaction stays valid (order does not matter)', async () => {
+    // B-002 (T040): the acceptance of T035 is that a seed rewriting both sides in one transaction passes in
+    // any order. These cases COMMIT for real, assert the final state and restore the original values.
+    const TREE =
+      "UPDATE mastery_trees SET slug = 'shaman-x', name_en = 'Shaman X' WHERE id = 'class06'";
+    const MASTERY =
+      "UPDATE masteries SET slug = 'chaman-x', name_en = 'Shaman X' WHERE slug = 'chaman'";
+    const TREE_BACK =
+      "UPDATE mastery_trees SET slug = 'shaman', name_en = 'Shaman' WHERE id = 'class06'";
+    const MASTERY_BACK =
+      "UPDATE masteries SET slug = 'chaman', name_en = 'Shaman' WHERE slug = 'chaman-x'";
+    const commitOk = async (...statements: string[]) => {
       await importer!.query('BEGIN');
-      await importer!.query(
-        "UPDATE mastery_trees SET slug = 'shaman-x', name_en = 'Shaman X' WHERE id = 'class06'",
+      try {
+        for (const sql of statements) await importer!.query(sql);
+        await importer!.query('COMMIT');
+      } catch (error) {
+        await importer!.query('ROLLBACK').catch(() => undefined);
+        throw error;
+      }
+    };
+    const names = async () =>
+      (
+        await admin!.query<{ tree: string; mastery: string }>(
+          `SELECT t.slug || '/' || t.name_en AS tree, m.slug || '/' || m.name_en AS mastery
+           FROM mastery_trees t, masteries m WHERE t.id = 'class06' AND m.slug IN ('chaman', 'chaman-x')`,
+        )
+      ).rows[0]!;
+    let original: { tree: string; mastery: string };
+    beforeAll(async () => {
+      original = await names();
+    });
+    afterEach(async () => {
+      // Whatever a case left behind, put both sides back together so the next case starts valid.
+      await importer!.query('ROLLBACK').catch(() => undefined);
+      await commitOk(TREE_BACK, MASTERY_BACK).catch(() => undefined);
+      await commitOk(
+        "UPDATE masteries SET slug = 'chaman', name_en = 'Shaman' WHERE slug = 'chaman'",
+      ).catch(() => undefined);
+    });
+
+    it.each([
+      ['tree first, then mastery', [TREE, MASTERY]],
+      ['mastery first, then tree', [MASTERY, TREE]],
+    ] as const)('rewriting both sides in one transaction COMMITs (%s)', async (_label, order) => {
+      await commitOk(...order);
+      expect(await names()).toEqual({ tree: 'shaman-x/Shaman X', mastery: 'chaman-x/Shaman X' });
+      expect(withRef(await guideNodes())).toHaveLength(14);
+      await commitOk(MASTERY_BACK, TREE_BACK);
+      expect(await names()).toEqual(original);
+    });
+
+    it('rewriting both sides to values that no longer match fails at COMMIT with 23514 and changes nothing', async () => {
+      const error = await commitFails(
+        TREE,
+        "UPDATE masteries SET slug = 'chaman-y', name_en = 'Shaman Y' WHERE slug = 'chaman'",
       );
-      await importer!.query("UPDATE masteries SET name_en = 'Shaman X' WHERE slug = 'chaman'");
-      await importer!.query('ROLLBACK');
+      expect(error.code).toBe('23514');
+      expect(error.message).toMatch(/another mastery/);
+      expect(await names()).toEqual(original);
+    });
+
+    it('the trigger on catalog_skill_nodes.mastery_id exists and is deferred (its effect is unreachable by UPDATE)', async () => {
+      // Moving a catalog node to another mastery cannot reach the deferred check: catalog_skill_nodes_id_ck
+      // (id prefix = mastery_id) rejects it at once with 23514, and changing the id too is blocked by the
+      // non-deferrable FK from build_skill_nodes (23503) or by the immediate 0010 trigger on build_skill_nodes.
+      // So the behaviour cannot be exercised end to end; pin the trigger definition instead.
+      const trigger = await admin!.query<{
+        deferrable: boolean;
+        initially: boolean;
+        enabled: string;
+      }>(
+        `SELECT tgdeferrable AS deferrable, tginitdeferred AS initially, tgenabled AS enabled FROM pg_trigger
+         WHERE tgname = 'catalog_skill_nodes_revalidate_skill_node_mastery' AND NOT tgisinternal`,
+      );
+      expect(trigger.rows).toEqual([{ deferrable: true, initially: true, enabled: 'O' }]);
+      const immediate = await commitFails(
+        `UPDATE catalog_skill_nodes SET mastery_id = 'class02', parent_id = NULL
+         WHERE id = (SELECT skill_node_id FROM build_skill_nodes WHERE skill_node_id LIKE 'class06/%' LIMIT 1)`,
+      );
+      expect(immediate.message).toMatch(/catalog_skill_nodes_id_ck|foreign key|another mastery/);
     });
 
     it('an unchanged re-seed of catalog and guides still passes (rows rewritten with the same values)', async () => {
