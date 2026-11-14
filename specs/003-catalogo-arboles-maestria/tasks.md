@@ -58,7 +58,7 @@ teclado, con y sin JS.
 ## Fase 3 — US2 (P2): índice de maestrías
 
 - [x] **T014** [P] [US2] Página `/maestrias` desde el catálogo — `src/app/features/masteries/index*` — Aceptación: seis tarjetas (v1) con conteo real; una maestría sin datos aparece como «sin datos» sin romper (escenario 2 de US2). **Estado 2026-11-13: hecha.** `apps/web/src/app/features/masteries/index.page.*` en `/maestrias` y `/es/maestrias`, prerenderizada, con SEO (title, descripción, canonical, `hreflang` EN/ES/x-default). Lista de filas (no rejilla de tarjetas; criterio del skill `impeccable`) desde el catálogo con nombre en el idioma activo y recuento real; «Sin datos» sin enlace si una maestría tiene 0 nodos o no carga. `MasteryCatalog.listSummaries()` lee los fixtures (tolera un árbol roto) o `GET /api/v1/masteries` en release, sin fallback. Arregla además el `test:scripts` de T012 con una prueba guardia en `scripts/verify-local.test.mjs` que falla si alguna ruta listada no existe. Evidencia: rojo previo (módulos inexistentes, 4 fallos en `masteries.server.test.mts`) y verde 11/11; `pnpm test` (apps/web) 450 passed + 2 expected fail; `test:scripts` 624 pass; HTML 40270 B (EN) y 40523 B (ES); `impeccable detect` sin hallazgos; capturas 375/768/1280 EN/ES; `pnpm verify` exit 0, repetido por el orquestador tras integrar.
-- [ ] **T015** [US2] Presentación de retrato con fallback — según Q3 y enmienda §VII — Aceptación: con `ASSET_SOURCE=own` se usa iconografía propia; con `game` solo entradas `approved` con `license_or_permission = tolerancia_de_facto_sin_permiso`; build falla cerrado si falta (FR-014, §VII).
+- [ ] **T015** [US2] Presentación de retrato con fallback — según Q3 (resuelta) y enmienda §VII 1.10.0 (T029) — Aceptación: con `ASSET_SOURCE=own` se usa iconografía propia; con `game` solo entradas `approved` con `license_or_permission = tolerancia_de_facto_sin_permiso`; build falla cerrado si falta (FR-014, §VII).
 
 ---
 
@@ -86,6 +86,8 @@ teclado, con y sin JS.
 - [x] **T024** Cargar el catálogo de árboles en `db:seed` desde `fixtures/content/mastery-trees/*.json` (T007) — `apps/api/src/db/seed.mts` + pruebas — Aceptación: sin nada extraído del juego en el repo; idempotente (dos ejecuciones, mismo estado) y con el rol `importer`. Depende de T008 y T007. **Estado 2026-11-13: hecha.** `db:seed` lee `fixtures/content/mastery-trees/*.json` y los valida con `MasteryTreeSchema`; si alguno no valida, devuelve `invalid-content` y no escribe nada. Escribe con `importer` en la misma transacción que el contenido editorial y es idempotente: upsert por id, por maestría borra los nodos que ya no están en el fixture, y los padres van primero. `seedData` sigue bloqueado tras el bootstrap; `seedCatalog` (exportado, con su propia transacción y la misma comprobación de `importer`) permite refrescar el catálogo después, porque T008 lo excluyó del corte editorial (documentado en `docs/content/bootstrap.md`; aún sin CLI). Limitación conocida: intercambiar las celdas de dos nodos que se conservan viola el UNIQUE y hace rollback, es decir, falla cerrado. Evidencia: unitarias rojas primero (3 fallos) y luego verdes; integración con PostgreSQL real: 6 maestrías y 186 nodos vistos como `api_ro`, segunda ejecución con estado idéntico, un nodo menos → 185 y vuelta a 186, rollback total ante fallo; `RUN_DB_TESTS=1 vitest run` (api): 436 passed + 1 expected fail; `pnpm verify` OK.
 - [x] **T025** Regenerar los fixtures del catálogo con nombres reales EN/ES y añadir su aviso de atribución a Crate — `fixtures/content/mastery-trees/{soldier,demolition,occult,nightblade,arcanist,shaman}.json`, `fixtures/content/mastery-trees/NOTICE.md` — Aceptación: 0 nombres que empiecen por `tag`; 186 nodos y 6 maestrías (Soldier/Soldado … Shaman/Chamán); respecto a los fixtures previos solo cambian `mastery.name`, `nodes[].name` y `source.sha256` (ahora con los dos `.arc`), sin cambios de `id`, de esquema ni de otros textos del juego; `NOTICE.md` atribuye a Crate (versión `steam-build-25813250`, sha256 de origen, extracción local con `pnpm catalog:extract`, nombres usados como hecho, sin afiliación, sin arte ni descripciones, cómo regenerar) y ningún validador de `fixtures/content/**` falla por él; dos regeneraciones a carpetas distintas son idénticas; `pnpm catalog:nodes` y `pnpm verify` en verde. Aprobada por Paco, 2026-11-13; depende de T022 y T007; T024 (implementación) y UI consumen estos fixtures.
 
+- [x] **T029** Enmienda de constitución 1.10.0 (retratos de maestría versionados con atribución, fallback y retirada) y ajuste de FR-014/Q3 — `.specify/memory/constitution.md`, `specs/003-catalogo-arboles-maestria/{spec,plan,research,tasks}.md`, `fixtures/content/assets/NOTICE.md` — Aceptación: la constitución dice 1.10.0, cita `tolerancia_de_facto_sin_permiso` y «sin permiso escrito de Crate»; §VII admite iconos de habilidad (solo local) y retratos de maestría versionados con manifiesto, atribución, fallback `ASSET_SOURCE=own|game`, retirada inmediata y sin ingesta automatizada; FR-014 y Q3 ajustados; `pnpm lint:md`, `pnpm format:check` y `pnpm verify` en verde sin tocar código ni añadir imágenes. Aprobada por Paco, 2026-11-13; desbloquea T015. **Estado 2026-11-13: hecha.** Constitución 1.10.0 (§II y §VII, pie de versiones), FR-014 y Q3 en `spec.md`, `plan.md`, `research.md` §T029 (análisis de riesgos como `proof_ref`) y `fixtures/content/assets/NOTICE.md`; retratos previstos en `apps/web/public/assets/portraits/` con manifiesto en `fixtures/content/assets/manifest.json` (sin entradas ni imágenes todavía). Evidencia: `pnpm lint:md` 0 issues, `pnpm format:check` OK, `pnpm assets:check` OK (0 entradas), `pnpm content:validate` OK, `pnpm verify` (ver reporte). Salvedad para T015: `ASSET_STATUSES` no incluye `withdrawn`.
+
 ---
 
 ## Dependencias
@@ -93,8 +95,8 @@ teclado, con y sin JS.
 - Fase 0 → Fase 1 → (US1 ∥ US2) → US3 → Fase 5.
 - T022 amplía T006 (solo toca el script y su prueba); no bloquea T007–T009.
 - T004 (licencia) bloquea T015 y cualquier copia de la wiki; **no** bloquea el resto.
-- Q3 (retratos) bloquea T015; el catálogo funciona sin ella con iconografía propia.
-- Todo lo que toque arte del juego requiere la enmienda 1.10.0 aprobada.
+- Q3 (retratos) resuelta (Paco, 2026-11-13): T029 desbloquea T015; el catálogo funciona con iconografía propia por defecto.
+- Todo lo que toque arte del juego requiere la enmienda 1.10.0 (aprobada) y su entrada en el manifiesto.
 
 ## Paralelización segura
 
@@ -103,6 +105,6 @@ teclado, con y sin JS.
 
 ## Notas
 
-- Ninguna tarea versiona `.dbr`, `.arc`, localización ni iconos del juego (FR-014).
+- Ninguna tarea versiona `.dbr`, `.arc`, localización, iconos de habilidad ni fondos del juego; solo los retratos de maestría derivados que FR-014 admite con manifiesto (enmienda 1.10.0).
 - Ninguna tarea consume Grim Tools (FR-013).
 - La extracción corre en la máquina del usuario; el repo recibe solo JSON y hashes.
