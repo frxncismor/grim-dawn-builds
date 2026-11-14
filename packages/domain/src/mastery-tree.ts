@@ -13,7 +13,7 @@ export const SKILL_KINDS = ['active', 'passive', 'modifier', 'transmuter'] as co
 export type SkillKind = (typeof SKILL_KINDS)[number];
 
 const masteryId = z.string().regex(/^class\d{2}$/, 'id de maestría classNN');
-const nodeId = z
+export const skillNodeIdSchema = z
   .string()
   .regex(
     /^class\d{2}\/[a-z0-9]+(?:[_-][a-z0-9]+)*$/,
@@ -50,7 +50,7 @@ export function findDependencyCycle(
 
 export const CatalogSkillNodeSchema = z
   .object({
-    id: nodeId,
+    id: skillNodeIdSchema,
     name: localizedName,
     kind: z.enum(SKILL_KINDS),
     /** Circular UI marker (`isCircular`); false when absent in the game data. */
@@ -69,7 +69,7 @@ export const CatalogSkillNodeSchema = z
         row: z.number().int().nonnegative(),
       })
       .strict(),
-    parent_id: nodeId.nullable(),
+    parent_id: skillNodeIdSchema.nullable(),
     /** Texture name only; art is never versioned (FR-014). */
     icon: text.optional(),
   })

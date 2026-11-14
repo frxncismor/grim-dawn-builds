@@ -144,6 +144,7 @@ describe('@gd/domain built output', () => {
       'publicFilter',
       'requiredEvidenceType',
       'toLinkOnlyMetadata',
+      'validateSkillNodeRefs',
     ]);
     assert.deepEqual(loaded.vocabulary, ['CONTENT_STATUSES', 'TIERS']);
     assert.ok(loaded.testing.length > 0);

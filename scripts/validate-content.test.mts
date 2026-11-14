@@ -2,8 +2,23 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { readFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { MasteryTreeSchema } from '@gd/domain';
 import { validateBuildFiles } from './validate-content.mts';
+
+const fixtureJson = (path: string): any =>
+  JSON.parse(readFileSync(new URL('../fixtures/content/' + path, import.meta.url), 'utf8'));
+const guide = fixtureJson('builds/chaman-demoledor-golpe-primigenio.json');
+const catalog = ['shaman', 'demolition'].map((s) =>
+  MasteryTreeSchema.parse(fixtureJson('mastery-trees/' + s + '.json')),
+);
+const withRef = (skill_node_id: string) => ({
+  ...guide,
+  skill_nodes: guide.skill_nodes.map((n: any, i: number) =>
+    i === 0 ? { ...n, skill_node_id } : n,
+  ),
+});
 
 const validDraft: Record<string, unknown> = JSON.parse(
   readFileSync(
@@ -35,6 +50,37 @@ describe('validateBuildFiles', () => {
   });
 });
 
+describe('validateBuildFiles con catálogo (T016)', () => {
+  const run = (data: unknown) => validateBuildFiles([{ file: 'builds/g.json', data }], catalog);
+
+  it('la guía actual sigue válida sin skill_node_id', () => {
+    assert.deepEqual(run(guide), []);
+  });
+
+  it('acepta una referencia válida', () => {
+    assert.deepEqual(run(withRef(catalog[0]!.nodes[0]!.id)), []);
+  });
+
+  it('un id inexistente falla con archivo, nodo y motivo', () => {
+    const issues = run(withRef('class06/no-existe'));
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0]!.file, 'builds/g.json');
+    assert.equal(issues[0]!.path, 'skill_nodes.0.skill_node_id');
+    assert.match(issues[0]!.message, /golpe-primigenio.*no existe en el catálogo/);
+  });
+
+  it('un id de otra maestría falla', () => {
+    const issues = run(withRef(catalog[1]!.nodes[0]!.id));
+    assert.equal(issues.length, 1);
+    assert.match(issues[0]!.message, /otra maestría/);
+  });
+
+  it('un id con formato inválido falla por esquema', () => {
+    const issues = run(withRef('golpe-primigenio'));
+    assert.ok(issues.some((i) => i.path === 'skill_nodes.0.skill_node_id'));
+  });
+});
+
 describe('content:validate CLI', () => {
   const run = (dir: string) =>
     spawnSync(
@@ -57,5 +103,17 @@ describe('content:validate CLI', () => {
   it('exits 1 when the builds folder is missing', () => {
     const result = run(join('scripts', 'fixtures', 'no-such-dir'));
     assert.equal(result.status, 1);
+  });
+
+  it('exits 1 naming the node when skill_node_id is not in the catalog', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'content-ref-'));
+    mkdirSync(join(dir, 'builds'));
+    cpSync(join('fixtures', 'content', 'mastery-trees'), join(dir, 'mastery-trees'), {
+      recursive: true,
+    });
+    writeFileSync(join(dir, 'builds', 'g.json'), JSON.stringify(withRef('class06/no-existe')));
+    const result = run(dir);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /golpe-primigenio.*no existe en el catálogo/);
   });
 });

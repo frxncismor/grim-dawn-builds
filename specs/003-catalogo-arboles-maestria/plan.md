@@ -30,21 +30,22 @@ con fallback propio conmutable.
 
 _GATE: previo a la Fase 0 y re-comprobado tras el diseño._
 
-| Principio                            | Relevancia             | Cómo lo cumple                                                                                                                   |
-| ------------------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| I. Contenido verificable y atribuido | Alta                   | Datos del juego con `game_version` y hash de fuente; verificación editorial del catálogo                                         |
-| II. Sin scraping                     | Alta                   | La extracción es **local desde la copia legal**; sin descargas de web; la wiki solo con CC BY-SA 4.0 (Q1 resuelta) y share-alike |
-| III. SEO primero                     | Alta                   | Prerender EN/ES, canonical, `hreflang`, sitemap (FR-010)                                                                         |
-| IV. Rendimiento y SVG                | Alta                   | SVG propio, sin raster, presupuesto intacto (FR-017)                                                                             |
-| V. Accesibilidad AA                  | Alta                   | Un elemento enfocable por nodo, nombres/estado por texto, contraste, prefer-reduced-motion (FR-009)                              |
-| VI. Datos tipados y única fuente     | Alta                   | Esquema Zod en `packages/domain`, PostgreSQL como fuente de verdad, sin duplicar reglas                                          |
-| VII. Legalidad y activos             | **Bloqueante parcial** | Iconos/retratos solo por enmienda 1.10.0 + manifest `approved` + fallback; datos del juego como hechos; **nada** de Grim Tools   |
-| XI. Backend seguro                   | Media                  | Vistas públicas de solo lectura; `api_ro` sin tablas base                                                                        |
-| X. Idioma                            | Alta                   | EN/ES de nombres desde los `.dbr`; sin invención de traducciones                                                                 |
+| Principio                            | Relevancia | Cómo lo cumple                                                                                                                                     |
+| ------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| I. Contenido verificable y atribuido | Alta       | Datos del juego con `game_version` y hash de fuente; verificación editorial del catálogo                                                           |
+| II. Sin scraping                     | Alta       | La extracción es **local desde la copia legal**; sin descargas de web; la wiki solo con CC BY-SA 4.0 (Q1 resuelta) y share-alike                   |
+| III. SEO primero                     | Alta       | Prerender EN/ES, canonical, `hreflang`, sitemap (FR-010)                                                                                           |
+| IV. Rendimiento y SVG                | Alta       | SVG propio, sin raster, presupuesto intacto (FR-017)                                                                                               |
+| V. Accesibilidad AA                  | Alta       | Un elemento enfocable por nodo, nombres/estado por texto, contraste, prefer-reduced-motion (FR-009)                                                |
+| VI. Datos tipados y única fuente     | Alta       | Esquema Zod en `packages/domain`, PostgreSQL como fuente de verdad, sin duplicar reglas                                                            |
+| VII. Legalidad y activos             | Alta       | Retratos (y iconos, solo local) por enmienda 1.10.0 aprobada + manifest `approved` + fallback; datos del juego como hechos; **nada** de Grim Tools |
+| XI. Backend seguro                   | Media      | Vistas públicas de solo lectura; `api_ro` sin tablas base                                                                                          |
+| X. Idioma                            | Alta       | EN/ES de nombres desde los `.dbr`; sin invención de traducciones                                                                                   |
 
-**Desviación declarada**: la enmienda 1.10.0 (arte del juego bajo tolerancia de facto, sin
-permiso escrito) **no está aprobada**; hasta que lo esté, US1/US2 se entregan con
-iconografía propia y US3 no cambia. El plan no depende de ella para funcionar.
+**Enmienda 1.10.0 aprobada** (Paco, 2026-11-13, T029): arte del juego bajo tolerancia de
+facto, sin permiso escrito de Crate; retratos de maestría versionados y servidos, iconos de
+habilidad solo en local. El plan no depende de ella para funcionar: US1/US2 se entregan con
+iconografía propia por defecto (`ASSET_SOURCE=own`).
 
 ## Project Structure
 
@@ -97,9 +98,15 @@ src/app/
    1/5/10/15/20/25/32/40/50 y contrastado con la wiki **si** se usa (CC BY-SA 4.0, Q1 resuelta).
 4. **Un solo componente de árbol** con dos modos (`catálogo` completo / `asignación` de
    guía), accesible por teclado y con estado por texto, no solo color.
-5. **Iconos**: `ASSET_SOURCE=own|game` (enmienda §VII), default `own`; con `game` exige
-   entradas `approved` cuyo `license_or_permission = tolerancia_de_facto_sin_permiso` y
-   `fallback_svg` presente; build falla cerrado si falta.
+5. **Iconos y retratos**: `ASSET_SOURCE=own|game` (enmienda §VII 1.10.0), default `own`; con
+   `game` exige entradas `approved` cuyo `license_or_permission = tolerancia_de_facto_sin_permiso`
+   y `fallback_svg` presente; build falla cerrado si falta. Los retratos viven en
+   `apps/web/public/assets/portraits/<slug>.webp` (la carpeta que `assets:check` ya vigila) y
+   se declaran en `fixtures/content/assets/manifest.json` (`file_path = public/assets/portraits/…`,
+   `proof_ref = specs/003-catalogo-arboles-maestria/research.md#t029`). Su atribución
+   vive en `fixtures/content/assets/NOTICE.md` (fuera de `public/` para no servirse como activo
+   sin manifiesto). La retirada pone `status: withdrawn` (hoy `ASSET_STATUSES` solo tiene
+   `pending|approved|rejected`: T015 debe añadirlo o mapearlo, sin cambiar la regla de `approved`).
 6. **Wiki**: no es fuente por defecto (Q1 resuelta: CC BY-SA 4.0, decisión de Paco,
    2026-11-13); si se usa, artefacto derivado CC BY-SA 4.0 con atribución y aviso de licencia en la propia página/JSON.
 7. **Nombres localizados desde los `.arc` de texto (T022).** El script lee también
@@ -116,7 +123,7 @@ src/app/
 | Parser `.dbr`/`.arz` no estable en 1.3.1.0    | Media | Alto    | Fase 0: prueba de extracción real antes de comprometer el formato; fallback a herramienta oficial de Crate en local |
 | Mapeo `tier → bar_required` ambiguo           | Media | Medio   | Contrastar con wiki (CC BY-SA 4.0) y con la UI del juego; registrar tabla en `research.md`                          |
 | Presupuesto de JS por el árbol completo       | Media | Alto    | Render estático + islas; medir con `check:initial-js` antes de integrar la ruta                                     |
-| Derechos de arte                              | Alta  | Alto    | Fallback propio obligatorio; enmienda aparte; nada de Grim Tools                                                    |
+| Derechos de arte                              | Alta  | Alto    | Enmienda 1.10.0 (sin permiso escrito de Crate), retirada inmediata, fallback propio obligatorio; nada de Grim Tools |
 | Divergencia entre catálogo y guías existentes | Media | Medio   | Validador cruzado y prueba de migración con la guía actual                                                          |
 | Licencia de la wiki (3.0 vs 4.0)              | Baja  | Bajo    | Q1 resuelta: CC BY-SA 4.0 (Paco, 2026-11-13)                                                                        |
 
@@ -124,7 +131,7 @@ src/app/
 
 - Planner interactivo de builds (guardar/compartir builds) — spec futura.
 - Devociones y constelaciones como catálogo canónico (solo builds existentes).
-- Iconos/retratos sin la enmienda 1.10.0 aprobada.
+- Arte del juego fuera de la enmienda 1.10.0 (fondos, marcos, otro arte, datos internos) y publicar iconos de habilidad (solo local).
 - Cualquier ingestión automatizada del foro, de Grim Tools o de la wiki.
 - Nuevos hosting/publicación (sigue MVP local).
 - Maestrías de expansiones (AoM, FG, FoA) y mods: después de v1 (decisión de Paco, 2026-11-13).

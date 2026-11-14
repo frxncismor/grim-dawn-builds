@@ -526,3 +526,40 @@ Text_ES.arc  e6f785d155d0791b3100092762111f59a06faa9e1a86d91898ec98317e395752
   Carga solo `tags_skills.txt` de cada idioma (único archivo con estos tags).
 - ES ausente ⇒ valor EN y aviso por stderr con el conteo; EN ausente ⇒ error con el tag.
 - `--no-localize` deja `name.en = name.es = tag` (comportamiento de T006) y no toca los `.arc`.
+
+## T029 — Enmienda 1.10.0: arte del juego bajo tolerancia de facto
+
+Decisión de Paco (2026-11-13, opción B): los **retratos de maestría** se versionan y publican
+por el sitio; los **iconos de habilidad** se admiten solo en uso local por ahora. Es el
+`proof_ref` de las entradas del manifiesto (`specs/003-catalogo-arboles-maestria/research.md#t029`).
+
+> **No existe permiso escrito de Crate Entertainment.** La base del uso es tolerancia de facto
+> de la comunidad, asumida como riesgo por el dueño del repositorio. La atribución no
+> sustituye al permiso.
+
+### Análisis de riesgos
+
+| Riesgo                                       | Probabilidad                         | Impacto                         | Mitigación decidida                                                                                     |
+| -------------------------------------------- | ------------------------------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Crate pide retirar el arte                   | Media-baja (tolerancia con fansites) | Medio: los retratos se publican | Retirada inmediata (`status: withdrawn`, registro en `handoff.md`) y fallback propio en el mismo cambio |
+| Publicar aumenta la exposición               | Alta                                 | Medio                           | Solo seis retratos derivados; atribución y no afiliación visibles; publicar iconos exige revisar esto   |
+| Confundir tolerancia con licencia            | Alta                                 | Alto (deuda ética/legal)        | El texto lo dice literalmente y el manifiesto registra `tolerancia_de_facto_sin_permiso`                |
+| Extender la excepción a más arte por inercia | Media                                | Alto                            | Bloques explícitos: fondos, marcos, otro arte, datos internos y Grim Tools solo por enmienda nueva      |
+| Contaminar contenido con datos de Grim Tools | Media                                | Alto                            | §VII lo prohíbe; el esquema de fuentes no cambia; incorporación manual y editorial                      |
+
+### Traza técnica (lo que ya existe)
+
+- `AssetSchema` (`packages/domain/src/schema.ts`) exige para `status: approved`: `file_path`,
+  `origin_url`, `rights_holder`, `license_or_permission` y `proof_ref`; `fallback_svg` es
+  obligatorio en toda entrada. La enmienda encaja sin cambiar el esquema.
+- Salvedad: `ASSET_STATUSES` es `pending | approved | rejected`; la retirada con
+  `status: withdrawn` exige añadir el valor (o mapearlo) al implementar T015.
+- El manifiesto es `fixtures/content/assets/manifest.json` (vacío hoy) y `pnpm assets:check`
+  rechaza archivos bajo `apps/web/public/assets/**` sin entrada `approved`.
+- Ubicación prevista de los retratos: `apps/web/public/assets/portraits/<slug>.webp`.
+- El interruptor `ASSET_SOURCE=own|game` y la iconografía propia son trabajo de T015.
+
+### Decisión de dueño asumida
+
+Riesgo asumido por el dueño del repositorio, sin permiso escrito de Crate. No es ausencia de
+riesgo. Publicar iconos de habilidad exige revisar este análisis y tener terminado el fallback.
