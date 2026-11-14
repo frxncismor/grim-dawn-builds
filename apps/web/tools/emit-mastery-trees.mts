@@ -1,7 +1,7 @@
 import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { MasteryTreeSchema } from '@gd/domain';
+import { PublicMasteryTreeSchema } from '@gd/domain';
 import type { MasteryCatalog } from '../src/app/core/content/masteries.ts';
 import { createMasteryCatalog } from '../src/app/core/content/masteries.server.ts';
 
@@ -28,7 +28,8 @@ export async function emitMasteryTrees(catalog: MasteryCatalog, output: string):
     for (const slug of slugs) {
       const tree = await catalog.get(slug);
       if (!tree) fail();
-      const valid = MasteryTreeSchema.parse(tree);
+      // Strict public schema: an `icon` (game texture path, S-004) would fail the emission.
+      const valid = PublicMasteryTreeSchema.parse(tree);
       if (valid.mastery.slug !== slug || index[valid.mastery.id] !== undefined) fail();
       index[valid.mastery.id] = slug;
       files.set(`${slug}.json`, JSON.stringify(valid));

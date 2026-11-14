@@ -3,13 +3,15 @@ import { pathToFileURL } from 'node:url';
 import { createMasteryCatalog } from '../src/app/core/content/masteries.server.ts';
 import { emitDeferredStyles } from './emit-deferred-styles.mts';
 import { emitMasteryTrees, MASTERY_TREES_DIR } from './emit-mastery-trees.mts';
+import { emitPortraits } from './emit-portraits.mts';
 
 const WEB_ROOT = resolve(import.meta.dirname, '..');
 const REPO_ROOT = resolve(WEB_ROOT, '..', '..');
 
 /**
- * Own static files generated after the Angular build (T017, T033): the canonical mastery trees and
- * the stylesheet of the deferred components. One entry so `build` and `runRelease` run both, with
+ * Own static files generated after the Angular build (T017, T033, T036): the canonical mastery trees,
+ * the stylesheet of the deferred components and, only with `ASSET_SOURCE=game`, the game's mastery
+ * buttons (S-001: `angular.json` does not copy them; the default source is `own`, §VII). One entry so `build` and `runRelease` run both, with
  * the same environment (release: API source, no fallback) and the same fail-closed behaviour.
  */
 async function main(argv: string[]): Promise<number> {
@@ -19,12 +21,17 @@ async function main(argv: string[]): Promise<number> {
     const catalog = createMasteryCatalog(join(REPO_ROOT, 'fixtures', 'content'), process.env);
     const trees = await emitMasteryTrees(catalog, output);
     const styles = await emitDeferredStyles(WEB_ROOT, output);
+    const source = process.env['ASSET_SOURCE'] ?? 'own';
+    if (source !== 'own' && source !== 'game') throw new Error();
+    const portraits = await emitPortraits(WEB_ROOT, output, source);
     console.log(
-      `emit-static-assets OK (${trees.length} ficheros en ${MASTERY_TREES_DIR} y ${styles}).`,
+      `emit-static-assets OK (${trees.length} ficheros en ${MASTERY_TREES_DIR}, ${styles} y ${portraits.length} retratos con ASSET_SOURCE=${source}).`,
     );
     return 0;
   } catch {
-    console.error('emit-static-assets FALLÓ: árboles de maestría o hoja de estilos diferidos.');
+    console.error(
+      'emit-static-assets FALLÓ: árboles de maestría, hoja de estilos diferidos o retratos.',
+    );
     return 1;
   }
 }

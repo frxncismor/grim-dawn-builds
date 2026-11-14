@@ -83,6 +83,26 @@ export function assertGameAssets(root: string): void {
     throw new Error(`ASSET_SOURCE=game no permitido: ${problems.join('; ')}`);
 }
 
+/**
+ * Gate of the artifact (S-001): with `ASSET_SOURCE=own` no file of `assets/portraits/` may be in the
+ * staging, in the default locale or in any other (`browser/assets/portraits`, `browser/es/…`).
+ * The PNGs are the game's art; `own` is the withdrawal path. With `game` there is nothing to check
+ * here: `assertGameAssets` already vouches for the manifest and the copy is the emitter's job.
+ */
+export function assertNoGamePortraits(artifact: string, source: string): void {
+  if (source !== 'own') return;
+  const found = existsSync(artifact)
+    ? readdirSync(artifact, { recursive: true, withFileTypes: true })
+        .filter((entry) => entry.isFile())
+        .map((entry) => join(entry.parentPath, entry.name).split('\\').join('/'))
+        .filter((path) => /\/assets\/portraits\//.test(path))
+    : [];
+  if (found.length > 0)
+    throw new Error(
+      `ASSET_SOURCE=own: el artefacto no puede llevar retratos del juego (${found.length} ficheros).`,
+    );
+}
+
 function main(root: string): number {
   const { count, issues } = checkAssets(root);
   if (issues.length === 0) {

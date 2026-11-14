@@ -356,6 +356,28 @@ export function validateCiWorkflow(source: string): string[] {
 }
 
 describe('PR verification workflow (T-064)', () => {
+  it('every job that builds the web artifact fixes ASSET_SOURCE explicitly (T036, S-001/S-003)', () => {
+    const text = readFileSync(WORKFLOW_URL, 'utf8').replace(/\r\n/g, '\n');
+    const lines = text.split('\n');
+    const jobs = lines
+      .map((line, index) => ({ line, index }))
+      .filter(({ line }) => /^ {2}[a-z][\w-]*:\s*$/.test(line));
+    let checked = 0;
+    jobs.forEach(({ line, index }, k) => {
+      const end = jobs[k + 1]?.index ?? lines.length;
+      const block = lines.slice(index, end);
+      if (!block.some((entry) => /^\s+run: pnpm run build\s*$/.test(entry))) return;
+      checked += 1;
+      const envLines = block.filter((entry) => /^ {6}ASSET_SOURCE:/.test(entry));
+      assert.deepEqual(
+        envLines.map((entry) => entry.trim()),
+        ['ASSET_SOURCE: game'],
+        `${line.trim()} must set ASSET_SOURCE: game at job level`,
+      );
+    });
+    assert.ok(checked >= 2, 'the verify and dast jobs build the artifact');
+  });
+
   // Normalise CRLF so the line-based mutations match on Windows checkouts too.
   const real = readFileSync(WORKFLOW_URL, 'utf8').replace(/\r\n/g, '\n');
 

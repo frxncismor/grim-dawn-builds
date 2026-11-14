@@ -126,7 +126,12 @@ build instead of degrading silently.
 build:release` and the CI jobs that build the measured artifact (`verify` and
   `dast` in `.github/workflows/ci.yml`). The release also checks the manifest
   before building (`assertGameAssets`) and refuses to build unless all six
-  masteries have an `approved` portrait. Local builds stay on `own`.
+  masteries have an `approved` portrait. Local builds stay on `own`. Release does
+  not default the switch: an unset `ASSET_SOURCE` is an error (T036, S-003).
+- **The PNGs**: `angular.json` does not copy `public/assets/portraits/`; only
+  `ASSET_SOURCE=game` emits them (`apps/web/tools/emit-portraits.mts`, run by
+  `pnpm build` and `build:release`) and release rejects an `own` artifact that has
+  any (T036, S-001). `ng serve` and `--configuration development` still serve them.
 - **Fallback**: with `own`, or with a missing, `withdrawn` or non-approved entry,
   the row shows the project's own icon. The site is never left without icons. Skill
   icons always use the project's own icons.

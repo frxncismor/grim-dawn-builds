@@ -35,7 +35,8 @@
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "public",
+                "ignore": ["assets/portraits/**"]
               },
               {
                 "glob": "*.svg",
@@ -74,6 +75,17 @@
               "i18nMissingTranslation": "error"
             },
             "development": {
+              "assets": [
+                {
+                  "glob": "**/*",
+                  "input": "public"
+                },
+                {
+                  "glob": "*.svg",
+                  "input": "src/assets/icons",
+                  "output": "assets/icons"
+                }
+              ],
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
@@ -199,7 +211,8 @@
               "assets": [
                 {
                   "glob": "**/*",
-                  "input": "public"
+                  "input": "public",
+                  "ignore": ["assets/portraits/**"]
                 },
                 {
                   "glob": "*.svg",

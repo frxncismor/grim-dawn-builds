@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { MasteryTreeSchema, type MasteryTree } from '@gd/domain';
+import { PublicMasteryTreeSchema, type MasteryTree } from '@gd/domain';
 import type { MasteryCatalog } from '../src/app/core/content/masteries.ts';
 import { FixtureMasteryCatalog } from '../src/app/core/content/masteries.server.ts';
 import { emitMasteryTrees, MASTERY_TREES_DIR, MASTERY_TREES_INDEX } from './emit-mastery-trees.mts';
@@ -31,9 +31,10 @@ test('emite un JSON por maestría y el índice id→slug, válidos contra Master
     >;
     assert.equal(Object.keys(index).length, slugs.length);
     for (const slug of slugs) {
-      const tree = MasteryTreeSchema.parse(
-        JSON.parse(await readFile(join(folder, `${slug}.json`), 'utf8')),
-      );
+      const text = await readFile(join(folder, `${slug}.json`), 'utf8');
+      // S-004: the game's texture path is not published.
+      assert.doesNotMatch(text, /"icon"|.tex/);
+      const tree = PublicMasteryTreeSchema.parse(JSON.parse(text));
       assert.equal(tree.mastery.slug, slug);
       assert.equal(index[tree.mastery.id], slug);
     }

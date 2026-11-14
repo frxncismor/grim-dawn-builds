@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MasteryTreeSchema, type MasteryTree } from '@gd/domain';
+import { PublicMasteryTreeSchema, type PublicMasteryTree } from '@gd/domain';
 
 /** Opaque on purpose: never carries row values, SQL or schema issues (constitution §XI). */
 export class InvalidCatalogError extends Error {
@@ -33,25 +33,27 @@ export interface SkillNodeRow {
   max_points: number;
   ultimate_points: number | null;
   parent_id: string | null;
-  icon: string | null;
 }
 
-const mastery = MasteryTreeSchema.shape.mastery;
+const mastery = PublicMasteryTreeSchema.shape.mastery;
 /** Public list entry: one mastery with its node count. */
 export const MasterySummarySchema = z
   .object({
     id: mastery.shape.id,
     slug: mastery.shape.slug,
     name: mastery.shape.name,
-    game_version: MasteryTreeSchema.shape.game_version,
+    game_version: PublicMasteryTreeSchema.shape.game_version,
     node_count: z.number().int().nonnegative(),
   })
   .strict();
 export type MasterySummary = z.infer<typeof MasterySummarySchema>;
 
 /** Rows are projected field by field, so nothing outside the DTO can pass through. */
-export function mapMasteryTree(tree: MasteryTreeRow, nodes: readonly SkillNodeRow[]): MasteryTree {
-  const result = MasteryTreeSchema.safeParse({
+export function mapMasteryTree(
+  tree: MasteryTreeRow,
+  nodes: readonly SkillNodeRow[],
+): PublicMasteryTree {
+  const result = PublicMasteryTreeSchema.safeParse({
     mastery: { id: tree.id, slug: tree.slug, name: { en: tree.name_en, es: tree.name_es } },
     game_version: tree.game_version,
     source: { game_version: tree.game_version, sha256: tree.source_sha256 },
@@ -66,7 +68,6 @@ export function mapMasteryTree(tree: MasteryTreeRow, nodes: readonly SkillNodeRo
       ...(n.ultimate_points === null ? {} : { ultimate_points: n.ultimate_points }),
       grid: { col: n.grid_col, row: n.grid_row },
       parent_id: n.parent_id,
-      ...(n.icon === null ? {} : { icon: n.icon }),
     })),
   });
   if (!result.success) throw new InvalidCatalogError();

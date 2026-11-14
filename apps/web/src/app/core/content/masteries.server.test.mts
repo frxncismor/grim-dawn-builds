@@ -21,8 +21,22 @@ const summary = (slug: string) => ({
   node_count: 1,
 });
 
-async function tree(slug: string): Promise<{ mastery: { slug: string }; nodes: unknown[] }> {
+type Tree = { mastery: { slug: string }; nodes: Record<string, unknown>[] };
+
+/** The versioned source fixture: its nodes still carry `icon` (the extractor needs it). */
+async function sourceTree(slug: string): Promise<Tree> {
   return JSON.parse(await readFile(join(ROOT, 'mastery-trees', `${slug}.json`), 'utf8'));
+}
+
+/** What the API sends (S-004): the same tree without the game's texture path. */
+async function tree(slug: string): Promise<Tree> {
+  const source = await sourceTree(slug);
+  return {
+    ...source,
+    nodes: source.nodes.map((node) =>
+      Object.fromEntries(Object.entries(node).filter(([key]) => key !== 'icon')),
+    ),
+  };
 }
 
 test('fixture catalog lists the six slugs sorted and validates each tree', async () => {
@@ -77,6 +91,22 @@ test('API catalog lists slugs and reads one tree with credential-free requests',
     '/api/v1/masteries/demolition',
     '/api/v1/masteries/missing',
   ]);
+});
+
+test('S-004: the fixture catalog serves no node icon; the API catalog rejects one', async () => {
+  const source = await sourceTree('demolition');
+  assert.ok(
+    source.nodes.some((node) => 'icon' in node),
+    'the fixture keeps the icon for the extractor',
+  );
+  const fromFixture = await new FixtureMasteryCatalog(ROOT).get('demolition');
+  assert.ok(fromFixture);
+  assert.equal(fromFixture.nodes.length, source.nodes.length);
+  assert.ok(fromFixture.nodes.every((node) => !('icon' in node)));
+  await assert.rejects(
+    new ApiMasteryCatalog('http://localhost:3000/', async () => json(source)).get('demolition'),
+    (error: Error) => error.message === unavailable,
+  );
 });
 
 test('API catalog turns 503, network errors, invalid bodies and slug mismatches into a build failure', async () => {

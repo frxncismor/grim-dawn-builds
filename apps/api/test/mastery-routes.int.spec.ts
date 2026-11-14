@@ -19,7 +19,7 @@ import pg from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { MasteryTreeSchema, type MasteryTree } from '@gd/domain';
+import { MasteryTreeSchema, PublicMasteryTreeSchema, type MasteryTree } from '@gd/domain';
 import { buildApp } from '../src/app.js';
 import { loadConfig } from '../src/config.js';
 import { createDatabaseContentRepository } from '../src/content/repository.js';
@@ -33,6 +33,16 @@ const enabled = process.env['RUN_DB_TESTS'] === '1' || process.env['CI'] === 'tr
 const suite = enabled ? describe : describe.skip;
 const DB = 'gd_mastery_routes_test';
 const fixtureDir = join(root, 'fixtures/content/mastery-trees');
+/** Public contract (S-004): the source fixture minus the game's texture path. */
+const publicOf = (tree: MasteryTree): unknown => ({
+  ...tree,
+  nodes: tree.nodes.map((node) => {
+    const copy: Record<string, unknown> = { ...node };
+    delete copy['icon'];
+    return copy;
+  }),
+});
+
 const fixtures: MasteryTree[] = readdirSync(fixtureDir)
   .filter((f) => f.endsWith('.json'))
   .sort()
@@ -192,12 +202,13 @@ suite('mastery catalog HTTP routes on real PostgreSQL (spec 003 T023)', () => {
   });
 
   it.each(fixtures.map((t) => [t.mastery.slug, t] as const))(
-    'GET /api/v1/masteries/%s returns the tree equal to its versioned fixture',
+    'GET /api/v1/masteries/%s returns the tree equal to its fixture without the game texture path',
     async (slug, expected) => {
       const response = await app!.inject(`/api/v1/masteries/${slug}`);
       expect(response.statusCode).toBe(200);
-      expect(response.json()).toEqual(expected);
-      expect(MasteryTreeSchema.safeParse(response.json()).success).toBe(true);
+      expect(response.json()).toEqual(publicOf(expected));
+      expect(PublicMasteryTreeSchema.safeParse(response.json()).success).toBe(true);
+      expect(response.body).not.toContain('icon');
     },
   );
 

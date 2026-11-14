@@ -133,7 +133,13 @@ hacen fallar el build en lugar de degradarse en silencio.
 build:release` y los jobs de CI que construyen el artefacto medido (`verify` y
   `dast` en `.github/workflows/ci.yml`). El release además comprueba el manifiesto
   antes de construir (`assertGameAssets`) y se niega a construir salvo que las seis
-  maestrías tengan un retrato `approved`. Los builds locales siguen en `own`.
+  maestrías tengan un retrato `approved`. Los builds locales siguen en `own`. El
+  release no da valor por defecto al interruptor: un `ASSET_SOURCE` sin definir es
+  un error (T036, S-003).
+- **Los PNG**: `angular.json` no copia `public/assets/portraits/`; solo
+  `ASSET_SOURCE=game` los emite (`apps/web/tools/emit-portraits.mts`, que ejecutan
+  `pnpm build` y `build:release`) y el release rechaza un artefacto `own` que lleve
+  alguno (T036, S-001). `ng serve` y `--configuration development` los siguen sirviendo.
 - **Fallback**: con `own`, o con una entrada ausente, `withdrawn` o no aprobada, la
   fila muestra el icono propio del proyecto. El sitio nunca se queda sin iconos. Los
   iconos de habilidad usan siempre los iconos propios.

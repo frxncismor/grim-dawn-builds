@@ -13,7 +13,7 @@ skill only validates.
 
 1. Confirm the content source the release must use (API versus fixtures) from the plan or release runbook. If
    it is not documented, stop and report.
-2. Run `pnpm build:release`, then `pnpm check:release`, then `pnpm check:public-build`, in that order, and keep
+2. Run `pnpm build:release` with an explicit `ASSET_SOURCE` (`game` or `own`; release fails without it), then `pnpm check:release`, then `pnpm check:public-build`, in that order, and keep
    each output.
 3. Smoke-check the artifact under `dist/`: `/` and `/es` index pages exist, `404.html` exists, and
    `sitemap.xml` lists both locales.

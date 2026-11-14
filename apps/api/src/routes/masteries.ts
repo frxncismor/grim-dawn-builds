@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { FastifyInstance } from 'fastify';
-import { MasteryTreeSchema } from '@gd/domain';
+import { PublicMasteryTreeSchema } from '@gd/domain';
 import { MasterySummarySchema } from '../catalog/map-mastery.js';
 import type { MasteryCatalogRepository } from '../catalog/mastery-repository.js';
 
@@ -44,5 +44,10 @@ export function registerMasteryRoutes(
     });
   };
   route('/api/v1/masteries', z.array(MasterySummarySchema), (repo) => repo.listTrees());
-  route('/api/v1/masteries/:slug', MasteryTreeSchema, (repo, slug) => repo.findTree(slug), true);
+  route(
+    '/api/v1/masteries/:slug',
+    PublicMasteryTreeSchema,
+    (repo, slug) => repo.findTree(slug),
+    true,
+  );
 }

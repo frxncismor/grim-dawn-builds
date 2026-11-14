@@ -1,4 +1,4 @@
-import type { MasteryTree } from '@gd/domain';
+import type { PublicMasteryTree } from '@gd/domain';
 import type { ContentQuery } from '../content/repository.js';
 import {
   InvalidCatalogError,
@@ -14,7 +14,7 @@ export interface MasteryCatalogRepository {
   /** One entry per mastery, ordered by slug. Empty when the catalog is not loaded. */
   listTrees(): Promise<MasterySummary[]>;
   /** Full tree by slug, or `null` when it does not exist. Never falls back to fixtures. */
-  findTree(slug: string): Promise<MasteryTree | null>;
+  findTree(slug: string): Promise<PublicMasteryTree | null>;
 }
 
 export class CatalogUnavailableError extends Error {
@@ -32,7 +32,7 @@ const LIST_SQL = `SELECT ${TREE_COLUMNS},
   FROM v_public_mastery_trees t ORDER BY slug COLLATE "C"`;
 const TREE_SQL = `SELECT ${TREE_COLUMNS} FROM v_public_mastery_trees WHERE slug = $1`;
 const NODES_SQL = `SELECT id, mastery_id, name_en, name_es, kind, circular, tier, bar_required,
-  grid_col, grid_row, max_points, ultimate_points, parent_id, icon
+  grid_col, grid_row, max_points, ultimate_points, parent_id
   FROM v_public_skill_nodes WHERE mastery_id = $1
   ORDER BY grid_col, grid_row, id COLLATE "C"`;
 
@@ -53,7 +53,7 @@ export class PostgresMasteryRepository implements MasteryCatalogRepository {
     );
   }
 
-  async findTree(slug: string): Promise<MasteryTree | null> {
+  async findTree(slug: string): Promise<PublicMasteryTree | null> {
     // An invalid slug cannot exist in the catalog; same answer as a missing one.
     if (!MasterySummarySchema.shape.slug.safeParse(slug).success) return null;
     const tree = (await this.read<MasteryTreeRow>(TREE_SQL, [slug]))[0];

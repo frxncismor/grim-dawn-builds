@@ -3,6 +3,8 @@ import fc from 'fast-check';
 import {
   CatalogSkillNodeSchema,
   MasteryTreeSchema,
+  PublicMasteryTreeSchema,
+  PublicSkillNodeSchema,
   SKILL_KINDS,
   TIER_BAR_REQUIRED,
   findDependencyCycle,
@@ -288,5 +290,23 @@ describe('mastery tree properties', () => {
       }),
       { numRuns: 200, seed: SEED + 3 },
     );
+  });
+});
+
+describe('public schemas (S-004: no icon)', () => {
+  it('rejects the game texture path in the public node and tree, accepts it in the source ones', () => {
+    const withIcon = node({ icon: 'ui/skills/cadence1up.tex' });
+    expect(CatalogSkillNodeSchema.safeParse(withIcon).success).toBe(true);
+    expect(PublicSkillNodeSchema.safeParse(withIcon).success).toBe(false);
+    expect(PublicSkillNodeSchema.safeParse(node()).success).toBe(true);
+    expect(MasteryTreeSchema.safeParse(tree([withIcon])).success).toBe(true);
+    expect(PublicMasteryTreeSchema.safeParse(tree([withIcon])).success).toBe(false);
+    expect(PublicMasteryTreeSchema.safeParse(tree()).success).toBe(true);
+  });
+
+  it('keeps the structural rules of the source tree', () => {
+    const bad = tree([node(), node({ id: 'class01/other' })]);
+    expect(MasteryTreeSchema.safeParse(bad).success).toBe(false);
+    expect(PublicMasteryTreeSchema.safeParse(bad).success).toBe(false);
   });
 });
