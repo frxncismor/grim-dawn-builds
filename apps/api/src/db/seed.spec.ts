@@ -4,6 +4,8 @@ import {
   prepareSeed,
   readSeedFixtures,
   runSeeder,
+  seedCompleteLine,
+  seedContentRoot,
   seedCatalog,
   seedData,
   SeedError,
@@ -242,5 +244,27 @@ describe('skill_node_id reaches the database (spec 003 T031)', () => {
     const without = (await run()).find((q) => q.sql.includes('INSERT INTO "build_skill_nodes"'))!;
     expect(without.sql).toContain('"skill_node_id"');
     expect(without.values).toContain(null);
+  });
+});
+
+describe('fixtures root (F-001)', () => {
+  it('uses SEED_CONTENT_ROOT when the container launcher sets it, else the checkout', () => {
+    expect(seedContentRoot({ SEED_CONTENT_ROOT: '/content' })).toBe('/content');
+    expect(seedContentRoot({}).replaceAll('\\', '/')).toMatch(/\/fixtures\/content\/?$/);
+  });
+
+  it('runSeeder reads the fixtures from SEED_CONTENT_ROOT, not the bundle-relative path', async () => {
+    const err = vi.fn();
+    await runSeeder(
+      { APP_ENV: 'test', SEED_CONTENT_ROOT: '/nonexistent-gd-root' },
+      { write: { out: vi.fn(), err } },
+    );
+    expect(err).toHaveBeenCalledWith('seed failed: fixture-read');
+  });
+
+  it('prints the exact line the launcher pattern accepts', () => {
+    expect(seedCompleteLine({ builds: 1, tierLists: 2, masteries: 6, nodes: 186 })).toBe(
+      'seed complete: 1 builds, 2 tier lists, 6 masteries, 186 nodes',
+    );
   });
 });
