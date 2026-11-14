@@ -704,3 +704,31 @@ integrationTest(
     assert.ok(!result.stdout.includes('REVIEW_SENTINEL'));
   },
 );
+
+integrationTest(
+  'snapshot ignores CRLF vs LF in text files but still detects real changes and keeps binaries byte-exact',
+  async (t) => {
+    const f = await readyFixture();
+    t.after(() => f.close());
+    const textPath = path.join(f.root, 'notes.txt');
+    const binPath = path.join(f.root, 'blob.bin');
+    await writeFile(textPath, 'one\ntwo\nthree\n');
+    await writeFile(binPath, Buffer.from([0x00, 0x01, 0x0a, 0x02]));
+    const lf = cli(f, 'prepare').json.snapshot;
+
+    await writeFile(textPath, 'one\r\ntwo\r\nthree\r\n');
+    assert.equal(cli(f, 'prepare').json.snapshot, lf, 'same content with CRLF must hash the same');
+
+    await writeFile(textPath, 'one\r\ntwo\r\nchanged\r\n');
+    assert.notEqual(cli(f, 'prepare').json.snapshot, lf, 'a real edit must change the snapshot');
+
+    await writeFile(textPath, 'one\ntwo\nthree\n');
+    assert.equal(cli(f, 'prepare').json.snapshot, lf);
+    await writeFile(binPath, Buffer.from([0x00, 0x01, 0x0d, 0x0a, 0x02]));
+    assert.notEqual(
+      cli(f, 'prepare').json.snapshot,
+      lf,
+      'a binary file containing CRLF must not be normalized',
+    );
+  },
+);
