@@ -94,9 +94,9 @@ declarada del hosting divergen.
 - **Regla.** Los documentos públicos son en inglés primario, con una contraparte en
   español llamada `*.es.md`.
 - **Cobertura actual.** `README.md`, `CONTRIBUTING.md`, `docs/quality-gates.md` y
-  todos los documentos bajo `docs/orchestration/` se entregan en ambos idiomas. Los
-  documentos bajo `docs/content/` siguen solo en español y quedan fuera del alcance
-  de T-158.
+  todos los documentos bajo `docs/orchestration/` se entregan en ambos idiomas. Bajo
+  `docs/content/`, `mastery-catalog.md` se entrega en ambos idiomas (spec 003,
+  T019/T020); el resto sigue solo en español y queda fuera del alcance de T-158.
 - **Artefactos internos de SDD** (`specs/**`, `handoff.md`, `plan.md`, `tasks.md`):
   solo en español, como permite la constitución; no se exige paridad.
 - **Qué comprueba la automatización.** `pnpm check:locale-parity` compara los
