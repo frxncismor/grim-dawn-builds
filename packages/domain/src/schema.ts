@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CONTENT_STATUSES, TIERS } from './vocabulary.js';
+import { skillNodeIdSchema } from './mastery-tree.js';
 
 export { CONTENT_STATUSES, TIERS } from './vocabulary.js';
 export type { ContentStatus, Tier } from './vocabulary.js';
@@ -145,6 +146,8 @@ const SkillNodeSchema = z
     max_points_hint: z.number().int().positive().nullable(),
     points_label: nullableText,
     layout: z.object({ x: z.number().finite(), y: z.number().finite() }).strict(),
+    /** Reference to the canonical catalog node (spec 003, FR-015); optional so existing guides stay valid. */
+    skill_node_id: skillNodeIdSchema.optional(),
   })
   .strict();
 const PrioritySchema = z
