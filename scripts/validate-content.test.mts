@@ -20,6 +20,13 @@ const withRef = (skill_node_id: string) => ({
   ),
 });
 
+const withDuplicateRef = () => ({
+  ...guide,
+  skill_nodes: guide.skill_nodes.map((n: any, i: number) =>
+    i < 2 ? { ...n, skill_node_id: catalog[0]!.nodes[0]!.id } : n,
+  ),
+});
+
 const validDraft: Record<string, unknown> = JSON.parse(
   readFileSync(
     new URL('./fixtures/content-valid/builds/valid-draft.json', import.meta.url),
@@ -67,6 +74,13 @@ describe('validateBuildFiles con catálogo (T016)', () => {
     assert.equal(issues[0]!.file, 'builds/g.json');
     assert.equal(issues[0]!.path, 'skill_nodes.0.skill_node_id');
     assert.match(issues[0]!.message, /golpe-primigenio.*no existe en el catálogo/);
+  });
+
+  it('un skill_node_id repetido en la guía falla nombrando el primer nodo (T035)', () => {
+    const issues = run(withDuplicateRef());
+    assert.ok(
+      issues.some((i) => i.path === 'skill_nodes.1.skill_node_id' && /repetido/.test(i.message)),
+    );
   });
 
   it('un id de otra maestría falla', () => {

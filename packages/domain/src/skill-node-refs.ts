@@ -30,6 +30,7 @@ export function validateSkillNodeRefs(
 ): SkillNodeRefIssue[] {
   const issues: SkillNodeRefIssue[] = [];
   const nodeOwner = new Map<string, string>();
+  const firstUse = new Map<string, string>();
   for (const tree of catalog) for (const n of tree.nodes) nodeOwner.set(n.id, tree.mastery.id);
 
   build.skill_nodes.forEach((node, index) => {
@@ -37,6 +38,15 @@ export function validateSkillNodeRefs(
     if (ref === undefined) return;
     const path = ['skill_nodes', index, 'skill_node_id'];
     const label = `nodo «${node.slug}» (${node.mastery_slug})`;
+    const first = firstUse.get(ref);
+    if (first !== undefined) {
+      issues.push({
+        path,
+        message: `${label}: «${ref}» está repetido, ya lo usa el nodo «${first}»`,
+      });
+      return;
+    }
+    firstUse.set(ref, node.slug);
     const owner = nodeOwner.get(ref);
     if (owner === undefined) {
       issues.push({ path, message: `${label}: «${ref}» no existe en el catálogo` });

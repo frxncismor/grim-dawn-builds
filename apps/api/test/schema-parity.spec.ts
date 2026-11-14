@@ -61,6 +61,14 @@ const skillNodeIdSql = readFileSync(
   'utf8',
 );
 
+// T035 (spec 003) migration: unique skill_node_id per guide and same-mastery revalidation.
+const skillNodeIdUniqueSql = readFileSync(
+  fileURLToPath(
+    new URL('../drizzle/0012_skill_node_id_unique_and_revalidation.sql', import.meta.url),
+  ),
+  'utf8',
+);
+
 // T008 (spec 003) custom SQL: mastery catalog tables, CHECKs and public views.
 const masteryCatalogSql = readFileSync(
   fileURLToPath(new URL('../drizzle/0009_mastery_catalog.sql', import.meta.url)),
@@ -880,5 +888,39 @@ describe('parity: guide skill_node_id (0010 SQL + Drizzle ↔ SkillNodeSchema, T
 
   it('adds no new grants: importer/editor already hold DML on build_skill_nodes, api_ro sees views only', () => {
     expect(skillNodeIdSql).not.toMatch(/GRANT /);
+  });
+});
+
+describe('parity: unique skill_node_id per guide and mastery revalidation (0012 SQL + Drizzle, T035)', () => {
+  const cols = getTableConfig(db.buildSkillNodes);
+
+  it('declares the partial unique index in Drizzle and in the migration', () => {
+    const index = cols.indexes.find(
+      (i) => i.config.name === 'build_skill_nodes_build_skill_node_uq',
+    );
+    expect(index?.config.unique).toBe(true);
+    expect(index?.config.columns.map((c) => (c as { name: string }).name)).toEqual([
+      'build_id',
+      'skill_node_id',
+    ]);
+    expect(index?.config.where).toBeDefined();
+    expect(skillNodeIdUniqueSql).toMatch(
+      /CREATE UNIQUE INDEX "build_skill_nodes_build_skill_node_uq" ON "build_skill_nodes" USING btree \("build_id","skill_node_id"\) WHERE .*"skill_node_id" IS NOT NULL;/,
+    );
+  });
+
+  it('revalidates the mastery rule from deferred constraint triggers on both sides', () => {
+    expect(skillNodeIdUniqueSql).toMatch(/SECURITY DEFINER SET search_path = pg_catalog, public/);
+    expect(skillNodeIdUniqueSql).toMatch(/ERRCODE = 'check_violation'/);
+    for (const [table, columns] of [
+      ['masteries', 'slug, name_en'],
+      ['mastery_trees', 'slug, name_en'],
+      ['catalog_skill_nodes', 'mastery_id'],
+      ['skills', 'mastery_id'],
+    ] as const)
+      expect(skillNodeIdUniqueSql).toContain(
+        `AFTER UPDATE OF ${columns} ON ${table} DEFERRABLE INITIALLY DEFERRED FOR EACH ROW`,
+      );
+    expect(skillNodeIdUniqueSql).not.toMatch(/GRANT /);
   });
 });
