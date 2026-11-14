@@ -69,4 +69,19 @@ describe('validateSkillNodeRefs (T016)', () => {
     expect(issues).toHaveLength(1);
     expect(issues[0]!.message).toMatch(/sin árbol en el catálogo/);
   });
+
+  it('rechaza un skill_node_id repetido en la misma guía y nombra el primer nodo', () => {
+    const dup = guide('class06/primal-strike');
+    dup.skill_nodes.push({
+      slug: 'repetido',
+      mastery_slug: 'chaman',
+      skill_node_id: 'class06/primal-strike',
+    });
+    const issues = validateSkillNodeRefs(dup, catalog);
+    expect(issues).toHaveLength(1);
+    expect(issues[0]!.path).toEqual(['skill_nodes', 2, 'skill_node_id']);
+    expect(issues[0]!.message).toContain('repetido');
+    expect(issues[0]!.message).toContain('golpe-primigenio');
+    expect(issues[0]!.message).toMatch(/repetido|duplicado/);
+  });
 });

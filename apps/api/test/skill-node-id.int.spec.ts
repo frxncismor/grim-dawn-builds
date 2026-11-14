@@ -204,6 +204,88 @@ suite('guide skill_node_id from fixture to API on real PostgreSQL (spec 003 T031
     expect(withRef(await guideNodes())).toHaveLength(14);
   });
 
+  it('rejects a second node of the same guide pointing at the same catalog node (unique index, T035)', async () => {
+    const error = await reject(
+      `UPDATE build_skill_nodes SET skill_node_id = (SELECT skill_node_id FROM build_skill_nodes WHERE skill_node_id LIKE 'class06/%' LIMIT 1)
+       WHERE id = (SELECT id FROM build_skill_nodes WHERE skill_node_id LIKE 'class06/%' OFFSET 1 LIMIT 1)`,
+      [],
+    );
+    expect(error.code).toBe('23505');
+    expect(error.message).toMatch(/build_skill_node_uq/);
+  });
+
+  it('seeding a guide with a duplicated skill_node_id fails closed and writes nothing (T035)', async () => {
+    const bad = structuredClone(data);
+    const refs = bad.builds
+      .find((b) => b.slug === SLUG)!
+      .skill_nodes.filter((n) => n.skill_node_id?.startsWith('class06/'));
+    refs[1]!.skill_node_id = refs[0]!.skill_node_id!;
+    bad.authors[0]!.display_name = 'Must roll back too';
+    await expect(seedData(importer!, bad)).rejects.toThrow('database-failed');
+    const author = await admin!.query('SELECT display_name FROM authors WHERE slug=$1', [
+      bad.authors[0]!.slug,
+    ]);
+    expect(author.rows[0]!['display_name']).not.toBe('Must roll back too');
+    expect(withRef(await guideNodes())).toHaveLength(14);
+  });
+
+  describe('same-mastery invariant is revalidated when the other side changes (T035)', () => {
+    // Each case runs in a transaction that is rolled back; the deferred check fires at COMMIT.
+    const commitFails = async (...statements: string[]) => {
+      await importer!.query('BEGIN');
+      try {
+        for (const sql of statements) await importer!.query(sql);
+        await importer!.query('COMMIT');
+      } catch (error) {
+        await importer!.query('ROLLBACK').catch(() => undefined);
+        return error as { code?: string; message: string };
+      }
+      throw new Error('the database accepted a change that invalidates a guide skill_node_id');
+    };
+
+    it('renaming the catalog tree of a referenced mastery fails at COMMIT', async () => {
+      const error = await commitFails(
+        "UPDATE mastery_trees SET slug = 'shaman-renamed', name_en = 'Shaman Renamed' WHERE id = 'class06'",
+      );
+      expect(error.code).toBe('23514');
+      expect(error.message).toMatch(/another mastery/);
+    });
+
+    it('renaming the guide mastery (slug and English name) fails at COMMIT', async () => {
+      const error = await commitFails(
+        "UPDATE masteries SET slug = 'otra-cosa', name_en = 'Something Else' WHERE slug = 'chaman'",
+      );
+      expect(error.code).toBe('23514');
+    });
+
+    it('moving a guide skill or a catalog node to another mastery fails at COMMIT', async () => {
+      const skill = await commitFails(
+        `UPDATE skills SET mastery_id = (SELECT id FROM masteries WHERE slug <> 'chaman' LIMIT 1)
+         WHERE id = (SELECT skill_id FROM build_skill_nodes WHERE skill_node_id LIKE 'class06/%' LIMIT 1)`,
+      );
+      expect(skill.code).toBe('23514');
+      const node = await commitFails(
+        `UPDATE catalog_skill_nodes SET mastery_id = 'class02', parent_id = NULL
+         WHERE id = (SELECT skill_node_id FROM build_skill_nodes WHERE skill_node_id LIKE 'class06/%' LIMIT 1)`,
+      );
+      expect(['23514', '23503']).toContain(node.code);
+    });
+
+    it('renaming both sides together in one transaction stays valid (order does not matter)', async () => {
+      await importer!.query('BEGIN');
+      await importer!.query(
+        "UPDATE mastery_trees SET slug = 'shaman-x', name_en = 'Shaman X' WHERE id = 'class06'",
+      );
+      await importer!.query("UPDATE masteries SET name_en = 'Shaman X' WHERE slug = 'chaman'");
+      await importer!.query('ROLLBACK');
+    });
+
+    it('an unchanged re-seed of catalog and guides still passes (rows rewritten with the same values)', async () => {
+      await seedData(importer!, data);
+      expect(withRef(await guideNodes())).toHaveLength(14);
+    });
+  });
+
   it('the listing endpoint serves the reference too, through the public view only', async () => {
     const list = await app!.inject('/api/v1/builds');
     expect(list.statusCode).toBe(200);

@@ -43,6 +43,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
@@ -361,29 +362,39 @@ export const buildMasteries = pgTable(
   (t) => [primaryKey({ columns: [t.build_id, t.mastery_id] })],
 );
 
-export const buildSkillNodes = pgTable('build_skill_nodes', {
-  id: idColumn(),
-  build_id: uuid('build_id')
-    .notNull()
-    .references(() => builds.id, { onDelete: 'cascade' }),
-  skill_id: uuid('skill_id')
-    .notNull()
-    .references(() => skills.id),
-  // Spec 003 T031. Optional link to the game-derived catalog. RESTRICT: `seedCatalog` must not
-  // silently drop a node a guide still points at. Same-mastery is enforced by a trigger (0010).
-  skill_node_id: text('skill_node_id').references(() => catalogSkillNodes.id, {
-    onDelete: 'restrict',
-  }),
-  status: nodeStatusEnum('status').notNull(),
-  tag: text('tag'),
-  rationale: text('rationale').notNull(),
-  max_points_hint: integer('max_points_hint'),
-  points_label: text('points_label'),
-  layout_x: numeric('layout_x').notNull(),
-  layout_y: numeric('layout_y').notNull(),
-  display_order: integer('display_order').notNull(),
-  ...timestamps(),
-});
+export const buildSkillNodes = pgTable(
+  'build_skill_nodes',
+  {
+    id: idColumn(),
+    build_id: uuid('build_id')
+      .notNull()
+      .references(() => builds.id, { onDelete: 'cascade' }),
+    skill_id: uuid('skill_id')
+      .notNull()
+      .references(() => skills.id),
+    // Spec 003 T031. Optional link to the game-derived catalog. RESTRICT: `seedCatalog` must not
+    // silently drop a node a guide still points at. Same-mastery is enforced by a trigger (0010),
+    // revalidated when masteries or the catalog change (0012).
+    skill_node_id: text('skill_node_id').references(() => catalogSkillNodes.id, {
+      onDelete: 'restrict',
+    }),
+    status: nodeStatusEnum('status').notNull(),
+    tag: text('tag'),
+    rationale: text('rationale').notNull(),
+    max_points_hint: integer('max_points_hint'),
+    points_label: text('points_label'),
+    layout_x: numeric('layout_x').notNull(),
+    layout_y: numeric('layout_y').notNull(),
+    display_order: integer('display_order').notNull(),
+    ...timestamps(),
+  },
+  (t) => [
+    // Spec 003 T035: a catalog node is claimed at most once per guide (0012).
+    uniqueIndex('build_skill_nodes_build_skill_node_uq')
+      .on(t.build_id, t.skill_node_id)
+      .where(sql`${t.skill_node_id} IS NOT NULL`),
+  ],
+);
 
 export const buildPriorities = pgTable('build_priorities', {
   id: idColumn(),
