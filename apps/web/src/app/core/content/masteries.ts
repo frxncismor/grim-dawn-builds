@@ -1,5 +1,5 @@
 import { InjectionToken, makeStateKey } from '@angular/core';
-import type { MasteryTree } from '@gd/domain';
+import type { PublicMasteryTree } from '@gd/domain';
 import type { MasteryPortrait } from './portraits';
 
 /**
@@ -26,13 +26,13 @@ export interface MasteryCatalog {
    */
   listSummaries(): Promise<readonly MasterySummary[]>;
   /** The validated tree, or `null` when the slug does not exist. Failures throw. */
-  get(slug: string): Promise<MasteryTree | null>;
+  get(slug: string): Promise<PublicMasteryTree | null>;
 }
 
 export const MASTERY_CATALOG = new InjectionToken<MasteryCatalog>('MASTERY_CATALOG');
 
 /** Snapshot of the tree rendered by the page; the browser reads it back on hydration. */
-export const MASTERY_TREE_STATE = makeStateKey<MasteryTree | null>('gd-mastery-tree');
+export const MASTERY_TREE_STATE = makeStateKey<PublicMasteryTree | null>('gd-mastery-tree');
 
 /** Snapshot of the index rendered by `/maestrias`; the browser reads it back on hydration. */
 export const MASTERY_INDEX_STATE = makeStateKey<readonly MasterySummary[]>('gd-mastery-index');

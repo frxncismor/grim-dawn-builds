@@ -8,7 +8,7 @@ import {
   LOCALE_ID,
   signal,
 } from '@angular/core';
-import type { CatalogSkillNode, MasteryTree, PublicBuild, SkillKind } from '@gd/domain';
+import type { PublicSkillNode, PublicMasteryTree, PublicBuild, SkillKind } from '@gd/domain';
 import { createKeyboardNav } from '../keyboard-nav';
 import { layoutForest } from '../layout';
 
@@ -41,7 +41,7 @@ const CATALOG_MARGIN_BOTTOM = 96;
 const CATALOG_MAX_NODES = 400;
 
 interface CatalogRenderNode {
-  node: CatalogSkillNode;
+  node: PublicSkillNode;
   id: string;
   labelLines: string[];
   label: string;
@@ -107,7 +107,7 @@ export class SkillTree {
   readonly mastery = input<Mastery>(EMPTY_MASTERY);
   readonly nodes = input<readonly SkillNode[]>([]);
   /** Catalog mode: a full canonical tree drawn from its `grid`; guide inputs are ignored. */
-  readonly catalogTree = input<MasteryTree | undefined>(undefined);
+  readonly catalogTree = input<PublicMasteryTree | undefined>(undefined);
   /**
    * Assignment mode (T017): with a `catalogTree`, the guide nodes of that mastery. Each one points
    * at a catalog node through `skill_node_id` and marks it with its editorial status; the rest of
@@ -153,7 +153,7 @@ export class SkillTree {
         .sort((a, b) => a - b)
         .map((row, rank) => [row, rank]),
     );
-    const point = (node: CatalogSkillNode) => ({
+    const point = (node: PublicSkillNode) => ({
       x: CATALOG_MARGIN_X + (node.grid.col - 1) * CATALOG_COL_WIDTH,
       y:
         CATALOG_HEADER_HEIGHT +
@@ -517,7 +517,7 @@ export class SkillTree {
     return $localize`:@@skillTree.tierLabel:Tier ${tier}:tier:`;
   }
 
-  maxPointsLabel(node: CatalogSkillNode): string {
+  maxPointsLabel(node: PublicSkillNode): string {
     return node.ultimate_points === undefined
       ? $localize`:@@skillTree.catalogMax:Max ${node.max_points}:max:`
       : $localize`:@@skillTree.catalogMaxUltimate:Max ${node.max_points}:max: (${node.ultimate_points}:ultimate:)`;
@@ -533,7 +533,7 @@ export class SkillTree {
    * tier, bar and dependency follow. A name shortened on screen is repeated in full afterwards.
    */
   catalogNodeLabel(
-    node: CatalogSkillNode,
+    node: PublicSkillNode,
     nameById: ReadonlyMap<string, string>,
     visibleName: string = node.name[this.nameLang],
     assignment: SkillNode | null = null,
@@ -555,7 +555,7 @@ export class SkillTree {
     return parts.join('. ');
   }
 
-  dependencyLabel(node: CatalogSkillNode, nameById: ReadonlyMap<string, string>): string {
+  dependencyLabel(node: PublicSkillNode, nameById: ReadonlyMap<string, string>): string {
     if (node.parent_id === null) return $localize`:@@skillTree.noRequirement:No requirement`;
     const parent = nameById.get(node.parent_id) ?? node.parent_id;
     return $localize`:@@skillTree.requiresParent:Requires ${parent}:parent:`;
@@ -566,7 +566,7 @@ export class SkillTree {
       new Map((this.catalogTree()?.nodes ?? []).map((node) => [node.id, node.name[this.nameLang]])),
   );
 
-  catalogListItemId(node: CatalogSkillNode): string {
+  catalogListItemId(node: PublicSkillNode): string {
     return `${this.treeId()}-${this.scopeSlug()}-${node.id}-listitem`;
   }
 

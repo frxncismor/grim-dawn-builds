@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import type { MasteryTree } from '@gd/domain';
+import type { PublicMasteryTree } from '@gd/domain';
 import {
   assignmentMasteryId,
   MASTERY_TREE_ASSETS,
@@ -43,7 +43,7 @@ export class BuildSkills {
   readonly slots = input.required<readonly SkillTreeSlot[]>();
   readonly activeIds = input<readonly string[]>([]);
 
-  private readonly loaded = signal<ReadonlyMap<string, MasteryTree>>(new Map());
+  private readonly loaded = signal<ReadonlyMap<string, PublicMasteryTree>>(new Map());
   private readonly phase = signal<Phase>('idle');
 
   /** Mastery id of each slot that can use the canonical tree, in slot order. */
@@ -51,7 +51,7 @@ export class BuildSkills {
   readonly loading = computed(() => this.phase() === 'loading');
 
   /** Canonical tree for a slot once loaded; `null` keeps the guide mode. */
-  treeFor(index: number): MasteryTree | null {
+  treeFor(index: number): PublicMasteryTree | null {
     const id = this.masteryIds()[index];
     return id && this.phase() === 'ready' ? (this.loaded().get(id) ?? null) : null;
   }

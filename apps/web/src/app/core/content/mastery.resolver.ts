@@ -1,7 +1,7 @@
 import { isPlatformServer } from '@angular/common';
 import { inject, Injector, PLATFORM_ID, TransferState } from '@angular/core';
 import type { ActivatedRouteSnapshot } from '@angular/router';
-import type { MasteryTree } from '@gd/domain';
+import type { PublicMasteryTree } from '@gd/domain';
 import { MASTERY_CATALOG, MASTERY_TREE_STATE } from './masteries';
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -12,7 +12,9 @@ const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
  * that snapshot. A missing slug is `null` (the page renders a 404); a catalog failure rejects, so
  * the prerender fails instead of emitting an empty page.
  */
-export async function resolveMastery(route: ActivatedRouteSnapshot): Promise<MasteryTree | null> {
+export async function resolveMastery(
+  route: ActivatedRouteSnapshot,
+): Promise<PublicMasteryTree | null> {
   const state = inject(TransferState);
   // Captured before any `await`: `inject()` only works in the synchronous injection context.
   const injector = inject(Injector);

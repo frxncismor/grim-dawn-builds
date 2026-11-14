@@ -80,6 +80,12 @@ artefactos SDD. Escritura de informes en `specs/*/reviews/**` no la cambia. Fuer
 esa exclusión, cambios nuevos, editados o eliminados invalidan el resultado.
 Las rutas no pueden escapar raíz ni usar symlinks para leer fuera del repo.
 
+El snapshot no depende de los finales de línea del checkout (T038, spec 003): antes de
+hashear, los archivos de texto pliegan CRLF a LF, de modo que el mismo commit da el mismo
+snapshot con y sin `core.autocrlf`. Los binarios (un NUL en los primeros 8000 bytes,
+heurística de git) se hashean tal cual. Editar, añadir o borrar un archivo sigue
+invalidando el resultado.
+
 CRITICAL/HIGH solo se resuelven tras tarea planificada, corrección verificada y
 revisión nueva. No se admite aplazarlos para pasar. MEDIUM/LOW open no permite
 pasar sin disposición: se resuelven o se aplazan con motivo explícito; aplazar no

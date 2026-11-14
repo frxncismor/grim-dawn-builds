@@ -171,7 +171,9 @@ mensaje fijo que no repite credenciales. `INCLUDE_DRAFTS` solo acepta `true` o
 y `CONTENT_SOURCE=api` lo rechaza con `La API pública no admite INCLUDE_DRAFTS.`.
 Exportar `INCLUDE_DRAFTS=true` antes de `pnpm build` renderiza la guía
 `borrador` con el banner «Borrador · no público» y `noindex`, así que la ruta
-queda fuera del sitemap y nunca forma parte de un build público ni de release.
+queda fuera del sitemap y nunca forma parte de un build público ni de release. `ASSET_SOURCE` solo acepta `own` o
+`game`; `build:release` lo exige explícito (sin valor por defecto) y cualquier otro valor falla
+con `public-build: invalid-environment`; con `ASSET_SOURCE=own` no se publican retratos del juego.
 
 ### Flujo editorial
 

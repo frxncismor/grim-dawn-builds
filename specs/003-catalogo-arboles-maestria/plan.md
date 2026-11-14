@@ -3,7 +3,7 @@
 **Branch**: `orq/11111619-diseno-catalogo` → integración en `orq/11111619` | **Date**: 2026-11-12
 **Spec**: `specs/003-catalogo-arboles-maestria/spec.md`
 **Input**: Investigación `runs/11111619/investigacion.md` (Fase 1 y §5.3), `runs/11111619/diseno-investigacion.md`, `specs/001-mvp-guias-builds/*`, `.specify/memory/constitution.md` (1.10.1), `AGENTS.md`.
-**Estado**: aprobado e implementado (T001–T034); la puerta de cierre (T021) sigue abierta tras las correcciones T035–T038. Actualizado 2026-11-14.
+**Estado**: aprobado e implementado (T001–T034); la puerta de cierre (T021) sigue abierta tras las correcciones T035–T038 y la ronda 2 (T039–T041). Actualizado 2026-11-14.
 
 ## Summary
 
@@ -83,14 +83,15 @@ scripts/
 
 fixtures/content/mastery-trees/     # fixtures generados (JSON), versionados
 fixtures/content/assets/            # manifiesto y NOTICE de los retratos
-apps/api/drizzle/                   # 0009 catálogo + vistas, 0010 skill_node_id, 0011 asset withdrawn
+apps/api/drizzle/                   # 0009 catálogo + vistas, 0010 skill_node_id, 0011 asset withdrawn,
+                                    # 0012 skill_node_id único por guía + revalidación (T035), 0013 vista pública sin icon (T036)
 apps/api/src/                       # repositorio de catálogo (lectura) y rutas GET /api/v1/masteries[/:slug]
 apps/web/
 ├── src/app/features/masteries/     # índice y página por maestría (lazy + prerender)
 ├── src/app/shared/svg/skill-tree/  # componente de árbol reutilizado (modos catálogo y asignación)
 ├── src/app/core/content/           # lectura del catálogo, retratos, estáticos de árboles
 ├── src/styles/deferred.css         # estilos de los componentes diferidos (T033)
-└── tools/                          # emit-mastery-trees, emit-deferred-styles, emit-static-assets
+└── tools/                          # emit-mastery-trees, emit-deferred-styles, emit-portraits (T036), emit-static-assets
 ```
 
 **Lo que NO se toca aquí**: la web vive en `apps/web` (no en `src/` de la raíz); este plan ya
@@ -161,6 +162,17 @@ está implementado salvo lo que `tasks.md` mantenga abierto.
     que los usan (guía y `/maestrias/`+`<slug>`), también en el prerender. Un solo paso de build,
     `apps/web/tools/emit-static-assets.mts`, emite los árboles (decisión 9) y la hoja, en `build` y
     dentro de `runRelease`.
+
+11. **Correcciones de la revisión de cierre (T035, T036, T038).** T035: `validateSkillNodeRefs` rechaza
+    un `skill_node_id` repetido en una guía y la migración `0012` añade el índice único parcial
+    `(build_id, skill_node_id) WHERE skill_node_id IS NOT NULL` y triggers diferidos que revalidan
+    «misma maestría» también al cambiar `masteries`, `mastery_trees`, `catalog_skill_nodes` o
+    `skills`. T036: `angular.json` ya no copia `assets/portraits/**` (el desarrollo los conserva);
+    `apps/web/tools/emit-portraits.mts` los emite solo con `ASSET_SOURCE=game`; la migración `0013`
+    recrea `v_public_skill_nodes` sin `icon` y el JSON público y la API usan `PublicMasteryTreeSchema`
+    (S-004); `build:release` exige `ASSET_SOURCE` explícito y `assertNoGamePortraits` rechaza un
+    artefacto `own` con PNG. T038: el snapshot de `spec-review` pliega CRLF a LF en archivos de
+    texto (contrato de spec002).
 
 ## Riesgos
 

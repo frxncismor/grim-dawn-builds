@@ -2,7 +2,7 @@ import { inject, Injector, runInInjectionContext } from '@angular/core';
 import { Routes, type ActivatedRouteSnapshot, type CanActivateFn } from '@angular/router';
 import { resolveCatalog } from './core/content/catalog.resolver';
 import type { AuthorPageData } from './features/author/author.state';
-import type { MasteryTree } from '@gd/domain';
+import type { PublicMasteryTree } from '@gd/domain';
 import type { MasterySummary } from './core/content/masteries';
 import type { BuildPageContent } from './features/build/build.page';
 
@@ -50,7 +50,7 @@ const resolveBuildPage = lazyResolver<BuildPageContent | null>(() =>
 const resolveAuthor = lazyResolver<AuthorPageData | null>(() =>
   import('./features/author/author.state').then((module) => module.resolveAuthor),
 );
-const resolveMasteryTree = lazyResolver<MasteryTree | null>(() =>
+const resolveMasteryTree = lazyResolver<PublicMasteryTree | null>(() =>
   import('./core/content/mastery.resolver').then((module) => module.resolveMastery),
 );
 const resolveMasteryIndexPage = lazyResolver<readonly MasterySummary[]>(() =>

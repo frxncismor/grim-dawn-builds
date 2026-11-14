@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import type { MasteryTree, PublicBuild, SkillKind } from '@gd/domain';
+import type { PublicMasteryTree, PublicBuild, SkillKind } from '@gd/domain';
 
 /**
  * Own static files of the site (plan 003, decision 9; T017): `apps/web/tools/emit-mastery-trees.mts`
@@ -16,7 +16,7 @@ type SkillNode = PublicBuild['skill_nodes'][number];
 
 export interface MasteryTreeAssets {
   /** Trees by mastery id (`class06`). Rejects if any file is missing or invalid. */
-  load(masteryIds: readonly string[]): Promise<ReadonlyMap<string, MasteryTree>>;
+  load(masteryIds: readonly string[]): Promise<ReadonlyMap<string, PublicMasteryTree>>;
 }
 
 /**
@@ -42,7 +42,7 @@ const isCount = (value: unknown): value is number =>
   Number.isInteger(value) && (value as number) >= 0;
 
 /** Structural check of what the component reads; the build already validated the full schema. */
-function isMasteryTree(value: unknown, slug: string): value is MasteryTree {
+function isMasteryTree(value: unknown, slug: string): value is PublicMasteryTree {
   if (!isRecord(value) || !isRecord(value['mastery']) || !Array.isArray(value['nodes']))
     return false;
   const mastery = value['mastery'];
@@ -93,7 +93,7 @@ export function createMasteryTreeAssets(request: typeof fetch): MasteryTreeAsset
   return {
     async load(masteryIds) {
       const index = await once('index.json');
-      const result = new Map<string, MasteryTree>();
+      const result = new Map<string, PublicMasteryTree>();
       await Promise.all(
         masteryIds.map(async (id) => {
           const slug = isRecord(index) ? index[id] : undefined;
