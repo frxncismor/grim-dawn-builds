@@ -47,6 +47,7 @@ const PUBLIC_RUNTIME_EXPORTS = [
   'PUBLICATION_GATE_CODES',
   'evaluatePublicationGate',
   'toLinkOnlyMetadata',
+  'validateSkillNodeRefs',
   'CatalogSkillNodeSchema',
   'MasteryTreeSchema',
   'SKILL_KINDS',
