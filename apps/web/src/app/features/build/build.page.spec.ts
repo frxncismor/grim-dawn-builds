@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import draftFixture from '../../../../../../fixtures/content/builds/chaman-demoledor-golpe-primigenio.json';
 import { sampleAdaptation } from './source-attribution/source-attribution.fixture';
 import { SITE_BASE_URL } from '../../core/seo/site-url';
+import { MASTERY_TREE_ASSETS } from '../../core/content/mastery-tree-assets';
 import { BuildPage, type BuildPageContent } from './build.page';
 
 const draftContent = draftFixture as unknown as BuildPageContent;
@@ -96,6 +97,15 @@ async function createFixture(value: BuildPageContent, options: RenderOptions = {
       provideRouter([]),
       { provide: PLATFORM_ID, useValue: options.platform ?? 'browser' },
       { provide: SITE_BASE_URL, useValue: 'https://example.test/' },
+      // The canonical trees are covered by build-skills.spec.ts; here the guide mode stays in force.
+      {
+        provide: MASTERY_TREE_ASSETS,
+        useValue: {
+          load: async () => {
+            throw new Error('mastery-trees');
+          },
+        },
+      },
     ],
     deferBlockBehavior: DeferBlockBehavior.Manual,
   });
@@ -404,6 +414,16 @@ describe('gd-build-page', () => {
     expect(root.textContent).toContain('Golpe Primigenio');
   });
 
+  it('links the textual skill fallback to the mastery catalog, so it reads without JavaScript (T017)', async () => {
+    const fixture = await createFixture(publicContent);
+    const root = fixture.nativeElement as HTMLElement;
+    await renderDeferred(fixture, DeferBlockState.Placeholder);
+    const link = root.querySelector<HTMLAnchorElement>('#habilidades a[data-masteries-link]');
+    expect(link).not.toBeNull();
+    expect(link!.getAttribute('href')).toBe('/maestrias');
+    expect(root.querySelectorAll('#habilidades [data-fallback-node]')).toHaveLength(14);
+  });
+
   it('keeps every devotion step, including the ones without a constellation, in the placeholder', async () => {
     const fixture = await createFixture(publicContent);
     const root = fixture.nativeElement as HTMLElement;
@@ -429,6 +449,10 @@ describe('gd-build-page', () => {
         provideRouter([]),
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: SITE_BASE_URL, useValue: 'https://example.test/' },
+        {
+          provide: MASTERY_TREE_ASSETS,
+          useValue: { load: async () => Promise.reject(new Error('x')) },
+        },
       ],
       deferBlockBehavior: DeferBlockBehavior.Manual,
     });

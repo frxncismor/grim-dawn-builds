@@ -8,6 +8,14 @@ import { publicBuildEnv, runRelease } from './build-release.mts';
 import { expectedMigration } from './check-release.mts';
 import { assertStaticHome } from './static-home.mts';
 
+type Dependencies = NonNullable<Parameters<typeof runRelease>[2]>;
+/** Tree emission has its own tests; by default these flows stub it (the real one spawns tsx). */
+const release = (
+  root: string,
+  env: Record<string, string | undefined>,
+  dependencies: Dependencies,
+) => runRelease(root, env, { emitTrees: async () => undefined, ...dependencies });
+
 /** Minimal repo layout where every mastery has an approved, hash-matching portrait. */
 async function seedGameAssets(root: string, over: Record<string, unknown> = {}): Promise<void> {
   const png = Buffer.from('png-bytes');
@@ -79,7 +87,7 @@ test('release builds with ASSET_SOURCE=game and fails closed when the manifest d
       const request: typeof fetch = async () =>
         new Response('{"status":"ready"}', { headers: { 'X-Content-Migration': migration } });
       await assert.rejects(
-        runRelease(root, { CONTENT_SOURCE: 'api', ...env }, { build: stub(seen), request }),
+        release(root, { CONTENT_SOURCE: 'api', ...env }, { build: stub(seen), request }),
       );
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -183,11 +191,11 @@ test('release invalidates prior report, stages build, verifies twice and reports
       { CONTENT_SOURCE: 'fixture' },
       { CONTENT_SOURCE: 'api', INCLUDE_DRAFTS: 'true' },
     ]) {
-      await assert.rejects(runRelease(root, env, { build, request }));
+      await assert.rejects(release(root, env, { build, request }));
       await assert.rejects(access(report));
     }
     assert.equal(builds, 0);
-    const info = await runRelease(root, { CONTENT_SOURCE: 'api' }, { build, request });
+    const info = await release(root, { CONTENT_SOURCE: 'api' }, { build, request });
     assert.equal(info.source, 'api');
     assert.equal(probes, 2);
     assert.deepEqual(JSON.parse(await readFile(report, 'utf8')), info);
@@ -196,7 +204,7 @@ test('release invalidates prior report, stages build, verifies twice and reports
     );
     const sentinel = `gd-release-canary-${Date.now()}`;
     await assert.rejects(
-      runRelease(
+      release(
         root,
         { CONTENT_SOURCE: 'api', CI_TOKEN: sentinel },
         {
@@ -215,7 +223,7 @@ test('release invalidates prior report, stages build, verifies twice and reports
     await assert.rejects(access(report));
     let driftProbes = 0;
     await assert.rejects(
-      runRelease(
+      release(
         root,
         { CONTENT_SOURCE: 'api', CI_TOKEN: sentinel },
         {
@@ -234,7 +242,7 @@ test('release invalidates prior report, stages build, verifies twice and reports
     );
     await assert.rejects(access(report));
     await assert.rejects(
-      runRelease(
+      release(
         root,
         { CONTENT_SOURCE: 'api' },
         {
@@ -251,7 +259,7 @@ test('release invalidates prior report, stages build, verifies twice and reports
     assert.equal(driftProbes, 2);
     await assert.rejects(access(report));
     await assert.rejects(
-      runRelease(
+      release(
         root,
         { CONTENT_SOURCE: 'api' },
         {
@@ -264,7 +272,7 @@ test('release invalidates prior report, stages build, verifies twice and reports
     );
     await assert.rejects(access(report));
     await assert.rejects(
-      runRelease(
+      release(
         root,
         { CONTENT_SOURCE: 'api' },
         {
@@ -279,6 +287,91 @@ test('release invalidates prior report, stages build, verifies twice and reports
   } finally {
     assert.equal(dirname(root), tmpdir());
     assert.ok(basename(root).startsWith('gd-release-'));
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('release emits the mastery trees into the staging before the fingerprint and fails closed (T017)', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gd-release-trees-'));
+  try {
+    const folder = join(root, 'apps/api/drizzle');
+    await mkdir(join(folder, 'meta'), { recursive: true });
+    await writeFile(
+      join(folder, 'meta/_journal.json'),
+      JSON.stringify({ entries: [{ idx: 0, tag: '0000_first' }] }),
+    );
+    await writeFile(join(folder, '0000_first.sql'), 'SELECT 1;');
+    await seedGameAssets(root);
+    const migration = await expectedMigration(root);
+    const request: typeof fetch = async () =>
+      new Response('{"status":"ready"}', { headers: { 'X-Content-Migration': migration } });
+    const build = async (output: string) => {
+      await mkdir(join(output, 'browser'), { recursive: true });
+      await writeFile(
+        join(output, 'browser/index.html'),
+        await readFile(new URL('./fixtures/static-home.html', import.meta.url), 'utf8'),
+      );
+      for (const name of ['main.js', 'home.js'])
+        await writeFile(join(output, 'browser', name), 'console.log(1);');
+      await writeFile(
+        join(output, 'stats.json'),
+        JSON.stringify({
+          outputs: {
+            'main.js': { imports: [] },
+            'home.js': { imports: [], entryPoint: 'src/app/features/home/home.page.ts' },
+          },
+        }),
+      );
+    };
+    const seen: { output: string; env: Record<string, string> }[] = [];
+    const emitTrees = async (output: string, env: Record<string, string>) => {
+      seen.push({ output, env });
+      await mkdir(join(output, 'browser/assets/mastery-trees'), { recursive: true });
+      await writeFile(join(output, 'browser/assets/mastery-trees/index.json'), '{"a":"b"}');
+    };
+    const env = { CONTENT_SOURCE: 'api' };
+    const first = await runRelease(root, env, { build, request, emitTrees });
+    assert.equal(seen.length, 1);
+    assert.equal(seen[0].env['CONTENT_SOURCE'], 'api');
+    assert.equal(basename(seen[0].output).startsWith('.release-'), true);
+    assert.equal(
+      await readFile(
+        join(root, 'dist/grim-dawn-builds/browser/assets/mastery-trees/index.json'),
+        'utf8',
+      ),
+      '{"a":"b"}',
+    );
+    // The trees are part of the fingerprint: a different file gives a different hash.
+    const second = await runRelease(root, env, {
+      build,
+      request,
+      emitTrees: async (output, childEnv) => {
+        await emitTrees(output, childEnv);
+        await writeFile(join(output, 'browser/assets/mastery-trees/index.json'), '{"a":"c"}');
+      },
+    });
+    assert.notEqual(second.contentHash, first.contentHash);
+    // A failing emitter fails the release and publishes nothing new.
+    const report = join(root, 'dist/build-info.json');
+    await assert.rejects(
+      runRelease(root, env, {
+        build,
+        request,
+        emitTrees: async () => {
+          throw new Error('private catalog details');
+        },
+      }),
+    );
+    await assert.rejects(access(report));
+    // The previous publication is untouched: nothing new is published on failure.
+    assert.equal(
+      await readFile(
+        join(root, 'dist/grim-dawn-builds/browser/assets/mastery-trees/index.json'),
+        'utf8',
+      ),
+      '{"a":"c"}',
+    );
+  } finally {
     await rm(root, { recursive: true, force: true });
   }
 });

@@ -48,6 +48,9 @@ interface CatalogRenderNode {
   y: number;
   selected: boolean;
   focused: boolean;
+  /** Assignment mode: the guide node that points at this catalog node, if any. */
+  assignment: SkillNode | null;
+  active: boolean;
 }
 
 interface CatalogModel {
@@ -103,6 +106,12 @@ export class SkillTree {
   readonly nodes = input<readonly SkillNode[]>([]);
   /** Catalog mode: a full canonical tree drawn from its `grid`; guide inputs are ignored. */
   readonly catalogTree = input<MasteryTree | undefined>(undefined);
+  /**
+   * Assignment mode (T017): with a `catalogTree`, the guide nodes of that mastery. Each one points
+   * at a catalog node through `skill_node_id` and marks it with its editorial status; the rest of
+   * the tree stays drawn but subordinate. Empty keeps the plain catalog mode.
+   */
+  readonly assignments = input<readonly SkillNode[]>([]);
   readonly activeIds = input<readonly string[]>([]);
   readonly currentBar = input<number | undefined>(undefined);
 
@@ -116,6 +125,18 @@ export class SkillTree {
   readonly detailDismissed = signal(false);
   private focusOrigin: FocusTarget | null = null;
   private restoringFocus = false;
+
+  readonly assignmentById = computed(
+    () =>
+      new Map(
+        this.assignments()
+          .filter((node) => node.skill_node_id !== undefined)
+          .map((node) => [node.skill_node_id!, node]),
+      ),
+  );
+  readonly assignmentMode = computed(
+    () => this.catalogTree() !== undefined && this.assignmentById().size > 0,
+  );
 
   readonly scopeSlug = computed(() => this.catalogTree()?.mastery.slug ?? this.mastery().slug);
 
@@ -150,17 +171,23 @@ export class SkillTree {
     const tierBars = new Map(source.map((node) => [node.tier, node.bar_required]));
     const maxCol = Math.max(...source.map((node) => node.grid.col));
     const maxRank = Math.max(...rowRank.values());
+    const assignmentById = this.assignmentById();
+    const activeSlugs = new Set(this.activeIds());
     const renderNodes = ordered.map((node): CatalogRenderNode => {
       const at = positions.get(node.id)!;
       const labelLines = this.visibleNameLines(node.name[this.nameLang], maxLabelChars);
+      const assignment = assignmentById.get(node.id) ?? null;
+      const active = assignment !== null && activeSlugs.has(assignment.slug);
       return {
         node,
         id: this.nodeId(node.id),
         labelLines,
-        label: this.catalogNodeLabel(node, nameById, labelLines.join(' ')),
+        label: this.catalogNodeLabel(node, nameById, labelLines.join(' '), assignment, active),
         ...at,
         selected: selectedId === node.id,
         focused: rovingId === node.id,
+        assignment,
+        active,
       };
     });
     const edges = ordered
@@ -209,6 +236,23 @@ export class SkillTree {
     const id = this.selectedId() ?? this.hoveredId() ?? this.focusedId();
     return catalogTree.nodes.find((node) => node.id === id) ?? null;
   });
+
+  readonly catalogDetailAssignment = computed(
+    () => this.assignmentById().get(this.catalogDetailNode()?.id ?? '') ?? null,
+  );
+
+  /** Textual list order: assigned nodes first (the reason for the page), then the rest. */
+  readonly catalogListNodes = computed(() => {
+    const nodes = this.catalogTree()?.nodes ?? [];
+    const assigned = this.assignmentById();
+    if (assigned.size === 0) return nodes;
+    return [
+      ...nodes.filter((n) => assigned.has(n.id)),
+      ...nodes.filter((n) => !assigned.has(n.id)),
+    ];
+  });
+
+  readonly legendStatuses: readonly SkillNode['status'][] = ['recomendada', 'meta', 'omitir'];
 
   readonly masteryNodes = computed(() =>
     this.nodes().filter((node) => node.mastery_slug === this.mastery().slug),
@@ -400,6 +444,26 @@ export class SkillTree {
     return `${this.treeId()}-${this.scopeSlug()}-${node.slug}-listitem`;
   }
 
+  /** Small glyph of the status badge; each status has its own shape (not only its colour). */
+  badgeGlyph(status: SkillNode['status']): string {
+    switch (status) {
+      case 'recomendada':
+        return 'M-5 0 L-1.5 3.5 L5.5 -4';
+      case 'meta':
+        return 'M0 -5 L5 0 L0 5 L-5 0 Z';
+      case 'omitir':
+        return 'M-4 -4 L4 4 M4 -4 L-4 4';
+    }
+  }
+
+  assignedLabel(): string {
+    return $localize`:@@skillTree.assigned:Assigned`;
+  }
+
+  notAssignedLabel(): string {
+    return $localize`:@@skillTree.notAssigned:Not in this guide`;
+  }
+
   activeStepLabel(): string {
     return $localize`:@@skillTree.activeStep:Active step`;
   }
@@ -470,11 +534,17 @@ export class SkillTree {
     node: CatalogSkillNode,
     nameById: ReadonlyMap<string, string>,
     visibleName: string = node.name[this.nameLang],
+    assignment: SkillNode | null = null,
+    active = false,
   ): string {
     const name = node.name[this.nameLang];
     const parts = [visibleName, this.kindLabel(node.kind), this.maxPointsLabel(node)];
     if (node.circular) parts.push(this.circularLabel());
     if (visibleName !== name) parts.push(name);
+    if (assignment) {
+      parts.push(this.assignedLabel(), this.statusLabel(assignment.status));
+      if (active) parts.push(this.activeStepLabel());
+    }
     parts.push(
       this.tierLabel(node.tier),
       this.barLabel(node.bar_required),

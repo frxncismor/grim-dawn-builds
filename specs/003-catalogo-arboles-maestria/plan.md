@@ -120,6 +120,23 @@ src/app/
    `source.sha256[]`. Formato y evidencia en [`research.md#t022--textos-de-localización-arc`](research.md#t022--textos-de-localización-arc).
 8. **Texturas a PNG ignorado (T028).** `scripts/extract-textures.mts` (`pnpm catalog:textures`) decodifica los `.tex` de `resources/UI.arc` (DDS embebido: DXT1/3/5 y BGR(A)) a **PNG** —WebP no es posible sin dependencias (Constitución IV)— en `.game-assets/textures/`, carpeta gitignorada con `manifest.json`; nada del juego se versiona (FR-014, VII). Formato y evidencia en [`research.md#t028--texturas-tex`](research.md#t028--texturas-tex).
 
+9. **Árboles del catálogo como estáticos del sitio para la guía (T017).** La guía necesita los
+   árboles completos de sus maestrías en el navegador, pero llevarlos en `TransferState`
+   rompe el presupuesto de HTML de `/builds/:slug` (dos árboles añaden ≈ +25 kB de `ng-state`; el
+   límite es 120 000 B). **Enmienda de la regla de T012 «el navegador nunca abre una fuente de
+   datos»** (decisión de Paco, Pregunta 9, 2026-11-14): el navegador **sí** puede pedir
+   **estáticos propios del sitio generados en build** (mismo origen, `connect-src 'self'` sin
+   cambios); **nunca** la API ni terceros. `apps/web/tools/emit-mastery-trees.mts` escribe en el
+   artefacto `/assets/mastery-trees/<slug>.json` (árbol validado con `MasteryTreeSchema`) y
+   `/assets/mastery-trees/index.json` (`{ "<id de maestría>": "<slug>" }`, para casar el prefijo
+   de `skill_node_id`, p. ej. `class06`, con su fichero) desde el mismo catálogo que prerenderiza
+   `/maestrias/:slug` (fixtures en local, API en release, sin _fallback_; si la fuente falla, el
+   build falla). Los ficheros no se versionan: nacen en `dist`. El bloque diferido de la
+   guía los pide al entrar en el viewport; si la petición falla, o algún nodo de la guía no
+   lleva `skill_node_id` o los ids apuntan a más de una maestría por árbol, la guía usa el modo
+   guía actual (FR-015, SC-007). Sin JS se lee el _fallback_ textual de la guía. El HTML de
+   la guía no cambia de tamaño.
+
 ## Riesgos
 
 | Riesgo                                        | Prob. | Impacto | Mitigación                                                                                                          |

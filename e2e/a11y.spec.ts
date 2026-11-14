@@ -476,3 +476,48 @@ for (const route of INDEX_ROUTES) {
     });
   });
 }
+
+/** T017 (spec 003, US3): la guía con los árboles canónicos cargados (modo asignación), EN y ES. */
+for (const route of [
+  { name: 'guía con árboles canónicos', path: '/builds/chaman-demoledor-golpe-primigenio' },
+  { name: 'guía con árboles canónicos es', path: '/es/builds/chaman-demoledor-golpe-primigenio' },
+]) {
+  test.describe(`@a11y ${route.name} (${route.path})`, () => {
+    test('axe sin violaciones critical/serious y 14 nodos asignados', async ({ page }) => {
+      await page.goto(`${BASE_URL}${route.path}`, { waitUntil: 'networkidle' });
+      await page.locator('#habilidades').scrollIntoViewIfNeeded();
+      await expect(page.locator('#habilidades [data-skill-id][data-assigned="true"]')).toHaveCount(
+        14,
+      );
+      await settle(page);
+      expectGate(`${route.path} · modo asignación`, await audit(page));
+    });
+
+    test('Tab llega a un nodo asignado y su indicador de foco tiene contraste ≥ 3:1', async ({
+      page,
+    }) => {
+      await page.goto(`${BASE_URL}${route.path}`, { waitUntil: 'networkidle' });
+      await page.locator('#habilidades').scrollIntoViewIfNeeded();
+      await expect(page.locator('#habilidades [data-skill-id][data-assigned="true"]')).toHaveCount(
+        14,
+      );
+      await page.locator('#habilidades [data-skill-id][data-assigned="true"]').first().focus();
+      const focus = await page.evaluate(() => {
+        const element = document.activeElement as Element;
+        const style = getComputedStyle(element);
+        const canvas = element.closest('.skill-tree__canvas') as Element;
+        return {
+          assigned: element.getAttribute('data-assigned'),
+          outlineStyle: style.outlineStyle,
+          outlineWidth: Number.parseFloat(style.outlineWidth),
+          outlineColor: style.outlineColor,
+          background: getComputedStyle(canvas).backgroundColor,
+        };
+      });
+      expect(focus.assigned).toBe('true');
+      expect(focus.outlineStyle).not.toBe('none');
+      expect(focus.outlineWidth).toBeGreaterThanOrEqual(2);
+      expect(contrast(focus.outlineColor, focus.background)).toBeGreaterThanOrEqual(3);
+    });
+  });
+}

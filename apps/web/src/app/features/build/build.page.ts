@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import type { LinkOnlyMetadata, PublicBuild } from '@gd/domain';
 import { SeoService, type JsonLdRecord } from '../../core/seo/seo.service';
 import { BuildAttribution } from './attribution/build-attribution';
@@ -19,7 +20,7 @@ import { BuildSections } from './sections/build-sections';
 import { SourceAttribution } from './source-attribution/source-attribution';
 import { BuildToc } from './toc/build-toc';
 import { VideoFacade } from './video-facade/video-facade';
-import { SkillTree } from '../../shared/svg/skill-tree/skill-tree';
+import { BuildSkills } from './skills/build-skills';
 
 type SkillNode = PublicBuild['skill_nodes'][number];
 type Mastery = PublicBuild['masteries'][number];
@@ -71,7 +72,7 @@ function publicHttpUrl(value: string | null | undefined): string | null {
   standalone: true,
   imports: [
     BuildSections,
-    SkillTree,
+    BuildSkills,
     PurchaseStepper,
     LootFilter,
     DevotionSection,
@@ -79,6 +80,7 @@ function publicHttpUrl(value: string | null | undefined): string | null {
     BuildAttribution,
     BuildToc,
     NgTemplateOutlet,
+    RouterLink,
     SourceAttribution,
   ],
   templateUrl: './build.page.html',

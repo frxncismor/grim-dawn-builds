@@ -595,3 +595,81 @@ test.describe('@journeys fachada de video bajo la CSP', () => {
     await expect(section.locator('a[href="https://youtu.be/SampleID_01"]')).toBeVisible();
   });
 });
+
+/**
+ * T017 (spec 003, US3): la guía dibuja el árbol canónico de cada maestría y marca encima los 14
+ * nodos de la guía. Los árboles son estáticos propios (`/assets/mastery-trees/`), pedidos al llegar
+ * a la sección; sin JavaScript se lee el texto de los 14 nodos, y si los estáticos fallan la guía
+ * vuelve al modo guía (FR-015, SC-007).
+ */
+const GUIDE_LOCALES = [
+  { prefix: '', assigned: 'Assigned', link: /full skill tree of each mastery/i },
+  {
+    prefix: '/es',
+    skills: 'Habilidades',
+    assigned: 'Asignada',
+    link: /árbol de habilidades completo/i,
+  },
+] as const;
+const SKILL_TREES = '#habilidades gd-skill-tree';
+
+for (const locale of GUIDE_LOCALES) {
+  test.describe(`@journeys guía sobre el árbol canónico (${locale.prefix || '/'})`, () => {
+    test('dos árboles completos con los 14 nodos de la guía marcados y sin desbordar la página', async ({
+      page,
+    }) => {
+      const failures: string[] = [];
+      page.on('pageerror', (error) => failures.push(error.message));
+      page.on('requestfailed', (request) => failures.push(request.url()));
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}${GUIDE_PATH}`);
+      await page.locator('#habilidades').scrollIntoViewIfNeeded();
+      await expect(page.locator(SKILL_TREES)).toHaveCount(2);
+      await expect(page.locator(`${SKILL_TREES} [data-skill-id]`)).toHaveCount(30 + 33);
+      await expect(
+        page.locator(`${SKILL_TREES} [data-skill-id][data-assigned="true"]`),
+      ).toHaveCount(14);
+      await expect(
+        page.locator(`${SKILL_TREES}:nth-of-type(1) [data-skill-id][data-assigned="true"]`),
+      ).toHaveCount(9);
+      await expect(page.locator('[data-assignment-legend]').first()).toBeVisible();
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow, 'la página no debe desbordar horizontalmente').toBeLessThanOrEqual(0);
+      expect(failures, 'sin errores ni peticiones fallidas').toEqual([]);
+
+      const first = page.locator(`${SKILL_TREES} [data-skill-id][data-assigned="true"]`).first();
+      await first.scrollIntoViewIfNeeded();
+      await first.focus();
+      const panel = page.locator('#habilidades [data-detail-panel]').first();
+      await expect(panel).toContainText(locale.assigned);
+      await expect(first).toHaveAttribute('aria-label', new RegExp(locale.assigned));
+    });
+
+    test('si los estáticos fallan, la guía conserva sus 14 nodos en el modo guía', async ({
+      page,
+    }) => {
+      await page.route('**/assets/mastery-trees/**', (route) => route.abort());
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}${GUIDE_PATH}`);
+      await page.locator('#habilidades').scrollIntoViewIfNeeded();
+      await expect(page.locator(SKILL_TREES)).toHaveCount(2);
+      await expect(page.locator(`${SKILL_TREES} [data-skill-id]`)).toHaveCount(14);
+      await expect(page.locator('[data-assigned]')).toHaveCount(0);
+    });
+  });
+}
+
+test.describe('@journeys guía sin JavaScript: texto de las habilidades y enlace al catálogo', () => {
+  test.use({ javaScriptEnabled: false });
+
+  for (const locale of GUIDE_LOCALES) {
+    test(`${locale.prefix || '/'}: 14 nodos en el HTML y enlace a /maestrias`, async ({ page }) => {
+      const response = await open(page, `${PUBLIC_BASE_URL}${locale.prefix}${GUIDE_PATH}`);
+      expect(response.status()).toBe(200);
+      await expect(page.locator('#habilidades [data-fallback-node]')).toHaveCount(14);
+      const link = page.locator('#habilidades a[data-masteries-link]');
+      await expect(link).toHaveText(locale.link);
+      await expect(link).toHaveAttribute('href', `${locale.prefix}/maestrias`);
+    });
+  }
+});

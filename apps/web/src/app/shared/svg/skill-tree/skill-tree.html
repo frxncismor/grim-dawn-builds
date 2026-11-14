@@ -7,6 +7,31 @@
       </h2>
     </header>
 
+    @if (assignmentMode()) {
+      <ul class="skill-tree__legend" data-assignment-legend>
+        @for (status of legendStatuses; track status) {
+          <li>
+            <svg
+              viewBox="-12 -12 24 24"
+              width="24"
+              height="24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <g class="skill-tree__badge" [attr.data-status-badge]="status">
+                <circle r="10" />
+                <path [attr.d]="badgeGlyph(status)" />
+              </g>
+            </svg>
+            <span>{{ statusLabel(status) }}</span>
+          </li>
+        }
+        <li class="skill-tree__legend-muted">
+          <span>{{ notAssignedLabel() }}</span>
+        </li>
+      </ul>
+    }
+
     @if (catalog(); as model) {
       @if (model.error) {
         <p class="skill-tree__error" role="alert" i18n="@@skillTree.invalidTree">
@@ -65,6 +90,15 @@
                   [class.skill-tree__node--kind-modifier]="item.node.kind === 'modifier'"
                   [class.skill-tree__node--kind-transmuter]="item.node.kind === 'transmuter'"
                   [class.skill-tree__node--selected]="item.selected"
+                  [class.skill-tree__node--assigned]="item.assignment"
+                  [class.skill-tree__node--unassigned]="assignmentMode() && !item.assignment"
+                  [class.skill-tree__node--recommended]="item.assignment?.status === 'recomendada'"
+                  [class.skill-tree__node--meta]="item.assignment?.status === 'meta'"
+                  [class.skill-tree__node--skip]="item.assignment?.status === 'omitir'"
+                  [class.skill-tree__node--active]="item.active"
+                  [attr.data-assigned]="item.assignment ? 'true' : null"
+                  [attr.data-skill-state]="item.assignment?.status ?? null"
+                  [attr.data-active-step]="item.active ? 'true' : null"
                   [attr.data-skill-id]="item.node.id"
                   [attr.data-skill-kind]="item.node.kind"
                   [attr.data-tier]="item.node.tier"
@@ -123,6 +157,17 @@
                       }
                     }
                   </g>
+                  @if (item.assignment; as assigned) {
+                    <g
+                      class="skill-tree__badge"
+                      aria-hidden="true"
+                      transform="translate(22 -22)"
+                      [attr.data-status-badge]="assigned.status"
+                    >
+                      <circle r="10" />
+                      <path [attr.d]="badgeGlyph(assigned.status)" />
+                    </g>
+                  }
                   <text
                     class="skill-tree__name"
                     aria-hidden="true"
@@ -170,6 +215,24 @@
           {{ node.name[nameLang] }}
           <span [attr.lang]="otherLang">({{ node.name[otherLang] }})</span>
         </h3>
+        @if (catalogDetailAssignment(); as assigned) {
+          <p class="skill-tree__detail-status">
+            {{ assignedLabel() }} · {{ statusLabel(assigned.status) }}
+          </p>
+          @if (assigned.tag) {
+            <p>{{ assigned.tag }}</p>
+          }
+          <p>{{ assigned.rationale }}</p>
+          @if (assigned.points_label) {
+            <p>{{ assigned.points_label }}</p>
+          }
+          @if (assigned.max_points_hint !== null) {
+            <p>
+              <span i18n="@@skillTree.maxPoints">Suggested maximum points:</span>
+              {{ assigned.max_points_hint }}
+            </p>
+          }
+        }
         <p class="skill-tree__detail-status">{{ kindLabel(node.kind) }}</p>
         <p>{{ tierLabel(node.tier) }} · {{ barLabel(node.bar_required) }}</p>
         <p>{{ maxPointsLabel(node) }}</p>
@@ -195,10 +258,26 @@
     <details class="skill-tree__list" open>
       <summary i18n="@@skillTree.listSummary">Skill list and recommendations</summary>
       <ol>
-        @for (node of catalogSource.nodes; track node.id) {
-          <li [attr.id]="catalogListItemId(node)" [attr.data-skill-kind]="node.kind">
+        @for (node of catalogListNodes(); track node.id) {
+          <li
+            [attr.id]="catalogListItemId(node)"
+            [attr.data-skill-kind]="node.kind"
+            [attr.data-assigned]="assignmentById().has(node.id) ? 'true' : null"
+          >
             <strong>{{ node.name[nameLang] }}</strong>
             <span [attr.lang]="otherLang">({{ node.name[otherLang] }})</span>
+            @if (assignmentById().get(node.id); as assigned) {
+              <span class="skill-tree__list-status">
+                {{ assignedLabel() }} · {{ statusLabel(assigned.status) }}
+              </span>
+              @if (assigned.tag) {
+                <span>{{ assigned.tag }}</span>
+              }
+              <p>{{ assigned.rationale }}</p>
+              @if (assigned.points_label) {
+                <span>{{ assigned.points_label }}</span>
+              }
+            }
             <span class="skill-tree__list-status">{{ kindLabel(node.kind) }}</span>
             <span>{{ tierLabel(node.tier) }} · {{ barLabel(node.bar_required) }}</span>
             <span>{{ maxPointsLabel(node) }}</span>
