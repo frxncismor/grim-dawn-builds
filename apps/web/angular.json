@@ -87,6 +87,7 @@
               "statsJson": true
             },
             "skill-tree-preview": {
+              "styles": ["src/styles.css", "src/styles/deferred.css"],
               "browser": "src/app/shared/svg/skill-tree/preview.browser.ts",
               "server": "src/app/shared/svg/skill-tree/preview.server.ts",
               "outputPath": "../../dist/skill-tree-preview",
@@ -95,6 +96,7 @@
               "statsJson": true
             },
             "devotion-map-preview": {
+              "styles": ["src/styles.css", "src/styles/deferred.css"],
               "browser": "src/app/shared/svg/devotion-map/preview.browser.ts",
               "server": "src/app/shared/svg/devotion-map/preview.server.ts",
               "outputPath": "../../dist/devotion-map-preview",
@@ -111,6 +113,7 @@
               "statsJson": true
             },
             "devotion-section-preview": {
+              "styles": ["src/styles.css", "src/styles/deferred.css"],
               "browser": "src/app/features/build/devotion-section/preview.browser.ts",
               "server": "src/app/features/build/devotion-section/preview.server.ts",
               "outputPath": "../../dist/devotion-section-preview",

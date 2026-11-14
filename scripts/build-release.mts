@@ -25,7 +25,7 @@ interface BuildDependencies {
   request?: typeof fetch;
   build?: (output: string, env: Record<string, string>) => Promise<void>;
   /**
-   * Emits the mastery trees (`assets/mastery-trees/*.json`, T017) into the staging with the release
+   * Emits the site's own static files (mastery trees `assets/mastery-trees/*.json` of T017 and the deferred styles `assets/deferred.css` of T033) into the staging with the release
    * environment (API source, no fallback). It runs in a child process: `scripts/` may not import
    * the web zone. Any failure fails the release.
    */
@@ -86,7 +86,7 @@ export async function runRelease(
             [
               '--import',
               'tsx',
-              join(root, 'apps', 'web', 'tools', 'emit-mastery-trees.mts'),
+              join(root, 'apps', 'web', 'tools', 'emit-static-assets.mts'),
               '--dir',
               output,
             ],

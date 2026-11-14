@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ViewEncapsulation,
   Component,
   computed,
   inject,
@@ -96,7 +97,8 @@ interface TreeModel {
   selector: 'gd-skill-tree',
   standalone: true,
   templateUrl: './skill-tree.html',
-  styleUrl: './skill-tree.css',
+  // Styles are global (styles.css): a deferred component's inline <style> is blocked by the CSP (T033).
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SkillTree {

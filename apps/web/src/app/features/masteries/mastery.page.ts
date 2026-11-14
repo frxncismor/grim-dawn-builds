@@ -8,6 +8,7 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { MasteryTree } from '@gd/domain';
 import { SeoService, siteLocale } from '../../core/seo/seo.service';
+import { DeferredStyles } from '../../core/styles/deferred-styles';
 import { SkillTree } from '../../shared/svg/skill-tree/skill-tree';
 import { NotFoundPage } from '../static-pages/not-found.page';
 
@@ -35,6 +36,7 @@ export class MasteryPage {
       // `NotFoundPage` sets its own title and `noindex`.
       return;
     }
+    inject(DeferredStyles).ensure();
     const seo = inject(SeoService);
     const name = this.name;
     const count = this.nodeCount;

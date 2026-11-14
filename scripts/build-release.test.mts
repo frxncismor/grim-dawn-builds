@@ -375,3 +375,16 @@ test('release emits the mastery trees into the staging before the fingerprint an
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('the default static-assets emitter exists and local build and release both run it (T017, T033)', async () => {
+  const repo = join(import.meta.dirname, '..');
+  const source = await readFile(join(repo, 'scripts/build-release.mts'), 'utf8');
+  const entry = /'tools',\s*'(emit-[a-z-]+\.mts)'/.exec(source)?.[1];
+  assert.equal(entry, 'emit-static-assets.mts');
+  await access(join(repo, 'apps/web/tools', entry));
+  const scripts = JSON.parse(await readFile(join(repo, 'package.json'), 'utf8')).scripts as Record<
+    string,
+    string
+  >;
+  assert.match(scripts['build'] ?? '', /emit-static-assets\.mts/);
+});
