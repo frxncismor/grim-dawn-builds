@@ -16,6 +16,16 @@ export interface Options {
   write?: (line: string) => void;
 }
 
+/** Where the fixtures are mounted in the container and where the seeder is told to read them. */
+export const CONTENT_MOUNT = '/content';
+
+/** Success line each seeder prints; the format is owned by seedCompleteLine/bootstrapCompleteLine. */
+export function successPattern(operation: 'seed' | 'bootstrap'): RegExp {
+  return operation === 'seed'
+    ? /^seed complete: \d+ builds, \d+ tier lists, \d+ masteries, \d+ nodes\s*$/
+    : /^bootstrap complete: \d+ builds, \d+ tier lists\s*$/;
+}
+
 /** Public configuration and mount paths only; never reads or transports a password value. */
 export function contentContainerArguments(
   operation: 'seed' | 'bootstrap',
@@ -56,6 +66,8 @@ export function contentContainerArguments(
     '--env',
     `APP_ENV=${appEnv}`,
     '--env',
+    `SEED_CONTENT_ROOT=${CONTENT_MOUNT}`,
+    '--env',
     'DB_HOST=db',
     '--env',
     `POSTGRES_DB=${database}`,
@@ -64,7 +76,7 @@ export function contentContainerArguments(
     '--env',
     'DB_PASSWORD_IMPORTER_FILE=/run/secrets/db_password_importer',
     '--mount',
-    `type=bind,source=${join(root, 'fixtures/content')},target=/content,readonly`,
+    `type=bind,source=${join(root, 'fixtures/content')},target=${CONTENT_MOUNT},readonly`,
     '--mount',
     `type=bind,source=${join(root, 'infra/docker/secrets/db_password_importer.txt')},target=/run/secrets/db_password_importer,readonly`,
     'gd-api:local',
@@ -153,12 +165,7 @@ export function launchContentImport(
         appEnv,
       ),
     );
-    if (
-      result.code !== 0 ||
-      !new RegExp('^' + operation + ' complete: \\d+ builds, \\d+ tier lists\\s*$').test(
-        result.output,
-      )
-    ) {
+    if (result.code !== 0 || !successPattern(operation).test(result.output)) {
       const code = new RegExp(
         '^' +
           operation +

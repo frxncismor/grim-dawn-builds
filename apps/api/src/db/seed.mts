@@ -166,9 +166,25 @@ export function prepareSeed(input: SeedInput): SeedData {
   };
 }
 
-export async function readSeedFixtures(
-  root = fileURLToPath(new URL('../../../../fixtures/content/', import.meta.url)),
-): Promise<SeedData> {
+/**
+ * Fixtures root: `SEED_CONTENT_ROOT` when the launcher sets it (the container mounts them at
+ * /content, where the bundle's relative path does not reach), else the repository checkout.
+ */
+export function seedContentRoot(env: Readonly<Record<string, string | undefined>>): string {
+  return (
+    env['SEED_CONTENT_ROOT'] ||
+    fileURLToPath(new URL('../../../../fixtures/content/', import.meta.url))
+  );
+}
+export const seedCompleteLine = (r: {
+  builds: number;
+  tierLists: number;
+  masteries: number;
+  nodes: number;
+}): string =>
+  `seed complete: ${r.builds} builds, ${r.tierLists} tier lists, ${r.masteries} masteries, ${r.nodes} nodes`;
+
+export async function readSeedFixtures(root = seedContentRoot(process.env)): Promise<SeedData> {
   const json = async (path: string): Promise<unknown> => {
     try {
       return JSON.parse(await readFile(path, 'utf8')) as unknown;
@@ -304,7 +320,7 @@ export async function runSeeder(
   let client: pg.Client | undefined;
   try {
     const config = valid(Config, env);
-    const data = await (overrides.read ?? readSeedFixtures)();
+    const data = await (overrides.read ?? (() => readSeedFixtures(seedContentRoot(env))))();
     const secrets = loadSecrets(
       [
         {
@@ -330,9 +346,7 @@ export async function runSeeder(
     });
     await client.connect();
     const result = await seedData(client, data);
-    write.out(
-      `seed complete: ${result.builds} builds, ${result.tierLists} tier lists, ${result.masteries} masteries, ${result.nodes} nodes`,
-    );
+    write.out(seedCompleteLine(result));
     return 0;
   } catch (error) {
     write.err(

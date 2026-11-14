@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { loadSecrets } from '../config.js';
 import * as schema from './schema.js';
 import { compareMigrations, migrationFingerprint, readExpectedHashes } from './migration-state.js';
-import { prepareSeed, readSeedFixtures, type SeedData } from './seed.mjs';
+import { prepareSeed, readSeedFixtures, seedContentRoot, type SeedData } from './seed.mjs';
 import { writeCatalogRows, writeContentRows, type SeedClient } from './write-content.mjs';
 
 export class BootstrapError extends Error {
@@ -55,6 +55,9 @@ export function bootstrapPayloadHash(data: unknown): string {
     .update(JSON.stringify(canonical(data)))
     .digest('hex');
 }
+
+export const bootstrapCompleteLine = (r: { builds: number; tierLists: number }): string =>
+  `bootstrap complete: ${r.builds} builds, ${r.tierLists} tier lists`;
 
 /** Initial load only. Never adopts, resets or overwrites an editorial database. */
 export async function bootstrapData(
@@ -156,7 +159,9 @@ export async function runBootstrap(
     if (!config.success) throw new BootstrapError('credentials');
     let data: SeedData;
     try {
-      data = prepareSeed(await (overrides.read ?? readSeedFixtures)());
+      data = prepareSeed(
+        await (overrides.read ?? (() => readSeedFixtures(seedContentRoot(env))))(),
+      );
     } catch {
       throw new BootstrapError('invalid-content');
     }
@@ -187,7 +192,7 @@ export async function runBootstrap(
     });
     await client.connect();
     const result = await bootstrapData(client, data);
-    write.out(`bootstrap complete: ${result.builds} builds, ${result.tierLists} tier lists`);
+    write.out(bootstrapCompleteLine(result));
     return 0;
   } catch (error) {
     write.err(
