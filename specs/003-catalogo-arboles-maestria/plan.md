@@ -137,6 +137,20 @@ src/app/
    guía actual (FR-015, SC-007). Sin JS se lee el _fallback_ textual de la guía. El HTML de
    la guía no cambia de tamaño.
 
+10. **Estilos de los componentes diferidos como hoja propia (T033).** La CSP del artefacto
+    (`style-src 'self'` más hashes, sin `unsafe-inline`) bloquea el `<style>` que Angular inyecta
+    en el cliente para los componentes de bloques `@defer`. **Decisión del principal (Pregunta 10,
+    2026-11-14)**: opción b (hoja `'self'`); la opción a (CSS en la hoja global) se descarta por
+    medida, porque supera el error de 320 kB del presupuesto `initial` de Angular (321,39 kB con
+    +14,7 kB); la opción c (`unsafe-inline`, nonces) queda descartada. Los componentes diferidos
+    (`gd-skill-tree`, `gd-devotion-map`, `gd-devotion-section`, `gd-build-skills`) usan
+    `ViewEncapsulation.None` sin estilos de componente; su CSS lo emite
+    `apps/web/tools/emit-deferred-styles.mts` como `/assets/deferred.css` (fuente
+    `apps/web/src/styles/deferred.css`) y lo enlaza `DeferredStyles` en la cabecera de las páginas
+    que los usan (guía y `/maestrias/`+`<slug>`), también en el prerender. Un solo paso de build,
+    `apps/web/tools/emit-static-assets.mts`, emite los árboles (decisión 9) y la hoja, en `build` y
+    dentro de `runRelease`.
+
 ## Riesgos
 
 | Riesgo                                        | Prob. | Impacto | Mitigación                                                                                                          |

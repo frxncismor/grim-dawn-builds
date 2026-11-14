@@ -673,3 +673,74 @@ test.describe('@journeys guía sin JavaScript: texto de las habilidades y enlace
     });
   }
 });
+
+/**
+ * T033 (spec 003): la CSP del artefacto (`style-src 'self'` más hashes, sin `unsafe-inline`) no puede
+ * bloquear los estilos de los componentes diferidos (`@defer`), que se crean en el cliente. Se recorren
+ * las rutas públicas en EN y ES con la CSP real (sin `bypassCSP`) y se exige cero violaciones; en la guía
+ * se llega a las secciones diferidas y el árbol debe tener estilo aplicado, no el valor por defecto.
+ */
+const CSP_ROUTES = [
+  '/',
+  '/tier-list',
+  '/acerca',
+  '/legal',
+  '/autores/grim-dawn-builds',
+  '/maestrias',
+  '/maestrias/demolition',
+  '/maestrias/soldier',
+  GUIDE_PATH,
+  '/builds/guia-inexistente',
+] as const;
+
+for (const prefix of ['', '/es']) {
+  test.describe(`@journeys CSP sin violaciones de estilos (${prefix || '/'})`, () => {
+    for (const route of CSP_ROUTES) {
+      test(`${prefix}${route}`, async ({ page }) => {
+        const violations: string[] = [];
+        page.on('console', (message) => {
+          if (/content security policy/i.test(message.text())) violations.push(message.text());
+        });
+        await page.addInitScript(() => {
+          const sink: string[] = ((window as unknown as { __csp?: string[] }).__csp = []);
+          document.addEventListener('securitypolicyviolation', (event) =>
+            sink.push(`${event.violatedDirective} ${event.blockedURI}`),
+          );
+        });
+        await open(page, `${PUBLIC_BASE_URL}${prefix}${route}`);
+        if (route === GUIDE_PATH) {
+          await page.locator('#habilidades').scrollIntoViewIfNeeded();
+          await expect(
+            page.locator('#habilidades [data-skill-id][data-assigned="true"]'),
+          ).toHaveCount(14);
+          await page.locator('#devociones').scrollIntoViewIfNeeded();
+          await settle(page);
+          const style = await page.evaluate(() => {
+            const tree = document.querySelector('#habilidades .skill-tree') as Element;
+            const shape = document.querySelector(
+              '#habilidades [data-assigned="true"] .skill-tree__shape',
+            ) as Element;
+            return {
+              border: Number.parseFloat(getComputedStyle(tree).borderTopWidth),
+              background: getComputedStyle(tree).backgroundImage,
+              fill: getComputedStyle(shape).fill,
+              stroke: getComputedStyle(shape).strokeWidth,
+            };
+          });
+          expect(style.border, 'el panel del árbol tiene borde (estilo aplicado)').toBeGreaterThan(
+            0,
+          );
+          expect(style.fill, 'el nodo no usa el relleno negro por defecto').not.toBe(
+            'rgb(0, 0, 0)',
+          );
+          expect(Number.parseFloat(style.stroke)).toBeGreaterThan(1);
+        }
+        await settle(page);
+        const reported = await page.evaluate(
+          () => (window as unknown as { __csp?: string[] }).__csp ?? [],
+        );
+        expect([...violations, ...reported], 'violaciones de CSP').toEqual([]);
+      });
+    }
+  });
+}

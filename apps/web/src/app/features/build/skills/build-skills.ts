@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ViewEncapsulation,
   Component,
   computed,
   effect,
@@ -31,7 +32,8 @@ type Phase = 'idle' | 'loading' | 'ready' | 'failed';
   standalone: true,
   imports: [SkillTree],
   templateUrl: './build-skills.html',
-  styleUrl: './build-skills.css',
+  // Styles are global (styles.css): a deferred component's inline <style> is blocked by the CSP (T033).
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BuildSkills {

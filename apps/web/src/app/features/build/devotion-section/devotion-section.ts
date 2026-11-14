@@ -2,6 +2,7 @@ import { isPlatformBrowser } from '@angular/common';
 import {
   afterNextRender,
   ChangeDetectionStrategy,
+  ViewEncapsulation,
   Component,
   computed,
   inject,
@@ -24,7 +25,8 @@ export type DevotionSectionContent = Pick<
   standalone: true,
   imports: [DevotionMap],
   templateUrl: './devotion-section.html',
-  styleUrl: './devotion-section.css',
+  // Styles are global (styles.css): a deferred component's inline <style> is blocked by the CSP (T033).
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DevotionSection {

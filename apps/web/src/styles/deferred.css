@@ -1,0 +1,11 @@
+/*
+ * CSS of the components rendered inside `@defer` blocks (T033). Their inline <style> would be blocked
+ * by the CSP (`style-src 'self'` plus hashes, no `unsafe-inline`) because they are created in the
+ * browser, so they have no component styles: this sheet is served from 'self' as
+ * `/assets/deferred.css` (see `apps/web/tools/emit-deferred-styles.mts`) and linked by the pages that
+ * use them. The preview builds list it in their `styles`. Selectors carry the component's own prefix.
+ */
+@import '../app/shared/svg/skill-tree/skill-tree.css';
+@import '../app/shared/svg/devotion-map/devotion-map.css';
+@import '../app/features/build/devotion-section/devotion-section.css';
+@import '../app/features/build/skills/build-skills.css';

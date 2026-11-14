@@ -12,6 +12,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import type { LinkOnlyMetadata, PublicBuild } from '@gd/domain';
 import { SeoService, type JsonLdRecord } from '../../core/seo/seo.service';
+import { DeferredStyles } from '../../core/styles/deferred-styles';
 import { BuildAttribution } from './attribution/build-attribution';
 import { DevotionSection } from './devotion-section/devotion-section';
 import { LootFilter } from './loot-filter/loot-filter';
@@ -116,6 +117,7 @@ export class BuildPage {
   readonly hasVideo = computed(() => (this.content().video_url ?? '').trim().length > 0);
 
   constructor() {
+    inject(DeferredStyles).ensure();
     effect(() => {
       const content = this.content();
       this.seo.setPage({
