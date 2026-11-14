@@ -563,3 +563,87 @@ por el sitio; los **iconos de habilidad** se admiten solo en uso local por ahora
 
 Riesgo asumido por el dueño del repositorio, sin permiso escrito de Crate. No es ausencia de
 riesgo. Publicar iconos de habilidad exige revisar este análisis y tener terminado el fallback.
+
+## T028 — Texturas (.tex)
+
+Investigación para extraer a PNG, en una carpeta **gitignorada**, las texturas que referencian las
+maestrías base y las habilidades (aprobada por Paco, 2026-11-13). Solo lectura del juego
+(`steam-build-25813250`); no se versiona ningún `.tex`, DDS ni PNG (FR-014, Constitución VII).
+
+### Dónde están y qué campos las referencian
+
+Todas las texturas de UI están en `resources/UI.arc` (3 012 archivos, 3 010 `.tex`). Los registros las
+citan con la ruta `ui/…`, pero **dentro del `.arc` los nombres no llevan el prefijo `ui/`** (p. ej.
+`skills/icons/class01/…`), y la mayúscula del registro no siempre coincide con la del archivo: la búsqueda
+se hace sin distinguir mayúsculas y sin `ui/`.
+
+| Qué                       | Registro `.dbr`                                              | Campo                                      | Ruta (ejemplo, soldier / cadence1)                                     |
+| ------------------------- | ------------------------------------------------------------ | ------------------------------------------ | ---------------------------------------------------------------------- |
+| Maestría (botón de clase) | `records/skills/playerclassNN/_classtraining_classNN.dbr`    | `skillUpBitmapName`, `skillDownBitmapName` | `ui/skills/skillallocation/skills_class01trainingbuttonup.tex`         |
+| Habilidad (icono)         | el registro de la habilidad (mismo que alimenta el catálogo) | `skillUpBitmapName`, `skillDownBitmapName` | `ui/skills/icons/class01/skillicon_cadence1_up.tex`                    |
+| Marco del nodo            | `records/ui/skills/classNN/skillNN.dbr`                      | `bitmapNameUp`/`Down`/`InFocus`            | `ui/skills/skillallocation/skills_buttonborderround01.tex` (no se usa) |
+
+Las habilidades envoltorio (`buffSkillName`/`petSkillName`) toman el campo de la cadena, igual que el
+extractor del catálogo (`icon` del fixture es ese `skillUpBitmapName`). Los 186 iconos del catálogo
+existen en `UI.arc` (0 ausentes), y son 164 `.tex` distintos porque algunas habilidades comparten icono
+(p. ej. los transmutadores). El nombre de salida usa el `id` del nodo, así que cada nodo tiene su PNG.
+
+**No hay «retrato» de maestría** en `UI.arc`: la única textura que los registros de maestría referencian
+es el botón de entrenamiento. Las demás (`skills/classselection/skills_buttonclassNNselection*.tex`,
+300x38, y las pestañas `skills_buttontab_classNN_*.tex`, 174x34) no las cita ningún registro de maestría
+(solo `devotionbuttons_tab2button.dbr` cita las pestañas). La extracción de «maestrías» usa por tanto el
+botón `…trainingbuttonup.tex`; es una imagen pequeña de interfaz, no arte de retrato (decisión pendiente
+para T015).
+
+```text
+masteries   ui/skills/skillallocation/skills_class0{1..6}trainingbuttonup.tex   197x41  (las 6)
+soldier=class01 demolition=class02 occult=class03 nightblade=class04 arcanist=class05 shaman=class06
+skills      ui/skills/icons/class0N/skillicon_*up.tex                           32x32   (186 de 186)
+```
+
+### Formato `.tex`
+
+Salida real de la cabecera de `skills_class01trainingbuttonup.tex` (32 448 bytes):
+
+```text
+offset  0  54 45 58 02      "TEX" + versión 2
+offset  4  00 00 00 00      reservado (0 en los 3 010 archivos)
+offset  8  b4 7e 00 00      tamaño de la carga = longitud total - 12 (32 436): el DDS completo
+offset 12  44 44 53 52      "DDSR"  (magic de DDS con «R» en vez de espacio)
+offset 16  7c 00 00 00      dwSize = 124
+offset 20  07 10 00 00      flags 0x1007 (CAPS|HEIGHT|WIDTH|PIXELFORMAT)
+offset 24  29 00 00 00      alto  = 41
+offset 28  c5 00 00 00      ancho = 197
+offset 40  mipMapCount      1 en casi todos
+offset 88  DDS_PIXELFORMAT  (32 bytes): flags en 92, FourCC en 96, bits por píxel en 100
+offset 140 datos de píxel   (mip 0 primero; luego los mips menores, si los hay)
+```
+
+Es un DDS estándar de 124 bytes de cabecera tras un prefijo de 12 bytes (`TEX\x02`, 0, tamaño); el
+tamaño de carga coincide con `longitud - 12` en los 3 010 archivos. Los datos empiezan en el offset 140.
+Solo se decodifica el mip 0 (el resto son reducciones).
+
+Formatos de píxel encontrados en los 3 010 `.tex` de `UI.arc` (todos se decodifican, 0 errores):
+
+| Formato         | `pfFlags` | FourCC / bits | Archivos | Nota                                                                 |
+| --------------- | --------- | ------------- | -------- | -------------------------------------------------------------------- |
+| BGRA de 32 bits | `0x40`    | 32 bpp        | 2 620    | sin máscaras (todas 0): orden de bytes B,G,R,A; **todos los iconos** |
+| BGR de 24 bits  | `0x40`    | 24 bpp        | 374      | sin máscaras; sin relleno por fila; alfa 255                         |
+| DXT5            | `0x4`     | `DXT5`        | 13       | alfa interpolada                                                     |
+| DXT1            | `0x4`     | `DXT1`        | 3        | con el modo de 1 bit de alfa si `c0 <= c1`                           |
+
+No aparecen DXT3 ni BC4/5/7; el decodificador acepta DXT3 por completitud y falla con el nombre de
+la textura y el FourCC si ve otro. Verificado a ojo con el soldado (dorado, no azul): el orden BGR es el
+correcto aunque las máscaras vengan a 0.
+
+### Decisiones de T028
+
+- **Salida PNG** (RGBA de 8 bits, filtro 0, un solo `IDAT`, sin `tIME`/`tEXt`): WebP no se puede generar
+  sin dependencias (Constitución IV). El tamaño es pequeño: 6 maestrías ≈ 124 KiB; 186 iconos + 6 maestrías ≈ 1 MiB.
+- **Carpeta**: `.game-assets/textures/` en la raíz del repo, en `.gitignore`. `masteries/<slug>.png`,
+  `skills/<mastery-slug>/<registro>.png` y `manifest.json` (+ `NOTICE.txt`, también ignorado).
+- **Determinismo**: `node:zlib` nivel 9 fijo, filas sin filtro, orden de manifiesto por ruta de salida;
+  dos ejecuciones a carpetas distintas dan `diff -r` vacío.
+- **Reutilización**: el lector `.arc`/LZ4 y `buildCatalog` (slugs, ids, `icon`) salen de
+  `extract-mastery-trees.mts` sin cambios (solo se exporta `steamVersion`).
+- Una textura referenciada y ausente del `.arc` se avisa con su conteo y se sigue; si no queda ninguna, falla.

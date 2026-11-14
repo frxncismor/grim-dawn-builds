@@ -471,7 +471,7 @@ export function serializeCatalog(c: readonly CatalogTree[]): string {
 }
 
 /** `buildid` de Steam del manifiesto contiguo (`<steamapps>/appmanifest_219990.acf`), si existe. */
-function steamVersion(gameDir: string): string | null {
+export function steamVersion(gameDir: string): string | null {
   try {
     const acf = readFileSync(join(gameDir, '..', '..', 'appmanifest_219990.acf'), 'utf8');
     const id = /"buildid"\s+"(\d+)"/.exec(acf)?.[1];

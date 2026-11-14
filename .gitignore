@@ -84,3 +84,6 @@ Thumbs.db
 # Stryker mutation artifacts (T-142); generated locally, not source.
 packages/domain/reports/
 packages/domain/.stryker-tmp/
+
+# Textures extracted from a local Grim Dawn copy by `pnpm catalog:textures` (T028); never versioned
+/.game-assets/

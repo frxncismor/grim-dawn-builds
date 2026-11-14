@@ -115,6 +115,7 @@ src/app/
    `localizedName {en, es}` de T005 sin cambios. Falta en ES ⇒ texto EN y aviso con conteo; falta en
    EN ⇒ error. `--no-localize` mantiene los tags de T006. Los hashes de los dos `.arc` se añaden a
    `source.sha256[]`. Formato y evidencia en [`research.md#t022--textos-de-localización-arc`](research.md#t022--textos-de-localización-arc).
+8. **Texturas a PNG ignorado (T028).** `scripts/extract-textures.mts` (`pnpm catalog:textures`) decodifica los `.tex` de `resources/UI.arc` (DDS embebido: DXT1/3/5 y BGR(A)) a **PNG** —WebP no es posible sin dependencias (Constitución IV)— en `.game-assets/textures/`, carpeta gitignorada con `manifest.json`; nada del juego se versiona (FR-014, VII). Formato y evidencia en [`research.md#t028--texturas-tex`](research.md#t028--texturas-tex).
 
 ## Riesgos
 
