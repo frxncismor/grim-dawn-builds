@@ -190,9 +190,13 @@ section only adds what changes on a different machine.
 ## Verification commands
 
 `pnpm verify` runs the local checks in this order and stops at the first one that
-fails: `check:scope`, `check:boundaries`, `check:secrets`, typecheck, lint and
-tests of the `@gd/domain` package, `lint`, `lint:md`, `format:check`, `test`,
-`test:scripts`, `assets:check` and `build`.
+fails (the list is `VERIFY_STEPS` in `scripts/verify-local.mjs`): `check:scope`,
+`check:boundaries`, `check:secrets`, `check:ci-secrets`, build, typecheck, lint and
+tests of the `@gd/domain` package, typecheck, lint and tests of `@gd/api`,
+`test:rotation`, `lint`, `lint:md`, `format:check`, `test`, `test:scripts`,
+`content:validate`, `catalog:check`, `catalog:nodes`, `check:locale-parity`,
+`assets:check`, `check:contrast`, `build`, `check:public-build` and
+`check:performance` (last, on the artifact of `build`).
 
 | Command                                    | What it checks                                                                                                     |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |

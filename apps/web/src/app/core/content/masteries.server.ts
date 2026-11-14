@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { PublicMasteryTreeSchema, type MasteryTree } from '@gd/domain';
+import { PublicMasteryTreeSchema, type PublicMasteryTree } from '@gd/domain';
 import type { MasteryCatalog, MasterySummary } from './masteries';
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -28,7 +28,7 @@ function validSlug(slug: string): boolean {
  * public tree has no `icon` (the game's texture path, S-004): the API must not send it (strict
  * schema, fail closed) and the fixture source drops it before validating (`dropIcons`).
  */
-function parseTree(value: unknown, slug: string, dropIcons = false): MasteryTree {
+function parseTree(value: unknown, slug: string, dropIcons = false): PublicMasteryTree {
   const parsed = PublicMasteryTreeSchema.safeParse(dropIcons ? withoutIcons(value) : value);
   if (!parsed.success || parsed.data.mastery.slug !== slug) throw unavailable();
   return parsed.data;
@@ -67,7 +67,7 @@ export class FixtureMasteryCatalog implements MasteryCatalog {
     );
   }
 
-  async get(slug: string): Promise<MasteryTree | null> {
+  async get(slug: string): Promise<PublicMasteryTree | null> {
     if (!validSlug(slug)) return null;
     let raw: string;
     try {
@@ -174,7 +174,7 @@ export class ApiMasteryCatalog implements MasteryCatalog {
     return summaries.sort((a, b) => (a.slug < b.slug ? -1 : 1));
   }
 
-  async get(slug: string): Promise<MasteryTree | null> {
+  async get(slug: string): Promise<PublicMasteryTree | null> {
     if (!validSlug(slug)) return null;
     const body = await this.read(`api/v1/masteries/${slug}`, true);
     return body === null ? null : parseTree(body, slug);

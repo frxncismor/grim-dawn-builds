@@ -6,7 +6,7 @@ import {
   RESPONSE_INIT,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import type { MasteryTree } from '@gd/domain';
+import type { PublicMasteryTree } from '@gd/domain';
 import { SeoService, siteLocale } from '../../core/seo/seo.service';
 import { DeferredStyles } from '../../core/styles/deferred-styles';
 import { SkillTree } from '../../shared/svg/skill-tree/skill-tree';
@@ -25,7 +25,7 @@ import { NotFoundPage } from '../static-pages/not-found.page';
   styleUrl: './mastery.page.css',
 })
 export class MasteryPage {
-  readonly tree = inject(ActivatedRoute).snapshot.data['mastery'] as MasteryTree | null;
+  readonly tree = inject(ActivatedRoute).snapshot.data['mastery'] as PublicMasteryTree | null;
   readonly name = this.tree ? this.tree.mastery.name[siteLocale(inject(LOCALE_ID))] : '';
   readonly nodeCount = this.tree?.nodes.length ?? 0;
 

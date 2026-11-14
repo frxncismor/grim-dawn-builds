@@ -188,9 +188,13 @@ sección solo añade lo que cambia en otra máquina.
 ## Comandos de verificación
 
 `pnpm verify` ejecuta las comprobaciones locales en este orden y se detiene en la
-primera que falla: `check:scope`, `check:boundaries`, `check:secrets`, typecheck,
-lint y tests del paquete `@gd/domain`, `lint`, `lint:md`, `format:check`, `test`,
-`test:scripts`, `assets:check` y `build`.
+primera que falla (la lista es `VERIFY_STEPS` en `scripts/verify-local.mjs`):
+`check:scope`, `check:boundaries`, `check:secrets`, `check:ci-secrets`, build,
+typecheck, lint y tests del paquete `@gd/domain`, typecheck, lint y tests de
+`@gd/api`, `test:rotation`, `lint`, `lint:md`, `format:check`, `test`, `test:scripts`,
+`content:validate`, `catalog:check`, `catalog:nodes`, `check:locale-parity`,
+`assets:check`, `check:contrast`, `build`, `check:public-build` y `check:performance`
+(el último, sobre el artefacto de `build`).
 
 | Comando                                    | Qué comprueba                                                                                                              |
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |

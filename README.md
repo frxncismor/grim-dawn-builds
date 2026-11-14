@@ -167,7 +167,9 @@ message that does not echo credentials. `INCLUDE_DRAFTS` only accepts `true` or
 `CONTENT_SOURCE=api` rejects it with `La API pública no admite INCLUDE_DRAFTS.`.
 Exporting `INCLUDE_DRAFTS=true` before `pnpm build` renders the `borrador` guide
 with the "Borrador · no público" banner and `noindex`, so the route stays out of
-the sitemap and is never part of a public or release build.
+the sitemap and is never part of a public or release build. `ASSET_SOURCE` only accepts
+`own` or `game`; `build:release` requires it explicit (no default) and any other value fails
+with `public-build: invalid-environment`; `ASSET_SOURCE=own` ships no game portraits.
 
 ### Editorial flow
 
