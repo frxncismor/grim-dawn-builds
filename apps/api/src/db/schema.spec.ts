@@ -138,7 +138,7 @@ describe('database schema: enums', () => {
       'link_only',
     ]);
     expect(enumValues('content_status')).toEqual(['verificado', 'sin_verificar', 'placeholder']);
-    expect(enumValues('asset_status')).toEqual(['pending', 'approved', 'rejected']);
+    expect(enumValues('asset_status')).toEqual(['pending', 'approved', 'rejected', 'withdrawn']);
     expect(enumValues('entry_kind')).toEqual([
       'placeholder',
       'enlace_externo',

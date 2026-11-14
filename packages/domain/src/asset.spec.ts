@@ -109,4 +109,51 @@ describe('checkAssetManifest', () => {
       },
     ]);
   });
+
+  describe('file hashes (provenance)', () => {
+    const FILE = 'public/assets/official/rayo.png';
+    const SHA = 'b'.repeat(64);
+    const withProvenance = (sha = SHA) =>
+      approved({
+        provenance: {
+          game_version: 'v1',
+          source_path: 'ui/x.tex',
+          sha256: sha,
+          width: 1,
+          height: 1,
+        },
+      });
+
+    it('accepts a file whose hash matches the manifest', () => {
+      expect(checkAssetManifest({ assets: [withProvenance()] }, [FILE], { [FILE]: SHA })).toEqual(
+        [],
+      );
+    });
+
+    it('reports a file that differs from the recorded sha256', () => {
+      const issues = checkAssetManifest({ assets: [withProvenance()] }, [FILE], {
+        [FILE]: 'c'.repeat(64),
+      });
+      expect(issues).toEqual([
+        {
+          file: 'icono-rayo',
+          path: 'provenance.sha256',
+          message: expect.stringContaining('sha256'),
+        },
+      ]);
+    });
+
+    it('reports an approved asset whose file is not on disk', () => {
+      const issues = checkAssetManifest({ assets: [withProvenance()] }, [], {});
+      expect(issues.map((i) => i.path)).toEqual(['file_path']);
+    });
+
+    it('does not check hashes when none are supplied', () => {
+      expect(checkAssetManifest({ assets: [withProvenance()] }, [FILE])).toEqual([]);
+    });
+
+    it('lets a withdrawn entry (no file) pass', () => {
+      expect(checkAssetManifest({ assets: [asset({ status: 'withdrawn' })] }, [], {})).toEqual([]);
+    });
+  });
 });

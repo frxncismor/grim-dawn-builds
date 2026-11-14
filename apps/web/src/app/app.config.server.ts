@@ -11,7 +11,8 @@ import { provideServerRendering, withRoutes } from '@angular/ssr';
 import { resolve } from 'node:path';
 import { appConfig } from './app.config';
 import { serverRoutes } from './app.routes.server';
-import { MASTERY_CATALOG } from './core/content/masteries';
+import { MASTERY_CATALOG, MASTERY_PORTRAITS } from './core/content/masteries';
+import { createPortraitResolver } from './core/content/portraits.server';
 import { createMasteryCatalog } from './core/content/masteries.server';
 import { CONTENT_REPOSITORY } from './core/content/repository';
 import { createContentSource } from './core/content/content-source.server';
@@ -39,6 +40,11 @@ const serverConfig: ApplicationConfig = {
     {
       provide: MASTERY_CATALOG,
       useFactory: () => createMasteryCatalog(CONTENT_ROOT, process.env),
+    },
+    {
+      // Fails the build when `ASSET_SOURCE` is invalid or `game` has no readable manifest.
+      provide: MASTERY_PORTRAITS,
+      useFactory: () => createPortraitResolver(CONTENT_ROOT, process.env),
     },
     {
       provide: PUBLIC_SITE_LOADER,

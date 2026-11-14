@@ -92,7 +92,12 @@ export const rightsStatusEnum = pgEnum('rights_status', [
   'link_only',
 ]);
 export const contentStatusEnum = pgEnum('content_status', CONTENT_STATUSES);
-export const assetStatusEnum = pgEnum('asset_status', ['pending', 'approved', 'rejected']);
+export const assetStatusEnum = pgEnum('asset_status', [
+  'pending',
+  'approved',
+  'rejected',
+  'withdrawn',
+]);
 export const entryKindEnum = pgEnum('entry_kind', [
   'placeholder',
   'enlace_externo',

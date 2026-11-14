@@ -71,6 +71,13 @@
       "when": 1794602637686,
       "tag": "0009_mastery_catalog",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794624086250,
+      "tag": "0010_asset_withdrawn",
+      "breakpoints": true
     }
   ]
 }

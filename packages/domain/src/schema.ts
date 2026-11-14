@@ -34,7 +34,7 @@ export const ENTRY_KINDS = [
   'build_propia',
   'build_adaptada',
 ] as const;
-export const ASSET_STATUSES = ['pending', 'approved', 'rejected'] as const;
+export const ASSET_STATUSES = ['pending', 'approved', 'rejected', 'withdrawn'] as const;
 
 export type ReviewState = (typeof REVIEW_STATES)[number];
 export type RightsStatus = (typeof RIGHTS_STATUSES)[number];
@@ -533,6 +533,16 @@ export const AssetSchema = z
     proof_ref: nullableText,
     recorded_on: isoDate,
     fallback_svg: z.string().min(1),
+    /** Where a derived game asset comes from; checked against the file on disk (T015). */
+    provenance: z
+      .object({
+        game_version: z.string().min(1),
+        source_path: z.string().min(1),
+        sha256: z.string().regex(/^[0-9a-f]{64}$/),
+        width: z.number().int().positive(),
+        height: z.number().int().positive(),
+      })
+      .optional(),
   })
   .superRefine((asset, ctx) => {
     if (asset.file_path && asset.status !== 'approved')

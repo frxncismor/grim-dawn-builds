@@ -552,11 +552,11 @@ por el sitio; los **iconos de habilidad** se admiten solo en uso local por ahora
 - `AssetSchema` (`packages/domain/src/schema.ts`) exige para `status: approved`: `file_path`,
   `origin_url`, `rights_holder`, `license_or_permission` y `proof_ref`; `fallback_svg` es
   obligatorio en toda entrada. La enmienda encaja sin cambiar el esquema.
-- Salvedad: `ASSET_STATUSES` es `pending | approved | rejected`; la retirada con
-  `status: withdrawn` exige añadir el valor (o mapearlo) al implementar T015.
-- El manifiesto es `fixtures/content/assets/manifest.json` (vacío hoy) y `pnpm assets:check`
+- `ASSET_STATUSES` incluye ahora `withdrawn` (T015): una entrada retirada no lleva archivo
+  (`file_path` nulo) y nunca se sirve; se usa el fallback propio.
+- El manifiesto es `fixtures/content/assets/manifest.json` (seis retratos desde T015) y `pnpm assets:check`
   rechaza archivos bajo `apps/web/public/assets/**` sin entrada `approved`.
-- Ubicación prevista de los retratos: `apps/web/public/assets/portraits/<slug>.webp`.
+- Ubicación prevista de los retratos: `apps/web/public/assets/portraits/<slug>.png` (PNG, no WebP: convertir exigiría una dependencia nueva, IV; la enmienda admite «derivados PNG/WebP»).
 - El interruptor `ASSET_SOURCE=own|game` y la iconografía propia son trabajo de T015.
 
 ### Decisión de dueño asumida
@@ -647,3 +647,21 @@ correcto aunque las máscaras vengan a 0.
 - **Reutilización**: el lector `.arc`/LZ4 y `buildCatalog` (slugs, ids, `icon`) salen de
   `extract-mastery-trees.mts` sin cambios (solo se exporta `steamVersion`).
 - Una textura referenciada y ausente del `.arc` se avisa con su conteo y se sigue; si no queda ninguna, falla.
+
+## T015 — Retrato de maestría en el índice
+
+- **Qué se publica**: el botón `…trainingbuttonup.tex` de cada maestría (197×41), extraído por T028 y
+  copiado **sin modificar** a `apps/web/public/assets/portraits/<slug>.png` (sha256 igual al
+  `manifest.json` de T028; `assets:check` lo vuelve a comprobar contra `provenance.sha256`).
+  Sin fondos, marcos ni otro arte.
+- **Manifiesto**: una entrada `mastery-<slug>` por retrato con `provenance` (`game_version`,
+  `source_path`, `sha256`, `width`, `height`; opcional en `AssetSchema`) y `fallback_svg =
+src/assets/icons/mastery-<id>.svg` (iconos propios ya existentes).
+- **Interruptor**: `ASSET_SOURCE=own|game` (por defecto `own`) se lee en el servidor en el
+  prerenderizado (`portraits.server.ts`). `own` o entrada ausente/`withdrawn`/no aprobada/otra
+  licencia ⇒ icono propio; `game` con entrada `approved` y `tolerancia_de_facto_sin_permiso` ⇒ el
+  PNG con su tamaño real. Falla cerrado: `ASSET_SOURCE` inválido, `game` sin manifiesto legible,
+  entrada aprobada mal formada, fuera de `portraits/` o sin `fallback_svg` válido.
+- **Formato**: PNG (decisión del área); ~18 KB por imagen, 6 imágenes; el presupuesto de JS inicial
+  no cambia (las imágenes no son JS). Las dos primeras filas cargan sin `loading`, el resto `lazy`.
+- **API**: el enum `asset_status` de PostgreSQL sigue al dominio (`schema.spec` lo exige): migración `0010_asset_withdrawn.sql` (`ALTER TYPE … ADD VALUE 'withdrawn'`) generada con `drizzle-kit`.

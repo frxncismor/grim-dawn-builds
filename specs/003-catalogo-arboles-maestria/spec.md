@@ -230,6 +230,9 @@ editorial.
   se **versionan y publican** por el sitio bajo la enmienda §VII 1.10.0 (T029), con
   manifiesto, atribución, fallback y retirada. Desbloquea T015; riesgo asumido sin permiso
   escrito de Crate. Análisis en `research.md` §T029.
+  **Aclaración (Paco, 2026-11-13, T015)**: en el juego no hay retrato de maestría (T028);
+  «retrato» = el **botón de maestría del juego** (`skillUpBitmapName`, 197×41), publicado
+  tal cual como cabecera de cada entrada del índice, en PNG.
 
 > Nota (2026-11-13): slug del catálogo en inglés en ambos idiomas (decisión de Paco, 2026-11-13):
 > `/maestrias/soldier` y `/es/maestrias/soldier`; el ejemplo anterior `soldado` queda corregido.

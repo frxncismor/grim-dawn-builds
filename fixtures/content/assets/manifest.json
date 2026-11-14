@@ -1,3 +1,112 @@
 {
-  "assets": []
+  "assets": [
+    {
+      "slug": "mastery-arcanist",
+      "status": "approved",
+      "file_path": "public/assets/portraits/arcanist.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-arcanista.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class05trainingbuttonup.tex",
+        "sha256": "f0f85f505d5ccca667309270a30d7831d805aac8b31cd6d11c5e37c40b71e6f5",
+        "width": 197,
+        "height": 41
+      }
+    },
+    {
+      "slug": "mastery-demolition",
+      "status": "approved",
+      "file_path": "public/assets/portraits/demolition.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-demoledor.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class02trainingbuttonup.tex",
+        "sha256": "f2e05f48678f13ccea213a861990661aec2133f81bd88fcb3983c28daf9b4055",
+        "width": 197,
+        "height": 41
+      }
+    },
+    {
+      "slug": "mastery-nightblade",
+      "status": "approved",
+      "file_path": "public/assets/portraits/nightblade.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-filo-nocturno.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class04trainingbuttonup.tex",
+        "sha256": "5e6f7cbb1239db4d48c9b1c13e92227293ae1ec9ad4341a1f1fb1fc99abbeacd",
+        "width": 197,
+        "height": 41
+      }
+    },
+    {
+      "slug": "mastery-occult",
+      "status": "approved",
+      "file_path": "public/assets/portraits/occult.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-ocultista.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class03trainingbuttonup.tex",
+        "sha256": "9471de7a62a348ca254e5312da1d8f159cc6fc5b35cda3c7f1c417ae9eb1f85f",
+        "width": 197,
+        "height": 41
+      }
+    },
+    {
+      "slug": "mastery-shaman",
+      "status": "approved",
+      "file_path": "public/assets/portraits/shaman.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-chaman.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class06trainingbuttonup.tex",
+        "sha256": "a6c79f4dd9ec0052c60a7162a0d015edb8fd985414d4518614ea0b12ba1fbefc",
+        "width": 197,
+        "height": 41
+      }
+    },
+    {
+      "slug": "mastery-soldier",
+      "status": "approved",
+      "file_path": "public/assets/portraits/soldier.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-soldado.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class01trainingbuttonup.tex",
+        "sha256": "a815846d753d2a37240f75ef749d26886f80ee9a3ed162f3f60af19fd2494e01",
+        "width": 197,
+        "height": 41
+      }
+    }
+  ]
 }
