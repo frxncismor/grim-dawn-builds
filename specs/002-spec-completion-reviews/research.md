@@ -151,3 +151,16 @@ no se afirma que estas regresiones estuvieran verificadas en T010–T012.
 **Alternatives considered**: Copiar contratos a cada spec o reescribir las tareas
 001 para acomodar el parser ocultaría el defecto. Devolver mensajes JSON.parse
 sin saneamiento incumple la confidencialidad aunque la puerta falle cerrada.
+
+## Snapshot independiente del fin de línea (T038, spec 003)
+
+**Decision**: `snapshotFor` pliega CRLF a LF en archivos de texto antes de hashear; los
+binarios (NUL en los primeros 8000 bytes, heurística de git) se hashean tal cual.
+
+**Rationale**: el mismo commit daba snapshots distintos según `core.autocrlf` del
+checkout (`i/lf w/lf` vs `i/lf w/crlf`). Los cambios reales (editar, añadir, borrar)
+siguen invalidando el snapshot.
+
+**Alternatives considered**: `.gitattributes` con `* text=auto eol=lf` reescribiría
+el árbol de trabajo de todo el repo y no protege checkouts ya existentes; `git
+hash-object` por archivo añade un proceso por ruta.
