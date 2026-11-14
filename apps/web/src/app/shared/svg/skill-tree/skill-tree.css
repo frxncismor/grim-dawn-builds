@@ -322,3 +322,26 @@
     animation: none;
   }
 }
+
+/*
+ * The textual list sits far below the diagram. The browser skips its style and layout (about 8 ms of
+ * the first render) until it nears the viewport; it stays in the accessibility tree and in find in
+ * page. The intrinsic height approximates the real one (narrow, tablet and desktop widths) so the
+ * page does not jump when it renders; once rendered the browser remembers its real size.
+ */
+.skill-tree__list {
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 245rem;
+}
+
+@media (min-width: 40rem) {
+  .skill-tree__list {
+    contain-intrinsic-block-size: auto 145rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .skill-tree__list {
+    contain-intrinsic-block-size: auto 107rem;
+  }
+}

@@ -382,7 +382,17 @@ test.describe('@journeys árbol de maestría sin JavaScript', () => {
       await expect(items, 'la lista textual debe incluir todos los nodos').toHaveCount(33);
       await expect(page.locator('details.skill-tree__list')).toHaveAttribute('open', '');
       await expect(items.first()).toBeVisible();
-      expect(await page.locator('details.skill-tree__list').innerText()).toMatch(listHint);
+      // T030: the list is `content-visibility: auto`, so the browser only renders it (and only then
+      // `innerText` returns it) once it nears the viewport. The text is in the HTML regardless.
+      const list = page.locator('details.skill-tree__list');
+      expect(await list.textContent(), 'el texto está en el HTML sin desplazarse').toMatch(
+        listHint,
+      );
+      await list.scrollIntoViewIfNeeded();
+      await expect(items.first()).toBeVisible();
+      await expect
+        .poll(() => list.innerText(), { message: 'al llegar a la lista se renderiza completa' })
+        .toMatch(listHint);
     });
   }
 });
