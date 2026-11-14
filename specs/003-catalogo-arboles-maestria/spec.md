@@ -32,7 +32,7 @@ autoriza scraping.
 
 > **Constancia de derechos**: el arte del juego (iconos, retratos, fondos) es de Crate
 > Entertainment. Esta spec solo admite lo que la enmienda 1.10.0 (§VII, aprobada por Paco,
-> 2026-11-13) permite: **retratos de maestría** derivados, versionados y servidos por el
+> 2026-11-13; ratificada en 1.10.1, 2026-11-14: el botón de entrenamiento de `UI.arc` cuenta como retrato) permite: **retratos de maestría** derivados, versionados y servidos por el
 > sitio, y los iconos de habilidad (solo uso local por ahora). **No existe permiso escrito
 > de Crate**: la base es tolerancia de facto asumida como riesgo por el dueño, y la
 > atribución no sustituye al permiso. Lo que sea dato factual del juego (nombre, tier,
@@ -81,7 +81,10 @@ nodos sin ejecutar JavaScript.
 ### US2 (P2) — Explorar catálogo entre maestrías
 
 Como jugador, navego `/maestrias` y veo las seis maestrías base (v1) con su retrato, número de
-habilidades y enlace a su árbol, y cambio de una a otra sin recargar la página completa.
+habilidades y enlace a su árbol, y cambio de una maestría a otra con un clic. Cada maestría es
+una página prerenderizada (plan, decisión 9; T026): el cambio es una navegación por documento,
+sin carga de datos en el cliente. La fluidez tipo Maxroll (cambio sin recarga completa) se revisa
+en spec004.
 
 **Prueba independiente**: la página índice lista las seis maestrías base (v1) desde el catálogo (no
 desde una lista escrita a mano) y detecta una maestría añadida o quitada con solo cambiar
@@ -93,6 +96,9 @@ el dato.
    seis tarjetas con retrato y conteo real de habilidades.
 2. **Dado** que una maestría no tiene árbol válido, **cuando** abro el índice, **entonces**
    aparece marcada como «sin datos» y no rompe la página.
+3. **Dado** el índice `/maestrias`, **cuando** hago clic en la tarjeta de una maestría,
+   **entonces** llego con un solo clic a `/maestrias/<slug>` con su árbol completo ya en el HTML
+   prerenderizado (navegación por documento, también sin JavaScript).
 
 ### US3 (P3) — La guía se dibuja sobre el árbol canónico
 

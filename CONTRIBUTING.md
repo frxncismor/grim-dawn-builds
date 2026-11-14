@@ -194,25 +194,25 @@ fails: `check:scope`, `check:boundaries`, `check:secrets`, typecheck, lint and
 tests of the `@gd/domain` package, `lint`, `lint:md`, `format:check`, `test`,
 `test:scripts`, `assets:check` and `build`.
 
-| Command                                    | What it checks                                                                                          |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `pnpm verify`                              | All the local checks above. Run it before opening a PR.                                                 |
-| `pnpm test`                                | Unit tests of the web (Angular).                                                                        |
-| `pnpm test:scripts`                        | Tests of the verification scripts.                                                                      |
-| `pnpm --filter @gd/domain test`            | Tests of the `packages/domain` domain package.                                                          |
-| `pnpm --filter @gd/domain typecheck`       | Types of the domain package.                                                                            |
-| `pnpm --filter @gd/domain lint`            | Lint of the domain package.                                                                             |
-| `pnpm lint`                                | ESLint of the web application.                                                                          |
-| `pnpm lint:md`                             | markdownlint over all tracked Markdown. Check only.                                                     |
-| `pnpm lint:md:fix`                         | Applies markdownlint's safe automatic fixes. Review `git diff` afterwards and run `pnpm lint:md` again. |
-| `pnpm format:check`                        | Prettier over the files included in the script.                                                         |
-| `pnpm format`                              | Prettier with writes. Review the diff before committing.                                                |
-| `pnpm content:validate -- --dir <carpeta>` | Validates a set of content with the domain schema.                                                      |
-| `pnpm assets:check`                        | Validates the official assets manifest.                                                                 |
-| `pnpm check:scope`                         | Scope prohibitions (e.g. Redis, queues, external auth, storage).                                        |
-| `pnpm check:boundaries`                    | Boundaries between web, API and domain.                                                                 |
-| `pnpm check:secrets`                       | Secrets and credential patterns in files tracked by git.                                                |
-| `pnpm build`                               | Build of the web.                                                                                       |
+| Command                                    | What it checks                                                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `pnpm verify`                              | All the local checks above. Run it before opening a PR.                                                            |
+| `pnpm test`                                | Unit tests of the web (Angular).                                                                                   |
+| `pnpm test:scripts`                        | Tests of the verification scripts. They import the built `@gd/domain`: run `pnpm --filter @gd/domain build` first. |
+| `pnpm --filter @gd/domain test`            | Tests of the `packages/domain` domain package.                                                                     |
+| `pnpm --filter @gd/domain typecheck`       | Types of the domain package.                                                                                       |
+| `pnpm --filter @gd/domain lint`            | Lint of the domain package.                                                                                        |
+| `pnpm lint`                                | ESLint of the web application.                                                                                     |
+| `pnpm lint:md`                             | markdownlint over all tracked Markdown. Check only.                                                                |
+| `pnpm lint:md:fix`                         | Applies markdownlint's safe automatic fixes. Review `git diff` afterwards and run `pnpm lint:md` again.            |
+| `pnpm format:check`                        | Prettier over the files included in the script.                                                                    |
+| `pnpm format`                              | Prettier with writes. Review the diff before committing.                                                           |
+| `pnpm content:validate -- --dir <carpeta>` | Validates a set of content with the domain schema.                                                                 |
+| `pnpm assets:check`                        | Validates the official assets manifest.                                                                            |
+| `pnpm check:scope`                         | Scope prohibitions (e.g. Redis, queues, external auth, storage).                                                   |
+| `pnpm check:boundaries`                    | Boundaries between web, API and domain.                                                                            |
+| `pnpm check:secrets`                       | Secrets and credential patterns in files tracked by git.                                                           |
+| `pnpm build`                               | Build of the web.                                                                                                  |
 
 During development, run the narrowest command that covers your change (for
 example, `pnpm test` or `pnpm lint:md`) and leave `pnpm verify` for before the

@@ -105,6 +105,18 @@ describe('content:validate CLI', () => {
     assert.equal(result.status, 1);
   });
 
+  it('points an invalid catalog tree to `pnpm catalog:nodes`', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'content-tree-'));
+    mkdirSync(join(dir, 'builds'));
+    mkdirSync(join(dir, 'mastery-trees'));
+    writeFileSync(join(dir, 'mastery-trees', 'broken.json'), JSON.stringify({ slug: 'broken' }));
+    const result = run(dir);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /broken\.json/);
+    assert.match(result.stderr, /pnpm catalog:nodes/);
+    assert.doesNotMatch(result.stderr, /catalog:check/);
+  });
+
   it('exits 1 naming the node when skill_node_id is not in the catalog', () => {
     const dir = mkdtempSync(join(tmpdir(), 'content-ref-'));
     mkdirSync(join(dir, 'builds'));

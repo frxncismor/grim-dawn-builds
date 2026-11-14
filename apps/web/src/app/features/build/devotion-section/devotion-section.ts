@@ -25,7 +25,7 @@ export type DevotionSectionContent = Pick<
   standalone: true,
   imports: [DevotionMap],
   templateUrl: './devotion-section.html',
-  // Styles are global (styles.css): a deferred component's inline <style> is blocked by the CSP (T033).
+  // Styles live in src/styles/deferred.css, served by DeferredStyles: a deferred component's inline <style> is blocked by the CSP (T033).
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -2,8 +2,8 @@
 
 **Branch**: `orq/11111619-diseno-catalogo` → integración en `orq/11111619` | **Date**: 2026-11-12
 **Spec**: `specs/003-catalogo-arboles-maestria/spec.md`
-**Input**: Investigación `runs/11111619/investigacion.md` (Fase 1 y §5.3), `runs/11111619/diseno-investigacion.md`, `specs/001-mvp-guias-builds/*`, `.specify/memory/constitution.md` (1.9.0 + enmienda 1.10.0 en borrador), `AGENTS.md`.
-**Estado**: plan técnico borrador para aprobación. **Nada se implementa sin orden.**
+**Input**: Investigación `runs/11111619/investigacion.md` (Fase 1 y §5.3), `runs/11111619/diseno-investigacion.md`, `specs/001-mvp-guias-builds/*`, `.specify/memory/constitution.md` (1.10.1), `AGENTS.md`.
+**Estado**: aprobado e implementado (T001–T034); la puerta de cierre (T021) sigue abierta tras las correcciones T035–T038. Actualizado 2026-11-14.
 
 ## Summary
 
@@ -11,7 +11,7 @@ Derivar de los `.dbr` de la copia legal del juego un **catálogo canónico de á
 maestría** (6 maestrías base en v1, decisión de Paco, 2026-11-13), validarlo con reglas propias y renderizarlo con **SVG propio**
 accesible, prerenderizado en EN/ES. Las guías dejan de dibujar «su» esquema y pasan a
 asignar puntos sobre el árbol canónico. Los iconos/retratos del juego quedan detrás de la
-excepción de la constitución (§VII, enmienda 1.10.0 pendiente de aprobación) y **siempre**
+excepción de la constitución (§VII, enmienda 1.10.0 aprobada; ratificada en 1.10.1) y **siempre**
 con fallback propio conmutable.
 
 ## Technical Context
@@ -21,7 +21,7 @@ con fallback propio conmutable.
 **Storage**: PostgreSQL = fuente de verdad (`mastery_trees`, `catalog_skill_nodes`, vistas `v_public_*`); fixtures JSON generados para desarrollo/tests (`fixtures/content/mastery-trees/*.json`), nunca `.dbr`.
 **Testing**: Vitest/Jest del repo (dominio + API), `node --test` para scripts, Playwright + axe para UI, Lighthouse para presupuesto.
 **Target Platform**: web estática prerenderizada servida local (MVP local, §17.58) con API en Docker.
-**Project Type**: monorepo pnpm (`apps/api`, `packages/domain`, web en raíz).
+**Project Type**: monorepo pnpm (`apps/web`, `apps/api`, `packages/domain`).
 **Performance Goals**: sin ampliar presupuestos de `plan.md` §6 (JS inicial por ruta, gzip, TBT, CLS); la ruta de árbol debe caber en el presupuesto de su ruta.
 **Constraints**: WCAG 2.2 AA; sin dependencias nuevas sin justificación escrita (Constitución IV); inglés primario, español completo (X); nada de arte del juego fuera de §VII y con fallback.
 **Scale/Scope**: 6 maestrías base (v1) × ~25-30 nodos; 2 idiomas; 1 componente de árbol reutilizado por índice, maestría y guía.
@@ -55,35 +55,46 @@ iconografía propia por defecto (`ASSET_SOURCE=own`).
 specs/003-catalogo-arboles-maestria/
 ├── spec.md            # hecho
 ├── plan.md            # este archivo
-├── tasks.md           # siguiente entrega
-├── research.md        # (Fase 0) decisiones de formato y de parser .dbr
-├── data-model.md      # (Fase 1) esquema de catálogo vs guía
-├── quickstart.md      # (Fase 1) comandos: extract, catalog:nodes, build, gates
-└── contracts/
-    └── mastery-tree.md  # (Fase 1) contrato del JSON de catálogo y del componente
+├── tasks.md           # tareas y evidencia
+├── research.md        # decisiones de formato, parser, derechos (§T001–§T029) y de cada tarea
+├── quickstart.md      # comandos y salidas reales de cierre (T021/T034): verify, speckit-analyze
+└── reviews/           # puerta de cierre (spec-review) cuando se ejecuta
 ```
 
-### Source Code (tocará, cuando se ordene)
+El contrato del catálogo (esquema `MasteryTree`/`CatalogSkillNode`, reglas de aciclicidad, tier
+y rejilla) **no** vive en un `data-model.md` ni en `contracts/`: la fuente de verdad es el
+código en `packages/domain/src/mastery-tree.ts` (Constitución VI). Se retiraron del plan esos
+dos entregables (hallazgo A-05 de la revisión de cierre; I1 de `speckit-analyze`).
+
+### Source Code (estructura real)
 
 ```text
 packages/domain/src/
-├── mastery-tree.ts          # esquemas Zod del catálogo (nuevo)
-└── mastery-tree.spec.ts     # pruebas + propiedades (nuevo)
+├── mastery-tree.ts{,.spec.ts}      # esquemas Zod del catálogo + propiedades
+├── skill-node-refs.ts{,.spec.ts}   # validación de skill_node_id de la guía contra el catálogo
+└── asset.ts, schema.ts             # activos y `withdrawn` (T015)
 
 scripts/
-├── extract-mastery-trees.mts      # .dbr → JSON canónico (nuevo; lee ruta local, no versiona)
-├── check-mastery-catalog.mts      # validador `catalog:nodes` (nuevo)
+├── extract-mastery-trees.mts       # .dbr → JSON canónico (lee ruta local, no versiona)
+├── extract-textures.mts            # .tex → PNG en carpeta ignorada (T028)
+├── check-mastery-catalog.mts       # validador `catalog:nodes`
+├── validate-content.mts            # `content:validate` (guías + referencias al catálogo)
 └── <sus pruebas>.test.mts
 
-fixtures/content/mastery-trees/       # fixtures generados (JSON), versionados
-apps/api/drizzle/            # migración nueva: tablas + v_public_mastery_trees, v_public_skill_nodes
-apps/api/src/                # repositorio de catálogo (lectura) + pruebas; rutas GET /api/v1/masteries y /api/v1/masteries/:slug (T023)
-src/app/
-├── features/masteries/      # índice y página por maestría (nuevo; lazy + prerender)
-└── shared/svg/skill-tree/   # componente de árbol reutilizado (modificado, no reescrito)
+fixtures/content/mastery-trees/     # fixtures generados (JSON), versionados
+fixtures/content/assets/            # manifiesto y NOTICE de los retratos
+apps/api/drizzle/                   # 0009 catálogo + vistas, 0010 skill_node_id, 0011 asset withdrawn
+apps/api/src/                       # repositorio de catálogo (lectura) y rutas GET /api/v1/masteries[/:slug]
+apps/web/
+├── src/app/features/masteries/     # índice y página por maestría (lazy + prerender)
+├── src/app/shared/svg/skill-tree/  # componente de árbol reutilizado (modos catálogo y asignación)
+├── src/app/core/content/           # lectura del catálogo, retratos, estáticos de árboles
+├── src/styles/deferred.css         # estilos de los componentes diferidos (T033)
+└── tools/                          # emit-mastery-trees, emit-deferred-styles, emit-static-assets
 ```
 
-**Lo que NO se toca aquí**: `src/` solo cuando se implemente US1/US2/US3 con orden expresa; esta fase entrega documentos.
+**Lo que NO se toca aquí**: la web vive en `apps/web` (no en `src/` de la raíz); este plan ya
+está implementado salvo lo que `tasks.md` mantenga abierto.
 
 ## Design decisions
 
@@ -175,5 +186,5 @@ src/app/
 
 - **Fase 0 — Investigación de formato** (`research.md`): probar extracción real, fijar
   campos, mapear tier, decidir parser. 1-2 días.
-- **Fase 1 — Diseño** (`data-model.md`, `contracts/mastery-tree.md`, `quickstart.md`): 1 día.
-- **Fase 2 — Tareas** (`tasks.md`) y `speckit-analyze` antes de implementar.
+- **Fase 1 — Diseño**: el contrato vive en `packages/domain/src/mastery-tree.ts`; `quickstart.md` recoge los comandos y salidas de cierre (sin `data-model.md` ni `contracts/`): 1 día.
+- **Fase 2 — Tareas** (`tasks.md`); `speckit-analyze` se ejecutó al cierre (T021/T034), no antes de implementar.

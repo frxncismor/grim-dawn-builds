@@ -196,7 +196,7 @@ lint y tests del paquete `@gd/domain`, `lint`, `lint:md`, `format:check`, `test`
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm verify`                              | Todas las comprobaciones locales anteriores. Ejecútalo antes de abrir un PR.                                               |
 | `pnpm test`                                | Pruebas unitarias de la web (Angular).                                                                                     |
-| `pnpm test:scripts`                        | Pruebas de los scripts de verificación.                                                                                    |
+| `pnpm test:scripts`                        | Pruebas de los scripts de verificación. Importan `@gd/domain` compilado: ejecuta antes `pnpm --filter @gd/domain build`.   |
 | `pnpm --filter @gd/domain test`            | Pruebas del paquete de dominio `packages/domain`.                                                                          |
 | `pnpm --filter @gd/domain typecheck`       | Tipos del paquete de dominio.                                                                                              |
 | `pnpm --filter @gd/domain lint`            | Lint del paquete de dominio.                                                                                               |

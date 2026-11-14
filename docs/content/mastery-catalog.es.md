@@ -69,7 +69,7 @@ T022 y T028).
 
 ## Qué se versiona y qué no
 
-Regla: FR-014 de la spec y constitución 1.10.0, sección VII.
+Regla: FR-014 de la spec y constitución 1.10.1, sección VII.
 
 | Elemento                                                                                                                   | Estado                                                                                                    |
 | -------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -95,7 +95,7 @@ y
 - **Base del uso del arte**: **no existe permiso escrito de Crate Entertainment**.
   La base es **tolerancia de facto de la comunidad, asumida como riesgo por el dueño
   del repositorio**. La atribución no sustituye al permiso. Es el texto literal de
-  la sección VII de la constitución (1.10.0); el análisis de riesgos es
+  la sección VII de la constitución (1.10.1); el análisis de riesgos es
   [`research.md`, sección T029](../../specs/003-catalogo-arboles-maestria/research.md),
   que es el `proof_ref` de cada entrada del manifiesto. Cada entrada registra
   `license_or_permission = tolerancia_de_facto_sin_permiso`.
