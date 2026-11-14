@@ -187,3 +187,60 @@ describe('mastery catalog seed (spec 003 T024)', () => {
     expect(commands.some((s) => s.includes('DELETE FROM catalog_skill_nodes'))).toBe(true);
   });
 });
+
+describe('skill_node_id reaches the database (spec 003 T031)', () => {
+  const catalog = {
+    mastery: { id: 'class06', slug: 'shaman', name: { en: 'Shaman', es: 'Chamán' } },
+    game_version: '1.2.1.0',
+    source: { game_version: '1.2.1.0', sha256: ['a'.repeat(64)] },
+    nodes: [
+      {
+        id: 'class06/root',
+        name: { en: 'Root', es: 'Raíz' },
+        kind: 'active',
+        circular: false,
+        tier: 1,
+        bar_required: 1,
+        max_points: 5,
+        grid: { col: 1, row: 0 },
+        parent_id: null,
+      },
+    ],
+  };
+  const run = async (skillNodeId?: string) => {
+    const guide = contractDoc('seed-guide');
+    if (skillNodeId) guide.skill_nodes[0]!.skill_node_id = skillNodeId;
+    const queries: { sql: string; values: unknown[] }[] = [];
+    const client = {
+      query: async (sql: string, values: unknown[] = []) => {
+        queries.push({ sql, values });
+        if (sql.includes('current_user'))
+          return { rows: [{ role: 'importer', privileged: false }] };
+        if (sql.includes('bootstrapped')) return { rows: [{ bootstrapped: false }] };
+        if (sql.includes('RETURNING id')) return { rows: [{ id: crypto.randomUUID() }] };
+        return { rows: [] };
+      },
+    };
+    await seedData(client, prepareSeed({ ...raw(), builds: [guide], catalog: [catalog] }));
+    return queries;
+  };
+
+  it('loads the catalog before the guides so the node reference can resolve', async () => {
+    const queries = await run('class06/root');
+    const catalogAt = queries.findIndex((q) => q.sql.includes('INSERT INTO catalog_skill_nodes'));
+    const nodeAt = queries.findIndex((q) => q.sql.includes('INSERT INTO "build_skill_nodes"'));
+    expect(catalogAt).toBeGreaterThan(-1);
+    expect(nodeAt).toBeGreaterThan(catalogAt);
+  });
+
+  it('writes skill_node_id, and NULL when the guide node has no reference', async () => {
+    const withRef = (await run('class06/root')).find((q) =>
+      q.sql.includes('INSERT INTO "build_skill_nodes"'),
+    )!;
+    expect(withRef.sql).toContain('"skill_node_id"');
+    expect(withRef.values).toContain('class06/root');
+    const without = (await run()).find((q) => q.sql.includes('INSERT INTO "build_skill_nodes"'))!;
+    expect(without.sql).toContain('"skill_node_id"');
+    expect(without.values).toContain(null);
+  });
+});

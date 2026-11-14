@@ -8,7 +8,7 @@ import { loadSecrets } from '../config.js';
 import * as schema from './schema.js';
 import { compareMigrations, migrationFingerprint, readExpectedHashes } from './migration-state.js';
 import { prepareSeed, readSeedFixtures, type SeedData } from './seed.mjs';
-import { writeContentRows, type SeedClient } from './write-content.mjs';
+import { writeCatalogRows, writeContentRows, type SeedClient } from './write-content.mjs';
 
 export class BootstrapError extends Error {
   constructor(
@@ -106,6 +106,8 @@ export async function bootstrapData(
       ).ready
     )
       throw new BootstrapError('migration');
+    // Catalog first (idempotent upsert): guide nodes reference it through `skill_node_id` (T031).
+    await writeCatalogRows(client, data.catalog);
     await writeContentRows(client, data);
     for (const table of ['authors', 'sources', 'builds', 'tier_lists', 'tier_entries'])
       await client.query(`UPDATE ${quote(table)} SET origin='bootstrap'`);
