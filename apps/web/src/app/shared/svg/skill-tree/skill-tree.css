@@ -313,6 +313,96 @@
   margin: var(--space-1) 0 0;
 }
 
+/* Assignment mode (T017): the guide's nodes on the canonical tree; the rest stays drawn but quiet. */
+.skill-tree__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-bone);
+  font-size: var(--text-small);
+}
+
+.skill-tree__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.skill-tree__legend-muted {
+  color: var(--color-ash);
+}
+
+.skill-tree__node--assigned.skill-tree__node--recommended,
+[data-status-badge='recomendada'] {
+  --st-fill: var(--color-storm-dim);
+  --st-stroke: var(--color-storm);
+}
+
+.skill-tree__node--assigned.skill-tree__node--meta,
+[data-status-badge='meta'] {
+  --st-fill: var(--color-ember-dim);
+  --st-stroke: var(--color-ember);
+}
+
+.skill-tree__node--assigned.skill-tree__node--skip,
+[data-status-badge='omitir'] {
+  --st-fill: var(--color-panel-2);
+  --st-stroke: var(--color-ash);
+  --st-dash: 3 2;
+}
+
+.skill-tree__badge circle {
+  fill: var(--st-fill);
+  stroke: var(--st-stroke);
+  stroke-dasharray: var(--st-dash, none);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.skill-tree__badge path {
+  fill: none;
+  stroke: var(--color-bone);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.skill-tree__node--assigned .skill-tree__shape {
+  fill: var(--st-fill);
+  stroke: var(--st-stroke);
+  stroke-dasharray: var(--st-dash, none);
+  stroke-width: 3;
+}
+
+.skill-tree__node--assigned.skill-tree__node--active .skill-tree__shape {
+  stroke: var(--color-bone);
+  stroke-width: 4;
+}
+
+.skill-tree__node--unassigned .skill-tree__shape {
+  fill: var(--color-soot);
+  stroke: var(--color-ash);
+  stroke-width: 1.5;
+  stroke-dasharray: none;
+}
+
+.skill-tree__node--unassigned.skill-tree__node--selected .skill-tree__shape {
+  stroke: var(--color-storm);
+  stroke-width: 4;
+}
+
+.skill-tree__node--unassigned .skill-tree__glyph {
+  stroke: var(--color-ash);
+}
+
+.skill-tree__node--unassigned .skill-tree__name {
+  fill: var(--color-ash);
+  font-weight: 400;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .skill-tree__shape,
   .skill-tree__node,

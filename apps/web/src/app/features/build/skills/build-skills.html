@@ -1,0 +1,23 @@
+@if (loading()) {
+  <p class="skills-loading" role="status" i18n="@@buildSkills.loading">
+    Loading the full skill trees…
+  </p>
+} @else {
+  @for (slot of slots(); track slot.treeId; let index = $index) {
+    @if (treeFor(index); as tree) {
+      <gd-skill-tree
+        [treeId]="slot.treeId"
+        [catalogTree]="tree"
+        [assignments]="slot.nodes"
+        [activeIds]="activeIds()"
+      />
+    } @else {
+      <gd-skill-tree
+        [treeId]="slot.treeId"
+        [mastery]="slot.mastery"
+        [nodes]="slot.nodes"
+        [activeIds]="activeIds()"
+      />
+    }
+  }
+}

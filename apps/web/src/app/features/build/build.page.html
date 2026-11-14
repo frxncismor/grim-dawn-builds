@@ -47,6 +47,11 @@
             }
           </section>
         }
+        <p class="fallback-role">
+          <a data-masteries-link routerLink="/maestrias" i18n="@@buildPage.masteriesLink"
+            >Browse the full skill tree of each mastery</a
+          >
+        </p>
         <div class="build-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
       </section>
     </ng-template>
@@ -54,14 +59,7 @@
     @defer (on viewport) {
       <section class="build-block" id="habilidades" aria-labelledby="habilidades-title">
         <h2 id="habilidades-title" i18n="@@buildPage.skills">Skills</h2>
-        @for (slot of treeSlots(); track slot.treeId) {
-          <gd-skill-tree
-            [treeId]="slot.treeId"
-            [mastery]="slot.mastery"
-            [nodes]="slot.nodes"
-            [activeIds]="activeIds()"
-          />
-        }
+        <gd-build-skills [slots]="treeSlots()" [activeIds]="activeIds()" />
       </section>
     } @placeholder (minimum 500ms) {
       <div class="defer-placeholder">

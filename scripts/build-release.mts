@@ -24,6 +24,12 @@ export function publicBuildEnv(input: Environment): Record<string, string> {
 interface BuildDependencies {
   request?: typeof fetch;
   build?: (output: string, env: Record<string, string>) => Promise<void>;
+  /**
+   * Emits the mastery trees (`assets/mastery-trees/*.json`, T017) into the staging with the release
+   * environment (API source, no fallback). It runs in a child process: `scripts/` may not import
+   * the web zone. Any failure fails the release.
+   */
+  emitTrees?: (output: string, env: Record<string, string>) => Promise<void>;
 }
 
 export async function runRelease(
@@ -71,6 +77,29 @@ export async function runRelease(
         });
       });
     await build(staging, childEnv);
+    const emitTrees =
+      dependencies.emitTrees ??
+      (async (output: string, environment: Record<string, string>) => {
+        await new Promise<void>((resolveEmit, reject) => {
+          const child = spawn(
+            process.execPath,
+            [
+              '--import',
+              'tsx',
+              join(root, 'apps', 'web', 'tools', 'emit-mastery-trees.mts'),
+              '--dir',
+              output,
+            ],
+            { cwd: root, env: environment, stdio: 'inherit', windowsHide: true, shell: false },
+          );
+          child.once('error', () => reject(new Error('Emisión de árboles falló.')));
+          child.once('exit', (code) =>
+            code === 0 ? resolveEmit() : reject(new Error('Emisión de árboles falló.')),
+          );
+        });
+      });
+    // Before the public-build scan and the fingerprint, so the trees are verified and hashed.
+    await emitTrees(staging, childEnv);
     await assertPublicBuild(staging, sensitiveValues(env));
     await finalizeStaticHome(staging);
     const budgets = await measureInitialRoutes(staging);

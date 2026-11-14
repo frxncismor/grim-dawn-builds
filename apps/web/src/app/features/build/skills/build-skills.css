@@ -1,0 +1,10 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+
+.skills-loading {
+  margin: 0;
+  padding-block: var(--space-6);
+  color: var(--color-ash);
+}
