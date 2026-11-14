@@ -564,6 +564,17 @@ por el sitio; los **iconos de habilidad** se admiten solo en uso local por ahora
 Riesgo asumido por el dueño del repositorio, sin permiso escrito de Crate. No es ausencia de
 riesgo. Publicar iconos de habilidad exige revisar este análisis y tener terminado el fallback.
 
+### Ratificación 1.10.1 (S-002, 2026-11-14)
+
+La revisión de cierre de spec003 (hallazgo S-002) señaló que el «retrato» publicado es el botón
+de entrenamiento de `UI.arc` (`skills_classNNtrainingbuttonup.tex`, 197×41; ver §T028: `UI.arc` no
+contiene retratos de maestría como tales) y que §VII solo exceptuaba «retratos». Decisión de Paco
+(2026-11-14): **ratificar** que ese botón cuenta como «retrato de maestría» de la excepción 2, con la
+misma atribución a Crate, el mismo fallback propio conmutable (`ASSET_SOURCE=own|game`) y la misma
+retirada inmediata, y **enmendar §VII (constitución 1.10.1)**. El alcance no crece: botones de
+selección de clase, pestañas, marcos y fondos siguen fuera, y el riesgo asumido y su mitigación del
+análisis anterior no cambian. Esta entrada y la constitución 1.10.1 son el `proof_ref` de la ratificación.
+
 ## T028 — Texturas (.tex)
 
 Investigación para extraer a PNG, en una carpeta **gitignorada**, las texturas que referencian las

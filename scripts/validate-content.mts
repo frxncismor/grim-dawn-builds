@@ -73,7 +73,7 @@ function readCatalog(treesDir: string): { catalog: MasteryTree[]; issues: Conten
         issues.push({
           file,
           path: '(raíz)',
-          message: 'árbol de catálogo inválido (ver pnpm catalog:check)',
+          message: 'árbol de catálogo inválido (ver pnpm catalog:nodes)',
         });
     } catch (error) {
       issues.push({ file, path: '(raíz)', message: String(error) });

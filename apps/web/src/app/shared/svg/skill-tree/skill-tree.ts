@@ -97,7 +97,7 @@ interface TreeModel {
   selector: 'gd-skill-tree',
   standalone: true,
   templateUrl: './skill-tree.html',
-  // Styles are global (styles.css): a deferred component's inline <style> is blocked by the CSP (T033).
+  // Styles live in src/styles/deferred.css, served by DeferredStyles: a deferred component's inline <style> is blocked by the CSP (T033).
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

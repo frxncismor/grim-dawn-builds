@@ -66,7 +66,7 @@ and T028).
 
 ## What is versioned and what is not
 
-Rule: spec FR-014 and constitution 1.10.0, section VII.
+Rule: spec FR-014 and constitution 1.10.1, section VII.
 
 | Item                                                                                                    | Status                                                                                       |
 | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -90,7 +90,7 @@ and
 - **Basis for using the art**: there is **no written permission from Crate
   Entertainment**. The basis is **de facto tolerance of the community, accepted as
   a risk by the repository owner**. Attribution does not replace permission. This is
-  the literal wording of constitution section VII (1.10.0); the risk analysis is
+  the literal wording of constitution section VII (1.10.1); the risk analysis is
   [`research.md`, section T029](../../specs/003-catalogo-arboles-maestria/research.md),
   which is the `proof_ref` of every manifest entry. Each entry records
   `license_or_permission = tolerancia_de_facto_sin_permiso`.

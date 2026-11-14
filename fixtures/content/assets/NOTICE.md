@@ -7,8 +7,8 @@ are derived from **Grim Dawn © Crate Entertainment**.
 
 - This project is **not affiliated with or endorsed by Crate Entertainment**.
 - **There is no written permission from Crate.** The basis is de facto tolerance of the
-  community, accepted as a risk by the repository owner (constitution §VII, 1.10.0,
-  approved by Paco, 2026-11-13). Attribution does not replace permission.
+  community, accepted as a risk by the repository owner (constitution §VII, 1.10.1,
+  approved by Paco, 2026-11-13; the training button ratified as portrait on 2026-11-14). Attribution does not replace permission.
 - Each portrait needs an `approved` manifest entry with `license_or_permission =
 tolerancia_de_facto_sin_permiso` and a `proof_ref` to
   `specs/003-catalogo-arboles-maestria/research.md#t029`. Portraits are added manually,
@@ -30,8 +30,8 @@ Los retratos de maestría listados en `manifest.json` (servidos desde
 
 - Este proyecto **no está afiliado ni respaldado por Crate Entertainment**.
 - **No existe permiso escrito de Crate.** La base es tolerancia de facto de la comunidad,
-  asumida como riesgo por el dueño del repositorio (constitución §VII, 1.10.0, aprobada por
-  Paco, 2026-11-13). La atribución no sustituye al permiso.
+  asumida como riesgo por el dueño del repositorio (constitución §VII, 1.10.1, aprobada por
+  Paco, 2026-11-13; botón de entrenamiento ratificado como retrato el 2026-11-14). La atribución no sustituye al permiso.
 - Cada retrato exige una entrada `approved` en el manifiesto con `license_or_permission =
 tolerancia_de_facto_sin_permiso` y `proof_ref` a
   `specs/003-catalogo-arboles-maestria/research.md#t029`. Se incorporan a mano, nunca por

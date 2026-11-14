@@ -2,7 +2,7 @@ import { InjectionToken } from '@angular/core';
 import type { MasteryTree, PublicBuild, SkillKind } from '@gd/domain';
 
 /**
- * Own static files of the site (plan 003, decision 9; T017): `scripts/emit-mastery-trees.mts`
+ * Own static files of the site (plan 003, decision 9; T017): `apps/web/tools/emit-mastery-trees.mts`
  * writes them into the artifact from the catalog. They are same-origin (`connect-src 'self'`);
  * the browser never calls the API or a third party for them.
  */
