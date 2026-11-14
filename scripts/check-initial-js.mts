@@ -23,16 +23,23 @@ export const CATALOG_JS_LIMIT = 112000;
 export const MASTERY_JS_LIMIT = 150000;
 /** Pages of the mastery route that are measured (largest tree and a mid-size one), per locale. */
 export const MASTERY_BUDGET_SLUGS = ['demolition', 'soldier'] as const;
-type InitialRoute = 'home' | 'tier-list' | 'mastery';
+/**
+ * `/maestrias` (spec 003, T027): an interactive listing that draws no tree, so it is the same class
+ * as `/tier-list` and reuses its approved limit (`CATALOG_JS_LIMIT`); the home budget cannot apply
+ * because the home ships no JS at all. No existing limit changes.
+ */
+type InitialRoute = 'home' | 'tier-list' | 'mastery' | 'mastery-index';
 const ROUTE_ENTRY: Record<InitialRoute, string> = {
   home: 'src/app/features/home/home.page.ts',
   'tier-list': 'src/app/features/tier-list/tier-list.page.ts',
   mastery: 'src/app/features/masteries/mastery.page.ts',
+  'mastery-index': 'src/app/features/masteries/index.page.ts',
 };
 const ROUTE_LIMIT: Record<InitialRoute, number> = {
   home: INITIAL_JS_LIMIT,
   'tier-list': CATALOG_JS_LIMIT,
   mastery: MASTERY_JS_LIMIT,
+  'mastery-index': CATALOG_JS_LIMIT,
 };
 interface Output {
   entryPoint?: string;
@@ -125,7 +132,9 @@ export async function measureInitialJs(
       ? 'index.html'
       : route === 'tier-list'
         ? 'tier-list/index.html'
-        : `maestrias/${slug ?? ''}/index.html`;
+        : route === 'mastery-index'
+          ? 'maestrias/index.html'
+          : `maestrias/${slug ?? ''}/index.html`;
   if (route === 'mastery' && !slug) throw new Error('Falta el slug de la maestría.');
   const [stats, html] = await Promise.all([
     readFile(join(root, 'stats.json'), 'utf8'),
@@ -167,6 +176,7 @@ export async function measureInitialRoutes(
     );
   const hasTier = hasEntry('tier-list');
   const hasMastery = hasEntry('mastery');
+  const hasMasteryIndex = hasEntry('mastery-index');
   const results = [];
   for (const segments of locales) {
     const prefix = segments.length === 0 ? '' : `/${segments.join('/')}`;
@@ -193,6 +203,11 @@ export async function measureInitialRoutes(
           route: `${prefix}/maestrias/${slug}`,
           ...(await measureInitialJs(root, 'mastery', segments, slug)),
         });
+    if (hasMasteryIndex)
+      results.push({
+        route: `${prefix}/maestrias`,
+        ...(await measureInitialJs(root, 'mastery-index', segments)),
+      });
   }
   return results;
 }

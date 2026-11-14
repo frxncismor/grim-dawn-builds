@@ -30,6 +30,20 @@ const ensurePublicSite: CanActivateFn = (route, state) => {
   );
 };
 
+/** Guards of the mastery pages: a SPA navigation without their snapshot loads the document. */
+const ensureMasteryTreePage: CanActivateFn = (route, state) => {
+  const injector = inject(Injector);
+  return import('./core/content/mastery.guard').then((module) =>
+    runInInjectionContext(injector, () => module.ensureMasteryTree(route, state)),
+  );
+};
+const ensureMasteryIndexPage: CanActivateFn = (route, state) => {
+  const injector = inject(Injector);
+  return import('./core/content/mastery.guard').then((module) =>
+    runInInjectionContext(injector, () => module.ensureMasteryIndex(route, state)),
+  );
+};
+
 const resolveBuildPage = lazyResolver<BuildPageContent | null>(() =>
   import('./core/content/content.resolvers').then((module) => module.resolveBuildPage),
 );
@@ -72,11 +86,13 @@ export const routes: Routes = [
   },
   {
     path: 'maestrias',
+    canActivate: [ensureMasteryIndexPage],
     loadComponent: () => import('./features/masteries/index.page').then((m) => m.MasteryIndexPage),
     resolve: { masteries: resolveMasteryIndexPage },
   },
   {
     path: 'maestrias/:slug',
+    canActivate: [ensureMasteryTreePage],
     loadComponent: () => import('./features/masteries/mastery.page').then((m) => m.MasteryPage),
     resolve: { mastery: resolveMasteryTree },
   },

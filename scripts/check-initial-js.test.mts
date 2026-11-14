@@ -216,3 +216,35 @@ test('mastery tree pages (T013) are measured per slug and locale against the tre
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('the mastery index (T027) is measured at /maestrias and /es/maestrias against the existing catalog limit', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gd-initial-js-index-'));
+  try {
+    const meta = stats();
+    (meta.outputs as Record<string, unknown>)['index.js'] = {
+      entryPoint: 'src/app/features/masteries/index.page.ts',
+      imports: [{ path: 'shared.js', kind: 'import-statement' }],
+    };
+    await writeFile(join(root, 'stats.json'), JSON.stringify(meta));
+    for (const prefix of ['', 'es/']) {
+      await mkdir(join(root, 'browser', prefix, 'maestrias'), { recursive: true });
+      await writeFile(join(root, 'browser', prefix, 'index.html'), html);
+      await writeFile(join(root, 'browser', prefix, 'maestrias', 'index.html'), html);
+    }
+    for (const name of ['main.js', 'polyfills.js', 'shared.js', 'index.js', 'home.js'])
+      await writeFile(join(root, 'browser', name), 'console.log(1)');
+    const results = await measureInitialRoutes(root, [[], ['es']]);
+    const index = results.filter((r) => /\/maestrias$/.test(r.route));
+    assert.deepEqual(index.map((r) => r.route).sort(), ['/es/maestrias', '/maestrias']);
+    for (const r of index) {
+      assert.equal(r.limitBytes, CATALOG_JS_LIMIT);
+      assert.ok(r.files.some((f) => f.file === 'index.js'));
+    }
+    assert.equal(results.find((r) => r.route === '/')?.limitBytes, INITIAL_JS_LIMIT);
+    // A budgeted index page missing from the artifact fails closed instead of being skipped.
+    await rm(join(root, 'browser/es/maestrias/index.html'));
+    await assert.rejects(measureInitialRoutes(root, [[], ['es']]));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

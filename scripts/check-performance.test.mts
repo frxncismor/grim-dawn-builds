@@ -828,3 +828,30 @@ test('la ruta de árbol de maestría (T013) entra en presupuestos JS y en las UR
         `${prefix}${slug}`,
       );
 });
+
+test('el índice de maestrías (T027) usa el límite JS del catálogo y entra en las URLs de Lighthouse', async () => {
+  assert.equal(BUDGETS.jsBytes.masteryIndex, CATALOG_JS_LIMIT);
+  for (const route of ['/maestrias', '/es/maestrias']) {
+    assert.equal(
+      evaluateJsBudgets([
+        { route, totalGzipBytes: CATALOG_JS_LIMIT, limitBytes: CATALOG_JS_LIMIT },
+      ])[0]?.pass,
+      true,
+    );
+    assert.equal(
+      evaluateJsBudgets([
+        { route, totalGzipBytes: CATALOG_JS_LIMIT + 1, limitBytes: CATALOG_JS_LIMIT },
+      ])[0]?.pass,
+      false,
+    );
+    assert.throws(() =>
+      evaluateJsBudgets([{ route, totalGzipBytes: 1, limitBytes: MASTERY_JS_LIMIT }]),
+    );
+  }
+  const config = JSON.parse(
+    await readFile(join(import.meta.dirname, '..', 'lighthouserc.json'), 'utf8'),
+  );
+  const urls: string[] = config.ci.collect.url;
+  for (const prefix of ['', 'es/'])
+    assert.ok(urls.includes(`http://localhost/${prefix}maestrias/index.html`), prefix);
+});

@@ -388,6 +388,66 @@ test.describe('@journeys árbol de maestría sin JavaScript', () => {
 });
 
 /**
+ * T027 (spec 003, US2): el índice `/maestrias` se lee sin JavaScript. El HTML prerenderizado ya
+ * contiene las seis filas con su nombre, su recuento real y su enlace a `/maestrias/<slug>`.
+ */
+test.describe('@journeys índice de maestrías sin JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  for (const [path, heading, prefix, names] of [
+    [
+      '/maestrias',
+      'Mastery skill trees',
+      '',
+      ['Arcanist', 'Demolitionist', 'Nightblade', 'Occultist', 'Shaman', 'Soldier'],
+    ],
+    [
+      '/es/maestrias',
+      'Árboles de habilidades de las maestrías',
+      '/es',
+      ['Arcanista', 'Demoledor', 'Hoja de la Noche', 'Ocultista', 'Chamán', 'Soldado'],
+    ],
+  ] as const) {
+    test(`${path}: seis filas con nombre, recuento y enlace en el HTML`, async ({ page }) => {
+      const response = await open(page, `${PUBLIC_BASE_URL}${path}`);
+      expect(response.status(), `${path} debe existir en el artefacto prerenderizado`).toBe(200);
+      await expectSingleHeading(page, heading, `${path} sin JavaScript`);
+      const rows = page.locator('[data-mastery]');
+      await expect(rows).toHaveCount(6);
+      const slugs = ['arcanist', 'demolition', 'nightblade', 'occult', 'shaman', 'soldier'];
+      const counts = [30, 33, 31, 30, 30, 32];
+      for (const [index, slug] of slugs.entries()) {
+        const row = rows.nth(index);
+        await expect(row).toHaveAttribute('data-mastery', slug);
+        await expect(row.locator('a')).toHaveText(names[index]!);
+        await expect(row.locator('a')).toHaveAttribute('href', `${prefix}/maestrias/${slug}`);
+        await expect(row.locator('[data-count]')).toContainText(String(counts[index]));
+      }
+      await expect(page.locator('[data-empty]')).toHaveCount(0);
+    });
+  }
+});
+
+/** T027: índice → una maestría → vuelta, en inglés y en español. */
+test.describe('@journeys índice → maestría → vuelta', () => {
+  for (const [path, prefix, name] of [
+    ['/maestrias', '', 'Demolitionist'],
+    ['/es/maestrias', '/es', 'Demoledor'],
+  ] as const)
+    test(`${path}: abre Demoledor y vuelve al índice con el historial`, async ({ page }) => {
+      await open(page, `${PUBLIC_BASE_URL}${path}`);
+      await page.locator('[data-mastery="demolition"] a').click();
+      await page.waitForURL(`**${prefix}/maestrias/demolition`);
+      await expectSingleHeading(page, name, `${path} → maestría`);
+      await expect(page.locator('[data-skill-id]')).toHaveCount(33);
+      await page.goBack();
+      await page.waitForURL(`**${path}`);
+      await expect(page.locator('[data-mastery]')).toHaveCount(6);
+      await expect(page.locator('h1')).toHaveCount(1);
+    });
+});
+
+/**
  * T026 (spec 003): el snapshot global de catálogo y autores solo viaja en las páginas que lo
  * leen. Las de maestría no lo llevan en `ng-state` (presupuesto de HTML) y, al navegar desde ellas
  * al catálogo, el guard carga el documento prerenderizado en vez de fallar.

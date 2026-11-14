@@ -65,7 +65,11 @@ describe('application routes', () => {
     const server = serverRoutes.find((serverRoute) => serverRoute.path === 'maestrias');
     expect(server?.renderMode).toBe(RenderMode.Prerender);
     // The detail route stays parametrized and listed by the catalog.
-    expect(routes.some((route) => route.path === 'maestrias/:slug')).toBe(true);
+    const detail = routes.find((route) => route.path === 'maestrias/:slug');
+    expect(detail).toBeDefined();
+    // Both read a snapshot of the prerendered document, so both are guarded.
+    expect(index?.canActivate).toHaveLength(1);
+    expect(detail?.canActivate).toHaveLength(1);
   });
 
   it('prerenders only the slugs exposed by the repository', async () => {
