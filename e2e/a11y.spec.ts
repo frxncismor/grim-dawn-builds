@@ -30,6 +30,8 @@ const ROUTES = [
   { name: 'guía es', path: '/es/builds/chaman-demoledor-golpe-primigenio' },
   { name: 'acerca es', path: '/es/acerca' },
   { name: 'legal es', path: '/es/legal' },
+  { name: 'índice de maestrías', path: '/maestrias' },
+  { name: 'índice de maestrías es', path: '/es/maestrias' },
   { name: 'árbol soldier', path: '/maestrias/soldier' },
   { name: 'árbol demolition', path: '/maestrias/demolition' },
   { name: 'árbol soldier es', path: '/es/maestrias/soldier' },
@@ -403,6 +405,74 @@ for (const route of TREE_ROUTES) {
       await page.keyboard.press('Escape');
       await expect(close, 'Escape cierra el detalle').toHaveCount(0);
       expect((await activeNode(page)).id, 'el foco vuelve al nodo').toBe(first);
+    });
+  });
+}
+
+/**
+ * T027 (spec 003, US2): el índice `/maestrias` se recorre con teclado. Tab pasa por las seis
+ * filas (un enlace por maestría) con un indicador de foco visible de contraste ≥ 3:1 y Enter
+ * abre la maestría.
+ */
+const INDEX_ROUTES = ROUTES.filter((route) => /^(\/es)?\/maestrias$/.test(route.path));
+for (const route of INDEX_ROUTES) {
+  test.describe(`@a11y índice de maestrías con teclado (${route.path})`, () => {
+    const focused = (page: Page) =>
+      page.evaluate(() => {
+        const link = document.activeElement?.closest('a');
+        const row = document.activeElement?.closest('[data-mastery]');
+        const target = (row ?? document.activeElement) as Element;
+        const style = getComputedStyle(target);
+        return {
+          slug: row?.getAttribute('data-mastery') ?? null,
+          href: link?.getAttribute('href') ?? null,
+          outlineStyle: style.outlineStyle,
+          outlineWidth: Number.parseFloat(style.outlineWidth),
+          outlineColor: style.outlineColor,
+          background: getComputedStyle(row ?? document.body).backgroundColor,
+        };
+      });
+
+    test('Tab recorre las seis filas con foco visible y contraste ≥ 3:1', async ({ page }) => {
+      await openRoute(page, route);
+      await expectAppBundles(page, route.path);
+      await settle(page);
+      await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      const visited: string[] = [];
+      for (let presses = 0; presses < 40 && visited.length < 6; presses++) {
+        await page.keyboard.press('Tab');
+        const state = await focused(page);
+        if (!state.slug) continue;
+        visited.push(state.slug);
+        expect(
+          state.outlineStyle,
+          `${state.slug}: la fila enfocada debe dibujar contorno`,
+        ).not.toBe('none');
+        expect(state.outlineWidth).toBeGreaterThanOrEqual(2);
+        expect(
+          contrast(state.outlineColor, state.background),
+          `contraste del foco de ${state.slug} (${state.outlineColor} sobre ${state.background})`,
+        ).toBeGreaterThanOrEqual(3);
+      }
+      expect(visited, 'Tab debe pasar por las seis maestrías en orden').toEqual([
+        'arcanist',
+        'demolition',
+        'nightblade',
+        'occult',
+        'shaman',
+        'soldier',
+      ]);
+    });
+
+    test('Enter sobre una fila abre la maestría', async ({ page }) => {
+      await openRoute(page, route);
+      await expectAppBundles(page, route.path);
+      await settle(page);
+      const prefix = route.path.startsWith('/es') ? '/es' : '';
+      await page.locator('[data-mastery="demolition"] a').focus();
+      await page.keyboard.press('Enter');
+      await page.waitForURL(`**${prefix}/maestrias/demolition`);
+      await expect(page.locator('h1')).toHaveCount(1);
     });
   });
 }

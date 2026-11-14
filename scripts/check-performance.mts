@@ -54,6 +54,7 @@ export const BUDGETS = {
     home: INITIAL_JS_LIMIT,
     tierList: CATALOG_JS_LIMIT,
     mastery: MASTERY_JS_LIMIT,
+    masteryIndex: CATALOG_JS_LIMIT,
   },
 } as const;
 
@@ -644,7 +645,9 @@ export function evaluateJsBudgets(results: readonly JsMeasurement[]): MetricResu
           ? BUDGETS.jsBytes.tierList
           : /^(\/es)?\/maestrias\/[a-z0-9-]+$/.test(result.route)
             ? BUDGETS.jsBytes.mastery
-            : null;
+            : /^(\/es)?\/maestrias$/.test(result.route)
+              ? BUDGETS.jsBytes.masteryIndex
+              : null;
     if (expected !== null && expected !== result.limitBytes)
       throw new Error(
         `El límite JS de ${result.route} no coincide con plan §6 (${expected} B gzip).`,
