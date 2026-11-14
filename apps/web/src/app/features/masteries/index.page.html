@@ -6,8 +6,23 @@
     </p>
   </header>
   <ul class="masteries__list">
-    @for (row of rows; track row.slug) {
-      <li class="mastery-row" [attr.data-mastery]="row.slug">
+    @for (row of rows; track row.slug; let index = $index) {
+      <li
+        class="mastery-row"
+        [class.mastery-row--game]="row.portrait.source === 'game'"
+        [attr.data-mastery]="row.slug"
+        [attr.data-portrait]="row.portrait.source"
+      >
+        <img
+          class="mastery-row__art"
+          data-portrait
+          [src]="row.portrait.src"
+          [attr.width]="row.portrait.width"
+          [attr.height]="row.portrait.height"
+          alt=""
+          decoding="async"
+          [attr.loading]="index < eagerRows ? null : 'lazy'"
+        />
         @if (row.hasData) {
           <a class="mastery-row__name" [routerLink]="['/maestrias', row.slug]">{{ row.name }}</a>
           <span class="mastery-row__meta" data-count>
@@ -26,4 +41,10 @@
       </li>
     }
   </ul>
+  @if (showsGameArt) {
+    <p class="masteries__credit" data-credit i18n="@@masteryIndex.credit">
+      Mastery buttons from Grim Dawn, © Crate Entertainment. This project is not affiliated with or
+      endorsed by Crate Entertainment.
+    </p>
+  }
 </section>

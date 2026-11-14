@@ -15,6 +15,27 @@ const base: MasterySummary[] = [
   { slug: 'soldier', name: { en: 'Soldier', es: 'Soldado' }, nodeCount: 32 },
 ];
 
+const game = (slug: string) => ({
+  source: 'game' as const,
+  src: `assets/portraits/${slug}.png`,
+  width: 197,
+  height: 41,
+});
+const OWN_SRC: Record<string, string> = {
+  arcanist: 'arcanista',
+  demolition: 'demoledor',
+  nightblade: 'filo-nocturno',
+  occult: 'ocultista',
+  shaman: 'chaman',
+  soldier: 'soldado',
+};
+const own = (slug: string) => ({
+  source: 'own' as const,
+  src: `assets/icons/mastery-${OWN_SRC[slug]}.svg`,
+  width: 32,
+  height: 32,
+});
+
 describe('mastery index page', () => {
   afterEach(() => TestBed.resetTestingModule());
 
@@ -113,5 +134,71 @@ describe('mastery index page', () => {
       );
       TestBed.resetTestingModule();
     }
+  });
+
+  describe('portraits (T015)', () => {
+    const art = (row: HTMLElement) => row.querySelector<HTMLImageElement>('img[data-portrait]');
+
+    it('with ASSET_SOURCE=game shows the 197x41 button of each mastery, decorative and unstretched', async () => {
+      const fixture = create(base.map((m) => ({ ...m, portrait: game(m.slug) })));
+      await fixture.whenStable();
+      const list = rows(fixture.nativeElement);
+      expect(list).toHaveLength(6);
+      list.forEach((row, i) => {
+        const img = art(row)!;
+        expect(img.getAttribute('src')).toBe(`assets/portraits/${base[i]!.slug}.png`);
+        expect(img.getAttribute('width')).toBe('197');
+        expect(img.getAttribute('height')).toBe('41');
+        expect(img.getAttribute('alt')).toBe('');
+        expect(img.getAttribute('decoding')).toBe('async');
+        expect(row.dataset['portrait']).toBe('game');
+      });
+      expect(art(list[0]!)!.getAttribute('loading')).toBeNull();
+      expect(art(list[5]!)!.getAttribute('loading')).toBe('lazy');
+    });
+
+    it('with ASSET_SOURCE=own shows the own icon in the six rows and no attribution', async () => {
+      const fixture = create(base.map((m) => ({ ...m, portrait: own(m.slug) })));
+      await fixture.whenStable();
+      const list = rows(fixture.nativeElement);
+      list.forEach((row, i) => {
+        expect(art(row)!.getAttribute('src')).toBe(own(base[i]!.slug).src);
+        expect(art(row)!.getAttribute('width')).toBe('32');
+        expect(row.dataset['portrait']).toBe('own');
+      });
+      expect(fixture.nativeElement.querySelector('[data-credit]')).toBeNull();
+    });
+
+    it('falls back to the own icon when a summary carries no portrait', async () => {
+      const fixture = create(base);
+      await fixture.whenStable();
+      const list = rows(fixture.nativeElement);
+      expect(list.map((row) => art(row)!.getAttribute('src'))).toEqual(
+        base.map((m) => own(m.slug).src),
+      );
+    });
+
+    it('credits Crate and states non-affiliation whenever game art is shown, in both languages', async () => {
+      for (const [locale, word] of [
+        ['en', 'Crate Entertainment'],
+        ['es', 'Crate Entertainment'],
+      ] as const) {
+        const fixture = create(
+          base.map((m) => ({ ...m, portrait: game(m.slug) })),
+          locale,
+        );
+        await fixture.whenStable();
+        const credit = fixture.nativeElement.querySelector('[data-credit]') as HTMLElement;
+        expect(credit.textContent).toContain(word);
+        expect(credit.textContent).toContain('Grim Dawn');
+        TestBed.resetTestingModule();
+      }
+    });
+
+    it('keeps the accessible name of the link equal to the mastery name', async () => {
+      const fixture = create(base.map((m) => ({ ...m, portrait: game(m.slug) })));
+      await fixture.whenStable();
+      expect(rows(fixture.nativeElement).map(linkText)).toEqual(base.map((m) => m.name!.en));
+    });
   });
 });

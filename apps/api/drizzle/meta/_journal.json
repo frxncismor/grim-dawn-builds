@@ -78,6 +78,13 @@
       "when": 1794623084061,
       "tag": "0010_skill_node_id",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794625377720,
+      "tag": "0011_asset_withdrawn",
+      "breakpoints": true
     }
   ]
 }

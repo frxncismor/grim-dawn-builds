@@ -12,7 +12,7 @@ interface Schema<T> {
 const unavailable = () => new Error('API de contenido no disponible o respuesta inválida.');
 
 const DESCRIPTOR_KEYS = new Set(['slug', 'file_path', 'fallback_svg', 'status']);
-const ASSET_STATUSES = ['pending', 'approved', 'rejected'];
+const ASSET_STATUSES = ['pending', 'approved', 'rejected', 'withdrawn'];
 /**
  * Public descriptor contract of `GET /api/v1/assets`. Unknown keys are rejected on purpose:
  * a payload that tries to include private provenance fails closed instead of being ignored.

@@ -113,7 +113,13 @@ export async function writeContentRows(
   const combinations = new Map<string, string>();
   for (const author of data.authors) authors.set(author.slug, await root('authors', { ...author }));
   for (const source of data.sources) sources.set(source.slug, await root('sources', { ...source }));
-  for (const asset of data.assets) assets.set(asset.slug, await resource('assets', { ...asset }));
+  // `provenance` (game version, source path, sha256) lives only in the repo manifest, where
+  // `assets:check` verifies it against the files; the table has no column for it (T015).
+  for (const asset of data.assets) {
+    const row: Record<string, unknown> = { ...asset };
+    delete row['provenance'];
+    assets.set(asset.slug, await resource('assets', row));
+  }
   for (const mastery of data.masteries) {
     const { asset_slug, ...fields } = mastery;
     masteries.set(

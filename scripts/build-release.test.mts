@@ -1,11 +1,123 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdtemp, mkdir, writeFile, readFile, access, rm } from 'node:fs/promises';
 import { join, dirname, basename } from 'node:path';
 import { tmpdir } from 'node:os';
 import { publicBuildEnv, runRelease } from './build-release.mts';
 import { expectedMigration } from './check-release.mts';
 import { assertStaticHome } from './static-home.mts';
+
+/** Minimal repo layout where every mastery has an approved, hash-matching portrait. */
+async function seedGameAssets(root: string, over: Record<string, unknown> = {}): Promise<void> {
+  const png = Buffer.from('png-bytes');
+  const sha256 = createHash('sha256').update(png).digest('hex');
+  await mkdir(join(root, 'fixtures/content/mastery-trees'), { recursive: true });
+  await writeFile(join(root, 'fixtures/content/mastery-trees/soldier.json'), '{}');
+  await mkdir(join(root, 'fixtures/content/assets'), { recursive: true });
+  await mkdir(join(root, 'apps/web/public/assets/portraits'), { recursive: true });
+  await writeFile(join(root, 'apps/web/public/assets/portraits/soldier.png'), png);
+  await writeFile(
+    join(root, 'fixtures/content/assets/manifest.json'),
+    JSON.stringify({
+      assets: [
+        {
+          slug: 'mastery-soldier',
+          status: 'approved',
+          file_path: 'public/assets/portraits/soldier.png',
+          origin_url: 'https://store.steampowered.com/app/219990/Grim_Dawn/',
+          rights_holder: 'Crate Entertainment',
+          license_or_permission: 'tolerancia_de_facto_sin_permiso',
+          proof_ref: 'specs/003-catalogo-arboles-maestria/research.md#t029',
+          recorded_on: '2026-11-13',
+          fallback_svg: 'src/assets/icons/mastery-soldado.svg',
+          provenance: {
+            game_version: 'v',
+            source_path: 'ui/x.tex',
+            sha256,
+            width: 197,
+            height: 41,
+          },
+          ...over,
+        },
+      ],
+    }),
+  );
+}
+
+test('release defaults to ASSET_SOURCE=game; only an explicit own (withdrawal) overrides it', () => {
+  assert.equal(publicBuildEnv({ CONTENT_SOURCE: 'api' })['ASSET_SOURCE'], 'game');
+  assert.equal(
+    publicBuildEnv({ CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game' })['ASSET_SOURCE'],
+    'game',
+  );
+  assert.equal(
+    publicBuildEnv({ CONTENT_SOURCE: 'api', ASSET_SOURCE: 'own' })['ASSET_SOURCE'],
+    'own',
+  );
+  assert.throws(() => publicBuildEnv({ CONTENT_SOURCE: 'api', ASSET_SOURCE: 'both' }));
+});
+
+test('release builds with ASSET_SOURCE=game and fails closed when the manifest does not allow it', async () => {
+  const stub =
+    (seen: Record<string, string>[]) => async (_output: string, env: Record<string, string>) => {
+      seen.push(env);
+      throw new Error('stop after recording the build environment');
+    };
+  const run = async (prepare: (root: string) => Promise<void>, env = {}) => {
+    const root = await mkdtemp(join(tmpdir(), 'gd-release-assets-'));
+    const seen: Record<string, string>[] = [];
+    try {
+      await mkdir(join(root, 'apps/api/drizzle/meta'), { recursive: true });
+      await writeFile(
+        join(root, 'apps/api/drizzle/meta/_journal.json'),
+        JSON.stringify({ entries: [{ idx: 0, tag: '0000_first' }] }),
+      );
+      await writeFile(join(root, 'apps/api/drizzle/0000_first.sql'), 'SELECT 1;');
+      await prepare(root);
+      const migration = await expectedMigration(root);
+      const request: typeof fetch = async () =>
+        new Response('{"status":"ready"}', { headers: { 'X-Content-Migration': migration } });
+      await assert.rejects(
+        runRelease(root, { CONTENT_SOURCE: 'api', ...env }, { build: stub(seen), request }),
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+    return seen;
+  };
+  const ok = await run((root) => seedGameAssets(root));
+  assert.equal(ok.length, 1);
+  assert.equal(ok[0]?.['ASSET_SOURCE'], 'game');
+  // No usable manifest, withdrawn entry, other license or tampered file: the build never starts.
+  assert.equal((await run(async () => {})).length, 0);
+  assert.equal(
+    (await run((r) => seedGameAssets(r, { status: 'withdrawn', file_path: null }))).length,
+    0,
+  );
+  assert.equal(
+    (await run((r) => seedGameAssets(r, { license_or_permission: 'Permiso' }))).length,
+    0,
+  );
+  assert.equal(
+    (
+      await run((r) =>
+        seedGameAssets(r, {
+          provenance: {
+            game_version: 'v',
+            source_path: 'x',
+            sha256: 'a'.repeat(64),
+            width: 197,
+            height: 41,
+          },
+        }),
+      )
+    ).length,
+    0,
+  );
+  // Explicit own (the documented withdrawal switch) needs no game art.
+  assert.equal((await run(async () => {}, { ASSET_SOURCE: 'own' }))[0]?.['ASSET_SOURCE'], 'own');
+});
 
 test('release environment permits public configuration and excludes private and executable overrides', () => {
   const env = publicBuildEnv({
@@ -35,6 +147,7 @@ test('release invalidates prior report, stages build, verifies twice and reports
       JSON.stringify({ entries: [{ idx: 0, tag: '0000_first' }] }),
     );
     await writeFile(join(folder, '0000_first.sql'), 'SELECT 1;');
+    await seedGameAssets(root);
     await mkdir(join(root, 'dist'));
     const report = join(root, 'dist/build-info.json');
     await writeFile(report, '{"source":"api"}');

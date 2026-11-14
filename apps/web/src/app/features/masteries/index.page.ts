@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, LOCALE_ID } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { MasterySummary } from '../../core/content/masteries';
+import { ownPortrait, type MasteryPortrait } from '../../core/content/portraits';
 import { SeoService, siteLocale } from '../../core/seo/seo.service';
 
 interface MasteryRow {
@@ -9,7 +10,12 @@ interface MasteryRow {
   readonly nodeCount: number;
   /** A mastery without skills (or whose tree does not load) is listed but not linked. */
   readonly hasData: boolean;
+  /** Art of the row: the game button (`ASSET_SOURCE=game`) or the project's own icon. */
+  readonly portrait: MasteryPortrait;
 }
+
+/** The first rows sit above the fold on a phone: they load eagerly, the rest lazily. */
+const EAGER_ROWS = 3;
 
 /**
  * `/maestrias`: index of the mastery skill trees (spec 003, US2). The rows come from the catalog
@@ -25,6 +31,9 @@ interface MasteryRow {
 })
 export class MasteryIndexPage {
   readonly rows: readonly MasteryRow[];
+  readonly eagerRows = EAGER_ROWS;
+  /** Game art on screen: Crate is credited and non-affiliation stated next to it (§VII). */
+  readonly showsGameArt: boolean;
 
   constructor() {
     const locale = siteLocale(inject(LOCALE_ID));
@@ -35,7 +44,9 @@ export class MasteryIndexPage {
       name: item.name?.[locale] ?? item.slug,
       nodeCount: item.nodeCount,
       hasData: item.nodeCount > 0,
+      portrait: item.portrait ?? ownPortrait(item.slug),
     }));
+    this.showsGameArt = this.rows.some((row) => row.portrait.source === 'game');
     const count = this.rows.length;
     inject(SeoService).setPage({
       title: $localize`:@@masteryIndex.seoTitle:Mastery skill trees`,

@@ -29,6 +29,14 @@ export function createPublicBuildEnv(
     }
     output[key] = value;
   }
+  // Release serves the mastery buttons of the game (constitution §VII 1.10.0) unless the owner
+  // switches to the own icons explicitly (the documented withdrawal path). Fixture builds keep
+  // the default `own`.
+  if (mode === 'release') {
+    const source = input['ASSET_SOURCE'] ?? 'game';
+    if (source !== 'game' && source !== 'own') throw new Error('public-build: invalid-environment');
+    output['ASSET_SOURCE'] = source;
+  }
   return {
     ...output,
     CONTENT_SOURCE: mode === 'fixture' ? 'fixture' : 'api',

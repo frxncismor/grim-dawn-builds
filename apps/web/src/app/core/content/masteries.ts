@@ -1,5 +1,6 @@
 import { InjectionToken, makeStateKey } from '@angular/core';
 import type { MasteryTree } from '@gd/domain';
+import type { MasteryPortrait } from './portraits';
 
 /**
  * Read port of the mastery catalog (spec 003). Server only: the browser never opens a data
@@ -11,6 +12,8 @@ export interface MasterySummary {
   readonly name: { readonly en: string; readonly es: string } | null;
   /** Real number of skills of the tree; `0` means "no data". */
   readonly nodeCount: number;
+  /** Art for the index row; set by the route resolver on the server (T015), never by the catalog. */
+  readonly portrait?: MasteryPortrait;
 }
 
 export interface MasteryCatalog {
@@ -33,3 +36,11 @@ export const MASTERY_TREE_STATE = makeStateKey<MasteryTree | null>('gd-mastery-t
 
 /** Snapshot of the index rendered by `/maestrias`; the browser reads it back on hydration. */
 export const MASTERY_INDEX_STATE = makeStateKey<readonly MasterySummary[]>('gd-mastery-index');
+
+/**
+ * Server-only provider of the portrait of each mastery (`ASSET_SOURCE`, manifest). It is a
+ * promise because reading the manifest is async; a rejection fails the prerender.
+ */
+export const MASTERY_PORTRAITS = new InjectionToken<Promise<(slug: string) => MasteryPortrait>>(
+  'MASTERY_PORTRAITS',
+);

@@ -11,11 +11,14 @@ export interface AssetIssue {
 /**
  * Checks the asset manifest against the official-art files found on disk.
  * Official art may ship only when an approved manifest entry names that file.
- * Pure: the caller supplies the file list.
+ * When `fileHashes` (repo-relative path -> sha256) is supplied, every approved entry must have its
+ * file on disk and, if it records a provenance sha256, the file must match it.
+ * Pure: the caller supplies the file list and the hashes.
  */
 export function checkAssetManifest(
   manifest: { assets: readonly unknown[] },
   officialFiles: readonly string[],
+  fileHashes?: Readonly<Record<string, string>>,
 ): AssetIssue[] {
   const issues: AssetIssue[] = [];
   const seen = new Set<string>();
@@ -39,7 +42,10 @@ export function checkAssetManifest(
       issues.push({ file: asset.slug, message: `slug duplicado: ${asset.slug}` });
     }
     seen.add(asset.slug);
-    if (asset.status === 'approved' && asset.file_path) approvedPaths.add(asset.file_path);
+    if (asset.status === 'approved' && asset.file_path) {
+      approvedPaths.add(asset.file_path);
+      if (fileHashes) checkFile(asset, fileHashes, issues);
+    }
   }
 
   for (const file of officialFiles) {
@@ -48,6 +54,23 @@ export function checkAssetManifest(
     }
   }
   return issues;
+}
+
+function checkFile(
+  asset: Asset,
+  fileHashes: Readonly<Record<string, string>>,
+  issues: AssetIssue[],
+): void {
+  const actual = asset.file_path ? fileHashes[asset.file_path] : undefined;
+  if (actual === undefined) {
+    issues.push({ file: asset.slug, path: 'file_path', message: 'el archivo aprobado no existe' });
+  } else if (asset.provenance && asset.provenance.sha256 !== actual) {
+    issues.push({
+      file: asset.slug,
+      path: 'provenance.sha256',
+      message: 'el archivo no coincide con el sha256 del manifiesto',
+    });
+  }
 }
 
 function slugOf(raw: unknown): string | undefined {

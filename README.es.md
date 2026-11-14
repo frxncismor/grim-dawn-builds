@@ -116,6 +116,14 @@ pnpm build:release
 pnpm check:release
 ```
 
+`build:release` y los jobs de CI que construyen el artefacto medido usan
+`ASSET_SOURCE=game`: en `/maestrias` se sirven los seis botones de maestría de Grim Dawn
+(© Crate Entertainment, sin permiso escrito; ver `fixtures/content/assets/NOTICE.md`).
+El release falla cerrado antes de construir si el manifiesto de activos no aprueba los
+seis. Los iconos de habilidad usan siempre los propios. El build local por defecto sigue
+en `ASSET_SOURCE=own`. Para retirar el arte: entradas del manifiesto a `withdrawn`,
+borrar los PNG y publicar con `ASSET_SOURCE=own`.
+
 ## Vista previa del artefacto estático y flujo editorial
 
 `pnpm build` escribe el artefacto estático publicable en
@@ -145,11 +153,12 @@ valores por defecto seguros como referencia; los secretos reales viven solo en
 archivos ignorados por git, según
 [la gestión de secretos](docs/security/secrets.md).
 
-| Variable         | Valores aceptados                                           | Efecto en el build y la vista previa                                                                                        |
-| ---------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `BASE_URL`       | URL absoluta `http(s)` sin credenciales, query ni fragmento | Fija las URLs absolutas de canonical y Open Graph, `sitemap.xml` y `robots.txt`. Por defecto `http://localhost:4200/`.      |
-| `INCLUDE_DRAFTS` | `true` o `false`                                            | Añade la guía local `borrador` cuando vale `true`. Los builds público y de release lo fuerzan a `false`.                    |
-| `CONTENT_SOURCE` | `fixture` o `api`                                           | Elige fixtures (desarrollo, pruebas, CI sin Docker) o la API pública (release). `api` nunca degrada en silencio a fixtures. |
+| Variable         | Valores aceptados                                           | Efecto en el build y la vista previa                                                                                                                 |
+| ---------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BASE_URL`       | URL absoluta `http(s)` sin credenciales, query ni fragmento | Fija las URLs absolutas de canonical y Open Graph, `sitemap.xml` y `robots.txt`. Por defecto `http://localhost:4200/`.                               |
+| `INCLUDE_DRAFTS` | `true` o `false`                                            | Añade la guía local `borrador` cuando vale `true`. Los builds público y de release lo fuerzan a `false`.                                             |
+| `CONTENT_SOURCE` | `fixture` o `api`                                           | Elige fixtures (desarrollo, pruebas, CI sin Docker) o la API pública (release). `api` nunca degrada en silencio a fixtures.                          |
+| `ASSET_SOURCE`   | `own` o `game`                                              | Arte de maestrías en `/maestrias`: iconos propios (por defecto) o los botones del juego. Release y CI usan `game`; un valor inválido rompe el build. |
 
 Un `BASE_URL` inválido hace fallar la generación del sitemap y de robots con un
 mensaje fijo que no repite credenciales. `INCLUDE_DRAFTS` solo acepta `true` o

@@ -7,7 +7,7 @@ export interface PublicAssetDescriptor {
   readonly file_path: string | null;
   readonly fallback_svg: string;
   /** Present only when the payload is not the public endpoint (defensive check). */
-  readonly status?: 'pending' | 'approved' | 'rejected';
+  readonly status?: 'pending' | 'approved' | 'rejected' | 'withdrawn';
 }
 
 /** View-ready icon for one asset slug; the shape the templates consume. */

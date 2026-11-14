@@ -104,12 +104,12 @@ src/app/
 5. **Iconos y retratos**: `ASSET_SOURCE=own|game` (enmienda §VII 1.10.0), default `own`; con
    `game` exige entradas `approved` cuyo `license_or_permission = tolerancia_de_facto_sin_permiso`
    y `fallback_svg` presente; build falla cerrado si falta. Los retratos viven en
-   `apps/web/public/assets/portraits/<slug>.webp` (la carpeta que `assets:check` ya vigila) y
+   `apps/web/public/assets/portraits/<slug>.png` (la carpeta que `assets:check` ya vigila) y
    se declaran en `fixtures/content/assets/manifest.json` (`file_path = public/assets/portraits/…`,
    `proof_ref = specs/003-catalogo-arboles-maestria/research.md#t029`). Su atribución
    vive en `fixtures/content/assets/NOTICE.md` (fuera de `public/` para no servirse como activo
-   sin manifiesto). La retirada pone `status: withdrawn` (hoy `ASSET_STATUSES` solo tiene
-   `pending|approved|rejected`: T015 debe añadirlo o mapearlo, sin cambiar la regla de `approved`).
+   sin manifiesto). La retirada pone `status: withdrawn` (`ASSET_STATUSES` ya lo incluye, T015;
+   la regla de `approved` no cambia). «Retrato» = botón de maestría del juego 197×41, en PNG. Release y CI usan `ASSET_SOURCE=game` (decisión de Paco, 2026-11-13); el build local, `own`.
 6. **Wiki**: no es fuente por defecto (Q1 resuelta: CC BY-SA 4.0, decisión de Paco,
    2026-11-13); si se usa, artefacto derivado CC BY-SA 4.0 con atribución y aviso de licencia en la propia página/JSON.
 7. **Nombres localizados desde los `.arc` de texto (T022).** El script lee también

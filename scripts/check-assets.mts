@@ -1,7 +1,8 @@
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { checkAssetManifest } from '@gd/domain';
+import { checkAssetManifest, type AssetIssue } from '@gd/domain';
 
 const WEB_PUBLIC_DIR = 'apps/web/public';
 const OFFICIAL_SUBDIR = 'assets';
@@ -20,13 +21,72 @@ function listOfficialFiles(root: string): string[] {
     );
 }
 
-function main(root: string): number {
-  const manifest = JSON.parse(readFileSync(join(root, MANIFEST), 'utf8')) as {
-    assets: unknown[];
+/** sha256 of every official file, keyed by the same repo-relative path the manifest uses. */
+function hashFiles(root: string, files: readonly string[]): Record<string, string> {
+  return Object.fromEntries(
+    files.map((file) => [
+      file,
+      createHash('sha256')
+        .update(readFileSync(join(root, 'apps/web', file)))
+        .digest('hex'),
+    ]),
+  );
+}
+
+/** Pure of console output: returns the manifest size and every problem found. */
+export function checkAssets(root: string): { count: number; issues: AssetIssue[] } {
+  let manifest: { assets: unknown[] };
+  try {
+    manifest = JSON.parse(readFileSync(join(root, MANIFEST), 'utf8')) as { assets: unknown[] };
+    if (!Array.isArray(manifest.assets)) throw new Error();
+  } catch {
+    return { count: 0, issues: [{ file: MANIFEST, message: 'manifiesto ilegible o inválido' }] };
+  }
+  const files = listOfficialFiles(root);
+  return {
+    count: manifest.assets.length,
+    issues: checkAssetManifest(manifest, files, hashFiles(root, files)),
   };
-  const issues = checkAssetManifest(manifest, listOfficialFiles(root));
+}
+
+/**
+ * Gate for `ASSET_SOURCE=game` (release, CI): the manifest must pass `checkAssets` and every
+ * mastery of the catalog must have an `approved` portrait under `tolerancia_de_facto_sin_permiso`.
+ * Throws with the reasons; never reads the game.
+ */
+export function assertGameAssets(root: string): void {
+  const { issues } = checkAssets(root);
+  const problems = issues.map((i) => `${i.file ?? MANIFEST}: ${i.message}`);
+  const trees = join(root, 'fixtures/content/mastery-trees');
+  const slugs = existsSync(trees)
+    ? readdirSync(trees)
+        .filter((name) => name.endsWith('.json'))
+        .map((name) => name.slice(0, -'.json'.length))
+    : [];
+  if (slugs.length === 0) problems.push('sin maestrías en el catálogo');
+  let entries: { slug?: unknown; status?: unknown; license_or_permission?: unknown }[] = [];
+  try {
+    const manifest = JSON.parse(readFileSync(join(root, MANIFEST), 'utf8'));
+    if (Array.isArray(manifest.assets)) entries = manifest.assets;
+  } catch {
+    // checkAssets already reported the unreadable manifest.
+  }
+  for (const slug of slugs) {
+    const entry = entries.find((item) => item?.slug === `mastery-${slug}`);
+    if (
+      entry?.status !== 'approved' ||
+      entry.license_or_permission !== 'tolerancia_de_facto_sin_permiso'
+    )
+      problems.push(`mastery-${slug}: sin retrato aprobado (tolerancia_de_facto_sin_permiso)`);
+  }
+  if (problems.length > 0)
+    throw new Error(`ASSET_SOURCE=game no permitido: ${problems.join('; ')}`);
+}
+
+function main(root: string): number {
+  const { count, issues } = checkAssets(root);
   if (issues.length === 0) {
-    console.log(`assets:check OK (${manifest.assets.length} entradas)`);
+    console.log(`assets:check OK (${count} entradas)`);
     return 0;
   }
   for (const i of issues) {

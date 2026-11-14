@@ -30,6 +30,8 @@ jobs:
       NG_CLI_ANALYTICS: 'false'
       CONTENT_SOURCE: fixture
       INCLUDE_DRAFTS: 'false'
+      # T015: the measured artifact serves the six mastery buttons of the game, as release does.
+      ASSET_SOURCE: game
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -305,6 +307,8 @@ jobs:
     env:
       NG_CLI_ANALYTICS: 'false'
       CONTENT_SOURCE: fixture
+      # T015: the scanned artifact is the one served with the game's mastery buttons.
+      ASSET_SOURCE: game
       # Loopback targets only; scripts/check-ci-secrets.mts verifies this statically.
       DAST_WEB_URL: http://127.0.0.1:8081
       DAST_API_URL: http://127.0.0.1:3000
