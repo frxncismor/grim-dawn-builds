@@ -117,6 +117,41 @@ FR-011/FR-012 parciales); ambigüedades: 2; duplicaciones: 0; críticos: 0.
 - Sin CRITICAL: se puede proceder a la puerta de cierre.
 - C1, C2 e I1 (MEDIUM) son candidatos a una tarea posterior de limpieza de documentos; no bloquean.
 
+## Verify final tras T035–T041 (B-001)
+
+Fecha: 2026-11-15 (16:02–16:13, hora local). HEAD `bab5e34`. Comando: `pnpm verify` desde la raíz del
+worktree de integración. Resultado: **`verify OK (local)`, exit 0** (`== pnpm verify exit 0`).
+
+| Paso                  | Resultado                                                                     |
+| --------------------- | ----------------------------------------------------------------------------- |
+| `check-scope`         | OK, 246 archivos                                                              |
+| `check-boundaries`    | OK, 334 archivos                                                              |
+| `check-secrets`       | OK, 649 archivos rastreados                                                   |
+| `check-ci-secrets`    | OK, 2 workflows                                                               |
+| `domain:*`            | tests 281 passed, 2 expected fail (13 archivos)                               |
+| `api:*`               | tests 340 passed, 1 expected fail, 126 skipped (24 archivos, 10 saltados)     |
+| `test:rotation`       | 3 skipped (requiere PostgreSQL, sin `RUN_DB_TESTS`)                           |
+| `lint`                | `ng lint`: All files pass linting                                             |
+| `lint:md`             | 86 archivos, 0 issues                                                         |
+| `format`              | Prettier: todos los archivos conformes                                        |
+| `test` (web)          | 50 archivos passed; 514 passed, 2 expected fail                               |
+| `test:scripts`        | 701 tests, 699 pass, 0 fail, 2 skipped                                        |
+| `content:validate`    | OK, 1 build                                                                   |
+| `catalog:check`       | gen-catalog OK (10 maestrías, 45 pares)                                       |
+| `catalog:nodes`       | 6 maestrías OK                                                                |
+| `check:locale-parity` | OK, 324 unidades en paridad, 0 fallos                                         |
+| `assets:check`        | OK, 6 entradas                                                                |
+| `check:contrast`      | OK, 12 pares, mínimo 4.5:1                                                    |
+| `build`               | OK; `check:initial-js` OK en las 10 rutas                                     |
+| `check:public-build`  | OK, 1267 archivos; valores y patrones ausentes                                |
+| `check:performance`   | OK, 122/122 comprobaciones (13 rutas, mediana de 3 corridas; presupuestos OK) |
+
+Extracto del final del log: `check:performance OK (122/122 comprobaciones; …)`, `verify OK (local)`.
+
+Limitaciones: `pnpm verify` local no ejecuta e2e ni axe (`e2e:a11y`, `e2e:journeys`) y las pruebas con
+PostgreSQL real (`RUN_DB_TESTS=1`) quedan saltadas; esas se ejecutaron en las tareas T031, T035, T039
+y T040 y corren en CI.
+
 ## Puerta spec002 y T-136
 
 Se ejecutan **tras marcar T021** (precedente spec002 T014). La evidencia va en
