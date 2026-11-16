@@ -54,9 +54,8 @@ gd-skill-tree {
   margin-block: var(--space-4);
   overflow: auto;
   overscroll-behavior-inline: contain;
-  border: var(--frame-border);
-  background: var(--surface-sheen), var(--color-soot);
-  box-shadow: var(--frame-bevel);
+  /* The tree sits on the card of the section: a well on its surface, not a card inside it. */
+  background: var(--color-soot);
   scrollbar-color: var(--color-ash) var(--color-panel);
 }
 

@@ -39,9 +39,8 @@ gd-devotion-map {
   margin-block: var(--space-4);
   overflow: auto;
   overscroll-behavior-inline: contain;
-  border: var(--frame-border);
-  background: var(--surface-sheen), var(--color-soot);
-  box-shadow: var(--frame-bevel);
+  /* A well on the card of the section, not a card inside it. */
+  background: var(--color-soot);
   scrollbar-color: var(--color-ash) var(--color-panel);
 }
 .devotion-map__canvas:focus-visible,
