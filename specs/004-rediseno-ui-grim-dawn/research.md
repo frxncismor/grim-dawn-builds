@@ -81,6 +81,19 @@ Consecuencias de diseño:
 
 **Verificación futura**: medir bytes por tarjeta en la primera tarea y fijar un tope (se propone ≤ 600 B por tarjeta compacta y ≤ 1 000 B por tarjeta de build con guía; **cifras a validar con medición**, no medidas).
 
+**Resultado de la medición (spec004 T014, base `86a6385`, `pnpm build` del artefacto real)**: prototipo con el componente `gd-build-card` de T015 sustituyendo a `gd-tier-card` en `/tier-list` (fixtures: 45 combinaciones, todas `placeholder` salvo la guía de borradores; 1 destacada + 2 estándar + 42 compactas en el prototipo). Cifras del HTML prerenderizado, sin comprimir:
+
+| Concepto                                          | Antes (`gd-tier-card`) | Prototipo (`gd-build-card`)            |
+| ------------------------------------------------- | ---------------------- | -------------------------------------- |
+| Tarjeta sin guía (compacta)                       | 874–894 B (media 884)  | 289–311 B (media 297)                  |
+| Tarjeta con guía (destacada/estándar, 2 retratos) | —                      | 1 127–1 131 B (hasta 3 hechos de daño) |
+| 45 tarjetas, total del bloque                     | 39 793 B               | ≈ 15 900 B                             |
+| HTML `/tier-list` EN (máx. 120 000 B)             | 110 724 B              | 84 135 B (margen 35 865 B)             |
+| HTML `/es/tier-list` ES                           | 107 862 B              | 84 386 B                               |
+| JS inicial `/tier-list` (máx. 112 000 B)          | 110 834 B              | 111 568 B (+734 B; margen 432 B)       |
+
+**Topes fijados**: **≤ 400 B por tarjeta compacta** (medido ≤ 311 B) y **≤ 1 250 B por tarjeta con guía** (medido ≤ 1 131 B; son pocas por página). Peor caso razonable: 1 guía + 44 compactas ≈ 83 kB de HTML, dentro de 120 000 B con margen > 35 kB; incluso 45 tarjetas con guía de dos retratos (inexistente en el catálogo real) caben (≈ 119 kB). **El HTML cabe: no hace falta variante en lista ni parar.** El riesgo real es el **JS inicial**: con la tarjeta como plantilla sin lógica ni `computed` (etiquetas resueltas en `buildCardData`) y retirando `gd-tier-card`, `gd-content-badge` y `gd-external-attribution`, `/tier-list` sube +734 B (incluye el mapeo temporal del prototipo, que T017 sustituirá). La primera versión del componente, con `computed` y etiquetas dentro, subía +1 244 B y superaba el límite en 78 B: por eso la tarjeta es solo marcado y CSS. Las entradas `enlace_externo` (hoy `gd-external-attribution`) deben resolverse en T017 sin añadir JS.
+
 ## R3 — Tooltip junto al nodo
 
 **Estado actual** (código, no medición): el componente `gd-skill-tree` ya mantiene `hoveredId`, `focusedId` y `selectedId` y muestra el detalle en un `<section class="skill-tree__detail">` **bajo el árbol** (`skill-tree.html:207`), con `aria-live`. La navegación con flechas existe (`keyboard-nav.ts`).
