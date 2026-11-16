@@ -11,10 +11,13 @@ export interface CatalogCardContext {
   readonly damageLabels: ReadonlyMap<string, string>;
   /** Portrait of each mastery that has one; the rest draw the generic icon. */
   readonly portraits: ReadonlyMap<string, BuildCardPortrait>;
+  /** Language of the editorial titles when it is not the page's (EN page, ES content); else null. */
+  readonly titleLang: string | null;
 }
 
 export function catalogCardContext(catalog: CatalogSnapshot): CatalogCardContext {
   return {
+    titleLang: catalog.locale === catalog.contentLocale ? null : catalog.contentLocale,
     masteryNames: new Map(
       catalog.masteries.map((m) => [m.slug, catalog.locale === 'en' ? m.name_en : m.name_es]),
     ),
@@ -59,9 +62,12 @@ export function catalogCardInput(
   const external = card.entry.entry_kind === 'enlace_externo';
   const real = !!guide || external;
   const tier = card.entry.tier;
+  const title = guide?.title ?? card.entry.display_name ?? card.combinationName;
   return {
     variant: variant ?? (real ? 'standard' : 'compact'),
-    title: guide?.title ?? card.entry.display_name ?? card.combinationName,
+    title,
+    // Editorial titles are content in its own language; the combination name is localized (FR-042).
+    titleLang: title === card.combinationName ? null : context.titleLang,
     masteries: card.masteries.map((slug) => ({
       name: context.masteryNames.get(slug) ?? slug,
       portrait: context.portraits.get(slug) ?? null,

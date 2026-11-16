@@ -15,6 +15,8 @@ export interface BuildCardPortrait {
 export interface BuildCardInput {
   readonly variant: BuildCardVariant;
   readonly title: string;
+  /** Language of `title` when it differs from the page's (FR-042); absent or `null` otherwise. */
+  readonly titleLang?: string | null;
   /** `portrait: null` draws the own generic icon at its reserved size (no layout shift). */
   readonly masteries: readonly {
     readonly name: string;
@@ -48,6 +50,7 @@ export interface BuildCardInput {
 export interface BuildCardData {
   readonly variant: BuildCardVariant;
   readonly title: string;
+  readonly titleLang?: string | null;
   readonly masteries: readonly { readonly portrait: BuildCardPortrait }[];
   readonly status: ContentStatus;
   readonly statusLabel: string;

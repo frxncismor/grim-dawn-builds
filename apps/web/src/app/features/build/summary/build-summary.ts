@@ -82,6 +82,12 @@ export class BuildSummary {
     timeZone: 'UTC',
   });
 
+  /** Language of the page: it picks the primary mastery name (as `SkillTree.nameLang`). */
+  protected readonly nameLang: 'en' | 'es' = inject(LOCALE_ID).toLowerCase().startsWith('es')
+    ? 'es'
+    : 'en';
+  protected readonly otherLang: 'en' | 'es' = this.nameLang === 'es' ? 'en' : 'es';
+
   readonly content = input.required<BuildSummaryContent>();
   readonly authorPlaceholder = input<boolean>(false);
 
@@ -96,6 +102,8 @@ export class BuildSummary {
       const icon = `mastery-${mastery.slug}`;
       return {
         mastery,
+        name: this.nameLang === 'es' ? mastery.name_es : mastery.name_en,
+        otherName: this.nameLang === 'es' ? mastery.name_en : mastery.name_es,
         src: `assets/icons/${Object.hasOwn(ICONS, icon) ? icon : 'mastery-generic'}.svg`,
         size: ICON_SIZE,
       };

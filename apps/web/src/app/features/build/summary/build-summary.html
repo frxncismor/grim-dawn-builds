@@ -22,8 +22,8 @@
                   decoding="async"
                 />
                 <span>
-                  {{ item.mastery.name_es }}
-                  <span class="summary__alt" lang="en">({{ item.mastery.name_en }})</span>
+                  <span [attr.lang]="nameLang">{{ item.name }}</span>
+                  <span class="summary__alt" [attr.lang]="otherLang">({{ item.otherName }})</span>
                 </span>
               </li>
             }

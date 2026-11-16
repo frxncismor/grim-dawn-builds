@@ -16,10 +16,10 @@
   @if (featuredCard; as card) {
     <h2 id="publication-title" i18n="@@home.latest">Latest publication</h2>
     <gd-build-card [data]="card" />
-    @if (featured; as guide) {
+    @if (featuredDate; as date) {
       <p class="publication__meta">
         <span i18n="@@home.publishedOn">Published on</span>{{ ' '
-        }}<time [attr.datetime]="guide.publishedAt">{{ guide.publishedAt }}</time>
+        }}<time [attr.datetime]="date">{{ date }}</time>
       </p>
     }
     <p i18n="@@home.guideAttribution">

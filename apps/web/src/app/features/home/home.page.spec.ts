@@ -116,3 +116,30 @@ describe('native Home from public server snapshot', () => {
     });
   });
 });
+
+describe('Home: the date belongs to the featured card (spec004 T049, C-001)', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('does not show the date of a newer guide the catalog does not publish', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: SITE_BASE_URL, useValue: 'https://example.org/project/' },
+        provideRouter([]),
+      ],
+    });
+    // `reciente` is newer and published, but no catalog entry links it: the card is `tormenta`.
+    TestBed.inject(TransferState).set(CATALOG_STATE, {
+      ...input,
+      guides: [
+        ...input.guides,
+        { ...input.guides[0], slug: 'reciente', title: 'Reciente', published_at: '2026-12-31' },
+      ],
+    } as never);
+    const f = TestBed.createComponent(HomePage);
+    await f.whenStable();
+    const el: HTMLElement = f.nativeElement;
+    expect(el.querySelector('[data-variant="featured"] a[href="/builds/tormenta"]')).not.toBeNull();
+    expect(el.querySelector('time')?.getAttribute('datetime')).toBe('2026-11-09');
+    expect(el.textContent).not.toContain('2026-12-31');
+  });
+});

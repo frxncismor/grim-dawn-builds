@@ -153,3 +153,39 @@ describe('spec004 T042 (a): the card shows the mastery portrait when it exists',
     expect(sources).toEqual([shaman.src, 'assets/icons/mastery-generic.svg']);
   });
 });
+
+describe('spec004 T049 (B-002): the editorial title keeps its own language (FR-042)', () => {
+  afterEach(() => TestBed.resetTestingModule());
+  const build = (locale: 'en' | 'es') => {
+    const snapshot = buildCatalog(input as unknown as CatalogInput, locale);
+    const ctx = catalogCardContext(snapshot);
+    const data = (card: CatalogCard) => buildCardData(catalogCardInput(card, ctx));
+    return {
+      guide: data(snapshot.cards.find((c) => c.guide)!),
+      none: data(snapshot.cards.find((c) => !c.guide)!),
+    };
+  };
+
+  it('marks the guide title as Spanish on the English page, and the link carries that lang', async () => {
+    const { guide, none } = build('en');
+    expect(guide.titleLang).toBe('es');
+    expect(none.titleLang).toBeNull();
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    const fixture = TestBed.createComponent(BuildCard);
+    fixture.componentRef.setInput('data', guide);
+    await fixture.whenStable();
+    const link = (fixture.nativeElement as HTMLElement).querySelector('a')!;
+    expect(link.getAttribute('lang')).toBe('es');
+    expect(link.getAttribute('aria-label')).toContain(guide.title);
+  });
+
+  it('adds no lang on the Spanish page, where title and page share the language', async () => {
+    const { guide } = build('es');
+    expect(guide.titleLang).toBeNull();
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    const fixture = TestBed.createComponent(BuildCard);
+    fixture.componentRef.setInput('data', guide);
+    await fixture.whenStable();
+    expect((fixture.nativeElement as HTMLElement).querySelector('[lang]')).toBeNull();
+  });
+});

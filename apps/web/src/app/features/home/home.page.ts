@@ -8,9 +8,8 @@ import {
 import { RouterLink } from '@angular/router';
 import { SeoService, siteLocale } from '../../core/seo/seo.service';
 import { CATALOG_STATE } from '../../core/content/catalog.resolver';
-import { selectFeaturedGuide } from './featured-guide';
 import { BuildCard } from '../../shared/ui/build-card/build-card';
-import { buildCardData, showsGameArt } from '../../shared/ui/build-card/build-card.labels';
+import { buildCardData } from '../../shared/ui/build-card/build-card.labels';
 import { homeBuilds } from './home-builds';
 
 @Component({
@@ -22,17 +21,16 @@ import { homeBuilds } from './home-builds';
 })
 export class HomePage {
   private readonly catalog = inject(TransferState).get(CATALOG_STATE, null);
-  readonly featured = this.catalog ? selectFeaturedGuide(this.catalog.guides) : null;
   private readonly builds = this.catalog
     ? homeBuilds(this.catalog, inject(LOCALE_ID).startsWith('es') ? 'es' : 'en')
     : null;
   readonly featuredCard = this.builds?.featured ? buildCardData(this.builds.featured) : null;
+  /** Date of the very guide the featured card shows, never of another selection. */
+  readonly featuredDate = this.builds?.featuredDate ?? null;
   readonly otherCards = (this.builds?.others ?? []).map(buildCardData);
   /** Game art on a card: Crate is credited and non-affiliation stated (§VII). */
-  readonly showsGameArt = showsGameArt(
-    [this.featuredCard, ...this.otherCards].flatMap(
-      (card) => card?.masteries.map((m) => m.portrait) ?? [],
-    ),
+  readonly showsGameArt = [this.featuredCard, ...this.otherCards].some((card) =>
+    card?.masteries.some((m) => m.portrait.source === 'game'),
   );
   readonly masteries = this.builds?.masteries ?? [];
   readonly withoutGuide = this.builds?.withoutGuide ?? 0;

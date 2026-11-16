@@ -204,3 +204,21 @@ describe('gd-build-summary (spec004 T020)', () => {
     expect(root.querySelector('[data-build-summary]')).toBeNull();
   });
 });
+
+describe('gd-build-summary names follow the page language (spec004 T049, C-003)', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('puts the English name first with lang on each name in an English page', async () => {
+    const root = await render(base, false, 'en-US');
+    const [primary, secondary] = root.querySelectorAll('[data-summary-mastery] span[lang]');
+    expect([primary!.textContent, primary!.getAttribute('lang')]).toEqual(['Shaman', 'en']);
+    expect([secondary!.textContent, secondary!.getAttribute('lang')]).toEqual(['(Chamán)', 'es']);
+  });
+
+  it('puts the Spanish name first with lang on each name in a Spanish page', async () => {
+    const root = await render(base, false, 'es');
+    const [primary, secondary] = root.querySelectorAll('[data-summary-mastery] span[lang]');
+    expect([primary!.textContent, primary!.getAttribute('lang')]).toEqual(['Chamán', 'es']);
+    expect([secondary!.textContent, secondary!.getAttribute('lang')]).toEqual(['(Shaman)', 'en']);
+  });
+});
