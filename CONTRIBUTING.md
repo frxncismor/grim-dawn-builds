@@ -193,7 +193,7 @@ section only adds what changes on a different machine.
 fails (the list is `VERIFY_STEPS` in `scripts/verify-local.mjs`): `check:scope`,
 `check:boundaries`, `check:secrets`, `check:ci-secrets`, build, typecheck, lint and
 tests of the `@gd/domain` package, typecheck, lint and tests of `@gd/api`,
-`test:rotation`, `lint`, `lint:md`, `format:check`, `test`, `test:scripts`,
+`test:rotation`, `lint`, `typecheck:e2e`, `lint:md`, `format:check`, `test`, `test:scripts`,
 `content:validate`, `catalog:check`, `catalog:nodes`, `check:locale-parity`,
 `assets:check`, `check:contrast`, `build`, `check:public-build` and
 `check:performance` (last, on the artifact of `build`).
@@ -207,6 +207,7 @@ tests of the `@gd/domain` package, typecheck, lint and tests of `@gd/api`,
 | `pnpm --filter @gd/domain typecheck`       | Types of the domain package.                                                                                       |
 | `pnpm --filter @gd/domain lint`            | Lint of the domain package.                                                                                        |
 | `pnpm lint`                                | ESLint of the web application.                                                                                     |
+| `pnpm typecheck:e2e`                       | Types of the e2e sources (`tsconfig.e2e.json`). Part of `verify` and of the PR CI.                                 |
 | `pnpm lint:md`                             | markdownlint over all tracked Markdown. Check only.                                                                |
 | `pnpm lint:md:fix`                         | Applies markdownlint's safe automatic fixes. Review `git diff` afterwards and run `pnpm lint:md` again.            |
 | `pnpm format:check`                        | Prettier over the files included in the script.                                                                    |

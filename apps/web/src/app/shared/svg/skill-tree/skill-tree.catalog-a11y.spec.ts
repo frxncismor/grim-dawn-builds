@@ -123,7 +123,9 @@ describe('gd-skill-tree catalog accessibility (T011)', () => {
     );
   });
 
-  it('passes axe-core with no violations', async () => {
+  // axe-core in jsdom takes ~6-7 s on the full tree (5.5 s even on a free machine), above vitest's
+  // 5 s default; the assertion is unchanged, only its time budget (spec004 T038).
+  it('passes axe-core with no violations', { timeout: 20_000 }, async () => {
     const fixture = await render();
     const results = await axe.run(fixture.nativeElement as HTMLElement);
     const violations = results.violations.map(({ id, impact, nodes }) => ({

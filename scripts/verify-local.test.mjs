@@ -75,6 +75,15 @@ test('verify runs the API typecheck, lint and tests (T-053)', () => {
   assert.ok(commands.includes('pnpm --filter @gd/api test'), 'api test missing');
 });
 
+test('verify type-checks the e2e sources before the slow steps (spec 004 T001)', () => {
+  const names = VERIFY_STEPS.map((step) => step.name);
+  const index = names.indexOf('typecheck:e2e');
+  assert.notEqual(index, -1, 'typecheck:e2e step missing');
+  assert.equal(VERIFY_STEPS[index].command, 'pnpm typecheck:e2e');
+  assert.ok(index < names.indexOf('build'), 'typecheck:e2e must run before build');
+  assert.ok(index < names.indexOf('performance'), 'typecheck:e2e must run before performance');
+});
+
 test('verify builds @gd/domain before any consumer (T-071 blocker 2)', () => {
   const commands = VERIFY_STEPS.map((step) => step.command);
   const build = commands.indexOf('pnpm --filter @gd/domain build');
