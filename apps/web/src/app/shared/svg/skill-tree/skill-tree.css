@@ -435,3 +435,47 @@ gd-skill-tree {
     contain-intrinsic-block-size: auto 107rem;
   }
 }
+
+/* Tooltip next to the node (spec004 T011). Positioned by placeTooltip through DOM style properties. */
+.skill-tree__stage {
+  position: relative;
+}
+
+.skill-tree__tooltip {
+  position: absolute;
+  z-index: 3;
+  inline-size: max-content;
+  max-inline-size: min(20rem, 100%);
+  padding: var(--space-3) var(--space-4);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel-2);
+  box-shadow: var(--frame-bevel), var(--panel-shadow);
+  color: var(--color-bone);
+  font-size: var(--text-small);
+  line-height: var(--line-body);
+  visibility: hidden;
+}
+
+.skill-tree__tooltip p {
+  margin: 0 0 var(--space-1);
+}
+
+.skill-tree__tooltip p:last-child {
+  margin-block-end: 0;
+}
+
+.skill-tree__tooltip-name {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+}
+
+.skill-tree__tooltip-name span {
+  color: var(--color-ash);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+}
+
+.skill-tree__tooltip-meta {
+  color: var(--color-storm);
+  font-family: var(--font-mono);
+}
