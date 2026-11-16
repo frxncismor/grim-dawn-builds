@@ -1,4 +1,4 @@
-# Grim Dawn Builds
+# Grim Builds
 
 [English](README.md) · **Español**
 

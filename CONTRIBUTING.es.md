@@ -2,7 +2,7 @@
 
 [English](CONTRIBUTING.md) · **Español**
 
-Esta guía describe cómo proponer cambios en Grim Dawn Builds: ramas, entorno
+Esta guía describe cómo proponer cambios en Grim Builds: ramas, entorno
 local, comandos de verificación, reglas de contenido y lista de comprobación
 para pull requests. Aplica a personas y a agentes de implementación.
 

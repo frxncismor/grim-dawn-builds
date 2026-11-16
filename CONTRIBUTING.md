@@ -2,7 +2,7 @@
 
 **English** · [Español](CONTRIBUTING.es.md)
 
-This guide describes how to propose changes to Grim Dawn Builds: branches, local
+This guide describes how to propose changes to Grim Builds: branches, local
 environment, verification commands, content rules and a checklist for pull
 requests. It applies to people and to implementation agents.
 
