@@ -150,6 +150,39 @@ build, índice de guía, tooltip del nodo), `impeccable document` en modo scan l
 - **Tooltip de nodo:** solo datos factuales del catálogo (nombre EN/ES, tier, barra, rango, tipo, dependencia) y, en guía, estado,
   puntos y justificación; nada de texto de localización del juego (FR-011).
 
+## Hojas globales
+
+**Regla: las hojas globales llevan selectores con prefijo propio.** Cada selector de una hoja de `apps/web/src/styles/`
+empieza por la etiqueta del componente o por una clase con el prefijo de su dueño (`gd-tier-list-page …`,
+`.build-card…`); no se escriben selectores de elemento ni clases genéricas sueltas.
+
+**Cuándo es global.** El CSS de componente vive en `styleUrl`. Solo pasa a una hoja global importada en `styles.css` cuando
+el componente está en una ruta con poco margen de JS inicial (spec004 T052 la usó para `/tier-list`: 111 206/112 000 B) y su
+CSS no puede viajar dentro del JS. El coste es CSS crítico en todas las páginas, así que la hoja se mide y no se amplía en
+silencio.
+
+**Por qué el prefijo.** Sin encapsulación de Angular, una regla global alcanza todo el DOM que coincida, incluido el
+contenido proyectado con `<ng-content />` y los componentes anidados (`gd-tier-row` proyecta `gd-build-card`). Un selector
+sin prefijo cambia otras páginas sin que ningún test de componente lo vea (revisión de spec004, A-002).
+
+Correcto, de `apps/web/src/styles/tier-list.css` y `build-card.css`:
+
+```css
+gd-tier-list-page .filter-panel > summary { /* … */ }
+.build-card { /* clase con prefijo del dueño */ }
+```
+
+Incorrecto, de `apps/web/src/styles/tier-components.css`: la misma regla se aplica a cuatro etiquetas aunque pertenezca a
+una, y `input`/`fieldset` sueltos alcanzan cualquier control proyectado dentro:
+
+```css
+:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) input { /* … */ }
+:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) .filters { /* solo es de gd-filter-bar */ }
+```
+
+Una hoja nueva se importa en `apps/web/src/styles.css`, declara en su comentario inicial qué etiquetas posee y se acompaña de
+la medida de `pnpm check:performance`. Esta regla sustituye la entrada pendiente S4-D7 (A-001) sin editar `specs/004-*`.
+
 ## Do's and Don'ts
 
 ### Do
