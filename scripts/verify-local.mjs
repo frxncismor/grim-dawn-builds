@@ -34,6 +34,8 @@ export const VERIFY_STEPS = [
   { name: 'api:test', command: 'pnpm --filter @gd/api test' },
   { name: 'test:rotation', command: 'pnpm test:rotation' },
   { name: 'lint', command: 'pnpm lint' },
+  // Spec 004 T001 (deuda B-001 de spec003): tipado de los e2e, barato y antes de los pasos lentos.
+  { name: 'typecheck:e2e', command: 'pnpm typecheck:e2e' },
   { name: 'lint:md', command: 'pnpm lint:md' },
   { name: 'format', command: 'pnpm format:check' },
   { name: 'test', command: 'pnpm test' },
