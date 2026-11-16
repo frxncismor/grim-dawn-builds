@@ -14,6 +14,8 @@ const MAX_OTHER_BUILDS = 5;
 export interface HomeBuilds {
   /** Latest public guide, as the big card; `null` when no guide is public. */
   readonly featured: BuildCardInput | null;
+  /** `published_at` of that same guide (`YYYY-MM-DD`); `null` when it has no valid date. */
+  readonly featuredDate: string | null;
   /** Other public guides, newest first. */
   readonly others: readonly BuildCardInput[];
   /** One access per catalog mastery, opening the catalog filtered by it. */
@@ -56,6 +58,7 @@ export function homeBuilds(input: CatalogInput, locale: CatalogLocale): HomeBuil
   const [first, ...rest] = published;
   return {
     featured: first ? toCard(first, 'featured') : null,
+    featuredDate: first && /^\d{4}-\d{2}-\d{2}$/.test(first.date) ? first.date : null,
     others: rest.slice(0, MAX_OTHER_BUILDS).map((item) => toCard(item, 'standard')),
     masteries: catalog.masteries.map((m) => ({
       slug: m.slug,

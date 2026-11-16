@@ -34,17 +34,20 @@ import type { BuildCardData } from './build-card.model';
       }
       <h3 class="build-card__title">
         @if (d.href) {
-          <a [routerLink]="d.href" [attr.aria-label]="d.accessibleName">{{ d.title }}</a>
+          <a [routerLink]="d.href" [attr.lang]="d.titleLang" [attr.aria-label]="d.accessibleName">{{
+            d.title
+          }}</a>
         } @else if (d.externalHref) {
           <a
             [href]="d.externalHref"
             target="_blank"
             rel="noopener noreferrer"
+            [attr.lang]="d.titleLang"
             [attr.aria-label]="d.accessibleName"
             >{{ d.title }}</a
           >
         } @else {
-          {{ d.title }}
+          <span [attr.lang]="d.titleLang">{{ d.title }}</span>
         }
       </h3>
       <p class="build-card__status" [attr.data-status]="d.status">{{ d.statusLabel }}</p>
