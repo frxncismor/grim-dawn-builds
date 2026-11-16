@@ -466,6 +466,56 @@ test('S-001: with ASSET_SOURCE=own an artifact with game portraits is rejected; 
   }
 });
 
+test('T053 (A-01/S-001): with game a page with skill icons needs [data-game-art-credit]; with own none may carry it', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gd-release-icon-credit-'));
+  try {
+    const folder = join(root, 'apps/api/drizzle/meta');
+    await mkdir(folder, { recursive: true });
+    await writeFile(
+      join(folder, '_journal.json'),
+      JSON.stringify({ entries: [{ idx: 0, tag: '0000_first' }] }),
+    );
+    await writeFile(join(folder, '../0000_first.sql'), 'SELECT 1;');
+    await seedGameAssets(root);
+    const migration = await expectedMigration(root);
+    const request = apiWith(migration, [{ slug: 'mastery-soldier' }]);
+    const build = (extra: string) => async (output: string) => {
+      await mkdir(join(output, 'browser'), { recursive: true });
+      await writeFile(
+        join(output, 'browser/index.html'),
+        (await readFile(new URL('./fixtures/static-home.html', import.meta.url), 'utf8')) + extra,
+      );
+      for (const name of ['main.js', 'home.js'])
+        await writeFile(join(output, 'browser', name), 'console.log(1);');
+      await writeFile(
+        join(output, 'stats.json'),
+        JSON.stringify({
+          outputs: {
+            'main.js': { imports: [] },
+            'home.js': { imports: [], entryPoint: 'src/app/features/home/home.page.ts' },
+          },
+        }),
+      );
+    };
+    const icon = '<img src="assets/skill-icons/soldier-a.png" alt="">';
+    const credit = '<p data-game-art-credit>© Crate Entertainment</p>';
+    const game = { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game' };
+    const own = { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'own' };
+    await assert.rejects(
+      release(root, game, { build: build(icon), request }),
+      /data-game-art-credit/,
+    );
+    await assert.rejects(access(join(root, 'dist/build-info.json')));
+    await release(root, game, { build: build(icon + credit), request });
+    await assert.rejects(
+      release(root, own, { build: build(credit), request }),
+      /data-game-art-credit/,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 /** API stub: `/ready` is ready; `/api/v1/assets` lists the given public (approved) slugs. */
 const apiWith =
   (migration: string, assets: unknown, requested: string[] = []): typeof fetch =>

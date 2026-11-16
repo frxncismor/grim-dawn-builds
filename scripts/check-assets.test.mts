@@ -9,6 +9,7 @@ import {
   assertGameAssets,
   assertNoGamePortraits,
   assertPortraitCredit,
+  assertSkillIconCredit,
   checkAssets,
 } from './check-assets.mts';
 
@@ -259,6 +260,30 @@ test('assertPortraitCredit: with game every page with portraits carries [data-cr
       write(rel, '<img src="assets/icons/mastery-chaman.svg" alt="">');
     assert.doesNotThrow(() => assertPortraitCredit(root, 'game'));
     assert.doesNotThrow(() => assertPortraitCredit(root, 'own'));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('assertSkillIconCredit: with game every page with skill icons carries [data-game-art-credit]; with own none does (T053, A-01/S-001)', () => {
+  const root = mkdtempSync(join(tmpdir(), 'gd-icon-credit-'));
+  const credit = '<p class="skill-tree__credit" data-game-art-credit>© Crate Entertainment</p>';
+  const img = '<img src="assets/skill-icons/soldier-a.png" alt="">';
+  const write = (rel: string, body: string) => {
+    mkdirSync(dirname(join(root, 'browser', rel)), { recursive: true });
+    writeFileSync(join(root, 'browser', rel), `<!doctype html><html><body>${body}</body></html>`);
+  };
+  try {
+    const pages = ['masteries/soldier/index.html', 'es/maestrias/soldado/index.html'];
+    for (const rel of pages) write(rel, `${img}${credit}`);
+    assert.doesNotThrow(() => assertSkillIconCredit(root, 'game'));
+    assert.throws(() => assertSkillIconCredit(root, 'own'), /own.*data-game-art-credit/);
+    write('es/maestrias/soldado/index.html', img);
+    assert.throws(() => assertSkillIconCredit(root, 'game'), /es\/maestrias\/soldado\/index\.html/);
+    // A page without game icons needs no credit; own with no credit passes.
+    for (const rel of pages) write(rel, '<img src="assets/ui/skill-fallback.svg" alt="">');
+    assert.doesNotThrow(() => assertSkillIconCredit(root, 'game'));
+    assert.doesNotThrow(() => assertSkillIconCredit(root, 'own'));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
