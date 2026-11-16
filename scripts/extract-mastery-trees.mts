@@ -267,6 +267,15 @@ export interface LocalizedName {
   es: string;
 }
 /** Forma del contrato T005/T006 (`CatalogSkillNodeSchema`): `id` = `classNN/<registro>`. */
+/**
+ * Public icon id (spec004 T025, S-004): `ic-` + the first 16 hex of the SHA-256 of the texture path.
+ * Opaque, stable between runs and shared by the nodes that share a texture; it is the file name and the
+ * manifest slug of the derived icon, so the game's texture path never reaches the public contract.
+ */
+export function iconIdOf(texturePath: string): string {
+  return `ic-${createHash('sha256').update(texturePath).digest('hex').slice(0, 16)}`;
+}
+
 export interface CatalogNode {
   id: string;
   name: LocalizedName;
@@ -279,6 +288,8 @@ export interface CatalogNode {
   ultimate_points?: number;
   parent_id: string | null;
   icon?: string;
+  /** Public icon handle derived from `icon` (never the path itself); see `iconIdOf`. */
+  icon_id?: string;
 }
 export interface CatalogTree {
   mastery: { id: string; slug: string; name: LocalizedName };
@@ -405,7 +416,7 @@ function readMastery(
       ...(maxPoints !== null ? { max_points: maxPoints } : {}),
       ...(ultimate !== null ? { ultimate_points: ultimate } : {}),
       parent_id: null,
-      ...(icon ? { icon } : {}),
+      ...(icon ? { icon, icon_id: iconIdOf(icon) } : {}),
     });
   }
 

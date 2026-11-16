@@ -109,6 +109,18 @@ test('S-004: the fixture catalog serves no node icon; the API catalog rejects on
   );
 });
 
+test('spec004 T025: the public fixture view keeps the public icon_id of every node and drops the texture', async () => {
+  const source = await sourceTree('demolition');
+  const fromFixture = await new FixtureMasteryCatalog(ROOT).get('demolition');
+  assert.ok(fromFixture);
+  for (const node of source.nodes) {
+    const served = fromFixture.nodes.find((n) => n.id === node.id)!;
+    assert.match(String(served.icon_id), /^ic-[0-9a-f]{16}$/, node.id);
+    assert.equal(served.icon_id, node.icon_id);
+    assert.doesNotMatch(JSON.stringify(served), /\.tex|"icon"/);
+  }
+});
+
 test('API catalog turns 503, network errors, invalid bodies and slug mismatches into a build failure', async () => {
   const soldier = await tree('soldier');
   const attempts: [string, () => Promise<Response>][] = [

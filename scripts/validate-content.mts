@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -57,6 +58,10 @@ function readBuildFiles(buildsDir: string): ContentFile[] {
     });
 }
 
+/** Same derivation as the extractor (`iconIdOf` in extract-mastery-trees.mts); kept local so validating stays light. */
+const iconIdOf = (texturePath: string): string =>
+  `ic-${createHash('sha256').update(texturePath).digest('hex').slice(0, 16)}`;
+
 /** Reads `<dir>/mastery-trees/*.json` (optional); an invalid tree is reported as an issue. */
 function readCatalog(treesDir: string): { catalog: MasteryTree[]; issues: ContentIssue[] } {
   const catalog: MasteryTree[] = [];
@@ -68,8 +73,18 @@ function readCatalog(treesDir: string): { catalog: MasteryTree[]; issues: Conten
       const parsed = MasteryTreeSchema.safeParse(
         JSON.parse(readFileSync(join(treesDir, name), 'utf8')),
       );
-      if (parsed.success) catalog.push(parsed.data);
-      else
+      if (parsed.success) {
+        catalog.push(parsed.data);
+        // spec004 T025: the public icon id is derived from the texture, never typed by hand.
+        for (const node of parsed.data.nodes) {
+          if (node.icon !== undefined && node.icon_id !== iconIdOf(node.icon))
+            issues.push({
+              file,
+              path: `nodes.${node.id}.icon_id`,
+              message: `icon_id de ${node.id} no es el derivado de su textura (ic-<16 hex de sha256>)`,
+            });
+        }
+      } else
         issues.push({
           file,
           path: '(raíz)',

@@ -176,7 +176,7 @@ salida primero fuera del repositorio.
 pnpm catalog:extract --game-dir <Grim Dawn folder> --out <tmp>/all.json
 pnpm exec tsx scripts/split-mastery-catalog.mts <tmp>/all.json fixtures/content/mastery-trees
 pnpm catalog:nodes
-pnpm catalog:textures --game-dir <Grim Dawn folder> [--out <folder>] [--kind masteries|skills|all]
+pnpm catalog:textures --game-dir <Grim Dawn folder> [--out <folder>] [--kind masteries|skills|icons|all]
 ```
 
 - `catalog:extract` emite las seis maestrías base como un array JSON con la forma de
@@ -194,7 +194,10 @@ pnpm catalog:textures --game-dir <Grim Dawn folder> [--out <folder>] [--kind mas
   y en CI.
 - `catalog:textures` escribe PNG y su propio `manifest.json` en
   `.game-assets/textures/` (en `.gitignore`) por defecto. `--kind` es `masteries` por
-  defecto. Para publicar un botón de maestría, cópialo a mano a
+  defecto; `--kind icons` (spec004 T026) decodifica un PNG por textura de icono distinta (164 hoy), de
+  exactamente 32 x 32 y sin tocar sus píxeles, en `.game-assets/textures/icons/<icon_id>.png`, con su
+  `sha256` en `manifest.json`; no versiona ni publica nada (`all` sigue siendo maestrías + habilidades).
+  Para publicar un botón de maestría, cópialo a mano a
   `apps/web/public/assets/portraits/` y añade su entrada al manifiesto; la ingesta
   nunca se automatiza (constitución II, 1.10.0). `pnpm assets:check` rechaza un
   archivo bajo `apps/web/public/assets/` sin entrada `approved` o con otro hash.

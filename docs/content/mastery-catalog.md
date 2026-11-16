@@ -168,13 +168,17 @@ output outside the repository first.
 pnpm catalog:extract --game-dir <Grim Dawn folder> --out <tmp>/all.json
 pnpm exec tsx scripts/split-mastery-catalog.mts <tmp>/all.json fixtures/content/mastery-trees
 pnpm catalog:nodes
-pnpm catalog:textures --game-dir <Grim Dawn folder> [--out <folder>] [--kind masteries|skills|all]
+pnpm catalog:textures --game-dir <Grim Dawn folder> [--out <folder>] [--kind masteries|skills|icons|all]
 ```
 
 - `catalog:extract` emits the six base masteries as a JSON array with the shape of
   `MasteryTreeSchema` and `source {game_version, sha256[]}`. Options:
   `--game-version <text>` forces the version (the Steam `buildid` by default) and
   `--no-localize` keeps the localization tags and skips the `.arc` files.
+- `catalog:textures --kind icons` (spec004 T026) decodes one PNG per distinct skill-icon texture
+  (164 today), exactly 32 x 32 and with its pixels unchanged, to `.game-assets/textures/icons/<icon_id>.png`,
+  and records each one's `sha256` in `manifest.json`; `icon_id` is the public id of `catalog:extract`.
+  Nothing is versioned or published by it (`all` stays masteries + skills).
 - `split-mastery-catalog.mts` writes one `<slug>.json` per mastery. Nothing in the
   fixtures is edited by hand.
 - `catalog:nodes` (`scripts/check-mastery-catalog.mts`, option `--dir <folder>`)

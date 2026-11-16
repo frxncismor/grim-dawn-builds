@@ -33,6 +33,8 @@ export interface SkillNodeRow {
   max_points: number;
   ultimate_points: number | null;
   parent_id: string | null;
+  /** Public icon handle (never the texture path); NULL when the node has no icon. */
+  icon_id?: string | null;
 }
 
 const mastery = PublicMasteryTreeSchema.shape.mastery;
@@ -68,6 +70,7 @@ export function mapMasteryTree(
       ...(n.ultimate_points === null ? {} : { ultimate_points: n.ultimate_points }),
       grid: { col: n.grid_col, row: n.grid_row },
       parent_id: n.parent_id,
+      ...(n.icon_id == null ? {} : { icon_id: n.icon_id }),
     })),
   });
   if (!result.success) throw new InvalidCatalogError();

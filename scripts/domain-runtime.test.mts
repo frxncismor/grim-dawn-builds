@@ -111,6 +111,7 @@ describe('@gd/domain built output', () => {
       'EVIDENCE_STATUSES',
       'EVIDENCE_TYPES',
       'FR28_METADATA_FIELDS',
+      'ICON_ID_PATTERN',
       'LINK_ONLY_METADATA_FIELDS',
       'MasteryCombinationSchema',
       'MasterySchema',
@@ -128,6 +129,7 @@ describe('@gd/domain built output', () => {
       'SKILL_KINDS',
       'SOURCE_CHANGE_OUTCOMES',
       'SOURCE_CHANGE_TYPES',
+      'SkillIconAssetSchema',
       'SourceChangeEventSchema',
       'SourceRightsEvidenceSchema',
       'SourceSchema',
@@ -145,6 +147,7 @@ describe('@gd/domain built output', () => {
       'isPublishableRightsStatus',
       'publicFilter',
       'requiredEvidenceType',
+      'skillIconFilePath',
       'toLinkOnlyMetadata',
       'validateSkillNodeRefs',
     ]);

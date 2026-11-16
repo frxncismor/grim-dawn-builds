@@ -34,7 +34,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_passive01up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_passive01up.tex",
+      "icon_id": "ic-6df08d8664c9bc74"
     },
     {
       "id": "class06/savagery1",
@@ -53,7 +54,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_savagery1up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_savagery1up.tex",
+      "icon_id": "ic-2e44bb057553fabf"
     },
     {
       "id": "class06/devouringswarm1",
@@ -72,7 +74,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_devouringswarm1up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_devouringswarm1up.tex",
+      "icon_id": "ic-08b336088d9f9f6e"
     },
     {
       "id": "class06/savagestrike1",
@@ -91,7 +94,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_wildstrike1_up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_wildstrike1_up.tex",
+      "icon_id": "ic-cf5c1dc199a28f18"
     },
     {
       "id": "class06/savagery1b",
@@ -110,7 +114,8 @@
       "max_points": 3,
       "ultimate_points": 3,
       "parent_id": "class06/savagery1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class06/graspingvines1",
@@ -129,7 +134,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_graspingvines1up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_graspingvines1up.tex",
+      "icon_id": "ic-273857fc3c60859e"
     },
     {
       "id": "class06/natureblessing1",
@@ -148,7 +154,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_natureblessing1up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_natureblessing1up.tex",
+      "icon_id": "ic-6544b6a01d1bb586"
     },
     {
       "id": "class06/weaponpool01",
@@ -167,7 +174,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_weaponpool1up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_weaponpool1up.tex",
+      "icon_id": "ic-9a22e21ef5177f9c"
     },
     {
       "id": "class06/savagestrike1b",
@@ -186,7 +194,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class06/savagestrike1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class06/squall1",
@@ -205,7 +214,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_stormcloud1up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_stormcloud1up.tex",
+      "icon_id": "ic-979836f35e5adc41"
     },
     {
       "id": "class06/summon_briarthorn1",
@@ -224,7 +234,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_thornedhorrorsummon1up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_thornedhorrorsummon1up.tex",
+      "icon_id": "ic-953187ab7e4248c5"
     },
     {
       "id": "class06/weaponpool02",
@@ -243,7 +254,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_weaponpool2up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_weaponpool2up.tex",
+      "icon_id": "ic-c680c059c2047a12"
     },
     {
       "id": "class06/savagestrike2",
@@ -262,7 +274,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class06/savagestrike1",
-      "icon": "ui/skills/icons/class06/skillicon_wildstrike3up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_wildstrike3up.tex",
+      "icon_id": "ic-4eae345718f6b44a"
     },
     {
       "id": "class06/savagery2",
@@ -281,7 +294,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class06/savagery1",
-      "icon": "ui/skills/icons/class06/skillicon_savagery2up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_savagery2up.tex",
+      "icon_id": "ic-7088f83c01221d6f"
     },
     {
       "id": "class06/naturesblessing2",
@@ -300,7 +314,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": "class06/natureblessing1",
-      "icon": "ui/skills/icons/class06/skillicon_natureblessing3up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_natureblessing3up.tex",
+      "icon_id": "ic-c5799381dd316b2a"
     },
     {
       "id": "class06/totem1",
@@ -319,7 +334,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_totem1up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_totem1up.tex",
+      "icon_id": "ic-9ee4a7877ae2c654"
     },
     {
       "id": "class06/squall2",
@@ -338,7 +354,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class06/squall1",
-      "icon": "ui/skills/icons/class06/skillicon_stormcloud3up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_stormcloud3up.tex",
+      "icon_id": "ic-4be4fbd603c69971"
     },
     {
       "id": "class06/summon_briarthorn2_petmodifier",
@@ -357,7 +374,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class06/summon_briarthorn1",
-      "icon": "ui/skills/icons/class06/skillicon_thornedhorrorsummon3up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_thornedhorrorsummon3up.tex",
+      "icon_id": "ic-199bb8a9da8bab47"
     },
     {
       "id": "class06/savagestrike3",
@@ -376,7 +394,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class06/savagestrike1",
-      "icon": "ui/skills/icons/class06/skillicon_wildstrike2up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_wildstrike2up.tex",
+      "icon_id": "ic-37ef608f438c6e46"
     },
     {
       "id": "class06/graspingvines2",
@@ -395,7 +414,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class06/graspingvines1",
-      "icon": "ui/skills/icons/class06/skillicon_graspingvines2up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_graspingvines2up.tex",
+      "icon_id": "ic-3bfff140b367cc8e"
     },
     {
       "id": "class06/naturesblessing3",
@@ -414,7 +434,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": "class06/natureblessing1",
-      "icon": "ui/skills/icons/class06/skillicon_natureblessing2up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_natureblessing2up.tex",
+      "icon_id": "ic-a5d80341f4127b18"
     },
     {
       "id": "class06/stormtotem01",
@@ -433,7 +454,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_stormtotem1up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_stormtotem1up.tex",
+      "icon_id": "ic-e12c6766d95cf2e5"
     },
     {
       "id": "class06/savagery3",
@@ -452,7 +474,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class06/savagery1",
-      "icon": "ui/skills/icons/class06/skillicon_savagery3up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_savagery3up.tex",
+      "icon_id": "ic-b0a811d2200c6340"
     },
     {
       "id": "class06/totem2_petmodifier",
@@ -471,7 +494,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class06/totem1",
-      "icon": "ui/skills/icons/class06/skillicon_totem2up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_totem2up.tex",
+      "icon_id": "ic-39440b645363e53f"
     },
     {
       "id": "class06/stormtotem01b_petmodifier",
@@ -490,7 +514,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class06/stormtotem01",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class06/squall3",
@@ -509,7 +534,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class06/squall1",
-      "icon": "ui/skills/icons/class06/skillicon_stormcloud2up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_stormcloud2up.tex",
+      "icon_id": "ic-64b9063543d7f7f7"
     },
     {
       "id": "class06/summon_briarthorn3_petmodifier",
@@ -528,7 +554,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class06/summon_briarthorn1",
-      "icon": "ui/skills/icons/class06/skillicon_thornedhorrorsummon4up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_thornedhorrorsummon4up.tex",
+      "icon_id": "ic-b6d123edf393fba2"
     },
     {
       "id": "class06/stormcaller1",
@@ -547,7 +574,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_stormcaller1up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_stormcaller1up.tex",
+      "icon_id": "ic-8b9065e2f5866896"
     },
     {
       "id": "class06/summon_manticore1",
@@ -566,7 +594,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_manticoresummon1up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_manticoresummon1up.tex",
+      "icon_id": "ic-74489e721fea6c90"
     },
     {
       "id": "class06/primalbond01",
@@ -585,7 +614,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class06/skillicon_primalbond01up.tex"
+      "icon": "ui/skills/icons/class06/skillicon_primalbond01up.tex",
+      "icon_id": "ic-7a7d46077ee5b8a8"
     }
   ]
 }
