@@ -401,7 +401,7 @@ for (const route of TREE_ROUTES) {
       await expect(close).toHaveCount(0);
       await page.keyboard.press('Enter');
       await expect(close, 'Enter abre el detalle con su botón de cierre').toHaveCount(1);
-      await expect(page.locator('[data-detail-panel] h3')).not.toHaveText('');
+      await expect(page.locator('[role="tooltip"] .skill-tree__tooltip-name')).not.toHaveText('');
       await page.keyboard.press('Escape');
       await expect(close, 'Escape cierra el detalle').toHaveCount(0);
       expect((await activeNode(page)).id, 'el foco vuelve al nodo').toBe(first);

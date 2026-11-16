@@ -641,7 +641,7 @@ for (const locale of GUIDE_LOCALES) {
       const first = page.locator(`${SKILL_TREES} [data-skill-id][data-assigned="true"]`).first();
       await first.scrollIntoViewIfNeeded();
       await first.focus();
-      const panel = page.locator('#habilidades [data-detail-panel]').first();
+      const panel = page.locator('#habilidades [role="tooltip"]').first();
       await expect(panel).toContainText(locale.assigned);
       await expect(first).toHaveAttribute('aria-label', new RegExp(locale.assigned));
     });

@@ -479,3 +479,24 @@ gd-skill-tree {
   color: var(--color-storm);
   font-family: var(--font-mono);
 }
+
+.skill-tree__tooltip button {
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  margin-block-start: var(--space-2);
+  padding-inline: var(--space-4);
+  border: var(--frame-border);
+  background: var(--color-panel);
+  color: var(--color-bone);
+  font: inherit;
+  cursor: pointer;
+}
+
+.skill-tree__tooltip button:hover {
+  border-color: var(--color-storm);
+}
+
+.skill-tree__tooltip button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}

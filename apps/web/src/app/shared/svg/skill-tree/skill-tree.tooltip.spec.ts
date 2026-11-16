@@ -174,4 +174,102 @@ describe('gd-skill-tree tooltip next to the node (spec004 T011)', () => {
     expect(el.getAttribute('data-side')).toBe('top');
     expect(el.style.visibility).not.toBe('hidden');
   });
+
+  describe('touch pin and retired bottom panel (spec004 T012)', () => {
+    const tap = (f: { nativeElement: unknown }, id: string) => {
+      const el = node(f, id);
+      fire(el, 'mouseenter');
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    };
+    const closeButton = (f: { nativeElement: unknown }) =>
+      tooltip(f)[0]?.querySelector<HTMLButtonElement>('button[data-close-detail]') ?? null;
+
+    it('has no bottom detail panel in catalog mode but keeps the full text list', async () => {
+      const f = await render();
+      expect(host(f).querySelector('[data-detail-panel]')).toBeNull();
+      expect(host(f).querySelector('.skill-tree__detail')).toBeNull();
+      const items = host(f).querySelectorAll('details.skill-tree__list li');
+      expect(items).toHaveLength(tree.nodes.length);
+    });
+
+    it('does not show the close button on plain hover or focus', async () => {
+      const f = await render();
+      fire(node(f, child.id), 'mouseenter');
+      f.detectChanges();
+      expect(tooltip(f)).toHaveLength(1);
+      expect(closeButton(f)).toBeNull();
+    });
+
+    it('pins the tooltip on tap with a close button, and it survives the pointer leaving', async () => {
+      const f = await render();
+      vi.useFakeTimers();
+      tap(f, child.id);
+      fire(node(f, child.id), 'mouseleave');
+      f.detectChanges();
+      vi.advanceTimersByTime(2000);
+      f.detectChanges();
+      expect(tooltip(f)).toHaveLength(1);
+      expect(closeButton(f)).not.toBeNull();
+      expect(node(f, child.id).getAttribute('aria-pressed')).toBe('true');
+      expect(node(f, child.id).getAttribute('aria-describedby')).toBe(tooltip(f)[0].id);
+    });
+
+    it('closes when tapping outside, without stealing focus, but not when tapping inside it', async () => {
+      const f = await render();
+      tap(f, child.id);
+      f.detectChanges();
+      tooltip(f)[0].dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+      f.detectChanges();
+      expect(tooltip(f)).toHaveLength(1);
+      const other = document.createElement('button');
+      document.body.append(other);
+      other.focus();
+      other.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+      f.detectChanges();
+      expect(tooltip(f)).toHaveLength(0);
+      expect(node(f, child.id).getAttribute('aria-pressed')).toBe('false');
+      expect(document.activeElement).toBe(other);
+      other.remove();
+    });
+
+    it('moves the pin to another node when it is tapped', async () => {
+      const f = await render();
+      tap(f, child.id);
+      f.detectChanges();
+      node(f, root0.id).dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+      tap(f, root0.id);
+      f.detectChanges();
+      expect(tooltip(f)).toHaveLength(1);
+      expect(tooltip(f)[0].textContent).toContain(root0.name.en);
+      expect(node(f, child.id).getAttribute('aria-pressed')).toBe('false');
+      expect(closeButton(f)).not.toBeNull();
+    });
+
+    it('closes with its button and returns the focus to the node', async () => {
+      const f = await render();
+      const el = node(f, child.id);
+      el.focus();
+      tap(f, child.id);
+      f.detectChanges();
+      closeButton(f)!.click();
+      f.detectChanges();
+      expect(tooltip(f)).toHaveLength(0);
+      expect(document.activeElement).toBe(el);
+      expect(el.getAttribute('aria-pressed')).toBe('false');
+    });
+
+    it('Escape unpins a tapped tooltip and restores the focus to the node', async () => {
+      const f = await render();
+      const el = node(f, child.id);
+      el.focus();
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      f.detectChanges();
+      expect(closeButton(f)).not.toBeNull();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      f.detectChanges();
+      expect(tooltip(f)).toHaveLength(0);
+      expect(el.getAttribute('aria-pressed')).toBe('false');
+      expect(document.activeElement).toBe(el);
+    });
+  });
 });

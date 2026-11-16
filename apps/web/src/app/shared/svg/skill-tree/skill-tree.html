@@ -242,6 +242,17 @@
                   <p>{{ assigned.points_label }}</p>
                 }
               }
+              @if (selectedId() === tip.id) {
+                <button
+                  type="button"
+                  data-close-detail
+                  (click)="closeDetail()"
+                  (keydown)="onDetailKeydown($event)"
+                  i18n="@@skillTree.closeDetail"
+                >
+                  Close detail
+                </button>
+              }
             </div>
           }
         </div>
@@ -250,58 +261,6 @@
         </p>
       }
     }
-
-    <section
-      class="skill-tree__detail"
-      [attr.id]="detailId()"
-      data-detail-panel
-      aria-live="polite"
-      aria-atomic="true"
-    >
-      @if (catalogDetailNode(); as node) {
-        <h3>
-          {{ node.name[nameLang] }}
-          <span [attr.lang]="otherLang">({{ node.name[otherLang] }})</span>
-        </h3>
-        @if (catalogDetailAssignment(); as assigned) {
-          <p class="skill-tree__detail-status">
-            {{ assignedLabel() }} · {{ statusLabel(assigned.status) }}
-          </p>
-          @if (assigned.tag) {
-            <p>{{ assigned.tag }}</p>
-          }
-          <p>{{ assigned.rationale }}</p>
-          @if (assigned.points_label) {
-            <p>{{ assigned.points_label }}</p>
-          }
-          @if (assigned.max_points_hint !== null) {
-            <p>
-              <span i18n="@@skillTree.maxPoints">Suggested maximum points:</span>
-              {{ assigned.max_points_hint }}
-            </p>
-          }
-        }
-        <p class="skill-tree__detail-status">{{ kindLabel(node.kind) }}</p>
-        <p>{{ tierLabel(node.tier) }} · {{ barLabel(node.bar_required) }}</p>
-        <p>{{ maxPointsLabel(node) }}</p>
-        @if (node.circular) {
-          <p>{{ circularLabel() }}</p>
-        }
-        @if (selectedId() === node.id) {
-          <button
-            type="button"
-            data-close-detail
-            (click)="closeDetail()"
-            (keydown)="onDetailKeydown($event)"
-            i18n="@@skillTree.closeDetail"
-          >
-            Close detail
-          </button>
-        }
-      } @else {
-        <p i18n="@@skillTree.detailHint">Focus on or hover over a skill to see its details.</p>
-      }
-    </section>
 
     <details class="skill-tree__list" open>
       <summary i18n="@@skillTree.listSummary">Skill list and recommendations</summary>
