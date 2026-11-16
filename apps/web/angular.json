@@ -36,7 +36,7 @@
               {
                 "glob": "**/*",
                 "input": "public",
-                "ignore": ["assets/portraits/**"]
+                "ignore": ["assets/portraits/**", "assets/skill-icons/**"]
               },
               {
                 "glob": "*.svg",
@@ -212,7 +212,7 @@
                 {
                   "glob": "**/*",
                   "input": "public",
-                  "ignore": ["assets/portraits/**"]
+                  "ignore": ["assets/portraits/**", "assets/skill-icons/**"]
                 },
                 {
                   "glob": "*.svg",
