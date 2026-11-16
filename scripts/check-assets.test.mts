@@ -288,3 +288,43 @@ test('assertSkillIconCredit: with game every page with skill icons carries [data
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('credit gates fail on an empty artifact in game and own, naming the cause (spec005 T001, S4-D1, FR-001)', () => {
+  const gates = [
+    ['assertPortraitCredit', assertPortraitCredit],
+    ['assertSkillIconCredit', assertSkillIconCredit],
+  ] as const;
+  const root = mkdtempSync(join(tmpdir(), 'gd-credit-empty-'));
+  try {
+    for (const [name, gate] of gates)
+      for (const source of ['game', 'own']) {
+        // No `browser/` folder at all.
+        assert.throws(() => gate(root, source), /sin carpeta browser/, `${name} ${source}`);
+        // `browser/` with files but no HTML page.
+        mkdirSync(join(root, 'browser'), { recursive: true });
+        writeFileSync(join(root, 'browser', 'main.js'), 'console.log(1);');
+        assert.throws(() => gate(root, source), /ninguna p[aá]gina \.html/, `${name} ${source}`);
+        rmSync(join(root, 'browser'), { recursive: true, force: true });
+      }
+    // Any other source is not a credit decision: it is still ignored.
+    assert.doesNotThrow(() => assertPortraitCredit(root, ''));
+    assert.doesNotThrow(() => assertSkillIconCredit(root, ''));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('credit gates: the credit only goes with the game art — own fails with a credit even without art (spec005 T001, FR-003)', () => {
+  const root = mkdtempSync(join(tmpdir(), 'gd-credit-only-'));
+  try {
+    mkdirSync(join(root, 'browser'), { recursive: true });
+    writeFileSync(
+      join(root, 'browser', 'index.html'),
+      '<p data-credit>© Crate</p><p data-game-art-credit>© Crate</p>',
+    );
+    assert.throws(() => assertPortraitCredit(root, 'own'), /index\.html.*data-credit/);
+    assert.throws(() => assertSkillIconCredit(root, 'own'), /index\.html.*data-game-art-credit/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
