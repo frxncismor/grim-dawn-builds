@@ -149,22 +149,15 @@
                         <path class="skill-tree__shape" d="M0 -22 L22 0 L0 22 L-22 0 Z" />
                       }
                     }
-                    <g class="skill-tree__glyph" aria-hidden="true">
-                      @switch (item.node.kind) {
-                        @case ('active') {
-                          <path d="M-5 -8 L8 0 L-5 8 Z" />
-                        }
-                        @case ('passive') {
-                          <path d="M-8 0 H8" />
-                        }
-                        @case ('modifier') {
-                          <path d="M0 -8 V8 M-8 0 H8" />
-                        }
-                        @case ('transmuter') {
-                          <path d="M-8 -3 H8 M-8 3 H8" />
-                        }
-                      }
-                    </g>
+                    <use
+                      class="skill-tree__icon"
+                      aria-hidden="true"
+                      x="-12"
+                      y="-12"
+                      width="24"
+                      height="24"
+                      [attr.href]="iconHref(item.node)"
+                    />
                     @if (item.assignment; as assigned) {
                       <g
                         class="skill-tree__badge"
@@ -242,6 +235,17 @@
                   <p>{{ assigned.points_label }}</p>
                 }
               }
+              @if (selectedId() === tip.id) {
+                <button
+                  type="button"
+                  data-close-detail
+                  (click)="closeDetail()"
+                  (keydown)="onDetailKeydown($event)"
+                  i18n="@@skillTree.closeDetail"
+                >
+                  Close detail
+                </button>
+              }
             </div>
           }
         </div>
@@ -250,58 +254,6 @@
         </p>
       }
     }
-
-    <section
-      class="skill-tree__detail"
-      [attr.id]="detailId()"
-      data-detail-panel
-      aria-live="polite"
-      aria-atomic="true"
-    >
-      @if (catalogDetailNode(); as node) {
-        <h3>
-          {{ node.name[nameLang] }}
-          <span [attr.lang]="otherLang">({{ node.name[otherLang] }})</span>
-        </h3>
-        @if (catalogDetailAssignment(); as assigned) {
-          <p class="skill-tree__detail-status">
-            {{ assignedLabel() }} · {{ statusLabel(assigned.status) }}
-          </p>
-          @if (assigned.tag) {
-            <p>{{ assigned.tag }}</p>
-          }
-          <p>{{ assigned.rationale }}</p>
-          @if (assigned.points_label) {
-            <p>{{ assigned.points_label }}</p>
-          }
-          @if (assigned.max_points_hint !== null) {
-            <p>
-              <span i18n="@@skillTree.maxPoints">Suggested maximum points:</span>
-              {{ assigned.max_points_hint }}
-            </p>
-          }
-        }
-        <p class="skill-tree__detail-status">{{ kindLabel(node.kind) }}</p>
-        <p>{{ tierLabel(node.tier) }} · {{ barLabel(node.bar_required) }}</p>
-        <p>{{ maxPointsLabel(node) }}</p>
-        @if (node.circular) {
-          <p>{{ circularLabel() }}</p>
-        }
-        @if (selectedId() === node.id) {
-          <button
-            type="button"
-            data-close-detail
-            (click)="closeDetail()"
-            (keydown)="onDetailKeydown($event)"
-            i18n="@@skillTree.closeDetail"
-          >
-            Close detail
-          </button>
-        }
-      } @else {
-        <p i18n="@@skillTree.detailHint">Focus on or hover over a skill to see its details.</p>
-      }
-    </section>
 
     <details class="skill-tree__list" open>
       <summary i18n="@@skillTree.listSummary">Skill list and recommendations</summary>

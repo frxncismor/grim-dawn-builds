@@ -187,6 +187,12 @@ gd-skill-tree {
   pointer-events: none;
 }
 
+/* Own skill icon (spec004 T024): the sprite symbols draw with `currentColor`. */
+.skill-tree__icon {
+  color: var(--color-bone);
+  pointer-events: none;
+}
+
 .skill-tree__name {
   fill: var(--color-bone);
   font-size: var(--text-small);
@@ -398,6 +404,10 @@ gd-skill-tree {
   stroke: var(--color-ash);
 }
 
+.skill-tree__node--unassigned .skill-tree__icon {
+  color: var(--color-ash);
+}
+
 .skill-tree__node--unassigned .skill-tree__name {
   fill: var(--color-ash);
   font-weight: 400;
@@ -445,7 +455,11 @@ gd-skill-tree {
   position: absolute;
   z-index: 3;
   inline-size: max-content;
-  max-inline-size: min(20rem, 100%);
+  /* Bounded by the viewport, not by the (possibly very narrow) stage: at 200 % zoom the stage is
+     ~105 px wide and a tooltip squeezed into it grows taller than the viewport (T013 correction). */
+  max-inline-size: min(20rem, calc(100vw - var(--space-4)));
+  max-block-size: calc(100vh - var(--space-4));
+  overflow-y: auto;
   padding: var(--space-3) var(--space-4);
   border: var(--frame-border);
   background: var(--surface-sheen), var(--color-panel-2);
@@ -478,4 +492,25 @@ gd-skill-tree {
 .skill-tree__tooltip-meta {
   color: var(--color-storm);
   font-family: var(--font-mono);
+}
+
+.skill-tree__tooltip button {
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  margin-block-start: var(--space-2);
+  padding-inline: var(--space-4);
+  border: var(--frame-border);
+  background: var(--color-panel);
+  color: var(--color-bone);
+  font: inherit;
+  cursor: pointer;
+}
+
+.skill-tree__tooltip button:hover {
+  border-color: var(--color-storm);
+}
+
+.skill-tree__tooltip button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
 }

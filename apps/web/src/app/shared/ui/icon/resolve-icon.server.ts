@@ -1,5 +1,11 @@
 import { AssetSchema } from '@gd/domain';
 import { fallbackIcon, isPublicAssetPath, type ResolvedIcon } from './registry';
+import {
+  skillSymbol,
+  skillSymbolHref,
+  type SkillIconNode,
+  type SkillSymbolId,
+} from './skill-symbols';
 
 /** Public descriptor published by `GET /api/v1/assets`: approved art, never its evidence. */
 export interface PublicAssetDescriptor {
@@ -78,4 +84,19 @@ function official(
   const src = filePath.slice('public/'.length);
   if (!isPublicAssetPath(src)) throw new Error();
   return { id: fallback.id, src, fallbackSrc: fallback.src };
+}
+
+/** View-ready own icon of a skill node. Game art joins this shape in spec004 T028, under G1. */
+export interface ResolvedSkillIcon {
+  readonly source: 'own';
+  readonly symbol: SkillSymbolId;
+  readonly href: string;
+}
+
+/**
+ * Server-only: the own fallback of a skill node. It reads only `kind` and `circular`, so no
+ * texture path of the game can reach the view (S-004), and it never needs the manifest.
+ */
+export function resolveSkillIcon(node: SkillIconNode): ResolvedSkillIcon {
+  return { source: 'own', symbol: skillSymbol(node), href: skillSymbolHref(node) };
 }

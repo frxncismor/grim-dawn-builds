@@ -124,13 +124,13 @@ describe('gd-skill-tree assignment mode (guide on the canonical grid)', () => {
     });
   }
 
-  it('shows rationale, status and points of the focused assigned node in the detail panel', async () => {
+  it('shows rationale, status and points of the focused assigned node in the tooltip', async () => {
     const first = bySlot('chaman')[0];
     const fixture = await render(shaman, bySlot('chaman'));
     const root: HTMLElement = fixture.nativeElement;
     node(root, first.skill_node_id!).dispatchEvent(new FocusEvent('focus'));
     await fixture.whenStable();
-    const detail = root.querySelector('[data-detail-panel]')!.textContent ?? '';
+    const detail = root.querySelector('[role="tooltip"]')!.textContent ?? '';
     expect(detail).toContain(first.rationale);
     expect(detail).toContain('Recommended');
     if (first.points_label) expect(detail).toContain(first.points_label);

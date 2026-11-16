@@ -79,7 +79,7 @@ export default defineConfig({
   testDir: './e2e',
   // Solo estas specs: `playwright.svg.config.ts` conserva su propio runner y
   // `svg-responsive.spec.ts` pertenece a otro artefacto.
-  testMatch: ['a11y.spec.ts', 'journeys.spec.ts'],
+  testMatch: ['a11y.spec.ts', 'journeys.spec.ts', 'skill-tooltip.spec.ts'],
   workers: 1,
   fullyParallel: false,
   retries: 0,

@@ -1,7 +1,9 @@
 import {
-  afterRenderEffect,
+  afterNextRender,
   ChangeDetectionStrategy,
+  effect,
   ElementRef,
+  Injector,
   OnDestroy,
   ViewEncapsulation,
   Component,
@@ -15,6 +17,7 @@ import type { PublicSkillNode, PublicMasteryTree, PublicBuild, SkillKind } from 
 import { createKeyboardNav } from '../keyboard-nav';
 import { layoutForest } from '../layout';
 import { placeTooltip } from './place-tooltip';
+import { skillSymbolHref } from '../../ui/icon/skill-symbols';
 
 type Mastery = PublicBuild['masteries'][number];
 type SkillNode = PublicBuild['skill_nodes'][number];
@@ -107,7 +110,10 @@ interface TreeModel {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   // Esc closes the tooltip wherever the focus is (WCAG 1.4.13 dismissible), without moving it.
-  host: { '(document:keydown.escape)': 'dismissTooltip()' },
+  host: {
+    '(document:keydown.escape)': 'onEscape()',
+    '(document:pointerdown)': 'onDocumentPointerDown($event)',
+  },
 })
 export class SkillTree implements OnDestroy {
   readonly treeId = input.required<string>();
@@ -245,17 +251,10 @@ export class SkillTree implements OnDestroy {
     };
   });
 
-  readonly catalogDetailNode = computed(() => {
-    const catalogTree = this.catalogTree();
-    if (!catalogTree || this.detailDismissed()) return null;
-    const id = this.selectedId() ?? this.hoveredId() ?? this.focusedId();
-    return catalogTree.nodes.find((node) => node.id === id) ?? null;
-  });
-
   /** One tooltip at a time: the focused node wins over a residual hover. */
   readonly tooltipNodeId = computed(() =>
     this.catalogTree() && !this.tooltipDismissed()
-      ? (this.focusActiveId() ?? this.hoveredId())
+      ? (this.selectedId() ?? this.focusActiveId() ?? this.hoveredId())
       : null,
   );
   readonly tooltipNode = computed(() => {
@@ -268,9 +267,16 @@ export class SkillTree implements OnDestroy {
   readonly tooltipId = computed(() => `${this.treeId()}-${this.scopeSlug()}-tooltip`);
 
   /** Places the open tooltip next to its node with the pure `placeTooltip` (DOM style properties: CSP-safe). */
-  private readonly positionTooltip = afterRenderEffect(() => {
+  private readonly injector = inject(Injector);
+  private readonly positionTooltip = effect(() => {
+    // Signals read here re-run the placement; pinning adds the close button, so measure again.
     const id = this.tooltipNodeId();
+    this.selectedId();
     if (!id) return;
+    afterNextRender(() => this.placeOpenTooltip(id), { injector: this.injector });
+  });
+
+  private placeOpenTooltip(id: string): void {
     const root = this.host.nativeElement;
     const tip = root.querySelector<HTMLElement>('[role="tooltip"]');
     const stage = root.querySelector<HTMLElement>('.skill-tree__stage');
@@ -286,18 +292,13 @@ export class SkillTree implements OnDestroy {
       anchor: anchor.getBoundingClientRect(),
       tip: { width: tipRect.width, height: tipRect.height },
       viewport: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight },
-      container: stageRect,
       prefer: 'top',
     });
     tip.style.left = `${placed.left - stageRect.left}px`;
     tip.style.top = `${placed.top - stageRect.top}px`;
     tip.style.visibility = 'visible';
     tip.setAttribute('data-side', placed.side);
-  });
-
-  readonly catalogDetailAssignment = computed(
-    () => this.assignmentById().get(this.catalogDetailNode()?.id ?? '') ?? null,
-  );
+  }
 
   /** Textual list order: assigned nodes first (the reason for the page), then the rest. */
   readonly catalogListNodes = computed(() => {
@@ -473,17 +474,41 @@ export class SkillTree implements OnDestroy {
     const candidate = origin as (EventTarget & Partial<FocusTarget>) | null;
     this.focusOrigin = typeof candidate?.focus === 'function' ? (candidate as FocusTarget) : null;
     this.detailDismissed.set(false);
+    this.tooltipDismissed.set(false);
     this.selectedId.set(slug);
   }
 
-  closeDetail(): void {
+  /** Unpins the tooltip; `restoreFocus` is false when the user tapped elsewhere (focus stays there). */
+  closeDetail(restoreFocus = true): void {
     this.selectedId.set(null);
     this.detailDismissed.set(true);
+    this.tooltipDismissed.set(true);
     const origin = this.focusOrigin;
     this.focusOrigin = null;
+    if (!restoreFocus) return;
     this.restoringFocus = true;
     origin?.focus();
     this.restoringFocus = false;
+  }
+
+  /** Escape closes the pinned tooltip (returning focus to its node) or the hover/focus one, never moving focus otherwise. */
+  onEscape(): void {
+    if (this.selectedId()) this.closeDetail();
+    else this.dismissTooltip();
+  }
+
+  /** A tap or click outside the pinned tooltip and the nodes closes it (WCAG 1.4.13 dismissible; touch). */
+  onDocumentPointerDown(event: Event): void {
+    if (!this.selectedId()) return;
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    const root = this.host.nativeElement;
+    const tip = root.querySelector('[role="tooltip"]');
+    if (tip?.contains(target)) return;
+    const element = target instanceof Element ? target : target.parentElement;
+    if (element?.closest('[data-skill-id]') && root.contains(element)) return;
+    this.closeDetail(false);
+    this.hoveredId.set(null);
   }
 
   onDetailKeydown(event: KeyboardEvent): void {
@@ -587,6 +612,11 @@ export class SkillTree implements OnDestroy {
       lines[lines.length - 1] = `${last.slice(0, Math.max(1, maxChars - 1)).trimEnd()}…`;
     }
     return lines.slice(0, 2);
+  }
+
+  /** Own icon of a catalog node (spec004 T024, `ASSET_SOURCE=own`); never the game's texture. */
+  iconHref(node: Pick<PublicSkillNode, 'kind' | 'circular'>): string {
+    return skillSymbolHref(node);
   }
 
   kindLabel(kind: SkillKind): string {
