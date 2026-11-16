@@ -142,4 +142,25 @@ describe('Home: the date belongs to the featured card (spec004 T049, C-001)', ()
     expect(el.querySelector('time')?.getAttribute('datetime')).toBe('2026-11-09');
     expect(el.textContent).not.toContain('2026-12-31');
   });
+  it('shows the featured date in the UI language, with the ISO date in datetime (spec004 T052)', async () => {
+    for (const [locale, label] of [
+      ['es', '9 de noviembre de 2026'],
+      ['en', 'November 9, 2026'],
+    ] as const) {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: SITE_BASE_URL, useValue: 'https://example.org/project/' },
+          { provide: LOCALE_ID, useValue: locale },
+          provideRouter([]),
+        ],
+      });
+      TestBed.inject(TransferState).set(CATALOG_STATE, input as never);
+      const f = TestBed.createComponent(HomePage);
+      await f.whenStable();
+      const time: HTMLElement = f.nativeElement.querySelector('time');
+      expect(time.getAttribute('datetime')).toBe('2026-11-09');
+      expect(time.textContent).toBe(label);
+    }
+  });
 });

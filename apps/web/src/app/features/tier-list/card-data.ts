@@ -5,9 +5,8 @@ import type {
 import { catalogGroups, type CatalogCard, type CatalogSnapshot } from './catalog.model';
 import { publicGuideOf } from './public-guide';
 
-/** Lookups a card needs besides its own entry: localized mastery and damage names. */
+/** Lookups a card needs besides its own entry: portraits and localized damage names. */
 export interface CatalogCardContext {
-  readonly masteryNames: ReadonlyMap<string, string>;
   readonly damageLabels: ReadonlyMap<string, string>;
   /** Portrait of each mastery that has one; the rest draw the generic icon. */
   readonly portraits: ReadonlyMap<string, BuildCardPortrait>;
@@ -18,9 +17,6 @@ export interface CatalogCardContext {
 export function catalogCardContext(catalog: CatalogSnapshot): CatalogCardContext {
   return {
     titleLang: catalog.locale === catalog.contentLocale ? null : catalog.contentLocale,
-    masteryNames: new Map(
-      catalog.masteries.map((m) => [m.slug, catalog.locale === 'en' ? m.name_en : m.name_es]),
-    ),
     portraits: new Map(
       catalog.masteries.flatMap((m) => (m.portrait ? [[m.slug, m.portrait] as const] : [])),
     ),
@@ -68,10 +64,9 @@ export function catalogCardInput(
     title,
     // Editorial titles are content in its own language; the combination name is localized (FR-042).
     titleLang: title === card.combinationName ? null : context.titleLang,
-    masteries: card.masteries.map((slug) => ({
-      name: context.masteryNames.get(slug) ?? slug,
-      portrait: context.portraits.get(slug) ?? null,
-    })),
+    // A title that is not the combination (editorial) must not hide it (FR-003, FR-004).
+    combination: title === card.combinationName ? null : card.combinationName,
+    masteries: card.masteries.map((slug) => ({ portrait: context.portraits.get(slug) ?? null })),
     status: card.entry.content_status,
     reviewState: guide?.review_state ?? null,
     damage: card.damageTypes.map((d) => context.damageLabels.get(d) ?? d),

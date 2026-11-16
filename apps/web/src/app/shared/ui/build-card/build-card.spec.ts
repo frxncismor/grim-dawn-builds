@@ -13,8 +13,8 @@ const guide: BuildCardData = {
   variant: 'standard',
   title: 'Chamán + Demoledor: Golpe Primigenio',
   masteries: [
-    { name: 'Chamán', portrait: portrait('assets/portraits/shaman.png') },
-    { name: 'Demoledor', portrait: portrait('assets/portraits/demolition.png') },
+    { portrait: portrait('assets/portraits/shaman.png') },
+    { portrait: portrait('assets/portraits/demolition.png') },
   ],
   status: 'sin_verificar',
   reviewState: 'publicado',
@@ -28,10 +28,7 @@ const guide: BuildCardData = {
 const noGuide: BuildCardData = {
   variant: 'compact',
   title: 'Arcanista + Berserker',
-  masteries: [
-    { name: 'Arcanista', portrait: null },
-    { name: 'Berserker', portrait: null },
-  ],
+  masteries: [{ portrait: null }, { portrait: null }],
   status: 'placeholder',
   reviewState: null,
   damage: [],
@@ -52,13 +49,16 @@ async function render(data: BuildCardData) {
 describe('gd-build-card (spec004 T015)', () => {
   afterEach(() => TestBed.resetTestingModule());
 
-  it('is a single link whose accessible name carries the combination and the status', async () => {
-    const el = await render(guide);
+  it('is a single link whose accessible name carries the title, the combination and the status', async () => {
+    const el = await render({ ...guide, combination: 'Chamán + Demoledor' });
     const links = el.querySelectorAll('a');
     expect(links).toHaveLength(1);
-    const name = links[0]!.getAttribute('aria-label') ?? '';
+    expect(links[0]!.hasAttribute('aria-label')).toBe(false);
+    expect(links[0]!.hasAttribute('lang')).toBe(false);
+    const name = links[0]!.textContent ?? '';
     expect(name).toContain('Chamán + Demoledor: Golpe Primigenio');
-    expect(name).toContain('Unverified');
+    expect(name).toContain('. Chamán + Demoledor');
+    expect(name).toContain('. Unverified');
     expect(links[0]!.getAttribute('href')).toBe('/builds/chaman-demoledor-golpe-primigenio');
   });
 
@@ -75,7 +75,7 @@ describe('gd-build-card (spec004 T015)', () => {
   it('uses an own fallback of reserved size when a portrait is missing', async () => {
     const el = await render({
       ...guide,
-      masteries: [{ name: 'Chamán', portrait: null }, guide.masteries[1]!],
+      masteries: [{ portrait: null }, guide.masteries[1]!],
     });
     const first = el.querySelector('img')!;
     expect(first.getAttribute('src')).toContain('assets/icons/mastery-generic.svg');
@@ -136,7 +136,7 @@ describe('gd-build-card (spec004 T015)', () => {
       .repeat(3)
       .trim();
     const el = await render({ ...guide, title });
-    expect(el.querySelector('a')?.getAttribute('aria-label')).toContain(title);
+    expect(el.querySelector('a')?.textContent).toContain(title);
     expect(el.textContent).toContain(title);
   });
 
@@ -146,6 +146,53 @@ describe('gd-build-card (spec004 T015)', () => {
     expect(css).toMatch(/overflow-wrap:\s*anywhere/);
     expect(css).toMatch(/:focus-visible/);
     expect(css).toMatch(/position:\s*absolute/);
+  });
+});
+
+describe('spec004 T052: combination name and language-safe accessible name', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('draws the combination under an editorial title and keeps it out of the heading link text twice', async () => {
+    const el = await render({ ...guide, combination: 'Shaman + Demolitionist', titleLang: 'es' });
+    expect(el.querySelector('.build-card__combination')?.textContent).toBe(
+      'Shaman + Demolitionist',
+    );
+    const link = el.querySelector('a')!;
+    expect(link.hasAttribute('lang')).toBe(false);
+    expect(link.hasAttribute('aria-label')).toBe(false);
+    expect(link.textContent).toContain('. Shaman + Demolitionist. Unverified');
+  });
+
+  it('puts lang only on the title span, never on the hidden UI-language text', async () => {
+    const el = await render({ ...guide, titleLang: 'es', combination: 'Shaman + Demolitionist' });
+    const langs = [...el.querySelectorAll('[lang]')];
+    expect(langs).toHaveLength(1);
+    expect(langs[0]!.textContent).toBe(guide.title);
+    expect(el.querySelector('.build-card__sr')?.hasAttribute('lang')).toBe(false);
+  });
+
+  it('draws no combination line when the title is the combination', async () => {
+    const el = await render(guide);
+    expect(el.querySelector('.build-card__combination')).toBeNull();
+  });
+
+  it('names the new tab on an external link, in the hidden text, without aria-label or lang on it', async () => {
+    const el = await render({
+      ...guide,
+      href: null,
+      titleLang: 'es',
+      external: { url: 'https://example.invalid/g', author: null, note: null },
+    });
+    const link = el.querySelector('a')!;
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.hasAttribute('aria-label')).toBe(false);
+    expect(link.hasAttribute('lang')).toBe(false);
+    expect(el.querySelector('.build-card__sr')?.textContent).toContain('External source (new tab)');
+  });
+
+  it('hidden text is styled as visually hidden', () => {
+    const css = readFileSync(resolve(__dirname, '../../../../styles/build-card.css'), 'utf8');
+    expect(css).toMatch(/\.build-card__sr\s*\{[^}]*clip-path:\s*inset\(50%\)/);
   });
 });
 

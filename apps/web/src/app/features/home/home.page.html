@@ -19,7 +19,7 @@
     @if (featuredDate; as date) {
       <p class="publication__meta">
         <span i18n="@@home.publishedOn">Published on</span>{{ ' '
-        }}<time [attr.datetime]="date">{{ date }}</time>
+        }}<time [attr.datetime]="date">{{ featuredDateLabel }}</time>
       </p>
     }
     <p i18n="@@home.guideAttribution">

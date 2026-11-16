@@ -8,6 +8,15 @@ import {
 } from '../tier-list/catalog.model';
 import { publicGuideOf } from '../tier-list/public-guide';
 
+/** A `YYYY-MM-DD` that is a real calendar day (`2026-02-30` is not), or `null`. */
+function calendarDate(date: string): string | null {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+    Number.isFinite(Date.parse(date)) &&
+    new Date(date).toISOString().slice(0, 10) === date
+    ? date
+    : null;
+}
+
 /** Most builds shown after the featured one; the catalog has the rest. */
 const MAX_OTHER_BUILDS = 5;
 
@@ -58,11 +67,11 @@ export function homeBuilds(input: CatalogInput, locale: CatalogLocale): HomeBuil
   const [first, ...rest] = published;
   return {
     featured: first ? toCard(first, 'featured') : null,
-    featuredDate: first && /^\d{4}-\d{2}-\d{2}$/.test(first.date) ? first.date : null,
+    featuredDate: first ? calendarDate(first.date) : null,
     others: rest.slice(0, MAX_OTHER_BUILDS).map((item) => toCard(item, 'standard')),
     masteries: catalog.masteries.map((m) => ({
       slug: m.slug,
-      name: context.masteryNames.get(m.slug) ?? m.slug,
+      name: locale === 'en' ? m.name_en : m.name_es,
       query: { m: m.slug },
     })),
     withoutGuide: catalog.cards.filter((c) => !publicGuideOf(c.entry, c.guide)).length,

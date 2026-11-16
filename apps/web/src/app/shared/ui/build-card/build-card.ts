@@ -17,8 +17,9 @@ import type { BuildCardData } from './build-card.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `@let d = data();
+    @let full = d.variant !== 'compact';
     <article class="build-card" [attr.data-variant]="d.variant">
-      @if (d.variant !== 'compact') {
+      @if (full) {
         <div class="build-card__art">
           @for (m of d.masteries; track $index) {
             <img
@@ -34,24 +35,25 @@ import type { BuildCardData } from './build-card.model';
       }
       <h3 class="build-card__title">
         @if (d.href) {
-          <a [routerLink]="d.href" [attr.lang]="d.titleLang" [attr.aria-label]="d.accessibleName">{{
-            d.title
-          }}</a>
+          <a [routerLink]="d.href"
+            ><span [attr.lang]="d.titleLang">{{ d.title }}</span
+            ><span class="build-card__sr">{{ d.srText }}</span></a
+          >
         } @else if (d.externalHref) {
-          <a
-            [href]="d.externalHref"
-            target="_blank"
-            rel="noopener noreferrer"
-            [attr.lang]="d.titleLang"
-            [attr.aria-label]="d.accessibleName"
-            >{{ d.title }}</a
+          <a [href]="d.externalHref" target="_blank" rel="noopener noreferrer"
+            ><span [attr.lang]="d.titleLang">{{ d.title }}</span
+            ><span class="build-card__sr">{{ d.srText }}</span></a
           >
         } @else {
-          <span [attr.lang]="d.titleLang">{{ d.title }}</span>
+          <span [attr.lang]="d.titleLang">{{ d.title }}</span
+          ><span class="build-card__sr">{{ d.srText }}</span>
         }
       </h3>
+      @if (d.combination) {
+        <p class="build-card__combination" aria-hidden="true">{{ d.combination }}</p>
+      }
       <p class="build-card__status" [attr.data-status]="d.status">{{ d.statusLabel }}</p>
-      @if (d.variant !== 'compact') {
+      @if (full) {
         <p class="build-card__facts">
           @for (fact of d.facts; track $index) {
             <span>{{ fact }}</span>

@@ -17,9 +17,12 @@ export interface BuildCardInput {
   readonly title: string;
   /** Language of `title` when it differs from the page's (FR-042); absent or `null` otherwise. */
   readonly titleLang?: string | null;
+  /** Localized combination name, only when the editorial `title` is not it; absent otherwise. */
+  readonly combination?: string | null;
   /** `portrait: null` draws the own generic icon at its reserved size (no layout shift). */
   readonly masteries: readonly {
-    readonly name: string;
+    /** Not drawn (the portrait is decorative, `alt=""`); kept for callers that still pass it. */
+    readonly name?: string;
     readonly portrait: BuildCardPortrait | null;
   }[];
   readonly status: ContentStatus;
@@ -51,10 +54,16 @@ export interface BuildCardData {
   readonly variant: BuildCardVariant;
   readonly title: string;
   readonly titleLang?: string | null;
+  /** Localized combination name, drawn under a title that is not it; `null` otherwise. */
+  readonly combination: string | null;
   readonly masteries: readonly { readonly portrait: BuildCardPortrait }[];
   readonly status: ContentStatus;
   readonly statusLabel: string;
-  readonly accessibleName: string;
+  /**
+   * Hidden text after the title inside the link, in the UI language: `. combination. status. new tab`.
+   * The title keeps its own `lang`, so no part of the accessible name mixes languages.
+   */
+  readonly srText: string;
   readonly facts: readonly string[];
   readonly href: readonly string[] | null;
   /** Safe external URL of a third-party guide; opens in a new tab. */

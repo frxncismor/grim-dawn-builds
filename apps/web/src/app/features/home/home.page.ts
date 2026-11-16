@@ -27,6 +27,15 @@ export class HomePage {
   readonly featuredCard = this.builds?.featured ? buildCardData(this.builds.featured) : null;
   /** Date of the very guide the featured card shows, never of another selection. */
   readonly featuredDate = this.builds?.featuredDate ?? null;
+  /** The same date as the guide summary shows it: long form in the UI language, in UTC (FR-042). */
+  readonly featuredDateLabel = this.featuredDate
+    ? new Intl.DateTimeFormat(inject(LOCALE_ID), {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      }).format(new Date(`${this.featuredDate}T00:00:00Z`))
+    : null;
   readonly otherCards = (this.builds?.others ?? []).map(buildCardData);
   /** Game art on a card: Crate is credited and non-affiliation stated (§VII). */
   readonly showsGameArt = [this.featuredCard, ...this.otherCards].some((card) =>

@@ -554,6 +554,24 @@ for (const route of T018_CATALOGS) {
   });
 }
 
+for (const catalog of [
+  { path: '/tier-list', name: /Chamán \+ Demoledor.*\. Shaman \+ Demolitionist\. Unverified/i },
+  { path: '/es/tier-list', name: /Chamán \+ Demoledor.*\. Sin verificar/i },
+] as const) {
+  test.describe(`@a11y T052 tarjeta del catálogo (${catalog.path})`, () => {
+    test('el enlace de la guía no mezcla idiomas y nombra combinación y estado', async ({
+      page,
+    }) => {
+      await page.goto(`${BASE_URL}${catalog.path}`, { waitUntil: 'networkidle' });
+      await settle(page);
+      const link = page.locator('gd-build-card a[href*="/builds/"]').first();
+      await expect(link).not.toHaveAttribute('aria-label', /.*/);
+      await expect(link).not.toHaveAttribute('lang', /.*/);
+      await expect(link).toHaveAccessibleName(catalog.name);
+    });
+  });
+}
+
 for (const home of [
   { name: 'portada', path: '/' },
   { name: 'portada es', path: '/es' },
@@ -567,9 +585,26 @@ for (const home of [
       await settle(page);
       const link = page.locator('gd-build-card [data-variant="featured"] a');
       await expect(link, 'un solo enlace por tarjeta').toHaveCount(1);
-      const name = (await link.getAttribute('aria-label')) ?? '';
-      expect(name, 'el nombre accesible incluye la combinación y el estado').toMatch(
-        /Chamán \+ Demoledor\. (Unverified|Sin verificar|Verified|Verificado)/i,
+      await expect(link, 'sin aria-label ni lang que mezclen idiomas').not.toHaveAttribute(
+        'aria-label',
+        /.*/,
+      );
+      await expect(link).not.toHaveAttribute('lang', /.*/);
+      // Título editorial (es) + combinación y estado en el idioma de la interfaz (FR-003/FR-004).
+      await expect(
+        link,
+        'el nombre accesible incluye la combinación y el estado',
+      ).toHaveAccessibleName(
+        home.path === '/'
+          ? /Chamán \+ Demoledor.*\. Shaman \+ Demolitionist\. (Unverified|Verified)/i
+          : /Chamán \+ Demoledor.*\. (Sin verificar|Verificado)/i,
+      );
+      if (home.path === '/')
+        await expect(page.locator('[data-variant="featured"] .build-card__combination')).toHaveText(
+          'Shaman + Demolitionist',
+        );
+      await expect(link.locator('[lang]'), 'lang solo en el título').toHaveCount(
+        home.path === '/' ? 1 : 0,
       );
       await link.focus();
       const focus = await page.evaluate(() => {
