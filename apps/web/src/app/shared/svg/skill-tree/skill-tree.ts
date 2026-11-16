@@ -17,6 +17,7 @@ import type { PublicSkillNode, PublicMasteryTree, PublicBuild, SkillKind } from 
 import { createKeyboardNav } from '../keyboard-nav';
 import { layoutForest } from '../layout';
 import { placeTooltip } from './place-tooltip';
+import { skillSymbolHref } from '../../ui/icon/skill-symbols';
 
 type Mastery = PublicBuild['masteries'][number];
 type SkillNode = PublicBuild['skill_nodes'][number];
@@ -291,7 +292,6 @@ export class SkillTree implements OnDestroy {
       anchor: anchor.getBoundingClientRect(),
       tip: { width: tipRect.width, height: tipRect.height },
       viewport: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight },
-      container: stageRect,
       prefer: 'top',
     });
     tip.style.left = `${placed.left - stageRect.left}px`;
@@ -612,6 +612,11 @@ export class SkillTree implements OnDestroy {
       lines[lines.length - 1] = `${last.slice(0, Math.max(1, maxChars - 1)).trimEnd()}…`;
     }
     return lines.slice(0, 2);
+  }
+
+  /** Own icon of a catalog node (spec004 T024, `ASSET_SOURCE=own`); never the game's texture. */
+  iconHref(node: Pick<PublicSkillNode, 'kind' | 'circular'>): string {
+    return skillSymbolHref(node);
   }
 
   kindLabel(kind: SkillKind): string {

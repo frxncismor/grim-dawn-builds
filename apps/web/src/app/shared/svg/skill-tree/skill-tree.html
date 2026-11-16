@@ -149,22 +149,15 @@
                         <path class="skill-tree__shape" d="M0 -22 L22 0 L0 22 L-22 0 Z" />
                       }
                     }
-                    <g class="skill-tree__glyph" aria-hidden="true">
-                      @switch (item.node.kind) {
-                        @case ('active') {
-                          <path d="M-5 -8 L8 0 L-5 8 Z" />
-                        }
-                        @case ('passive') {
-                          <path d="M-8 0 H8" />
-                        }
-                        @case ('modifier') {
-                          <path d="M0 -8 V8 M-8 0 H8" />
-                        }
-                        @case ('transmuter') {
-                          <path d="M-8 -3 H8 M-8 3 H8" />
-                        }
-                      }
-                    </g>
+                    <use
+                      class="skill-tree__icon"
+                      aria-hidden="true"
+                      x="-12"
+                      y="-12"
+                      width="24"
+                      height="24"
+                      [attr.href]="iconHref(item.node)"
+                    />
                     @if (item.assignment; as assigned) {
                       <g
                         class="skill-tree__badge"
