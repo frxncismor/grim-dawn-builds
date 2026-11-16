@@ -27,18 +27,6 @@ export type BuildAttributionContent = Pick<
 /** Author slug reserved for unconfirmed identities; it must never produce a link. */
 const PLACEHOLDER_AUTHOR_SLUG = 'por-confirmar';
 
-const reviewLabels: Record<PublicBuild['review_state'], string> = {
-  borrador: $localize`:@@buildAttribution.reviewDraft:Draft`,
-  en_revision: $localize`:@@buildAttribution.reviewInReview:In review`,
-  publicado: $localize`:@@buildAttribution.reviewPublished:Published`,
-};
-
-const contentLabels: Record<PublicBuild['content_status'], string> = {
-  verificado: $localize`:@@buildAttribution.contentVerified:Verified`,
-  sin_verificar: $localize`:@@buildAttribution.contentUnverified:Unverified`,
-  placeholder: $localize`:@@buildAttribution.contentPlaceholder:Placeholder`,
-};
-
 const kindLabels: Record<PublicBuild['sources'][number]['kind'], string> = {
   original: $localize`:@@buildAttribution.kindOriginal:Original`,
   comunidad: $localize`:@@buildAttribution.kindCommunity:Community`,
@@ -101,18 +89,6 @@ export class BuildAttribution {
     return this.location.prepareExternalUrl(`/autores/${author.slug}`);
   });
 
-  protected readonly reviewLabel = computed(() => reviewLabels[this.content().review_state]);
-  protected readonly contentStatusLabel = computed(
-    () => contentLabels[this.content().content_status],
-  );
-
-  protected readonly publishedLabel = computed(() => {
-    const published = this.content().published_at;
-    return published
-      ? formatDate(this.dateFormatter, published)
-      : $localize`:@@buildAttribution.noDate:No date`;
-  });
-
   protected readonly disclaimer = computed(() => {
     const note = [...this.content().notes]
       .sort((left, right) => left.position - right.position)
@@ -121,14 +97,6 @@ export class BuildAttribution {
       ? { headline: note.headline, detail: note.detail }
       : { headline: null, detail: this.content().footer_disclaimer };
   });
-
-  protected reviewState(): string {
-    return this.content().review_state;
-  }
-
-  protected contentState(): string {
-    return this.content().content_status;
-  }
 
   protected kindLabel(kind: PublicBuild['sources'][number]['kind']): string {
     return kindLabels[kind];

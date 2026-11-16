@@ -19,6 +19,7 @@ import { LootFilter } from './loot-filter/loot-filter';
 import { PurchaseStepper, type PurchaseStepSelection } from './purchase-stepper/purchase-stepper';
 import { BuildSections } from './sections/build-sections';
 import { SourceAttribution } from './source-attribution/source-attribution';
+import { BuildSummary } from './summary/build-summary';
 import { BuildToc } from './toc/build-toc';
 import { VideoFacade } from './video-facade/video-facade';
 import { BuildSkills } from './skills/build-skills';
@@ -73,6 +74,7 @@ function publicHttpUrl(value: string | null | undefined): string | null {
   standalone: true,
   imports: [
     BuildSections,
+    BuildSummary,
     BuildSkills,
     PurchaseStepper,
     LootFilter,

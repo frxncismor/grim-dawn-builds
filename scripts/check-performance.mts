@@ -9,6 +9,7 @@ import { gzipSync } from 'node:zlib';
 import {
   CATALOG_JS_LIMIT,
   INITIAL_JS_LIMIT,
+  BUILD_JS_LIMIT,
   MASTERY_JS_LIMIT,
   measureInitialRoutes,
 } from './check-initial-js.mts';
@@ -55,6 +56,7 @@ export const BUDGETS = {
     tierList: CATALOG_JS_LIMIT,
     mastery: MASTERY_JS_LIMIT,
     masteryIndex: CATALOG_JS_LIMIT,
+    build: BUILD_JS_LIMIT,
   },
 } as const;
 
@@ -647,7 +649,9 @@ export function evaluateJsBudgets(results: readonly JsMeasurement[]): MetricResu
             ? BUDGETS.jsBytes.mastery
             : /^(\/es)?\/maestrias$/.test(result.route)
               ? BUDGETS.jsBytes.masteryIndex
-              : null;
+              : /^(\/es)?\/builds\/[a-z0-9-]+$/.test(result.route)
+                ? BUDGETS.jsBytes.build
+                : null;
     if (expected !== null && expected !== result.limitBytes)
       throw new Error(
         `El límite JS de ${result.route} no coincide con plan §6 (${expected} B gzip).`,

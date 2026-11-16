@@ -1,0 +1,111 @@
+.build-summary {
+  margin-block: var(--space-5);
+  padding: var(--space-4);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel);
+  color: var(--color-bone);
+}
+
+.build-summary h2 {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-large);
+  font-weight: var(--weight-display);
+  line-height: var(--line-heading);
+}
+
+.summary__facts {
+  display: grid;
+  gap: var(--space-3) var(--space-5);
+  margin: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+
+.summary__fact {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  min-inline-size: 0;
+  padding-block-start: var(--space-2);
+  border-block-start: var(--frame-border);
+}
+
+.summary__fact--wide {
+  grid-column: 1 / -1;
+}
+
+.summary__fact dt {
+  color: var(--color-ash);
+  font-size: var(--text-small);
+}
+
+.summary__fact dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.summary__masteries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.summary__masteries li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.summary__masteries img {
+  flex: none;
+  inline-size: 32px;
+  block-size: 32px;
+}
+
+.summary__alt {
+  color: var(--color-ash);
+  font-size: var(--text-small);
+}
+
+.summary__attribution {
+  margin: var(--space-3) 0 0;
+  color: var(--color-ash);
+  font-size: var(--text-small);
+}
+
+.summary__attribution a {
+  color: var(--color-storm);
+}
+
+.badge {
+  display: inline-block;
+  inline-size: fit-content;
+  padding-inline: var(--space-2);
+  border: 1px solid var(--color-line);
+  background: var(--color-panel-2);
+  color: var(--color-bone);
+  font-size: var(--text-small);
+  line-height: var(--line-heading);
+}
+
+.badge--pending,
+.badge[data-content-status='placeholder'] {
+  border-color: var(--color-ember);
+  color: var(--color-ember);
+}
+
+.badge[data-review-state='borrador'],
+.badge[data-content-status='sin_verificar'] {
+  border-style: dashed;
+  color: var(--color-ash);
+}
+
+.badge[data-review-state='publicado'],
+.badge[data-content-status='verificado'] {
+  border-color: var(--color-storm);
+  color: var(--color-storm);
+}

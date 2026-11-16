@@ -24,22 +24,31 @@ export const MASTERY_JS_LIMIT = 150000;
 /** Pages of the mastery route that are measured (largest tree and a mid-size one), per locale. */
 export const MASTERY_BUDGET_SLUGS = ['demolition', 'soldier'] as const;
 /**
+ * `/builds/:slug` (spec004 T020): plan §6 approves 150 kB gzip of initial JS for the guide (deferred
+ * trees and devotion map apart). The guide was not under any automatic gate until now; it is
+ * measured on the reference guide, per locale.
+ */
+export const BUILD_JS_LIMIT = 150000;
+export const BUILD_BUDGET_SLUGS = ['chaman-demoledor-golpe-primigenio'] as const;
+/**
  * `/maestrias` (spec 003, T027): an interactive listing that draws no tree, so it is the same class
  * as `/tier-list` and reuses its approved limit (`CATALOG_JS_LIMIT`); the home budget cannot apply
  * because the home ships no JS at all. No existing limit changes.
  */
-type InitialRoute = 'home' | 'tier-list' | 'mastery' | 'mastery-index';
+type InitialRoute = 'home' | 'tier-list' | 'mastery' | 'mastery-index' | 'build';
 const ROUTE_ENTRY: Record<InitialRoute, string> = {
   home: 'src/app/features/home/home.page.ts',
   'tier-list': 'src/app/features/tier-list/tier-list.page.ts',
   mastery: 'src/app/features/masteries/mastery.page.ts',
   'mastery-index': 'src/app/features/masteries/index.page.ts',
+  build: 'src/app/features/build/build-route.page.ts',
 };
 const ROUTE_LIMIT: Record<InitialRoute, number> = {
   home: INITIAL_JS_LIMIT,
   'tier-list': CATALOG_JS_LIMIT,
   mastery: MASTERY_JS_LIMIT,
   'mastery-index': CATALOG_JS_LIMIT,
+  build: BUILD_JS_LIMIT,
 };
 interface Output {
   entryPoint?: string;
@@ -134,8 +143,10 @@ export async function measureInitialJs(
         ? 'tier-list/index.html'
         : route === 'mastery-index'
           ? 'maestrias/index.html'
-          : `maestrias/${slug ?? ''}/index.html`;
-  if (route === 'mastery' && !slug) throw new Error('Falta el slug de la maestría.');
+          : route === 'build'
+            ? `builds/${slug ?? ''}/index.html`
+            : `maestrias/${slug ?? ''}/index.html`;
+  if ((route === 'mastery' || route === 'build') && !slug) throw new Error('Falta el slug.');
   const [stats, html] = await Promise.all([
     readFile(join(root, 'stats.json'), 'utf8'),
     readFile(join(root, 'browser', ...segments, page), 'utf8'),
@@ -177,6 +188,7 @@ export async function measureInitialRoutes(
   const hasTier = hasEntry('tier-list');
   const hasMastery = hasEntry('mastery');
   const hasMasteryIndex = hasEntry('mastery-index');
+  const hasBuild = hasEntry('build');
   const results = [];
   for (const segments of locales) {
     const prefix = segments.length === 0 ? '' : `/${segments.join('/')}`;
@@ -202,6 +214,13 @@ export async function measureInitialRoutes(
         results.push({
           route: `${prefix}/maestrias/${slug}`,
           ...(await measureInitialJs(root, 'mastery', segments, slug)),
+        });
+    // Strict as well: once the build ships the guide route, the reference guide must exist.
+    if (hasBuild)
+      for (const slug of BUILD_BUDGET_SLUGS)
+        results.push({
+          route: `${prefix}/builds/${slug}`,
+          ...(await measureInitialJs(root, 'build', segments, slug)),
         });
     if (hasMasteryIndex)
       results.push({

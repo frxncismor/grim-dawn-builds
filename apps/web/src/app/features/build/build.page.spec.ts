@@ -123,7 +123,14 @@ async function renderDeferred(
   state: DeferBlockState,
 ) {
   const blocks = await fixture.getDeferBlocks();
-  for (const block of blocks) await block.render(state);
+  for (const block of blocks) {
+    try {
+      await block.render(state);
+    } catch (error) {
+      // The index's observer block (T021) has no placeholder or loading state by design.
+      if (!/no @(placeholder|loading) block/.test(String(error))) throw error;
+    }
+  }
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
@@ -166,6 +173,32 @@ describe('gd-build-page', () => {
       .map((element) => element.id)
       .filter((id) => canonicalSections.includes(id));
     expect(rendered).toEqual(canonicalSections);
+  });
+
+  it('puts the build summary right after the hero and before the first content block (spec004 T020)', async () => {
+    const { root } = await render();
+    const summary = root.querySelector('[data-build-summary]')!;
+    expect(summary).not.toBeNull();
+    const hero = root.querySelector('#resumen')!;
+    const priorities = root.querySelector('#prioridades')!;
+    const before = Node.DOCUMENT_POSITION_FOLLOWING;
+    expect(hero.compareDocumentPosition(summary) & before).toBeTruthy();
+    expect(summary.compareDocumentPosition(priorities) & before).toBeTruthy();
+    expect(root.querySelectorAll('[data-build-summary]')).toHaveLength(1);
+    const text = summary.textContent!;
+    expect(text).toContain('Ana la Forjadora');
+    expect(text).toContain(publicContent.game_version);
+    for (const mastery of publicContent.masteries) expect(text).toContain(mastery.name_es);
+  });
+
+  it('replaces the old facts list of the attribution block: version and states live in the summary only', async () => {
+    const { root } = await render();
+    expect(root.querySelector('#fuentes [data-meta]')).toBeNull();
+    expect(root.querySelectorAll('[data-game-version]')).toHaveLength(1);
+    expect(root.querySelectorAll('[data-review-state]')).toHaveLength(1);
+    expect(root.querySelectorAll('[data-content-status]')).toHaveLength(1);
+    expect(root.querySelector('#fuentes [data-author]')).not.toBeNull();
+    expect(root.querySelector('#fuentes [data-sources]')).not.toBeNull();
   });
 
   it('renders one skill tree per mastery with only that mastery nodes', async () => {
@@ -382,7 +415,7 @@ describe('gd-build-page', () => {
   it('escapes hostile editorial strings instead of injecting markup', async () => {
     const hostile = '<img src=x onerror=alert(1)>';
     const { root } = await render({ ...publicContent, title: hostile });
-    expect(root.querySelector('img')).toBeNull();
+    expect(root.querySelector('img[src="x"], [onerror]')).toBeNull();
     expect(root.textContent).toContain(hostile);
   });
 
@@ -397,7 +430,8 @@ describe('gd-build-page', () => {
     const fixture = await createFixture(publicContent);
     const root = fixture.nativeElement as HTMLElement;
     const blocks = await renderDeferred(fixture, DeferBlockState.Placeholder);
-    expect(blocks).toHaveLength(2);
+    // The index's observer (T021), then the skill trees and the devotion map.
+    expect(blocks).toHaveLength(3);
 
     expect(root.querySelector('#habilidades')).not.toBeNull();
     expect(root.textContent).toContain('Golpe Primigenio');
@@ -407,7 +441,7 @@ describe('gd-build-page', () => {
     expect(root.textContent).toContain('Chamán');
     expect(root.textContent).toContain('Shaman');
 
-    await blocks[0].render(DeferBlockState.Loading);
+    await blocks[1].render(DeferBlockState.Loading);
     fixture.detectChanges();
     expect(root.querySelector('#habilidades')).not.toBeNull();
     expect(root.querySelector('.build-skeleton')?.getAttribute('aria-hidden')).toBe('true');
@@ -428,7 +462,7 @@ describe('gd-build-page', () => {
     const fixture = await createFixture(publicContent);
     const root = fixture.nativeElement as HTMLElement;
     const blocks = await renderDeferred(fixture, DeferBlockState.Placeholder);
-    await blocks[1].render(DeferBlockState.Placeholder);
+    await blocks[2].render(DeferBlockState.Placeholder);
     fixture.detectChanges();
 
     const section = root.querySelector('#devociones');

@@ -1,0 +1,117 @@
+@if (isVisible()) {
+  <section
+    class="build-summary"
+    data-build-summary
+    id="resumen-de-build"
+    aria-labelledby="build-summary-title"
+  >
+    <h2 id="build-summary-title" i18n="@@buildSummary.heading">Build summary</h2>
+
+    <dl class="summary__facts">
+      <div class="summary__fact summary__fact--wide">
+        <dt i18n="@@buildSummary.masteries">Masteries</dt>
+        <dd>
+          <ul class="summary__masteries">
+            @for (item of masteries(); track item.mastery.slug) {
+              <li data-summary-mastery>
+                <img
+                  [src]="item.src"
+                  [attr.width]="item.size"
+                  [attr.height]="item.size"
+                  alt=""
+                  decoding="async"
+                />
+                <span>
+                  {{ item.mastery.name_es }}
+                  <span class="summary__alt" lang="en">({{ item.mastery.name_en }})</span>
+                </span>
+              </li>
+            }
+          </ul>
+        </dd>
+      </div>
+
+      @if (damage().length) {
+        <div class="summary__fact">
+          <dt i18n="@@buildSummary.damage">Damage</dt>
+          <dd data-summary-damage>{{ damage().join(' · ') }}</dd>
+        </div>
+      }
+
+      <div class="summary__fact">
+        <dt i18n="@@buildAttribution.reviewState">Review state</dt>
+        <dd>
+          <span class="badge" data-review-state [attr.data-review-state]="content().review_state">{{
+            reviewLabel()
+          }}</span>
+        </dd>
+      </div>
+
+      <div class="summary__fact">
+        <dt i18n="@@buildAttribution.contentStatus">Content status</dt>
+        <dd>
+          <span
+            class="badge"
+            data-content-status
+            [attr.data-content-status]="content().content_status"
+            >{{ contentStatusLabel() }}</span
+          >
+        </dd>
+      </div>
+
+      <div class="summary__fact" data-summary-author>
+        <dt i18n="@@buildAttribution.authorLabel">Author</dt>
+        <dd>
+          @if (authorHref(); as href) {
+            <a [href]="href" data-author-link>{{ content().author.display_name }}</a>
+          } @else {
+            <span data-author-name>{{ content().author.display_name }}</span>
+            <span
+              class="badge badge--pending"
+              role="note"
+              data-author-placeholder
+              i18n="@@buildAttribution.authorPlaceholder"
+            >
+              Author to be confirmed
+            </span>
+          }
+        </dd>
+      </div>
+
+      <div class="summary__fact">
+        <dt i18n="@@buildAttribution.gameVersion">Game version</dt>
+        <dd data-game-version>{{ content().game_version }}</dd>
+      </div>
+
+      <div class="summary__fact">
+        <dt i18n="@@buildAttribution.published">Published</dt>
+        <dd data-published>
+          @if (content().published_at; as published) {
+            <time [attr.datetime]="published">{{ publishedLabel() }}</time>
+          } @else {
+            {{ publishedLabel() }}
+          }
+        </dd>
+      </div>
+
+      <div class="summary__fact summary__fact--wide">
+        <dt i18n="@@buildAttribution.sourcesHeading">Sources</dt>
+        <dd data-summary-source>
+          @if (firstSource(); as source) {
+            {{ source.title }}
+            @if (moreSources() > 0) {
+              <span class="summary__alt">({{ moreSourcesLabel(moreSources()) }})</span>
+            }
+          } @else {
+            <span i18n="@@buildAttribution.noSources">No sources recorded</span>
+          }
+        </dd>
+      </div>
+    </dl>
+
+    <p class="summary__attribution" data-summary-attribution>
+      <span i18n="@@buildSummary.attribution">Full credit, sources and disclaimer:</span>{{ ' '
+      }}<a [href]="sourcesHref()" i18n="@@buildAttribution.heading">Author and sources</a>
+    </p>
+  </section>
+}

@@ -1,8 +1,8 @@
 import { APP_BASE_HREF } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { DeferBlockBehavior, DeferBlockState, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import draftFixture from '../../../../../../../fixtures/content/builds/chaman-demoledor-golpe-primigenio.json';
 import { BuildToc, type BuildTocContent } from './build-toc';
 
@@ -56,6 +56,7 @@ async function render(value: BuildTocContent = content, platform = 'browser', ba
     ],
   });
   if (baseHref) TestBed.overrideProvider(APP_BASE_HREF, { useValue: baseHref });
+  await TestBed.compileComponents();
   const fixture = TestBed.createComponent(BuildToc);
   fixture.componentRef.setInput('content', value);
   fixture.detectChanges();
@@ -297,5 +298,106 @@ describe('gd-build-toc', () => {
     ] satisfies (keyof BuildTocContent)[]) {
       expect(content).toHaveProperty(key);
     }
+  });
+});
+
+describe('gd-build-toc active section (spec004 T021)', () => {
+  class FakeObserver {
+    static instances: FakeObserver[] = [];
+    readonly observed: Element[] = [];
+    constructor(
+      readonly callback: (entries: Partial<IntersectionObserverEntry>[]) => void,
+      readonly options?: IntersectionObserverInit,
+    ) {
+      FakeObserver.instances.push(this);
+    }
+    unobserve() {
+      /* the defer trigger releases its element */
+    }
+    /** Only the toc observer sets a rootMargin; Angular's own viewport trigger does not. */
+    static tocObservers() {
+      return FakeObserver.instances.filter((observer) => observer.options?.rootMargin);
+    }
+    observe(element: Element) {
+      this.observed.push(element);
+    }
+    disconnect() {
+      /* nothing to release */
+    }
+    fire(id: string, isIntersecting = true) {
+      this.callback([{ target: this.observed.find((e) => e.id === id)!, isIntersecting }]);
+    }
+  }
+
+  async function renderDeferred() {
+    FakeObserver.instances = [];
+    vi.stubGlobal('IntersectionObserver', FakeObserver);
+    for (const id of canonical) {
+      const el = document.createElement('section');
+      el.id = id;
+      document.body.append(el);
+    }
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [BuildToc],
+      deferBlockBehavior: DeferBlockBehavior.Manual,
+      providers: [
+        provideRouter([{ path: '**', children: [] }]),
+        { provide: PLATFORM_ID, useValue: 'browser' },
+      ],
+    });
+    await TestBed.compileComponents();
+    const fixture = TestBed.createComponent(BuildToc);
+    fixture.componentRef.setInput('content', content);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    return fixture;
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    document.body.replaceChildren();
+    TestBed.resetTestingModule();
+  });
+
+  it('marks no section and loads no observer until the deferred block renders', async () => {
+    const fixture = await renderDeferred();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(FakeObserver.tocObservers()).toHaveLength(0);
+    expect(root.querySelector('[aria-current]')).toBeNull();
+    expect(root.querySelector('[data-toc-current]')).toBeNull();
+    expect((await fixture.getDeferBlocks()).length).toBe(1);
+  });
+
+  it('marks the current section with aria-current and a visible text label, and moves it', async () => {
+    const fixture = await renderDeferred();
+    const root = fixture.nativeElement as HTMLElement;
+    const [block] = await fixture.getDeferBlocks();
+    await block.render(DeferBlockState.Complete);
+    fixture.detectChanges();
+    const observer = FakeObserver.tocObservers()[0];
+    expect(observer.observed.map((e) => e.id)).toEqual(canonical);
+    observer.fire('habilidades');
+    fixture.detectChanges();
+    const current = root.querySelectorAll('nav a[aria-current="location"]');
+    expect(current).toHaveLength(1);
+    expect(current[0].getAttribute('data-section')).toBe('habilidades');
+    const label = current[0].querySelector('[data-toc-current]')!;
+    expect(label.textContent?.trim()).toBe('Current section');
+    observer.fire('habilidades', false);
+    observer.fire('orden');
+    fixture.detectChanges();
+    const moved = root.querySelectorAll('nav a[aria-current="location"]');
+    expect(moved).toHaveLength(1);
+    expect(moved[0].getAttribute('data-section')).toBe('orden');
+    expect(root.querySelectorAll('[data-toc-current]')).toHaveLength(1);
+  });
+
+  it('keeps every link a plain same-page anchor whatever the observer does', async () => {
+    const fixture = await renderDeferred();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(ids(root)).toEqual(canonical);
+    for (const link of Array.from(root.querySelectorAll('nav a')))
+      expect(link.getAttribute('href')).toMatch(/#[a-z-]+$/);
   });
 });

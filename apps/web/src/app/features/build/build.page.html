@@ -11,6 +11,7 @@
 
   <div class="build-content">
     <gd-build-sections [content]="content()" section="resumen" />
+    <gd-build-summary [content]="content()" [authorPlaceholder]="content().authorIsPlaceholder" />
     @if (content().adaptation; as adaptation) {
       <gd-source-attribution [attribution]="adaptation" />
     }
