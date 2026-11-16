@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { LOCALE_ID, TransferState } from '@angular/core';
+import { ChangeDetectorRef, LOCALE_ID, TransferState } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HomePage } from './home.page';
 import { CATALOG_STATE } from '../../core/content/catalog.resolver';
 import { SITE_BASE_URL } from '../../core/seo/site-url';
@@ -162,5 +162,63 @@ describe('Home: the date belongs to the featured card (spec004 T049, C-001)', ()
       expect(time.getAttribute('datetime')).toBe('2026-11-09');
       expect(time.textContent).toBe(label);
     }
+  });
+});
+
+describe('Home: the list key is the destination (spec005 T010, S4-D4)', () => {
+  afterEach(() => {
+    TestBed.resetTestingModule();
+    vi.restoreAllMocks();
+  });
+
+  it('keeps both cards when two guides share a title but not a destination', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: SITE_BASE_URL, useValue: 'https://example.org/project/' },
+        provideRouter([]),
+      ],
+    });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const guide = (slug: string, published_at: string) => ({
+      ...input.guides[0],
+      slug,
+      title: 'Misma tormenta',
+      published_at,
+    });
+    const entryOf = (combination_slug: string, build_slug: string) => ({
+      ...input.entries[0],
+      combination_slug,
+      build_slug,
+      display_name: 'Misma tormenta',
+    });
+    TestBed.inject(TransferState).set(CATALOG_STATE, {
+      ...input,
+      combinations: [
+        ...input.combinations,
+        { slug: 'soldado-arcanista', mastery_a_slug: 'soldado', mastery_b_slug: 'arcanista' },
+      ],
+      entries: [
+        entryOf('chaman-soldado', 'uno'),
+        entryOf('chaman-arcanista', 'dos'),
+        entryOf('soldado-arcanista', 'tres'),
+      ],
+      guides: [guide('uno', '2026-11-09'), guide('dos', '2026-11-08'), guide('tres', '2026-11-07')],
+    } as never);
+    const f = TestBed.createComponent(HomePage);
+    await f.whenStable();
+    const el: HTMLElement = f.nativeElement;
+    expect(el.querySelector('[data-variant="featured"] a[href="/builds/uno"]')).not.toBeNull();
+    expect(el.querySelectorAll('.builds__list a[href="/builds/dos"]')).toHaveLength(1);
+    expect(el.querySelectorAll('.builds__list a[href="/builds/tres"]')).toHaveLength(1);
+    // The key is only checked when the list is reconciled again: swap the two cards in place.
+    const page = f.componentInstance as unknown as { otherCards: readonly unknown[] };
+    page.otherCards = [...page.otherCards].reverse();
+    f.componentRef.injector.get(ChangeDetectorRef).markForCheck();
+    f.detectChanges();
+    const hrefs = [...el.querySelectorAll('.builds__list a[href^="/builds/"]')].map((a) =>
+      a.getAttribute('href'),
+    );
+    expect(hrefs).toEqual(['/builds/tres', '/builds/dos']);
+    expect(warn.mock.calls.flat().join(' ')).not.toContain('NG0955');
   });
 });

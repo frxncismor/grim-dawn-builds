@@ -1,7 +1,9 @@
 /*
  * spec004 T052: styles of the catalog components (`gd-tier-row`, `gd-filter-chip`, `gd-filter-bar`,
  * `gd-empty-state`), global (not component CSS) so they do not ship inside the initial JS of `/tier-list`.
- * Every rule is scoped to those four tags, so nothing leaks to other pages.
+ * spec005 T008: every rule below the host block reaches only elements the component itself renders
+ * (child combinator from its own host), never content projected into `gd-tier-row` such as a
+ * `gd-build-card`, so nothing leaks to other components or pages.
  */
 
 :is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) {
@@ -9,106 +11,126 @@
   min-inline-size: 0;
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) .catalog-grid {
+gd-tier-row > section > .catalog-grid {
   display: grid;
   gap: var(--space-3);
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) .filters {
+gd-filter-bar > .filters {
   padding-block: var(--space-4);
   border-block: var(--frame-border);
   background: var(--surface-sheen), var(--color-panel);
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) .search {
+gd-filter-bar > .filters > .search {
   display: grid;
   gap: var(--space-2);
   max-inline-size: var(--reading-measure);
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) input {
+gd-filter-bar > .filters > .search > input {
   inline-size: 100%;
   min-inline-size: 0;
   padding: var(--space-2) var(--space-3);
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) fieldset {
+gd-filter-bar > .filters > fieldset {
   border: 0;
   padding: 0;
   margin: var(--space-5) 0;
   min-inline-size: 0;
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) legend {
+gd-filter-bar > .filters > fieldset > legend {
   padding: 0;
   margin-block-end: var(--space-2);
   font-weight: var(--weight-emphasis);
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) .chips {
+gd-filter-bar > .filters > fieldset > .chips {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) button {
+:is(gd-filter-chip > button, gd-filter-bar > .filters > button, gd-empty-state > .empty > button) {
   min-block-size: var(--space-7);
   max-inline-size: 100%;
   white-space: normal;
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) .chip {
+gd-filter-chip > .chip {
   border: var(--frame-border);
   background: var(--surface-sheen), var(--color-panel-2);
   box-shadow: var(--frame-bevel);
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) .chip[aria-pressed='true'] {
+gd-filter-chip > .chip[aria-pressed='true'] {
   background: var(--color-storm);
   color: var(--color-soot);
   border: var(--frame-border-active);
   font-weight: var(--weight-emphasis);
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) button:hover:enabled {
+:is(
+    gd-filter-chip > button,
+    gd-filter-bar > .filters > button,
+    gd-empty-state > .empty > button
+  ):hover:enabled {
   background: var(--color-panel-2);
   color: var(--color-bone);
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) button:active:enabled {
+:is(
+    gd-filter-chip > button,
+    gd-filter-bar > .filters > button,
+    gd-empty-state > .empty > button
+  ):active:enabled {
   border-color: var(--color-ember);
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) button:focus-visible,
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) input:focus-visible {
+:is(
+  gd-filter-chip > button,
+  gd-filter-bar > .filters > button,
+  gd-empty-state > .empty > button
+):focus-visible,
+gd-filter-bar > .filters > .search > input:focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-offset);
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) button:disabled,
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) input:disabled {
+:is(
+  gd-filter-chip > button,
+  gd-filter-bar > .filters > button,
+  gd-empty-state > .empty > button
+):disabled,
+gd-filter-bar > .filters > .search > input:disabled {
   color: var(--color-ash);
   cursor: not-allowed;
 }
 
-:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) .empty {
+gd-empty-state > .empty {
   padding: var(--space-5);
   border: 1px dashed var(--color-ash);
   background: var(--color-panel);
 }
 
 @media (min-width: 48rem) {
-  :is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) .catalog-grid {
+  gd-tier-row > section > .catalog-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  :is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) button {
+  :is(
+    gd-filter-chip > button,
+    gd-filter-bar > .filters > button,
+    gd-empty-state > .empty > button
+  ) {
     min-block-size: var(--space-6);
   }
 }
 
 @media (min-width: 80rem) {
-  :is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) .catalog-grid {
+  gd-tier-row > section > .catalog-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

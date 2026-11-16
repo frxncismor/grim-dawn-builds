@@ -52,7 +52,8 @@ import type { BuildCardData } from './build-card.model';
       @if (d.combination) {
         <p class="build-card__combination" aria-hidden="true">{{ d.combination }}</p>
       }
-      <p class="build-card__status" [attr.data-status]="d.status">{{ d.statusLabel }}</p>
+      <!-- prettier-ignore -->
+      <p class="build-card__status" aria-hidden="true" [attr.data-status]="d.status">{{ d.statusLabel }}</p>
       @if (full) {
         <p class="build-card__facts">
           @for (fact of d.facts; track $index) {

@@ -8,6 +8,7 @@ import {
   LOCALE_ID,
 } from '@angular/core';
 import type { PublicBuild } from '@gd/domain';
+import { formatLongDateUtc } from '../../../shared/date/long-date';
 
 export type BuildAttributionContent = Pick<
   PublicBuild,
@@ -53,11 +54,6 @@ function parseHttpUrl(value: string | null | undefined): LinkableUrl | null {
   }
 }
 
-function formatDate(formatter: Intl.DateTimeFormat, value: string): string {
-  const date = new Date(`${value}T00:00:00Z`);
-  return Number.isNaN(date.getTime()) ? value : formatter.format(date);
-}
-
 @Component({
   selector: 'gd-build-attribution',
   standalone: true,
@@ -67,12 +63,7 @@ function formatDate(formatter: Intl.DateTimeFormat, value: string): string {
 })
 export class BuildAttribution {
   private readonly location = inject(Location);
-  private readonly dateFormatter = new Intl.DateTimeFormat(inject(LOCALE_ID), {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+  private readonly locale = inject(LOCALE_ID);
 
   readonly content = input.required<BuildAttributionContent>();
   readonly authorPlaceholder = input<boolean>(false);
@@ -103,7 +94,7 @@ export class BuildAttribution {
   }
 
   protected sourceDate(value: string): string {
-    return formatDate(this.dateFormatter, value);
+    return formatLongDateUtc(this.locale, value) ?? value;
   }
 
   protected sourceUrl(value: string | null): LinkableUrl | null {

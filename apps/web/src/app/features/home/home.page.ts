@@ -10,6 +10,7 @@ import { SeoService, siteLocale } from '../../core/seo/seo.service';
 import { CATALOG_STATE } from '../../core/content/catalog.resolver';
 import { BuildCard } from '../../shared/ui/build-card/build-card';
 import { buildCardData } from '../../shared/ui/build-card/build-card.labels';
+import { formatLongDateUtc } from '../../shared/date/long-date';
 import { homeBuilds } from './home-builds';
 
 @Component({
@@ -28,14 +29,7 @@ export class HomePage {
   /** Date of the very guide the featured card shows, never of another selection. */
   readonly featuredDate = this.builds?.featuredDate ?? null;
   /** The same date as the guide summary shows it: long form in the UI language, in UTC (FR-042). */
-  readonly featuredDateLabel = this.featuredDate
-    ? new Intl.DateTimeFormat(inject(LOCALE_ID), {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        timeZone: 'UTC',
-      }).format(new Date(`${this.featuredDate}T00:00:00Z`))
-    : null;
+  readonly featuredDateLabel = formatLongDateUtc(inject(LOCALE_ID), this.featuredDate);
   readonly otherCards = (this.builds?.others ?? []).map(buildCardData);
   /** Game art on a card: Crate is credited and non-affiliation stated (§VII). */
   readonly showsGameArt = [this.featuredCard, ...this.otherCards].some((card) =>

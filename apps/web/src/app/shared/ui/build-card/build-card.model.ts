@@ -21,8 +21,6 @@ export interface BuildCardInput {
   readonly combination?: string | null;
   /** `portrait: null` draws the own generic icon at its reserved size (no layout shift). */
   readonly masteries: readonly {
-    /** Not drawn (the portrait is decorative, `alt=""`); kept for callers that still pass it. */
-    readonly name?: string;
     readonly portrait: BuildCardPortrait | null;
   }[];
   readonly status: ContentStatus;

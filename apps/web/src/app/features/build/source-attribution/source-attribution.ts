@@ -7,6 +7,7 @@ import {
   input,
 } from '@angular/core';
 import type { LinkOnlyMetadata } from '@gd/domain';
+import { formatLongDateUtc } from '../../../shared/date/long-date';
 
 interface LinkableUrl {
   href: string;
@@ -24,11 +25,6 @@ function parseHttpUrl(value: string | null | undefined): LinkableUrl | null {
   } catch {
     return null;
   }
-}
-
-function formatDate(formatter: Intl.DateTimeFormat, value: string): string {
-  const date = new Date(`${value}T00:00:00Z`);
-  return Number.isNaN(date.getTime()) ? value : formatter.format(date);
 }
 
 /**
@@ -50,18 +46,15 @@ function formatDate(formatter: Intl.DateTimeFormat, value: string): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SourceAttribution {
-  private readonly dateFormatter = new Intl.DateTimeFormat(inject(LOCALE_ID), {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+  private readonly locale = inject(LOCALE_ID);
 
   readonly attribution = input.required<LinkOnlyMetadata>();
 
   protected readonly originalLink = computed(() => parseHttpUrl(this.attribution().source_url));
 
-  protected readonly retrievedLabel = computed(() =>
-    formatDate(this.dateFormatter, this.attribution().retrieved_on),
+  protected readonly retrievedLabel = computed(
+    () =>
+      formatLongDateUtc(this.locale, this.attribution().retrieved_on) ??
+      this.attribution().retrieved_on,
   );
 }

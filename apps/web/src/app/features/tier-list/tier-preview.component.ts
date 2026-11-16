@@ -118,10 +118,7 @@ export class TierPreview {
     own: buildCardData({
       variant: 'standard',
       title: 'Guía propia de prueba',
-      masteries: [
-        { name: 'Chamán', portrait: null },
-        { name: 'Soldado', portrait: null },
-      ],
+      masteries: [{ portrait: null }, { portrait: null }],
       status: 'verificado',
       reviewState: 'publicado',
       damage: ['Rayo'],

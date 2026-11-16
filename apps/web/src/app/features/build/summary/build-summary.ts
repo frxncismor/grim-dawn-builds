@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import type { PublicBuild } from '@gd/domain';
+import { formatLongDateUtc } from '../../../shared/date/long-date';
 import { ICONS } from '../../../shared/ui/icon/registry';
 
 export type BuildSummaryContent = Pick<
@@ -75,12 +76,7 @@ const contentLabels: Record<PublicBuild['content_status'], string> = {
 export class BuildSummary {
   private readonly location = inject(Location);
   private readonly router = inject(Router);
-  private readonly dateFormatter = new Intl.DateTimeFormat(inject(LOCALE_ID), {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+  private readonly locale = inject(LOCALE_ID);
 
   /** Language of the page: it picks the primary mastery name (as `SkillTree.nameLang`). */
   protected readonly nameLang: 'en' | 'es' = inject(LOCALE_ID).toLowerCase().startsWith('es')
@@ -130,8 +126,7 @@ export class BuildSummary {
   protected readonly publishedLabel = computed(() => {
     const published = this.content().published_at;
     if (!published) return $localize`:@@buildAttribution.noDate:No date`;
-    const date = new Date(`${published}T00:00:00Z`);
-    return Number.isNaN(date.getTime()) ? published : this.dateFormatter.format(date);
+    return formatLongDateUtc(this.locale, published) ?? published;
   });
 
   protected readonly authorHref = computed(() => {
