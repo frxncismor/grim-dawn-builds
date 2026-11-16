@@ -47,3 +47,33 @@ summary:focus-visible {
 gd-tier-row {
   margin-block-end: var(--space-6);
 }
+
+.unguided {
+  margin-block: var(--space-6);
+  border: var(--frame-border);
+  background: var(--color-panel);
+}
+
+.unguided > summary {
+  padding-inline: var(--space-4);
+  color: var(--color-ash);
+  background: var(--surface-sheen), var(--color-panel-2);
+}
+
+.unguided .catalog-grid {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+@media (min-width: 48rem) {
+  .unguided .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 80rem) {
+  .unguided .catalog-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

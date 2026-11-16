@@ -28,6 +28,15 @@ export interface BuildCardInput {
   readonly href: readonly string[] | null;
   /** Documented editorial tier already localized; ignored on a placeholder (constitution I). */
   readonly tierLabel: string | null;
+  /**
+   * A link to a third-party guide (`enlace_externo`): attribution only, never a ranking. `url` is
+   * already validated (http/https without credentials) or `null` when it must stay text.
+   */
+  readonly external?: {
+    readonly url: string | null;
+    readonly author: string | null;
+    readonly note: string | null;
+  } | null;
 }
 
 /**
@@ -43,4 +52,6 @@ export interface BuildCardData {
   readonly accessibleName: string;
   readonly facts: readonly string[];
   readonly href: readonly string[] | null;
+  /** Safe external URL of a third-party guide; opens in a new tab. */
+  readonly externalHref: string | null;
 }

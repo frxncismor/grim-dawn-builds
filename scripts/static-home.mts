@@ -14,8 +14,14 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 interface StaticContract {
   selector: string;
   marker: string;
+  /** Extra inert custom elements this page may contain (spec004 T016: the build card). */
+  extraCustom?: readonly string[];
 }
-const homeContract: StaticContract = { selector: 'app-home-page', marker: STATIC_HOME_MARKER };
+const homeContract: StaticContract = {
+  selector: 'app-home-page',
+  marker: STATIC_HOME_MARKER,
+  extraCustom: ['gd-build-card'],
+};
 interface Node {
   name?: string;
   attrs?: { name: string; value: string }[];
@@ -101,8 +107,12 @@ function safeLink(value: string | undefined): boolean {
     return false;
   }
 }
-function structuralGuard(nodes: Node[], selector: string): void {
-  const custom = new Set([...baseCustom, selector]);
+function structuralGuard(
+  nodes: Node[],
+  selector: string,
+  extraCustom: readonly string[] = [],
+): void {
+  const custom = new Set([...baseCustom, selector, ...extraCustom]);
   for (const tag of ['head', 'body', selector, 'main', 'h1'])
     if (nodes.filter((n) => n.name === tag).length !== 1) fail();
   if (!nodes.some((n) => n.name === 'title') || !nodes.some((n) => n.name === 'a')) fail();
@@ -157,7 +167,7 @@ function hasMarker(nodes: Node[], name: string): boolean {
 function assertStatic(html: string, contract: StaticContract): void {
   try {
     const nodes = elements(html);
-    structuralGuard(nodes, contract.selector);
+    structuralGuard(nodes, contract.selector, contract.extraCustom);
     if (!marker(nodes, contract.marker)) fail();
     if (STATIC_MARKERS.some((name) => name !== contract.marker && hasMarker(nodes, name))) fail();
     for (const node of nodes) {
@@ -215,7 +225,7 @@ function staticHtml(html: string, contract: StaticContract): string {
       }
     }
     const nodes = elements(html);
-    structuralGuard(nodes, contract.selector);
+    structuralGuard(nodes, contract.selector, contract.extraCustom);
     if (marker(nodes, contract.marker)) {
       assertStatic(html, contract);
       return html;

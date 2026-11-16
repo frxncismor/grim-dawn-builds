@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { BuildCardData } from './build-card.model';
 
@@ -7,14 +7,15 @@ import type { BuildCardData } from './build-card.model';
  * no client logic of its own, because `/tier-list` has ~1 kB of initial-JS margin. Every text
  * arrives localized in `data` (see `build-card.labels.ts`) and the frame, the status shape and
  * the portrait fallback live in CSS and in the data. One destination: the title link covers the
- * whole card. It never contains another card; a combination with no guide is a compact, non-link
+ * whole card. Its CSS is global (`styles/build-card.css`): component CSS would ship inside the JS of
+ * `/tier-list`, and with no encapsulation attributes the HTML is smaller too. It never contains another card; a combination with no guide is a compact, non-link
  * card that says so and shows no tier.
  */
 @Component({
   selector: 'gd-build-card',
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './build-card.css',
+  encapsulation: ViewEncapsulation.None,
   template: `@let d = data();
     <article class="build-card" [attr.data-variant]="d.variant">
       @if (d.variant !== 'compact') {
@@ -34,6 +35,14 @@ import type { BuildCardData } from './build-card.model';
       <h3 class="build-card__title">
         @if (d.href) {
           <a [routerLink]="d.href" [attr.aria-label]="d.accessibleName">{{ d.title }}</a>
+        } @else if (d.externalHref) {
+          <a
+            [href]="d.externalHref"
+            target="_blank"
+            rel="noopener noreferrer"
+            [attr.aria-label]="d.accessibleName"
+            >{{ d.title }}</a
+          >
         } @else {
           {{ d.title }}
         }

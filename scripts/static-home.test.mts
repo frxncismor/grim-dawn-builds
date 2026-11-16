@@ -31,6 +31,20 @@ test('static delivery preserves native content and SEO while removing every Java
   assert.equal(staticHomeHtml(result), result);
 });
 
+test('the Home accepts the inert build card element and the other pages still reject it', () => {
+  const card =
+    '<gd-build-card><article><h3><a href="/builds/x">X</a></h3></article></gd-build-card>';
+  assertStaticHome(staticHomeHtml(html.replace('</app-home-page>', card + '</app-home-page>')));
+  assert.throws(() =>
+    assertStaticPage(
+      html
+        .replaceAll('app-home-page', 'gd-about-page')
+        .replace('</gd-about-page>', card + '</gd-about-page>'),
+      'gd-about-page',
+    ),
+  );
+});
+
 test('known Angular critical CSS activation becomes a native stylesheet; arbitrary onload stays forbidden', () => {
   const critical = html.replace(
     '<link rel="stylesheet" href="styles.css">',
