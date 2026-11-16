@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { checkAssetManifest, SkillIconAssetSchema, skillIconFilePath } from './asset.js';
+import {
+  checkAssetManifest,
+  classifySkillIconEntry,
+  SkillIconAssetSchema,
+  skillIconFilePath,
+} from './asset.js';
 
 const asset = (overrides: Record<string, unknown> = {}) => ({
   slug: 'icono-rayo',
@@ -237,5 +242,38 @@ describe('skill icon manifest entry (spec004 T025: one entry per icon)', () => {
     const file = skillIconFilePath(ICON_ID);
     const issues = checkAssetManifest({ assets: [icon()] }, [file], { [file]: 'b'.repeat(64) });
     expect(issues.some((i) => i.path === 'provenance.sha256')).toBe(true);
+  });
+
+  describe('classifySkillIconEntry (the one serveable-icon rule)', () => {
+    const withdrawn = (overrides: Record<string, unknown> = {}) =>
+      icon({ status: 'withdrawn', file_path: null, provenance: undefined, ...overrides });
+
+    it('classifies an approved entry with its derived file path and sha256', () => {
+      const result = classifySkillIconEntry(icon());
+      expect(result).toMatchObject({ kind: 'approved', slug: ICON_ID, sha256: SHA });
+      expect(result.kind === 'approved' && result.filePath).toBe(skillIconFilePath(ICON_ID));
+    });
+
+    it('classifies a valid withdrawn entry as withdrawn', () => {
+      expect(classifySkillIconEntry(withdrawn())).toEqual({ kind: 'withdrawn', slug: ICON_ID });
+    });
+
+    it.each([
+      ['a non-object', 'x'],
+      ['null', null],
+      ['a slug that is not an icon id', icon({ slug: 'ui/skills/x.tex' })],
+      ['a pending entry', icon({ status: 'pending', file_path: null, provenance: undefined })],
+      ['a rejected entry', icon({ status: 'rejected', file_path: null })],
+      ['another licence', icon({ license_or_permission: 'libre' })],
+      ['proof other than R10', icon({ proof_ref: 'otro' })],
+      ['a missing provenance', icon({ provenance: undefined })],
+      ['a file path off the icon id', icon({ file_path: 'public/assets/skill-icons/x.png' })],
+      [
+        'a withdrawn entry that still carries a file',
+        withdrawn({ file_path: skillIconFilePath(ICON_ID) }),
+      ],
+    ])('classifies %s as invalid', (_name, raw) => {
+      expect(classifySkillIconEntry(raw).kind).toBe('invalid');
+    });
   });
 });

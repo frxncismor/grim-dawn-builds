@@ -141,6 +141,7 @@ describe('@gd/domain built output', () => {
       'TierEntrySchema',
       'TierListSchema',
       'checkAssetManifest',
+      'classifySkillIconEntry',
       'evaluatePublicationGate',
       'findDependencyCycle',
       'isPermissionGranted',

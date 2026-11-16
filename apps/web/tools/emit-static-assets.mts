@@ -4,7 +4,7 @@ import { createMasteryCatalog } from '../src/app/core/content/masteries.server.t
 import { emitDeferredStyles } from './emit-deferred-styles.mts';
 import { emitMasteryTrees, MASTERY_TREES_DIR } from './emit-mastery-trees.mts';
 import { emitPortraits } from './emit-portraits.mts';
-import { emitSkillIcons } from './emit-skill-icons.mts';
+import { catalogIconIds, emitSkillIcons } from './emit-skill-icons.mts';
 
 const WEB_ROOT = resolve(import.meta.dirname, '..');
 const REPO_ROOT = resolve(WEB_ROOT, '..', '..');
@@ -30,6 +30,7 @@ async function main(argv: string[]): Promise<number> {
       output,
       source,
       join(REPO_ROOT, 'fixtures', 'content', 'assets', 'manifest.json'),
+      await catalogIconIds(catalog),
     );
     console.log(
       `emit-static-assets OK (${trees.length} ficheros en ${MASTERY_TREES_DIR}, ${styles}, ${portraits.length} retratos y ${skillIcons.length} iconos de habilidad con ASSET_SOURCE=${source}).`,

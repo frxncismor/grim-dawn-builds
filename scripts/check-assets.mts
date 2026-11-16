@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { checkAssetManifest, type AssetIssue } from '@gd/domain';
+import { checkAssetManifest, classifySkillIconEntry, type AssetIssue } from '@gd/domain';
 
 const WEB_PUBLIC_DIR = 'apps/web/public';
 const OFFICIAL_SUBDIR = 'assets';
@@ -82,8 +82,9 @@ export function assertGameAssets(root: string): void {
     )
       problems.push(`mastery-${slug}: sin retrato aprobado (tolerancia_de_facto_sin_permiso)`);
   }
-  // spec004 T028: every skill icon the catalog references needs an `approved` entry under the
-  // common condition, or a `withdrawn` one (the own symbol is shown); anything else fails closed.
+  // spec004 T028 / T050: every skill icon the catalog references needs an entry that the shared
+  // rule `classifySkillIconEntry` (the same as the prerender and the emitter) classifies as
+  // `approved` or `withdrawn` (the own symbol is shown); anything else fails closed.
   const iconIds = new Set<string>();
   for (const name of existsSync(trees)
     ? readdirSync(trees).filter((n) => n.endsWith('.json'))
@@ -100,11 +101,7 @@ export function assertGameAssets(root: string): void {
   }
   for (const id of [...iconIds].sort()) {
     const entry = entries.find((item) => item?.slug === id);
-    if (entry?.status === 'withdrawn') continue;
-    if (
-      entry?.status !== 'approved' ||
-      entry.license_or_permission !== 'tolerancia_de_facto_sin_permiso'
-    )
+    if (classifySkillIconEntry(entry).kind === 'invalid')
       problems.push(`${id}: sin icono aprobado ni retirado (tolerancia_de_facto_sin_permiso)`);
   }
   if (problems.length > 0)

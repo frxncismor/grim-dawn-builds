@@ -23,6 +23,7 @@ const PUBLIC_RUNTIME_EXPORTS = [
   'TIERS',
   'TierEntrySchema',
   'checkAssetManifest',
+  'classifySkillIconEntry',
   'SkillIconAssetSchema',
   'skillIconFilePath',
   'ICON_ID_PATTERN',

@@ -3,14 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { SKILL_KINDS } from '@gd/domain';
-import {
-  SKILL_SPRITE_PATH,
-  SKILL_SYMBOLS,
-  skillSymbol,
-  skillSymbolHref,
-  type SkillSymbolId,
-} from './skill-symbols.ts';
-import { resolveSkillIcon } from './resolve-icon.server.ts';
+import { SKILL_SPRITE_PATH, SKILL_SYMBOLS, skillSymbol, skillSymbolHref } from './skill-symbols.ts';
 
 /**
  * spec004 T024 (fase a): own fallback icons for skill nodes. One sprite with a `<symbol>` per skill
@@ -71,17 +64,13 @@ test('each skill kind resolves to the symbol of its type, circular or not (T045)
   assert.equal(skillSymbolHref('mastery'), '/assets/ui/skill-icons.svg#skill-mastery');
 });
 
-test('the server resolver returns the own symbol and never a game path or a texture name', () => {
-  const resolved = resolveSkillIcon({ kind: 'modifier', circular: false });
-  assert.deepEqual(resolved, {
-    source: 'own',
-    symbol: 'skill-modifier' satisfies SkillSymbolId,
-    href: '/assets/ui/skill-icons.svg#skill-modifier',
-  });
-  const withTexture = resolveSkillIcon({
+test('the own symbol is chosen from kind and circular only, never from a texture path (S-004)', () => {
+  const node = {
     kind: 'active',
     circular: false,
     icon: 'ui/skills/icons/class01/skillicon_x.tex',
-  } as never);
-  assert.doesNotMatch(JSON.stringify(withTexture), /\.tex|ui\/skills/);
+  } as never;
+  assert.equal(skillSymbol(node), 'skill-active');
+  assert.equal(skillSymbolHref(node), '/assets/ui/skill-icons.svg#skill-active');
+  assert.doesNotMatch(skillSymbolHref(node), /\.tex|ui\/skills\/icons/);
 });

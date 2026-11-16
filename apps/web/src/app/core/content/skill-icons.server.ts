@@ -1,18 +1,17 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { ICON_ID_PATTERN, SkillIconAssetSchema } from '@gd/domain';
+import { classifySkillIconEntry, ICON_ID_PATTERN } from '@gd/domain';
 import { parseAssetSource } from './portraits';
 import type { SkillIconSource } from './skill-icons';
 
-const PERMISSION = 'tolerancia_de_facto_sin_permiso';
 const closed = (why: string) => new Error(`Icono de habilidad inválido: ${why}.`);
 
 /**
- * Decides, for the icons the catalog references, which ones the game art may serve. Every id needs
- * an entry: `approved` under `tolerancia_de_facto_sin_permiso` (valid per `SkillIconAssetSchema`) is
- * served; `withdrawn` keeps the own symbol. A missing, pending, rejected or invalid entry fails
- * closed (FR-018, FR-019, section VII): the build stops instead of publishing an icon without a
- * manifest entry.
+ * Decides, for the icons the catalog references, which ones the game art may serve, with the one
+ * shared rule `classifySkillIconEntry` (`@gd/domain`, also used by the emitter and the release
+ * gate). Every id needs an entry: `approved` is served; `withdrawn` keeps the own symbol. A missing,
+ * pending, rejected or invalid entry fails closed (FR-018, FR-019, section VII): the build stops
+ * instead of publishing an icon without a manifest entry.
  */
 export function resolveSkillIconSource(
   iconIds: readonly string[],
@@ -23,16 +22,11 @@ export function resolveSkillIconSource(
     if (!ICON_ID_PATTERN.test(id)) throw closed(`${id} no es un icon_id`);
     const raw = entries.find(
       (item) => item && typeof item === 'object' && (item as { slug?: unknown }).slug === id,
-    ) as { status?: unknown } | undefined;
+    );
     if (!raw) throw closed(`${id} sin entrada en el manifiesto`);
-    if (raw.status === 'withdrawn') {
-      withdrawn.push(id);
-      continue;
-    }
-    if (raw.status !== 'approved') throw closed(`${id} sin aprobar`);
-    const parsed = SkillIconAssetSchema.safeParse(raw);
-    if (!parsed.success || parsed.data.license_or_permission !== PERMISSION)
-      throw closed(`entrada de ${id} no válida`);
+    const verdict = classifySkillIconEntry(raw);
+    if (verdict.kind === 'withdrawn') withdrawn.push(id);
+    else if (verdict.kind === 'invalid') throw closed(verdict.reason);
   }
   return { source: 'game', withdrawn };
 }
