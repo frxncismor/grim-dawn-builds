@@ -12,12 +12,14 @@ import {
   input,
   LOCALE_ID,
   signal,
+  TransferState,
 } from '@angular/core';
 import type { PublicSkillNode, PublicMasteryTree, PublicBuild, SkillKind } from '@gd/domain';
 import { createKeyboardNav } from '../keyboard-nav';
 import { layoutForest } from '../layout';
 import { placeTooltip } from './place-tooltip';
 import { skillSymbolHref } from '../../ui/icon/skill-symbols';
+import { SKILL_ICONS_STATE, skillIconSrc } from '../../../core/content/skill-icons';
 
 type Mastery = PublicBuild['masteries'][number];
 type SkillNode = PublicBuild['skill_nodes'][number];
@@ -613,6 +615,24 @@ export class SkillTree implements OnDestroy {
     }
     return lines.slice(0, 2);
   }
+
+  /**
+   * `ASSET_SOURCE=game` state written by the server (spec004 T028); `null` is `own`. Read from
+   * `TransferState` so the prerender and the hydrated page draw the same icons.
+   */
+  private readonly gameIcons = inject(TransferState).get(SKILL_ICONS_STATE, null);
+  private readonly withdrawnIcons = new Set(this.gameIcons?.withdrawn ?? []);
+
+  /** PNG of the game for a catalog node, or `null`: own source, no icon, or a `withdrawn` entry. */
+  gameIconSrc(node: Pick<PublicSkillNode, 'icon_id'>): string | null {
+    const id = node.icon_id;
+    return this.gameIcons && id && !this.withdrawnIcons.has(id) ? skillIconSrc(id) : null;
+  }
+
+  /** True when at least one node draws the game's art: the credit to Crate must then be visible. */
+  readonly showsGameArt = computed(
+    () => this.catalogTree()?.nodes.some((node) => this.gameIconSrc(node) !== null) ?? false,
+  );
 
   /** Own icon of a catalog node (spec004 T024, `ASSET_SOURCE=own`); never the game's texture. */
   iconHref(node: Pick<PublicSkillNode, 'kind' | 'circular'>): string {

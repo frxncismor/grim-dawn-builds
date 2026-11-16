@@ -4,7 +4,12 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
-import { assertAssetStatusParity, checkAssets } from './check-assets.mts';
+import {
+  assertAssetStatusParity,
+  assertGameAssets,
+  assertNoGamePortraits,
+  checkAssets,
+} from './check-assets.mts';
 
 const PNG = Buffer.from('not-really-a-png');
 const SHA = createHash('sha256').update(PNG).digest('hex');
@@ -142,6 +147,81 @@ test('our own art under assets/ui/ is not game art and needs no manifest entry (
     mkdirSync(join(root, 'apps/web/public/assets/portraits'), { recursive: true });
     writeFileSync(join(root, 'apps/web/public/assets/portraits/x.png'), PNG);
     assert.equal(checkAssets(root).issues.length, 1);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+// ---- spec004 T028: skill icons (SC-009 and fail-closed `game`) -------------------------------
+
+const ICON = 'ic-0123456789abcdef';
+const iconEntry = (over: Record<string, unknown> = {}) => ({
+  ...entry(),
+  slug: ICON,
+  file_path: `public/assets/skill-icons/${ICON}.png`,
+  proof_ref: 'specs/004-rediseno-ui-grim-dawn/research.md#r10',
+  fallback_svg: 'public/assets/ui/skill-icons.svg#skill-active',
+  provenance: {
+    game_version: 'steam-build-1',
+    source_path: 'ui/x.tex',
+    sha256: SHA,
+    width: 32,
+    height: 32,
+  },
+  ...over,
+});
+
+function gameRepo(entries: unknown[], iconIds: string[]): string {
+  const root = mkdtempSync(join(tmpdir(), 'gd-game-'));
+  const put = (path: string, data: string) => {
+    mkdirSync(dirname(join(root, path)), { recursive: true });
+    writeFileSync(join(root, path), data);
+  };
+  put('fixtures/content/assets/manifest.json', JSON.stringify({ assets: entries }));
+  put(
+    'fixtures/content/mastery-trees/soldier.json',
+    JSON.stringify({ nodes: iconIds.map((icon_id) => ({ icon_id })) }),
+  );
+  put(`apps/web/${FILE}`, PNG.toString());
+  for (const item of entries as { slug: string; status: string; file_path?: string | null }[])
+    if (item.slug.startsWith('ic-') && item.status === 'approved' && item.file_path)
+      put(`apps/web/${item.file_path}`, PNG.toString());
+  return root;
+}
+
+test('assertGameAssets: every icon of the catalog needs an approved or withdrawn entry', () => {
+  const portrait = entry({ slug: 'mastery-soldier' });
+  const roots = {
+    fine: gameRepo([portrait, iconEntry()], [ICON]),
+    withdrawn: gameRepo(
+      [portrait, iconEntry({ status: 'withdrawn', file_path: null, provenance: undefined })],
+      [ICON],
+    ),
+    missing: gameRepo([portrait], [ICON]),
+    pending: gameRepo([portrait, iconEntry({ status: 'pending' })], [ICON]),
+    license: gameRepo([portrait, iconEntry({ license_or_permission: 'libre' })], [ICON]),
+  };
+  try {
+    assert.doesNotThrow(() => assertGameAssets(roots.fine));
+    assert.doesNotThrow(() => assertGameAssets(roots.withdrawn));
+    for (const key of ['missing', 'pending', 'license'] as const)
+      assert.throws(() => assertGameAssets(roots[key]), new RegExp(ICON), key);
+  } finally {
+    for (const root of Object.values(roots)) rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('assertNoGamePortraits: with own an artifact with skill icons fails, with game it is not checked (SC-009)', () => {
+  const root = mkdtempSync(join(tmpdir(), 'gd-artifact-'));
+  try {
+    for (const locale of ['', 'es/']) {
+      mkdirSync(join(root, 'browser', locale, 'assets', 'skill-icons'), { recursive: true });
+    }
+    assert.doesNotThrow(() => assertNoGamePortraits(root, 'game'));
+    assert.doesNotThrow(() => assertNoGamePortraits(root, 'own'));
+    writeFileSync(join(root, 'browser', 'es', 'assets', 'skill-icons', `${ICON}.png`), PNG);
+    assert.throws(() => assertNoGamePortraits(root, 'own'), /iconos de habilidad|skill-icons/);
+    assert.doesNotThrow(() => assertNoGamePortraits(root, 'game'));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

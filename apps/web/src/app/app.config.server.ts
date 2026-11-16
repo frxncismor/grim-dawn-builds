@@ -13,6 +13,8 @@ import { appConfig } from './app.config';
 import { serverRoutes } from './app.routes.server';
 import { MASTERY_CATALOG, MASTERY_PORTRAITS } from './core/content/masteries';
 import { createPortraitResolver } from './core/content/portraits.server';
+import { SKILL_ICON_SOURCE, SKILL_ICONS_STATE } from './core/content/skill-icons';
+import { createSkillIconSource } from './core/content/skill-icons.server';
 import { createMasteryCatalog } from './core/content/masteries.server';
 import { CONTENT_REPOSITORY } from './core/content/repository';
 import { createContentSource } from './core/content/content-source.server';
@@ -47,6 +49,22 @@ const serverConfig: ApplicationConfig = {
       useFactory: () => createPortraitResolver(CONTENT_ROOT, process.env),
     },
     {
+      // spec004 T028: with `game`, fails the build when an icon of the catalog has no approved or
+      // withdrawn manifest entry; with `own` it resolves to `null` without reading the manifest.
+      provide: SKILL_ICON_SOURCE,
+      useFactory: () => {
+        const catalog = inject(MASTERY_CATALOG);
+        return createSkillIconSource(CONTENT_ROOT, process.env, async () => {
+          const trees = await Promise.all(
+            (await catalog.listSlugs()).map((slug) => catalog.get(slug)),
+          );
+          return trees.flatMap((tree) =>
+            (tree?.nodes ?? []).flatMap((node) => (node.icon_id ? [node.icon_id] : [])),
+          );
+        });
+      },
+    },
+    {
       provide: PUBLIC_SITE_LOADER,
       useFactory: () => {
         const repository = inject(CONTENT_SOURCE).repository;
@@ -58,11 +76,17 @@ const serverConfig: ApplicationConfig = {
       const selected = inject(CONTENT_SOURCE);
       const state = inject(TransferState);
       const load = inject(PUBLIC_SITE_LOADER);
+      // Injected before any `await` (an injection context is needed).
+      const iconSource = inject(SKILL_ICON_SOURCE);
       await selected.initialize();
       state.set(makeStateKey<typeof selected.metadata>('gd-content-source'), selected.metadata);
       // Fail fast on invalid content. The snapshot itself is written into `TransferState` only by
       // the routes that read it (`ensurePublicSite`), so other pages do not carry it (T026).
       await load();
+      // Only with `ASSET_SOURCE=game`: every tree reads it back (also after hydration) to draw the
+      // game icons. With `own` nothing is written, so the pages carry no extra bytes.
+      const icons = await iconSource;
+      if (icons) state.set(SKILL_ICONS_STATE, icons);
     }),
     {
       provide: SITE_BASE_URL,
