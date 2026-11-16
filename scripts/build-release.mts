@@ -1,4 +1,8 @@
-import { assertGameAssets, assertNoGamePortraits } from './check-assets.mts';
+import {
+  assertAssetStatusParity,
+  assertGameAssets,
+  assertNoGamePortraits,
+} from './check-assets.mts';
 import { createPublicBuildEnv } from './public-build-env.mts';
 import { assertPublicBuild, sensitiveValues } from './check-public-build.mts';
 import { spawn } from 'node:child_process';
@@ -32,6 +36,27 @@ interface BuildDependencies {
   emitTrees?: (output: string, env: Record<string, string>) => Promise<void>;
 }
 
+/** Slugs the API publishes from `v_public_assets` (approved rows only); anything unreadable fails the release. */
+async function fetchPublicAssets(base: string, request: typeof fetch): Promise<{ slug: string }[]> {
+  try {
+    const response = await request(new URL('api/v1/assets', base), {
+      redirect: 'error',
+      credentials: 'omit',
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.status !== 200) throw new Error();
+    const body: unknown = await response.json();
+    if (!Array.isArray(body)) throw new Error();
+    return body.map((item: unknown) => {
+      const slug = (item as { slug?: unknown } | null)?.slug;
+      if (typeof slug !== 'string') throw new Error();
+      return { slug };
+    });
+  } catch {
+    throw new Error('Release no pudo leer el estado de los activos de la API (/api/v1/assets).');
+  }
+}
+
 export async function runRelease(
   root: string,
   env: Environment,
@@ -54,7 +79,11 @@ export async function runRelease(
   try {
     const childEnv = publicBuildEnv({ ...env, API_BASE_URL: base });
     // Fail closed before building: game art needs a valid manifest and every portrait approved.
-    if (childEnv['ASSET_SOURCE'] === 'game') assertGameAssets(root);
+    if (childEnv['ASSET_SOURCE'] === 'game') {
+      assertGameAssets(root);
+      // A-03: the repository manifest decides; the table must agree (only `game` ships assets by status).
+      assertAssetStatusParity(root, await fetchPublicAssets(base, dependencies.request ?? fetch));
+    }
     const webRoot = join(root, 'apps', 'web');
     const build =
       dependencies.build ??

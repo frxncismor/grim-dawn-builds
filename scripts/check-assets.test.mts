@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
-import { checkAssets } from './check-assets.mts';
+import { assertAssetStatusParity, checkAssets } from './check-assets.mts';
 
 const PNG = Buffer.from('not-really-a-png');
 const SHA = createHash('sha256').update(PNG).digest('hex');
@@ -80,4 +80,55 @@ test('a withdrawn entry with its file deleted passes; keeping the file fails', (
   const withdrawn = entry({ status: 'withdrawn', file_path: null });
   assert.deepEqual(check({ assets: [withdrawn] }, false).issues, []);
   assert.ok(check({ assets: [withdrawn] }, true).issues.length > 0);
+});
+
+// T005 (A-03): one source of truth for an asset's status — the repository manifest rules.
+test('assertAssetStatusParity: passes when the table and the manifest agree on what is public', () => {
+  const root = repo({
+    assets: [
+      entry({ slug: 'mastery-soldier' }),
+      entry({ slug: 'mastery-oathkeeper', status: 'withdrawn' }),
+    ],
+  });
+  try {
+    assert.doesNotThrow(() => assertAssetStatusParity(root, [{ slug: 'mastery-soldier' }]));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('assertAssetStatusParity: fails closed naming the asset and both states when they disagree', () => {
+  const root = repo({
+    assets: [
+      entry({ slug: 'mastery-soldier', status: 'withdrawn' }),
+      entry({ slug: 'mastery-shaman' }),
+    ],
+  });
+  try {
+    // Table still publishes a withdrawn asset; manifest approves one the table does not publish.
+    assert.throws(
+      () => assertAssetStatusParity(root, [{ slug: 'mastery-soldier' }]),
+      (error: Error) =>
+        /mastery-soldier/.test(error.message) &&
+        /tabla assets: approved/.test(error.message) &&
+        /manifiesto: withdrawn/.test(error.message) &&
+        /mastery-shaman/.test(error.message) &&
+        /tabla assets: no publicado/.test(error.message) &&
+        /manifiesto: approved/.test(error.message),
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('assertAssetStatusParity: an asset public in the table but absent from the manifest is a discrepancy', () => {
+  const root = repo({ assets: [entry({ slug: 'mastery-soldier' })] });
+  try {
+    assert.throws(
+      () => assertAssetStatusParity(root, [{ slug: 'mastery-soldier' }, { slug: 'mastery-ghost' }]),
+      /mastery-ghost.*tabla assets: approved.*manifiesto: ausente/s,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });

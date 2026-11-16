@@ -36,6 +36,8 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm --filter @gd/api lint',
   'pnpm --filter @gd/api test',
   'pnpm run lint',
+  // Spec 004 T001: the e2e sources are type-checked in PR verification (debt B-001).
+  'pnpm run typecheck:e2e',
   'pnpm run lint:md',
   'pnpm run format:check',
   'pnpm run test',
