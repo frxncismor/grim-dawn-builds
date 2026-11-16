@@ -12,6 +12,7 @@
 
 .site-header {
   background: var(--surface-sheen), var(--color-panel);
+  background-image: var(--texture-surface), var(--surface-sheen);
   border-block-end: var(--frame-border);
   box-shadow: var(--frame-bevel);
 }
@@ -34,6 +35,8 @@
   color: var(--color-bone);
   font-family: var(--font-display);
   font-size: var(--text-large);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -81,6 +84,7 @@ main {
 .site-footer {
   border-block-start: var(--frame-border);
   background: var(--surface-sheen), var(--color-panel);
+  background-image: var(--texture-surface), var(--surface-sheen);
   box-shadow: var(--frame-bevel);
   color: var(--color-ash);
   font-size: var(--text-small);

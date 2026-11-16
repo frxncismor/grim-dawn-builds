@@ -4,9 +4,11 @@ import {
   inject,
   LOCALE_ID,
   RESPONSE_INIT,
+  TransferState,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { PublicMasteryTree } from '@gd/domain';
+import { MASTERY_SWITCHER_STATE } from '../../core/content/masteries';
 import { SeoService, siteLocale } from '../../core/seo/seo.service';
 import { DeferredStyles } from '../../core/styles/deferred-styles';
 import { SkillTree } from '../../shared/svg/skill-tree/skill-tree';
@@ -28,8 +30,19 @@ export class MasteryPage {
   readonly tree = inject(ActivatedRoute).snapshot.data['mastery'] as PublicMasteryTree | null;
   readonly name = this.tree ? this.tree.mastery.name[siteLocale(inject(LOCALE_ID))] : '';
   readonly nodeCount = this.tree?.nodes.length ?? 0;
+  /** Selector of masteries: the catalog's own list (route resolver), never a hand-written one. */
+  readonly switcher: readonly { slug: string; name: string; linked: boolean; current: boolean }[];
 
   constructor() {
+    const locale = siteLocale(inject(LOCALE_ID));
+    const listed = inject(TransferState).get(MASTERY_SWITCHER_STATE, []);
+    this.switcher = listed.map((item) => ({
+      slug: item.slug,
+      name: item.name?.[locale] ?? item.slug,
+      // A mastery without skills is listed but not linked, as in the index.
+      linked: item.nodeCount > 0,
+      current: item.slug === this.tree?.mastery.slug,
+    }));
     if (!this.tree) {
       const response = inject(RESPONSE_INIT, { optional: true });
       if (response) response.status = 404;

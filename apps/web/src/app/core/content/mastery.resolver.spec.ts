@@ -4,7 +4,12 @@ import { convertToParamMap, type ActivatedRouteSnapshot } from '@angular/router'
 import { MasteryTreeSchema, type MasteryTree } from '@gd/domain';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import demolitionRaw from '../../../../../../fixtures/content/mastery-trees/demolition.json';
-import { MASTERY_CATALOG, MASTERY_TREE_STATE, type MasteryCatalog } from './masteries';
+import {
+  MASTERY_CATALOG,
+  MASTERY_SWITCHER_STATE,
+  MASTERY_TREE_STATE,
+  type MasteryCatalog,
+} from './masteries';
 import { resolveMastery } from './mastery.resolver';
 
 const demolition: MasteryTree = MasteryTreeSchema.parse(demolitionRaw);
@@ -19,7 +24,7 @@ describe('mastery tree resolver', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: PLATFORM_ID, useValue: 'server' },
-        { provide: MASTERY_CATALOG, useValue: catalog },
+        { provide: MASTERY_CATALOG, useValue: { listSummaries: async () => [], ...catalog } },
       ],
     });
   }
@@ -30,6 +35,24 @@ describe('mastery tree resolver', () => {
     expect(await run('demolition')).toEqual(demolition);
     expect(get).toHaveBeenCalledWith('demolition');
     expect(TestBed.inject(TransferState).get(MASTERY_TREE_STATE, null)).toEqual(demolition);
+  });
+
+  it('on the server also leaves the catalog list for the mastery selector, without portraits (spec004 T033)', async () => {
+    const listed = [
+      {
+        slug: 'demolition',
+        name: { en: 'Demolitionist', es: 'Demoledor' },
+        nodeCount: 30,
+        portrait: { source: 'own', src: 'x.svg', width: 32, height: 32 },
+      },
+      { slug: 'soldier', name: { en: 'Soldier', es: 'Soldado' }, nodeCount: 31 },
+    ];
+    server({ get: async () => demolition, listSummaries: async () => listed as never });
+    await run('demolition');
+    expect(TestBed.inject(TransferState).get(MASTERY_SWITCHER_STATE, [])).toEqual([
+      { slug: 'demolition', name: { en: 'Demolitionist', es: 'Demoledor' }, nodeCount: 30 },
+      { slug: 'soldier', name: { en: 'Soldier', es: 'Soldado' }, nodeCount: 31 },
+    ]);
   });
 
   it('on the server a missing slug is a null page (404), not an error', async () => {

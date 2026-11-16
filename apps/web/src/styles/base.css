@@ -108,9 +108,7 @@ button {
 button:hover:enabled {
   border-color: var(--color-storm);
   background: var(--surface-sheen), var(--color-panel-2);
-  box-shadow:
-    var(--frame-bevel),
-    0 3px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--frame-bevel), var(--shadow-lift);
 }
 
 button:active:enabled {
@@ -147,7 +145,17 @@ video {
   background: var(--color-storm);
 }
 
+/* Cross-document view transitions (spec004 FR-025, Q15 = A): CSS only, progressive enhancement.
+   Browsers without support navigate exactly as before. */
+@view-transition {
+  navigation: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+
   *,
   *::before,
   *::after {

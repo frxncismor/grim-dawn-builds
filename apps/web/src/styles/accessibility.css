@@ -1,0 +1,22 @@
+/*
+ * spec004 T030 (FR-023): user preferences. `prefers-reduced-motion` is global in base.css (animation and
+ * transition off). With `prefers-contrast: more` the quiet greys become near-bone, the thin lines become
+ * visible and the ornamental frames give way to a plain solid border; no information is lost.
+ */
+@media (prefers-contrast: more) {
+  :root {
+    --color-ash: var(--color-ash-more);
+    --color-line: var(--color-line-more);
+    --color-storm-dim: var(--color-line-more);
+    --texture-surface: none;
+  }
+
+  .frame-panel,
+  .frame-featured,
+  .frame-compact,
+  .build-card[data-variant] {
+    border-image: none;
+    border-width: 2px;
+    border-color: var(--color-ash);
+  }
+}

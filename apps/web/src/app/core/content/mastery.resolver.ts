@@ -2,7 +2,7 @@ import { isPlatformServer } from '@angular/common';
 import { inject, Injector, PLATFORM_ID, TransferState } from '@angular/core';
 import type { ActivatedRouteSnapshot } from '@angular/router';
 import type { PublicMasteryTree } from '@gd/domain';
-import { MASTERY_CATALOG, MASTERY_TREE_STATE } from './masteries';
+import { MASTERY_CATALOG, MASTERY_SWITCHER_STATE, MASTERY_TREE_STATE } from './masteries';
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -26,7 +26,13 @@ export async function resolveMastery(
     return snapshot && snapshot.mastery.slug === slug ? snapshot : null;
   }
 
-  const tree = await injector.get(MASTERY_CATALOG).get(slug);
+  const catalog = injector.get(MASTERY_CATALOG);
+  const [tree, listed] = await Promise.all([catalog.get(slug), catalog.listSummaries()]);
   state.set(MASTERY_TREE_STATE, tree);
+  // The selector lists the catalog's masteries (spec004 T033); portraits are not needed there.
+  state.set(
+    MASTERY_SWITCHER_STATE,
+    listed.map(({ slug: item, name, nodeCount }) => ({ slug: item, name, nodeCount })),
+  );
   return tree;
 }

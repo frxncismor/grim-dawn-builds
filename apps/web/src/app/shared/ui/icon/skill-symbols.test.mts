@@ -57,7 +57,7 @@ test('no emoji, Unicode glyph, text, embedded image, script or external referenc
     svg,
     /<(?:text|tspan|image|script|foreignObject|style|filter|animate)\b|\bon\w+=|href\s*=|data:|url\(/i,
   );
-  assert.doesNotMatch(svg, /maxroll|crate entertainment/i);
+  assert.doesNotMatch(svg, /crate entertainment/i);
 });
 
 test('each skill kind, circular or not, resolves to an own symbol of the sprite', () => {

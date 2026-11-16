@@ -10,6 +10,9 @@
   --color-bone: #eadfca;
   --color-ash: #a3947a;
   --color-line: #382c1e;
+  /* `prefers-contrast: more` variants (applied in accessibility.css; verified at 7:1 by scripts/design-tokens.test.mts). */
+  --color-ash-more: #d9ccb0;
+  --color-line-more: #a58b5c;
   --frame-width: 12px;
   --frame-image-panel: url('/assets/ui/frame-panel.svg');
   --frame-image-featured: url('/assets/ui/frame-featured.svg');
@@ -22,6 +25,7 @@
   --surface-sheen: linear-gradient(180deg, rgba(216, 177, 90, 0.07) 0%, rgba(21, 17, 13, 0) 100%);
   --header-glow: radial-gradient(circle at 50% 0%, rgba(216, 177, 90, 0.14), transparent 70%);
   --panel-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  --shadow-lift: 0 3px 12px rgba(0, 0, 0, 0.3);
   --font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
   --font-body: 'Karla', Arial, sans-serif;
   --font-mono: 'Space Mono', monospace;
