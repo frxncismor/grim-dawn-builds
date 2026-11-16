@@ -34,6 +34,14 @@ export const MASTERY_CATALOG = new InjectionToken<MasteryCatalog>('MASTERY_CATAL
 /** Snapshot of the tree rendered by the page; the browser reads it back on hydration. */
 export const MASTERY_TREE_STATE = makeStateKey<PublicMasteryTree | null>('gd-mastery-tree');
 
+/**
+ * Snapshot of the mastery selector of `/maestrias/:slug` (spec004 T033): the catalog's own list, set by
+ * the mastery resolver. Separate from the index snapshot so a client navigation to `/maestrias`
+ * never renders from a list without portraits.
+ */
+export const MASTERY_SWITCHER_STATE =
+  makeStateKey<readonly MasterySummary[]>('gd-mastery-switcher');
+
 /** Snapshot of the index rendered by `/maestrias`; the browser reads it back on hydration. */
 export const MASTERY_INDEX_STATE = makeStateKey<readonly MasterySummary[]>('gd-mastery-index');
 

@@ -1,4 +1,7 @@
-import { expect, test, type Page, type Response } from '@playwright/test';
+import { expect, test, type Locator, type Page, type Response } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { join } from 'node:path';
 
 /**
  * T-040 - recorridos E2E sobre el artefacto prerenderizado (plan §17.52).
@@ -459,6 +462,75 @@ test.describe('@journeys índice → maestría → vuelta', () => {
 });
 
 /**
+ * spec004 T034 (US6, FR-025): el selector de maestrías de `/maestrias/<slug>` lleva a otra
+ * maestría conservando el idioma, sin errores de CSP ni violaciones axe críticas o serias.
+ */
+test.describe('@journeys selector de maestrías', () => {
+  const axeSource = readFileSync(
+    createRequire(join(process.cwd(), 'package.json')).resolve('axe-core/axe.min.js'),
+    'utf8',
+  );
+  const SIX = ['arcanist', 'demolition', 'nightblade', 'occult', 'shaman', 'soldier'];
+
+  for (const [prefix, from, to, toName, label] of [
+    ['', 'demolition', 'shaman', 'Shaman', 'inglés'],
+    ['/es', 'demolition', 'shaman', 'Chamán', 'español'],
+  ] as const)
+    test(`${label}: de ${from} a ${to} desde el selector, sin CSP ni axe`, async ({ page }) => {
+      const problems: string[] = [];
+      page.on('console', (message) => {
+        if (
+          message.type() === 'error' ||
+          /content security policy|refused to/i.test(message.text())
+        )
+          problems.push(`${message.type()}: ${message.text()}`);
+      });
+      page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
+
+      await open(page, `${PUBLIC_BASE_URL}${prefix}/maestrias/${from}`);
+      const switcher = page.locator('nav[data-mastery-switcher]');
+      await expect(switcher).toHaveCount(1);
+      // The six masteries, each linking to its own route in the same language.
+      const hrefs = await switcher
+        .locator('a')
+        .evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+      expect(hrefs).toEqual(SIX.map((slug) => `${prefix}/maestrias/${slug}`));
+      await expect(switcher.locator('[aria-current="page"]')).toHaveCount(1);
+      await expect(switcher.locator('[aria-current="page"]')).toHaveAttribute(
+        'href',
+        `${prefix}/maestrias/${from}`,
+      );
+
+      await switcher.locator(`a[href$="/maestrias/${to}"]`).click();
+      await page.waitForURL(`**${prefix}/maestrias/${to}`);
+      await expectSingleHeading(page, toName, `selector → ${to}`);
+      await expect(page.locator('[data-skill-id]').first()).toBeAttached();
+      await expect(
+        page.locator('nav[data-mastery-switcher] [aria-current="page"]'),
+      ).toHaveAttribute('href', `${prefix}/maestrias/${to}`);
+
+      await page.evaluate(axeSource);
+      const violations = await page.evaluate(async () => {
+        const results = await (
+          window as unknown as {
+            axe: {
+              run: (
+                c: Document,
+              ) => Promise<{ violations: { id: string; impact: string | null }[] }>;
+            };
+          }
+        ).axe.run(document);
+        return results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
+      });
+      expect(
+        violations,
+        'axe: sin violaciones críticas ni serias en la maestría de destino',
+      ).toEqual([]);
+      expect(problems, 'sin errores de consola ni violaciones de CSP').toEqual([]);
+    });
+});
+
+/**
  * T026 (spec 003): el snapshot global de catálogo y autores solo viaja en las páginas que lo
  * leen. Las de maestría no lo llevan en `ng-state` (presupuesto de HTML) y, al navegar desde ellas
  * al catálogo, el guard carga el documento prerenderizado en vez de fallar.
@@ -745,3 +817,180 @@ for (const prefix of ['', '/es']) {
     }
   });
 }
+
+/**
+ * spec004 T018 (SC-001, constitución I): de la portada a una build y a cualquier combinación en pocos
+ * clics, y las combinaciones sin guía nunca se presentan como recomendación. EN y ES, con el artefacto
+ * público; los clics se cuentan con un envoltorio, no se estiman.
+ */
+const T018_LOCALES = [
+  {
+    prefix: '',
+    heading: /Grim Dawn guides/i,
+    catalogLink: 'Browse the catalog',
+    summary: /Combinations still without a guide/,
+    noGuide: 'No guide',
+  },
+  {
+    prefix: '/es',
+    heading: /Guías de Grim Dawn/i,
+    catalogLink: 'Explorar el catálogo',
+    summary: /Combinaciones aún sin guía/,
+    noGuide: 'Sin guía',
+  },
+] as const;
+
+/** Un clic contado: toda navegación del recorrido pasa por aquí. */
+function counted() {
+  const clicks: string[] = [];
+  return {
+    clicks,
+    async click(locator: Locator, label: string) {
+      clicks.push(label);
+      await locator.click();
+    },
+  };
+}
+
+/** Recuento de tarjetas del catálogo por variante. */
+async function cardCounts(page: Page) {
+  return {
+    featured: await page.locator('gd-build-card [data-variant="featured"]').count(),
+    standard: await page.locator('gd-build-card [data-variant="standard"]').count(),
+    compact: await page.locator('gd-build-card [data-variant="compact"]').count(),
+  };
+}
+
+/** Despliega la sección «sin guía» si está plegada; cuenta el clic. */
+async function unfold(page: Page, steps: ReturnType<typeof counted>): Promise<void> {
+  const folded = page.locator('details.unguided');
+  if (!(await folded.count())) return;
+  if (!(await folded.evaluate((el) => (el as HTMLDetailsElement).open)))
+    await steps.click(folded.locator('summary'), 'desplegar sin guía');
+}
+
+for (const locale of T018_LOCALES) {
+  test.describe(`@journeys T018 recorrido de la portada (${locale.prefix || '/'})`, () => {
+    test('portada → guía publicada en ≤ 2 clics con la tarjeta destacada', async ({ page }) => {
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/`);
+      await expectSingleHeading(page, locale.heading, 'portada');
+      const steps = counted();
+      const featured = page.locator('gd-build-card [data-variant="featured"] a');
+      await expect(featured, 'la portada destaca una única guía').toHaveCount(1);
+      await steps.click(featured, 'tarjeta destacada');
+      await page.waitForURL(new RegExp(`${locale.prefix}${GUIDE_PATH}$`));
+      expect(steps.clicks.length, 'clics de portada a guía').toBeLessThanOrEqual(2);
+      await expect(page.locator('h1')).toHaveText(GUIDE_TITLE);
+    });
+
+    test('portada → cualquier combinación en ≤ 3 clics (catálogo y accesos por maestría)', async ({
+      page,
+    }) => {
+      // Combinaciones reales del catálogo, leídas del propio HTML (no escritas a mano).
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/tier-list`);
+      const titles = (await page.locator('gd-build-card h3').allInnerTexts()).map((t) => t.trim());
+      expect(titles.length, 'el catálogo lista combinaciones').toBeGreaterThan(10);
+      const sample = [titles[0]!, titles[Math.floor(titles.length / 2)]!, titles.at(-1)!];
+
+      for (const title of sample) {
+        await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/`);
+        const steps = counted();
+        await steps.click(
+          page.getByRole('link', { name: locale.catalogLink, exact: true }),
+          'catálogo',
+        );
+        await page.waitForURL(/\/tier-list$/);
+        await unfold(page, steps);
+        const card = page.locator('gd-build-card h3', { hasText: title }).first();
+        await expect(card, `«${title}» visible`).toBeVisible();
+        expect(steps.clicks.length, `clics hasta «${title}»`).toBeLessThanOrEqual(3);
+      }
+
+      // Por maestría: un clic en el acceso ya filtra el catálogo.
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/`);
+      const steps = counted();
+      const access = page.locator('.masteries__list a').first();
+      const masteryName = (await access.innerText()).trim();
+      await steps.click(access, 'acceso por maestría');
+      await page.waitForURL(/\/tier-list\?m=/);
+      await unfold(page, steps);
+      const shown = await page.locator('gd-build-card h3:visible').allInnerTexts();
+      expect(shown.length, 'hay combinaciones con esa maestría').toBeGreaterThan(0);
+      for (const text of shown) expect(text).toContain(masteryName);
+      expect(steps.clicks.length).toBeLessThanOrEqual(3);
+    });
+
+    test('las combinaciones sin guía no se presentan como recomendación (con y sin JavaScript)', async ({
+      browser,
+    }) => {
+      for (const javaScriptEnabled of [true, false]) {
+        const context = await browser.newContext({ javaScriptEnabled });
+        const page = await context.newPage();
+        await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/tier-list`);
+        const compact = page.locator('gd-build-card [data-variant="compact"]');
+        const n = await compact.count();
+        expect(n, `con JS=${javaScriptEnabled}: combinaciones sin guía en el HTML`).toBeGreaterThan(
+          0,
+        );
+        for (let i = 0; i < n; i++) {
+          const card = compact.nth(i);
+          await expect(card.locator('a'), 'una combinación sin guía no es un enlace').toHaveCount(
+            0,
+          );
+          // textContent: the cards live in a folded <details>, where innerText is empty.
+          const text = ((await card.textContent()) ?? '').trim();
+          expect(text).toContain(locale.noGuide);
+          expect(text, 'sin tier ni sello de recomendación').not.toMatch(
+            /tier\b|unranked|sin clasificar|recommended|recomendad/i,
+          );
+        }
+        // Una ranura por combinación (AC-04): ninguna tarjeta se pierde ni se duplica.
+        const counts = await cardCounts(page);
+        expect(counts.compact + counts.standard + counts.featured).toBe(
+          await page.locator('gd-build-card').count(),
+        );
+        const folded = page.locator('details.unguided');
+        expect(
+          await folded.evaluate((el) => (el as HTMLDetailsElement).open),
+          'plegada por defecto',
+        ).toBe(false);
+        await expect(folded.locator('summary')).toContainText(locale.summary);
+        await context.close();
+      }
+    });
+
+    test('la portada no lista combinaciones sin guía como builds', async ({ page }) => {
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/`);
+      await expect(page.locator('gd-build-card [data-variant="compact"]')).toHaveCount(0);
+      for (const card of await page.locator('gd-build-card').all())
+        await expect(card.locator('a')).toHaveCount(1);
+    });
+  });
+}
+
+test.describe('@journeys T018 paridad EN/ES de portada y catálogo', () => {
+  test('mismas tarjetas, accesos y recuentos en los dos idiomas', async ({ page }) => {
+    const seen = [] as {
+      cards: Awaited<ReturnType<typeof cardCounts>>;
+      accesses: number;
+      total: number;
+      homeCards: number;
+    }[];
+    for (const locale of T018_LOCALES) {
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/tier-list`);
+      const cards = await cardCounts(page);
+      const text = (await page.locator('.result-count').innerText()).trim();
+      const total = Number(/(\d+)\s+(?:entries|entradas)/.exec(text)?.[1]);
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/`);
+      seen.push({
+        cards,
+        total,
+        accesses: await page.locator('.masteries__list a').count(),
+        homeCards: await page.locator('gd-build-card').count(),
+      });
+    }
+    expect(seen[1], 'ES = EN').toEqual(seen[0]);
+    const en = seen[0]!;
+    expect(en.total).toBe(en.cards.featured + en.cards.standard + en.cards.compact);
+  });
+});

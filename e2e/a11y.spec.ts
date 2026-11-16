@@ -521,3 +521,72 @@ for (const route of [
     });
   });
 }
+
+/**
+ * spec004 T018: portada y catálogo con tarjetas. Las rutas base ya pasan axe en ROUTES; aquí se
+ * audita lo que ese pase no ve: la sección «sin guía» desplegada, el catálogo filtrado por una
+ * maestría y el teclado sobre la tarjeta destacada (un único enlace con foco visible).
+ */
+const T018_CATALOGS = [
+  { name: 'catálogo', path: '/tier-list' },
+  { name: 'catálogo es', path: '/es/tier-list' },
+  { name: 'catálogo filtrado', path: '/tier-list?m=arcanista' },
+  { name: 'catálogo filtrado es', path: '/es/tier-list?m=arcanista' },
+] as const;
+
+for (const route of T018_CATALOGS) {
+  test.describe(`@a11y T018 ${route.name} (${route.path})`, () => {
+    test('sección sin guía desplegada con teclado: axe sin violaciones critical/serious', async ({
+      page,
+    }) => {
+      const response = await page.goto(`${BASE_URL}${route.path}`, { waitUntil: 'networkidle' });
+      expect(response?.status(), `${route.path} debe existir en el artefacto`).toBe(200);
+      await settle(page);
+      const summary = page.locator('details.unguided > summary');
+      await expect(summary).toHaveCount(1);
+      // Teclado: Tab hasta el resumen y Enter lo despliega (sin ratón).
+      await summary.focus();
+      await expect(summary).toBeFocused();
+      await page.keyboard.press('Enter');
+      await expect(page.locator('details.unguided')).toHaveJSProperty('open', true);
+      expectGate(`${route.path} · sin guía desplegada`, await audit(page));
+    });
+  });
+}
+
+for (const home of [
+  { name: 'portada', path: '/' },
+  { name: 'portada es', path: '/es' },
+] as const) {
+  test.describe(`@a11y T018 ${home.name} (${home.path})`, () => {
+    test('la tarjeta destacada es un único destino con nombre completo y foco visible', async ({
+      page,
+    }) => {
+      const response = await page.goto(`${BASE_URL}${home.path}`, { waitUntil: 'networkidle' });
+      expect(response?.status()).toBe(200);
+      await settle(page);
+      const link = page.locator('gd-build-card [data-variant="featured"] a');
+      await expect(link, 'un solo enlace por tarjeta').toHaveCount(1);
+      const name = (await link.getAttribute('aria-label')) ?? '';
+      expect(name, 'el nombre accesible incluye la combinación y el estado').toMatch(
+        /Chamán \+ Demoledor\. (Unverified|Sin verificar|Verified|Verificado)/i,
+      );
+      await link.focus();
+      const focus = await page.evaluate(() => {
+        const card = document.querySelector('[data-variant="featured"]') as HTMLElement;
+        const style = getComputedStyle(card);
+        return {
+          outlineStyle: style.outlineStyle,
+          outlineWidth: Number.parseFloat(style.outlineWidth),
+          outlineColor: style.outlineColor,
+          background: getComputedStyle(document.body).backgroundColor,
+          size: card.getBoundingClientRect().height,
+        };
+      });
+      expect(focus.outlineStyle, 'la tarjeta enfocada dibuja contorno').not.toBe('none');
+      expect(focus.outlineWidth).toBeGreaterThanOrEqual(2);
+      expect(contrast(focus.outlineColor, focus.background)).toBeGreaterThanOrEqual(3);
+      expect(focus.size, 'área clicable ≥ 44 px').toBeGreaterThanOrEqual(44);
+    });
+  });
+}
