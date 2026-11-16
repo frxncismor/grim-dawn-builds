@@ -8,7 +8,7 @@ Actualizado el 2026-11-13.
 | [001-mvp-guias-builds](001-mvp-guias-builds/tasks.md)                   | Abierta, casi cerrada                      | 153           | 20         |
 | [002-spec-completion-reviews](002-spec-completion-reviews/tasks.md)     | Completa                                   | 17 de 17      | 0          |
 | [003-catalogo-arboles-maestria](003-catalogo-arboles-maestria/tasks.md) | Cerrada (puerta spec002 passed, `1fd7e77`) | 41 de 41      | 0          |
-| [004-rediseno-ui-grim-dawn](004-rediseno-ui-grim-dawn/tasks.md)         | Implementada; puerta spec002 en curso      | 46 de 46      | 0          |
+| [004-rediseno-ui-grim-dawn](004-rediseno-ui-grim-dawn/tasks.md)         | Implementada; puerta spec002 en curso      | 51 de 51      | 0          |
 
 ## 001-mvp-guias-builds
 
@@ -33,5 +33,5 @@ un módulo compartido).
 
 ## 004-rediseno-ui-grim-dawn
 
-T001-T046 marcadas; T036 (puerta spec002 + T-136) marcada antes de ejecutarla, según
+T001-T051 marcadas; T036 (puerta spec002 + T-136) marcada antes de ejecutarla, según
 el precedente; su resultado va en `specs/004-rediseno-ui-grim-dawn/reviews/`.
