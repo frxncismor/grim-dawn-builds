@@ -378,13 +378,14 @@ export async function writeCatalogRows(
     for (const n of [...tree.nodes].sort((a, b) => a.tier - b.tier)) {
       await client.query(
         `INSERT INTO catalog_skill_nodes (id, mastery_id, name_en, name_es, kind, circular, tier,
-           bar_required, grid_col, grid_row, max_points, ultimate_points, parent_id, icon)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+           bar_required, grid_col, grid_row, max_points, ultimate_points, parent_id, icon, icon_id)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
          ON CONFLICT (id) DO UPDATE SET name_en=EXCLUDED.name_en, name_es=EXCLUDED.name_es,
            kind=EXCLUDED.kind, circular=EXCLUDED.circular, tier=EXCLUDED.tier,
            bar_required=EXCLUDED.bar_required, grid_col=EXCLUDED.grid_col, grid_row=EXCLUDED.grid_row,
            max_points=EXCLUDED.max_points, ultimate_points=EXCLUDED.ultimate_points,
-           parent_id=EXCLUDED.parent_id, icon=EXCLUDED.icon, updated_at=now()`,
+           parent_id=EXCLUDED.parent_id, icon=EXCLUDED.icon, icon_id=EXCLUDED.icon_id,
+           updated_at=now()`,
         [
           n.id,
           m.id,
@@ -400,6 +401,7 @@ export async function writeCatalogRows(
           n.ultimate_points ?? null,
           n.parent_id,
           n.icon ?? null,
+          n.icon_id ?? null,
         ],
       );
     }

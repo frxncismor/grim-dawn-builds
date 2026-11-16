@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkAssetManifest } from './asset.js';
+import { checkAssetManifest, SkillIconAssetSchema, skillIconFilePath } from './asset.js';
 
 const asset = (overrides: Record<string, unknown> = {}) => ({
   slug: 'icono-rayo',
@@ -155,5 +155,87 @@ describe('checkAssetManifest', () => {
     it('lets a withdrawn entry (no file) pass', () => {
       expect(checkAssetManifest({ assets: [asset({ status: 'withdrawn' })] }, [], {})).toEqual([]);
     });
+  });
+});
+
+describe('skill icon manifest entry (spec004 T025: one entry per icon)', () => {
+  const ICON_ID = 'ic-0123456789abcdef';
+  const SHA = 'a'.repeat(64);
+  const icon = (overrides: Record<string, unknown> = {}) => ({
+    slug: ICON_ID,
+    status: 'approved',
+    file_path: skillIconFilePath(ICON_ID),
+    origin_url: 'https://store.steampowered.com/app/219990/Grim_Dawn/',
+    rights_holder: 'Crate Entertainment',
+    license_or_permission: 'tolerancia_de_facto_sin_permiso',
+    proof_ref: 'specs/004-rediseno-ui-grim-dawn/research.md#r10',
+    recorded_on: '2026-11-15',
+    fallback_svg: 'src/assets/icons/skill-generic.svg',
+    provenance: {
+      game_version: 'steam-build-25813250',
+      source_path: 'ui/skills/icons/class01/skillicon_x1up.tex',
+      sha256: SHA,
+      width: 32,
+      height: 32,
+    },
+    ...overrides,
+  });
+
+  it('derives the file path from the icon id, not from a texture path', () => {
+    expect(skillIconFilePath(ICON_ID)).toBe('public/assets/skill-icons/ic-0123456789abcdef.png');
+  });
+
+  it('accepts a complete approved entry and a pending one without file', () => {
+    expect(SkillIconAssetSchema.safeParse(icon()).success).toBe(true);
+    expect(
+      SkillIconAssetSchema.safeParse(
+        icon({
+          status: 'pending',
+          file_path: null,
+          origin_url: null,
+          rights_holder: null,
+          license_or_permission: null,
+          proof_ref: null,
+          provenance: undefined,
+        }),
+      ).success,
+    ).toBe(true);
+  });
+
+  it.each([
+    ['slug that is not an icon id', { slug: 'ui/skills/x.tex' }],
+    ['file path off the icon id', { file_path: 'public/assets/skill-icons/other.png' }],
+    ['another rights holder', { rights_holder: 'Otro' }],
+    ['another licence', { license_or_permission: 'Permiso escrito' }],
+    ['proof other than R10', { proof_ref: 'proofs/x.pdf' }],
+    ['a missing provenance', { provenance: undefined }],
+    [
+      'a size other than 32 x 32',
+      {
+        provenance: { game_version: 'v', source_path: 'a.tex', sha256: SHA, width: 64, height: 64 },
+      },
+    ],
+    ['an empty fallback', { fallback_svg: '' }],
+  ])('rejects an approved entry with %s', (_name, overrides) => {
+    expect(SkillIconAssetSchema.safeParse(icon(overrides)).success).toBe(false);
+  });
+
+  it('is enforced by checkAssetManifest for icon slugs and leaves other assets alone', () => {
+    const file = skillIconFilePath(ICON_ID);
+    const hashes = { [file]: SHA };
+    expect(checkAssetManifest({ assets: [icon()] }, [file], hashes)).toEqual([]);
+    const issues = checkAssetManifest(
+      { assets: [icon({ rights_holder: 'Otro' })] },
+      [file],
+      hashes,
+    );
+    expect(issues.some((i) => i.file === ICON_ID && i.path === 'rights_holder')).toBe(true);
+    expect(checkAssetManifest({ assets: [asset()] }, [])).toEqual([]);
+  });
+
+  it('flags a file whose sha256 differs from the entry', () => {
+    const file = skillIconFilePath(ICON_ID);
+    const issues = checkAssetManifest({ assets: [icon()] }, [file], { [file]: 'b'.repeat(64) });
+    expect(issues.some((i) => i.path === 'provenance.sha256')).toBe(true);
   });
 });

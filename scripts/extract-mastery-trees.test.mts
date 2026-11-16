@@ -22,6 +22,7 @@ import {
   lz4Block,
   parseTags,
   serializeCatalog,
+  iconIdOf,
 } from './extract-mastery-trees.mts';
 
 type Val = number | string | boolean;
@@ -350,6 +351,7 @@ test('buildCatalog: forma del contrato T005/T006 y source', () => {
     ultimate_points: 26,
     parent_id: null,
     icon: 'ui/skills/cadence1up.tex',
+    icon_id: iconIdOf('ui/skills/cadence1up.tex'),
   });
   assert.equal(n['class01/cadence2']!.kind, 'modifier');
   assert.equal(n['class01/cadence2']!.circular, false);
@@ -459,6 +461,7 @@ test('serializeCatalog: determinista (bytes idénticos), claves estables, sin ru
     'ultimate_points',
     'parent_id',
     'icon',
+    'icon_id',
   ]);
   assert.doesNotMatch(a, /[A-Za-z]:\\|\/Users\/|\/home\/|\d{4}-\d{2}-\d{2}T/);
 });
@@ -741,3 +744,27 @@ test(
     }
   },
 );
+
+test('iconIdOf: id público opaco y estable, sin la ruta de textura (spec004 T025)', () => {
+  const path = 'ui/skills/cadence1up.tex';
+  const id = iconIdOf(path);
+  assert.match(id, /^ic-[0-9a-f]{16}$/);
+  assert.equal(id, iconIdOf(path), 'determinista');
+  assert.notEqual(id, iconIdOf('ui/skills/cadence2up.tex'));
+  assert.equal(
+    id,
+    'ic-' + createHash('sha256').update(path).digest('hex').slice(0, 16),
+    'derivación documentada: sha256 de la ruta, 16 hex',
+  );
+  assert.doesNotMatch(id, /cadence|ui|skills|tex/);
+});
+
+test('buildCatalog: cada nodo con textura lleva icon_id derivado de ella', () => {
+  const t = catalogOf(synthetic(), ['class01']);
+  for (const tree of t) {
+    for (const n of tree.nodes) {
+      if (n.icon) assert.equal(n.icon_id, iconIdOf(n.icon), n.id);
+      else assert.equal(n.icon_id, undefined, n.id);
+    }
+  }
+});

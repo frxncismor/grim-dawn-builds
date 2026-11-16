@@ -77,6 +77,25 @@ describe('mapMasteryTree', () => {
     expect(JSON.stringify(tree)).not.toMatch(/icon|secret.tex/);
   });
 
+  it('exposes the public icon_id but still never the texture path (spec004 T025)', () => {
+    const row = { ...nodeRow({ icon_id: 'ic-0123456789abcdef' }), icon: 'ui/skills/secret.tex' };
+    const [n] = mapMasteryTree(treeRow, [row]).nodes;
+    expect(n!.icon_id).toBe('ic-0123456789abcdef');
+    expect(Object.keys(n!)).not.toContain('icon');
+    expect(JSON.stringify(n)).not.toMatch(/"icon"|secret|\.tex/);
+  });
+
+  it('omits icon_id when the view returns NULL for a node without icon', () => {
+    const [n] = mapMasteryTree(treeRow, [nodeRow({ icon_id: null })]).nodes;
+    expect(Object.keys(n!)).not.toContain('icon_id');
+  });
+
+  it('fails closed when icon_id is not a public id, e.g. a texture path', () => {
+    expect(() => mapMasteryTree(treeRow, [nodeRow({ icon_id: 'ui/skills/secret.tex' })])).toThrow(
+      InvalidCatalogError,
+    );
+  });
+
   it('never leaks internal columns', () => {
     const dirty = { ...nodeRow(), created_at: new Date(), updated_at: new Date() };
     const tree = mapMasteryTree({ ...treeRow, created_at: new Date() } as MasteryTreeRow, [dirty]);

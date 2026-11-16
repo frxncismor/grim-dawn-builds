@@ -34,7 +34,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class03/skillicon_evileye1up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_evileye1up.tex",
+      "icon_id": "ic-7109d811f90e410d"
     },
     {
       "id": "class03/curse1",
@@ -53,7 +54,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": null,
-      "icon": "ui/skills/icons/class03/skillicon_curse1up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_curse1up.tex",
+      "icon_id": "ic-e36983ce20ec17e3"
     },
     {
       "id": "class03/summon_raven1",
@@ -72,7 +74,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class03/skillicon_ravensummon1up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon1up.tex",
+      "icon_id": "ic-c553e0cab25b1787"
     },
     {
       "id": "class03/witchfire1",
@@ -91,7 +94,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class03/skillicon_witchfireenchantment1up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_witchfireenchantment1up.tex",
+      "icon_id": "ic-64e21962560767cf"
     },
     {
       "id": "class03/evileye2",
@@ -110,7 +114,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/evileye1",
-      "icon": "ui/skills/icons/class03/skillicon_evileye2up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_evileye2up.tex",
+      "icon_id": "ic-b269ac964ee9ab97"
     },
     {
       "id": "class03/pox1",
@@ -129,7 +134,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class03/skillicon_pox1up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_pox1up.tex",
+      "icon_id": "ic-b51690c3ec206b63"
     },
     {
       "id": "class03/summon_raven2_petmodifier",
@@ -148,7 +154,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": "class03/summon_raven1",
-      "icon": "ui/skills/icons/class03/skillicon_ravensummon2up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon2up.tex",
+      "icon_id": "ic-5622f82dd07921ac"
     },
     {
       "id": "class03/sigilofdestruction1",
@@ -167,7 +174,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class03/skillicon_sigilofdestruction1up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_sigilofdestruction1up.tex",
+      "icon_id": "ic-9128b268542e3d19"
     },
     {
       "id": "class03/evileye1b",
@@ -186,7 +194,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class03/evileye1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class03/curse2",
@@ -205,7 +214,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": "class03/curse1",
-      "icon": "ui/skills/icons/class03/skillicon_curse2up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_curse2up.tex",
+      "icon_id": "ic-b3112ee878901beb"
     },
     {
       "id": "class03/summon_hellhound1",
@@ -224,7 +234,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon1up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon1up.tex",
+      "icon_id": "ic-e8e05998d586561d"
     },
     {
       "id": "class03/witchfire1b",
@@ -243,7 +254,8 @@
       "max_points": 3,
       "ultimate_points": 3,
       "parent_id": "class03/witchfire1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class03/pox1b",
@@ -262,7 +274,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class03/pox1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class03/bloodofdreeg1",
@@ -281,7 +294,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class03/skillicon_bloodofdreeg1up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_bloodofdreeg1up.tex",
+      "icon_id": "ic-1d6f9e45eb698a12"
     },
     {
       "id": "class03/summon_raven3_petmodifier",
@@ -300,7 +314,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/summon_raven1",
-      "icon": "ui/skills/icons/class03/skillicon_ravensummon3up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon3up.tex",
+      "icon_id": "ic-a23f37b40fb15e4e"
     },
     {
       "id": "class03/evileye3",
@@ -319,7 +334,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/evileye1",
-      "icon": "ui/skills/icons/class03/skillicon_evileye3up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_evileye3up.tex",
+      "icon_id": "ic-3f81e10cc5a8a0aa"
     },
     {
       "id": "class03/pox2",
@@ -338,7 +354,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/pox1",
-      "icon": "ui/skills/icons/class03/skillicon_pox2up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_pox2up.tex",
+      "icon_id": "ic-f1eed3080d42d8b7"
     },
     {
       "id": "class03/summon_hellhound2_petmodifier",
@@ -357,7 +374,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/summon_hellhound1",
-      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon2up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon2up.tex",
+      "icon_id": "ic-e3cf944e24550a22"
     },
     {
       "id": "class03/sigilofdestruction2",
@@ -376,7 +394,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/sigilofdestruction1",
-      "icon": "ui/skills/icons/class03/skillicon_sigilofdestruction2up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_sigilofdestruction2up.tex",
+      "icon_id": "ic-6fca3082447e2b2a"
     },
     {
       "id": "class03/witchfire2",
@@ -395,7 +414,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/witchfire1",
-      "icon": "ui/skills/icons/class03/skillicon_witchfireenchantment2up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_witchfireenchantment2up.tex",
+      "icon_id": "ic-962d60cb6c269363"
     },
     {
       "id": "class03/summon_raven4_petmodifier",
@@ -414,7 +434,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/summon_raven1",
-      "icon": "ui/skills/icons/class03/skillicon_ravensummon4up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon4up.tex",
+      "icon_id": "ic-7ba4effebe95826a"
     },
     {
       "id": "class03/bloodofdreeg2",
@@ -433,7 +454,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/bloodofdreeg1",
-      "icon": "ui/skills/icons/class03/skillicon_bloodofdreeg2up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_bloodofdreeg2up.tex",
+      "icon_id": "ic-c66eac6d185bdfed"
     },
     {
       "id": "class03/bondsofbysmiel1",
@@ -452,7 +474,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class03/skillicon_bondsofbysmiel1up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_bondsofbysmiel1up.tex",
+      "icon_id": "ic-74a48d689b418b42"
     },
     {
       "id": "class03/summon_hellhound3_petmodifier",
@@ -471,7 +494,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/summon_hellhound1",
-      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon3up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon3up.tex",
+      "icon_id": "ic-59680f77dce513be"
     },
     {
       "id": "class03/doombolt1",
@@ -490,7 +514,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class03/skillicon_doombolt1up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_doombolt1up.tex",
+      "icon_id": "ic-19d48d78fb4bbb0a"
     },
     {
       "id": "class03/evileye4",
@@ -509,7 +534,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/evileye1",
-      "icon": "ui/skills/icons/class03/skillicon_evileye4up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_evileye4up.tex",
+      "icon_id": "ic-094d7c9ee6ace22f"
     },
     {
       "id": "class03/pox3",
@@ -528,7 +554,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/pox1",
-      "icon": "ui/skills/icons/class03/skillicon_pox3up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_pox3up.tex",
+      "icon_id": "ic-5840ebdae83c5226"
     },
     {
       "id": "class03/possession1",
@@ -547,7 +574,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class03/skillicon_possession1up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_possession1up.tex",
+      "icon_id": "ic-09ce81c3517444b5"
     },
     {
       "id": "class03/bondsofbysmiel2",
@@ -566,7 +594,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/bondsofbysmiel1",
-      "icon": "ui/skills/icons/class03/skillicon_bondsofbysmiel2up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_bondsofbysmiel2up.tex",
+      "icon_id": "ic-67e9bc81f9fcb3c8"
     },
     {
       "id": "class03/summon_hellhound4_petmodifier",
@@ -585,7 +614,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class03/summon_hellhound1",
-      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon4up.tex"
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon4up.tex",
+      "icon_id": "ic-6b1cb57e3edba173"
     }
   ]
 }

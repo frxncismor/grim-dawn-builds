@@ -725,6 +725,8 @@ export const catalogSkillNodes = pgTable(
     ultimate_points: integer('ultimate_points'),
     parent_id: text('parent_id'),
     icon: text('icon'),
+    /** Public icon handle (spec004 T025): `ic-<16 hex>`, never the texture path in `icon`. */
+    icon_id: text('icon_id'),
     ...timestamps(),
   },
   (t) => [
@@ -755,6 +757,10 @@ export const catalogSkillNodes = pgTable(
     check(
       'catalog_skill_nodes_ultimate_ck',
       sql`${t.ultimate_points} IS NULL OR ${t.ultimate_points} >= ${t.max_points}`,
+    ),
+    check(
+      'catalog_skill_nodes_icon_id_ck',
+      sql`${t.icon_id} IS NULL OR ${t.icon_id} ~ '^ic-[0-9a-f]{16}$'`,
     ),
     check(
       'catalog_skill_nodes_no_self_parent_ck',

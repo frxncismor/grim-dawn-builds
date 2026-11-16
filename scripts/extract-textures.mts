@@ -2,7 +2,7 @@
 // carpeta gitignorada. Solo lectura del juego, solo `node:` builtins (Constitución IV).
 //
 // Uso:
-//   pnpm catalog:textures --game-dir <ruta> [--out <carpeta>] [--kind masteries|skills|all]
+//   pnpm catalog:textures --game-dir <ruta> [--out <carpeta>] [--kind masteries|skills|icons|all]  (all = masteries + skills; icons va aparte)
 //   (o env GRIMDAWN_DIR; `--game-version <texto>` fuerza la versión; por defecto, el buildid de Steam)
 //
 // Por defecto `--out` es `.game-assets/textures/` en la raíz del repo (gitignorada) y `--kind` es
@@ -13,7 +13,14 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { deflateSync } from 'node:zlib';
-import { Arc, Arz, BASE_MASTERIES, buildCatalog, steamVersion } from './extract-mastery-trees.mts';
+import {
+  Arc,
+  Arz,
+  BASE_MASTERIES,
+  buildCatalog,
+  iconIdOf,
+  steamVersion,
+} from './extract-mastery-trees.mts';
 
 // ---------------------------------------------------------------------------------------------
 // Formato `.tex` (research.md §T028): 12 bytes de cabecera + un DDS cuyo «magic» es `DDSR`
@@ -234,10 +241,13 @@ export function encodePng(width: number, height: number, rgba: Uint8Array): Buff
 // Extracción
 // ---------------------------------------------------------------------------------------------
 
-export type TextureKind = 'masteries' | 'skills' | 'all';
+export type TextureKind = 'masteries' | 'skills' | 'icons' | 'all';
+
+/** Tamaño de los iconos de habilidad del juego (spec004 T026); otro tamaño es un error, no se remuestrea. */
+export const SKILL_ICON_SIZE = 32;
 
 export interface ManifestEntry {
-  /** Slug de la maestría (`masteries`) o id del nodo `classNN/<registro>` (`skills`). */
+  /** Slug de la maestría (`masteries`), id del nodo `classNN/<registro>` (`skills`) o `icon_id` (`icons`). */
   readonly slug?: string;
   readonly id?: string;
   readonly path: string;
@@ -258,10 +268,12 @@ export interface TextureManifest {
   };
   readonly masteries: readonly ManifestEntry[];
   readonly skills: readonly ManifestEntry[];
+  /** Un icono por textura única, nombrado por su `icon_id` público (spec004 T025/T026). */
+  readonly icons: readonly ManifestEntry[];
 }
 
 export interface TextureJob {
-  readonly group: 'masteries' | 'skills';
+  readonly group: 'masteries' | 'skills' | 'icons';
   readonly key: string; // slug o id del nodo
   readonly outPath: string; // relativa a `out`, con `/`
   readonly sourcePath: string; // ruta del registro, p. ej. `ui/skills/...tex`
@@ -280,7 +292,7 @@ export function collectJobs(
   const trees = buildCatalog(arz, { gameVersion: 'x', sha256: [], masteries });
   const jobs: TextureJob[] = [];
   for (const t of trees) {
-    if (kind !== 'skills') {
+    if (kind === 'masteries' || kind === 'all') {
       const rec = arz.read(
         `records/skills/player${t.mastery.id}/_classtraining_${t.mastery.id}.dbr`,
       );
@@ -294,7 +306,7 @@ export function collectJobs(
         sourcePath: src,
       });
     }
-    if (kind !== 'masteries') {
+    if (kind === 'skills' || kind === 'all') {
       for (const n of t.nodes) {
         if (!n.icon) continue; // nodo sin `skillUpBitmapName`: no hay textura referenciada
         jobs.push({
@@ -305,6 +317,18 @@ export function collectJobs(
         });
       }
     }
+  }
+  if (kind === 'icons') {
+    // Un icono por textura única: los nodos que comparten textura comparten icon_id (S-004: el id
+    // público no es la ruta de textura).
+    const seen = new Set<string>();
+    for (const t of trees)
+      for (const n of t.nodes) {
+        if (!n.icon || seen.has(n.icon)) continue;
+        seen.add(n.icon);
+        const id = iconIdOf(n.icon);
+        jobs.push({ group: 'icons', key: id, outPath: `icons/${id}.png`, sourcePath: n.icon });
+      }
   }
   return jobs.sort((a, b) => cmp(a.outPath, b.outPath));
 }
@@ -339,6 +363,10 @@ export function renderJobs(
     }
     const tex = arc.read(real);
     const d = decodeTex(tex, job.sourcePath);
+    if (job.group === 'icons' && (d.width !== SKILL_ICON_SIZE || d.height !== SKILL_ICON_SIZE))
+      throw new Error(
+        `${job.sourcePath}: un icono mide ${SKILL_ICON_SIZE} x ${SKILL_ICON_SIZE}, no ${d.width} x ${d.height}`,
+      );
     out.push({
       job,
       png: encodePng(d.width, d.height, d.rgba),
@@ -370,12 +398,18 @@ export function buildManifest(
     sha256: sha(r.png),
     sourceSha256: r.sourceSha256,
   });
-  const of = (g: 'masteries' | 'skills'): ManifestEntry[] =>
+  const of = (g: 'masteries' | 'skills' | 'icons'): ManifestEntry[] =>
     rendered
       .filter((r) => r.job.group === g)
       .sort((a, b) => cmp(a.job.outPath, b.job.outPath))
       .map(entry);
-  return { version: 1, source, masteries: of('masteries'), skills: of('skills') };
+  return {
+    version: 1,
+    source,
+    masteries: of('masteries'),
+    skills: of('skills'),
+    icons: of('icons'),
+  };
 }
 
 const NOTICE =
@@ -437,7 +471,10 @@ function main(): void {
   };
   const gameDir = opt('--game-dir') ?? process.env['GRIMDAWN_DIR'];
   const kind = opt('--kind') ?? 'masteries';
-  if (!gameDir || (kind !== 'masteries' && kind !== 'skills' && kind !== 'all')) {
+  if (
+    !gameDir ||
+    (kind !== 'masteries' && kind !== 'skills' && kind !== 'icons' && kind !== 'all')
+  ) {
     console.error(
       'uso: extract-textures.mts --game-dir <ruta> [--out <carpeta>] [--kind masteries|skills|all]\n' +
         '     [--game-version <texto>]  (o variable GRIMDAWN_DIR)\n' +
@@ -453,7 +490,7 @@ function main(): void {
     ...(gameVersion ? { gameVersion } : {}),
   });
   console.error(
-    `ok: ${m.masteries.length} maestría(s) y ${m.skills.length} habilidad(es) en ${out}`,
+    `ok: ${m.masteries.length} maestría(s), ${m.skills.length} habilidad(es) y ${m.icons.length} icono(s) en ${out}`,
   );
 }
 

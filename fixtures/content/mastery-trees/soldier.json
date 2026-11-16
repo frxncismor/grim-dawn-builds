@@ -34,7 +34,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_weaponpool1up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_weaponpool1up.tex",
+      "icon_id": "ic-511c183b86c58aaa"
     },
     {
       "id": "class01/shieldhammer1",
@@ -53,7 +54,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_shieldhammer1up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_shieldhammer1up.tex",
+      "icon_id": "ic-1975898a739a2e76"
     },
     {
       "id": "class01/cadence1",
@@ -72,7 +74,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_cadence1_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_cadence1_up.tex",
+      "icon_id": "ic-9480257a34856f3e"
     },
     {
       "id": "class01/fightingspirit1",
@@ -91,7 +94,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_fightingspirit1_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_fightingspirit1_up.tex",
+      "icon_id": "ic-c216d34502f4454e"
     },
     {
       "id": "class01/shieldhammer1b",
@@ -110,7 +114,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class01/shieldhammer1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class01/cadence1b",
@@ -129,7 +134,8 @@
       "max_points": 3,
       "ultimate_points": 3,
       "parent_id": "class01/cadence1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class01/willtolive1",
@@ -148,7 +154,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_willtolive1_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_willtolive1_up.tex",
+      "icon_id": "ic-ff731543a81b7b02"
     },
     {
       "id": "class01/passive1",
@@ -167,7 +174,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_militaryconditioning1_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_militaryconditioning1_up.tex",
+      "icon_id": "ic-2426857687d69b8f"
     },
     {
       "id": "class01/weaponpool2",
@@ -186,7 +194,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_weaponpool2up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_weaponpool2up.tex",
+      "icon_id": "ic-007017f1e483b771"
     },
     {
       "id": "class01/bladearc1",
@@ -205,7 +214,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_bladearc1up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_bladearc1up.tex",
+      "icon_id": "ic-b6e843875fd38c43"
     },
     {
       "id": "class01/blitz1",
@@ -224,7 +234,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_blitz1_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_blitz1_up.tex",
+      "icon_id": "ic-eefa8113d7628f78"
     },
     {
       "id": "class01/overguard1",
@@ -243,7 +254,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_overguard1_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_overguard1_up.tex",
+      "icon_id": "ic-db042895e31395ce"
     },
     {
       "id": "class01/passiveshield",
@@ -262,7 +274,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_passiveshield1up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_passiveshield1up.tex",
+      "icon_id": "ic-865f36a501b2e00c"
     },
     {
       "id": "class01/bladearc1b",
@@ -281,7 +294,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class01/bladearc1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class01/shieldhammer2",
@@ -300,7 +314,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class01/shieldhammer1",
-      "icon": "ui/skills/icons/class01/skillicon_shieldhammer2up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_shieldhammer2up.tex",
+      "icon_id": "ic-afc31074474c5735"
     },
     {
       "id": "class01/cadence2",
@@ -319,7 +334,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class01/cadence1",
-      "icon": "ui/skills/icons/class01/skillicon_cadence2_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_cadence2_up.tex",
+      "icon_id": "ic-c54ce471a16ecd9a"
     },
     {
       "id": "class01/overguard1b",
@@ -338,7 +354,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class01/overguard1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class01/passive2",
@@ -357,7 +374,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_veterancy1_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_veterancy1_up.tex",
+      "icon_id": "ic-c6deb5e13a8434f5"
     },
     {
       "id": "class01/warcry1",
@@ -376,7 +394,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_battlefury_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_battlefury_up.tex",
+      "icon_id": "ic-26da9893ce90b957"
     },
     {
       "id": "class01/fieldcommand1",
@@ -395,7 +414,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_fieldcommand1_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_fieldcommand1_up.tex",
+      "icon_id": "ic-b05ca80be7938288"
     },
     {
       "id": "class01/warcry1b",
@@ -414,7 +434,8 @@
       "max_points": 3,
       "ultimate_points": 3,
       "parent_id": "class01/warcry1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class01/shieldhammer3",
@@ -433,7 +454,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class01/shieldhammer1",
-      "icon": "ui/skills/icons/class01/skillicon_shieldhammer3up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_shieldhammer3up.tex",
+      "icon_id": "ic-61fd255f1c06914f"
     },
     {
       "id": "class01/passive3",
@@ -452,7 +474,8 @@
       "max_points": 8,
       "ultimate_points": 18,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_decoratedsoldier1_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_decoratedsoldier1_up.tex",
+      "icon_id": "ic-95713eccf3f0471d"
     },
     {
       "id": "class01/bladearc2",
@@ -471,7 +494,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class01/bladearc1",
-      "icon": "ui/skills/icons/class01/skillicon_bladearc2up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_bladearc2up.tex",
+      "icon_id": "ic-de3b34c7283a9fe7"
     },
     {
       "id": "class01/blitz2",
@@ -490,7 +514,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class01/blitz1",
-      "icon": "ui/skills/icons/class01/skillicon_blitz2_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_blitz2_up.tex",
+      "icon_id": "ic-7f130e6fc695a1b1"
     },
     {
       "id": "class01/fieldcommand2",
@@ -509,7 +534,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class01/fieldcommand1",
-      "icon": "ui/skills/icons/class01/skillicon_fieldcommand2up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_fieldcommand2up.tex",
+      "icon_id": "ic-4ddc9e37c7efa6d0"
     },
     {
       "id": "class01/warcry2",
@@ -528,7 +554,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class01/warcry1",
-      "icon": "ui/skills/icons/class01/skillicon_battlefury2_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_battlefury2_up.tex",
+      "icon_id": "ic-961d6c5db18ea922"
     },
     {
       "id": "class01/counterstrike1",
@@ -547,7 +574,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_counterstrike1up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_counterstrike1up.tex",
+      "icon_id": "ic-00cee7c991c4a30b"
     },
     {
       "id": "class01/cadence3",
@@ -566,7 +594,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class01/cadence1",
-      "icon": "ui/skills/icons/class01/skillicon_cadence3_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_cadence3_up.tex",
+      "icon_id": "ic-1e40516210d0a947"
     },
     {
       "id": "class01/passive4",
@@ -585,7 +614,8 @@
       "max_points": 8,
       "ultimate_points": 18,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_scarsofbattle1_up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_scarsofbattle1_up.tex",
+      "icon_id": "ic-99a7ecf1eea8c87e"
     },
     {
       "id": "class01/stanceoffensive",
@@ -604,7 +634,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_stanceoffensive1up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_stanceoffensive1up.tex",
+      "icon_id": "ic-65088053a061f846"
     },
     {
       "id": "class01/stancedefensive",
@@ -623,7 +654,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class01/skillicon_stancedefensive1up.tex"
+      "icon": "ui/skills/icons/class01/skillicon_stancedefensive1up.tex",
+      "icon_id": "ic-588acf8037c67463"
     }
   ]
 }

@@ -7,7 +7,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { crc32 as zlibCrc32, inflateSync } from 'node:zlib';
-import { Arc, Arz } from './extract-mastery-trees.mts';
+import { Arc, Arz, iconIdOf } from './extract-mastery-trees.mts';
 import {
   buildManifest,
   collectJobs,
@@ -672,6 +672,194 @@ test(
         const png = readPng(await readFile(join(root, e.path)));
         assert.deepEqual([png.width, png.height], [e.width, e.height]);
         assert.ok(png.rgba.length > 0);
+      }
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);
+
+// --- spec004 T026: iconos de habilidad a PNG 32 x 32 --------------------------------------------
+
+const ICON_ARC_NAME = 'skills/icons/class01/skillicon_cadence1up.tex';
+/** Píxeles BGRA de un icono 32 x 32 sintético, todos distintos para detectar cualquier remuestreo. */
+const iconBgra = (): Uint8Array => {
+  const data = new Uint8Array(32 * 32 * 4);
+  for (let i = 0; i < 32 * 32; i++)
+    data.set([i % 251, (i * 3) % 253, (i * 7) % 255, 255 - (i % 200)], i * 4);
+  return data;
+};
+const iconArc = (size = 32): Buffer =>
+  buildArc([
+    { name: 'Skills/SkillAllocation/skills_class01trainingbuttonup.tex', content: dxt1(4, 4) },
+    {
+      name: ICON_ARC_NAME,
+      content: buildTex({
+        width: size,
+        height: size,
+        bits: 32,
+        data: size === 32 ? iconBgra() : new Uint8Array(size * size * 4),
+      }),
+    },
+  ]);
+
+test('collectJobs icons: un trabajo por textura única, nombrado por su icon_id público', () => {
+  const arz = new Arz(syntheticArz());
+  const jobs = collectJobs(arz, 'icons', ONE);
+  assert.deepEqual(
+    jobs.map((j) => [j.group, j.key, j.outPath, j.sourcePath]),
+    [
+      ['icons', iconIdOf(ICON), `icons/${iconIdOf(ICON)}.png`, ICON],
+      ['icons', iconIdOf(ICON_MISSING), `icons/${iconIdOf(ICON_MISSING)}.png`, ICON_MISSING],
+    ].sort((a, b) => (a[2]! < b[2]! ? -1 : 1)),
+  );
+  for (const j of jobs) assert.doesNotMatch(j.outPath, /skillicon|cadence|\.tex$/);
+});
+
+test('collectJobs icons: dos nodos con la misma textura dan un solo icono', () => {
+  const arz = new Arz(
+    buildArz([
+      { path: 'records/game/gameengine.dbr', fields: { skillMasteryTierLevel: [1, 5, 10] } },
+      {
+        path: `${SK}_classtraining_class01.dbr`,
+        fields: {
+          FileDescription: 'Soldier',
+          skillDisplayName: 'tagClass01SkillName00A',
+          skillUpBitmapName: TEX_UP,
+        },
+      },
+      ...[
+        [11, 246, 39, 'a'],
+        [12, 246, 179, 'b'],
+      ].map(([n, x, y, id]) => ({
+        path: `records/ui/skills/class01/skill${n}.dbr`,
+        fields: {
+          bitmapPositionX: x as number,
+          bitmapPositionY: y as number,
+          skillName: `${SK}${id}.dbr`,
+        },
+      })),
+      ...['a', 'b'].map((id) => ({
+        path: `${SK}${id}.dbr`,
+        fields: {
+          Class: 'Skill_AttackWeapon',
+          skillDisplayName: `tag_${id}`,
+          skillTier: 1,
+          skillMaxLevel: 12,
+          skillUpBitmapName: ICON,
+        },
+      })),
+    ]),
+  );
+  assert.equal(collectJobs(arz, 'icons', ONE).length, 1);
+});
+
+test('extractTextures icons: PNG 32 x 32 con los píxeles sin tocar, sha256 y salida determinista', async () => {
+  const { root, game } = await fakeGame(iconArc());
+  try {
+    const opts = {
+      gameVersion: 'v-test',
+      kind: 'icons',
+      masteries: ONE,
+      warn: () => undefined,
+    } as const;
+    const m1 = extractTextures(game, { ...opts, out: join(root, 'a') });
+    extractTextures(game, { ...opts, out: join(root, 'b') });
+    assert.equal(m1.icons.length, 1);
+    const e = m1.icons[0]!;
+    assert.equal(e.id, iconIdOf(ICON));
+    assert.deepEqual(
+      [e.path, e.width, e.height, e.sourcePath],
+      [`icons/${iconIdOf(ICON)}.png`, 32, 32, ICON],
+    );
+    const png = await readFile(join(root, 'a', e.path));
+    assert.ok(png.equals(await readFile(join(root, 'b', e.path))), 'determinista');
+    const { createHash } = await import('node:crypto');
+    assert.equal(e.sha256, createHash('sha256').update(png).digest('hex'));
+    assert.match(e.sourceSha256, /^[0-9a-f]{64}$/);
+    const px = readPng(png);
+    assert.deepEqual([px.width, px.height], [32, 32]);
+    const bgra = iconBgra();
+    for (const i of [0, 1, 31, 32, 500, 1023]) {
+      assert.deepEqual(
+        [...px.rgba.subarray(i * 4, i * 4 + 4)],
+        [bgra[i * 4 + 2], bgra[i * 4 + 1], bgra[i * 4], bgra[i * 4 + 3]],
+        `píxel ${i} sin modificar`,
+      );
+    }
+    // no escribe máscaras ni maestrías: solo los iconos pedidos
+    assert.equal(existsSync(join(root, 'a', 'masteries')), false);
+    assert.deepEqual(m1.masteries, []);
+    assert.deepEqual(m1.skills, []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('extractTextures icons: un icono que no mide 32 x 32 falla nombrando la textura', async () => {
+  const { root, game } = await fakeGame(iconArc(16));
+  try {
+    assert.throws(
+      () =>
+        extractTextures(game, {
+          gameVersion: 'v-test',
+          kind: 'icons',
+          masteries: ONE,
+          out: join(root, 'o'),
+          warn: () => undefined,
+        }),
+      /skillicon_cadence1up\.tex.*32 x 32.*16 x 16/,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('extractTextures: sin --kind icons el manifiesto trae `icons` vacío', async () => {
+  const { root, game } = await fakeGame();
+  try {
+    const m = extractTextures(game, {
+      gameVersion: 'v-test',
+      masteries: ONE,
+      out: join(root, 'o'),
+      warn: () => undefined,
+    });
+    assert.deepEqual(m.icons, []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test(
+  'juego instalado (opcional): 164 iconos 32 x 32 cuyos icon_id son los del catálogo versionado',
+  {
+    skip:
+      existsSync(join(REAL, 'database', 'database.arz')) &&
+      existsSync(join(REAL, 'resources', 'UI.arc'))
+        ? false
+        : 'juego no instalado',
+  },
+  async () => {
+    const root = await mkdtemp(join(tmpdir(), 'gdb-t026-real-'));
+    try {
+      const m = extractTextures(REAL, { out: root, kind: 'icons', warn: () => undefined });
+      assert.equal(m.icons.length, 164);
+      assert.ok(m.icons.every((e) => e.width === 32 && e.height === 32));
+      const fixtures = ['arcanist', 'demolition', 'nightblade', 'occult', 'shaman', 'soldier'];
+      const expected = new Set<string>();
+      for (const slug of fixtures) {
+        const tree = JSON.parse(
+          await readFile(
+            new URL(`../fixtures/content/mastery-trees/${slug}.json`, import.meta.url),
+            'utf8',
+          ),
+        );
+        for (const n of tree.nodes) if (n.icon_id) expected.add(n.icon_id);
+      }
+      assert.deepEqual(new Set(m.icons.map((e) => e.id)), expected);
+      for (const e of m.icons) {
+        const png = readPng(await readFile(join(root, e.path)));
+        assert.deepEqual([png.width, png.height], [32, 32]);
       }
     } finally {
       await rm(root, { recursive: true, force: true });

@@ -76,6 +76,12 @@ const masteryCatalogSql = readFileSync(
   'utf8',
 );
 
+// spec004 T025 (S-004): `icon_id`, the public icon handle, joins the public node view.
+const publicIconIdSql = readFileSync(
+  fileURLToPath(new URL('../drizzle/0014_public_skill_icon_id.sql', import.meta.url)),
+  'utf8',
+);
+
 // T036 (S-004) custom SQL: the public node view is recreated without `icon`.
 const publicNodesSql = readFileSync(
   fileURLToPath(new URL('../drizzle/0013_public_skill_nodes_without_icon.sql', import.meta.url)),
@@ -766,6 +772,7 @@ describe('parity: mastery catalog (0009 SQL + Drizzle ↔ CatalogSkillNodeSchema
         'ultimate_points',
         'parent_id',
         'icon',
+        'icon_id',
       ]),
     );
     const shape = CatalogSkillNodeSchema.shape;
@@ -774,6 +781,9 @@ describe('parity: mastery catalog (0009 SQL + Drizzle ↔ CatalogSkillNodeSchema
     );
     expect(columnOf(db.catalogSkillNodes, 'icon').notNull).toBe(
       !shape.icon.safeParse(undefined).success,
+    );
+    expect(columnOf(db.catalogSkillNodes, 'icon_id').notNull).toBe(
+      !shape.icon_id.safeParse(undefined).success,
     );
     expect(columnOf(db.catalogSkillNodes, 'parent_id').notNull).toBe(
       !nullableInZod(shape.parent_id),
@@ -791,6 +801,7 @@ describe('parity: mastery catalog (0009 SQL + Drizzle ↔ CatalogSkillNodeSchema
         'catalog_skill_nodes_bar_required_ck',
         'catalog_skill_nodes_grid_col_ck',
         'catalog_skill_nodes_grid_row_ck',
+        'catalog_skill_nodes_icon_id_ck',
         'catalog_skill_nodes_id_ck',
         'catalog_skill_nodes_max_points_ck',
         'catalog_skill_nodes_no_self_parent_ck',
@@ -799,7 +810,7 @@ describe('parity: mastery catalog (0009 SQL + Drizzle ↔ CatalogSkillNodeSchema
       ].sort(),
     );
     for (const ck of checks) {
-      expect(masteryCatalogSql, ck).toContain(`CONSTRAINT "${ck}" CHECK`);
+      expect(masteryCatalogSql + publicIconIdSql, ck).toContain(`CONSTRAINT "${ck}" CHECK`);
     }
     expect(masteryCatalogSql).toMatch(/CONSTRAINT "mastery_trees_id_ck" CHECK/);
     expect(masteryCatalogSql).toMatch(/CONSTRAINT "catalog_skill_nodes_grid_cell_uq" UNIQUE/);
@@ -871,6 +882,27 @@ describe('parity: mastery catalog (0009 SQL + Drizzle ↔ CatalogSkillNodeSchema
     expect(publicNodesSql).toMatch(/DROP VIEW v_public_skill_nodes;/);
     expect(publicNodesSql).toMatch(/GRANT SELECT ON v_public_skill_nodes TO api_ro;/);
     expect(publicNodesSql).not.toMatch(/GRANT [^;]* ON catalog_skill_nodes/);
+  });
+
+  it('publishes icon_id (never icon) in the public node view and checks its shape (spec004 T025)', () => {
+    const nodes = publicIconIdSql.slice(
+      publicIconIdSql.indexOf('CREATE VIEW v_public_skill_nodes'),
+      publicIconIdSql.lastIndexOf('GRANT'),
+    );
+    const columns = nodes
+      .slice(nodes.indexOf('SELECT') + 'SELECT'.length, nodes.indexOf('FROM'))
+      .split(',')
+      .map((c) => c.trim());
+    expect(columns).toContain('icon_id');
+    expect(columns).not.toContain('icon');
+    expect(columns.every((c) => nodeCols.includes(c))).toBe(true);
+    expect(nodeCols).toContain('icon_id');
+    expect(publicIconIdSql).toMatch(/DROP VIEW v_public_skill_nodes;/);
+    expect(publicIconIdSql).toMatch(/GRANT SELECT ON v_public_skill_nodes TO api_ro;/);
+    expect(publicIconIdSql).not.toMatch(/GRANT [^;]* ON catalog_skill_nodes/);
+    expect(publicIconIdSql).toContain("'^ic-[0-9a-f]{16}$'");
+    const sample = { id: 'class01/x', icon_id: 'ic-0123456789abcdef' };
+    expect(sample.icon_id).toMatch(/^ic-[0-9a-f]{16}$/);
   });
 
   it('never grants the base tables to api_ro or any write on the views', () => {
