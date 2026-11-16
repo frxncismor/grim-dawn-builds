@@ -131,6 +131,25 @@ describe('content:validate CLI', () => {
     assert.doesNotMatch(result.stderr, /catalog:check/);
   });
 
+  it('exits 1 naming the node when its icon_id is not the one derived from its texture (spec004 T025)', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'content-icon-'));
+    cpSync(join('fixtures', 'content', 'builds'), join(dir, 'builds'), { recursive: true });
+    mkdirSync(join(dir, 'mastery-trees'));
+    const tree = fixtureJson('mastery-trees/demolition.json');
+    const target = tree.nodes.find((n: any) => n.icon);
+    target.icon_id = 'ic-0000000000000000';
+    writeFileSync(join(dir, 'mastery-trees', 'demolition.json'), JSON.stringify(tree));
+    const result = run(dir);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /icon_id/);
+    assert.match(result.stderr, new RegExp(target.id));
+  });
+
+  it('accepts the versioned catalog: every texture has its derived icon_id', () => {
+    const result = run(join('fixtures', 'content'));
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  });
+
   it('exits 1 naming the node when skill_node_id is not in the catalog', () => {
     const dir = mkdtempSync(join(tmpdir(), 'content-ref-'));
     mkdirSync(join(dir, 'builds'));

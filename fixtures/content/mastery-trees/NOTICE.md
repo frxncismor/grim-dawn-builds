@@ -14,6 +14,10 @@ English and Spanish, tier, grid position, point limits, parent links) derived fr
   attribution, to identify game elements.
 - This project is **not affiliated with or endorsed by Crate Entertainment**.
 - No official art, icons or descriptive game text is included.
+- `icon` is the game's internal texture path and stays in these source files only. `icon_id` is the
+  public handle of that icon (`ic-` plus the first 16 hex of the SHA-256 of the path, derived by
+  the extractor and checked by `pnpm content:validate`); it is the only icon reference the API and
+  the emitted JSON expose (spec004 T025).
 
 To regenerate (output goes outside the repository first, then is split here):
 
@@ -38,5 +42,9 @@ del juego `steam-build-25813250`.
   esta atribución, para identificar elementos del juego.
 - Este proyecto **no está afiliado ni respaldado por Crate Entertainment**.
 - No se incluye arte oficial, iconos ni textos descriptivos del juego.
+- `icon` es la ruta interna de textura del juego y solo vive en estos archivos fuente. `icon_id` es
+  el identificador público de ese icono (`ic-` más los 16 primeros hex del SHA-256 de la ruta, que
+  deriva el extractor y comprueba `pnpm content:validate`); es la única referencia a un icono que
+  exponen la API y el JSON emitido (spec004 T025).
 
 Para regenerar, usa los mismos tres comandos de la sección en inglés.

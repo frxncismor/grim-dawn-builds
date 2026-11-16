@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import {
   CatalogSkillNodeSchema,
+  ICON_ID_PATTERN,
   MasteryTreeSchema,
   PublicMasteryTreeSchema,
   PublicSkillNodeSchema,
@@ -54,7 +55,11 @@ describe('CatalogSkillNodeSchema', () => {
     const noUltimate: Record<string, unknown> = { ...node() };
     delete noUltimate['ultimate_points'];
     expect(CatalogSkillNodeSchema.safeParse(noUltimate).success).toBe(true);
-    expect(CatalogSkillNodeSchema.safeParse(node({ icon: 'skills/x.tex' })).success).toBe(true);
+    expect(
+      CatalogSkillNodeSchema.safeParse(
+        node({ icon: 'skills/x.tex', icon_id: 'ic-0123456789abcdef' }),
+      ).success,
+    ).toBe(true);
   });
 
   it('is strict: rejects unknown (e.g. editorial) fields', () => {
@@ -295,7 +300,7 @@ describe('mastery tree properties', () => {
 
 describe('public schemas (S-004: no icon)', () => {
   it('rejects the game texture path in the public node and tree, accepts it in the source ones', () => {
-    const withIcon = node({ icon: 'ui/skills/cadence1up.tex' });
+    const withIcon = node({ icon: 'ui/skills/cadence1up.tex', icon_id: 'ic-0123456789abcdef' });
     expect(CatalogSkillNodeSchema.safeParse(withIcon).success).toBe(true);
     expect(PublicSkillNodeSchema.safeParse(withIcon).success).toBe(false);
     expect(PublicSkillNodeSchema.safeParse(node()).success).toBe(true);
@@ -308,5 +313,53 @@ describe('public schemas (S-004: no icon)', () => {
     const bad = tree([node(), node({ id: 'class01/other' })]);
     expect(MasteryTreeSchema.safeParse(bad).success).toBe(false);
     expect(PublicMasteryTreeSchema.safeParse(bad).success).toBe(false);
+  });
+});
+
+describe('public icon id (spec004 T025, S-004)', () => {
+  const ICON_ID = 'ic-0123456789abcdef';
+
+  it('has a stable shape that cannot be a texture path', () => {
+    expect(ICON_ID_PATTERN.test(ICON_ID)).toBe(true);
+    for (const bad of [
+      'ui/skills/cadence1up.tex',
+      'cadence1up.tex',
+      'IC-0123456789abcdef',
+      'ic-0123456789abcde',
+      'ic-0123456789abcdeg',
+      'ic-0123456789abcdef0',
+      '',
+    ])
+      expect(ICON_ID_PATTERN.test(bad), bad).toBe(false);
+  });
+
+  it('is public: both the source and the public node and tree carry it, optional', () => {
+    const withId = node({ icon_id: ICON_ID });
+    expect(PublicSkillNodeSchema.safeParse(withId).success).toBe(true);
+    expect(CatalogSkillNodeSchema.safeParse(withId).success).toBe(true);
+    expect(PublicMasteryTreeSchema.safeParse(tree([withId])).success).toBe(true);
+    expect(MasteryTreeSchema.safeParse(tree([withId])).success).toBe(true);
+    expect(PublicSkillNodeSchema.safeParse(node()).success).toBe(true);
+  });
+
+  it('rejects an icon_id that is a texture path or malformed, in every schema', () => {
+    for (const icon_id of ['ui/skills/cadence1up.tex', 'ic-XYZ', 42]) {
+      expect(PublicSkillNodeSchema.safeParse(node({ icon_id })).success).toBe(false);
+      expect(CatalogSkillNodeSchema.safeParse(node({ icon_id })).success).toBe(false);
+    }
+  });
+
+  it('still never exposes the texture path, even next to a valid icon_id', () => {
+    const both = node({ icon: 'ui/skills/cadence1up.tex', icon_id: ICON_ID });
+    expect(CatalogSkillNodeSchema.safeParse(both).success).toBe(true);
+    expect(PublicSkillNodeSchema.safeParse(both).success).toBe(false);
+    expect(PublicMasteryTreeSchema.safeParse(tree([both])).success).toBe(false);
+  });
+
+  it('requires a source node with a texture to declare its public icon_id', () => {
+    const result = CatalogSkillNodeSchema.safeParse(node({ icon: 'ui/skills/cadence1up.tex' }));
+    expect(result.success).toBe(false);
+    if (!result.success)
+      expect(result.error.issues.map((i) => i.path.join('.'))).toContain('icon_id');
   });
 });

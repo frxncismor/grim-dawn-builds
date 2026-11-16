@@ -27,7 +27,7 @@ describe('catalog page with URL state', () => {
   };
   it('restores a combined query filter, count and canonical structured data', async () => {
     const harness = await start('/tier-list?m=chaman&d=rayo');
-    expect(harness.routeNativeElement!.querySelectorAll('gd-tier-card')).toHaveLength(1);
+    expect(harness.routeNativeElement!.querySelectorAll('gd-build-card')).toHaveLength(1);
     expect(harness.routeNativeElement!.textContent).toContain('1 of 2');
     expect(harness.routeNativeElement!.querySelector('h1')?.getAttribute('lang')).toBe('es');
     expect(document.querySelector('link[rel=canonical]')?.getAttribute('href')).toBe(
@@ -37,9 +37,6 @@ describe('catalog page with URL state', () => {
     expect(json['@type']).toBe('ItemList');
     expect(json.numberOfItems).toBe(2);
     expect(harness.routeNativeElement!.textContent).toContain('test-version');
-    expect(harness.routeNativeElement!.querySelector('time')?.getAttribute('datetime')).toBe(
-      '2026-11-09',
-    );
   });
   it('synchronizes controls with URL and restores selection when navigating between history states', async () => {
     const harness = await start('/tier-list');
@@ -49,25 +46,38 @@ describe('catalog page with URL state', () => {
     button.click();
     await harness.fixture.whenStable();
     expect(TestBed.inject(Router).url).toContain('d=rayo');
-    expect(harness.routeNativeElement!.querySelectorAll('gd-tier-card')).toHaveLength(1);
+    expect(harness.routeNativeElement!.querySelectorAll('gd-build-card')).toHaveLength(1);
     await harness.navigateByUrl('/tier-list?m=arcanista');
     await harness.fixture.whenStable();
-    expect(harness.routeNativeElement!.querySelectorAll('gd-tier-card')).toHaveLength(1);
-    expect(harness.routeNativeElement!.textContent).toContain('Guide coming soon');
+    expect(harness.routeNativeElement!.querySelectorAll('gd-build-card')).toHaveLength(1);
+    expect(harness.routeNativeElement!.textContent).toContain('No guide');
     await harness.navigateByUrl('/tier-list?d=rayo');
     await harness.fixture.whenStable();
     expect(button.getAttribute('aria-pressed')).toBe('true');
   });
   it('shows an empty state and reset removes filter parameters', async () => {
     const harness = await start('/tier-list?d=caos');
-    expect(harness.routeNativeElement!.querySelectorAll('gd-tier-card')).toHaveLength(0);
+    expect(harness.routeNativeElement!.querySelectorAll('gd-build-card')).toHaveLength(0);
     expect(harness.routeNativeElement!.querySelector('gd-empty-state')).not.toBeNull();
     (
       harness.routeNativeElement!.querySelector('gd-empty-state button') as HTMLButtonElement
     ).click();
     await harness.fixture.whenStable();
     expect(TestBed.inject(Router).url).toBe('/tier-list');
-    expect(harness.routeNativeElement!.querySelectorAll('gd-tier-card')).toHaveLength(2);
+    expect(harness.routeNativeElement!.querySelectorAll('gd-build-card')).toHaveLength(2);
+  });
+  it('lists real builds first and folds the combinations with no guide into their own section (spec004 FR-006)', async () => {
+    const harness = await start('/tier-list');
+    const root = harness.routeNativeElement!;
+    const folded = root.querySelector<HTMLDetailsElement>('details.unguided')!;
+    expect(folded).not.toBeNull();
+    expect(folded.open).toBe(false);
+    expect(folded.querySelectorAll('[data-variant="compact"]')).toHaveLength(1);
+    expect(folded.textContent).toContain('Combinations still without a guide');
+    expect(folded.querySelector('summary')?.textContent).toContain('(1)');
+    expect(root.querySelectorAll('gd-tier-row [data-variant="standard"]')).toHaveLength(1);
+    expect(root.querySelectorAll('gd-tier-row [data-variant="compact"]')).toHaveLength(0);
+    expect(root.querySelector('article article')).toBeNull();
   });
   it('omits lang when the active locale matches the content locale', async () => {
     const harness = await start('/tier-list', 'es');

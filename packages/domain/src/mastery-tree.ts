@@ -12,6 +12,14 @@ export const TIER_BAR_REQUIRED = [1, 5, 10, 15, 20, 25, 32, 40, 50] as const;
 export const SKILL_KINDS = ['active', 'passive', 'modifier', 'transmuter'] as const;
 export type SkillKind = (typeof SKILL_KINDS)[number];
 
+/**
+ * Public icon identifier (spec004 T025): opaque and stable, derived from the texture by the extractor
+ * (`ic-` + first 16 hex of the SHA-256 of the texture path). It is not the game's texture path
+ * (S-004) and is the only handle the public contract has to an icon: file name and manifest slug.
+ */
+export const ICON_ID_PATTERN = /^ic-[0-9a-f]{16}$/;
+export const iconIdSchema = z.string().regex(ICON_ID_PATTERN, 'icon_id con forma ic-<16 hex>');
+
 const masteryId = z.string().regex(/^class\d{2}$/, 'id de maestría classNN');
 export const skillNodeIdSchema = z
   .string()
@@ -69,6 +77,8 @@ const skillNodeShape = {
     })
     .strict(),
   parent_id: skillNodeIdSchema.nullable(),
+  /** Public icon handle; absent when the game data has no icon for the node. */
+  icon_id: iconIdSchema.optional(),
 };
 
 interface NodeFacts {
@@ -120,7 +130,15 @@ export const CatalogSkillNodeSchema = z
     icon: text.optional(),
   })
   .strict()
-  .superRefine(refineNode);
+  .superRefine((n, ctx) => {
+    refineNode(n, ctx);
+    if (n.icon !== undefined && n.icon_id === undefined)
+      ctx.addIssue({
+        code: 'custom',
+        path: ['icon_id'],
+        message: 'un nodo con textura debe declarar su icon_id público',
+      });
+  });
 
 /** Public node (API, emitted JSON): same node without `icon`; `.strict()` rejects it. */
 export const PublicSkillNodeSchema = z.object(skillNodeShape).strict().superRefine(refineNode);

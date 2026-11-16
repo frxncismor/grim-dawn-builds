@@ -32,7 +32,7 @@ const LIST_SQL = `SELECT ${TREE_COLUMNS},
   FROM v_public_mastery_trees t ORDER BY slug COLLATE "C"`;
 const TREE_SQL = `SELECT ${TREE_COLUMNS} FROM v_public_mastery_trees WHERE slug = $1`;
 const NODES_SQL = `SELECT id, mastery_id, name_en, name_es, kind, circular, tier, bar_required,
-  grid_col, grid_row, max_points, ultimate_points, parent_id
+  grid_col, grid_row, max_points, ultimate_points, parent_id, icon_id
   FROM v_public_skill_nodes WHERE mastery_id = $1
   ORDER BY grid_col, grid_row, id COLLATE "C"`;
 

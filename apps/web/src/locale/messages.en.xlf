@@ -865,7 +865,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="home.intro" datatype="html">
-        <source> Browse mastery combinations and see what is verified, what still needs review and what is still awaiting a guide. </source>
+        <source> Survive Cairn with a build you can trust: see which combinations are verified, which still need review and which are still waiting for a guide. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/home.page.html</context>
           <context context-type="linenumber">6,9</context>
@@ -890,13 +890,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/home.page.html</context>
           <context context-type="linenumber">17,19</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="home.version" datatype="html">
-        <source>Game version:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
-          <context context-type="linenumber">22</context>
         </context-group>
       </trans-unit>
       <trans-unit id="home.publishedOn" datatype="html">
@@ -1512,55 +1505,6 @@
           <context context-type="linenumber">25</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="catalog.externalAuthor" datatype="html">
-        <source>Original author:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
-          <context context-type="linenumber">34,35</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="catalog.externalLink" datatype="html">
-        <source>View external source (new tab)</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
-          <context context-type="linenumber">40,43</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="catalog.externalWarning" datatype="html">
-        <source> Link to a third-party site. The content remains at its original source. </source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
-          <context context-type="linenumber">44,47</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="catalog.cardVersion" datatype="html">
-        <source>Version:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
-          <context context-type="linenumber">84,85</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="catalog.reviewDate" datatype="html">
-        <source>Last reviewed:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
-          <context context-type="linenumber">88,89</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="catalog.noReviewDate" datatype="html">
-        <source>Review date not reported</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
-          <context context-type="linenumber">91,94</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="catalog.comingSoon" datatype="html">
-        <source>Guide coming soon</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
-          <context context-type="linenumber">102,105</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="catalog.unranked" datatype="html">
         <source>Unranked</source>
         <context-group purpose="location">
@@ -1573,14 +1517,14 @@
         </context-group>
       </trans-unit>
       <trans-unit id="catalog.tier" datatype="html">
-        <source>Tier <x id="PH" equiv-text="this.entry().tier"/></source>
+        <source>Tier <x id="PH" equiv-text="tier"/></source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/tier-list/tier-components.ts</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="sourcefile">src/app/features/tier-list/card-data.ts</context>
+          <context context-type="linenumber">67</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.ts</context>
-          <context context-type="linenumber">42</context>
+          <context context-type="linenumber">53</context>
         </context-group>
       </trans-unit>
       <trans-unit id="catalog.search" datatype="html">
@@ -1905,10 +1849,10 @@
         </context-group>
       </trans-unit>
       <trans-unit id="skillTree.empty" datatype="html">
-        <source>There are no skills for this mastery.</source>
+        <source> There are no skills for this mastery. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
-          <context context-type="linenumber">22,25</context>
+          <context context-type="linenumber">323,325</context>
         </context-group>
       </trans-unit>
       <trans-unit id="skillTree.canvasLabel" datatype="html">
@@ -1997,10 +1941,10 @@
         </context-group>
       </trans-unit>
       <trans-unit id="skillTree.svgTitle" datatype="html">
-        <source>Skill tree of <x id="mastery" equiv-text="this.mastery().name_es"/></source>
+        <source>Skill tree of <x id="mastery" equiv-text="this.masteryName()"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
-          <context context-type="linenumber">163</context>
+          <context context-type="linenumber">419</context>
         </context-group>
       </trans-unit>
       <trans-unit id="skillTree.status.recommended" datatype="html">
@@ -2249,10 +2193,10 @@
         </context-group>
       </trans-unit>
       <trans-unit id="masteryIndex.intro" datatype="html">
-        <source>Pick a mastery to open its full tree: every skill with its tier, requirements and ranks.</source>
+        <source> Pick a mastery to open its full tree: every skill with its tier, requirements and ranks. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/masteries/index.page.html</context>
-          <context context-type="linenumber">4</context>
+          <context context-type="linenumber">5,8</context>
         </context-group>
       </trans-unit>
       <trans-unit id="masteryIndex.skills" datatype="html">
@@ -2263,10 +2207,10 @@
         </context-group>
       </trans-unit>
       <trans-unit id="masteryIndex.credit" datatype="html">
-        <source>Mastery buttons from Grim Dawn, © Crate Entertainment. This project is not affiliated with or endorsed by Crate Entertainment.</source>
+        <source> Mastery buttons from Grim Dawn, © Crate Entertainment. This project is not affiliated with or endorsed by Crate Entertainment. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/masteries/index.page.html</context>
-          <context context-type="linenumber">45</context>
+          <context context-type="linenumber">46,50</context>
         </context-group>
       </trans-unit>
       <trans-unit id="masteryIndex.noData" datatype="html">
@@ -2305,10 +2249,10 @@
         </context-group>
       </trans-unit>
       <trans-unit id="buildSkills.loading" datatype="html">
-        <source>Loading the full skill trees…</source>
+        <source> Loading the full skill trees… </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/build/skills/build-skills.html</context>
-          <context context-type="linenumber">1</context>
+          <context context-type="linenumber">3,6</context>
         </context-group>
       </trans-unit>
       <trans-unit id="buildPage.masteriesLink" datatype="html">
@@ -2316,6 +2260,69 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/build/build.page.html</context>
           <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildCard.noGuide" datatype="html">
+        <source>No guide</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/build-card/build-card.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildCard.review.published" datatype="html">
+        <source>Published</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/build-card/build-card.ts</context>
+          <context context-type="linenumber">103</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.moreBuilds" datatype="html">
+        <source>More builds</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">39,40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.masteriesTitle" datatype="html">
+        <source>Start from your mastery</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">49,50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="home.withoutGuideCount" datatype="html">
+        <source> <x id="INTERPOLATION" equiv-text="{{ withoutGuide }}"/> of <x id="INTERPOLATION_1" equiv-text="{{ total }}"/> combinations are still waiting for a guide. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">58,60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="catalog.unguidedSummary" datatype="html">
+        <source>Combinations still without a guide</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.html</context>
+          <context context-type="linenumber">38,39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildCard.externalAuthor" datatype="html">
+        <source>Original author:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/build-card/build-card.labels.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildCard.externalNotice" datatype="html">
+        <source>Link to a third-party site. The content remains at its original source.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/build-card/build-card.labels.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildCard.externalLink" datatype="html">
+        <source>External source (new tab)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/build-card/build-card.labels.ts</context>
+          <context context-type="linenumber">51</context>
         </context-group>
       </trans-unit>
     </body>

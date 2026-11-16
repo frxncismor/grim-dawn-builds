@@ -36,6 +36,8 @@ export interface CatalogCard extends CatalogItem {
   gameVersion: string;
   guide: Pick<PublicBuild, 'slug' | 'title' | 'review_state' | 'rights_status'> | null;
   source: Pick<PublicSource, 'title' | 'license_note'> | null;
+  /** Author of the entry's source (own guides: the site author); `null` when unknown. */
+  author: string | null;
 }
 export interface CatalogSnapshot {
   /** Active UI locale this snapshot was built for. */
@@ -108,6 +110,7 @@ export function buildCatalog(input: CatalogInput, locale: CatalogLocale = 'en'):
             }
           : null,
         source: source ? { title: source.title, license_note: source.license_note } : null,
+        author: source?.author_name ?? null,
       };
     });
   });

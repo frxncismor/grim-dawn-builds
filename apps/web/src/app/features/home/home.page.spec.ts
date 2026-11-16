@@ -47,6 +47,28 @@ describe('native Home from public server snapshot', () => {
     expect(f.nativeElement.innerHTML).not.toContain('PRIVATE-');
     expect(f.nativeElement.textContent).not.toContain('No guides published yet');
   });
+  it('shows the latest guide as a featured card and one catalog access per mastery (spec004 T016)', async () => {
+    setup();
+    TestBed.inject(TransferState).set(CATALOG_STATE, input);
+    const f = TestBed.createComponent(HomePage);
+    await f.whenStable();
+    const el: HTMLElement = f.nativeElement;
+    expect(el.querySelectorAll('[data-variant="featured"]')).toHaveLength(1);
+    expect(el.querySelector('[data-variant="featured"] a[href="/builds/tormenta"]')).not.toBeNull();
+    for (const slug of ['chaman', 'soldado', 'arcanista'])
+      expect(el.querySelector(`a[href="/tier-list?m=${slug}"]`)).not.toBeNull();
+    expect(el.querySelector('article article')).toBeNull();
+    expect(el.textContent).toMatch(/1 of 2 combinations/);
+  });
+  it('keeps the mastery accesses and the honest empty state when no guide is public', async () => {
+    setup();
+    TestBed.inject(TransferState).set(CATALOG_STATE, { ...input, guides: [] });
+    const f = TestBed.createComponent(HomePage);
+    await f.whenStable();
+    expect(f.nativeElement.querySelector('[data-variant]')).toBeNull();
+    expect(f.nativeElement.querySelector('a[href="/tier-list?m=chaman"]')).not.toBeNull();
+    expect(f.nativeElement.textContent).toMatch(/2 of 2 combinations/);
+  });
   it('fails explicitly without the server snapshot', () => {
     setup();
     expect(() => TestBed.createComponent(HomePage)).toThrow('Falta el catálogo prerenderizado.');

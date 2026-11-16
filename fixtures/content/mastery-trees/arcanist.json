@@ -34,7 +34,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_elementalinfusion1up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_elementalinfusion1up.tex",
+      "icon_id": "ic-faeb8abc5b3d44dd"
     },
     {
       "id": "class05/arcanemissile",
@@ -53,7 +54,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_arcanemissile1_up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_arcanemissile1_up.tex",
+      "icon_id": "ic-b9e521ab22729acf"
     },
     {
       "id": "class05/passive01",
@@ -72,7 +74,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_passive01up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_passive01up.tex",
+      "icon_id": "ic-95cc60ef5cec4068"
     },
     {
       "id": "class05/elementalinfusion1b",
@@ -91,7 +94,8 @@
       "max_points": 3,
       "ultimate_points": 3,
       "parent_id": "class05/elementalinfusion1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class05/razorwind1",
@@ -110,7 +114,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_arcanetempest1up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_arcanetempest1up.tex",
+      "icon_id": "ic-7e5d7fee6fc1e665"
     },
     {
       "id": "class05/chillingsurge",
@@ -129,7 +134,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_chillingsurge_up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_chillingsurge_up.tex",
+      "icon_id": "ic-41e9aefa297dcbfe"
     },
     {
       "id": "class05/elementalinfusion2",
@@ -148,7 +154,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class05/elementalinfusion1",
-      "icon": "ui/skills/icons/class05/skillicon_elementalinfusion2up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_elementalinfusion2up.tex",
+      "icon_id": "ic-7d8a76e0b91f448b"
     },
     {
       "id": "class05/arcaneshield",
@@ -167,7 +174,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_arcaneshield1up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_arcaneshield1up.tex",
+      "icon_id": "ic-10d84f635dc4f7fa"
     },
     {
       "id": "class05/razorwind1b",
@@ -186,7 +194,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class05/razorwind1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class05/skyshard1",
@@ -205,7 +214,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_skyshard1up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_skyshard1up.tex",
+      "icon_id": "ic-5202095888228efe"
     },
     {
       "id": "class05/sphereofprotection1",
@@ -224,7 +234,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_sphereofprotection1up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_sphereofprotection1up.tex",
+      "icon_id": "ic-9d0497a14cbafb46"
     },
     {
       "id": "class05/arcanemissile2",
@@ -243,7 +254,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class05/arcanemissile",
-      "icon": "ui/skills/icons/class05/skillicon_arcanemissile2up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_arcanemissile2up.tex",
+      "icon_id": "ic-be24b6b4e5f4b990"
     },
     {
       "id": "class05/passive02",
@@ -262,7 +274,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_passive02up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_passive02up.tex",
+      "icon_id": "ic-9988cb12e7b692a4"
     },
     {
       "id": "class05/razorwind2",
@@ -281,7 +294,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class05/razorwind1",
-      "icon": "ui/skills/icons/class05/skillicon_arcanetempest2up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_arcanetempest2up.tex",
+      "icon_id": "ic-11324a7a62272ccd"
     },
     {
       "id": "class05/chillingsurge2",
@@ -300,7 +314,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class05/chillingsurge",
-      "icon": "ui/skills/icons/class05/skillicon_chillingsurge2up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_chillingsurge2up.tex",
+      "icon_id": "ic-4295f1aea200a17b"
     },
     {
       "id": "class05/skyshard2",
@@ -319,7 +334,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class05/skyshard1",
-      "icon": "ui/skills/icons/class05/skillicon_skyshard2up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_skyshard2up.tex",
+      "icon_id": "ic-21fa7409afd3e55c"
     },
     {
       "id": "class05/nullification",
@@ -338,7 +354,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_nullification1up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_nullification1up.tex",
+      "icon_id": "ic-cd671a3946c82fd0"
     },
     {
       "id": "class05/elementalinfusion3",
@@ -357,7 +374,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class05/elementalinfusion1",
-      "icon": "ui/skills/icons/class05/skillicon_elementalinfusion3up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_elementalinfusion3up.tex",
+      "icon_id": "ic-0b3794da9322031a"
     },
     {
       "id": "class05/arcanemissile3",
@@ -376,7 +394,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class05/arcanemissile",
-      "icon": "ui/skills/icons/class05/skillicon_arcanemissile3up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_arcanemissile3up.tex",
+      "icon_id": "ic-a0f01bbe7afca7bc"
     },
     {
       "id": "class05/aetherray1",
@@ -395,7 +414,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_aetherray1up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_aetherray1up.tex",
+      "icon_id": "ic-31990d0005b65129"
     },
     {
       "id": "class05/sphereofprotection2",
@@ -414,7 +434,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": "class05/sphereofprotection1",
-      "icon": "ui/skills/icons/class05/skillicon_sphereofprotection2up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_sphereofprotection2up.tex",
+      "icon_id": "ic-d1a219a3ac711468"
     },
     {
       "id": "class05/aetherray1b",
@@ -433,7 +454,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class05/aetherray1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class05/passive03",
@@ -452,7 +474,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_passive03up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_passive03up.tex",
+      "icon_id": "ic-0121505ebd13bd6a"
     },
     {
       "id": "class05/arcanemissile4",
@@ -471,7 +494,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class05/arcanemissile",
-      "icon": "ui/skills/icons/class05/skillicon_arcanemissile4up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_arcanemissile4up.tex",
+      "icon_id": "ic-8dc977f5a7b7117f"
     },
     {
       "id": "class05/skyshard3",
@@ -490,7 +514,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class05/skyshard1",
-      "icon": "ui/skills/icons/class05/skillicon_skyshard3up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_skyshard3up.tex",
+      "icon_id": "ic-799a6d66786ff4ac"
     },
     {
       "id": "class05/passive04",
@@ -509,7 +534,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_passive04up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_passive04up.tex",
+      "icon_id": "ic-cd239889aa4aada7"
     },
     {
       "id": "class05/mindovermatter1",
@@ -528,7 +554,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_mindovermatter1up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_mindovermatter1up.tex",
+      "icon_id": "ic-ec2367b93365755b"
     },
     {
       "id": "class05/devastation",
@@ -547,7 +574,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_devastation1up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_devastation1up.tex",
+      "icon_id": "ic-8f00a58a9e6f359e"
     },
     {
       "id": "class05/aetherray2",
@@ -566,7 +594,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class05/aetherray1",
-      "icon": "ui/skills/icons/class05/skillicon_aetherray2up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_aetherray2up.tex",
+      "icon_id": "ic-3cd26d82ecf5796e"
     },
     {
       "id": "class05/mindovermatter2",
@@ -585,7 +614,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class05/skillicon_mindovermatter2up.tex"
+      "icon": "ui/skills/icons/class05/skillicon_mindovermatter2up.tex",
+      "icon_id": "ic-4f38a0e86097dabb"
     }
   ]
 }

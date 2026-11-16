@@ -1,34 +1,14 @@
 import { Component, computed, signal } from '@angular/core';
 import { provideRouter, RouterOutlet } from '@angular/router';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import type { TierEntry } from '@gd/domain';
 import { EMPTY_FILTER } from './filter';
-import {
-  EmptyState,
-  FilterBar,
-  FilterChip,
-  TierCard,
-  TierRow,
-  type FilterGroup,
-} from './tier-components';
+import { EmptyState, FilterBar, FilterChip, TierRow, type FilterGroup } from './tier-components';
+import { BuildCard } from '../../shared/ui/build-card/build-card';
+import { buildCardData } from '../../shared/ui/build-card/build-card.labels';
 
-const placeholder: TierEntry = {
-  entry_kind: 'placeholder',
-  combination_slug: 'chaman-demoledor',
-  display_name: 'Chamán + Demoledor',
-  build_slug: null,
-  tier: 'sin_clasificar',
-  content_status: 'placeholder',
-  rights_status: 'own_original',
-  review_state: 'publicado',
-  external_url: null,
-  external_author: null,
-  source_slug: null,
-  evaluated_on: null,
-};
 @Component({
   selector: 'gd-tier-preview',
-  imports: [FilterBar, FilterChip, TierRow, TierCard, EmptyState],
+  imports: [FilterBar, FilterChip, TierRow, BuildCard, EmptyState],
   template: `<main>
     <h1 i18n="@@tierPreview.title">Catálogo de builds</h1>
     <p i18n="@@tierPreview.notice">
@@ -38,12 +18,12 @@ const placeholder: TierEntry = {
     <gd-filter-bar [value]="filter()" [groups]="groups" (valueChange)="filter.set($event)" />
     <p role="status" aria-live="polite">{{ selectionSummary() }}</p>
     <gd-tier-row label="Sin clasificar" i18n-label="@@tierPreview.unranked">
-      <gd-tier-card [entry]="placeholder" combinationName="Chamán + Demoledor" />
-      <gd-tier-card [entry]="own" [guide]="guide" combinationName="Chamán + Soldado" />
-      <gd-tier-card [entry]="external" [source]="source" combinationName="Inquisidor + Demoledor" />
+      <gd-build-card [data]="cards.placeholder" />
+      <gd-build-card [data]="cards.own" />
+      <gd-build-card [data]="cards.external" />
     </gd-tier-row>
     <gd-tier-row label="Nombres extensos" i18n-label="@@tierPreview.longNames">
-      <gd-tier-card [entry]="long" combinationName="Guardián del Juramento + Nigromante" />
+      <gd-build-card [data]="cards.long" />
     </gd-tier-row>
     <gd-empty-state (filtersReset)="filter.set(empty)" />
     <section aria-labelledby="disabled-heading">
@@ -122,38 +102,64 @@ export class TierPreview {
     },
   ];
   readonly disabledGroups = [this.groups[1]];
-  readonly placeholder = placeholder;
-  readonly own: TierEntry = {
-    ...placeholder,
-    entry_kind: 'build_propia',
-    display_name: 'Guía propia de prueba',
-    build_slug: 'guia-propia-de-prueba',
-    content_status: 'verificado',
-  };
-  readonly guide = {
-    slug: 'guia-propia-de-prueba',
-    title: 'Guía propia de prueba',
-    review_state: 'publicado',
-    rights_status: 'own_original',
-  } as const;
-  readonly external: TierEntry = {
-    ...placeholder,
-    entry_kind: 'enlace_externo',
-    display_name: 'Referencia externa de prueba',
-    content_status: 'sin_verificar',
-    rights_status: 'link_only',
-    external_url: 'https://example.org/',
-    external_author: 'Autora sintética',
-    source_slug: 'prueba',
-  };
-  readonly source = {
-    title: 'Fuente sintética de prueba',
-    license_note: 'Solo enlace; ningún cuerpo de guía republicado.',
-  };
-  readonly long: TierEntry = {
-    ...placeholder,
-    display_name:
-      'Guardián del Juramento + Nigromante · combinación de nombre extenso para comprobar el ajuste de texto',
+  readonly cards = {
+    placeholder: buildCardData({
+      variant: 'compact',
+      title: 'Chamán + Demoledor',
+      masteries: [],
+      status: 'placeholder',
+      reviewState: null,
+      damage: [],
+      author: null,
+      gameVersion: '1.3.x',
+      href: null,
+      tierLabel: null,
+    }),
+    own: buildCardData({
+      variant: 'standard',
+      title: 'Guía propia de prueba',
+      masteries: [
+        { name: 'Chamán', portrait: null },
+        { name: 'Soldado', portrait: null },
+      ],
+      status: 'verificado',
+      reviewState: 'publicado',
+      damage: ['Rayo'],
+      author: 'Autora sintética',
+      gameVersion: '1.3.x',
+      href: ['/builds', 'guia-propia-de-prueba'],
+      tierLabel: null,
+    }),
+    external: buildCardData({
+      variant: 'standard',
+      title: 'Referencia externa de prueba',
+      masteries: [],
+      status: 'sin_verificar',
+      reviewState: null,
+      damage: [],
+      author: null,
+      gameVersion: '1.3.x',
+      href: null,
+      tierLabel: null,
+      external: {
+        url: 'https://example.org/',
+        author: 'Autora sintética',
+        note: 'Fuente sintética de prueba · Solo enlace; ningún cuerpo de guía republicado.',
+      },
+    }),
+    long: buildCardData({
+      variant: 'compact',
+      title:
+        'Guardián del Juramento + Nigromante · combinación de nombre extenso para comprobar el ajuste de texto',
+      masteries: [],
+      status: 'placeholder',
+      reviewState: null,
+      damage: [],
+      author: null,
+      gameVersion: '1.3.x',
+      href: null,
+      tierLabel: null,
+    }),
   };
 }
 @Component({ selector: 'app-root', imports: [RouterOutlet], template: '<router-outlet />' })

@@ -35,6 +35,8 @@ test('emite un JSON por maestría y el índice id→slug, válidos contra Master
       // S-004: the game's texture path is not published.
       assert.doesNotMatch(text, /"icon"|.tex/);
       const tree = PublicMasteryTreeSchema.parse(JSON.parse(text));
+      // spec004 T025: the public icon handle is published, never the texture it came from.
+      assert.ok(tree.nodes.every((node) => /^ic-[0-9a-f]{16}$/.test(node.icon_id ?? '')));
       assert.equal(tree.mastery.slug, slug);
       assert.equal(index[tree.mastery.id], slug);
     }

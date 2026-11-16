@@ -34,7 +34,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_dualblades1up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_dualblades1up.tex",
+      "icon_id": "ic-9b22d228fcd492ed"
     },
     {
       "id": "class04/eviscerate1",
@@ -53,7 +54,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_lethalgambit1up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_lethalgambit1up.tex",
+      "icon_id": "ic-462b10a1aa09b67e"
     },
     {
       "id": "class04/veilofshadows1",
@@ -72,7 +74,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_veilofshadows1up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_veilofshadows1up.tex",
+      "icon_id": "ic-9688e2e435876104"
     },
     {
       "id": "class04/wpattack1",
@@ -91,7 +94,8 @@
       "max_points": 8,
       "ultimate_points": 18,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_dualblades2up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_dualblades2up.tex",
+      "icon_id": "ic-9d4d0ed81d602f0a"
     },
     {
       "id": "class04/phantomblade",
@@ -110,7 +114,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_phantomblades1up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_phantomblades1up.tex",
+      "icon_id": "ic-de27abc2b6726608"
     },
     {
       "id": "class04/nightbladeenchant1",
@@ -129,7 +134,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant1up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant1up.tex",
+      "icon_id": "ic-9843c12abf866eef"
     },
     {
       "id": "class04/wpattack4",
@@ -148,7 +154,8 @@
       "max_points": 8,
       "ultimate_points": 18,
       "parent_id": "class04/wpattack1",
-      "icon": "ui/skills/icons/class04/skillicon_dualblades5up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_dualblades5up.tex",
+      "icon_id": "ic-d32f08ce020107c5"
     },
     {
       "id": "class04/phantomblade_mod0",
@@ -167,7 +174,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class04/phantomblade",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class04/shadowstrike",
@@ -186,7 +194,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_shadowstrike1up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_shadowstrike1up.tex",
+      "icon_id": "ic-f310ad8dfa43d37a"
     },
     {
       "id": "class04/nightbladeenchant1b",
@@ -205,7 +214,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class04/nightbladeenchant1",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class04/passive1",
@@ -224,7 +234,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_passive1up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_passive1up.tex",
+      "icon_id": "ic-b22a2c06b74a5ad2"
     },
     {
       "id": "class04/wpattack2",
@@ -243,7 +254,8 @@
       "max_points": 8,
       "ultimate_points": 18,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_dualblades3up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_dualblades3up.tex",
+      "icon_id": "ic-fecf79ccfb903a68"
     },
     {
       "id": "class04/phantomblade_mod1",
@@ -262,7 +274,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class04/phantomblade",
-      "icon": "ui/skills/icons/class04/skillicon_phantomblades2up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_phantomblades2up.tex",
+      "icon_id": "ic-0d1fcca44e47d307"
     },
     {
       "id": "class04/eviscerate2",
@@ -281,7 +294,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class04/eviscerate1",
-      "icon": "ui/skills/icons/class04/skillicon_lethalgambit2up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_lethalgambit2up.tex",
+      "icon_id": "ic-b8223b5bf6fff74d"
     },
     {
       "id": "class04/nightbladeenchant2",
@@ -300,7 +314,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class04/nightbladeenchant1",
-      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant2up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant2up.tex",
+      "icon_id": "ic-d40afdb17e0f2388"
     },
     {
       "id": "class04/veilofshadows2",
@@ -319,7 +334,8 @@
       "max_points": 10,
       "ultimate_points": 20,
       "parent_id": "class04/veilofshadows1",
-      "icon": "ui/skills/icons/class04/skillicon_veilofshadows2up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_veilofshadows2up.tex",
+      "icon_id": "ic-08f7abeea2ee16c3"
     },
     {
       "id": "class04/ringofsteel",
@@ -338,7 +354,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_ringofsteel1up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_ringofsteel1up.tex",
+      "icon_id": "ic-f66b9d3ad5b7a13c"
     },
     {
       "id": "class04/bladebarrier1",
@@ -357,7 +374,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_bladebarrier1up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_bladebarrier1up.tex",
+      "icon_id": "ic-aa0a92fc81399c3a"
     },
     {
       "id": "class04/passive2",
@@ -376,7 +394,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_passive2up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_passive2up.tex",
+      "icon_id": "ic-3444a94ecbfc13ff"
     },
     {
       "id": "class04/wpattack3",
@@ -395,7 +414,8 @@
       "max_points": 8,
       "ultimate_points": 18,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_dualblades4up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_dualblades4up.tex",
+      "icon_id": "ic-5618a0eedcc2ec8a"
     },
     {
       "id": "class04/ringofsteel_mod0",
@@ -414,7 +434,8 @@
       "max_points": 1,
       "ultimate_points": 1,
       "parent_id": "class04/ringofsteel",
-      "icon": "ui/skills/icons/skillicon_transmuter01up.tex"
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
     },
     {
       "id": "class04/shadowstrike_mod1",
@@ -433,7 +454,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class04/shadowstrike",
-      "icon": "ui/skills/icons/class04/skillicon_shadowstrike2up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_shadowstrike2up.tex",
+      "icon_id": "ic-b96f21431bccb83a"
     },
     {
       "id": "class04/bladetrap1",
@@ -452,7 +474,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_bladetrap1up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_bladetrap1up.tex",
+      "icon_id": "ic-51abc4e672214ff8"
     },
     {
       "id": "class04/phantomblade_mod2",
@@ -471,7 +494,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class04/phantomblade",
-      "icon": "ui/skills/icons/class04/skillicon_phantomblades3up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_phantomblades3up.tex",
+      "icon_id": "ic-515fe2bde60c1db0"
     },
     {
       "id": "class04/nightbladeenchant3",
@@ -490,7 +514,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class04/nightbladeenchant1",
-      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant3up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant3up.tex",
+      "icon_id": "ic-5e8c63c641d3b903"
     },
     {
       "id": "class04/passive3",
@@ -509,7 +534,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_passive3up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_passive3up.tex",
+      "icon_id": "ic-4fe7b554eb3c5d20"
     },
     {
       "id": "class04/ringofsteel_mod1",
@@ -528,7 +554,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class04/ringofsteel",
-      "icon": "ui/skills/icons/class04/skillicon_ringofsteel2up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_ringofsteel2up.tex",
+      "icon_id": "ic-ebe124d178b062fb"
     },
     {
       "id": "class04/bladetrap2",
@@ -547,7 +574,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class04/bladetrap1",
-      "icon": "ui/skills/icons/class04/skillicon_bladetrap2up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_bladetrap2up.tex",
+      "icon_id": "ic-6e2c64e748078fe3"
     },
     {
       "id": "class04/wpattack5",
@@ -566,7 +594,8 @@
       "max_points": 8,
       "ultimate_points": 18,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_dualblades6up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_dualblades6up.tex",
+      "icon_id": "ic-1f81e87747e45bd3"
     },
     {
       "id": "class04/summon_bladespirit",
@@ -585,7 +614,8 @@
       "max_points": 16,
       "ultimate_points": 26,
       "parent_id": null,
-      "icon": "ui/skills/icons/class04/skillicon_bladespirit1up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_bladespirit1up.tex",
+      "icon_id": "ic-6177ebedd141adaa"
     },
     {
       "id": "class04/shadowstrike_mod2",
@@ -604,7 +634,8 @@
       "max_points": 12,
       "ultimate_points": 22,
       "parent_id": "class04/shadowstrike",
-      "icon": "ui/skills/icons/class04/skillicon_shadowstrike3up.tex"
+      "icon": "ui/skills/icons/class04/skillicon_shadowstrike3up.tex",
+      "icon_id": "ic-f6b63125fa7b7af7"
     }
   ]
 }

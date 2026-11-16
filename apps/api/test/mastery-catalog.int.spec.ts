@@ -117,6 +117,7 @@ interface NodeOptions {
   readonly ultimate?: number | null;
   readonly parent?: string | null;
   readonly icon?: string | null;
+  readonly iconId?: string | null;
 }
 
 const literal = (value: string | number | null | undefined): string =>
@@ -129,10 +130,10 @@ const literal = (value: string | number | null | undefined): string =>
 function node(o: NodeOptions): string {
   const tier = o.tier ?? 1;
   return `INSERT INTO catalog_skill_nodes (id, mastery_id, name_en, name_es, kind, circular, tier,
-      bar_required, grid_col, grid_row, max_points, ultimate_points, parent_id, icon)
+      bar_required, grid_col, grid_row, max_points, ultimate_points, parent_id, icon, icon_id)
     VALUES ('${o.id}', '${o.mastery ?? TREE}', 'En ${o.id}', 'Es ${o.id}', '${o.kind ?? 'active'}',
       false, ${tier}, ${o.bar ?? BAR[tier - 1]}, ${o.col ?? tier}, ${o.row ?? 0}, ${o.max ?? 5},
-      ${literal(o.ultimate)}, ${literal(o.parent)}, ${literal(o.icon)});`;
+      ${literal(o.ultimate)}, ${literal(o.parent)}, ${literal(o.icon)}, ${literal(o.iconId)});`;
 }
 
 function expectRejected(result: CommandResult, code: string, constraint: string): void {
@@ -225,7 +226,7 @@ databaseSuite('mastery catalog migration (spec 003 T008)', () => {
       psql(`BEGIN;
         ${tree(TREE, 'soldier')}
         ${tree(OTHER_TREE, 'demolition')}
-        ${node({ id: 'class01/root', tier: 1, row: 4, icon: 'icon.tex' })}
+        ${node({ id: 'class01/root', tier: 1, row: 4, icon: 'icon.tex', iconId: 'ic-0123456789abcdef' })}
         ${node({ id: 'class01/child', tier: 2, row: 4, parent: 'class01/root', max: 5, ultimate: 8, kind: 'modifier' })}
         ${node({ id: 'class02/root', mastery: OTHER_TREE, tier: 1, row: 4 })}
         COMMIT;`),
@@ -267,8 +268,27 @@ databaseSuite('mastery catalog migration (spec 003 T008)', () => {
       expect(nodes.output, field).toContain(field);
     }
     expect(nodes.output).not.toMatch(/created_at|updated_at/);
-    // S-004: the base table keeps `icon`, the public view does not.
-    expect(nodes.output).not.toContain('icon');
+    // S-004: the base table keeps `icon` (texture path); the public view exposes only `icon_id`.
+    expect(nodes.output).not.toMatch(/"icon"\s*:/);
+    expect(nodes.output).not.toContain('icon.tex');
+    expect(nodes.output).toContain('"icon_id":null');
+    // The root row carries both a texture path and an icon id in the base table.
+    const root = psql(
+      "SELECT row_to_json(n)::text FROM v_public_skill_nodes n WHERE id = 'class01/root'",
+      { user: 'api_ro', tcp: true },
+    );
+    expectDockerSuccess(root, 'read the root node as api_ro');
+    expect(root.output).toContain('"icon_id":"ic-0123456789abcdef"');
+    expect(root.output).not.toMatch(/"icon"\s*:/);
+    expect(root.output).not.toContain('icon.tex');
+    const columns = psql(
+      "SELECT string_agg(column_name, ',' ORDER BY ordinal_position) FROM information_schema.columns WHERE table_name = 'v_public_skill_nodes'",
+      { user: 'api_ro', tcp: true },
+    );
+    expectDockerSuccess(columns, 'list v_public_skill_nodes columns');
+    const names = columns.output.trim().split(',');
+    expect(names).not.toContain('icon');
+    expect(names).toContain('icon_id');
     const count = psql('SELECT count(*) FROM v_public_skill_nodes', { user: 'api_ro', tcp: true });
     expect(count.output.trim()).toBe('3');
   });
