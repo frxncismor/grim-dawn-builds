@@ -175,6 +175,104 @@ describe('gd-skill-tree tooltip next to the node (spec004 T011)', () => {
     expect(el.style.visibility).not.toBe('hidden');
   });
 
+  describe('viewport following (spec004 T054)', () => {
+    const rect = (left: number, top: number, width: number, height: number) =>
+      ({
+        left,
+        top,
+        width,
+        height,
+        right: left + width,
+        bottom: top + height,
+        x: left,
+        y: top,
+      }) as DOMRect;
+    const rafCallbacks: FrameRequestCallback[] = [];
+    let nodeRect = rect(600, 400, 40, 40);
+
+    function mockLayout() {
+      rafCallbacks.length = 0;
+      nodeRect = rect(600, 400, 40, 40);
+      vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+        this: Element,
+      ) {
+        if (this.hasAttribute('data-skill-id')) return nodeRect;
+        if (this.getAttribute('role') === 'tooltip') return rect(0, 0, 200, 100);
+        if (this.classList.contains('skill-tree__stage')) return rect(100, 100, 900, 600);
+        return rect(0, 0, 0, 0);
+      });
+      vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(1280);
+      vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(800);
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        rafCallbacks.push(cb);
+        return rafCallbacks.length;
+      });
+      vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
+    }
+    const flushFrames = () => rafCallbacks.splice(0).forEach((cb) => cb(0));
+
+    it.each(['resize', 'orientationchange'])(
+      'keeps the open tooltip next to its node after a window %s',
+      async (type) => {
+        mockLayout();
+        const f = await render();
+        fire(node(f, child.id), 'mouseenter');
+        f.detectChanges();
+        await f.whenStable();
+        const el = tooltip(f)[0];
+        expect(el.style.left).toBe('420px');
+        expect(el.style.top).toBe('192px');
+        expect(el.getAttribute('data-side')).toBe('top');
+        // The node ends up at the top edge after the viewport change: the tooltip flips below it.
+        nodeRect = rect(300, 10, 40, 40);
+        window.dispatchEvent(new Event(type));
+        flushFrames();
+        expect(el.getAttribute('data-side')).toBe('bottom');
+        expect(el.style.left).not.toBe('420px');
+        expect(el.style.top).not.toBe('192px');
+        // Still next to the node: its vertical gap to the node is the placement offset.
+        const gap = parseFloat(el.style.top) + 100 - (nodeRect.bottom as number);
+        expect(Math.abs(gap)).toBeLessThanOrEqual(16);
+      },
+    );
+
+    it('removes the window listeners when the tooltip closes', async () => {
+      mockLayout();
+      const add = vi.spyOn(window, 'addEventListener');
+      const remove = vi.spyOn(window, 'removeEventListener');
+      const f = await render();
+      fire(node(f, child.id), 'mouseenter');
+      f.detectChanges();
+      await f.whenStable();
+      const count = (spy: typeof add, name: string) =>
+        spy.mock.calls.filter(([t]) => t === name).length;
+      expect(count(add, 'resize')).toBe(1);
+      expect(count(add, 'orientationchange')).toBe(1);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      f.detectChanges();
+      await f.whenStable();
+      expect(count(remove, 'resize')).toBe(1);
+      expect(count(remove, 'orientationchange')).toBe(1);
+    });
+
+    it('leaves no listeners when the tooltip opens and closes before the render', async () => {
+      mockLayout();
+      const add = vi.spyOn(window, 'addEventListener');
+      const remove = vi.spyOn(window, 'removeEventListener');
+      const f = await render();
+      const el = node(f, child.id);
+      fire(el, 'mouseenter');
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      f.detectChanges();
+      await f.whenStable();
+      const names = ['resize', 'orientationchange'];
+      const added = add.mock.calls.filter(([t]) => names.includes(t as string)).length;
+      const removed = remove.mock.calls.filter(([t]) => names.includes(t as string)).length;
+      expect(added).toBe(removed);
+      expect(tooltip(f)).toHaveLength(0);
+    });
+  });
+
   describe('touch pin and retired bottom panel (spec004 T012)', () => {
     const tap = (f: { nativeElement: unknown }, id: string) => {
       const el = node(f, id);
