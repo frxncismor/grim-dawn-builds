@@ -128,8 +128,8 @@ suite('mastery catalog HTTP routes on real PostgreSQL (spec 003 T023)', () => {
         for (const n of [...tree.nodes].sort((a, b) => a.tier - b.tier)) {
           await importer.query(
             `INSERT INTO catalog_skill_nodes (id, mastery_id, name_en, name_es, kind, circular, tier,
-               bar_required, grid_col, grid_row, max_points, ultimate_points, parent_id, icon)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+               bar_required, grid_col, grid_row, max_points, ultimate_points, parent_id, icon, icon_id)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
             [
               n.id,
               tree.mastery.id,
@@ -145,6 +145,7 @@ suite('mastery catalog HTTP routes on real PostgreSQL (spec 003 T023)', () => {
               n.ultimate_points ?? null,
               n.parent_id,
               n.icon ?? null,
+              n.icon_id ?? null,
             ],
           );
         }
@@ -208,7 +209,13 @@ suite('mastery catalog HTTP routes on real PostgreSQL (spec 003 T023)', () => {
       expect(response.statusCode).toBe(200);
       expect(response.json()).toEqual(publicOf(expected));
       expect(PublicMasteryTreeSchema.safeParse(response.json()).success).toBe(true);
-      expect(response.body).not.toContain('icon');
+      // Exact checks: no `icon` key and none of the texture paths; `icon_id` is public.
+      expect(response.body).not.toMatch(/"icon"\s*:/);
+      expect(response.body).not.toMatch(/\.tex/);
+      for (const node of expected.nodes) {
+        if (node.icon) expect(response.body, node.icon).not.toContain(node.icon);
+      }
+      expect(response.body).toMatch(/"icon_id"\s*:\s*"ic-[0-9a-f]{16}"/);
     },
   );
 
