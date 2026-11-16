@@ -51,6 +51,8 @@ export async function emitSkillIcons(
     if (source === 'own') return [];
     const manifest = JSON.parse(await readFile(manifestFile, 'utf8')) as { assets?: unknown };
     if (!Array.isArray(manifest.assets)) fail();
+    // An empty catalog (no icon_id at all) is a wiring error; all `withdrawn` is not (T053, C-001).
+    if (iconIds.length === 0) fail();
     const approved: { id: string; from: string }[] = [];
     for (const id of [...new Set(iconIds)].sort()) {
       if (!ICON_ID_PATTERN.test(id)) fail();
@@ -68,7 +70,6 @@ export async function emitSkillIcons(
       if (sha !== verdict.sha256) fail();
       approved.push({ id, from });
     }
-    if (approved.length === 0) fail();
     for (const root of roots) {
       await mkdir(join(root, SKILL_ICONS), { recursive: true });
       for (const { id, from } of approved)

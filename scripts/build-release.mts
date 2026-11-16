@@ -3,6 +3,7 @@ import {
   assertGameAssets,
   assertNoGamePortraits,
   assertPortraitCredit,
+  assertSkillIconCredit,
 } from './check-assets.mts';
 import { createPublicBuildEnv } from './public-build-env.mts';
 import { assertPublicBuild, sensitiveValues } from './check-public-build.mts';
@@ -134,6 +135,8 @@ export async function runRelease(
     assertNoGamePortraits(staging, childEnv['ASSET_SOURCE'] ?? '');
     // T047: the credit to Crate goes with the game's portraits on every page, and only with them.
     assertPortraitCredit(staging, childEnv['ASSET_SOURCE'] ?? '');
+    // T053 (A-01/S-001): the same for the skill icons and their `[data-game-art-credit]`.
+    assertSkillIconCredit(staging, childEnv['ASSET_SOURCE'] ?? '');
     await assertPublicBuild(staging, sensitiveValues(env));
     await finalizeStaticHome(staging);
     const budgets = await measureInitialRoutes(staging);

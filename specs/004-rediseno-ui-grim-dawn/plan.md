@@ -22,7 +22,7 @@ Rediseñar la **capa de presentación** del sitio: portada y catálogo con **tar
 
 **Target Platform**: web estática prerenderizada servida local (MVP local-first, sin hosting) con API en Docker para release.
 
-**Project Type**: monorepo pnpm; esta feature solo toca `apps/web` y herramientas/`scripts` de activos.
+**Project Type**: monorepo pnpm; la huella real de esta feature es `apps/web`, `packages/domain`, `apps/api` (migración 0014 y lectura del catálogo), `scripts` y la constitución.
 
 **Performance Goals**: presupuestos de §6 intactos (FR-040). Margen real medido en spec003: `/tier-list` HTML 110 406/120 000 B y JS 110 834/112 000 B; `/` JS 0 B; CSS gzip 1 657/20 000 B (R1).
 

@@ -314,3 +314,44 @@ test.describe('@journeys tooltip del árbol · scroll del lienzo', () => {
     expect(problems, 'sin errores de consola ni violaciones de CSP').toEqual([]);
   });
 });
+
+for (const locale of LOCALES) {
+  test.describe(`@journeys tooltip del árbol · resize y rotación (${locale.name})`, () => {
+    test('con el tooltip fijado, cambiar el tamaño del viewport lo recoloca junto a su nodo', async ({
+      page,
+    }) => {
+      const problems = watchConsole(page);
+      const nodes = await openTree(page, locale.prefix, 'demolition');
+      const node = nodes[Math.floor(nodes.length / 2)];
+      const shape = await reveal(node);
+      const { x, y } = await centre(shape);
+      await page.mouse.click(x, y);
+      await settled(page, node, 'resize inicial', true);
+      const tipBox = () =>
+        node.evaluate((element) => {
+          const tip = element
+            .closest('gd-skill-tree')!
+            .querySelector<HTMLElement>('[role="tooltip"]')!;
+          const r = tip.getBoundingClientRect();
+          return { left: r.left, top: r.top, side: tip.getAttribute('data-side') };
+        });
+      const before = await tipBox();
+      const viewport = page.viewportSize()!;
+      // Un cambio de tamaño (y, vía el mismo oyente, un giro) debe recolocar el tooltip abierto.
+      for (const size of [
+        { width: Math.max(320, Math.round(viewport.width * 0.6)), height: viewport.height },
+        { width: viewport.height, height: viewport.width },
+      ]) {
+        await page.setViewportSize(size);
+        await node.scrollIntoViewIfNeeded();
+        await settled(page, node, `resize a ${size.width}x${size.height}`, true);
+      }
+      const after = await tipBox();
+      expect(
+        after.left !== before.left || after.top !== before.top || after.side !== before.side,
+        'el tooltip debe haberse movido o cambiado de lado con el viewport',
+      ).toBe(true);
+      expect(problems, 'sin errores de consola ni violaciones de CSP').toEqual([]);
+    });
+  });
+}

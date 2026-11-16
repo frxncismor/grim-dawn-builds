@@ -158,9 +158,10 @@ test('fails closed: missing file, sha256 mismatch, same rule as the prerender, n
     const none = await fixture([]);
     await assert.rejects(emitSkillIcons(none.web, root, 'game', none.manifest, []), /skill-icons/);
     const onlyWithdrawn = await fixture([withdrawnEntry(A)]);
-    await assert.rejects(
-      emitSkillIcons(onlyWithdrawn.web, root, 'game', onlyWithdrawn.manifest, [A]),
-      /skill-icons/,
+    // T053 (C-001): with everything withdrawn (R10.5 step 2) it emits zero PNG, without error.
+    assert.deepEqual(
+      await emitSkillIcons(onlyWithdrawn.web, root, 'game', onlyWithdrawn.manifest, [A]),
+      [],
     );
     const ok = await fixture([entry(A)]);
     await assert.rejects(

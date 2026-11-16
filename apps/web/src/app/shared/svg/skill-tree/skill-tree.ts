@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  type AfterRenderRef,
   ChangeDetectionStrategy,
   effect,
   ElementRef,
@@ -287,18 +288,25 @@ export class SkillTree implements OnDestroy {
     // Signals read here re-run the placement; pinning adds the close button, so measure again.
     const id = this.tooltipNodeId();
     this.selectedId();
+    // A pending render hook from an earlier run must not outlive it (open + close before the render).
+    this.pendingRender?.destroy();
+    this.pendingRender = null;
     if (!id) {
       this.stopFollowing();
       return;
     }
-    afterNextRender(
+    this.pendingRender = afterNextRender(
       () => {
+        this.pendingRender = null;
+        if (this.tooltipNodeId() !== id) return;
         this.placeOpenTooltip(id);
         this.followViewport(id);
       },
       { injector: this.injector },
     );
   });
+
+  private pendingRender: AfterRenderRef | null = null;
 
   private stopFollowingFn: (() => void) | null = null;
   private followFrame: number | null = null;
