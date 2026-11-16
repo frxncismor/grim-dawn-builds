@@ -23,7 +23,7 @@ test('S-001: the angular asset glob ignores the game portraits and development k
   const publicGlob = project.options.assets.find(
     (asset: { input?: string }) => asset.input === 'public',
   );
-  assert.deepEqual(publicGlob.ignore, ['assets/portraits/**']);
+  assert.deepEqual(publicGlob.ignore, ['assets/portraits/**', 'assets/skill-icons/**']);
   // `ng serve` / `ng build --watch` are never published: they keep serving the folder.
   const development = project.configurations.development.assets.find(
     (asset: { input?: string }) => asset.input === 'public',
