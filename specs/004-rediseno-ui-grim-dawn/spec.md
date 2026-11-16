@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-15
 
-**Status**: Clarified (Q11–Q15 resueltas por Paco, 2026-11-15; ver «Clarifications»). Listo para `tasks`; la publicación de iconos queda bloqueada hasta la enmienda 1.11.0 de §VII (FR-018).
+**Status**: Clarified (Q11–Q15 resueltas por Paco, 2026-11-15; ver «Clarifications»). Listo para `tasks`; la enmienda 1.11.0 de §VII (T004) y el análisis de riesgos R10 (aprobado por Paco el 2026-11-15, Pregunta 21 = A; manifiesto: una entrada por icono) habilitan la puerta G1; publicar iconos sigue sujeto a FR-018 y a sus condiciones previas.
 
 **Depende de**: `001-mvp-guias-builds` (páginas, SEO, presupuestos de §6), `002-spec-completion-reviews` (puerta de cierre) y `003-catalogo-arboles-maestria` (catálogo, árbol SVG en modos catálogo/guía/asignación, retratos, `deferred.css`).
 
@@ -22,7 +22,7 @@
 | `tooltip=junto_nodo`  | El detalle del nodo aparece **junto al nodo** al pasar el ratón, no debajo del árbol; con equivalente accesible por teclado y táctil.                                                   | US3, FR-010–FR-015          |
 | `restricciones=§6`    | Siguen vigentes los presupuestos de `001/plan.md` §6, la CSP sin `unsafe-inline`, la paridad EN/ES, la accesibilidad, la lectura sin JS y el contenido fixtures/API sin _fallback_.     | SC-005–SC-009, FR-040–FR-046 |
 
-> **Constancia de derechos** (constitución §VII, 1.10.1): no existe permiso escrito de Crate Entertainment; la base es tolerancia de facto asumida como riesgo por el dueño. La excepción 1 cubre **iconos de habilidad** (hoy solo uso local) y la excepción 2 los **retratos de maestría** (el botón de entrenamiento de 197×41). **Nada más del juego entra**: ni fondos, ni marcos, ni otro arte, ni datos internos (`.dbr`, `.arc`, `.arz`, localización), ni la marca. **Q11 = B** pide publicar los iconos de habilidad: eso **amplía** la excepción 1 y exige la enmienda **1.11.0** y el análisis de riesgos actualizado como **tarea previa** a cualquier publicación (FR-018); el riesgo lo asume Paco, sin permiso escrito de Crate. Marcos, fondos y tipografía del juego **siguen fuera** (Q12 = A).
+> **Constancia de derechos** (constitución §VII, 1.11.0 con T004; texto de 1.10.1 salvo la excepción 1): no existe permiso escrito de Crate Entertainment; la base es tolerancia de facto asumida como riesgo por el dueño. La excepción 1 cubre **iconos de habilidad** (publicados desde la enmienda 1.11.0, T004, con una entrada de manifiesto por icono) y la excepción 2 los **retratos de maestría** (el botón de entrenamiento de 197×41). **Nada más del juego entra**: ni fondos, ni marcos, ni otro arte, ni datos internos (`.dbr`, `.arc`, `.arz`, localización), ni la marca. **Q11 = B** (publicar los iconos de habilidad) **amplió** la excepción 1 con la enmienda **1.11.0** y el análisis de riesgos R10, aprobados por Paco el 2026-11-15 (Pregunta 21 = A); la publicación sigue sujeta a FR-018 y a sus condiciones previas; el riesgo lo asume Paco, sin permiso escrito de Crate. Marcos, fondos y tipografía del juego **siguen fuera** (Q12 = A).
 
 ## 1. Resumen y valor
 

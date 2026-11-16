@@ -18,7 +18,12 @@ tolerancia_de_facto_sin_permiso` and a `proof_ref` to
 - **Where it ships (T015)**: the six mastery buttons (197×41, unmodified PNG from
   `UI.arc`) are shown on `/maestrias` with a visible credit to Crate and a
   non-affiliation notice. `build:release` and the CI artifact build use
-  `ASSET_SOURCE=game`; local builds default to `own`. Skill icons are not published.
+  `ASSET_SOURCE=game`; local builds default to `own`.
+- **Skill icons (constitution §VII, 1.11.0, approved by Paco, 2026-11-15)**: the same
+  basis, attribution and withdrawal apply to the skill icons of the six base masteries
+  (unmodified PNG derived from `UI.arc`), with **one manifest entry per icon** whose
+  `proof_ref` is `specs/004-rediseno-ui-grim-dawn/research.md#r10`. No icon is versioned
+  or served until the own fallback icon set is finished and the entries exist.
 - **Withdrawal**: if Crate asks, set the entry to `status: withdrawn`, delete the file,
   record it in `handoff.md` and switch to the own icon set (`ASSET_SOURCE=own`) in the
   same change.
@@ -41,7 +46,13 @@ tolerancia_de_facto_sin_permiso` y `proof_ref` a
 - **Dónde se publican (T015)**: los seis botones de maestría (197×41, PNG sin modificar de
   `UI.arc`) se muestran en `/maestrias` con crédito visible a Crate y aviso de no
   afiliación. `build:release` y el build del artefacto de CI usan `ASSET_SOURCE=game`;
-  el build local usa `own` por defecto. Los iconos de habilidad no se publican.
+  el build local usa `own` por defecto.
+- **Iconos de habilidad (constitución §VII, 1.11.0, aprobada por Paco, 2026-11-15)**: se
+  aplican la misma base, atribución y retirada a los iconos de habilidad de las seis
+  maestrías base (PNG derivado sin modificar de `UI.arc`), con **una entrada de manifiesto
+  por icono** cuyo `proof_ref` es `specs/004-rediseno-ui-grim-dawn/research.md#r10`. Ningún
+  icono se versiona ni se sirve hasta terminar el conjunto propio de _fallback_ y tener las
+  entradas.
 - **Retirada**: si Crate lo pide, la entrada pasa a `status: withdrawn`, se borra el
   archivo, se registra en `handoff.md` y se cambia a la iconografía propia
   (`ASSET_SOURCE=own`) en el mismo cambio.

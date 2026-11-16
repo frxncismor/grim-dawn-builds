@@ -75,7 +75,7 @@ Regla: FR-014 de la spec y constitución 1.10.1, sección VII.
 | -------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | Datos factuales: nombres, tier, posición en la rejilla, límites de puntos, relaciones de padre, con los hashes de `source` | **Se versionan** en `fixtures/content/mastery-trees/*.json`                                               |
 | Los seis **botones de maestría**, PNG de 197x41 sin modificar, publicados como «retratos» de maestría (decisión de Paco)   | **Se versionan** en `apps/web/public/assets/portraits/`, cada uno con entrada `approved` en el manifiesto |
-| **Iconos de habilidad** (32x32)                                                                                            | **Solo en local**, en `.game-assets/textures/`; nunca se versionan ni se publican                         |
+| **Iconos de habilidad** (32x32)                                                                                            | Se extraen a `.game-assets/textures/` (nunca se versionan); se **publican** como PNG derivados con **una entrada de manifiesto por icono** solo tras la constitución 1.11.0 y el fallback propio |
 | `.arz`, `.arc`, `.dbr`, volcados de localización, descripciones de habilidades                                             | **Nunca** se versionan                                                                                    |
 | Fondos, marcos, otro arte, datos de Grim Tools                                                                             | **Nunca**; quedan fuera de las excepciones de la sección VII                                              |
 
@@ -142,7 +142,9 @@ build:release` y los jobs de CI que construyen el artefacto medido (`verify` y
   alguno (T036, S-001). `ng serve` y `--configuration development` los siguen sirviendo.
 - **Fallback**: con `own`, o con una entrada ausente, `withdrawn` o no aprobada, la
   fila muestra el icono propio del proyecto. El sitio nunca se queda sin iconos. Los
-  iconos de habilidad usan siempre los iconos propios.
+  iconos de habilidad usan los iconos propios hasta que se publiquen bajo la constitución
+  1.11.0 (una entrada de manifiesto por icono, `proof_ref` a
+  [`research.md`, sección R10](../../specs/004-rediseno-ui-grim-dawn/research.md)).
 
 ## Procedimiento de retirada
 
