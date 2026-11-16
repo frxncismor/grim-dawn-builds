@@ -86,7 +86,7 @@ describe('gd-skill-tree catalog accessibility (T011)', () => {
       el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
       fixture.detectChanges();
       expect(el.getAttribute('aria-pressed')).toBe('true');
-      expect(root.querySelector('[data-detail-panel]')?.textContent).toContain(
+      expect(root.querySelector('[role="tooltip"]')?.textContent).toContain(
         el.getAttribute('data-skill-id') ? nameOf.get(el.getAttribute('data-skill-id')!) : '',
       );
       el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
