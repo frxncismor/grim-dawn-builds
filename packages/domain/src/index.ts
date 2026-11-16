@@ -113,3 +113,13 @@ export type {
 } from './mastery-tree.js';
 export { validateSkillNodeRefs } from './skill-node-refs.js';
 export type { SkillNodeRefIssue } from './skill-node-refs.js';
+export {
+  CONTENT_MOUNT,
+  SEED_ERROR_CODES,
+  bootstrapCompleteLine,
+  failurePattern,
+  isSeedErrorCode,
+  seedCompleteLine,
+  successPattern,
+} from './seed-contract.js';
+export type { SeedErrorCode, SeedOperation } from './seed-contract.js';
