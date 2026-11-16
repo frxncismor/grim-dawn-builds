@@ -203,7 +203,10 @@ function expectRejectedByGate(result: CommandResult, message: string): void {
 
 const databaseSuite = RUN_DB_TESTS ? describe : describe.skip;
 
-databaseSuite('third-party adaptation SQL gates (T-108, AC-20)', () => {
+// T055: every case shells out to docker exec/psql; under CPU load it can exceed vitest's
+// default 5 s testTimeout, so the suite carries its own timeout (assertions unchanged).
+const SUITE_OPTIONS = { timeout: 30_000 };
+databaseSuite('third-party adaptation SQL gates (T-108, AC-20)', SUITE_OPTIONS, () => {
   beforeAll(async () => {
     if (!POSTGRES_IMAGE || !/@sha256:[a-f0-9]{64}$/.test(POSTGRES_IMAGE)) {
       throw new Error('The Compose file must pin the PostgreSQL 17 fixture image by digest');

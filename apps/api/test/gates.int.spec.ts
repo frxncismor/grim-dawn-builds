@@ -264,7 +264,10 @@ function proveCheckAndMutation(check: CheckMutation): void {
 
 const databaseSuite = RUN_DB_TESTS ? describe : describe.skip;
 
-databaseSuite('PostgreSQL publication and API-role gates (T-073)', () => {
+// T055: every case shells out to docker exec/psql; under CPU load it can exceed vitest's
+// default 5 s testTimeout, so the suite carries its own timeout (assertions unchanged).
+const SUITE_OPTIONS = { timeout: 30_000 };
+databaseSuite('PostgreSQL publication and API-role gates (T-073)', SUITE_OPTIONS, () => {
   beforeAll(async () => {
     if (!POSTGRES_IMAGE || !/@sha256:[a-f0-9]{64}$/.test(POSTGRES_IMAGE)) {
       throw new Error('The Compose file must pin the PostgreSQL 17 fixture image by digest');

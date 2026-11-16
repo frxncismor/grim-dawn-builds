@@ -59,7 +59,11 @@ const reject = async (sql: string, values: unknown[]) => {
 };
 const SHAMAN_NODE = `(SELECT id FROM build_skill_nodes WHERE skill_node_id LIKE 'class06/%' LIMIT 1)`;
 
-suite('guide skill_node_id from fixture to API on real PostgreSQL (spec 003 T031)', () => {
+// T055: cases shell out to docker exec/psql or spawn the API against a real PostgreSQL; under CPU
+// load they can exceed vitest's default 5 s testTimeout, so the suite carries its own timeout.
+const SUITE_OPTIONS = { timeout: 30_000 };
+const SUITE_TITLE = 'guide skill_node_id from fixture to API on real PostgreSQL (spec 003 T031)';
+suite(SUITE_TITLE, SUITE_OPTIONS, () => {
   beforeAll(async () => {
     if (!image || !/@sha256:[a-f0-9]{64}$/.test(image))
       throw new Error('Pinned PostgreSQL image required');
