@@ -63,7 +63,7 @@ specs/004-rediseno-ui-grim-dawn/
 ├── quickstart.md    # Fase 1 (comandos y salidas esperadas de cierre)
 ├── checklists/
 │   └── requirements.md
-└── tasks.md         # 51 tareas (T001–T051) en 9 fases (puerta G1 para iconos)
+└── tasks.md         # 54 tareas (T001–T054) en 9 fases (puerta G1 para iconos)
 ```
 
 No se crean `data-model.md` ni `contracts/`: la feature no añade entidades persistentes ni interfaces externas; las «entidades» de la spec son vistas de presentación definidas en código (lección I1/A-05 de spec003). El identificador público de icono y la forma del manifiesto se documentan en `research.md` §R4 y viven en `packages/domain` (Constitución VI).
