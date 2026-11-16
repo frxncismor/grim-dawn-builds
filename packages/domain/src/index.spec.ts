@@ -59,6 +59,13 @@ const PUBLIC_RUNTIME_EXPORTS = [
   'SKILL_KINDS',
   'TIER_BAR_REQUIRED',
   'findDependencyCycle',
+  'CONTENT_MOUNT',
+  'SEED_ERROR_CODES',
+  'bootstrapCompleteLine',
+  'failurePattern',
+  'isSeedErrorCode',
+  'seedCompleteLine',
+  'successPattern',
 ];
 
 describe('@gd/domain public API', () => {
