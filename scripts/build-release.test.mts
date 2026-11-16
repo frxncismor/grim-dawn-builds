@@ -88,8 +88,7 @@ test('release builds with ASSET_SOURCE=game and fails closed when the manifest d
       await writeFile(join(root, 'apps/api/drizzle/0000_first.sql'), 'SELECT 1;');
       await prepare(root);
       const migration = await expectedMigration(root);
-      const request: typeof fetch = async () =>
-        new Response('{"status":"ready"}', { headers: { 'X-Content-Migration': migration } });
+      const request = apiWith(migration, [{ slug: 'mastery-soldier' }]);
       await assert.rejects(
         release(root, { CONTENT_SOURCE: 'api', ...env }, { build: stub(seen), request }),
       );
@@ -168,9 +167,10 @@ test('release invalidates prior report, stages build, verifies twice and reports
     let builds = 0;
     let probes = 0;
     const migration = await expectedMigration(root);
-    const request: typeof fetch = async () => {
-      probes++;
-      return new Response('{"status":"ready"}', { headers: { 'X-Content-Migration': migration } });
+    const published = apiWith(migration, [{ slug: 'mastery-soldier' }]);
+    const request: typeof fetch = async (input, init) => {
+      if (!String(input).endsWith('/api/v1/assets')) probes++;
+      return published(input, init);
     };
     const build = async (output: string) => {
       builds++;
@@ -313,8 +313,7 @@ test('release emits the mastery trees into the staging before the fingerprint an
     await writeFile(join(folder, '0000_first.sql'), 'SELECT 1;');
     await seedGameAssets(root);
     const migration = await expectedMigration(root);
-    const request: typeof fetch = async () =>
-      new Response('{"status":"ready"}', { headers: { 'X-Content-Migration': migration } });
+    const request = apiWith(migration, [{ slug: 'mastery-soldier' }]);
     const build = async (output: string) => {
       await mkdir(join(output, 'browser'), { recursive: true });
       await writeFile(
@@ -411,8 +410,7 @@ test('S-001: with ASSET_SOURCE=own an artifact with game portraits is rejected; 
     await writeFile(join(folder, '../0000_first.sql'), 'SELECT 1;');
     await seedGameAssets(root);
     const migration = await expectedMigration(root);
-    const request: typeof fetch = async () =>
-      new Response('{"status":"ready"}', { headers: { 'X-Content-Migration': migration } });
+    const request = apiWith(migration, [{ slug: 'mastery-soldier' }]);
     const build = (locales: string[]) => async (output: string) => {
       await mkdir(join(output, 'browser'), { recursive: true });
       await writeFile(
@@ -463,6 +461,84 @@ test('S-001: with ASSET_SOURCE=own an artifact with game portraits is rejected; 
       ),
       'png',
     );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+/** API stub: `/ready` is ready; `/api/v1/assets` lists the given public (approved) slugs. */
+const apiWith =
+  (migration: string, assets: unknown, requested: string[] = []): typeof fetch =>
+  async (input) => {
+    const url = String(input);
+    requested.push(url);
+    return url.endsWith('/api/v1/assets')
+      ? new Response(JSON.stringify(assets))
+      : new Response('{"status":"ready"}', { headers: { 'X-Content-Migration': migration } });
+  };
+
+test('release fails closed, before building, when the assets table and the manifest disagree on status (T005, A-03)', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gd-release-parity-'));
+  try {
+    await mkdir(join(root, 'apps/api/drizzle/meta'), { recursive: true });
+    await writeFile(
+      join(root, 'apps/api/drizzle/meta/_journal.json'),
+      JSON.stringify({ entries: [{ idx: 0, tag: '0000_first' }] }),
+    );
+    await writeFile(join(root, 'apps/api/drizzle/0000_first.sql'), 'SELECT 1;');
+    await seedGameAssets(root);
+    const migration = await expectedMigration(root);
+    let builds = 0;
+    const build = async () => {
+      builds++;
+      throw new Error('stop after the parity gate');
+    };
+    const env = { CONTENT_SOURCE: 'api', ASSET_SOURCE: 'game' };
+    // Manifest approves mastery-soldier, the table does not publish it.
+    await assert.rejects(
+      release(root, env, { build, request: apiWith(migration, []) }),
+      /mastery-soldier.*tabla assets: no publicado.*manifiesto: approved/s,
+    );
+    // The table publishes an asset the manifest does not know.
+    await assert.rejects(
+      release(root, env, {
+        build,
+        request: apiWith(migration, [
+          {
+            slug: 'mastery-soldier',
+            file_path: 'public/assets/portraits/soldier.png',
+            fallback_svg: 'x.svg',
+          },
+          {
+            slug: 'mastery-ghost',
+            file_path: 'public/assets/portraits/ghost.png',
+            fallback_svg: 'x.svg',
+          },
+        ]),
+      }),
+      /mastery-ghost.*tabla assets: approved.*manifiesto: ausente/s,
+    );
+    // An unreadable listing is not "no discrepancy".
+    await assert.rejects(
+      release(root, env, { build, request: apiWith(migration, { not: 'a list' }) }),
+      /activos/,
+    );
+    assert.equal(builds, 0);
+    // They agree: the gate passes and the build starts.
+    await assert.rejects(
+      release(root, env, {
+        build,
+        request: apiWith(migration, [
+          {
+            slug: 'mastery-soldier',
+            file_path: 'public/assets/portraits/soldier.png',
+            fallback_svg: 'x.svg',
+          },
+        ]),
+      }),
+      /stop after the parity gate/,
+    );
+    assert.equal(builds, 1);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

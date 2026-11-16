@@ -84,6 +84,42 @@ export function assertGameAssets(root: string): void {
 }
 
 /**
+ * T005 (A-03): the repository manifest is the single source of truth for an asset's status and the
+ * `assets` table must agree with it. The public view (`/api/v1/assets`) only lists `approved` rows,
+ * so "public in the table" means approved there. Any slug that is public on one side and not
+ * `approved` on the other (including present on one side only) is a discrepancy: throws, naming the
+ * asset and both states. An asset non-approved in the manifest and unpublished in the table agrees.
+ */
+export function assertAssetStatusParity(
+  root: string,
+  published: readonly { readonly slug: string }[],
+): void {
+  const states = new Map<string, string>();
+  try {
+    const manifest = JSON.parse(readFileSync(join(root, MANIFEST), 'utf8'));
+    if (!Array.isArray(manifest.assets)) throw new Error();
+    for (const item of manifest.assets as { slug?: unknown; status?: unknown }[])
+      if (typeof item?.slug === 'string') states.set(item.slug, String(item.status));
+  } catch {
+    throw new Error(`estado de activos: ${MANIFEST} ilegible o inválido`);
+  }
+  const table = new Set(published.map((item) => item.slug));
+  const problems: string[] = [];
+  for (const slug of [...new Set([...states.keys(), ...table])].sort()) {
+    const manifestState = states.get(slug);
+    const inTable = table.has(slug);
+    if (inTable && manifestState !== 'approved')
+      problems.push(`${slug} (tabla assets: approved; manifiesto: ${manifestState ?? 'ausente'})`);
+    else if (!inTable && manifestState === 'approved')
+      problems.push(`${slug} (tabla assets: no publicado; manifiesto: approved)`);
+  }
+  if (problems.length > 0)
+    throw new Error(
+      `El estado de los activos discrepa entre la tabla assets y el manifiesto (manda el manifiesto): ${problems.join('; ')}`,
+    );
+}
+
+/**
  * Gate of the artifact (S-001): with `ASSET_SOURCE=own` no file of `assets/portraits/` may be in the
  * staging, in the default locale or in any other (`browser/assets/portraits`, `browser/es/…`).
  * The PNGs are the game's art; `own` is the withdrawal path. With `game` there is nothing to check
