@@ -1,13 +1,14 @@
 import { isPlatformBrowser } from '@angular/common';
 import {
   afterNextRender,
+  effect,
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   inject,
   input,
   output,
   PLATFORM_ID,
+  signal,
 } from '@angular/core';
 
 /**
@@ -26,15 +27,22 @@ export class TocObserver {
   readonly activeChange = output<string>();
 
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
-  private readonly destroyRef = inject(DestroyRef);
+
+  private readonly rendered = signal(false);
 
   constructor() {
-    afterNextRender(() => this.observe());
+    afterNextRender(() => this.rendered.set(true));
+    // Rebuilds the observer whenever the sections change (navigating to another guide).
+    effect((onCleanup) => {
+      const order = this.ids();
+      if (!this.rendered()) return;
+      const stop = this.observe(order);
+      if (stop) onCleanup(stop);
+    });
   }
 
-  private observe(): void {
-    if (!this.browser || typeof IntersectionObserver !== 'function') return;
-    const order = this.ids();
+  private observe(order: readonly string[]): (() => void) | null {
+    if (!this.browser || typeof IntersectionObserver !== 'function') return null;
     const inside = new Set<string>();
     let current: string | null = null;
     // The upper half of the viewport: an anchored section lands below the sticky header, inside it.
@@ -78,9 +86,9 @@ export class TocObserver {
       childList: true,
       subtree: true,
     });
-    this.destroyRef.onDestroy(() => {
+    return () => {
       mutations?.disconnect();
       observer.disconnect();
-    });
+    };
   }
 }

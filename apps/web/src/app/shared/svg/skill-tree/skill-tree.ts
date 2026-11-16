@@ -287,9 +287,53 @@ export class SkillTree implements OnDestroy {
     // Signals read here re-run the placement; pinning adds the close button, so measure again.
     const id = this.tooltipNodeId();
     this.selectedId();
-    if (!id) return;
-    afterNextRender(() => this.placeOpenTooltip(id), { injector: this.injector });
+    if (!id) {
+      this.stopFollowing();
+      return;
+    }
+    afterNextRender(
+      () => {
+        this.placeOpenTooltip(id);
+        this.followViewport(id);
+      },
+      { injector: this.injector },
+    );
   });
+
+  private stopFollowingFn: (() => void) | null = null;
+  private followFrame: number | null = null;
+
+  /**
+   * While a tooltip is open, re-places it when the canvas scrolls or the window resizes or rotates
+   * (passive listeners, one frame at a time). Browser only: `afterNextRender` never runs on the server.
+   */
+  private followViewport(id: string): void {
+    this.stopFollowing();
+    const canvas = this.host.nativeElement.querySelector<HTMLElement>('.skill-tree__canvas');
+    const schedule = () => {
+      if (this.followFrame !== null) return;
+      this.followFrame = requestAnimationFrame(() => {
+        this.followFrame = null;
+        this.placeOpenTooltip(id);
+      });
+    };
+    const options: AddEventListenerOptions = { passive: true };
+    canvas?.addEventListener('scroll', schedule, options);
+    window.addEventListener('resize', schedule, options);
+    window.addEventListener('orientationchange', schedule, options);
+    this.stopFollowingFn = () => {
+      canvas?.removeEventListener('scroll', schedule, options);
+      window.removeEventListener('resize', schedule, options);
+      window.removeEventListener('orientationchange', schedule, options);
+      if (this.followFrame !== null) cancelAnimationFrame(this.followFrame);
+      this.followFrame = null;
+    };
+  }
+
+  private stopFollowing(): void {
+    this.stopFollowingFn?.();
+    this.stopFollowingFn = null;
+  }
 
   private placeOpenTooltip(id: string): void {
     const root = this.host.nativeElement;
@@ -479,6 +523,7 @@ export class SkillTree implements OnDestroy {
 
   ngOnDestroy(): void {
     this.cancelHoverClear();
+    this.stopFollowing();
   }
 
   clearHovered(): void {

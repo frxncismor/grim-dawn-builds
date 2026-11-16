@@ -261,3 +261,56 @@ for (const locale of LOCALES) {
     });
   });
 }
+
+test.describe('@journeys tooltip del árbol · scroll del lienzo', () => {
+  test('con el tooltip fijado, desplazar el lienzo lo mantiene anclado a su nodo', async ({
+    page,
+  }) => {
+    const problems = watchConsole(page);
+    const nodes = await openTree(page, '', 'demolition');
+    const node = nodes[Math.floor(nodes.length / 2)];
+    const shape = await reveal(node);
+    // Nodo centrado en el lienzo: el tooltip no queda recortado por el borde del viewport.
+    await shape.evaluate((element) => {
+      const canvas = element.closest<HTMLElement>('.skill-tree__canvas')!;
+      const box = element.getBoundingClientRect();
+      const view = canvas.getBoundingClientRect();
+      canvas.scrollLeft += box.left + box.width / 2 - (view.left + view.width / 2);
+    });
+    const { x, y } = await centre(shape);
+    await page.mouse.click(x, y);
+    await settled(page, node, 'demolition scroll inicial', false);
+    // Desplazamiento (px) del tooltip respecto del nodo: debe conservarse al mover el lienzo.
+    const offset = () =>
+      node.evaluate((element) => {
+        const tip = element
+          .closest('gd-skill-tree')!
+          .querySelector<HTMLElement>('[role="tooltip"]')!
+          .getBoundingClientRect();
+        const n = element.getBoundingClientRect();
+        return { dx: tip.left + tip.width / 2 - (n.left + n.width / 2), nodeLeft: n.left };
+      });
+    const before = await offset();
+    // Se desplaza el lienzo 60 px hacia atrás (o adelante si no hay margen).
+    const moved = await page.evaluate(() => {
+      const canvas = document.querySelector<HTMLElement>('gd-skill-tree .skill-tree__canvas')!;
+      const start = canvas.scrollLeft;
+      const max = canvas.scrollWidth - canvas.clientWidth;
+      canvas.scrollLeft = start > 60 ? start - 60 : Math.min(start + 60, max);
+      return Math.abs(canvas.scrollLeft - start);
+    });
+    // A 1280 px el árbol cabe entero: sin desbordamiento no hay nada que desplazar.
+    test.skip(moved === 0, 'el lienzo no desborda a esta anchura');
+    await expect
+      .poll(async () => Math.abs((await offset()).nodeLeft - before.nodeLeft), { timeout: 2000 })
+      .toBeGreaterThan(0);
+    await expect
+      .poll(async () => Math.abs((await offset()).dx - before.dx), {
+        message: 'el tooltip debe seguir al nodo al desplazar el lienzo',
+        timeout: 4000,
+      })
+      .toBeLessThanOrEqual(2);
+    await settled(page, node, 'demolition tras desplazar el lienzo', true);
+    expect(problems, 'sin errores de consola ni violaciones de CSP').toEqual([]);
+  });
+});

@@ -4,6 +4,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
+  untracked,
   DestroyRef,
   ElementRef,
   inject,
@@ -140,6 +142,11 @@ export class BuildToc {
   protected readonly entryIds = computed(() => this.entries().map((entry) => entry.id));
 
   constructor() {
+    // Another guide has other sections: the section being read starts over.
+    effect(() => {
+      this.entryIds();
+      untracked(() => this.active.set(null));
+    });
     const subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.hrefBase.set(event.urlAfterRedirects.split('#')[0]);
