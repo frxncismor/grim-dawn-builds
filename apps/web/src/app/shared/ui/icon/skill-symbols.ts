@@ -1,11 +1,11 @@
 /** Path of the own skill-icon sprite (spec004 T024); same origin, so `img-src 'self'` covers it. */
 export const SKILL_SPRITE_PATH = '/assets/ui/skill-icons.svg';
-/** One `<symbol>` per skill type, plus the mastery glyph; the sprite defines each exactly once. */
+/** One `<symbol>` per skill type, plus the mastery glyph; the sprite defines each exactly once.
+ * The circular marker has no symbol: it is a ring around the node (T045). */
 export const SKILL_SYMBOLS = {
   active: 'skill-active',
   modifier: 'skill-modifier',
   transmuter: 'skill-transmuter',
-  circular: 'skill-circular',
   passive: 'skill-passive',
   mastery: 'skill-mastery',
 } as const;
@@ -17,9 +17,9 @@ export interface SkillIconNode {
   readonly circular: boolean;
 }
 
-/** Own symbol of a node: the circular marker wins over the type, so the shape tells it apart. */
+/** Own symbol of a node: always the one of its type (T045); `circular` is shown as a ring and as text. */
 export function skillSymbol(node: SkillIconNode): SkillSymbolId {
-  return node.circular ? SKILL_SYMBOLS.circular : SKILL_SYMBOLS[node.kind];
+  return SKILL_SYMBOLS[node.kind];
 }
 
 /** `href` for `<use>`; `'mastery'` is the glyph of a mastery (button fallback, index cards). */

@@ -117,7 +117,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_weaponpool2up.tex",
@@ -153,7 +153,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_passive03up.tex",
@@ -189,7 +189,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_grenado2_up.tex",
@@ -225,7 +225,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_veilofshadows2up.tex",
@@ -243,7 +243,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_evileye4up.tex",
@@ -279,7 +279,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_elementalinfusion3up.tex",
@@ -297,7 +297,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_phantomblades2up.tex",
@@ -333,7 +333,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_arcanetempest2up.tex",
@@ -369,7 +369,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_thornedhorrorsummon3up.tex",
@@ -423,7 +423,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_cadence3_up.tex",
@@ -441,7 +441,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_dualblades6up.tex",
@@ -477,7 +477,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_skyshard2up.tex",
@@ -495,7 +495,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_militaryconditioning1_up.tex",
@@ -549,7 +549,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_mortartrap3_up.tex",
@@ -567,7 +567,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_flametouched2_up.tex",
@@ -621,7 +621,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_passive2up.tex",
@@ -639,7 +639,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_wildstrike2up.tex",
@@ -657,7 +657,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_molotov2_up.tex",
@@ -675,7 +675,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_totem2up.tex",
@@ -693,7 +693,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_flashbang2_up.tex",
@@ -711,7 +711,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_graspingvines2up.tex",
@@ -729,7 +729,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_aetherray2up.tex",
@@ -747,7 +747,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_evileye3up.tex",
@@ -783,7 +783,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_chillingsurge2up.tex",
@@ -801,7 +801,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_pyrotechnics1_up.tex",
@@ -837,7 +837,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_stormcloud3up.tex",
@@ -855,7 +855,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_fieldcommand2up.tex",
@@ -873,7 +873,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_wildstrike3up.tex",
@@ -909,7 +909,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_passive3up.tex",
@@ -927,7 +927,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_weaponpool1up.tex",
@@ -945,7 +945,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_phantomblades3up.tex",
@@ -999,7 +999,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_dualblades4up.tex",
@@ -1017,7 +1017,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_ravensummon2up.tex",
@@ -1035,7 +1035,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_pox3up.tex",
@@ -1071,7 +1071,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_grenado3orange_up.tex",
@@ -1089,7 +1089,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_hellhoundsummon3up.tex",
@@ -1125,7 +1125,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_nightbladeenchant3up.tex",
@@ -1143,7 +1143,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_firestrike4_up.tex",
@@ -1179,7 +1179,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_shieldhammer3up.tex",
@@ -1233,7 +1233,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_stormcloud2up.tex",
@@ -1305,7 +1305,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_bondsofbysmiel2up.tex",
@@ -1323,7 +1323,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_blastshield2up.tex",
@@ -1341,7 +1341,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_hellhoundsummon4up.tex",
@@ -1377,7 +1377,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_passive01up.tex",
@@ -1395,7 +1395,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_bladetrap2up.tex",
@@ -1413,7 +1413,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_sigilofdestruction2up.tex",
@@ -1449,7 +1449,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_savagery2up.tex",
@@ -1485,7 +1485,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_mortartrap2_up.tex",
@@ -1539,7 +1539,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_skyshard3up.tex",
@@ -1593,7 +1593,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_ravensummon4up.tex",
@@ -1611,7 +1611,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_flaremine2_up.tex",
@@ -1629,7 +1629,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_elementalinfusion2up.tex",
@@ -1665,7 +1665,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_blitz2_up.tex",
@@ -1683,7 +1683,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_vindictiveflame2_up.tex",
@@ -1701,7 +1701,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_passiveshield1up.tex",
@@ -1737,7 +1737,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_arcanemissile4up.tex",
@@ -1773,7 +1773,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_canisterbomb2_up.tex",
@@ -1845,7 +1845,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_decoratedsoldier1_up.tex",
@@ -1863,7 +1863,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_passive01up.tex",
@@ -1881,7 +1881,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_battlefury2_up.tex",
@@ -1899,7 +1899,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_witchfireenchantment2up.tex",
@@ -1971,7 +1971,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_passive02up.tex",
@@ -1989,7 +1989,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_scarsofbattle1_up.tex",
@@ -2007,7 +2007,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_weaponpool1up.tex",
@@ -2043,7 +2043,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_dualblades1up.tex",
@@ -2061,7 +2061,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-transmuter",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/skillicon_transmuter01up.tex",
@@ -2097,7 +2097,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_dualblades2up.tex",
@@ -2133,7 +2133,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_arcanemissile3up.tex",
@@ -2151,7 +2151,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_ravensummon3up.tex",
@@ -2187,7 +2187,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_natureblessing2up.tex",
@@ -2223,7 +2223,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_firestrike3_up.tex",
@@ -2241,7 +2241,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_shieldhammer2up.tex",
@@ -2277,7 +2277,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_savagery3up.tex",
@@ -2295,7 +2295,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_passive1up.tex",
@@ -2313,7 +2313,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_evileye2up.tex",
@@ -2331,7 +2331,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_curse2up.tex",
@@ -2367,7 +2367,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_thornedhorrorsummon4up.tex",
@@ -2403,7 +2403,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_lethalgambit2up.tex",
@@ -2421,7 +2421,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_shadowstrike2up.tex",
@@ -2457,7 +2457,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_arcanemissile2up.tex",
@@ -2475,7 +2475,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_fightingspirit1_up.tex",
@@ -2493,7 +2493,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_firestrike2_up.tex",
@@ -2511,7 +2511,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_cadence2_up.tex",
@@ -2547,7 +2547,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_natureblessing3up.tex",
@@ -2565,7 +2565,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_bloodofdreeg2up.tex",
@@ -2583,7 +2583,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class06/skillicon_weaponpool2up.tex",
@@ -2601,7 +2601,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_veterancy1_up.tex",
@@ -2619,7 +2619,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_passive04up.tex",
@@ -2673,7 +2673,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class05/skillicon_sphereofprotection2up.tex",
@@ -2691,7 +2691,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_dualblades5up.tex",
@@ -2709,7 +2709,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_nightbladeenchant2up.tex",
@@ -2763,7 +2763,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_bladearc2up.tex",
@@ -2817,7 +2817,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_hellhoundsummon2up.tex",
@@ -2853,7 +2853,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_ringofsteel2up.tex",
@@ -2889,7 +2889,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_stunjacks2_up.tex",
@@ -2925,7 +2925,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class03/skillicon_pox2up.tex",
@@ -2979,7 +2979,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_shadowstrike3up.tex",
@@ -2997,7 +2997,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class02/skillicon_molotov3_up.tex",
@@ -3033,7 +3033,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class04/skillicon_dualblades3up.tex",
@@ -3051,7 +3051,7 @@
       "license_or_permission": "tolerancia_de_facto_sin_permiso",
       "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
       "recorded_on": "2026-11-15",
-      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-circular",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
       "provenance": {
         "game_version": "steam-build-25813250",
         "source_path": "ui/skills/icons/class01/skillicon_willtolive1_up.tex",

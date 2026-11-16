@@ -3,41 +3,44 @@
 <header class="site-header">
   <div class="page-width header-inner">
     <a class="brand" routerLink="/" i18n="@@layout.brand">Grim Dawn <span>Builds</span></a>
-    <nav aria-label="Main navigation" i18n-aria-label="@@layout.primaryNav">
-      <a routerLink="/" [attr.aria-current]="isCurrent('/') ? 'page' : null" i18n="@@layout.home"
-        >Home</a
-      >
-      <a
-        routerLink="/tier-list"
-        [attr.aria-current]="isCurrent('/tier-list') ? 'page' : null"
-        i18n="@@layout.catalog"
-        >Catalog</a
-      >
-      <a
-        routerLink="/acerca"
-        [attr.aria-current]="isCurrent('/acerca') ? 'page' : null"
-        i18n="@@layout.about"
-        >About</a
-      >
-    </nav>
-    <nav class="lang-switch" aria-label="Language" i18n-aria-label="@@locale.navLabel">
-      <a
-        [href]="localeHref('en')"
-        hreflang="en"
-        lang="en"
-        [attr.aria-current]="currentLocale === 'en' ? 'true' : null"
-        i18n="@@locale.english"
-        >English</a
-      >
-      <a
-        [href]="localeHref('es')"
-        hreflang="es"
-        lang="es"
-        [attr.aria-current]="currentLocale === 'es' ? 'true' : null"
-        i18n="@@locale.spanish"
-        >Español</a
-      >
-    </nav>
+    <details>
+      <summary i18n="@@layout.menu">Menu</summary>
+      <nav aria-label="Main navigation" i18n-aria-label="@@layout.primaryNav">
+        <a routerLink="/" [attr.aria-current]="isCurrent('/') ? 'page' : null" i18n="@@layout.home"
+          >Home</a
+        >
+        <a
+          routerLink="/tier-list"
+          [attr.aria-current]="isCurrent('/tier-list') ? 'page' : null"
+          i18n="@@layout.catalog"
+          >Catalog</a
+        >
+        <a
+          routerLink="/acerca"
+          [attr.aria-current]="isCurrent('/acerca') ? 'page' : null"
+          i18n="@@layout.about"
+          >About</a
+        >
+      </nav>
+      <nav class="lang-switch" aria-label="Language" i18n-aria-label="@@locale.navLabel">
+        <a
+          [href]="localeHref('en')"
+          hreflang="en"
+          lang="en"
+          [attr.aria-current]="currentLocale === 'en' ? 'true' : null"
+          i18n="@@locale.english"
+          >English</a
+        >
+        <a
+          [href]="localeHref('es')"
+          hreflang="es"
+          lang="es"
+          [attr.aria-current]="currentLocale === 'es' ? 'true' : null"
+          i18n="@@locale.spanish"
+          >Español</a
+        >
+      </nav>
+    </details>
   </div>
 </header>
 

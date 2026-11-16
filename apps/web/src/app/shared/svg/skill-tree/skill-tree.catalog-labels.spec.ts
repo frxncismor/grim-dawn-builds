@@ -10,7 +10,12 @@ import nightblade from '../../../../../../../fixtures/content/mastery-trees/nigh
 import occult from '../../../../../../../fixtures/content/mastery-trees/occult.json';
 import shaman from '../../../../../../../fixtures/content/mastery-trees/shaman.json';
 import soldier from '../../../../../../../fixtures/content/mastery-trees/soldier.json';
-import { CATALOG_COLUMN_STEP, CATALOG_MIN_COLUMN_GAP, SkillTree } from './skill-tree';
+import {
+  CATALOG_COLUMN_STEP,
+  CATALOG_MIN_COLUMN_GAP,
+  CATALOG_NAME_CHAR_WIDTH,
+  SkillTree,
+} from './skill-tree';
 
 const trees: readonly MasteryTree[] = [
   arcanist,
@@ -22,7 +27,7 @@ const trees: readonly MasteryTree[] = [
 ].map((raw) => MasteryTreeSchema.parse(raw));
 
 /** Conservative advance widths at `--text-small` (12 px): Karla bold names, Space Mono meta. */
-const NAME_CHAR_WIDTH = 8;
+const NAME_CHAR_WIDTH = CATALOG_NAME_CHAR_WIDTH;
 const META_CHAR_WIDTH = 7.4;
 
 const xlf = readFileSync(resolve(process.cwd(), 'src/locale/messages.es.xlf'), 'utf8');

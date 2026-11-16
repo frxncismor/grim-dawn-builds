@@ -174,6 +174,13 @@ describe('gd-build-summary (spec004 T020)', () => {
     );
   });
 
+  it('shows the unconfirmed version in the UI language and a real one untouched (T042)', async () => {
+    const root = await render({ ...base, game_version: 'Sin confirmar' });
+    expect(root.querySelector('[data-game-version]')!.textContent?.trim()).toBe(
+      'Version unconfirmed',
+    );
+  });
+
   it('renders hostile text as text and no event handlers', async () => {
     const hostile = '<img src=x onerror=alert(1)>';
     const root = await render({

@@ -100,6 +100,20 @@ gd-skill-tree {
   vector-effect: non-scaling-stroke;
 }
 
+/* The ring is the circular marker (T045): a shape, so it does not rely on colour alone. */
+@media (prefers-contrast: more) {
+  .skill-tree__ring {
+    stroke-width: 3;
+    stroke-dasharray: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .skill-tree__ring {
+    stroke: CanvasText;
+  }
+}
+
 .skill-tree__node--kind-active .skill-tree__shape {
   fill: var(--color-storm-dim);
   stroke: var(--color-storm);
@@ -522,4 +536,14 @@ gd-skill-tree {
 .skill-tree__tooltip button:focus-visible {
   outline: var(--focus-ring);
   outline-offset: 2px;
+}
+
+/*
+ * From 80rem the section's canvas (1182 px) holds the whole compacted tree (T043): the scroll hint
+ * would describe something that cannot happen there, so it is dropped. Narrower screens keep it.
+ */
+@media (min-width: 80rem) {
+  .skill-tree__scroll-help {
+    display: none;
+  }
 }

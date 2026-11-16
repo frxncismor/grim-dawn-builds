@@ -3,7 +3,11 @@ import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { createPortraitResolver, resolveMasteryPortrait } from './portraits.server.ts';
+import {
+  createPortraitResolver,
+  resolveMasteryPortrait,
+  withCatalogPortraits,
+} from './portraits.server.ts';
 import { parseAssetSource } from './portraits.ts';
 
 const REAL_ROOT = 'fixtures/content';
@@ -141,4 +145,28 @@ test('resolver with game and a withdrawn entry serves the own icon', async () =>
   const game = await createPortraitResolver(root, { ASSET_SOURCE: 'game' });
   assert.equal(game('soldier').source, 'own');
   assert.equal(game('shaman').source, 'game');
+});
+
+test('spec004 T042: catalog masteries get the portrait of their tree, the rest none', async () => {
+  const catalog = {
+    masteries: [
+      { slug: 'chaman', name_es: 'Chamán', name_en: 'Shaman' },
+      { slug: 'demoledor', name_es: 'Demoledor', name_en: 'Demolitionist' },
+      { slug: 'berserker', name_es: 'Berserker', name_en: 'Berserker' },
+    ],
+  };
+  const game = await createPortraitResolver(await rootWith(manifest()), { ASSET_SOURCE: 'game' });
+  const [chaman, demoledor, berserker] = withCatalogPortraits(catalog, game).masteries;
+  assert.deepEqual(chaman?.portrait, {
+    src: 'assets/portraits/shaman.png',
+    width: 197,
+    height: 41,
+  });
+  assert.equal(demoledor?.portrait?.src, 'assets/portraits/demolition.png');
+  assert.equal('portrait' in (berserker ?? {}), false, 'a mastery with no tree stays generic');
+  const own = await createPortraitResolver('unused', { ASSET_SOURCE: 'own' });
+  assert.equal(
+    withCatalogPortraits(catalog, own).masteries[0]?.portrait?.src,
+    'assets/icons/mastery-chaman.svg',
+  );
 });

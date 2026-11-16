@@ -187,7 +187,12 @@ describe('gd-build-page', () => {
     expect(root.querySelectorAll('[data-build-summary]')).toHaveLength(1);
     const text = summary.textContent!;
     expect(text).toContain('Ana la Forjadora');
-    expect(text).toContain(publicContent.game_version);
+    // The fixture keeps the unconfirmed version as Spanish text; the summary speaks the UI language.
+    expect(text).toContain(
+      publicContent.game_version === 'Sin confirmar'
+        ? 'Version unconfirmed'
+        : publicContent.game_version,
+    );
     for (const mastery of publicContent.masteries) expect(text).toContain(mastery.name_es);
   });
 

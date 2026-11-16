@@ -219,7 +219,7 @@ for (const slug of MASTERIES) {
           ).toHaveCount(1);
         }
         const last = nodes[nodes.length - 1];
-        const outside = page.locator('gd-skill-tree .skill-tree__scroll-help').first();
+        const outside = page.locator('gd-skill-tree .skill-tree__header').first();
         await outside.scrollIntoViewIfNeeded();
         const target = await centre(outside);
         await page.touchscreen.tap(target.x, target.y);

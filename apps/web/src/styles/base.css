@@ -193,3 +193,47 @@ video {
 .frame-compact {
   border-image-source: var(--frame-image-compact);
 }
+
+/* Cabecera de una fila (T044): menú `details` sin JS a <48rem. Mínimo: este CSS va en el HTML. */
+@media (max-width: 47.99rem) {
+  header summary {
+    display: block;
+    padding: var(--space-3);
+  }
+
+  header details[open]::details-content {
+    position: absolute;
+    inset: 100% 0 auto;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-3);
+    border: var(--frame-border-active);
+    background: var(--color-panel);
+  }
+
+  header details nav {
+    flex-direction: column;
+  }
+
+  .site-header details nav a[href] {
+    min-block-size: var(--space-7);
+  }
+}
+
+@media (min-width: 48rem) {
+  @supports selector(::details-content) {
+    header details {
+      flex: 1;
+    }
+
+    header summary {
+      display: none;
+    }
+
+    header details::details-content {
+      content-visibility: visible;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+}

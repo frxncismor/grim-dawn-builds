@@ -57,6 +57,8 @@ gd-build-card {
 
 .build-card__title {
   margin: 0;
+  /* Between words, never inside one: the featured size shrinks on narrow screens instead. */
+  overflow-wrap: normal;
   font-family: var(--font-display);
   font-size: var(--text-large);
   font-weight: var(--weight-display);
@@ -65,7 +67,7 @@ gd-build-card {
 }
 
 .build-card[data-variant='featured'] .build-card__title {
-  font-size: var(--text-heading);
+  font-size: clamp(1.125rem, 5.2vw, var(--text-heading));
 }
 
 .build-card[data-variant='compact'] .build-card__title {

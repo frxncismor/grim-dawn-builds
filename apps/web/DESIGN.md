@@ -136,7 +136,7 @@ Esquinas **rectas** (`--radius-0`, radio 0) como sello: la forma del metal corta
 viene de **marcos de 9 cortes** (`border-image`) servidos como SVG estáticos propios del mismo origen (≤ 5 archivos, sin
 `data:`), con esquinas ornamentadas sobrias y filetes. Los marcos son decorativos (`aria-hidden`/CSS) y los SVG repetidos se
 definen una vez y se referencian. Iconos de habilidad: 32 × 32 (juego, con manifiesto) o símbolo propio por tipo de habilidad
-(activa, modificadora, _transmuter_, circular, pasiva), nunca emoji ni glifos Unicode.
+(activa, modificadora, _transmuter_, pasiva; «circular» se muestra como anillo y texto, nunca como otro icono), nunca emoji ni glifos Unicode.
 
 ## Components
 

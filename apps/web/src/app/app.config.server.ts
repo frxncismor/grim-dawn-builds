@@ -12,7 +12,7 @@ import { resolve } from 'node:path';
 import { appConfig } from './app.config';
 import { serverRoutes } from './app.routes.server';
 import { MASTERY_CATALOG, MASTERY_PORTRAITS } from './core/content/masteries';
-import { createPortraitResolver } from './core/content/portraits.server';
+import { createPortraitResolver, withCatalogPortraits } from './core/content/portraits.server';
 import { SKILL_ICON_SOURCE, SKILL_ICONS_STATE } from './core/content/skill-icons';
 import { createSkillIconSource } from './core/content/skill-icons.server';
 import { createMasteryCatalog } from './core/content/masteries.server';
@@ -68,8 +68,16 @@ const serverConfig: ApplicationConfig = {
       provide: PUBLIC_SITE_LOADER,
       useFactory: () => {
         const repository = inject(CONTENT_SOURCE).repository;
+        const portraits = inject(MASTERY_PORTRAITS);
         let pending: Promise<PublicSiteData> | undefined;
-        return () => (pending ??= loadPublicSiteData(repository));
+        return () =>
+          (pending ??= Promise.all([loadPublicSiteData(repository), portraits]).then(
+            ([data, portraitOf]) => ({
+              ...data,
+              // spec004 T042: cards of the home and the catalog draw the mastery portrait.
+              catalog: withCatalogPortraits(data.catalog, portraitOf),
+            }),
+          ));
       },
     },
     provideAppInitializer(async () => {

@@ -32,7 +32,7 @@ const EMPTY_MASTERY: Mastery = { slug: '', name_es: '', name_en: '', role_text: 
 
 /** Catalog grid geometry (px in SVG user units). Columns are tiers; rows are compacted ranks. */
 /** Column step; labels use at most `step - CATALOG_MIN_COLUMN_GAP` so neighbours never touch. */
-export const CATALOG_COLUMN_STEP = 192;
+export const CATALOG_COLUMN_STEP = 132;
 export const CATALOG_MIN_COLUMN_GAP = 16;
 const CATALOG_COL_WIDTH = CATALOG_COLUMN_STEP;
 /**
@@ -40,11 +40,18 @@ const CATALOG_COL_WIDTH = CATALOG_COLUMN_STEP;
  * the label block (two name lines, kind, "Max n (u)" and "Circular", one per line) below it, plus a margin.
  */
 const CATALOG_RING_RADIUS = 28;
-const CATALOG_LABEL_BOTTOM = 100; // last baseline (circular line at y=96) + descent
+/** Name lines a catalog label may take; the row step holds the worst case (three lines). */
+const CATALOG_NAME_LINES = 3;
+const CATALOG_NAME_TOP = 40;
+const CATALOG_LINE_STEP = 14;
+/** Last baseline (kind, max, circular below the name lines) + descent. */
+const CATALOG_LABEL_BOTTOM = CATALOG_NAME_TOP + CATALOG_LINE_STEP * (CATALOG_NAME_LINES + 2) + 4;
+/** Advance width the label wrapping assumes for a bold 12 px name character (measured in the e2e). */
+export const CATALOG_NAME_CHAR_WIDTH = 7;
 const CATALOG_ROW_MARGIN = 8;
 export const CATALOG_MIN_ROW_STEP = CATALOG_RING_RADIUS + CATALOG_LABEL_BOTTOM + CATALOG_ROW_MARGIN;
 const CATALOG_ROW_HEIGHT = CATALOG_MIN_ROW_STEP;
-const CATALOG_MARGIN_X = 96;
+const CATALOG_MARGIN_X = 60;
 const CATALOG_HEADER_HEIGHT = 56;
 const CATALOG_MARGIN_BOTTOM = 96;
 const CATALOG_MAX_NODES = 400;
@@ -188,7 +195,9 @@ export class SkillTree implements OnDestroy {
     const currentFocus = this.focusedId();
     const rovingId = known.has(currentFocus ?? '') ? currentFocus! : (ordered[0]?.id ?? null);
     const selectedId = this.selectedId();
-    const maxLabelChars = Math.floor((CATALOG_COL_WIDTH - CATALOG_MIN_COLUMN_GAP) / 8);
+    const maxLabelChars = Math.floor(
+      (CATALOG_COL_WIDTH - CATALOG_MIN_COLUMN_GAP) / CATALOG_NAME_CHAR_WIDTH,
+    );
     const nameById = new Map(source.map((node) => [node.id, node.name[this.nameLang]]));
     const positions = new Map(source.map((node) => [node.id, point(node)]));
     const tierBars = new Map(source.map((node) => [node.tier, node.bar_required]));
@@ -198,7 +207,11 @@ export class SkillTree implements OnDestroy {
     const activeSlugs = new Set(this.activeIds());
     const renderNodes = ordered.map((node): CatalogRenderNode => {
       const at = positions.get(node.id)!;
-      const labelLines = this.visibleNameLines(node.name[this.nameLang], maxLabelChars);
+      const labelLines = this.visibleNameLines(
+        node.name[this.nameLang],
+        maxLabelChars,
+        CATALOG_NAME_LINES,
+      );
       const assignment = assignmentById.get(node.id) ?? null;
       const active = assignment !== null && activeSlugs.has(assignment.slug);
       return {
@@ -586,7 +599,7 @@ export class SkillTree implements OnDestroy {
     return $localize`:@@skillTree.activeStep:Active step`;
   }
 
-  visibleNameLines(name: string, maxChars: number): string[] {
+  visibleNameLines(name: string, maxChars: number, maxLines = 2): string[] {
     const words = name.trim().split(/\s+/);
     const lines: string[] = [];
     let current = '';
@@ -601,19 +614,19 @@ export class SkillTree implements OnDestroy {
         }
         if (current) lines.push(current);
         current = chunk;
-        if (lines.length === 2) {
+        if (lines.length === maxLines) {
           truncated = true;
           break;
         }
       }
       if (truncated) break;
     }
-    if (current && lines.length < 2) lines.push(current);
+    if (current && lines.length < maxLines) lines.push(current);
     if (truncated && lines.length) {
       const last = lines[lines.length - 1];
       lines[lines.length - 1] = `${last.slice(0, Math.max(1, maxChars - 1)).trimEnd()}…`;
     }
-    return lines.slice(0, 2);
+    return lines.slice(0, maxLines);
   }
 
   /**

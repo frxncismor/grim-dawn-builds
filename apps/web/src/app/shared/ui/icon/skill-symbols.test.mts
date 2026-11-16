@@ -27,7 +27,6 @@ test('the sprite declares exactly one symbol per own skill icon, each defined on
   assert.equal(new Set(ids).size, ids.length, 'duplicate symbol id');
   assert.deepEqual(Object.values(SKILL_SYMBOLS).sort(), [
     'skill-active',
-    'skill-circular',
     'skill-mastery',
     'skill-modifier',
     'skill-passive',
@@ -60,10 +59,10 @@ test('no emoji, Unicode glyph, text, embedded image, script or external referenc
   assert.doesNotMatch(svg, /crate entertainment/i);
 });
 
-test('each skill kind, circular or not, resolves to an own symbol of the sprite', () => {
+test('each skill kind resolves to the symbol of its type, circular or not (T045)', () => {
   for (const kind of SKILL_KINDS) {
     assert.equal(skillSymbol({ kind, circular: false }), SKILL_SYMBOLS[kind]);
-    assert.equal(skillSymbol({ kind, circular: true }), SKILL_SYMBOLS.circular);
+    assert.equal(skillSymbol({ kind, circular: true }), SKILL_SYMBOLS[kind]);
   }
   assert.equal(
     skillSymbolHref({ kind: 'passive', circular: false }),

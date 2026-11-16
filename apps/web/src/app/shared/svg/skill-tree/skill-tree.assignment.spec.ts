@@ -151,3 +151,25 @@ describe('gd-skill-tree assignment mode (guide on the canonical grid)', () => {
     expect(root.querySelectorAll('.skill-tree__node--unassigned')).toHaveLength(0);
   });
 });
+
+describe('spec004 T042 (d): title of the skill list under the tree', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  async function summary(assignments: readonly SkillNode[]): Promise<string> {
+    const fixture = TestBed.createComponent(SkillTree);
+    fixture.componentRef.setInput('treeId', 'guide');
+    fixture.componentRef.setInput('catalogTree', shaman);
+    fixture.componentRef.setInput('assignments', assignments);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    return root.querySelector('details.skill-tree__list > summary')!.textContent!.trim();
+  }
+
+  it('the catalog has no recommendations, so it only says "Skill list"', async () => {
+    expect(await summary([])).toBe('Skill list');
+  });
+
+  it('a guide keeps "Skill list and recommendations"', async () => {
+    expect(await summary(bySlot('chaman'))).toBe('Skill list and recommendations');
+  });
+});

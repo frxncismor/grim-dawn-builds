@@ -199,7 +199,7 @@
                       class="skill-tree__bar-required"
                       aria-hidden="true"
                       text-anchor="middle"
-                      [attr.y]="68"
+                      [attr.y]="40 + 14 * item.labelLines.length"
                     >
                       <tspan [attr.x]="0">{{ ' ' + kindLabel(item.node.kind) + ' ' }}</tspan>
                       <tspan [attr.x]="0" dy="14">
@@ -276,7 +276,11 @@
     }
 
     <details class="skill-tree__list" open>
-      <summary i18n="@@skillTree.listSummary">Skill list and recommendations</summary>
+      @if (assignmentMode()) {
+        <summary i18n="@@skillTree.listSummary">Skill list and recommendations</summary>
+      } @else {
+        <summary i18n="@@skillTree.catalogListSummary">Skill list</summary>
+      }
       <ol>
         @for (node of catalogListNodes(); track node.id) {
           <li
