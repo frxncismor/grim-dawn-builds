@@ -144,7 +144,10 @@ function expectRejected(result: CommandResult, code: string, constraint: string)
 
 const databaseSuite = RUN_DB_TESTS ? describe : describe.skip;
 
-databaseSuite('mastery catalog migration (spec 003 T008)', () => {
+// T055: every case shells out to docker exec/psql; under CPU load it can exceed vitest's
+// default 5 s testTimeout, so the suite carries its own timeout (assertions unchanged).
+const CASE_TIMEOUT_MS = 30_000;
+databaseSuite('mastery catalog migration (spec 003 T008)', { timeout: CASE_TIMEOUT_MS }, () => {
   beforeAll(async () => {
     if (!POSTGRES_IMAGE || !/@sha256:[a-f0-9]{64}$/.test(POSTGRES_IMAGE)) {
       throw new Error('The Compose file must pin the PostgreSQL 17 fixture image by digest');

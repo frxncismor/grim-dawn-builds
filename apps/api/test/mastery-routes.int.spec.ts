@@ -58,7 +58,10 @@ function docker(args: string[]): string {
   return result.stdout.trim();
 }
 
-suite('mastery catalog HTTP routes on real PostgreSQL (spec 003 T023)', () => {
+// T055: cases shell out to docker exec/psql or spawn the API against a real PostgreSQL; under CPU
+// load they can exceed vitest's default 5 s testTimeout, so the suite carries its own timeout.
+const SUITE_OPTIONS = { timeout: 30_000 };
+suite('mastery catalog HTTP routes on real PostgreSQL (spec 003 T023)', SUITE_OPTIONS, () => {
   beforeAll(async () => {
     if (!image || !/@sha256:[a-f0-9]{64}$/.test(image))
       throw new Error('Pinned PostgreSQL image required');
