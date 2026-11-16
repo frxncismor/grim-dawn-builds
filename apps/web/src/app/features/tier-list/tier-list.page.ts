@@ -28,7 +28,6 @@ import { catalogCardContext, catalogCardInput, isRealBuild } from './card-data';
   imports: [FilterBar, TierRow, BuildCard, EmptyState],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './tier-list.page.html',
-  styleUrl: './tier-list.page.css',
 })
 export class TierListPage {
   private readonly route = inject(ActivatedRoute);

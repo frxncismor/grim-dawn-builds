@@ -99,6 +99,23 @@ gd-build-card {
   outline-offset: var(--focus-offset);
 }
 
+/* Combination under an editorial title; the link's hidden text already names it for assistive tech. */
+.build-card__combination {
+  margin: 0;
+  color: var(--color-ash);
+  font-size: var(--text-small);
+}
+
+/* Text for assistive technology only: part of the link's accessible name, in the UI language. */
+.build-card__sr {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Status = text + a shape drawn with borders, never colour alone (constitution V). */
 .build-card__status {
   display: inline-flex;

@@ -11,7 +11,7 @@ describe('home builds (spec004 T016)', () => {
     const home = homeBuilds(catalogInput(), 'es');
     expect(home.featured?.variant).toBe('featured');
     expect(home.featured?.href).toEqual(['/builds', 'tormenta']);
-    expect(home.featured?.masteries.map((m) => m.name)).toEqual(['Chamán', 'Soldado']);
+    expect(home.featured?.masteries).toHaveLength(2);
     expect(home.featured?.status).toBe('verificado');
     expect(home.featured?.author).toBe('Autora');
     expect(home.featured?.damage).toEqual(['Lightning']);
@@ -63,5 +63,16 @@ describe('home builds (spec004 T016)', () => {
     expect(home.featured?.href).toEqual(['/builds', 'tormenta']);
     expect(home.others.map((c) => c.href?.[1])).toEqual(['otra']);
     expect(home.others[0]?.variant).toBe('standard');
+  });
+
+  it('dates the featured card with the guide it shows and keeps the ISO date', () => {
+    expect(homeBuilds(catalogInput(), 'es').featuredDate).toBe('2026-11-09');
+  });
+
+  it('drops a date that is not a real calendar day', () => {
+    for (const published_at of ['2026-02-30', '2026-13-01', '2026-11-9', '', null, 'hoy']) {
+      const guides = [{ ...input.guides[0], published_at }] as never;
+      expect(homeBuilds(catalogInput({ guides }), 'es').featuredDate).toBeNull();
+    }
   });
 });

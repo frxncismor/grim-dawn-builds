@@ -175,8 +175,30 @@ describe('spec004 T049 (B-002): the editorial title keeps its own language (FR-0
     fixture.componentRef.setInput('data', guide);
     await fixture.whenStable();
     const link = (fixture.nativeElement as HTMLElement).querySelector('a')!;
-    expect(link.getAttribute('lang')).toBe('es');
-    expect(link.getAttribute('aria-label')).toContain(guide.title);
+    expect(link.hasAttribute('lang')).toBe(false);
+    expect(link.querySelector('[lang]')?.getAttribute('lang')).toBe('es');
+    expect(link.querySelector('[lang]')?.textContent).toBe(guide.title);
+    expect(link.hasAttribute('aria-label')).toBe(false);
+  });
+
+  it('keeps the localized combination name under the editorial title, in EN and ES (FR-003/FR-004)', async () => {
+    for (const [locale, name] of [
+      ['en', 'Shaman + Soldier'],
+      ['es', 'Chamán + Soldado'],
+    ] as const) {
+      TestBed.resetTestingModule();
+      const { guide, none } = build(locale);
+      expect(guide.title).not.toBe(name);
+      expect(guide.combination).toBe(name);
+      expect(none.combination).toBeNull();
+      TestBed.configureTestingModule({ providers: [provideRouter([])] });
+      const fixture = TestBed.createComponent(BuildCard);
+      fixture.componentRef.setInput('data', guide);
+      await fixture.whenStable();
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('.build-card__combination')?.textContent).toBe(name);
+      expect(el.querySelector('a')?.textContent).toContain(`. ${name}.`);
+    }
   });
 
   it('adds no lang on the Spanish page, where title and page share the language', async () => {

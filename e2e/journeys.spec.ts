@@ -1042,7 +1042,10 @@ for (const locale of T018_LOCALES) {
     }) => {
       // Combinaciones reales del catálogo, leídas del propio HTML (no escritas a mano).
       await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/tier-list`);
-      const titles = (await page.locator('gd-build-card h3').allInnerTexts()).map((t) => t.trim());
+      // textContent, not innerText: the hidden text of the link adds a line break to innerText.
+      const titles = (await page.locator('gd-build-card h3').allTextContents()).map((t) =>
+        t.trim(),
+      );
       expect(titles.length, 'el catálogo lista combinaciones').toBeGreaterThan(10);
       const sample = [titles[0]!, titles[Math.floor(titles.length / 2)]!, titles.at(-1)!];
 

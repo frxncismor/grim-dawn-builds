@@ -3,16 +3,6 @@ import type { BuildCardData, BuildCardInput, BuildCardPortrait } from './build-c
 /** Value of `game_version` while the guide does not confirm any (content is written in Spanish). */
 const UNCONFIRMED_VERSION = 'Sin confirmar';
 
-/**
- * The content stores the unconfirmed game version as Spanish text; every page that shows it
- * (the card, and the guide summary with its own copy) speaks the UI language instead. A real version is returned as is.
- */
-function gameVersionLabel(version: string): string {
-  return version === UNCONFIRMED_VERSION
-    ? $localize`:@@buildCard.versionUnconfirmed:Version unconfirmed`
-    : version;
-}
-
 const FALLBACK_PORTRAIT: BuildCardPortrait = {
   src: 'assets/icons/mastery-generic.svg',
   width: 32,
@@ -39,7 +29,11 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
     input.reviewState === 'publicado'
       ? $localize`:@@buildCard.review.published:Published`
       : undefined;
-  const gameVersion = gameVersionLabel(input.gameVersion);
+  // The content stores the unconfirmed version as Spanish text; the card speaks the UI language.
+  const gameVersion =
+    input.gameVersion === UNCONFIRMED_VERSION
+      ? $localize`:@@buildCard.versionUnconfirmed:Version unconfirmed`
+      : input.gameVersion;
   const facts = (
     external
       ? [
@@ -64,10 +58,13 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
     variant: input.variant,
     title: input.title,
     titleLang: input.titleLang,
+    combination: input.combination ?? null,
     masteries: input.masteries.map((m) => ({ portrait: m.portrait ?? FALLBACK_PORTRAIT })),
     status: input.status,
     statusLabel,
-    accessibleName: [input.title, statusLabel, newTab].filter(Boolean).join('. '),
+    srText: [input.combination, statusLabel, newTab]
+      .map((part) => (part ? '. ' + part : ''))
+      .join(''),
     facts,
     href: input.href,
     externalHref: external?.url ?? null,

@@ -8,7 +8,6 @@ import { EMPTY_FILTER, type TierFilter } from './filter';
     <h2>{{ label() }}</h2>
     <div class="catalog-grid"><ng-content /></div>
   </section>`,
-  styleUrl: './tier-components.css',
 })
 export class TierRow {
   readonly label = input.required<string>();
@@ -26,7 +25,6 @@ export class TierRow {
   >
     {{ label() }}
   </button>`,
-  styleUrl: './tier-components.css',
 })
 export class FilterChip {
   readonly label = input.required<string>();
@@ -72,7 +70,6 @@ export interface FilterGroup {
       Clear filters
     </button>
   </div>`,
-  styleUrl: './tier-components.css',
 })
 export class FilterBar {
   readonly value = input<TierFilter>(EMPTY_FILTER);
@@ -117,7 +114,6 @@ export class FilterBar {
       Clear filters
     </button>
   </section>`,
-  styleUrl: './tier-components.css',
 })
 export class EmptyState {
   readonly filtersReset = output<void>();
