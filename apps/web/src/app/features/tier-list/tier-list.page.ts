@@ -20,7 +20,7 @@ import {
 import { applyFilter, EMPTY_FILTER, parseFilter, serializeFilter, type TierFilter } from './filter';
 import { EmptyState, FilterBar, TierRow } from './tier-components';
 import { BuildCard } from '../../shared/ui/build-card/build-card';
-import { buildCardData } from '../../shared/ui/build-card/build-card.labels';
+import { buildCardData, showsGameArt } from '../../shared/ui/build-card/build-card.labels';
 import { catalogCardContext, catalogCardInput, isRealBuild } from './card-data';
 
 @Component({
@@ -37,6 +37,8 @@ export class TierListPage {
   readonly catalog = this.route.snapshot.data['catalog'] as CatalogSnapshot;
   readonly filter = signal<TierFilter>(EMPTY_FILTER);
   readonly groups = catalogGroups(this.catalog);
+  /** Game art on a card: Crate is credited and non-affiliation stated (§VII). */
+  readonly showsGameArt = showsGameArt(this.catalog.masteries.map((m) => m.portrait ?? null));
   readonly visible = computed(() => applyFilter(this.catalog.cards, this.filter()));
   private readonly cardContext = catalogCardContext(this.catalog);
   private readonly cardOf = (card: CatalogCard) => ({

@@ -77,3 +77,10 @@ gd-tier-row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+.credit {
+  max-width: var(--reading-measure);
+  margin: var(--space-6, 1.5rem) 0 0;
+  color: var(--color-ash);
+  font-size: var(--text-base);
+}

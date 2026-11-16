@@ -22,7 +22,12 @@ export interface CatalogInput {
     readonly name_es: string;
     readonly name_en: string;
     /** Portrait resolved at prerender (`ASSET_SOURCE`); absent when the mastery has no tree art. */
-    readonly portrait?: { readonly src: string; readonly width: number; readonly height: number };
+    readonly portrait?: {
+      readonly source?: 'game' | 'own';
+      readonly src: string;
+      readonly width: number;
+      readonly height: number;
+    };
   }[];
   readonly combinations: readonly MasteryCombination[];
   readonly entries: readonly TierEntry[];

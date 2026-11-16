@@ -2310,6 +2310,14 @@
           <context context-type="sourcefile">src/app/features/masteries/index.page.html</context>
           <context context-type="linenumber">46,50</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/home.page.html</context>
+          <context context-type="linenumber">62,66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.html</context>
+          <context context-type="linenumber">52,56</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="masteryIndex.noData" datatype="html">
         <source>No data</source>

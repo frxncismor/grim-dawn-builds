@@ -48,6 +48,12 @@
 @if (!rows().length && !unguided().length) {
   <gd-empty-state (filtersReset)="clear()" />
 }
+@if (showsGameArt) {
+  <p class="credit" data-credit i18n="@@masteryIndex.credit">
+    Mastery buttons from Grim Dawn, © Crate Entertainment. This project is not affiliated with or
+    endorsed by Crate Entertainment.
+  </p>
+}
 <p i18n="@@catalog.noScript">
   The full catalog can be read without JavaScript. Filters require JavaScript.
 </p>

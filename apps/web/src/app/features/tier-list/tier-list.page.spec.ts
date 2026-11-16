@@ -1,3 +1,4 @@
+import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -82,5 +83,59 @@ describe('catalog page with URL state', () => {
   it('omits lang when the active locale matches the content locale', async () => {
     const harness = await start('/tier-list', 'es');
     expect(harness.routeNativeElement!.querySelector('h1')?.hasAttribute('lang')).toBe(false);
+  });
+  describe('Crate credit (spec004 T047)', () => {
+    const startWith = async (source: 'game' | 'own' | null, locale: 'en' | 'es') => {
+      const data = {
+        ...input,
+        masteries: input.masteries.map((m) =>
+          source
+            ? {
+                ...m,
+                portrait: {
+                  source,
+                  src:
+                    source === 'game'
+                      ? `assets/portraits/${m.slug}.png`
+                      : `assets/icons/${m.slug}.svg`,
+                  width: 197,
+                  height: 41,
+                },
+              }
+            : m,
+        ),
+      };
+      TestBed.configureTestingModule({
+        providers: [
+          provideRouter([
+            {
+              path: 'tier-list',
+              component: TierListPage,
+              resolve: { catalog: () => buildCatalog(data, locale) },
+            },
+          ]),
+          { provide: LOCALE_ID, useValue: locale },
+          { provide: SITE_BASE_URL, useValue: 'https://example.org/' },
+        ],
+      });
+      const harness = await RouterTestingHarness.create('/tier-list');
+      await harness.fixture.whenStable();
+      return harness.routeNativeElement as HTMLElement;
+    };
+    it('credits Crate and states non-affiliation when a card shows a game portrait, in both languages', async () => {
+      for (const locale of ['en', 'es'] as const) {
+        const el = await startWith('game', locale);
+        expect(el.querySelector('img[src^="assets/portraits/"]')).not.toBeNull();
+        const credit = el.querySelector('[data-credit]');
+        expect(credit?.textContent).toContain('Crate Entertainment');
+        expect(credit?.textContent).toContain('Grim Dawn');
+        TestBed.resetTestingModule();
+      }
+    });
+    it('shows no credit with own art or with no portrait', async () => {
+      expect((await startWith('own', 'en')).querySelector('[data-credit]')).toBeNull();
+      TestBed.resetTestingModule();
+      expect((await startWith(null, 'en')).querySelector('[data-credit]')).toBeNull();
+    });
   });
 });

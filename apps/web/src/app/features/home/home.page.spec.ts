@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TransferState } from '@angular/core';
+import { LOCALE_ID, TransferState } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { afterEach, describe, expect, it } from 'vitest';
 import { HomePage } from './home.page';
@@ -72,5 +72,47 @@ describe('native Home from public server snapshot', () => {
   it('fails explicitly without the server snapshot', () => {
     setup();
     expect(() => TestBed.createComponent(HomePage)).toThrow('Falta el catálogo prerenderizado.');
+  });
+  describe('Crate credit (spec004 T047)', () => {
+    const withPortraits = (source: 'game' | 'own') => ({
+      ...input,
+      masteries: input.masteries.map((m) => ({
+        ...m,
+        portrait: {
+          source,
+          src: source === 'game' ? `assets/portraits/${m.slug}.png` : `assets/icons/${m.slug}.svg`,
+          width: 197,
+          height: 41,
+        },
+      })),
+    });
+    const render = async (data: unknown, locale = 'en') => {
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: SITE_BASE_URL, useValue: 'https://example.org/project/' },
+          { provide: LOCALE_ID, useValue: locale },
+          provideRouter([]),
+        ],
+      });
+      TestBed.inject(TransferState).set(CATALOG_STATE, data as never);
+      const f = TestBed.createComponent(HomePage);
+      await f.whenStable();
+      return f.nativeElement as HTMLElement;
+    };
+    it('credits Crate and states non-affiliation when a card shows a game portrait, in both languages', async () => {
+      for (const locale of ['en', 'es']) {
+        const el = await render(withPortraits('game'), locale);
+        expect(el.querySelector('img[src^="assets/portraits/"]')).not.toBeNull();
+        const credit = el.querySelector('[data-credit]');
+        expect(credit?.textContent).toContain('Crate Entertainment');
+        expect(credit?.textContent).toContain('Grim Dawn');
+        TestBed.resetTestingModule();
+      }
+    });
+    it('shows no credit with own art or with no portrait', async () => {
+      expect((await render(withPortraits('own'))).querySelector('[data-credit]')).toBeNull();
+      TestBed.resetTestingModule();
+      expect((await render(input)).querySelector('[data-credit]')).toBeNull();
+    });
   });
 });
