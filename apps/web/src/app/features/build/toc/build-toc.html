@@ -5,10 +5,25 @@
       <ol class="toc__list">
         @for (entry of entries(); track entry.id) {
           <li>
-            <a [href]="href(entry.id)" [attr.data-section]="entry.id">{{ entry.label }}</a>
+            <a
+              [href]="href(entry.id)"
+              [attr.data-section]="entry.id"
+              [attr.aria-current]="active() === entry.id ? 'location' : null"
+              >{{ entry.label }}
+              @if (active() === entry.id) {
+                <span class="toc__current" data-toc-current i18n="@@buildToc.current"
+                  >Current section</span
+                >
+              }
+            </a>
           </li>
         }
       </ol>
     </nav>
+    @defer (on viewport) {
+      <gd-toc-observer [ids]="entryIds()" (activeChange)="active.set($event)" />
+    } @placeholder {
+      <span aria-hidden="true"></span>
+    }
   }
 </details>

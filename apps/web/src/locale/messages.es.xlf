@@ -134,6 +134,46 @@
           <context context-type="linenumber">3,5</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="buildSummary.heading" datatype="html">
+        <source>Build summary</source>
+        <target state="translated">Resumen de la guía</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/summary/build-summary.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildSummary.masteries" datatype="html">
+        <source>Masteries</source>
+        <target state="translated">Maestrías</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/summary/build-summary.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildSummary.damage" datatype="html">
+        <source>Damage</source>
+        <target state="translated">Daño</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/summary/build-summary.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildSummary.moreSources" datatype="html">
+        <source>+<x id="count" equiv-text="count"/> more</source>
+        <target state="translated">+<x id="count" equiv-text="count"/> más</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/summary/build-summary.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildSummary.attribution" datatype="html">
+        <source>Full credit, sources and disclaimer:</source>
+        <target state="translated">Crédito completo, fuentes y descargo:</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/summary/build-summary.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="buildAttribution.authorLabel" datatype="html">
         <source>Author</source>
         <target state="translated">Autor</target>
@@ -816,6 +856,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/build/toc/build-toc.html</context>
           <context context-type="linenumber">2,3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildToc.current" datatype="html">
+        <source>Current section</source>
+        <target state="translated">Sección actual</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/toc/build-toc.html</context>
+          <context context-type="linenumber">1</context>
         </context-group>
       </trans-unit>
       <trans-unit id="buildToc.navLabel" datatype="html">
