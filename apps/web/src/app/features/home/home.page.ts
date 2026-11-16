@@ -10,7 +10,7 @@ import { SeoService, siteLocale } from '../../core/seo/seo.service';
 import { CATALOG_STATE } from '../../core/content/catalog.resolver';
 import { selectFeaturedGuide } from './featured-guide';
 import { BuildCard } from '../../shared/ui/build-card/build-card';
-import { buildCardData } from '../../shared/ui/build-card/build-card.labels';
+import { buildCardData, showsGameArt } from '../../shared/ui/build-card/build-card.labels';
 import { homeBuilds } from './home-builds';
 
 @Component({
@@ -28,6 +28,12 @@ export class HomePage {
     : null;
   readonly featuredCard = this.builds?.featured ? buildCardData(this.builds.featured) : null;
   readonly otherCards = (this.builds?.others ?? []).map(buildCardData);
+  /** Game art on a card: Crate is credited and non-affiliation stated (§VII). */
+  readonly showsGameArt = showsGameArt(
+    [this.featuredCard, ...this.otherCards].flatMap(
+      (card) => card?.masteries.map((m) => m.portrait) ?? [],
+    ),
+  );
   readonly masteries = this.builds?.masteries ?? [];
   readonly withoutGuide = this.builds?.withoutGuide ?? 0;
   readonly total = this.builds?.total ?? 0;

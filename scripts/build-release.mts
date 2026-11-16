@@ -2,6 +2,7 @@ import {
   assertAssetStatusParity,
   assertGameAssets,
   assertNoGamePortraits,
+  assertPortraitCredit,
 } from './check-assets.mts';
 import { createPublicBuildEnv } from './public-build-env.mts';
 import { assertPublicBuild, sensitiveValues } from './check-public-build.mts';
@@ -131,6 +132,8 @@ export async function runRelease(
     await emitTrees(staging, childEnv);
     // S-001: an `own` artifact never carries the game's portraits, whatever the build copied.
     assertNoGamePortraits(staging, childEnv['ASSET_SOURCE'] ?? '');
+    // T047: the credit to Crate goes with the game's portraits on every page, and only with them.
+    assertPortraitCredit(staging, childEnv['ASSET_SOURCE'] ?? '');
     await assertPublicBuild(staging, sensitiveValues(env));
     await finalizeStaticHome(staging);
     const budgets = await measureInitialRoutes(staging);

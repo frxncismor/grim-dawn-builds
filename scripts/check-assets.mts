@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { checkAssetManifest, type AssetIssue } from '@gd/domain';
 
@@ -166,6 +166,33 @@ export function assertNoGamePortraits(artifact: string, source: string): void {
     throw new Error(
       `ASSET_SOURCE=own: el artefacto no puede llevar retratos ni iconos de habilidad del juego (${found.length} ficheros).`,
     );
+}
+
+/**
+ * Gate of the artifact (T047, F-001/S-001, constitution §VII): the credit to Crate must appear on
+ * every prerendered page that draws a game portrait, and only then. With `game`, a page that
+ * references `assets/portraits/*.png` without `[data-credit]` fails; with `own`, no page may carry
+ * `[data-credit]` (the credit is tied to the game's art).
+ */
+export function assertPortraitCredit(artifact: string, source: string): void {
+  if (source !== 'game' && source !== 'own') return;
+  const browser = join(artifact, 'browser');
+  if (!existsSync(browser)) return;
+  const pages = readdirSync(browser, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.html'))
+    .map((entry) => join(entry.parentPath, entry.name));
+  const problems: string[] = [];
+  for (const page of pages) {
+    const html = readFileSync(page, 'utf8');
+    const rel = relative(browser, page).split(sep).join('/');
+    const credited = html.includes('data-credit');
+    if (source === 'game' && /assets\/portraits\/[^"'\s]+\.png/.test(html) && !credited)
+      problems.push(`${rel} lleva retratos del juego sin [data-credit]`);
+    if (source === 'own' && credited)
+      problems.push(`${rel} lleva crédito [data-credit] con ASSET_SOURCE=own`);
+  }
+  if (problems.length > 0)
+    throw new Error(`ASSET_SOURCE=${source}: crédito a Crate incoherente: ${problems.join('; ')}.`);
 }
 
 function main(root: string): number {

@@ -90,8 +90,8 @@ export function withCatalogPortraits<T extends { readonly masteries: readonly { 
     masteries: catalog.masteries.map((m) => {
       const tree = Object.hasOwn(TREE_SLUG, m.slug) ? TREE_SLUG[m.slug] : undefined;
       if (!tree) return m;
-      const { src, width, height } = portraitOf(tree);
-      return { ...m, portrait: { src, width, height } };
+      const { source, src, width, height } = portraitOf(tree);
+      return { ...m, portrait: { source, src, width, height } };
     }),
   } as T;
 }

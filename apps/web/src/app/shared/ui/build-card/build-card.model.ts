@@ -4,6 +4,8 @@ import type { ContentStatus } from '@gd/domain/vocabulary';
 export type BuildCardVariant = 'featured' | 'standard' | 'compact';
 
 export interface BuildCardPortrait {
+  /** `game` when the art is the game's (Crate is credited next to it); absent for own art. */
+  readonly source?: 'game' | 'own';
   readonly src: string;
   readonly width: number;
   readonly height: number;

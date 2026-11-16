@@ -8,6 +8,7 @@ import {
   assertAssetStatusParity,
   assertGameAssets,
   assertNoGamePortraits,
+  assertPortraitCredit,
   checkAssets,
 } from './check-assets.mts';
 
@@ -222,6 +223,42 @@ test('assertNoGamePortraits: with own an artifact with skill icons fails, with g
     writeFileSync(join(root, 'browser', 'es', 'assets', 'skill-icons', `${ICON}.png`), PNG);
     assert.throws(() => assertNoGamePortraits(root, 'own'), /iconos de habilidad|skill-icons/);
     assert.doesNotThrow(() => assertNoGamePortraits(root, 'game'));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('assertPortraitCredit: with game every page with portraits carries [data-credit]; with own none does (T047, F-001)', () => {
+  const root = mkdtempSync(join(tmpdir(), 'gd-credit-'));
+  const credit = '<p class="credit" data-credit>© Crate Entertainment</p>';
+  const page = (body: string) => `<!doctype html><html><body>${body}</body></html>`;
+  const img = '<img src="assets/portraits/shaman.png" alt="">';
+  const write = (rel: string, html: string) => {
+    mkdirSync(dirname(join(root, 'browser', rel)), { recursive: true });
+    writeFileSync(join(root, 'browser', rel), page(html));
+  };
+  try {
+    for (const rel of [
+      'index.html',
+      'tier-list/index.html',
+      'es/index.html',
+      'es/tier-list/index.html',
+    ])
+      write(rel, `${img}${credit}`);
+    assert.doesNotThrow(() => assertPortraitCredit(root, 'game'));
+    assert.throws(() => assertPortraitCredit(root, 'own'), /own.*cr[eé]dito|data-credit/);
+    write('es/tier-list/index.html', img);
+    assert.throws(() => assertPortraitCredit(root, 'game'), /es\/tier-list\/index\.html/);
+    // A page with no game portrait needs no credit; own with no credit passes.
+    for (const rel of [
+      'index.html',
+      'tier-list/index.html',
+      'es/index.html',
+      'es/tier-list/index.html',
+    ])
+      write(rel, '<img src="assets/icons/mastery-chaman.svg" alt="">');
+    assert.doesNotThrow(() => assertPortraitCredit(root, 'game'));
+    assert.doesNotThrow(() => assertPortraitCredit(root, 'own'));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

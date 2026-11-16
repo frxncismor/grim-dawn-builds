@@ -158,6 +158,7 @@ test('spec004 T042: catalog masteries get the portrait of their tree, the rest n
   const game = await createPortraitResolver(await rootWith(manifest()), { ASSET_SOURCE: 'game' });
   const [chaman, demoledor, berserker] = withCatalogPortraits(catalog, game).masteries;
   assert.deepEqual(chaman?.portrait, {
+    source: 'game',
     src: 'assets/portraits/shaman.png',
     width: 197,
     height: 41,
@@ -169,4 +170,5 @@ test('spec004 T042: catalog masteries get the portrait of their tree, the rest n
     withCatalogPortraits(catalog, own).masteries[0]?.portrait?.src,
     'assets/icons/mastery-chaman.svg',
   );
+  assert.equal(withCatalogPortraits(catalog, own).masteries[0]?.portrait?.source, 'own');
 });

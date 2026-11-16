@@ -19,6 +19,12 @@ const FALLBACK_PORTRAIT: BuildCardPortrait = {
   height: 32,
 };
 
+/** True when any of these portraits is the game's art: the page must credit Crate (§VII, T047). */
+export function showsGameArt(portraits: Iterable<{ readonly source?: string } | null>): boolean {
+  for (const portrait of portraits) if (portrait?.source === 'game') return true;
+  return false;
+}
+
 /**
  * Resolves a page's build into the localized, ready-to-draw card data. A combination with no
  * guide says "No guide" and never carries a tier or a recommendation (constitution I); a tier is
