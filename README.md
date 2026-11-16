@@ -120,12 +120,19 @@ the CI jobs that build the measured artifact use
 `ASSET_SOURCE=game`: the six mastery buttons of Grim Dawn (© Crate Entertainment,
 no written permission; see `fixtures/content/assets/NOTICE.md`) are served on
 `/maestrias`. The release fails closed before building if the asset manifest does not
-approve all six. Skill icons always use the project's own icons. The default local
-build stays on `ASSET_SOURCE=own`. The six PNGs of `apps/web/public/assets/portraits/` are
+approve all six. With `game` the skill icons of the six base masteries are served too:
+164 unmodified 32×32 PNG (spec004 T027/T028, constitution §VII 1.11.0), one `approved`
+manifest entry per icon with `proof_ref` `specs/004-rediseno-ui-grim-dawn/research.md#r10`,
+shown with a visible credit to Crate in the mastery tree and in the guide
+(`apps/web/tools/emit-skill-icons.mts`). With `own` they use the project's own icons. The
+default local build stays on `ASSET_SOURCE=own`. The six PNGs of `apps/web/public/assets/portraits/` are
 not in the Angular asset glob: `pnpm build` copies them to the artifact only with
 `ASSET_SOURCE=game` (`apps/web/tools/emit-portraits.mts`), and release rejects an `own`
-artifact that carries any. To withdraw the art, set the manifest entries to
-`withdrawn`, delete the PNGs and release with `ASSET_SOURCE=own`.
+artifact that carries any. The 164 skill icons
+(`apps/web/public/assets/skill-icons/`) follow the same rule. To withdraw the art (portraits
+and icons), as `fixtures/content/assets/NOTICE.md` documents: set the manifest entries to
+`status: withdrawn`, delete the PNG files, record it in `handoff.md` and release with
+`ASSET_SOURCE=own` in the same change.
 
 ## Static artifact preview and editorial flow
 
@@ -154,12 +161,12 @@ command. [`.env.example`](.env.example) lists the public names and safe defaults
 as a reference; real secrets live in git-ignored files only, as documented in
 [secret management](docs/security/secrets.md).
 
-| Variable         | Accepted values                                               | Effect on the build and the preview                                                                                                                               |
-| ---------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BASE_URL`       | absolute `http(s)` URL without credentials, query or fragment | Fixes the absolute canonical and Open Graph URLs, `sitemap.xml` and `robots.txt`. Defaults to `http://localhost:4200/`.                                           |
-| `INCLUDE_DRAFTS` | `true` or `false`                                             | Adds the local `borrador` guide when `true`. Public and release builds force it to `false`.                                                                       |
-| `CONTENT_SOURCE` | `fixture` or `api`                                            | Selects fixtures (development, tests, CI without Docker) or the public API (release). `api` never degrades silently to fixtures.                                  |
-| `ASSET_SOURCE`   | `own` or `game`                                               | Mastery art on `/maestrias`: own icons (default) or the game's buttons. Release requires it explicit (no default); CI sets `game`; invalid values fail the build. |
+| Variable         | Accepted values                                               | Effect on the build and the preview                                                                                                                                                                                         |
+| ---------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BASE_URL`       | absolute `http(s)` URL without credentials, query or fragment | Fixes the absolute canonical and Open Graph URLs, `sitemap.xml` and `robots.txt`. Defaults to `http://localhost:4200/`.                                                                                                     |
+| `INCLUDE_DRAFTS` | `true` or `false`                                             | Adds the local `borrador` guide when `true`. Public and release builds force it to `false`.                                                                                                                                 |
+| `CONTENT_SOURCE` | `fixture` or `api`                                            | Selects fixtures (development, tests, CI without Docker) or the public API (release). `api` never degrades silently to fixtures.                                                                                            |
+| `ASSET_SOURCE`   | `own` or `game`                                               | Mastery art on `/maestrias` and skill icons (tree and guide): own icons (default) or the game's art (6 buttons, 164 skill icons). Release requires it explicit (no default); CI sets `game`; invalid values fail the build. |
 
 An invalid `BASE_URL` fails the sitemap and robots generation with a fixed
 message that does not echo credentials. `INCLUDE_DRAFTS` only accepts `true` or

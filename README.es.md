@@ -122,12 +122,19 @@ Este y los jobs de CI que construyen el artefacto medido usan
 `ASSET_SOURCE=game`: en `/maestrias` se sirven los seis botones de maestría de Grim Dawn
 (© Crate Entertainment, sin permiso escrito; ver `fixtures/content/assets/NOTICE.md`).
 El release falla cerrado antes de construir si el manifiesto de activos no aprueba los
-seis. Los iconos de habilidad usan siempre los propios. El build local por defecto sigue
-en `ASSET_SOURCE=own`. Los seis PNG de `apps/web/public/assets/portraits/` no están en el
+seis. Con `game` también se sirven los iconos de habilidad de las seis maestrías base: 164
+PNG de 32×32 sin modificar (spec004 T027/T028, constitución §VII 1.11.0), una entrada
+`approved` del manifiesto por icono con `proof_ref`
+`specs/004-rediseno-ui-grim-dawn/research.md#r10`, con crédito visible a Crate en el árbol de
+maestría y en la guía (`apps/web/tools/emit-skill-icons.mts`). Con `own` usan los propios. El
+build local por defecto sigue en `ASSET_SOURCE=own`. Los seis PNG de `apps/web/public/assets/portraits/` no están en el
 glob de activos de Angular: `pnpm build` los copia al artefacto solo con
 `ASSET_SOURCE=game` (`apps/web/tools/emit-portraits.mts`), y el release rechaza un
-artefacto `own` que lleve alguno. Para retirar el arte: entradas del manifiesto a `withdrawn`,
-borrar los PNG y publicar con `ASSET_SOURCE=own`.
+artefacto `own` que lleve alguno. Los 164 iconos de habilidad
+(`apps/web/public/assets/skill-icons/`) siguen la misma regla. Para retirar el arte (retratos
+e iconos), según documenta `fixtures/content/assets/NOTICE.md`: entradas del manifiesto a
+`status: withdrawn`, borrar los PNG, registrarlo en `handoff.md` y publicar con
+`ASSET_SOURCE=own` en el mismo cambio.
 
 ## Vista previa del artefacto estático y flujo editorial
 
@@ -158,12 +165,12 @@ valores por defecto seguros como referencia; los secretos reales viven solo en
 archivos ignorados por git, según
 [la gestión de secretos](docs/security/secrets.md).
 
-| Variable         | Valores aceptados                                           | Efecto en el build y la vista previa                                                                                                                                                              |
-| ---------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BASE_URL`       | URL absoluta `http(s)` sin credenciales, query ni fragmento | Fija las URLs absolutas de canonical y Open Graph, `sitemap.xml` y `robots.txt`. Por defecto `http://localhost:4200/`.                                                                            |
-| `INCLUDE_DRAFTS` | `true` o `false`                                            | Añade la guía local `borrador` cuando vale `true`. Los builds público y de release lo fuerzan a `false`.                                                                                          |
-| `CONTENT_SOURCE` | `fixture` o `api`                                           | Elige fixtures (desarrollo, pruebas, CI sin Docker) o la API pública (release). `api` nunca degrada en silencio a fixtures.                                                                       |
-| `ASSET_SOURCE`   | `own` o `game`                                              | Arte de maestrías en `/maestrias`: iconos propios (por defecto) o los botones del juego. El release lo exige explícito (sin valor por defecto); CI fija `game`; un valor inválido rompe el build. |
+| Variable         | Valores aceptados                                           | Efecto en el build y la vista previa                                                                                                                                                                                                                             |
+| ---------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BASE_URL`       | URL absoluta `http(s)` sin credenciales, query ni fragmento | Fija las URLs absolutas de canonical y Open Graph, `sitemap.xml` y `robots.txt`. Por defecto `http://localhost:4200/`.                                                                                                                                           |
+| `INCLUDE_DRAFTS` | `true` o `false`                                            | Añade la guía local `borrador` cuando vale `true`. Los builds público y de release lo fuerzan a `false`.                                                                                                                                                         |
+| `CONTENT_SOURCE` | `fixture` o `api`                                           | Elige fixtures (desarrollo, pruebas, CI sin Docker) o la API pública (release). `api` nunca degrada en silencio a fixtures.                                                                                                                                      |
+| `ASSET_SOURCE`   | `own` o `game`                                              | Arte de maestrías en `/maestrias` e iconos de habilidad (árbol y guía): propios (por defecto) o el arte del juego (6 botones, 164 iconos de habilidad). El release lo exige explícito (sin valor por defecto); CI fija `game`; un valor inválido rompe el build. |
 
 Un `BASE_URL` inválido hace fallar la generación del sitemap y de robots con un
 mensaje fijo que no repite credenciales. `INCLUDE_DRAFTS` solo acepta `true` o
