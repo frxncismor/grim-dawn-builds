@@ -165,60 +165,77 @@ export function assertNoGamePortraits(artifact: string, source: string): void {
     );
 }
 
-/**
- * Gate of the artifact (T047, F-001/S-001, constitution §VII): the credit to Crate must appear on
- * every prerendered page that draws a game portrait, and only then. With `game`, a page that
- * references `assets/portraits/*.png` without `[data-credit]` fails; with `own`, no page may carry
- * `[data-credit]` (the credit is tied to the game's art).
- */
-export function assertPortraitCredit(artifact: string, source: string): void {
-  if (source !== 'game' && source !== 'own') return;
-  const browser = join(artifact, 'browser');
-  if (!existsSync(browser)) return;
-  const pages = readdirSync(browser, { recursive: true, withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.html'))
-    .map((entry) => join(entry.parentPath, entry.name));
-  const problems: string[] = [];
-  for (const page of pages) {
-    const html = readFileSync(page, 'utf8');
-    const rel = relative(browser, page).split(sep).join('/');
-    const credited = html.includes('data-credit');
-    if (source === 'game' && /assets\/portraits\/[^"'\s]+\.png/.test(html) && !credited)
-      problems.push(`${rel} lleva retratos del juego sin [data-credit]`);
-    if (source === 'own' && credited)
-      problems.push(`${rel} lleva crédito [data-credit] con ASSET_SOURCE=own`);
-  }
-  if (problems.length > 0)
-    throw new Error(`ASSET_SOURCE=${source}: crédito a Crate incoherente: ${problems.join('; ')}.`);
+/** What tells the two credit gates apart: data, not copied code (spec005 FR-002). */
+interface CreditGate {
+  /** Matches a prerendered page that draws the game's art. */
+  readonly art: RegExp;
+  /** The attribute that marks the credit to Crate on a page. */
+  readonly marker: string;
+  /** Names the art in the "without credit" message. */
+  readonly artLabel: string;
+  /** Names the gate in the final message. */
+  readonly gateLabel: string;
 }
 
 /**
- * Gate of the artifact (A-01/S-001, spec004 T053, constitution §VII): the credit to Crate for the
- * skill icons (`[data-game-art-credit]`) must appear on every prerendered page that references
- * `assets/skill-icons/*.png`, and only then. With `game`, such a page without the marker fails;
- * with `own`, no page may carry it (the credit is tied to the game's art).
+ * Shared body of the credit gates (constitution §VII). With `game`, a page that draws the game's art
+ * without the marker fails; with `own`, no page may carry the marker (the credit is tied to the
+ * game's art, so "only with it" is proved by the `own` branch). Fails closed (spec005 FR-001, Q-B = A):
+ * an artifact with no `browser/` folder or with no `.html` page cannot be a valid release in either
+ * mode, so an empty artifact never passes silently. Any other source is not a credit decision.
  */
-export function assertSkillIconCredit(artifact: string, source: string): void {
+function assertCredit(artifact: string, source: string, gate: CreditGate): void {
   if (source !== 'game' && source !== 'own') return;
   const browser = join(artifact, 'browser');
-  if (!existsSync(browser)) return;
+  if (!existsSync(browser))
+    throw new Error(
+      `ASSET_SOURCE=${source}: ${gate.gateLabel}: el artefacto está vacío (sin carpeta browser/ en ${artifact}).`,
+    );
   const pages = readdirSync(browser, { recursive: true, withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name.endsWith('.html'))
     .map((entry) => join(entry.parentPath, entry.name));
+  if (pages.length === 0)
+    throw new Error(
+      `ASSET_SOURCE=${source}: ${gate.gateLabel}: el artefacto está vacío (ninguna página .html en browser/).`,
+    );
   const problems: string[] = [];
   for (const page of pages) {
     const html = readFileSync(page, 'utf8');
     const rel = relative(browser, page).split(sep).join('/');
-    const credited = html.includes('data-game-art-credit');
-    if (source === 'game' && /assets\/skill-icons\/[^"'\s]+\.png/.test(html) && !credited)
-      problems.push(`${rel} lleva iconos de habilidad del juego sin [data-game-art-credit]`);
+    const credited = html.includes(gate.marker);
+    if (source === 'game' && gate.art.test(html) && !credited)
+      problems.push(`${rel} lleva ${gate.artLabel} sin [${gate.marker}]`);
     if (source === 'own' && credited)
-      problems.push(`${rel} lleva crédito [data-game-art-credit] con ASSET_SOURCE=own`);
+      problems.push(`${rel} lleva crédito [${gate.marker}] con ASSET_SOURCE=own`);
   }
   if (problems.length > 0)
-    throw new Error(
-      `ASSET_SOURCE=${source}: crédito de iconos de habilidad incoherente: ${problems.join('; ')}.`,
-    );
+    throw new Error(`ASSET_SOURCE=${source}: ${gate.gateLabel}: ${problems.join('; ')}.`);
+}
+
+/**
+ * Gate of the artifact (T047, F-001/S-001, constitution §VII): the credit to Crate (`[data-credit]`)
+ * must appear on every prerendered page that references `assets/portraits/*.png`, and with `own` on none.
+ */
+export function assertPortraitCredit(artifact: string, source: string): void {
+  assertCredit(artifact, source, {
+    art: /assets\/portraits\/[^"'\s]+\.png/,
+    marker: 'data-credit',
+    artLabel: 'retratos del juego',
+    gateLabel: 'crédito a Crate incoherente',
+  });
+}
+
+/**
+ * Gate of the artifact (A-01/S-001, spec004 T053, constitution §VII): the same for the skill icons
+ * (`assets/skill-icons/*.png`) and their `[data-game-art-credit]`.
+ */
+export function assertSkillIconCredit(artifact: string, source: string): void {
+  assertCredit(artifact, source, {
+    art: /assets\/skill-icons\/[^"'\s]+\.png/,
+    marker: 'data-game-art-credit',
+    artLabel: 'iconos de habilidad del juego',
+    gateLabel: 'crédito de iconos de habilidad incoherente',
+  });
 }
 
 function main(root: string): number {
