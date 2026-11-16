@@ -2066,6 +2066,14 @@
           <context context-type="linenumber">194,195</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="skillTree.catalogListSummary" datatype="html">
+        <source>Skill list</source>
+        <target state="translated">Lista de habilidades</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">280</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="skillTree.emptyList" datatype="html">
         <source>There are no skills to review.</source>
         <target state="translated">No hay habilidades para consultar.</target>
@@ -2204,7 +2212,7 @@
       </trans-unit>
       <trans-unit id="skillTree.circular" datatype="html">
         <source>Circular</source>
-        <target state="translated">De tipo circular</target>
+        <target state="translated">Circular</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.ts</context>
           <context context-type="linenumber">285</context>
@@ -2232,6 +2240,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
           <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="layout.menu" datatype="html">
+        <source>Menu</source>
+        <target state="translated">Menú</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
+          <context context-type="linenumber">5</context>
         </context-group>
       </trans-unit>
       <trans-unit id="layout.home" datatype="html">
@@ -2684,6 +2700,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/ui/build-card/build-card.ts</context>
           <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildCard.versionUnconfirmed" datatype="html">
+        <source>Version unconfirmed</source>
+        <target state="translated">Versión sin confirmar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/ui/build-card/build-card.labels.ts</context>
+          <context context-type="linenumber">27</context>
         </context-group>
       </trans-unit>
       <trans-unit id="buildCard.review.published" datatype="html">

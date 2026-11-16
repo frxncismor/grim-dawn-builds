@@ -66,3 +66,32 @@ export async function createPortraitResolver(
   }
   return (slug) => resolveMasteryPortrait(slug, source, entries);
 }
+
+/** Catalog mastery slug (Spanish) to the slug of its tree and portrait (English). */
+const TREE_SLUG: Readonly<Record<string, string>> = {
+  arcanista: 'arcanist',
+  demoledor: 'demolition',
+  'filo-nocturno': 'nightblade',
+  ocultista: 'occult',
+  chaman: 'shaman',
+  soldado: 'soldier',
+};
+
+/**
+ * Server only (spec004 T042): puts the portrait of its tree on every catalog mastery that has one,
+ * so the home and the catalog cards draw it in the prerendered HTML. The others stay without it.
+ */
+export function withCatalogPortraits<T extends { readonly masteries: readonly { slug: string }[] }>(
+  catalog: T,
+  portraitOf: (treeSlug: string) => MasteryPortrait,
+): T {
+  return {
+    ...catalog,
+    masteries: catalog.masteries.map((m) => {
+      const tree = Object.hasOwn(TREE_SLUG, m.slug) ? TREE_SLUG[m.slug] : undefined;
+      if (!tree) return m;
+      const { src, width, height } = portraitOf(tree);
+      return { ...m, portrait: { src, width, height } };
+    }),
+  } as T;
+}

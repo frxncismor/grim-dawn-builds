@@ -148,3 +148,15 @@ describe('gd-build-card (spec004 T015)', () => {
     expect(css).toMatch(/position:\s*absolute/);
   });
 });
+
+describe('spec004 T042 (b): unconfirmed game version is localized', () => {
+  it('replaces the Spanish content value with the UI-language label', () => {
+    const data = buildCardData({ ...guide, gameVersion: 'Sin confirmar' });
+    expect(data.facts).not.toContain('Sin confirmar');
+    expect(data.facts).toContain('Version unconfirmed');
+  });
+
+  it('keeps a real game version untouched', () => {
+    expect(buildCardData({ ...guide, gameVersion: '1.3.x' }).facts).toContain('1.3.x');
+  });
+});

@@ -131,3 +131,25 @@ describe('catalog card data (spec004 T017)', () => {
     expect(el.textContent).toContain(hostile);
   });
 });
+
+describe('spec004 T042 (a): the card shows the mastery portrait when it exists', () => {
+  const shaman = { src: 'assets/portraits/shaman.png', width: 197, height: 41 };
+
+  it('takes the portrait carried by the catalog mastery and nothing else for the rest', () => {
+    const masteries = input.masteries.map((m) =>
+      m.slug === 'chaman' ? { ...m, portrait: shaman } : m,
+    );
+    const { cards, ctx } = cardsOf({ masteries } as unknown as Partial<CatalogInput>);
+    const built = catalogCardInput(cards[0]!, ctx);
+    expect(built.masteries.map((m) => m.portrait)).toEqual([shaman, null]);
+  });
+
+  it('draws that portrait in the rendered card and the generic icon only without one', async () => {
+    const masteries = input.masteries.map((m) =>
+      m.slug === 'chaman' ? { ...m, portrait: shaman } : m,
+    );
+    const el = await render({ masteries } as unknown as Partial<CatalogInput>);
+    const sources = [...el.querySelectorAll('img')].map((img) => img.getAttribute('src'));
+    expect(sources).toEqual([shaman.src, 'assets/icons/mastery-generic.svg']);
+  });
+});

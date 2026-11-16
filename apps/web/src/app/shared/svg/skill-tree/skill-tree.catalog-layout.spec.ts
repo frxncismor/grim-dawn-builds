@@ -19,6 +19,10 @@ const trees: readonly MasteryTree[] = [
   soldier,
 ].map((raw) => MasteryTreeSchema.parse(raw));
 
+/** Short unique stand-in for a node id, so a synthetic name fits the label wrapping (T043). */
+const shortId = (id: string) =>
+  `n${[...id].reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) % 100000, 7)}`;
+
 /** Distinct names per language so the tests can tell which one is shown. */
 function named(tree: MasteryTree): MasteryTree {
   return {
@@ -26,7 +30,7 @@ function named(tree: MasteryTree): MasteryTree {
     mastery: { ...tree.mastery, name: { en: 'Mastery EN', es: 'Maestría ES' } },
     nodes: tree.nodes.map((node) => ({
       ...node,
-      name: { en: `${node.id} en`, es: `${node.id} es` },
+      name: { en: `${shortId(node.id)} en`, es: `${shortId(node.id)} es` },
     })),
   };
 }
@@ -43,6 +47,16 @@ describe('gd-skill-tree catalog layout (T012)', () => {
     return fixture;
   }
 
+  /** Widest content box of the section on desktop (1280 px viewport), measured in the e2e (T043). */
+  const DESKTOP_CANVAS_WIDTH = 1182;
+
+  for (const tree of trees)
+    it(`${tree.mastery.slug}: the whole tree fits the desktop canvas without horizontal scroll (T043)`, async () => {
+      const fixture = await render(tree);
+      const svg = (fixture.nativeElement as HTMLElement).querySelector('svg.skill-tree__svg')!;
+      expect(Number(svg.getAttribute('width'))).toBeLessThanOrEqual(DESKTOP_CANVAS_WIDTH);
+    });
+
   it('the row step holds ring + name + kind/max + Circular lines of a node, with margin', async () => {
     const fixture = await render(trees[1]);
     const root: HTMLElement = fixture.nativeElement;
@@ -52,12 +66,30 @@ describe('gd-skill-tree catalog layout (T012)', () => {
     const metaY = Number(meta.getAttribute('y'));
     const lineStep = 14;
     const descent = 4;
-    expect(metaY).toBeGreaterThan(nameY + lineStep); // two name lines end above the meta line
+    expect(metaY).toBeGreaterThanOrEqual(nameY + lineStep); // the name lines end above the meta line
     const metaLines = meta.querySelectorAll('tspan').length; // kind, max, circular (3 for a circular node)
     expect(metaLines).toBeGreaterThanOrEqual(2);
     const labelBottom = metaY + lineStep * 2 /* max + Circular */ + descent;
     const ring = Number(root.querySelector('.skill-tree__ring')!.getAttribute('r'));
     expect(CATALOG_MIN_ROW_STEP).toBeGreaterThanOrEqual(ring + labelBottom + 8);
+  });
+
+  it('the row step also holds the worst case: three name lines + kind + max + Circular (T043)', () => {
+    const ring = 28;
+    const worstBottom = 40 + 14 * (3 + 2) + 4;
+    expect(CATALOG_MIN_ROW_STEP).toBeGreaterThanOrEqual(ring + worstBottom + 8);
+  });
+
+  it('long names wrap onto at most three lines and none of the real ones is cut (T043)', async () => {
+    for (const tree of trees)
+      for (const locale of ['en', 'es'] as const) {
+        const fixture = await render(tree, locale);
+        for (const item of fixture.componentInstance.catalog()!.nodes) {
+          expect(item.labelLines.length, item.node.id).toBeLessThanOrEqual(3);
+          expect(item.labelLines.join(' '), `${item.node.id} (${locale})`).not.toContain('…');
+        }
+        TestBed.resetTestingModule();
+      }
   });
 
   for (const tree of trees) {
@@ -91,8 +123,8 @@ describe('gd-skill-tree catalog layout (T012)', () => {
       it(`${locale}: main name in ${main}, secondary in ${other} with lang="${other}"`, async () => {
         const fixture = await render(tree, locale);
         const root: HTMLElement = fixture.nativeElement;
-        const mainName = (n: { id: string }) => `${n.id} ${main}`;
-        const otherName = (n: { id: string }) => `${n.id} ${other}`;
+        const mainName = (n: { id: string }) => `${shortId(n.id)} ${main}`;
+        const otherName = (n: { id: string }) => `${shortId(n.id)} ${other}`;
 
         const heading = root.querySelector('h2')!;
         expect(heading.textContent).toContain(main === 'en' ? 'Mastery EN' : 'Maestría ES');

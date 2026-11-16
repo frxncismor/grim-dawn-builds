@@ -21,7 +21,7 @@ describe('gd-skill-tree own icons on catalog nodes (T024)', () => {
     return fixture.nativeElement as HTMLElement;
   }
 
-  it('every node has exactly one own icon, decorative, chosen by circular marker then type', async () => {
+  it('every node has exactly one own icon, decorative, chosen by type only, never by the circular marker (T045)', async () => {
     const root = await render();
     const nodes = [...root.querySelectorAll<SVGGElement>('g[data-skill-id]')];
     expect(nodes.length).toBe(tree.nodes.length);
@@ -29,10 +29,7 @@ describe('gd-skill-tree own icons on catalog nodes (T024)', () => {
       const icons = node.querySelectorAll('use.skill-tree__icon');
       expect(icons.length, node.getAttribute('data-skill-id') ?? '').toBe(1);
       const icon = icons[0]!;
-      const expected =
-        node.getAttribute('data-circular') === 'true'
-          ? 'skill-circular'
-          : `skill-${node.getAttribute('data-skill-kind')}`;
+      const expected = `skill-${node.getAttribute('data-skill-kind')}`;
       expect(icon.getAttribute('href')).toBe(`/assets/ui/skill-icons.svg#${expected}`);
       expect(icon.getAttribute('aria-hidden')).toBe('true');
       expect(icon.getAttribute('width')).toBe('24');
@@ -51,5 +48,19 @@ describe('gd-skill-tree own icons on catalog nodes (T024)', () => {
     for (const node of root.querySelectorAll('g[data-skill-id]'))
       expect(node.getAttribute('aria-label')?.length ?? 0).toBeGreaterThan(0);
     expect(root.querySelectorAll('use.skill-tree__icon title').length).toBe(0);
+  });
+
+  it('draws the circular marker as a ring (a shape) on the node, and as text, not as another icon', async () => {
+    const root = await render();
+    const nodes = [...root.querySelectorAll<SVGGElement>('g[data-skill-id]')];
+    const circular = nodes.filter((node) => node.getAttribute('data-circular') === 'true');
+    expect(circular.length).toBeGreaterThan(0);
+    expect(circular.length).toBeLessThan(nodes.length);
+    for (const node of nodes) {
+      const isCircular = node.getAttribute('data-circular') === 'true';
+      expect(node.querySelectorAll('circle.skill-tree__ring').length).toBe(isCircular ? 1 : 0);
+      expect(node.querySelectorAll('use.skill-tree__icon').length).toBe(1);
+    }
+    expect(root.querySelector('[href$="#skill-circular"]')).toBeNull();
   });
 });

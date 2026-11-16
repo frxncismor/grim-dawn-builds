@@ -1,4 +1,7 @@
-import type { BuildCardInput } from '../../shared/ui/build-card/build-card.model';
+import type {
+  BuildCardInput,
+  BuildCardPortrait,
+} from '../../shared/ui/build-card/build-card.model';
 import { catalogGroups, type CatalogCard, type CatalogSnapshot } from './catalog.model';
 import { publicGuideOf } from './public-guide';
 
@@ -6,12 +9,17 @@ import { publicGuideOf } from './public-guide';
 export interface CatalogCardContext {
   readonly masteryNames: ReadonlyMap<string, string>;
   readonly damageLabels: ReadonlyMap<string, string>;
+  /** Portrait of each mastery that has one; the rest draw the generic icon. */
+  readonly portraits: ReadonlyMap<string, BuildCardPortrait>;
 }
 
 export function catalogCardContext(catalog: CatalogSnapshot): CatalogCardContext {
   return {
     masteryNames: new Map(
       catalog.masteries.map((m) => [m.slug, catalog.locale === 'en' ? m.name_en : m.name_es]),
+    ),
+    portraits: new Map(
+      catalog.masteries.flatMap((m) => (m.portrait ? [[m.slug, m.portrait] as const] : [])),
     ),
     damageLabels: new Map(
       (catalogGroups(catalog).find((g) => g.key === 'damageTypes')?.options ?? []).map(
@@ -56,7 +64,7 @@ export function catalogCardInput(
     title: guide?.title ?? card.entry.display_name ?? card.combinationName,
     masteries: card.masteries.map((slug) => ({
       name: context.masteryNames.get(slug) ?? slug,
-      portrait: null,
+      portrait: context.portraits.get(slug) ?? null,
     })),
     status: card.entry.content_status,
     reviewState: guide?.review_state ?? null,

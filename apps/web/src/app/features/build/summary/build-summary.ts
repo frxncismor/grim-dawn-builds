@@ -106,6 +106,14 @@ export class BuildSummary {
     this.content().damage_types.map((type) => damageLabels[type]),
   );
 
+  protected readonly gameVersion = computed(() => {
+    const version = this.content().game_version;
+    // Same message as the cards: the content stores the unconfirmed version as Spanish text.
+    return version === 'Sin confirmar'
+      ? $localize`:@@buildCard.versionUnconfirmed:Version unconfirmed`
+      : version;
+  });
+
   protected readonly reviewLabel = computed(() => reviewLabels[this.content().review_state]);
   protected readonly contentStatusLabel = computed(
     () => contentLabels[this.content().content_status],

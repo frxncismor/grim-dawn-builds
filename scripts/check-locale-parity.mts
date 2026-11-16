@@ -10,6 +10,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
  */
 export const ALLOWED_IDENTICAL_IDS: readonly { readonly id: string; readonly reason: string }[] = [
   {
+    id: 'skillTree.circular',
+    reason:
+      'Circular: adjetivo idéntico en ambos idiomas; «De tipo circular» no cabe en la columna',
+  },
+  {
     id: 'buildAttribution.contentPlaceholder',
     reason: 'Placeholder: término de UI idéntico en ambos idiomas',
   },

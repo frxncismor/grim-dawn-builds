@@ -1,5 +1,18 @@
 import type { BuildCardData, BuildCardInput, BuildCardPortrait } from './build-card.model';
 
+/** Value of `game_version` while the guide does not confirm any (content is written in Spanish). */
+const UNCONFIRMED_VERSION = 'Sin confirmar';
+
+/**
+ * The content stores the unconfirmed game version as Spanish text; every page that shows it
+ * (the card, and the guide summary with its own copy) speaks the UI language instead. A real version is returned as is.
+ */
+function gameVersionLabel(version: string): string {
+  return version === UNCONFIRMED_VERSION
+    ? $localize`:@@buildCard.versionUnconfirmed:Version unconfirmed`
+    : version;
+}
+
 const FALLBACK_PORTRAIT: BuildCardPortrait = {
   src: 'assets/icons/mastery-generic.svg',
   width: 32,
@@ -26,6 +39,7 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
     input.reviewState === 'publicado'
       ? $localize`:@@buildCard.review.published:Published`
       : undefined;
+  const gameVersion = gameVersionLabel(input.gameVersion);
   const facts = (
     external
       ? [
@@ -33,14 +47,14 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
             $localize`:@@buildCard.externalAuthor:Original author:` + ' ' + external.author,
           external.note,
           $localize`:@@buildCard.externalNotice:Link to a third-party site. The content remains at its original source.`,
-          input.gameVersion,
+          gameVersion,
         ]
       : [
           input.status === 'placeholder' ? undefined : input.tierLabel,
           review,
           ...input.damage,
           input.author,
-          input.gameVersion,
+          gameVersion,
         ]
   ).filter((fact): fact is string => !!fact);
   const newTab = external?.url

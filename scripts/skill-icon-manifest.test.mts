@@ -39,9 +39,8 @@ const manifest = JSON.parse(
 ) as { assets: Entry[] };
 const iconEntries = manifest.assets.filter((a) => /^ic-[0-9a-f]{16}$/.test(a.slug));
 
-/** Own symbol of a node (T024): the circular marker wins over the type; scripts cannot import the web zone. */
-const skillSymbol = (node: { kind: string; circular: boolean }): string =>
-  node.circular ? 'skill-circular' : `skill-${node.kind}`;
+/** Own symbol of a node (T024, T045): always the one of its type; scripts cannot import the web zone. */
+const skillSymbol = (node: { kind: string }): string => `skill-${node.kind}`;
 
 /** icon_id -> own symbol expected from the nodes that use it (kind and circular marker). */
 function expectedSymbols(): Map<string, Set<string>> {

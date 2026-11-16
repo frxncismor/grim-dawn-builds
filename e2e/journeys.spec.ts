@@ -53,6 +53,14 @@ async function expectSingleHeading(page: Page, expected: string | RegExp, scope:
   await expect(heading, `${scope}: h1 inesperado`).toHaveText(expected);
 }
 
+/** A <768 px la navegación vive en el menú `details` de la cabecera (T044): se abre si hace falta. */
+async function openHeaderMenu(page: Page): Promise<void> {
+  const summary = page.locator('.site-header summary');
+  if (await summary.isVisible()) {
+    if ((await page.locator('.site-header details[open]').count()) === 0) await summary.click();
+  }
+}
+
 /** Estabiliza el render: fuentes resueltas y dos frames pintados (como T-036/T-041). */
 async function settle(page: Page): Promise<void> {
   await page.evaluate(() => document.fonts.ready);
@@ -185,6 +193,7 @@ test.describe('@journeys artefacto público', () => {
       console.log('[journeys] catálogo: 0 enlaces a /builds (guía pendiente de derechos, T-044).');
     }
 
+    await openHeaderMenu(page);
     await page.getByRole('link', { name: 'Home', exact: true }).click();
     await page.waitForURL(new RegExp(`${PUBLIC_BASE_URL.replaceAll('.', '\\.')}/$`));
     await expectSingleHeading(page, /Grim Dawn guides/i, 'vuelta a portada');
@@ -271,6 +280,7 @@ test.describe('@journeys artefacto público', () => {
 test.describe('@journeys conmutador de idioma', () => {
   test('el enlace a español conserva ruta y query y vuelve al inglés', async ({ page }) => {
     await open(page, `${PUBLIC_BASE_URL}/tier-list?m=arcanista`);
+    await openHeaderMenu(page);
     await page.getByRole('link', { name: 'Español', exact: true }).click();
     await page.waitForURL(/\/es\/tier-list\?m=arcanista$/);
     expect(await page.locator('html').getAttribute('lang')).toBe('es');
@@ -282,6 +292,7 @@ test.describe('@journeys conmutador de idioma', () => {
     // The first card may sit in the folded "no guide" section: it is in the HTML, not necessarily visible.
     expect(await page.locator('gd-build-card').count()).toBeGreaterThan(0);
 
+    await openHeaderMenu(page);
     await page.getByRole('link', { name: 'English', exact: true }).click();
     await page.waitForURL(/\/tier-list\?m=arcanista$/);
     expect(await page.locator('html').getAttribute('lang')).toBe('en');
@@ -337,6 +348,7 @@ test.describe('@journeys sin JavaScript', () => {
       'el catálogo completo debe estar en el HTML, sin depender de hidratación',
     ).toBeGreaterThan(0);
     await expect(page.getByText(/The full catalog can be read without JavaScript/)).toBeVisible();
+    await openHeaderMenu(page);
     await page.getByRole('link', { name: 'Home', exact: true }).click();
     await page.waitForURL(new RegExp(`${PUBLIC_BASE_URL.replaceAll('.', '\\.')}/$`));
     await expectSingleHeading(page, /Grim Dawn guides/i, 'vuelta a portada sin JS');
@@ -1134,5 +1146,156 @@ test.describe('@journeys T018 paridad EN/ES de portada y catálogo', () => {
     expect(seen[1], 'ES = EN').toEqual(seen[0]);
     const en = seen[0]!;
     expect(en.total).toBe(en.cards.featured + en.cards.standard + en.cards.compact);
+  });
+});
+
+/**
+ * spec004 T042 (defectos a, b y d de la revisión de Paco): retrato de maestría en las tarjetas,
+ * versión «Sin confirmar» en el idioma de la interfaz y título de la lista del catálogo.
+ */
+for (const locale of [
+  {
+    prefix: '',
+    version: 'Version unconfirmed',
+    list: 'Skill list',
+    guideList: /and recommendations/,
+  },
+  {
+    prefix: '/es',
+    version: 'Versión sin confirmar',
+    list: 'Lista de habilidades',
+    guideList: /y recomendaciones/,
+  },
+] as const) {
+  test.describe(`@journeys T042 tarjetas y lista (${locale.prefix || '/'})`, () => {
+    test('la tarjeta de la portada dibuja el retrato de cada maestría y la versión en su idioma', async ({
+      page,
+    }) => {
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/`);
+      const card = page.locator('gd-build-card [data-variant="featured"]');
+      const sources = await card
+        .locator('img')
+        .evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')));
+      expect(sources, 'retrato propio de Chamán y de Demoledor, no el genérico').toEqual([
+        'assets/icons/mastery-chaman.svg',
+        'assets/icons/mastery-demoledor.svg',
+      ]);
+      const text = (await card.textContent()) ?? '';
+      expect(text).toContain(locale.version);
+      expect(text, 'el valor del contenido no se muestra tal cual').not.toMatch(
+        locale.prefix ? /Version unconfirmed/ : /Sin confirmar/,
+      );
+    });
+
+    test('el catálogo no promete recomendaciones y la guía las conserva', async ({ page }) => {
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/maestrias/shaman`);
+      await expect(page.locator('details.skill-tree__list > summary')).toHaveText(locale.list);
+      await open(page, `${DRAFTS_BASE_URL}${locale.prefix}${GUIDE_PATH}`);
+      // The trees are deferred until they reach the viewport.
+      await page.locator('#habilidades').scrollIntoViewIfNeeded();
+      await expect(page.locator('details.skill-tree__list > summary').first()).toHaveText(
+        locale.guideList,
+      );
+    });
+  });
+}
+
+/** spec004 T042, ronda 2: versión sin confirmar en el resumen de la guía y títulos que no parten palabras. */
+for (const locale of [
+  { prefix: '', version: 'Version unconfirmed' },
+  { prefix: '/es', version: 'Versión sin confirmar' },
+] as const) {
+  test.describe(`@journeys T042 ronda 2 (${locale.prefix || '/'})`, () => {
+    test('el resumen de la guía muestra la versión sin confirmar en el idioma de la interfaz', async ({
+      page,
+    }) => {
+      await open(page, `${DRAFTS_BASE_URL}${locale.prefix}${GUIDE_PATH}`);
+      await expect(page.locator('[data-game-version]')).toHaveText(locale.version);
+    });
+
+    for (const width of [320, 375]) {
+      test(`ningún título de tarjeta parte una palabra a ${width} px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        for (const path of ['/', '/tier-list']) {
+          await open(page, `${PUBLIC_BASE_URL}${locale.prefix}${path}`);
+          const broken = await page.evaluate(() => {
+            const bad: string[] = [];
+            for (const link of document.querySelectorAll('.build-card__title')) {
+              const walker = document.createTreeWalker(link, NodeFilter.SHOW_TEXT);
+              for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+                for (const match of (node.textContent ?? '').matchAll(/\S+/g)) {
+                  const range = document.createRange();
+                  range.setStart(node, match.index!);
+                  range.setEnd(node, match.index! + match[0].length);
+                  const lines = new Set([...range.getClientRects()].map((r) => Math.round(r.top)));
+                  if (lines.size > 1) bad.push(match[0]);
+                }
+              }
+              const box = link as HTMLElement;
+              if (box.scrollWidth > box.clientWidth + 1) bad.push(`overflow: ${box.textContent}`);
+            }
+            return bad;
+          });
+          expect(broken, `${path} a ${width} px`).toEqual([]);
+        }
+      });
+    }
+  });
+}
+
+/**
+ * spec004 T044 (defecto e de T032): a 320-375 px la cabecera ocupa una sola fila, sin JS, en EN y
+ * ES, y el menú plegable conserva todos los enlaces accesibles (objetivos ≥ 44 px, `aria-current`).
+ */
+const HEADER_ROUTES = ['/', '/tier-list', '/maestrias', '/acerca', GUIDE_PATH] as const;
+const HEADER_LOCALES = [
+  { prefix: '', menu: /^Menu$/, home: 'Home' },
+  { prefix: '/es', menu: /^Menú$/, home: 'Inicio' },
+] as const;
+const ONE_ROW_MAX_PX = 88;
+
+test.describe('@journeys cabecera de una fila (T044)', () => {
+  test.use({ javaScriptEnabled: false });
+  for (const width of [320, 375])
+    for (const locale of HEADER_LOCALES)
+      for (const route of HEADER_ROUTES)
+        test(`${width}px ${locale.prefix || '/'}${route}: la cabecera mide una fila`, async ({
+          page,
+        }) => {
+          await page.setViewportSize({ width, height: 900 });
+          await open(page, `${PUBLIC_BASE_URL}${locale.prefix}${route === '/' ? '' : route}`);
+          const box = await page.locator('.site-header').boundingBox();
+          expect(box?.height ?? 999, 'altura de la cabecera').toBeLessThanOrEqual(ONE_ROW_MAX_PX);
+          expect(
+            await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+            'sin desbordamiento horizontal',
+          ).toBe(true);
+        });
+
+  test('375px: el menú se abre con teclado sin JS y sus enlaces miden ≥ 44 px', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 900 });
+    await open(page, `${PUBLIC_BASE_URL}/tier-list`);
+    const summary = page.locator('.site-header summary');
+    await expect(summary).toHaveText(/^Menu$/);
+    await expect(page.locator('.site-header nav a:visible')).toHaveCount(0);
+    await summary.focus();
+    await page.keyboard.press('Enter');
+    const links = page.locator('.site-header nav a:visible');
+    await expect(links).toHaveCount(5);
+    for (const link of await links.all())
+      expect((await link.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+    await expect(page.locator('.site-header nav a[aria-current="page"]')).toHaveText('Catalog');
+    expect((await page.locator('.site-header').boundingBox())?.height ?? 999).toBeLessThanOrEqual(
+      ONE_ROW_MAX_PX,
+    );
+  });
+
+  test('1280px: los enlaces se ven sin menú', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await open(page, `${PUBLIC_BASE_URL}/`);
+    await expect(page.locator('.site-header summary')).toBeHidden();
+    await expect(page.locator('.site-header nav a:visible')).toHaveCount(5);
   });
 });
