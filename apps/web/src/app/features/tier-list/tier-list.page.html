@@ -28,16 +28,24 @@
 @for (row of rows(); track row.tier) {
   <gd-tier-row [label]="row.label">
     @for (card of row.cards; track card.id) {
-      <gd-tier-card
-        [entry]="card.entry"
-        [combinationName]="card.combinationName"
-        [guide]="card.guide"
-        [source]="card.source"
-        [gameVersion]="card.gameVersion"
-      />
+      <gd-build-card [data]="card.data" />
     }
   </gd-tier-row>
-} @empty {
+}
+@if (unguided().length) {
+  <details class="unguided">
+    <summary>
+      <span i18n="@@catalog.unguidedSummary">Combinations still without a guide</span>
+      ({{ unguided().length }})
+    </summary>
+    <div class="catalog-grid">
+      @for (card of unguided(); track card.id) {
+        <gd-build-card [data]="card.data" />
+      }
+    </div>
+  </details>
+}
+@if (!rows().length && !unguided().length) {
   <gd-empty-state (filtersReset)="clear()" />
 }
 <p i18n="@@catalog.noScript">

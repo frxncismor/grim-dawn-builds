@@ -12,7 +12,8 @@ const FALLBACK_PORTRAIT: BuildCardPortrait = {
  * shown only on a real build.
  */
 export function buildCardData(input: BuildCardInput): BuildCardData {
-  const noGuide = input.href === null && input.status === 'placeholder';
+  const external = input.external ?? null;
+  const noGuide = input.href === null && !external;
   const statusLabel = noGuide
     ? $localize`:@@buildCard.noGuide:No guide`
     : {
@@ -20,30 +21,40 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
         sin_verificar: $localize`:@@catalog.unverified:Unverified`,
         placeholder: $localize`:@@catalog.placeholder:Placeholder`,
       }[input.status];
-  const review = input.reviewState
-    ? (
-        {
-          publicado: $localize`:@@buildCard.review.published:Published`,
-          en_revision: $localize`:@@buildCard.review.inReview:In review`,
-          borrador: $localize`:@@buildCard.review.draft:Draft`,
-        } as Record<string, string>
-      )[input.reviewState]
-    : undefined;
-  const facts = [
-    input.status === 'placeholder' ? undefined : input.tierLabel,
-    review,
-    ...input.damage,
-    input.author,
-    input.gameVersion,
-  ].filter((fact): fact is string => !!fact);
+  // Only a published guide reaches a card with a review state; other states are never listed.
+  const review =
+    input.reviewState === 'publicado'
+      ? $localize`:@@buildCard.review.published:Published`
+      : undefined;
+  const facts = (
+    external
+      ? [
+          external.author &&
+            $localize`:@@buildCard.externalAuthor:Original author:` + ' ' + external.author,
+          external.note,
+          $localize`:@@buildCard.externalNotice:Link to a third-party site. The content remains at its original source.`,
+          input.gameVersion,
+        ]
+      : [
+          input.status === 'placeholder' ? undefined : input.tierLabel,
+          review,
+          ...input.damage,
+          input.author,
+          input.gameVersion,
+        ]
+  ).filter((fact): fact is string => !!fact);
+  const newTab = external?.url
+    ? $localize`:@@buildCard.externalLink:External source (new tab)`
+    : null;
   return {
     variant: input.variant,
     title: input.title,
     masteries: input.masteries.map((m) => ({ portrait: m.portrait ?? FALLBACK_PORTRAIT })),
     status: input.status,
     statusLabel,
-    accessibleName: `${input.title}. ${statusLabel}`,
+    accessibleName: [input.title, statusLabel, newTab].filter(Boolean).join('. '),
     facts,
     href: input.href,
+    externalHref: external?.url ?? null,
   };
 }

@@ -154,7 +154,7 @@ test.describe('@journeys artefacto público', () => {
     await page.waitForURL(/\/tier-list$/);
     await expectSingleHeading(page, /Catálogo de combinaciones de maestrías/i, 'catálogo');
 
-    const cards = page.locator('gd-tier-card');
+    const cards = page.locator('gd-build-card');
     expect(await cards.count(), 'el catálogo debe listar combinaciones').toBeGreaterThan(0);
     await expect(page.locator('.result-count')).toContainText(/of \d+ entries/);
 
@@ -174,7 +174,7 @@ test.describe('@journeys artefacto público', () => {
       await page.goBack();
       await page.waitForURL(/\/tier-list$/);
     } else {
-      const pending = await page.getByText('Guide coming soon').count();
+      const pending = await page.getByText('No guide').count();
       expect(
         pending,
         'sin guías publicadas el catálogo debe marcar las ranuras como pendientes, no enlazarlas',
@@ -276,7 +276,8 @@ test.describe('@journeys conmutador de idioma', () => {
       'href',
       /\/tier-list$/,
     );
-    await expect(page.locator('gd-tier-card').first()).toBeVisible();
+    // The first card may sit in the folded "no guide" section: it is in the HTML, not necessarily visible.
+    expect(await page.locator('gd-build-card').count()).toBeGreaterThan(0);
 
     await page.getByRole('link', { name: 'English', exact: true }).click();
     await page.waitForURL(/\/tier-list\?m=arcanista$/);
@@ -329,7 +330,7 @@ test.describe('@journeys sin JavaScript', () => {
     await page.waitForURL(/\/tier-list$/);
     await expectSingleHeading(page, /Catálogo de combinaciones de maestrías/i, 'catálogo sin JS');
     expect(
-      await page.locator('gd-tier-card').count(),
+      await page.locator('gd-build-card').count(),
       'el catálogo completo debe estar en el HTML, sin depender de hidratación',
     ).toBeGreaterThan(0);
     await expect(page.getByText(/The full catalog can be read without JavaScript/)).toBeVisible();
@@ -505,7 +506,7 @@ test.describe('@journeys snapshot de catálogo solo donde se lee', () => {
       await page.waitForURL(listUrl);
       await expect(page.locator('h1')).toHaveCount(1);
       await expect(page.locator('h1')).toHaveText(/Catálogo de combinaciones de maestrías/i);
-      expect(await page.locator('gd-tier-card').count()).toBeGreaterThan(0);
+      expect(await page.locator('gd-build-card').count()).toBeGreaterThan(0);
     });
 });
 

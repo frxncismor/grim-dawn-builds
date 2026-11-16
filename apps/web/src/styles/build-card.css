@@ -1,4 +1,6 @@
-:host {
+/* spec004 T015: the card styles are global (not component CSS) so they do not weigh on the initial JS of /tier-list. */
+
+gd-build-card {
   display: block;
   min-inline-size: 0;
 }

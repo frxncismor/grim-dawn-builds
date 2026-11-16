@@ -141,7 +141,7 @@ describe('gd-build-card (spec004 T015)', () => {
   });
 
   it('declares the 44 px target, the wrapping of long names and a visible focus in its styles', () => {
-    const css = readFileSync(resolve(__dirname, 'build-card.css'), 'utf8');
+    const css = readFileSync(resolve(__dirname, '../../../../styles/build-card.css'), 'utf8');
     expect(css).toMatch(/min-block-size:\s*44px/);
     expect(css).toMatch(/overflow-wrap:\s*anywhere/);
     expect(css).toMatch(/:focus-visible/);
