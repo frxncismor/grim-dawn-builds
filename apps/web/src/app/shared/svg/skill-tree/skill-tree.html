@@ -149,15 +149,29 @@
                         <path class="skill-tree__shape" d="M0 -22 L22 0 L0 22 L-22 0 Z" />
                       }
                     }
-                    <use
-                      class="skill-tree__icon"
-                      aria-hidden="true"
-                      x="-12"
-                      y="-12"
-                      width="24"
-                      height="24"
-                      [attr.href]="iconHref(item.node)"
-                    />
+                    @if (gameIconSrc(item.node); as art) {
+                      <image
+                        class="skill-tree__icon-art"
+                        aria-hidden="true"
+                        x="-16"
+                        y="-16"
+                        width="32"
+                        height="32"
+                        loading="lazy"
+                        decoding="async"
+                        [attr.href]="art"
+                      />
+                    } @else {
+                      <use
+                        class="skill-tree__icon"
+                        aria-hidden="true"
+                        x="-12"
+                        y="-12"
+                        width="24"
+                        height="24"
+                        [attr.href]="iconHref(item.node)"
+                      />
+                    }
                     @if (item.assignment; as assigned) {
                       <g
                         class="skill-tree__badge"
@@ -252,6 +266,12 @@
         <p class="skill-tree__scroll-help" i18n="@@skillTree.scrollHelp">
           If the tree is wider than the screen, scroll within the diagram to view it.
         </p>
+        @if (showsGameArt()) {
+          <p class="skill-tree__credit" data-game-art-credit i18n="@@skillTree.gameArtCredit">
+            Skill icons from Grim Dawn, © Crate Entertainment. This project is not affiliated with
+            or endorsed by Crate Entertainment.
+          </p>
+        }
       }
     }
 

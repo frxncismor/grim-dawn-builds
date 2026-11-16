@@ -193,6 +193,16 @@ gd-skill-tree {
   pointer-events: none;
 }
 
+.skill-tree__icon-art {
+  pointer-events: none;
+}
+
+.skill-tree__credit {
+  margin-block: var(--space-2) 0;
+  color: var(--color-ash);
+  font-size: var(--text-small);
+}
+
 .skill-tree__name {
   fill: var(--color-bone);
   font-size: var(--text-small);

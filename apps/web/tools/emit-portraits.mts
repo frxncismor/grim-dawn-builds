@@ -9,7 +9,7 @@ function fail(): never {
 }
 
 /** `<output>/browser` and each locale folder next to it (`browser/es`): the app serves `assets/…` under its own base. */
-async function assetRoots(browser: string): Promise<string[]> {
+export async function assetRoots(browser: string): Promise<string[]> {
   const roots = [browser];
   for (const entry of await readdir(browser, { withFileTypes: true }))
     if (entry.isDirectory() && entry.name !== 'assets') {

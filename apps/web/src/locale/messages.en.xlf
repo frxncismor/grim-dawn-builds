@@ -1918,6 +1918,13 @@
           <context context-type="linenumber">142,146</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="skillTree.gameArtCredit" datatype="html">
+        <source> Skill icons from Grim Dawn, © Crate Entertainment. This project is not affiliated with or endorsed by Crate Entertainment. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/svg/skill-tree/skill-tree.html</context>
+          <context context-type="linenumber">254,258</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="skillTree.requiredBarText" datatype="html">
         <source>Requires bar</source>
         <context-group purpose="location">

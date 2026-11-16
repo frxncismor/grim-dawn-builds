@@ -82,6 +82,31 @@ export function assertGameAssets(root: string): void {
     )
       problems.push(`mastery-${slug}: sin retrato aprobado (tolerancia_de_facto_sin_permiso)`);
   }
+  // spec004 T028: every skill icon the catalog references needs an `approved` entry under the
+  // common condition, or a `withdrawn` one (the own symbol is shown); anything else fails closed.
+  const iconIds = new Set<string>();
+  for (const name of existsSync(trees)
+    ? readdirSync(trees).filter((n) => n.endsWith('.json'))
+    : []) {
+    try {
+      const tree = JSON.parse(readFileSync(join(trees, name), 'utf8')) as {
+        nodes?: { icon_id?: unknown }[];
+      };
+      for (const node of tree.nodes ?? [])
+        if (typeof node.icon_id === 'string') iconIds.add(node.icon_id);
+    } catch {
+      problems.push(`${name}: árbol ilegible`);
+    }
+  }
+  for (const id of [...iconIds].sort()) {
+    const entry = entries.find((item) => item?.slug === id);
+    if (entry?.status === 'withdrawn') continue;
+    if (
+      entry?.status !== 'approved' ||
+      entry.license_or_permission !== 'tolerancia_de_facto_sin_permiso'
+    )
+      problems.push(`${id}: sin icono aprobado ni retirado (tolerancia_de_facto_sin_permiso)`);
+  }
   if (problems.length > 0)
     throw new Error(`ASSET_SOURCE=game no permitido: ${problems.join('; ')}`);
 }
@@ -123,7 +148,8 @@ export function assertAssetStatusParity(
 }
 
 /**
- * Gate of the artifact (S-001): with `ASSET_SOURCE=own` no file of `assets/portraits/` may be in the
+ * Gate of the artifact (S-001, spec004 T028/SC-009): with `ASSET_SOURCE=own` no file of `assets/portraits/`
+ * or `assets/skill-icons/` may be in the
  * staging, in the default locale or in any other (`browser/assets/portraits`, `browser/es/…`).
  * The PNGs are the game's art; `own` is the withdrawal path. With `game` there is nothing to check
  * here: `assertGameAssets` already vouches for the manifest and the copy is the emitter's job.
@@ -134,11 +160,11 @@ export function assertNoGamePortraits(artifact: string, source: string): void {
     ? readdirSync(artifact, { recursive: true, withFileTypes: true })
         .filter((entry) => entry.isFile())
         .map((entry) => join(entry.parentPath, entry.name).split('\\').join('/'))
-        .filter((path) => /\/assets\/portraits\//.test(path))
+        .filter((path) => /\/assets\/(?:portraits|skill-icons)\//.test(path))
     : [];
   if (found.length > 0)
     throw new Error(
-      `ASSET_SOURCE=own: el artefacto no puede llevar retratos del juego (${found.length} ficheros).`,
+      `ASSET_SOURCE=own: el artefacto no puede llevar retratos ni iconos de habilidad del juego (${found.length} ficheros).`,
     );
 }
 
