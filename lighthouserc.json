@@ -15,7 +15,9 @@
         "http://localhost/maestrias/soldier/index.html",
         "http://localhost/maestrias/demolition/index.html",
         "http://localhost/es/maestrias/soldier/index.html",
-        "http://localhost/es/maestrias/demolition/index.html"
+        "http://localhost/es/maestrias/demolition/index.html",
+        "http://localhost/builds/chaman-demoledor-golpe-primigenio/index.html",
+        "http://localhost/es/builds/chaman-demoledor-golpe-primigenio/index.html"
       ],
       "numberOfRuns": 3,
       "settings": {

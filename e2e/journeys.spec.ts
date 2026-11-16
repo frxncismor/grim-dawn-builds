@@ -670,6 +670,148 @@ test.describe('@journeys fachada de video bajo la CSP', () => {
 });
 
 /**
+ * spec004 T023 (US2): la guía se lee sin JavaScript (resumen e índice en el HTML), el índice marca
+ * la sección actual al desplazarse, el paso a paso resalta el árbol y se anuncia, y nada rompe
+ * la CSP ni axe (críticas/serias) en inglés y español a 375/768/1280.
+ */
+const GUIDE_SECTION_IDS = [
+  'resumen',
+  'prioridades',
+  'habilidades',
+  'orden',
+  'notas',
+  'filtro-de-botin',
+  'guia-espiritual',
+  'devociones',
+  'video',
+  'fuentes',
+] as const;
+const STEP_LOCALES = [
+  { prefix: '', cleared: /cleared/i, announced: /Step 1/ },
+  { prefix: '/es', cleared: /quitado/i, announced: /Paso 1/ },
+] as const;
+const axeCore = readFileSync(
+  createRequire(join(process.cwd(), 'package.json')).resolve('axe-core/axe.min.js'),
+  'utf8',
+);
+
+test.describe('@journeys guía sin JavaScript: resumen e índice', () => {
+  test.use({ javaScriptEnabled: false });
+  for (const locale of STEP_LOCALES)
+    test(`${locale.prefix || '/'}: el HTML trae el resumen y enlaza el 100 % de las secciones`, async ({
+      page,
+    }) => {
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}${GUIDE_PATH}`);
+      await settleWithoutScripts(page);
+      const summary = page.locator('[data-build-summary]');
+      await expect(summary).toHaveCount(1);
+      await expect(summary.locator('[data-summary-mastery]')).toHaveCount(2);
+      for (const sel of [
+        '[data-game-version]',
+        '[data-published]',
+        '[data-summary-author]',
+        '[data-summary-source]',
+      ])
+        await expect(summary.locator(sel)).toHaveCount(1);
+      // Summary before the first content block.
+      const order = await page.evaluate(() => {
+        const s = document.querySelector('[data-build-summary]')!;
+        const p = document.getElementById('prioridades')!;
+        return Boolean(s.compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING);
+      });
+      expect(order, 'el resumen va antes de prioridades').toBe(true);
+      // Every section of the page has its link in the index and every link has its target.
+      const report = await page.evaluate(
+        (ids) => {
+          const links = [...document.querySelectorAll<HTMLAnchorElement>('gd-build-toc nav a')];
+          const linked = links.map((a) => (a.getAttribute('href') ?? '').split('#')[1]);
+          const present = ids.filter((id) => document.getElementById(id));
+          return {
+            missingLinks: present.filter((id) => !linked.includes(id)),
+            missingTargets: linked.filter((id) => !document.getElementById(id)),
+            count: links.length,
+          };
+        },
+        [...GUIDE_SECTION_IDS],
+      );
+      expect(report.count).toBeGreaterThanOrEqual(6);
+      expect(report.missingLinks, 'secciones sin enlace en el índice').toEqual([]);
+      expect(report.missingTargets, 'enlaces del índice sin destino').toEqual([]);
+    });
+});
+
+test.describe('@journeys guía con JavaScript: sección actual, paso a paso, CSP y axe', () => {
+  for (const locale of STEP_LOCALES)
+    test(`${locale.prefix || '/'}: la sección actual cambia al desplazarse`, async ({ page }) => {
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}${GUIDE_PATH}`);
+      const current = page.locator('gd-build-toc nav a[aria-current="location"]');
+      for (const id of ['prioridades', 'orden', 'fuentes']) {
+        await page.evaluate((target) => document.getElementById(target)!.scrollIntoView(), id);
+        await expect(current, `sección actual tras ir a #${id}`).toHaveAttribute(
+          'data-section',
+          id,
+        );
+        await expect(current.locator('[data-toc-current]')).toHaveCount(1);
+      }
+    });
+
+  for (const locale of STEP_LOCALES)
+    test(`${locale.prefix || '/'}: el paso a paso resalta el árbol, se anuncia y se opera con teclado`, async ({
+      page,
+    }) => {
+      const problems: string[] = [];
+      page.on('console', (message) => {
+        if (
+          message.type() === 'error' ||
+          /content security policy|refused to/i.test(message.text())
+        )
+          problems.push(`${message.type()}: ${message.text()}`);
+      });
+      page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
+      page.on('requestfailed', (request) => problems.push(`requestfailed: ${request.url()}`));
+
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}${GUIDE_PATH}`);
+      await page.locator('#habilidades').scrollIntoViewIfNeeded();
+      await expect(page.locator(SKILL_TREES)).toHaveCount(2);
+      await expect(page.locator('[data-active-step]')).toHaveCount(0);
+
+      const first = page.locator('[data-select-step]').first();
+      await first.scrollIntoViewIfNeeded();
+      await first.focus();
+      await page.keyboard.press('Enter');
+      await expect(first).toHaveAttribute('aria-pressed', 'true');
+      const region = page.locator('[data-step-announcement]');
+      await expect(region).toHaveText(locale.announced);
+      await expect(region).toHaveAttribute('aria-live', 'polite');
+      expect(await page.locator('[data-active-step]').count()).toBeGreaterThan(0);
+
+      await page.evaluate(axeCore);
+      const violations = await page.evaluate(async () => {
+        const axe = (
+          window as unknown as {
+            axe: {
+              run: (
+                c: Document,
+              ) => Promise<{ violations: { id: string; impact: string | null }[] }>;
+            };
+          }
+        ).axe;
+        return (await axe.run(document)).violations.filter(
+          (v) => v.impact === 'critical' || v.impact === 'serious',
+        );
+      });
+      expect(violations, 'axe con el paso a paso activo').toEqual([]);
+
+      await first.focus();
+      await page.keyboard.press('Space');
+      await expect(first).toHaveAttribute('aria-pressed', 'false');
+      await expect(region).toHaveText(locale.cleared);
+      await expect(page.locator('[data-active-step]')).toHaveCount(0);
+      expect(problems, 'sin errores de consola, CSP ni peticiones fallidas').toEqual([]);
+    });
+});
+
+/**
  * T017 (spec 003, US3): la guía dibuja el árbol canónico de cada maestría y marca encima los 14
  * nodos de la guía. Los árboles son estáticos propios (`/assets/mastery-trees/`), pedidos al llegar
  * a la sección; sin JavaScript se lee el texto de los 14 nodos, y si los estáticos fallan la guía

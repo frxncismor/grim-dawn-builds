@@ -40,13 +40,12 @@
   color: var(--color-bone);
 }
 
+/* A pull-quote rule on the summary card, not a card inside it. */
 .callout {
   max-inline-size: var(--reading-measure);
   margin-block-start: var(--space-6);
-  padding: var(--space-4) var(--space-5);
-  border: var(--frame-border-active);
-  background: var(--surface-sheen), var(--color-panel-2);
-  box-shadow: var(--frame-bevel);
+  padding: var(--space-2) var(--space-5);
+  border-inline-start: 4px solid var(--color-storm);
 }
 
 .callout h2 {

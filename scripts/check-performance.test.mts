@@ -855,3 +855,23 @@ test('el índice de maestrías (T027) usa el límite JS del catálogo y entra en
   for (const prefix of ['', 'es/'])
     assert.ok(urls.includes(`http://localhost/${prefix}maestrias/index.html`), prefix);
 });
+
+test('la guía (T041) entra en Lighthouse y en el presupuesto de HTML de 120 000 B sin ampliarlo', async () => {
+  assert.equal(BUDGETS.htmlBytes, 120000, 'el presupuesto de HTML no se amplía');
+  const route = '/builds/chaman-demoledor-golpe-primigenio';
+  for (const prefix of ['', '/es'])
+    assert.equal(measureHtml('x'.repeat(BUDGETS.htmlBytes), `${prefix}${route}`).pass, true);
+  for (const prefix of ['', '/es'])
+    assert.equal(measureHtml('x'.repeat(BUDGETS.htmlBytes + 1), `${prefix}${route}`).pass, false);
+  const config = JSON.parse(
+    await readFile(join(import.meta.dirname, '..', 'lighthouserc.json'), 'utf8'),
+  );
+  const urls: string[] = config.ci.collect.url;
+  for (const prefix of ['', 'es/'])
+    assert.ok(
+      urls.includes(
+        `http://localhost/${prefix}builds/chaman-demoledor-golpe-primigenio/index.html`,
+      ),
+      `guía ${prefix || 'EN'} en lighthouserc.json`,
+    );
+});
