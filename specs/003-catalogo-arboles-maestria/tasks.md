@@ -108,6 +108,13 @@ teclado, con y sin JS.
 
 **Aplazamientos con motivo (ronda 2 de la puerta, decisión del principal/Paco, 2026-11-14).** A-01/B-008 (la regla de emparejamiento maestría↔árbol está triplicada en las migraciones 0010/0012 y en el dominio, con `btrim` ≠ `trim`) es riesgo de mantenimiento sin defecto observable; C-001/F-003 (el refresco del catálogo en `write-content.mts` falla cerrado ante un intercambio de celdas por UNIQUE no diferible) no corrompe datos y solo afecta a un cambio de layout futuro del juego. No bloquean el cierre de spec003; candidatos a spec004.
 
+**Deuda aplazada tras el cierre (ronda 3, 2026-11-15).** Disposición de la ronda 3 de la puerta (decisión del principal, opción A), con el motivo registrado en `reviews/completion-review.json` y `reviews/t136-review.md` (`deferReason`). Se anotan como texto, sin casilla: son seguimientos de otra spec y no tareas de esta.
+
+- S3-T042 (seguimiento): C-001/F-001, los códigos de error de `seed-content` (lista derivada de `SeedError`/`BootstrapError` y regex con flag `m`, con prueba). Motivo: solo afecta a la precisión del código de error que el lanzador local reenvía; el fallo del seed se sigue detectando (exit distinto de 0 y `seed failed: local-container`). Y B-001, `typecheck:e2e` fuera de `verify`/CI. Motivo: ampliar la puerta es un cambio de alcance de la puerta; `typecheck:e2e` se ejecutó en verde en la ronda. Este segundo punto lo cierra spec004 T001.
+- S3-T043 (seguimiento): A-01 de la ronda 3, el contrato lanzador–seeder pasa a un módulo compartido permitido para `scripts/` y `apps/api`, sin importar `apps/api` desde `scripts/`. Motivo: refactor entre zonas sin defecto funcional.
+- A-01 y C-003 de la ronda 1 ya figuran aplazadas con su motivo en el párrafo «Aplazamientos con motivo (revisión de cierre…)» de arriba, y A-01/B-008 y C-001/F-003 en el de la ronda 2; no se repiten.
+- spec003 quedó cerrada con `spec-review check` passed en `1fd7e77` (snapshot `a5a33731…`).
+
 ---
 
 ## Dependencias

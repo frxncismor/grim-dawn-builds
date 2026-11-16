@@ -3,11 +3,12 @@
 Registro vivo del avance por spec (fuente de verdad: el `tasks.md` de cada una).
 Actualizado el 2026-11-13.
 
-| Spec                                                                    | Estado                       | Tareas hechas | Pendientes |
-| ----------------------------------------------------------------------- | ---------------------------- | ------------- | ---------- |
-| [001-mvp-guias-builds](001-mvp-guias-builds/tasks.md)                   | Abierta, casi cerrada        | 153           | 20         |
-| [002-spec-completion-reviews](002-spec-completion-reviews/tasks.md)     | Completa                     | 17 de 17      | 0          |
-| [003-catalogo-arboles-maestria](003-catalogo-arboles-maestria/tasks.md) | Planificada, sin implementar | 0 de 21       | 21         |
+| Spec                                                                    | Estado                                     | Tareas hechas | Pendientes |
+| ----------------------------------------------------------------------- | ------------------------------------------ | ------------- | ---------- |
+| [001-mvp-guias-builds](001-mvp-guias-builds/tasks.md)                   | Abierta, casi cerrada                      | 153           | 20         |
+| [002-spec-completion-reviews](002-spec-completion-reviews/tasks.md)     | Completa                                   | 17 de 17      | 0          |
+| [003-catalogo-arboles-maestria](003-catalogo-arboles-maestria/tasks.md) | Cerrada (puerta spec002 passed, `1fd7e77`) | 41 de 41      | 0          |
+| [004-rediseno-ui-grim-dawn](004-rediseno-ui-grim-dawn/tasks.md)         | Implementada; puerta spec002 en curso      | 46 de 46      | 0          |
 
 ## 001-mvp-guias-builds
 
@@ -25,6 +26,12 @@ Pendientes:
 
 ## 003-catalogo-arboles-maestria
 
-Ninguna tarea iniciada. Orden previsto: investigación (T001-T004), datos y API
-(T005-T009), US1 árbol y ruta (T010-T013), US2 página y retrato (T014-T015), US3
-asignación (T016-T018), cierre y puerta spec002 (T019-T021).
+Cerrada. T001-T041 hechas (41 de 41). Puerta spec002 y T-136 passed en `1fd7e77`
+(snapshot `a5a33731…`). Quedan aplazados, con su motivo en su `tasks.md`, los LOW
+S3-T042 (códigos de error de `seed-content`) y S3-T043 (contrato lanzador-seeder en
+un módulo compartido).
+
+## 004-rediseno-ui-grim-dawn
+
+T001-T046 marcadas; T036 (puerta spec002 + T-136) marcada antes de ejecutarla, según
+el precedente; su resultado va en `specs/004-rediseno-ui-grim-dawn/reviews/`.

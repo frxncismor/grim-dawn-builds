@@ -63,7 +63,7 @@ specs/004-rediseno-ui-grim-dawn/
 ├── quickstart.md    # Fase 1 (comandos y salidas esperadas de cierre)
 ├── checklists/
 │   └── requirements.md
-└── tasks.md         # 37 tareas en 9 fases (puerta G1 para iconos)
+└── tasks.md         # 46 tareas (T001–T046) en 9 fases (puerta G1 para iconos)
 ```
 
 No se crean `data-model.md` ni `contracts/`: la feature no añade entidades persistentes ni interfaces externas; las «entidades» de la spec son vistas de presentación definidas en código (lección I1/A-05 de spec003). El identificador público de icono y la forma del manifiesto se documentan en `research.md` §R4 y viven en `packages/domain` (Constitución VI).
@@ -89,7 +89,7 @@ apps/web/src/
 scripts/
 ├── extract-textures.mts           # (Q11=B, tras G1) PNG derivados de iconos de habilidad → .game-assets/
 ├── check-assets.mts               # entradas de iconos; cruce manifiesto↔BD (A-03)
-└── verify-local.mjs               # typecheck:e2e en la puerta (T042/B-001)
+└── verify-local.mjs               # typecheck:e2e en la puerta (S3-T042/B-001)
 e2e/                               # tooltip, recorrido, CSP en consola
 PRODUCT.md, DESIGN.md              # raíz de apps/web (impeccable init/document, con Paco)
 ```
@@ -104,7 +104,7 @@ PRODUCT.md, DESIGN.md              # raíz de apps/web (impeccable init/document
 6. **Identidad visual**: `PRODUCT.md`/`DESIGN.md` primero (con Paco), después tokens, fuente, marcos SVG estáticos y rollout por superficie; `impeccable detect` una vez por superficie (R5, R9).
 7. **Guía**: resumen que **sustituye** marcado existente (presupuesto de HTML), índice sticky/plegable, sección activa por `IntersectionObserver` diferido, paso a paso enlazado al resaltado del árbol (Q14 = A) (R6).
 8. **Fluidez de maestría**: `@view-transition` CSS más selector de enlaces (Q15 = A) (R7).
-9. **Deuda**: entran A-03 (fuente única de estado de activos) y T042/B-001 (`typecheck:e2e`); el resto queda fuera con motivo (R8).
+9. **Deuda**: entran A-03 (fuente única de estado de activos) y S3-T042/B-001 (`typecheck:e2e`); el resto queda fuera con motivo (R8).
 10. **Medición antes de componer**: la primera tarea de cada superficie mide la línea base del artefacto real; el rediseño no se integra sin `check:performance` en verde.
 
 ## Riesgos
