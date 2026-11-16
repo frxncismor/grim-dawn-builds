@@ -2,7 +2,7 @@
 
 **Spec**: [spec.md](spec.md) | **Plan**: [plan.md](plan.md)
 
-> Guía de validación **prevista** (clarify cerrado el 2026-11-15; `tasks.md` T001–T051): los comandos son los que ya existen en `package.json` (`pnpm verify` y sus
+> Guía de validación **prevista** (clarify cerrado el 2026-11-15; `tasks.md` T001–T054): los comandos son los que ya existen en `package.json` (`pnpm verify` y sus
 > piezas) más los e2e nuevos que crearán las tareas. Las salidas reales de cierre figuran abajo, en «Evidencia de
 > cierre (T035)». Una casilla de `tasks.md` no se marca sin evidencia citable.
 
@@ -171,3 +171,42 @@ Holgura de `/tier-list`: **2 B** (111 998/112 000); cualquier cambio posterior e
 `check:performance`: **141/141 con `own` y 141/141 con `game`** (15 rutas, mediana de 3 corridas, móvil, 4G lento simulado).
 
 Esta verificación **no** repite `e2e:journeys` ni `e2e:a11y`: sus cifras (450 y 165) son las de las notas de T049 en `tasks.md`.
+
+## Verificación tras las correcciones de la ronda 2 de la puerta (T052–T054)
+
+Fecha: 2026-11-16. HEAD: `bad1ac6` (con T052–T054 integradas). Todo en un worktree de integración; extractos saneados (sin rutas internas ni secretos) del log de la corrida. Todos los bloques terminaron en **exit 0** (`verify=0 owncredit=0 gamebuild=0 gamecredit=0 gameperf=0 apidb=0`, más la reconstrucción final con `own`).
+
+| Comando                                     | Exit | Extracto                                                                                                   |
+| ------------------------------------------- | ---- | ---------------------------------------------------------------------------------------------------------- |
+| `pnpm verify` (`own`)                       | 0    | `verify OK (local)`                                                                                        |
+| `domain:test`                               | 0    | `Test Files  13 passed (13)` · `Tests  310 passed \| 2 expected fail (312)`                                |
+| `api:test` (sin BD)                         | 0    | `Test Files  24 passed \| 10 skipped (34)` · `Tests  344 passed \| 1 expected fail \| 126 skipped (471)`   |
+| `lint`                                      | 0    | `All files pass linting.`                                                                                  |
+| `lint:md`                                   | 0    | `Linting: 95 files` · `Summary: 0 issues in 0 files`                                                       |
+| `format`                                    | 0    | `All matched files use Prettier code style!`                                                               |
+| `test` (web)                                | 0    | `Test Files  57 passed (57)` · `Tests  653 passed \| 2 expected fail (655)`                                |
+| `test:scripts`                              | 0    | `# tests 761` · `# pass 759` · `# fail 0` (2 skipped)                                                      |
+| `check:locale-parity` / `assets:check`      | 0    | `OK: 340 unidades en paridad, 0 fallos` / `OK (170 entradas)`                                              |
+| `check:public-build`                        | 0    | `OK (1639 archivos; valores y patrones ausentes)`                                                          |
+| `check:performance` (`own`)                 | 0    | `check:performance OK (141/141 comprobaciones; …)`                                                         |
+| Puertas de crédito (`own`)                  | 0    | `credit gates OK (own)` (retratos e iconos de habilidad: ninguna página lleva crédito)                     |
+| `ASSET_SOURCE=game pnpm build`              | 0    | `emit-static-assets OK (… 6 retratos y 164 iconos de habilidad con ASSET_SOURCE=game)`                     |
+| `ASSET_SOURCE=game pnpm check:initial-js`   | 0    | OK en todas las rutas; `/tier-list` 111206/112000                                                          |
+| Puertas de crédito (`game`)                 | 0    | `credit gates OK (game)` (retratos con `[data-credit]` e iconos con `[data-game-art-credit]`)              |
+| `ASSET_SOURCE=game pnpm check:performance`  | 0    | `check:performance OK (141/141 comprobaciones; …)`                                                         |
+| `RUN_DB_TESTS=1 pnpm --filter @gd/api test` | 0    | `Test Files  34 passed (34)` · `Tests  470 passed \| 1 expected fail (471)` (0 fallos)                     |
+| `pnpm build` final (`own`)                  | 0    | `emit-static-assets OK (… 0 retratos y 0 iconos de habilidad con ASSET_SOURCE=own)`; `check:initial-js` OK |
+
+`check:initial-js` por ruta (idéntico con `own` en `verify`, con `game` y en la reconstrucción final con `own`; la versión `/es/…` coincide con la inglesa):
+
+| Ruta                                              | JS inicial (gzip 6) | Límite  |
+| ------------------------------------------------- | ------------------- | ------- |
+| `/` y `/es`                                       | 0 B                 | 90 000  |
+| **`/tier-list` y `/es/tier-list`**                | **111 206 B**       | 112 000 |
+| `/maestrias` y `/es/maestrias`                    | 106 160 B           | 112 000 |
+| `/maestrias/soldier` y `/demolition` (+ES)        | 118 430 B           | 150 000 |
+| `/builds/chaman-demoledor-golpe-primigenio` (+ES) | 126 349 B           | 150 000 |
+
+Holgura de `/tier-list`: **794 B** (111 206/112 000; antes 2 B). CSS crítico: 3 231 B en las rutas sin árbol y 5 931 B en las que cargan `deferred` (límite 20 000). `check:performance`: **141/141 con `own` y 141/141 con `game`** (15 rutas, mediana de 3 corridas). CLS 0,000 en las 15 rutas; LCP máximo 908,6 ms (`/builds/…`).
+
+Esta verificación **no** repite `e2e:journeys` ni `e2e:a11y`: sus cifras (446 + 6 de vídeo y 171) son las de la nota de T052 en `tasks.md`.
