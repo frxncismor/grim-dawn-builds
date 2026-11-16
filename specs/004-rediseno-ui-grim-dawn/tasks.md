@@ -10,7 +10,7 @@ description: 'Tareas de implementación del rediseño de UI estilo Grim Dawn con
 
 **Formato**: `[ID] [P?] [US?] descripción` — `[P]` = archivos disjuntos, paralelizable. Cada tarea declara archivos, aceptación y evidencia. **Ninguna casilla `[x]` sin salida real citable** (comando y resultado).
 
-> **Estado (2026-11-16)**: implementación completa: T001–T035 y T037–T046 hechas (45 de 46); queda T036 (puerta de cierre de spec002), que se ejecuta tras T035. Las cifras de cada tarea son las medidas y citadas en su nota de verificación.
+> **Estado (2026-11-16)**: implementación completa: T001–T051 marcadas (T047–T051 nacen de la ronda 1 de la puerta T036). T036 (puerta de cierre de spec002 y T-136) está marcada antes de ejecutarla, según el precedente (spec002 T014, spec003 T021); su resultado va en `reviews/`. Las cifras de cada tarea son las medidas y citadas en su nota de verificación.
 >
 > **Puerta de gobernanza G1 (Q11 = B)**: ninguna tarea puede versionar, extraer a una carpeta servida ni publicar un icono de habilidad del juego antes de que **T003 y T004 estén hechas y aprobadas por Paco**. Las tareas bloqueadas por G1 lo declaran como «Depende de T004 (G1)».
 >
@@ -104,10 +104,10 @@ description: 'Tareas de implementación del rediseño de UI estilo Grim Dawn con
 - [x] **T045** [US4] Icono propio siempre por tipo; «circular» solo como anillo y texto — `apps/web/src/app/shared/ui/icon/skill-symbols.ts`, `apps/web/public/assets/ui/skill-icons.svg`, `apps/web/src/app/shared/svg/skill-tree/skill-tree.css` (solo la regla del anillo), `fixtures/content/assets/manifest.json` (`fallback_svg`), pruebas (`skill-symbols.test.mts`, `skill-tree.icons.spec.ts`, `scripts/skill-icon-manifest.test.mts`) — Aceptación: con `ASSET_SOURCE=own` `skillSymbol` devuelve siempre el símbolo del tipo (activa, modificadora, _transmuter_, pasiva); el marcador circular se ve como anillo (forma; con `prefers-contrast` y `forced-colors`) y como texto (meta y tooltip); el sprite deja de definir `skill-circular`; cada `fallback_svg` del manifiesto apunta al símbolo de su tipo; con `game` no cambia nada; sin regresión de axe, §6 (HTML ≤ 120000 B, JS inicial `/tier-list` ≤ 112000 B) ni `impeccable detect`. Aprobada por el principal (decisión 1 de la Pregunta 22). Depende de T024, T028. Verificado 2026-11-16 (orquestador UI, `ui-s4-check5`): `skillSymbol` por tipo; `skill-circular` fuera del sprite; 100 entradas del manifiesto con `fallback_svg` por tipo; anillo con variantes `prefers-contrast` y `forced-colors`; pruebas rojas antes; `skill-tree.game-icons.spec.ts` sin cambios; `verify` OK, `e2e:journeys` 450, `e2e:a11y` 165.
 - [x] **T046** [US5] Quitar el _eyebrow_ en mayúsculas espaciadas de `/maestrias/<slug>` (hallazgo `hero-eyebrow-chip` de `impeccable detect`) — `apps/web/src/app/features/masteries/mastery.page.{html,css}` (el rótulo pasa bajo el h1 y pierde las mayúsculas espaciadas), `e2e/skill-tree-fit.spec.ts` — Aceptación: prueba e2e roja antes (`text-transform: uppercase`, `letter-spacing` 0,08em); `impeccable detect` vivo en `/maestrias/<slug>` EN/ES a 1280 y 390 sin hallazgos; HTML sin crecer; `e2e:journeys`, `e2e:a11y` y `verify` verdes. Nota: aprobada por el principal. Verificado 2026-11-16 (orquestador UI, `ui-s4-check5`): _eyebrow_ bajo el h1 sin mayúsculas espaciadas; `impeccable detect` vivo en `/maestrias/<slug>` EN/ES a 1280 y 390 sin hallazgos; HTML −33/−29 B; `verify` OK, `e2e:journeys` 450, `e2e:a11y` 165.
 - [x] **T047** [US5] Crédito © Crate traducido en `/` y `/tier-list` cuando las tarjetas muestran retratos del juego (`ASSET_SOURCE=game`) y corrección de research §R10.7 — `apps/web/src/app/features/{home/home.page.{ts,html,css,spec.ts},tier-list/tier-list.page.{ts,html,css,spec.ts},tier-list/catalog.model.ts}`, `apps/web/src/app/shared/ui/build-card/build-card.{labels,model}.ts`, `apps/web/src/app/core/content/portraits.server{,.test}.ts`, `apps/web/src/locale/messages.*.xlf`, `scripts/{check-assets,check-assets.test,build-release}.mts`, `specs/004-rediseno-ui-grim-dawn/research.md` — Aceptación: con `game`, `/` y `/tier-list` (EN y ES) muestran el mismo crédito i18n que `/maestrias` (`data-credit`, mensaje `masteryIndex.credit`) si alguna tarjeta usa un retrato con `source: 'game'`; con `own` no aparece; la prueba de artefacto (`assertPortraitCredit`, también en `build-release`) falla si una página lleva `assets/portraits/*.png` sin `[data-credit]` con `game`, o lleva crédito con `own`; research §R10.7 corregido; `/tier-list` ≤ 112 000 B. Hallazgo F-001/S-001 de la puerta T036; aprobada por el principal 2026-11-16. Verificado 2026-11-16 (implementador de review): `ng test` 58 archivos / 636 pruebas OK; `ASSET_SOURCE=game pnpm build` con crédito en las cuatro portadas (`/`, `/tier-list`, EN y ES) y `own` sin retratos ni crédito; `/tier-list` 111 992/112 000 B.
-- [ ] **T048** [P] [US5] Documentación de la huella real — `README.md`, `README.es.md`, `specs/004-rediseno-ui-grim-dawn/{plan,spec}.md` — Aceptación: README EN/ES dicen que con `game` también se sirven los 164 iconos de habilidad (B-001); plan.md (A-04) y spec.md (B-006) citan la migración 0014 e `icon_id` en el contrato público. Aprobada por el principal 2026-11-16 (correcciones de la ronda 1 de la puerta T036).
-- [ ] **T049** [US5] Idioma y portada — `apps/web/src/app/features/home/{featured-guide,home.page.html}.ts`, `apps/web/src/app/shared/ui/build-card/`, `apps/web/src/app/features/build/summary/` — Aceptación: la fecha de la guía destacada sale de la misma selección que la tarjeta (C-001); nombre localizado o `lang` en el título de la tarjeta (B-002) y en el resumen de la guía (C-003). Depende de T047. Aprobada por el principal 2026-11-16 (ronda 1 de la puerta T036).
-- [ ] **T050** [P] [US4] Una sola regla de icono del juego servible — `packages/domain/`, emisor de iconos, `apps/web/src/app/core/content/` y `scripts/check-assets.mts` — Aceptación: una sola regla en el dominio, usada por el emisor, el servidor y `check-assets` (A-01/B-004); prueba de `TREE_SLUG` (A-02/B-003); `resolveSkillIcon` muerto borrado (A-03). Aprobada por el principal 2026-11-16 (ronda 1 de la puerta T036).
-- [ ] **T051** [P] [US5] Tooltip recolocado y TocObserver reactivo — `apps/web/src/app/shared/svg/skill-tree/`, `apps/web/src/app/features/build/toc/toc-observer.ts` — Aceptación: el tooltip se recoloca con el scroll del lienzo y con `resize` (C-002/B-005); `TocObserver` reacciona a cambios de `ids` y reinicia `active` al navegar (F-002), con pruebas. Aprobada por el principal 2026-11-16 (ronda 1 de la puerta T036).
+- [x] **T048** [P] [US5] Documentación de la huella real — `README.md`, `README.es.md`, `specs/004-rediseno-ui-grim-dawn/{plan,spec}.md` — Aceptación: README EN/ES dicen que con `game` también se sirven los 164 iconos de habilidad (B-001); plan.md (A-04) y spec.md (B-006) citan la migración 0014 e `icon_id` en el contrato público. Aprobada por el principal 2026-11-16 (correcciones de la ronda 1 de la puerta T036). Verificado 2026-11-16 (implementador de review): README EN/ES, plan.md y spec.md reflejan la huella real (164 iconos, `icon_id`/0014, 1.11.0, retirada); lint:md 0 issues, format:check y prettier OK, spec-review prepare `ready`; verify de integración en `quickstart.md`.
+- [x] **T049** [US5] Idioma y portada — `apps/web/src/app/features/home/{featured-guide,home.page.html}.ts`, `apps/web/src/app/shared/ui/build-card/`, `apps/web/src/app/features/build/summary/` — Aceptación: la fecha de la guía destacada sale de la misma selección que la tarjeta (C-001); nombre localizado o `lang` en el título de la tarjeta (B-002) y en el resumen de la guía (C-003). Depende de T047. Aprobada por el principal 2026-11-16 (ronda 1 de la puerta T036). Verificado 2026-11-16 (implementador de review): fecha de portada de la misma selección que la tarjeta (C-001), título de tarjeta con `lang` (B-002) y nombres del resumen por idioma (C-003); web 641 passed, lint/format/locale-parity OK, initial-js /tier-list 111 998/112 000 (+5 B), e2e:journeys 450 passed, e2e:a11y 165 passed (0 axe); verify de integración en `quickstart.md`.
+- [x] **T050** [P] [US4] Una sola regla de icono del juego servible — `packages/domain/`, emisor de iconos, `apps/web/src/app/core/content/` y `scripts/check-assets.mts` — Aceptación: una sola regla en el dominio, usada por el emisor, el servidor y `check-assets` (A-01/B-004); prueba de `TREE_SLUG` (A-02/B-003); `resolveSkillIcon` muerto borrado (A-03). Aprobada por el principal 2026-11-16 (ronda 1 de la puerta T036). Verificado 2026-11-16 (implementador de review): `classifySkillIconEntry` única en `@gd/domain` usada por prerender, emisor (con sha256) y `assertGameAssets`; resolveSkillIcon eliminado; prueba de TREE_SLUG; dominio 310 ok, test:scripts 756/758 ok, web 632 ok, lint/format/boundaries/assets:check/catalog:nodes OK, `game` emite 164 iconos (== catálogo no retirado) y `own` 0 con check:public-build OK; verify de integración en `quickstart.md`.
+- [x] **T051** [P] [US5] Tooltip recolocado y TocObserver reactivo — `apps/web/src/app/shared/svg/skill-tree/`, `apps/web/src/app/features/build/toc/toc-observer.ts` — Aceptación: el tooltip se recoloca con el scroll del lienzo y con `resize` (C-002/B-005); `TocObserver` reacciona a cambios de `ids` y reinicia `active` al navegar (F-002), con pruebas. Aprobada por el principal 2026-11-16 (ronda 1 de la puerta T036). Verificado 2026-11-16 (implementador de review): tooltip recolocado en scroll/resize/orientationchange (oyentes pasivos+rAF, solo con tooltip abierto) y TocObserver reactivo a `ids()`; web 633 passed, lint/format OK, e2e skill-tooltip 80 passed (mutación sin oyente falla), initial-js /tier-list 111 744 B (−2 B); verify de integración en `quickstart.md`.
 
 ---
 
@@ -148,45 +148,45 @@ F8: T035 -> T036, T037
 
 ## Trazabilidad requisitos → tareas
 
-| Requisito           | Tareas                         |
-| ------------------- | ------------------------------ |
-| FR-001, FR-003–005  | T015, T016                     |
-| FR-002, FR-006      | T017                           |
-| FR-007, FR-008      | T020, T021                     |
-| FR-009              | T022                           |
-| FR-010–FR-015       | T009–T013                      |
-| FR-016, FR-017      | T024, T025, T027, T028, T045   |
-| FR-018              | T003, T004 (G1), T027          |
-| FR-019              | T025, T028                     |
-| FR-020              | T006, T007                     |
-| FR-021, FR-024      | T008                           |
-| FR-022, FR-023      | T007, T030, T031               |
-| FR-025              | T033, T034                     |
-| FR-030              | T019, T031 (detección de marca)|
-| FR-040              | T002, T013, T014, T016–T017, T020, T023, T029, T035 |
-| FR-041              | T013, T018, T023, T031         |
-| FR-042              | T011, T015, T017, T020, T033   |
-| FR-043              | T013, T018, T023, T029, T031   |
-| FR-044              | T016, T017, T020, T021         |
-| FR-045, FR-046      | T005, T010, T035               |
-| SC-001              | T018                           |
-| SC-002              | T021, T023                     |
-| SC-003              | T013                           |
-| SC-004, SC-007      | T013, T018, T023, T031         |
-| SC-005, SC-006      | T002, T013, T035               |
-| SC-008              | T011, T035                     |
-| SC-009              | T004, T027, T028               |
-| SC-010              | T019, T031                     |
-| SC-011              | T032, T042–T046                |
-| FR-003, FR-042, constitución §VII (crédito a Crate en `/` y `/tier-list`) | T047 |
-| FR-040 (huella real documentada) | T048 |
-| FR-003, FR-042 (idioma y portada) | T049 |
-| FR-016, FR-017 (una regla de icono servible) | T050 |
-| FR-010, FR-014 (tooltip), FR-022 (índice de la guía) | T051 |
-| FR-003, FR-042 (retrato y versión localizada) | T042 |
-| FR-010, FR-014 (tooltip dentro del árbol ajustado) | T043 |
-| FR-043 (cabecera de una fila; axe del árbol) | T038, T044 |
-| FR-016, FR-017 (icono propio por tipo; BD con `icon_id`) | T039, T045 |
-| FR-040, SC-005, SC-006 (guía en la puerta de rendimiento) | T041 |
-| SC-010 (`impeccable detect` limpio) | T040, T046 |
-| SC-003, SC-004, SC-007 (e2e que `typecheck:e2e` protege) | T001 |
+| Requisito                                                                 | Tareas                                              |
+| ------------------------------------------------------------------------- | --------------------------------------------------- |
+| FR-001, FR-003–005                                                        | T015, T016                                          |
+| FR-002, FR-006                                                            | T017                                                |
+| FR-007, FR-008                                                            | T020, T021                                          |
+| FR-009                                                                    | T022                                                |
+| FR-010–FR-015                                                             | T009–T013                                           |
+| FR-016, FR-017                                                            | T024, T025, T027, T028, T045                        |
+| FR-018                                                                    | T003, T004 (G1), T027                               |
+| FR-019                                                                    | T025, T028                                          |
+| FR-020                                                                    | T006, T007                                          |
+| FR-021, FR-024                                                            | T008                                                |
+| FR-022, FR-023                                                            | T007, T030, T031                                    |
+| FR-025                                                                    | T033, T034                                          |
+| FR-030                                                                    | T019, T031 (detección de marca)                     |
+| FR-040                                                                    | T002, T013, T014, T016–T017, T020, T023, T029, T035 |
+| FR-041                                                                    | T013, T018, T023, T031                              |
+| FR-042                                                                    | T011, T015, T017, T020, T033                        |
+| FR-043                                                                    | T013, T018, T023, T029, T031                        |
+| FR-044                                                                    | T016, T017, T020, T021                              |
+| FR-045, FR-046                                                            | T005, T010, T035                                    |
+| SC-001                                                                    | T018                                                |
+| SC-002                                                                    | T021, T023                                          |
+| SC-003                                                                    | T013                                                |
+| SC-004, SC-007                                                            | T013, T018, T023, T031                              |
+| SC-005, SC-006                                                            | T002, T013, T035                                    |
+| SC-008                                                                    | T011, T035                                          |
+| SC-009                                                                    | T004, T027, T028                                    |
+| SC-010                                                                    | T019, T031                                          |
+| SC-011                                                                    | T032, T042–T046                                     |
+| FR-003, FR-042, constitución §VII (crédito a Crate en `/` y `/tier-list`) | T047                                                |
+| FR-040 (huella real documentada)                                          | T048                                                |
+| FR-003, FR-042 (idioma y portada)                                         | T049                                                |
+| FR-016, FR-017 (una regla de icono servible)                              | T050                                                |
+| FR-010, FR-014 (tooltip), FR-022 (índice de la guía)                      | T051                                                |
+| FR-003, FR-042 (retrato y versión localizada)                             | T042                                                |
+| FR-010, FR-014 (tooltip dentro del árbol ajustado)                        | T043                                                |
+| FR-043 (cabecera de una fila; axe del árbol)                              | T038, T044                                          |
+| FR-016, FR-017 (icono propio por tipo; BD con `icon_id`)                  | T039, T045                                          |
+| FR-040, SC-005, SC-006 (guía en la puerta de rendimiento)                 | T041                                                |
+| SC-010 (`impeccable detect` limpio)                                       | T040, T046                                          |
+| SC-003, SC-004, SC-007 (e2e que `typecheck:e2e` protege)                  | T001                                                |
