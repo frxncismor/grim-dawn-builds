@@ -31,6 +31,7 @@ h4 {
   margin-block: var(--space-6) var(--space-3);
   font-family: var(--font-display);
   font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   line-height: var(--line-heading);
   text-wrap: balance;
 }
@@ -160,4 +161,27 @@ video {
   :focus-visible {
     outline-color: Highlight;
   }
+}
+
+/* spec004 T008: own 9-slice frames (decorative; the content keeps its own semantics). */
+.frame-panel,
+.frame-featured,
+.frame-compact {
+  border-style: solid;
+  border-width: var(--frame-width);
+  border-image-slice: 16;
+  border-image-repeat: stretch;
+  background-image: var(--texture-surface);
+}
+
+.frame-panel {
+  border-image-source: var(--frame-image-panel);
+}
+
+.frame-featured {
+  border-image-source: var(--frame-image-featured);
+}
+
+.frame-compact {
+  border-image-source: var(--frame-image-compact);
 }

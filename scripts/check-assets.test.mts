@@ -132,3 +132,17 @@ test('assertAssetStatusParity: an asset public in the table but absent from the 
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('our own art under assets/ui/ is not game art and needs no manifest entry (spec004 T008)', () => {
+  const root = repo({ assets: [] }, false);
+  try {
+    mkdirSync(join(root, 'apps/web/public/assets/ui'), { recursive: true });
+    writeFileSync(join(root, 'apps/web/public/assets/ui/frame-panel.svg'), '<svg/>');
+    assert.deepEqual(checkAssets(root), { count: 0, issues: [] });
+    mkdirSync(join(root, 'apps/web/public/assets/portraits'), { recursive: true });
+    writeFileSync(join(root, 'apps/web/public/assets/portraits/x.png'), PNG);
+    assert.equal(checkAssets(root).issues.length, 1);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

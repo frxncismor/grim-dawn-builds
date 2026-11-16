@@ -6,6 +6,8 @@ import { checkAssetManifest, type AssetIssue } from '@gd/domain';
 
 const WEB_PUBLIC_DIR = 'apps/web/public';
 const OFFICIAL_SUBDIR = 'assets';
+/** Our own art (frames, textures, fallback icons): not game art, so it needs no manifest entry. */
+const OWN_ART_PREFIX = 'public/assets/ui/';
 const MANIFEST = 'fixtures/content/assets/manifest.json';
 
 /** Lists every file under the official-art folder, as repo-relative POSIX paths. */
@@ -18,7 +20,8 @@ function listOfficialFiles(root: string): string[] {
     .map(
       (entry) =>
         `public/${relative(publicRoot, join(entry.parentPath, entry.name)).split('\\').join('/')}`,
-    );
+    )
+    .filter((file) => !file.startsWith(OWN_ART_PREFIX));
 }
 
 /** sha256 of every official file, keyed by the same repo-relative path the manifest uses. */
