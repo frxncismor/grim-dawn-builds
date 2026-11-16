@@ -2,9 +2,9 @@
 
 **Spec**: [spec.md](spec.md) | **Plan**: [plan.md](plan.md)
 
-> Guía de validación **prevista** (clarify cerrado el 2026-11-15; `tasks.md` T001–T037): los comandos son los que ya existen en `package.json` (`pnpm verify` y sus
-> piezas) más los e2e nuevos que crearán las tareas. Las salidas reales de cierre se registrarán aquí cuando se
-> implemente la spec; hoy no hay ninguna. Una casilla de `tasks.md` no se marca sin evidencia citable.
+> Guía de validación **prevista** (clarify cerrado el 2026-11-15; `tasks.md` T001–T046): los comandos son los que ya existen en `package.json` (`pnpm verify` y sus
+> piezas) más los e2e nuevos que crearán las tareas. Las salidas reales de cierre figuran abajo, en «Evidencia de
+> cierre (T035)». Una casilla de `tasks.md` no se marca sin evidencia citable.
 
 ## Prerrequisitos
 
@@ -26,7 +26,7 @@
 | Recorrido (SC-001, SC-003)          | `pnpm e2e:journeys`                                                                        | portada → guía en ≤ 2 clics; tooltip a ≤ 16 px del nodo y dentro del viewport (ratón, teclado, toque)                                                                                                        |
 | Contraste                           | `pnpm check:contrast`                                                                      | tokens con contraste ≥ 4,5:1 (texto) y ≥ 3:1 (controles)                                                                                                                                                     |
 | Paridad EN/ES (SC-008)              | `pnpm check:locale-parity`                                                                 | mismas secciones y cadenas                                                                                                                                                                                   |
-| Tipado de e2e (deuda T042/B-001)    | `pnpm typecheck:e2e`                                                                       | exit 0, y forma parte de `pnpm verify`                                                                                                                                                                       |
+| Tipado de e2e (deuda S3-T042/B-001)    | `pnpm typecheck:e2e`                                                                       | exit 0, y forma parte de `pnpm verify`                                                                                                                                                                       |
 | Activos (SC-009, FR-017, FR-019)    | `pnpm assets:check`                                                                        | manifiesto válido con entradas de iconos y `proof_ref` a `research.md#r10`; artefacto `own` sin arte del juego; `game` con entrada inválida falla cerrado; sin rutas internas de textura en la vista pública |
 | Orden de gobernanza (SC-009)        | revisión del historial: T003 y T004 antes de T027                                          | enmienda 1.11.0 y análisis de riesgos registrados antes del primer PNG de icono versionado                                                                                                                   |
 | Anti «AI slop» (SC-010)             | `impeccable.cmd detect --json <archivos cambiados>`                                        | sin hallazgos de reglas deterministas; pruebas de componente sin tarjetas anidadas                                                                                                                           |
