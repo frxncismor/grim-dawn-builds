@@ -38,7 +38,7 @@
   <section class="builds" aria-labelledby="builds-title">
     <h2 id="builds-title" i18n="@@home.moreBuilds">More builds</h2>
     <ul class="builds__list">
-      @for (card of otherCards; track card.title) {
+      @for (card of otherCards; track card.href) {
         <li><gd-build-card [data]="card" /></li>
       }
     </ul>

@@ -207,3 +207,30 @@ describe('spec004 T042 (b): unconfirmed game version is localized', () => {
     expect(buildCardData({ ...guide, gameVersion: '1.3.x' }).facts).toContain('1.3.x');
   });
 });
+
+describe('spec005 T009 (S4-D3, Q-C = A): the status is announced once', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  /** Text a screen reader reads: everything but the subtrees hidden with `aria-hidden="true"`. */
+  const announced = (node: Node): string =>
+    node.nodeType === Node.TEXT_NODE
+      ? (node.textContent ?? '')
+      : (node as Element).getAttribute?.('aria-hidden') === 'true'
+        ? ''
+        : [...node.childNodes].map(announced).join(' ');
+  const times = (text: string, word: string) => text.split(word).length - 1;
+
+  it('hides the visible status line from assistive technology and keeps it as text', async () => {
+    const el = await render({ ...guide, combination: 'Chamán + Demoledor' });
+    const status = el.querySelector('.build-card__status')!;
+    expect(status.getAttribute('aria-hidden')).toBe('true');
+    expect(status.textContent).toContain('Unverified');
+    expect(times(announced(el.querySelector('a')!), 'Unverified')).toBe(1);
+    expect(times(announced(el.querySelector('article')!), 'Unverified')).toBe(1);
+  });
+
+  it('still announces the status of a card with no link', async () => {
+    const el = await render(noGuide);
+    expect(times(announced(el.querySelector('article')!), 'No guide')).toBe(1);
+  });
+});
