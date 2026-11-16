@@ -116,6 +116,24 @@ describe('gd-toc-observer (spec004 T021)', () => {
     expect(active).toEqual(['habilidades']);
   });
 
+  it('observes again when ids change, and emits the new guide section', async () => {
+    mountSections();
+    const { fixture, observer, active } = await create();
+    observer!.fire([{ id: 'resumen', intersecting: true }]);
+    expect(active).toEqual(['resumen']);
+    document.body.replaceChildren();
+    mountSections(['video', 'fuentes']);
+    fixture.componentRef.setInput('ids', ['video', 'fuentes']);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const next = FakeObserver.instances.at(-1)!;
+    expect(next).not.toBe(observer);
+    expect(observer!.disconnected).toBe(true);
+    expect(next.observed.map((e) => e.id)).toEqual(['video', 'fuentes']);
+    next.fire([{ id: 'video', intersecting: true }]);
+    expect(active.at(-1)).toBe('video');
+  });
+
   it('disconnects when destroyed', async () => {
     mountSections();
     const { fixture, observer } = await create();
