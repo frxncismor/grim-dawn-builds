@@ -1,5 +1,8 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
+  ElementRef,
+  OnDestroy,
   ViewEncapsulation,
   Component,
   computed,
@@ -11,6 +14,7 @@ import {
 import type { PublicSkillNode, PublicMasteryTree, PublicBuild, SkillKind } from '@gd/domain';
 import { createKeyboardNav } from '../keyboard-nav';
 import { layoutForest } from '../layout';
+import { placeTooltip } from './place-tooltip';
 
 type Mastery = PublicBuild['masteries'][number];
 type SkillNode = PublicBuild['skill_nodes'][number];
@@ -39,6 +43,8 @@ const CATALOG_MARGIN_X = 96;
 const CATALOG_HEADER_HEIGHT = 56;
 const CATALOG_MARGIN_BOTTOM = 96;
 const CATALOG_MAX_NODES = 400;
+/** Grace period before the tooltip hides, long enough to move the pointer onto it. */
+const TOOLTIP_HIDE_DELAY_MS = 250;
 
 interface CatalogRenderNode {
   node: PublicSkillNode;
@@ -100,8 +106,10 @@ interface TreeModel {
   // Styles live in src/styles/deferred.css, served by DeferredStyles: a deferred component's inline <style> is blocked by the CSP (T033).
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Esc closes the tooltip wherever the focus is (WCAG 1.4.13 dismissible), without moving it.
+  host: { '(document:keydown.escape)': 'dismissTooltip()' },
 })
-export class SkillTree {
+export class SkillTree implements OnDestroy {
   readonly treeId = input.required<string>();
   /** Guide mode: mastery and nodes of a published build (editorial `layout`). */
   readonly mastery = input<Mastery>(EMPTY_MASTERY);
@@ -125,6 +133,11 @@ export class SkillTree {
   readonly hoveredId = signal<string | null>(null);
   readonly selectedId = signal<string | null>(null);
   readonly detailDismissed = signal(false);
+  /** Node that really holds keyboard focus (the roving `focusedId` is set even when nothing is focused). */
+  readonly focusActiveId = signal<string | null>(null);
+  readonly tooltipDismissed = signal(false);
+  private hoverClearTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private focusOrigin: FocusTarget | null = null;
   private restoringFocus = false;
 
@@ -237,6 +250,49 @@ export class SkillTree {
     if (!catalogTree || this.detailDismissed()) return null;
     const id = this.selectedId() ?? this.hoveredId() ?? this.focusedId();
     return catalogTree.nodes.find((node) => node.id === id) ?? null;
+  });
+
+  /** One tooltip at a time: the focused node wins over a residual hover. */
+  readonly tooltipNodeId = computed(() =>
+    this.catalogTree() && !this.tooltipDismissed()
+      ? (this.focusActiveId() ?? this.hoveredId())
+      : null,
+  );
+  readonly tooltipNode = computed(() => {
+    const id = this.tooltipNodeId();
+    return this.catalogTree()?.nodes.find((node) => node.id === id) ?? null;
+  });
+  readonly tooltipAssignment = computed(
+    () => this.assignmentById().get(this.tooltipNode()?.id ?? '') ?? null,
+  );
+  readonly tooltipId = computed(() => `${this.treeId()}-${this.scopeSlug()}-tooltip`);
+
+  /** Places the open tooltip next to its node with the pure `placeTooltip` (DOM style properties: CSP-safe). */
+  private readonly positionTooltip = afterRenderEffect(() => {
+    const id = this.tooltipNodeId();
+    if (!id) return;
+    const root = this.host.nativeElement;
+    const tip = root.querySelector<HTMLElement>('[role="tooltip"]');
+    const stage = root.querySelector<HTMLElement>('.skill-tree__stage');
+    const anchor = Array.from(root.querySelectorAll<Element>('[data-skill-id]')).find(
+      (el) => el.getAttribute('data-skill-id') === id,
+    );
+    if (!tip || !stage || !anchor) return;
+    tip.style.left = '0px';
+    tip.style.top = '0px';
+    const tipRect = tip.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    const placed = placeTooltip({
+      anchor: anchor.getBoundingClientRect(),
+      tip: { width: tipRect.width, height: tipRect.height },
+      viewport: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight },
+      container: stageRect,
+      prefer: 'top',
+    });
+    tip.style.left = `${placed.left - stageRect.left}px`;
+    tip.style.top = `${placed.top - stageRect.top}px`;
+    tip.style.visibility = 'visible';
+    tip.setAttribute('data-side', placed.side);
   });
 
   readonly catalogDetailAssignment = computed(
@@ -372,8 +428,41 @@ export class SkillTree {
   }
 
   setHovered(slug: string): void {
+    this.cancelHoverClear();
     this.hoveredId.set(slug);
     this.detailDismissed.set(false);
+    this.tooltipDismissed.set(false);
+  }
+
+  /** Leaving the node or the tooltip hides after a short grace so the pointer can reach the tooltip (WCAG 1.4.13). */
+  scheduleHoverClear(): void {
+    this.cancelHoverClear();
+    this.hoverClearTimer = setTimeout(() => {
+      this.hoverClearTimer = null;
+      this.hoveredId.set(null);
+    }, TOOLTIP_HIDE_DELAY_MS);
+  }
+
+  cancelHoverClear(): void {
+    if (this.hoverClearTimer !== null) clearTimeout(this.hoverClearTimer);
+    this.hoverClearTimer = null;
+  }
+
+  setFocusActive(slug: string): void {
+    this.focusActiveId.set(slug);
+    if (!this.restoringFocus) this.tooltipDismissed.set(false);
+  }
+
+  clearFocusActive(slug: string): void {
+    if (this.focusActiveId() === slug) this.focusActiveId.set(null);
+  }
+
+  dismissTooltip(): void {
+    if (this.tooltipNodeId() !== null) this.tooltipDismissed.set(true);
+  }
+
+  ngOnDestroy(): void {
+    this.cancelHoverClear();
   }
 
   clearHovered(): void {
