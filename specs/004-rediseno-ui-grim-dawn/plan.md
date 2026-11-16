@@ -2,7 +2,7 @@
 
 **Branch**: `004-rediseno-ui-grim-dawn` (planificación en `orq/11111619-ui-s4-plan`) | **Date**: 2026-11-15 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `specs/004-rediseno-ui-grim-dawn/spec.md`; investigación en [research.md](research.md); `.specify/memory/constitution.md` (1.10.1); `AGENTS.md`; `CONTRIBUTING.md`; `specs/003-catalogo-arboles-maestria/{spec,plan,tasks}.md`.
+**Input**: Feature specification from `specs/004-rediseno-ui-grim-dawn/spec.md`; investigación en [research.md](research.md); `.specify/memory/constitution.md` (1.11.0 desde spec004 T004; 1.10.1 al planificar); `AGENTS.md`; `CONTRIBUTING.md`; `specs/003-catalogo-arboles-maestria/{spec,plan,tasks}.md`.
 
 **Estado**: **clarify cerrado** (Paco, 2026-11-15): Q11 = **B** (publicar iconos de habilidad, con enmienda 1.11.0 de §VII y análisis de riesgos **antes**), Q12–Q15 = A. Las tareas están en [tasks.md](tasks.md).
 

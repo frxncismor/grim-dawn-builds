@@ -72,7 +72,7 @@ Rule: spec FR-014 and constitution 1.10.1, section VII.
 | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Factual data: names, tier, grid position, point limits, parent links, with `source` hashes              | **Versioned** in `fixtures/content/mastery-trees/*.json`                                     |
 | The six **mastery buttons**, 197x41 PNG, unmodified, published as the mastery "portraits" (Paco's call) | **Versioned** in `apps/web/public/assets/portraits/`, each with an `approved` manifest entry |
-| **Skill icons** (32x32)                                                                                 | **Local only**, in `.game-assets/textures/`; never versioned and not published               |
+| **Skill icons** (32x32)                                                                                 | Extracted to `.game-assets/textures/` (never versioned); **published** as derived PNG with **one manifest entry per icon** only after constitution 1.11.0 and the own fallback are in place |
 | `.arz`, `.arc`, `.dbr`, localization dumps, skill descriptions                                          | **Never** versioned                                                                          |
 | Backgrounds, frames, other art, Grim Tools data                                                         | **Never**; they are outside the exceptions of section VII                                    |
 
@@ -134,7 +134,9 @@ build:release` and the CI jobs that build the measured artifact (`verify` and
   any (T036, S-001). `ng serve` and `--configuration development` still serve them.
 - **Fallback**: with `own`, or with a missing, `withdrawn` or non-approved entry,
   the row shows the project's own icon. The site is never left without icons. Skill
-  icons always use the project's own icons.
+  icons use the project's own icons until the skill icons are published under
+  constitution 1.11.0 (one manifest entry per icon, `proof_ref` to
+  [`research.md`, section R10](../../specs/004-rediseno-ui-grim-dawn/research.md)).
 
 ## Withdrawal procedure
 
