@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -169,4 +169,28 @@ test('spec004 T042: catalog masteries get the portrait of their tree, the rest n
     withCatalogPortraits(catalog, own).masteries[0]?.portrait?.src,
     'assets/icons/mastery-chaman.svg',
   );
+});
+
+test('every mastery tree of the catalog is joined to a catalog mastery by TREE_SLUG (T050, A-02/B-003)', async () => {
+  const masteries = JSON.parse(await readFile(join(REAL_ROOT, 'masteries.json'), 'utf8')) as {
+    slug: string;
+  }[];
+  const trees = (await readdir(join(REAL_ROOT, 'mastery-trees')))
+    .filter((name) => name.endsWith('.json'))
+    .map((name) => name.slice(0, -'.json'.length))
+    .sort();
+  assert.ok(trees.length > 0, 'no mastery trees in the catalog');
+  const asked: string[] = [];
+  const joined = withCatalogPortraits({ masteries }, (tree) => {
+    asked.push(tree);
+    return { source: 'own', src: `assets/icons/${tree}.svg`, width: 32, height: 32 };
+  }).masteries as { slug: string; portrait?: { src: string } }[];
+  // A tree with no entry in TREE_SLUG would never be asked for: its mastery card would silently
+  // fall back to the generic icon. Each tree must be reached exactly once, by one catalog mastery.
+  assert.deepEqual(
+    asked.sort(),
+    trees,
+    'a tree has no TREE_SLUG entry (or an entry points to a missing tree)',
+  );
+  assert.equal(joined.filter((m) => m.portrait).length, trees.length);
 });

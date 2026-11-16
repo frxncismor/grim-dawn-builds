@@ -87,8 +87,13 @@ export type {
   PublicationOutcome,
 } from './publication-gate.js';
 export { publicFilter } from './visibility.js';
-export { checkAssetManifest, SkillIconAssetSchema, skillIconFilePath } from './asset.js';
-export type { AssetIssue } from './asset.js';
+export {
+  checkAssetManifest,
+  classifySkillIconEntry,
+  SkillIconAssetSchema,
+  skillIconFilePath,
+} from './asset.js';
+export type { AssetIssue, SkillIconClass } from './asset.js';
 export {
   CatalogSkillNodeSchema,
   ICON_ID_PATTERN,

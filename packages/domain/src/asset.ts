@@ -119,3 +119,41 @@ function slugOf(raw: unknown): string | undefined {
 function isIconSlug(slug: string | undefined): boolean {
   return slug !== undefined && ICON_ID_PATTERN.test(slug);
 }
+
+/** What the build does with one manifest entry of a skill icon (the single serveable-icon rule). */
+export type SkillIconClass =
+  | {
+      /** Valid, approved under the common condition: its PNG may be served. */
+      kind: 'approved';
+      slug: string;
+      /** Repo path of the PNG, relative to `apps/web`, derived from the icon id. */
+      filePath: string;
+      sha256: string;
+    }
+  | { kind: 'withdrawn'; slug: string }
+  | { kind: 'invalid'; reason: string };
+
+/**
+ * The one rule behind "this game icon may be served" (constitution §VII, research.md §R10), shared
+ * by the prerender, the emitter and the release gate. `approved` needs `SkillIconAssetSchema` (the
+ * common condition, 32 x 32, provenance) and the file path derived by `skillIconFilePath`;
+ * `withdrawn` must be a valid entry with no file; anything else (pending, rejected, malformed) is
+ * `invalid` and callers fail closed.
+ */
+export function classifySkillIconEntry(raw: unknown): SkillIconClass {
+  const parsed = SkillIconAssetSchema.safeParse(raw);
+  if (!parsed.success) {
+    const slug = slugOf(raw);
+    return { kind: 'invalid', reason: `entrada de ${slug ?? '(sin slug)'} no válida` };
+  }
+  const asset = parsed.data;
+  if (asset.status === 'withdrawn') return { kind: 'withdrawn', slug: asset.slug };
+  if (asset.status !== 'approved' || !asset.provenance)
+    return { kind: 'invalid', reason: `${asset.slug} sin aprobar` };
+  return {
+    kind: 'approved',
+    slug: asset.slug,
+    filePath: skillIconFilePath(asset.slug),
+    sha256: asset.provenance.sha256,
+  };
+}
