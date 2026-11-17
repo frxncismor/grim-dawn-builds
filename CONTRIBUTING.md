@@ -237,7 +237,10 @@ EN/ES) with the references in `e2e/visual-baselines/`, named `<route>-<language>
 builds its own `ASSET_SOURCE=own` artifact, so no game image takes part. When it fails it uploads the
 expected, actual and diff images as the `visual-regression-report` artifact.
 
-The references are generated **only on Linux**, with the manual workflow, never on Windows or macOS:
+The references are generated **only on Linux**, never with a native Windows or macOS browser. There are
+two equivalent ways, both on Ubuntu 24.04 with the Playwright version of `package.json` (`1.65.0`):
+
+### A. Manual GitHub workflow
 
 1. Push the branch with the intended visual change.
 2. In GitHub, open Actions, pick `Visual baselines (Linux)`, choose the branch and run it
@@ -246,9 +249,25 @@ The references are generated **only on Linux**, with the manual workflow, never 
    `e2e/visual-baselines/` with its contents.
 4. Review the PNG differences in the pull request and commit them. The workflow never pushes.
 
-`pnpm e2e:visual` needs a built `dist/` (`pnpm build`). Run it locally only to see the comparison work:
-a reference missing or generated on another platform fails, and `pnpm e2e:visual:update` must not be
-used to commit references from a local machine.
+### B. Local Docker (same image family, same Node as the CI)
+
+Use the official image `mcr.microsoft.com/playwright:v1.65.0-noble` (keep the tag equal to the
+`@playwright/test` version). The script installs Node 22.23.5 and pnpm inside the container, copies the
+repository without `node_modules`, `dist` or `.angular` and builds with `ASSET_SOURCE=own`, so nothing from the
+host enters. From the repository root:
+
+```sh
+mkdir -p test-results/visual-out
+docker run --rm --ipc=host   -v "$PWD:/src:ro" -v "$PWD/test-results/visual-out:/out"   -v "$PWD/scripts/visual-baselines-docker.sh:/run.sh:ro"   mcr.microsoft.com/playwright:v1.65.0-noble sh /run.sh update
+cp test-results/visual-out/*.png e2e/visual-baselines/
+```
+
+Check them the same way with `sh /run.sh check` (no `/out` mount needed). On Windows use Git Bash with
+`MSYS_NO_PATHCONV=1`. `test-results/` is ignored by git.
+
+`pnpm e2e:visual` needs a built `dist/` (`pnpm build`). Run it on the host only to see the comparison work:
+a reference generated on another platform fails, and `pnpm e2e:visual:update` on a host browser must not be
+used to commit references.
 
 ## PostgreSQL logs in Docker
 
