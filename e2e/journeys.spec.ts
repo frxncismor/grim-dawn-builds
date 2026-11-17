@@ -654,21 +654,69 @@ test.describe('@journeys catálogo: ancho y panel de filtros plegable', () => {
       });
     }
 
-  test('/tier-list a 1280px: filtros visibles sin abrir nada y cabecera, panel y contador comparten ancho', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await open(page, `${PUBLIC_BASE_URL}/tier-list`);
-    await expect(page.locator('details.filter-panel input[type="search"]')).toBeVisible();
-    const width = async (selector: string) =>
-      page
-        .locator(selector)
-        .first()
-        .evaluate((el) => Math.round(el.getBoundingClientRect().width));
-    const intro = await width('.catalog-intro');
-    expect(await width('details.filter-panel')).toBe(intro);
-    expect(await width('.result-count')).toBe(intro);
-  });
+  for (const prefix of ['', '/es']) {
+    test(`/tier-list a 1280px (${prefix || '/en'}): filtros visibles sin abrir nada y cabecera, panel y contador comparten ancho`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await open(page, `${PUBLIC_BASE_URL}${prefix}/tier-list`);
+      await expect(page.locator('details.filter-panel input[type="search"]')).toBeVisible();
+      const width = async (selector: string) =>
+        page
+          .locator(selector)
+          .first()
+          .evaluate((el) => Math.round(el.getBoundingClientRect().width));
+      const intro = await width('.catalog-intro');
+      expect(await width('details.filter-panel')).toBe(intro);
+      expect(await width('.result-count')).toBe(intro);
+      // B-06: the title strip spans the whole panel inside its border (the reading measure of `<p>` must not cut it).
+      const inner = await page
+        .locator('details.filter-panel')
+        .evaluate((el) => (el as HTMLElement).clientWidth);
+      expect(await width('.filter-title'), 'franja del título').toBe(inner);
+    });
+
+    test(`/tier-list a 1280px (${prefix || '/en'}): el resumen no es un control falso y el panel se usa con teclado`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await open(page, `${PUBLIC_BASE_URL}${prefix}/tier-list`);
+      const panel = page.locator('details.filter-panel');
+      const summary = panel.locator('> summary');
+      const title = panel.locator('> .filter-title');
+      // B-07: the inert summary leaves the accessibility tree and the tab order; the title stands in.
+      await expect(summary).toBeHidden();
+      await expect(summary).toHaveCSS('display', 'none');
+      await expect(title).toBeVisible();
+      await expect(title).not.toHaveText('');
+      expect(
+        await page.evaluate(() => {
+          const el = document.querySelector('details.filter-panel > summary');
+          return el instanceof HTMLElement ? el.offsetParent === null : true;
+        }),
+        'summary fuera del flujo',
+      ).toBe(true);
+      // Keyboard: tabbing from the top never lands on the summary and reaches the search box.
+      const search = panel.locator('input[type="search"]');
+      let reachedSearch = false;
+      for (let i = 0; i < 40 && !reachedSearch; i++) {
+        await page.keyboard.press('Tab');
+        const focus = await page.evaluate(() => {
+          const el = document.activeElement;
+          return {
+            inSummary: !!el?.closest('details.filter-panel > summary'),
+            isSearch: el instanceof HTMLInputElement && el.type === 'search',
+          };
+        });
+        expect(focus.inSummary, 'el resumen no recibe el foco').toBe(false);
+        reachedSearch = focus.isSearch;
+      }
+      expect(reachedSearch, 'el buscador se alcanza con Tab').toBe(true);
+      await expect(search).toBeFocused();
+      await page.keyboard.type('zzzz-sin-resultados');
+      await expect(search).toHaveValue('zzzz-sin-resultados');
+    });
+  }
 });
 
 async function openVideoPreview(page: Page): Promise<CspProbe> {

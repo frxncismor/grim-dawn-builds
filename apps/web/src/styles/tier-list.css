@@ -81,6 +81,8 @@ gd-tier-list-page .filter-title {
     gd-tier-list-page .filter-panel > .filter-title {
       display: block;
       margin: 0;
+      /* A `<p>` inherits the reading measure from base.css; the strip spans the whole panel (B-06). */
+      max-inline-size: none;
       padding: var(--space-3) var(--space-4);
       min-block-size: var(--space-7);
       font-weight: var(--weight-emphasis);

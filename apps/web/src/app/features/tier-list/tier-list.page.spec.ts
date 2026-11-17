@@ -230,6 +230,10 @@ describe('spec005 T026 (F-06, F-07): catalog width and the filter panel', () => 
     );
     expect(css).toMatch(/\.filter-panel > summary \{\s*display: none;/);
     expect(css).not.toContain('pointer-events: none');
+    // B-06: the `<p>` title would inherit the reading measure of `base.css`; it must span the panel.
+    expect(rule(css, 'gd-tier-list-page .filter-panel > .filter-title')).toContain(
+      'max-inline-size: none',
+    );
     expect(rule(filtersCss, 'gd-filter-bar > .filters')).toContain('padding-inline');
     expect(rule(css, 'gd-tier-list-page .filter-help')).toContain('padding-inline');
   });

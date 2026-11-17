@@ -182,15 +182,11 @@ describe('spec004 T049 (B-002): the editorial title keeps its own language (FR-0
     const editorial = el.querySelector('.build-card__combination[lang="es"]');
     expect(editorial).not.toBeNull();
     expect(editorial!.textContent).not.toBe('Shaman + Soldier');
-    // T037 (F-002): AT reads the Spanish title, but only inside its own lang="es" span; the
-    // UI-language hidden text never mixes it in.
-    const langs = [...link.querySelectorAll('[lang]')];
-    expect(langs).toHaveLength(1);
-    expect(langs[0]!.getAttribute('lang')).toBe('es');
-    expect(langs[0]!.textContent).toContain(editorial!.textContent!);
-    expect(link.querySelector('.build-card__sr:not([lang])')!.textContent).not.toContain(
-      editorial!.textContent!,
-    );
+    // T040 (T052 vs F-002): the link name stays in the UI language, with no lang inside; AT still
+    // reads the Spanish title as the link's description, in its own lang="es" element.
+    expect(link.querySelector('[lang]')).toBeNull();
+    expect(link.textContent).not.toContain(editorial!.textContent!);
+    expect(link.getAttribute('aria-describedby')).toBe(editorial!.id);
   });
 
   it('keeps the localized combination name under the editorial title on the Spanish page (FR-003/FR-004)', async () => {
