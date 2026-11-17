@@ -24,6 +24,7 @@ tipo (FR-003 de la spec).
   30, Shaman 30). Las expansiones (Ashes of Malmouth, Forgotten Gods, Fangs of
   Asterkarn) y los mods quedan **fuera de v1**, por decisión de Paco del 2026-11-13;
   el esquema no impide añadirlas después.
+- **Nombres ES**: `fixtures/content/masteries.json` (`name_es`) es el único origen del nombre ES de cada maestría (Nightblade = «Hoja de la Noche»); `content:validate` falla si el `es` de un árbol difiere.
 - **Quién lo consume**: los datos fluyen en un solo sentido, de los fixtures
   versionados al sitio público.
 

@@ -145,6 +145,26 @@ describe('content:validate CLI', () => {
     assert.match(result.stderr, new RegExp(target.id));
   });
 
+  it('exits 1 naming the tree when its ES name differs from masteries.json (spec005 T024)', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'content-names-'));
+    cpSync(join('fixtures', 'content', 'builds'), join(dir, 'builds'), { recursive: true });
+    cpSync(join('fixtures', 'content', 'masteries.json'), join(dir, 'masteries.json'));
+    mkdirSync(join(dir, 'mastery-trees'));
+    const tree = fixtureJson('mastery-trees/nightblade.json');
+    tree.mastery.name.es = 'Nombre Distinto';
+    writeFileSync(join(dir, 'mastery-trees', 'nightblade.json'), JSON.stringify(tree));
+    const result = run(dir);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /nightblade\.json/);
+    assert.match(result.stderr, /name\.es/);
+    assert.match(result.stderr, /Hoja de la Noche|masteries\.json/);
+  });
+
+  it('names Nightblade «Hoja de la Noche» in the single ES source (spec005 T024, P31)', () => {
+    const night = fixtureJson('masteries.json').find((m: any) => m.name_en === 'Nightblade');
+    assert.equal(night.name_es, 'Hoja de la Noche');
+  });
+
   it('accepts the versioned catalog: every texture has its derived icon_id', () => {
     const result = run(join('fixtures', 'content'));
     assert.equal(result.status, 0, result.stderr || result.stdout);
