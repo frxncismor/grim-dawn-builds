@@ -57,6 +57,31 @@ describe('validateBuildFiles', () => {
   });
 });
 
+describe('claves internas en texto visible (spec005 T032)', () => {
+  it('la guía versionada no muestra claves internas en ninguna cadena visible', () => {
+    assert.deepEqual(validateBuildFiles([{ file: 'g.json', data: guide }], catalog), []);
+  });
+
+  it('falla nombrando el campo si una cadena visible lleva content_status= o un identificador', () => {
+    const data = {
+      ...guide,
+      hero_callout_body: [
+        ...guide.hero_callout_body.slice(0, 1),
+        'Dato: content_status=sin_verificar',
+      ],
+    };
+    const issues = validateBuildFiles([{ file: 'g.json', data }], catalog);
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0]!.path, 'hero_callout_body.1');
+    assert.match(issues[0]!.message, /content_status=/);
+  });
+
+  it('no marca identificadores de campos internos (rights_notes, slugs)', () => {
+    const data = { ...guide, rights_notes: 'Es own_original, no se muestra.' };
+    assert.deepEqual(validateBuildFiles([{ file: 'g.json', data }], catalog), []);
+  });
+});
+
 describe('validateBuildFiles con catálogo (T016)', () => {
   const run = (data: unknown) => validateBuildFiles([{ file: 'builds/g.json', data }], catalog);
 

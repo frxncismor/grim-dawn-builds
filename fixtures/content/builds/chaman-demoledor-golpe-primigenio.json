@@ -47,7 +47,7 @@
   "hero_callout_title": "Datos del build",
   "hero_callout_body": [
     "Esta ficha transcribe solo datos del build: maestrías, habilidades y puntos, devociones y filtro de botín.",
-    "No incluye texto ni imágenes de terceros. Los datos no se han verificado contra el juego y content_status=sin_verificar lo indica."
+    "No incluye texto ni imágenes de terceros. Los datos no se han verificado contra el juego y la etiqueta «Sin verificar» lo indica."
   ],
   "masteries": [
     {
