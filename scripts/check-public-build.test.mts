@@ -174,3 +174,46 @@ test('public canary workflow uses isolated output and removes it after success o
     await clean(root);
   }
 });
+
+test('C-004: the brand gate inspects the fresh build output, not a previous dist/', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gd-public-brand-'));
+  const pages = async (output: string, home: string) => {
+    await mkdir(join(output, 'browser'), { recursive: true });
+    for (const n of ['a', 'b', 'c', 'd', 'e', 'f'])
+      await writeFile(join(output, 'browser', `${n}.html`), '<p>Público</p>');
+    await writeFile(join(output, 'browser', 'index.html'), home);
+  };
+  try {
+    // A stale, clean artifact left in dist/ by an earlier `pnpm build` must not hide a bad fresh build.
+    await mkdir(join(root, 'dist/grim-dawn-builds/browser'), { recursive: true });
+    for (const n of ['a', 'b', 'c', 'd', 'e', 'f', 'index'])
+      await writeFile(join(root, 'dist/grim-dawn-builds/browser', `${n}.html`), '<p>Limpio</p>');
+    const brand = async (dir: string) =>
+      (await import('./check-legacy-brand.mts')).assertNoLegacyBrand(dir);
+    await assert.rejects(
+      runPublicBuildCheck(
+        root,
+        {},
+        { build: (output) => pages(output, '<h1>Grim Dawn Builds</h1>'), brand },
+      ),
+      /unsafe-artifact/,
+    );
+    const ok = await runPublicBuildCheck(
+      root,
+      {},
+      { build: (output) => pages(output, '<h1>Otra marca</h1>'), brand },
+    );
+    assert.equal(ok.pages, 7);
+    // The gate fails, never skips, when the fresh build has no prerendered pages.
+    await assert.rejects(
+      runPublicBuildCheck(
+        root,
+        {},
+        { build: (output) => writeFile(join(output, 'index.html'), '<p>x</p>'), brand },
+      ),
+      /unsafe-artifact/,
+    );
+  } finally {
+    await clean(root);
+  }
+});
