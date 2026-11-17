@@ -222,6 +222,9 @@ Quien revisa un PR necesita que el CI **falle** si cambia, sin quererlo, el aspe
 - **FR-035**: La regresión visual MUST correr en el CI de PR como un trabajo propio y paralelo a la verificación, sin alterar el artefacto que miden las demás puertas.
 - **FR-036**: La regresión MUST fallar con un mensaje que nombre la ruta, el ancho y el idioma, y adjuntar esperada, obtenida y diferencia.
 - **FR-037**: La regresión MUST ejecutarse después de la marca (T015) y de todos los cambios visuales de S4-D* y de las correcciones de la revisión de fidelidad, para no regenerar las referencias.
+- **FR-038**: Cuando una guía no tenga contenido en el idioma de la página (hoy, la guía solo está en español y la página es EN), la página MUST mostrar al inicio un aviso visible («This guide is only available in Spanish»), MUST marcar el contenido con `lang="es"` y su tarjeta (portada y catálogo) MUST usar los nombres de maestría del idioma de la página; MUST NOT traducirse el contenido en esta spec. Decisión de Paco P28 = A (2026-11-16). Corrige F-02.
+- **FR-039**: Cada maestría MUST tener un único nombre en cada idioma, con una sola fuente de la que lean el árbol, el catálogo, los chips, los filtros, las combinaciones y las etiquetas de icono; MUST existir una prueba que falle si dos fuentes difieren. El nombre ES de Nightblade es «Hoja de la Noche» (el del juego; decisión de Paco P31, 2026-11-16). Los identificadores internos (slug `filo-nocturno`, id y archivo del icono) MUST NOT cambiar. Corrige F-20.
+- **FR-040**: Las maestrías sin árbol (Berserker, Oathkeeper, Inquisitor y Necromancer) MUST mostrar «árbol no disponible» (EN y ES) sin enlace allí donde el sitio enlazaría un árbol, y toda maestría enlazada MUST abrir un árbol. Decisión de Paco P29 = A (2026-11-16). Corrige F-19.
 
 #### Transversales
 
@@ -273,6 +276,10 @@ Quien revisa un PR necesita que el CI **falle** si cambia, sin quererlo, el aspe
 - Q: (Q-E, Pregunta 27, S3-T043) ¿Dónde vive el módulo del contrato lanzador–sembrador? → A: A, en `packages/domain` como entrada propia.
 - Decisión de alcance (Paco, 2026-11-16, sin pregunta): la marca pública es «Grim Builds» (US6, FR-023 a FR-029).
 - Decisión de alcance (Paco, 2026-11-16, sin pregunta): verificación visual con una revisión de fidelidad (US7) y una regresión visual en CI (US8), FR-030 a FR-037.
+- Q: (P28, F-02) ¿Qué se hace con la guía solo en español en las páginas EN? → A: A, aviso visible «This guide is only available in Spanish», `lang="es"` en el contenido y nombres EN de maestría en la tarjeta, sin traducir (FR-038; T023).
+- Q: (P30) ¿Qué correcciones de la revisión de fidelidad van antes de T017? → A: A, HIGH y MEDIUM (F-01 a F-15 y F-20) y las LOW por ser baratas (F-16 a F-19); las sugerencias S-01 a S-04 quedan como deuda anotada sin ID en `reviews/fidelity.md` (T020–T033).
+- Q: (P31, F-20) ¿Nombre oficial ES de Nightblade? → A: «Hoja de la Noche», el del juego, con una sola fuente de nombres ES (FR-039; T024).
+- Q: (P29, F-19) ¿Qué se hace con las maestrías sin árbol? → A: A, las cuatro de expansión muestran «árbol no disponible» sin enlace (FR-040; T033, antes de T017).
 
 ## Assumptions
 

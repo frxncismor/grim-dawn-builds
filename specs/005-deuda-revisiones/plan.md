@@ -128,8 +128,22 @@ Regla: lo de `apps/web` lo hace **UI**; lo de `apps/api`, `packages/*` o `script
 | T015  | marca (US6)   | **UI**               | `apps/web/src/**` (layout, SEO, home, build, estáticas, `index.html`, xlf), `apps/web/public/og/`, `apps/web/{PRODUCT,DESIGN}.md`, `apps/web/src/brand.test.mts`, registro en `package.json` | T012, T013, T014 | no |
 | T014  | marca (US6)   | implementación       | `fixtures/content/**`, `apps/api/test/content.int.spec.ts`, `scripts/*.test.mts`, `scripts/fixtures/static-home.html`, `scripts/check-locale-parity.mts`, `docs/content/{permission-request-template,source-policy}.md`, `apps/web/src/app/core/content/{parity,fixture-source.server}.test.mts` (solo la aserción del nombre) | T007 | no |
 | T016  | fidelidad (US7) | **UI**             | `e2e/fidelity-capture.spec.ts`, `package.json`, `specs/005-deuda-revisiones/reviews/fidelity.md` | T015, T008–T012 | no |
-| T017  | regresión visual (US8) | **UI**      | `e2e/visual.spec.ts`, `playwright.visual.config.ts`, `e2e/visual-baselines/**`, `.github/workflows/{ci,visual-baselines}.yml`, `scripts/ci-workflow.test.mts`, `package.json`, `CONTRIBUTING.md` | T016 y correcciones; T015 | no |
-| T018  | cierre        | implementación (coordina la puerta) | `specs/005-deuda-revisiones/reviews/`, `specs/README.md`        | T001–T017             | no    |
+| T017  | regresión visual (US8) | **UI**      | `e2e/visual.spec.ts`, `playwright.visual.config.ts`, `e2e/visual-baselines/**`, `.github/workflows/{ci,visual-baselines}.yml`, `scripts/ci-workflow.test.mts`, `package.json`, `CONTRIBUTING.md` | T016 y correcciones T020–T033; T015 | no |
+| T018  | cierre        | implementación (coordina la puerta) | `specs/005-deuda-revisiones/reviews/`, `specs/README.md`        | T001–T017, T020–T033  | no    |
+| T020  | F-01          | **UI**               | `apps/web/src/app/features/tier-list/tier-list.page.*`, xlf, `e2e/journeys.spec.ts` | T016              | no    |
+| T021  | F-03          | **UI**               | `apps/web/src/app/features/masteries/index.page.{css,html}`                | T016                  | no    |
+| T022  | F-04          | **UI**               | `apps/web/src/app/shared/svg/skill-tree/skill-tree.{css,html}`, `e2e/fidelity-capture.spec.ts` | T016 | `[P]` con T024 |
+| T023  | F-02          | **UI**               | `apps/web/src/app/features/build/build.page.*`, `build-card.*`, adaptadores de `home/` y `tier-list/`, xlf, `e2e/journeys.spec.ts` | T024; P28 | no |
+| T024  | F-20          | **implementación**   | `fixtures/content/{masteries.json,tier-lists,mastery-trees}`, `scripts/gen-catalog.mts` y validador, `docs/content/mastery-catalog.es.md`; excepción de frontera: nombres en `registry.ts`, `build-card.spec.ts`, `index.page.spec.ts`, `e2e/journeys.spec.ts` | T016; P31 | `[P]` con T022 |
+| T025  | F-05          | **UI**               | `apps/web/src/app/features/build/{video-facade,skills,devotion-section}/`, `apps/web/src/styles/deferred.css` | T023 | `[P]` con T026 |
+| T026  | F-06, F-07    | **UI**               | `apps/web/src/styles/{tier-list,tier-components}.css`, `tier-list.page.*`  | T020                  | `[P]` con T025 |
+| T027  | F-08, F-09    | **UI**               | `build/{attribution,loot-filter,sections,source-attribution}/*.css`, `build.page.html`, `masteries/mastery.page.html` | T025, T021 | no |
+| T028  | F-10, F-17, F-18 | **UI**            | `build/{sections,devotion-section,purchase-stepper}/`, `build.page.css`, `tokens.css`, xlf | T027 | no |
+| T029  | F-11          | **UI**               | `home/home.page.*`, `apps/web/src/styles/build-card.css`                   | T023, T026            | `[P]` con T032 |
+| T030  | F-12          | **UI**               | `tokens.css`, `build-card.css`, `build/summary/`, `scripts/check-contrast.mts` (solo pares) | T029, T028 | no |
+| T031  | F-13, F-14, F-16 | **UI**            | `apps/web/src/app/shared/svg/skill-tree/{skill-tree.*,place-tooltip.*}`, `e2e/skill-tooltip.spec.ts` | T022, T030 | no |
+| T032  | F-15          | **implementación**   | `fixtures/content/builds/chaman-demoledor-golpe-primigenio.json`, `docs/content/source-policy.md`, validador | T024 | `[P]` con T029 |
+| T033  | F-19          | **UI**               | `home/`, `masteries/`, xlf (P29 = A)                     | T021, T029; P29 = A   | no    |
 
 Dueño y dependencia en las tareas que cruzan áreas: **A-01** se divide en T005 (implementación: dominio + API) y T006 (UI: web), con T006 después de T005 y después de reconstruir `packages/domain`. **Marca (US6)** se divide en T014 (implementación: fixtures y pruebas de `scripts/` y `apps/api`) y T015 (UI: `apps/web`), con T015 después de T014. Excepciones acotadas de frontera, declaradas aquí para que ningún agente edite fuera de su área sin saberlo: T014 cambia solo la aserción del nombre en dos pruebas de contenido de `apps/web` (`parity.test.mts:247`, `fixture-source.server.test.mts:38`) porque comprueban las fixtures que T014 cambia; T015 añade una línea al `test:scripts` de `package.json` para registrar su prueba de marca. **S3-T043** y **C-003** son solo implementación.
 
@@ -142,7 +156,7 @@ Dueño y dependencia en las tareas que cruzan áreas: **A-01** se divide en T005
 1. **T001** (S4-D1, por decisión de Paco).
 2. Implementación: T002 → T003 → T004 → T005 → T007 → T014.
 3. UI en paralelo a lo anterior: T008 ∥ T010 ∥ T013, luego T009 → T011 → T012; T006 cuando T005 esté integrada; T015 cuando T012, T013 y T014 estén integradas.
-4. T016: revisión de fidelidad (cuando T015 y T008–T012 estén integradas); las correcciones que acepte el principal van entre T016 y T017.
+4. T016: revisión de fidelidad (cuando T015 y T008–T012 estén integradas). Después, las correcciones **T020–T033** (Fase 9 de `tasks.md`, decisiones P28, P30 y P31): T020, T021, T022 ∥ T024, T023, T025 ∥ T026, T027, T028, T029 ∥ T032, T030, T031, T033. Dos son de implementación (T024, T032) y doce de UI; las aristas entre áreas son T024 → T023 y T024 → T032. Las sugerencias S-01 a S-04 son deuda anotada sin ID.
 5. T017: regresión visual, **la última visual**.
 6. T018: puerta de cierre de spec002 sobre spec005.
 
