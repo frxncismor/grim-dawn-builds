@@ -214,3 +214,17 @@ describe('spec004 T049 (B-002): the editorial title keeps its own language (FR-0
     expect((fixture.nativeElement as HTMLElement).querySelector('[lang]')).toBeNull();
   });
 });
+
+describe('spec006 T002 (L1): card keys come from the content', () => {
+  it('gives every card of the catalog fixtures its own key, the same one on every build', () => {
+    const keysOf = () => {
+      const { cards, ctx } = cardsOf({});
+      return cards.map((c) => catalogCardInput(c, ctx).key);
+    };
+    const keys = keysOf();
+    expect(keys.length).toBeGreaterThan(1);
+    expect(new Set(keys).size).toBe(keys.length);
+    expect(keysOf()).toEqual(keys);
+    for (const key of keys) expect(key).not.toMatch(/\s/);
+  });
+});

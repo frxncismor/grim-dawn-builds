@@ -64,7 +64,10 @@ export function homeBuilds(input: CatalogInput, locale: CatalogLocale): HomeBuil
   const toCard = (
     item: (typeof published)[number],
     variant: BuildCardInput['variant'],
-  ): BuildCardInput => catalogCardInput(item.card, context, variant);
+  ): BuildCardInput => ({
+    ...catalogCardInput(item.card, context, variant),
+    key: item.guide.slug,
+  });
 
   const [first, ...rest] = published;
   return {
