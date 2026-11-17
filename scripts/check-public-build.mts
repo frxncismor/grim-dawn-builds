@@ -101,12 +101,14 @@ export async function assertPublicBuild(
 
 interface Dependencies {
   build?(output: string, env: Record<string, string>): Promise<void>;
+  /** C-004: brand gate over the fresh `<output>/browser` this run built (never a previous `dist/`). */
+  brand?(browserDir: string): Promise<{ pages: number }>;
 }
 export async function runPublicBuildCheck(
   root: string,
   input: Environment,
   dependencies: Dependencies = {},
-): Promise<{ files: number }> {
+): Promise<{ files: number; pages?: number }> {
   const dist = resolve(root, 'dist');
   await mkdir(dist, { recursive: true });
   if ((await lstat(dist)).isSymbolicLink()) throw new PublicBuildError('unsafe-artifact');
@@ -143,6 +145,15 @@ export async function runPublicBuildCheck(
     } catch {
       throw new PublicBuildError('build-failed');
     }
+    let pages: number | undefined;
+    if (dependencies.brand) {
+      try {
+        pages = (await dependencies.brand(join(output, 'browser'))).pages;
+      } catch (error) {
+        console.error(`check:public-build: ${error instanceof Error ? error.message : error}`);
+        throw new PublicBuildError('unsafe-artifact');
+      }
+    }
     const report = join(dist, 'build-info.json');
     const extra: string[] = [];
     try {
@@ -154,7 +165,8 @@ export async function runPublicBuildCheck(
         throw new PublicBuildError('unsafe-artifact');
     }
     await assertPublicBuild(output, watched, extra);
-    return await assertPublicBuild(dist, watched);
+    const scanned = await assertPublicBuild(dist, watched);
+    return pages === undefined ? scanned : { ...scanned, pages };
   } finally {
     if (dirname(output) !== dist || !basename(output).startsWith('.public-check-'))
       throw new PublicBuildError('unsafe-artifact');
@@ -169,17 +181,11 @@ async function main(): Promise<number> {
   try {
     if (process.argv.length !== 2) throw new PublicBuildError('build-failed');
     const root = resolve(import.meta.dirname, '..');
-    // T034: first the official artifact of `pnpm build` (fails, never skips, when it is missing,
-    // empty or still carries the old brand), then the fixture build that scans for secrets.
-    const brand = await assertNoLegacyBrand(
-      join(root, 'dist', 'grim-dawn-builds', 'browser'),
-    ).catch((error: unknown) => {
-      console.error(`check:public-build: ${error instanceof Error ? error.message : error}`);
-      throw new PublicBuildError('unsafe-artifact');
-    });
-    const result = await runPublicBuildCheck(root, process.env);
+    // T034/C-004: the brand gate inspects the fresh fixture build made here (fails, never skips,
+    // when it is missing, empty or carries the old brand), not a possibly stale `dist/`.
+    const result = await runPublicBuildCheck(root, process.env, { brand: assertNoLegacyBrand });
     console.log(
-      `check:public-build: marca antigua ausente en ${brand.pages} páginas prerrenderizadas.`,
+      `check:public-build: marca antigua ausente en ${result.pages} páginas prerrenderizadas del build fresco.`,
     );
     console.log(`check:public-build OK (${result.files} archivos; valores y patrones ausentes).`);
     return 0;
