@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "feature": "specs/005-deuda-revisiones",
+  "snapshot": "8c9d04be1048388377d59178c67ae69348fed7902d9fcd5cfa96ea1ebbd4d204",
+  "createdAt": "2026-11-17T20:51:09Z",
+  "implementationActor": "agentes implementadores de la corrida de orquestación 11111619 (OpenCode/Claude Code)",
+  "delegationAvailable": true,
+  "reviews": [
+    {
+      "specialty": "code",
+      "reviewer": "11111619-revisor-cierre-s5-code-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "Ronda 2 → 3: git diff b562d83..0c9cf02 completo en apps/ y e2e/ (write-content.mts, seed-errors.spec.ts, seed.int.spec.ts, build-card.{ts,spec.ts}, card-data.spec.ts, tier-list.page.spec.ts, tier-list.css, journeys.spec.ts) y registro SDD (tasks.md Fase 11, quickstart.md, reviews/deuda.md)",
+        "C-101/F-001 (T041): consulta de aparcamiento de slugs en writeCatalogRows cotejada con el esquema (mastery_trees slug UNIQUE, mastery_trees_slug_ck, mastery_trees_id_ck), los permisos del rol importer (0009), los triggers de revalidación diferidos (0012) e inmediatos de build_skill_nodes (0010), y los tres llamadores (seedData, bootstrapData, seedCatalog) con su retireMasteries posterior",
+        "T040 (B-06, B-07, F-002 vs T052): build-card.ts (aria-describedby a la línea de combinación con lang, contador de ids de módulo frente a SSR/hidratación), build-card.labels.ts y build-card.model.ts (srCombination), card-data.ts (único productor de combinationLang), tier-list.css y las pruebas e2e nuevas a 1280 en EN y ES",
+        "Hallazgos aplazados de la ronda 2 en reviews/deuda.md (F-002 y S-001): F-002 comprobado de nuevo en el código actual (sigue presente, aplazado); S-001 no es de esta especialidad",
+        "Huella completa de spec005 (fe77dd6..0c9cf02) revisada en las rondas 1 y 2 con el mismo enfoque; en esta pasada solo se volvió sobre el código que T040 y T041 tocan o del que dependen"
+      ],
+      "checks": [
+        {
+          "name": "pnpm exec vitest run src/db/seed-errors.spec.ts src/db/seed.spec.ts src/db/bootstrap.spec.ts (apps/api)",
+          "result": "3 archivos, 42 passed (incluye el caso nuevo de T041 sobre el orden aparcar → upsert en seed, bootstrap y catálogo)"
+        },
+        {
+          "name": "pnpm exec ng test --watch=false --include build-card.spec.ts --include card-data.spec.ts --include tier-list.page.spec.ts (apps/web)",
+          "result": "3 archivos, 60 passed"
+        },
+        {
+          "name": "git diff b562d83..0c9cf02 -- apps e2e (lectura) y grep de llamadores de writeCatalogRows/retireMasteries y productores de combinationLang",
+          "result": "writeCatalogRows solo se llama desde seedData, bootstrapData y seedCatalog, siempre seguido de retireMasteries en la misma transacción; combinationLang solo lo produce card-data.ts y siempre con href"
+        },
+        {
+          "name": "git status --short tras las pruebas",
+          "result": "limpio (0 líneas)"
+        }
+      ],
+      "limitations": [
+        "No se ejecutaron pnpm verify, check:performance, e2e (journeys, a11y, visual) ni las pruebas de integración con Postgres (seed.int.spec.ts con los tres casos nuevos de T041): por encargo; la evidencia está en quickstart.md («Verificación tras las correcciones de la ronda 2 de la puerta (T040–T041)»: API con BD 494 passed, e2e:a11y 171, e2e:journeys 544).",
+        "El comportamiento de hidratación del id de la descripción (contador de módulo) se razona sobre el código y la semántica de bindings de Angular; no se inspeccionó el HTML prerenderizado ni se probó en navegador.",
+        "La base de /tier-list (111 403 B) no se evalúa: Paco la aceptó el 2026-11-17 según el orquestador; el texto «pendiente de confirmación» se actualizará al registrar la ronda.",
+        "Revisión con un solo modelo (claude-opus-5-5 en Claude Code)."
+      ],
+      "findings": [
+        {
+          "id": "C-201",
+          "severity": "LOW",
+          "path": "apps/web/src/app/shared/ui/build-card/build-card.labels.ts",
+          "line": 66,
+          "evidence": "T040 dejó de dibujar el span lang con srCombination dentro de los enlaces; ahora srCombination solo se usa como booleano para aria-describedby (build-card.ts:40 y :49). Los comentarios siguen diciendo lo anterior: build-card.labels.ts:66-67 («is read in its own lang span (srCombination)») y build-card.model.ts:68-71 («drawn in its own lang span so AT still reads it (T037, F-002)»). La cadena '. ' + combination solo se pinta en la rama sin enlace (build-card.ts:55-59), que no se alcanza: combinationLang solo lo pone card-data.ts:72 cuando hay guía, y entonces href nunca es null (card-data.ts:79).",
+          "impact": "Sin efecto en tiempo de ejecución. La documentación del modelo describe un mecanismo de accesibilidad que ya no existe, y queda una rama muerta con un span lang dentro de un h3. Si alguien reutiliza la tarjeta sin enlace y con combinationLang, el nombre del encabezado mezclaría idiomas, lo que T052 prohíbe para el enlace.",
+          "recommendation": "Actualizar los comentarios de labels.ts y model.ts para describir la descripción por aria-describedby (T040). Convertir srCombination en un booleano (p. ej. describedByCombination), o quitar el span de la rama sin enlace. Con T040 cerrada, puede ir como limpieza en la próxima tarea que toque la tarjeta.",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por decisión del principal 2026-11-17 (opción B, ronda 3 de la puerta T018); Paco aceptó la ronda; seguimiento S5-D2 en specs/005-deuda-revisiones/reviews/deuda.md."
+        },
+        {
+          "id": "C-202",
+          "severity": "LOW",
+          "path": "apps/api/src/db/write-content.mts",
+          "line": 429,
+          "evidence": "Sigue abierto F-002 de T-136 r2 (antes en la línea 417): para una maestría que se conserva, writeCatalogRows ejecuta `DELETE FROM catalog_skill_nodes WHERE mastery_id = $1 AND id <> ALL($2::text[])` antes de writeContentRows. T041 no lo cambia. ID original: F-002 (T-136, ronda 2).",
+          "impact": "Una siembra que quite un nodo que una guía deja de usar en esa misma siembra falla con 23503, que sale como database-failed sin id. Falla cerrado y solo afecta a desarrollo y test.",
+          "recommendation": "La del plan de reviews/deuda.md: podar los nodos después de writeContentRows o traducir el 23503 a SeedError('reference', <id de la maestría>), y añadir el caso a seed.int.spec.ts.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado por decisión de Paco 2026-11-17 en la ronda 2 de T018; registrado con motivo, riesgo residual y plan en specs/005-deuda-revisiones/reviews/deuda.md (entrada 1, F-002). Tarea de referencia: T018."
+        }
+      ]
+    },
+    {
+      "specialty": "architecture",
+      "reviewer": "11111619-revisor-cierre-s5-architecture-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "Seguimiento de la ronda 2 de arquitectura (11111619-revisor-cierre-s5-architecture-r2-reporte.md, 0 hallazgos): nada que verificar como corregido; se buscaron regresiones de frontera en git diff b562d83..0c9cf02",
+        "T041 (C-101/F-001): apps/api/src/db/write-content.mts (aparcamiento de slugs 'released-<id>' antes del upsert en writeCatalogRows), consumidores seed.mts y bootstrap.mts (todos dentro de BEGIN/COMMIT), apps/api/src/db/seed-errors.spec.ts y apps/api/test/seed.int.spec.ts; regex de slug y de id de maestría en packages/domain/src/mastery-tree.ts",
+        "T040 (B-06, B-07, B-09 y T052 frente a F-002): apps/web/src/app/shared/ui/build-card/{build-card.ts,build-card.model.ts,build-card.labels.ts} (aria-describedby a la línea de combinación con lang, id por contador de módulo), card-data.spec.ts, tier-list.page.spec.ts, styles/tier-list.css, e2e/journeys.spec.ts; app.config.ts (hidratación) y angular.json/app.routes.server.ts (outputMode static, RenderMode.Prerender)",
+        "Registro SDD de la ronda 2: specs/005-deuda-revisiones/{spec,plan,tasks}.md (SC-008/P32 con la base 111 343 B y la medida 111 403 B) y reviews/deuda.md (F-002 y S-001 aplazados)",
+        "Repaso de la huella fe77dd6..0c9cf02 ya revisada en las rondas 1 y 2 (contrato seed-contract y failureLine en packages/domain, MasterySummarySchema, catalog-trees.server.ts, puertas de crédito, marca, workflows) buscando roturas de frontera nuevas"
+      ],
+      "checks": [
+        {
+          "name": "pnpm check:boundaries",
+          "result": "check:boundaries OK (379 archivos revisados), exit 0"
+        },
+        {
+          "name": "apps/api: pnpm exec vitest run src/db/seed-errors.spec.ts src/db/seed.spec.ts",
+          "result": "2 ficheros, 34 tests passed (incluye el caso nuevo de T041 sobre el orden aparcamiento → upsert en seed, bootstrap y catálogo)"
+        },
+        {
+          "name": "apps/web: pnpm exec ng test --watch=false --include=src/app/shared/ui/build-card/build-card.spec.ts --include=src/app/features/tier-list/card-data.spec.ts",
+          "result": "2 ficheros, 48 tests passed"
+        },
+        {
+          "name": "git diff b562d83..0c9cf02 y lectura de los archivos tocados; grep de srCombination/combinationLang en apps/web/src; grep de BEGIN/COMMIT y writeCatalogRows en apps/api/src/db",
+          "result": "writeCatalogRows solo se llama dentro de transacciones (seed.mts:249/271, bootstrap.mts:75); srCombination solo se pinta como texto en la rama sin enlace de build-card.ts"
+        },
+        {
+          "name": "git status --short",
+          "result": "árbol limpio en 0c9cf02 tras las comprobaciones"
+        }
+      ],
+      "limitations": [
+        "No ejecuté pnpm verify, check:performance, los *.int.spec.ts con Postgres, e2e ni Docker: el encargo los excluye y constan en quickstart.md («Verificación tras las correcciones de la ronda 2 de la puerta (T040–T041)»).",
+        "No hay dist/ actual (el de la carpeta es del 2026-11-16, anterior a T040), así que no medí los id generados en el HTML prerrenderizado: A-101 se basa en la lectura del código y de la configuración de prerender, no en dos builds comparados.",
+        "El slug de aparcamiento 'released-<id>' es un slug válido para el dominio (regex kebab-case y id classNN); una colisión exigiría una fixture con un slug literal 'released-classNN'. Es teórico y falla cerrado dentro de la transacción (database-failed), así que no lo registro como hallazgo.",
+        "La poda de nodos (F-002 de T-136 r2) y la frontera del contenedor de referencias (S-001 de security r2) siguen como están, aplazadas por Paco en specs/005-deuda-revisiones/reviews/deuda.md; no son de mi especialidad y no las repito.",
+        "No evalué la semántica de accesibilidad de aria-describedby sobre un elemento aria-hidden con lang (lo cubren e2e:a11y y la especialidad correspondiente)."
+      ],
+      "findings": [
+        {
+          "id": "A-101",
+          "severity": "LOW",
+          "path": "apps/web/src/app/shared/ui/build-card/build-card.ts",
+          "line": 5,
+          "evidence": "T040 añade `let nextCardId = 0;` a nivel de módulo y `descriptionId = `build-card-combination-${nextCardId++}`` (línea 81). La cabecera del componente (líneas 8-9) declara que la tarjeta «no tiene estado, ni valores calculados, ni lógica de cliente propia». La web se prerenderiza (`outputMode: static`, `RenderMode.Prerender`) con hidratación (`provideClientHydration` en app.config.ts:15), así que el contador vive en el proceso de prerender y sigue sumando entre rutas, y en el cliente vuelve a empezar en 0.",
+          "impact": "Los id del HTML de /tier-list dependen de cuántas tarjetas se pintaron antes en ese proceso de prerender, no solo de los datos de la página, y cambian al hidratar. Cada instancia usa el mismo valor para `id` y `aria-describedby`, así que hoy no rompe la asociación ni la unicidad. Pero es estado mutable compartido en un componente cuyo diseño declara no tenerlo, y quita reproducibilidad al HTML prerrenderizado. Es un riesgo de mantenimiento si mañana se compara HTML entre builds o se reutiliza la tarjeta con SSR por petición.",
+          "recommendation": "Documentar la excepción en la cabecera del componente (por qué un contador y que es seguro con la hidratación porque id y aria-describedby salen de la misma instancia), o derivar el id de una clave estable del dato si la página garantiza que no se repite. No hace falta rediseñar.",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por decisión del principal 2026-11-17 (opción B, ronda 3 de la puerta T018); Paco aceptó la ronda; seguimiento S5-D1 en specs/005-deuda-revisiones/reviews/deuda.md."
+        },
+        {
+          "id": "A-102",
+          "severity": "LOW",
+          "path": "apps/web/src/app/shared/ui/build-card/build-card.model.ts",
+          "line": 69,
+          "evidence": "El contrato de `srCombination` (build-card.model.ts:68-72) dice que es «texto oculto que se lee antes de `srText` … pintado en su propio span con `lang` (T037, F-002)», y el comentario de build-card.labels.ts:66-67 lo repite. Tras T040 las dos ramas con enlace de build-card.ts (líneas 40 y 49) solo usan `d.srCombination` como condición para `aria-describedby`. El texto `'. ' + combination` solo se pinta en la rama sin enlace (líneas 55-58).",
+          "impact": "El modelo de la tarjeta, que es la interfaz entre build-card.labels.ts y la plantilla, documenta un comportamiento que ya no existe en el caso principal (tarjetas con enlace). Quien lo mantenga puede volver a meter el texto en el nombre accesible del enlace y reabrir el conflicto entre T052 de spec004 y F-002 que T040 acaba de resolver.",
+          "recommendation": "Actualizar los comentarios de build-card.model.ts y build-card.labels.ts. En el modelo: en una tarjeta con enlace, `srCombination` solo activa `aria-describedby` hacia la línea de combinación con `lang`, y su texto solo se pinta en la tarjeta sin enlace. Opcionalmente, separarlo en un booleano y el texto, vigilando los bytes de /tier-list.",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por decisión del principal 2026-11-17 (opción B, ronda 3 de la puerta T018); Paco aceptó la ronda; seguimiento S5-D2 en specs/005-deuda-revisiones/reviews/deuda.md."
+        }
+      ]
+    },
+    {
+      "specialty": "security",
+      "reviewer": "11111619-revisor-cierre-s5-security-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "Seguimiento de la ronda 2 (S-001 security r2) y de las correcciones T040-T041: git diff b562d83..0c9cf02 completo (14 archivos)",
+        "apps/api/src/db/write-content.mts: aparcado de slugs 'released-<id>' en writeCatalogRows (T041), su orden respecto a retireMasteries y las transacciones de seed.mts (seedCatalog, seedData) y bootstrap.mts",
+        "apps/api/test/seed.int.spec.ts y apps/api/src/db/seed-errors.spec.ts: casos nuevos de T041 (slug reutilizado, intercambio de slugs, maestría retirada usada por una guía)",
+        "apps/web/src/app/shared/ui/build-card/build-card.ts: aria-describedby, contador de ids a nivel de módulo, interpolación de texto (T040); apps/web/src/app/app.routes.server.ts (modo de render)",
+        "apps/web/src/styles/tier-list.css y e2e/journeys.spec.ts (T040, sin superficie de seguridad)",
+        "Huella completa de spec005 (git diff fe77dd6..0c9cf02): búsqueda de sumideros de HTML/JS y SQL interpolado en apps, packages y scripts; .github/workflows, scripts/, packages/, infra/ y CONTRIBUTING{,.es}.md sin cambios desde la ronda 2 (git diff --stat b562d83..0c9cf02 vacío en esas rutas)",
+        "scripts/visual-baselines-docker.sh y CONTRIBUTING.md:255-264 (estado del S-001 de la ronda 2)",
+        "specs/005-deuda-revisiones/reviews/deuda.md (aplazamientos F-002 y S-001)"
+      ],
+      "checks": [
+        {
+          "name": "pnpm run check:secrets",
+          "result": "check:secrets OK (929 archivos rastreados revisados)"
+        },
+        {
+          "name": "pnpm run check:ci-secrets",
+          "result": "check-ci-secrets OK (3 workflow(s) revisados)"
+        },
+        {
+          "name": "apps/api: pnpm exec vitest run src/db/seed.spec.ts src/db/seed-errors.spec.ts",
+          "result": "2 files, 34 tests passed (incluye el caso T041 de orden aparcado -> upsert en seed, bootstrap y catálogo)"
+        },
+        {
+          "name": "node --import tsx --test scripts/check-public-build.test.mts scripts/ci-workflow.test.mts scripts/seed-content.test.mts scripts/domain-runtime.test.mts scripts/check-assets.test.mts scripts/check-legacy-brand.test.mts scripts/check-ci-secrets.test.mts apps/web/src/app/core/content/portraits.server.test.mts",
+          "result": "164 tests, 164 pass, 0 fail"
+        },
+        {
+          "name": "git diff --stat b562d83..0c9cf02 -- .github scripts packages infra CONTRIBUTING.md CONTRIBUTING.es.md",
+          "result": "vacío: workflows, scripts, dominio, infra y guía de contribución sin cambios desde la ronda 2"
+        },
+        {
+          "name": "git diff fe77dd6..0c9cf02 -- apps packages scripts | grep de innerHTML/outerHTML/bypassSecurityTrust/eval/new Function/insertAdjacentHTML/SQL interpolado en líneas añadidas",
+          "result": "3 coincidencias, todas en pruebas (fixture de DOM con innerHTML literal y outerHTML en mensajes de aserción); ninguna en código de producción"
+        }
+      ],
+      "limitations": [
+        "No se ejecutó DAST (ZAP) ni se repitió pnpm verify ni check:performance; se toma la evidencia de quickstart.md («Verificación tras las correcciones de la ronda 2 de la puerta (T040–T041)»).",
+        "No se ejecutó auditoría de dependencias (pnpm audit) ni SCA; la revisión no hace peticiones de red.",
+        "No se ejecutaron las pruebas de integración con PostgreSQL real (seed.int.spec.ts, casos nuevos de T041); se toma el resultado registrado (API con BD 494 passed). El análisis del UPDATE de aparcado es estático más la prueba unitaria de orden.",
+        "No se ejecutaron las pruebas de apps/web (ng test) para no regenerar cachés compartidas con otros revisores en paralelo; build-card.ts se revisó estáticamente.",
+        "No se ejecutaron los workflows de GitHub Actions ni el contenedor Docker de referencias (no se toca Docker por encargo).",
+        "No se abrieron las 30 PNG de e2e/visual-baselines (aceptadas por Paco)."
+      ],
+      "findings": [
+        {
+          "id": "S-101",
+          "severity": "LOW",
+          "path": "CONTRIBUTING.md",
+          "line": 257,
+          "evidence": "Sigue abierto el S-001 de la ronda 2 de security (ID original S-001, antes S-002 de la ronda 1). CONTRIBUTING.md:256-258 sigue afirmando que «neither local secrets nor results of earlier runs enter the container», pero el comando documentado (CONTRIBUTING.md:264) monta el repositorio completo como -v \"$PWD:/src:ro\", así que .env, .env.* e infra/docker/secrets/ del host siguen legibles en /src durante pnpm install --frozen-lockfile (scripts/visual-baselines-docker.sh:36); el filtro pasa las rutas a tar -X como patrones con comodines (scripts/visual-baselines-docker.sh:27-31). Ni el script ni la guía cambiaron entre b562d83 y 0c9cf02.",
+          "impact": "Igual que en la ronda 2: la frontera documentada no existe del todo; la exposición equivale a un pnpm install en el host, en uso manual y local con ASSET_SOURCE=own y CONTENT_SOURCE=fixture, sin efecto en CI ni en el producto.",
+          "recommendation": "Al planificar la deuda: enviar al contenedor solo los archivos seguros por stdin (git ls-files -co --exclude-standard | tar -cf - -T -) o montar una copia ya filtrada, usar --no-wildcards en el filtro y, si se mantiene el montaje, corregir CONTRIBUTING{,.es}.md y el comentario del script.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado por decisión de Paco 2026-11-17 en la ronda 2 de T018 (S-001 security r2), registrado con motivo, riesgo residual y plan en specs/005-deuda-revisiones/reviews/deuda.md, entrada 2. Tarea de referencia: T018."
+        }
+      ]
+    },
+    {
+      "specialty": "best-practices",
+      "reviewer": "11111619-revisor-cierre-s5-best-practices-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "Seguimiento de la ronda 2 (B-06, B-07, B-08 y B-09 de 11111619-revisor-cierre-s5-best-practices-r2-reporte.md) sobre git diff b562d83..0c9cf02 (T040-T041)",
+        "apps/web/src/styles/tier-list.css y tier-list.page.spec.ts (B-06), e2e/journeys.spec.ts:657-719 (B-07), e2e/a11y.spec.ts (proyectos 375/768/1280, rutas /tier-list y /es/tier-list, caso T052)",
+        "apps/web/src/app/shared/ui/build-card/{build-card.ts,build-card.labels.ts,build-card.model.ts,build-card.spec.ts} y features/tier-list/card-data.spec.ts (desviación T052 frente a F-002, aria-describedby)",
+        "apps/api/src/db/write-content.mts:399-413, seed-errors.spec.ts y apps/api/test/seed.int.spec.ts (T041, C-101/F-001), solo desde la calidad de pruebas y el registro SDD",
+        "specs/005-deuda-revisiones/{spec,plan,tasks,quickstart}.md y reviews/deuda.md (registro de T040-T041, B-08, B-09, aplazamientos F-002 y S-001)",
+        "CONTRIBUTING.md:250-260 (frontera de secretos del contenedor visual, ya aplazada como S-001)",
+        "Huella completa git diff fe77dd6..0c9cf02 ya revisada en las rondas 1 y 2; en esta ronda solo se reabrió lo que tocaron T040-T041 (sin abrir los 30 PNG)"
+      ],
+      "checks": [
+        {
+          "name": "git log -1 --oneline",
+          "result": "0c9cf02, rama orq/11111619"
+        },
+        {
+          "name": "pnpm check:locale-parity",
+          "result": "OK: 341 unidades en paridad, 0 fallos"
+        },
+        {
+          "name": "pnpm lint:md",
+          "result": "Linting: 110 files; Summary: 0 issues in 0 files"
+        },
+        {
+          "name": "pnpm --filter @gd/web exec ng test --include build-card.spec.ts --include card-data.spec.ts --include tier-list.page.spec.ts",
+          "result": "3 ficheros; 60 passed"
+        },
+        {
+          "name": "pnpm exec vitest run src/db/seed-errors.spec.ts (apps/api)",
+          "result": "1 fichero; 15 passed"
+        },
+        {
+          "name": "pnpm exec prettier --check build-card.ts tier-list.css e2e/journeys.spec.ts",
+          "result": "conformes; los .md de specs/005 dan avisos de estilo, pero están fuera del alcance de format:check (package.json:35) y no se reportan"
+        },
+        {
+          "name": "Lectura de e2e/a11y.spec.ts y playwright.config.ts:105-107",
+          "result": "axe corre en /tier-list y /es/tier-list en los proyectos de 375, 768 y 1280 px, así que la parte «axe sin violaciones» de B-07 queda cubierta (171 passed según quickstart.md)"
+        }
+      ],
+      "limitations": [
+        "No ejecuté pnpm verify, check:performance ni e2e:* (journeys, a11y o visual), por encargo. Las cifras salen de quickstart.md, «Verificación tras las correcciones de la ronda 2 de la puerta (T040-T041)».",
+        "No ejecuté pnpm build porque dist/ está compartido con otros revisores. El dist/ local es del 2026-11-16 y anterior a T040, así que el efecto del contador de ids en el HTML prerenderizado (B-11) se razona sobre el código y no se midió.",
+        "No probé con un lector de pantalla real cómo se pronuncia la descripción en español en una página EN (B-12).",
+        "No ejecuté las pruebas con Postgres (*.int.spec.ts). T041 se revisó solo como calidad de pruebas: la corrección lógica es del revisor de código.",
+        "No ejecuté node scripts/spec-review.mjs prepare: uso el snapshot que da el encargo.",
+        "Por indicación del orquestador (mensaje hc del 2026-11-17), no se reporta que la base de 111 403 B de /tier-list figure como «pendiente de confirmación de Paco»: Paco ya la aceptó y el texto se actualiza al registrar esta ronda.",
+        "Revisión de solo lectura: no edité ningún archivo versionado."
+      ],
+      "findings": [
+        {
+          "id": "B-10",
+          "severity": "LOW",
+          "path": "specs/005-deuda-revisiones/tasks.md",
+          "line": 141,
+          "evidence": "La casilla [x] de T040 conserva la frase «Pendiente: fallo preexistente de `e2e:a11y` T052 (ver arriba)», y justo detrás dice «T052 frente a F-002 resuelta con aria-describedby; e2e:a11y 171 passed». El fallo no era preexistente: lo introdujo T037/F-002 en esta misma spec, como reconoce el propio párrafo de la desviación. Además, la nota de T037 (tasks.md:129) sigue describiendo F-002 como «título editorial ES leído en `<span lang=\"es\">` dentro del enlace de la tarjeta», sin la anotación de que T040 lo revirtió. A B-09 sí se le añadió esa anotación.",
+          "impact": "El registro SDD de dos tareas cerradas se contradice: una casilla marcada declara algo pendiente y llama preexistente a una regresión propia, y T037 describe un diseño que ya no existe. Quien audite la trazabilidad no sabe cuál es el estado real de F-002.",
+          "recommendation": "Al registrar esta ronda, quitar «Pendiente: fallo preexistente…» de T040 (o reescribirlo como «regresión de T037/F-002, resuelta») y añadir a T037 una nota «F-002 sustituido en T040 por aria-describedby (T052)».",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por decisión del principal 2026-11-17 (opción B, ronda 3 de la puerta T018); Paco aceptó la ronda; seguimiento S5-D4 en specs/005-deuda-revisiones/reviews/deuda.md."
+        },
+        {
+          "id": "B-11",
+          "severity": "LOW",
+          "path": "apps/web/src/app/shared/ui/build-card/build-card.ts",
+          "line": 5,
+          "evidence": "T040 añade un contador mutable a nivel de módulo, `let nextCardId = 0`, y `descriptionId = `build-card-combination-${nextCardId++}`` (:81). El docstring de la clase (:8) sigue diciendo «Markup and CSS only: it has no state, no computed values and no client logic of its own». En el prerender, el contador vive mientras dura el proceso o worker y no se reinicia por página. En el cliente vuelve a empezar en 0 (provideClientHydration, app.config.ts:15), así que el id del HTML servido y el del DOM hidratado no coinciden. Hoy los dos bindings ([id] y aria-describedby) se reescriben juntos y no se rompe nada.",
+          "impact": "El HTML prerenderizado deja de ser determinista: los ids dependen del orden en que se rendericen las rutas, y los bytes del HTML pueden variar entre builds en las rutas con margen de HTML medido (SC-008). Además, el comentario que justifica el diseño sin estado de la tarjeta ya no es cierto, y un patrón de estado global en SSR invita a romper la hidratación en el próximo cambio.",
+          "recommendation": "Derivar el id de los datos, por ejemplo del slug de `d.href` o de la URL externa, con un prefijo fijo, o pasarlo como parte de BuildCardData desde card-data.ts. Así no hace falta estado de módulo y el HTML vuelve a ser reproducible. Actualizar el docstring en consecuencia.",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por decisión del principal 2026-11-17 (opción B, ronda 3 de la puerta T018); Paco aceptó la ronda; seguimiento S5-D1 en specs/005-deuda-revisiones/reviews/deuda.md."
+        },
+        {
+          "id": "B-12",
+          "severity": "LOW",
+          "path": "apps/web/src/app/shared/ui/build-card/build-card.model.ts",
+          "line": 70,
+          "evidence": "Tras T040, en las tarjetas con enlace el título editorial ya no está en un `<span lang>` dentro del enlace: es la descripción accesible (aria-describedby a un <p aria-hidden lang=\"es\">). Aun así, build-card.model.ts:68-71 («drawn in its own `lang` span so AT still reads it (T037, F-002)») y build-card.labels.ts:66-67 («read in its own `lang` span») siguen describiendo el diseño de T037. Las pruebas y los comentarios nuevos (build-card.spec.ts y card-data.spec.ts: «reads the Spanish title as the link's description, in its own lang=\"es\" element») dan a entender que el idioma se conserva. La descripción accesible es una cadena plana (accname 1.2) y las API de accesibilidad no llevan el idioma con ella, así que el lang del <p> no llega a la descripción. Por último, ninguna prueba en navegador comprueba la descripción: la de T052 en e2e/a11y.spec.ts:557-571 solo comprueba el nombre, y las de componente comprueban atributos en jsdom.",
+          "impact": "La documentación del modelo engaña a quien mantenga la tarjeta: srCombination ya solo se pinta como span en la variante sin enlace y, en las demás, sirve de bandera. La garantía de F-002 (que AT oiga el título editorial) solo está probada a nivel de atributos. Una regresión en el navegador, como cambiar el aria-hidden o el id del <p>, no la detecta ninguna puerta. Es probable que un lector con voz EN pronuncie el título en español con la voz inglesa (no lo verifiqué).",
+          "recommendation": "Actualizar los comentarios de build-card.model.ts:68-71 y build-card.labels.ts:66-67 al diseño de T040: descripción por aria-describedby, sin cambio de idioma garantizado. Añadir al caso T052 de e2e/a11y.spec.ts (ruta EN con guía solo en ES) un `expect(link).toHaveAccessibleDescription(/…título editorial…/)`. Si la pronunciación importa, registrarlo como deuda conocida de la opción (b).",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por decisión del principal 2026-11-17 (opción B, ronda 3 de la puerta T018); Paco aceptó la ronda; seguimiento S5-D2 y S5-D3 en specs/005-deuda-revisiones/reviews/deuda.md."
+        },
+        {
+          "id": "B-13",
+          "severity": "LOW",
+          "path": "CONTRIBUTING.md",
+          "line": 257,
+          "evidence": "Ya aplazado como S-001 (security r2). CONTRIBUTING.md:257-258 afirma «so neither local secrets nor results of earlier runs enter the container», pero el comando documentado monta el repositorio entero en /src (`-v \"$PWD:/src:ro\"`), así que .env, .env.* e infra/docker/secrets/ siguen visibles dentro del contenedor. Ver specs/005-deuda-revisiones/reviews/deuda.md, entrada 2.",
+          "impact": "La documentación promete una frontera que no existe del todo, y un desarrollador puede fiarse de ella.",
+          "recommendation": "Seguir el plan de reviews/deuda.md (enviar solo los archivos seguros por stdin o corregir CONTRIBUTING{,.es}.md).",
+          "disposition": "deferred",
+          "deferReason": "Aplazado por decisión de Paco 2026-11-17 (ronda 2 de T018, S-001) en specs/005-deuda-revisiones/reviews/deuda.md; tarea de referencia T018."
+        }
+      ]
+    }
+  ]
+}
