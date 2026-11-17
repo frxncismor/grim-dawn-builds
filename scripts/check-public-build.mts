@@ -4,6 +4,7 @@ import { lstat, mkdir, mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { basename, dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { isSecretName, scanFiles } from './check-secrets.mts';
+import { assertNoLegacyBrand } from './check-legacy-brand.mts';
 import { createPublicBuildEnv } from './public-build-env.mts';
 import { finalizeStaticHome } from './static-home.mts';
 
@@ -167,7 +168,19 @@ export async function runPublicBuildCheck(
 async function main(): Promise<number> {
   try {
     if (process.argv.length !== 2) throw new PublicBuildError('build-failed');
-    const result = await runPublicBuildCheck(resolve(import.meta.dirname, '..'), process.env);
+    const root = resolve(import.meta.dirname, '..');
+    // T034: first the official artifact of `pnpm build` (fails, never skips, when it is missing,
+    // empty or still carries the old brand), then the fixture build that scans for secrets.
+    const brand = await assertNoLegacyBrand(
+      join(root, 'dist', 'grim-dawn-builds', 'browser'),
+    ).catch((error: unknown) => {
+      console.error(`check:public-build: ${error instanceof Error ? error.message : error}`);
+      throw new PublicBuildError('unsafe-artifact');
+    });
+    const result = await runPublicBuildCheck(root, process.env);
+    console.log(
+      `check:public-build: marca antigua ausente en ${brand.pages} páginas prerrenderizadas.`,
+    );
     console.log(`check:public-build OK (${result.files} archivos; valores y patrones ausentes).`);
     return 0;
   } catch (error) {
