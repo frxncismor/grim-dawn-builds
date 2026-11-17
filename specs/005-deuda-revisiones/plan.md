@@ -2,9 +2,9 @@
 
 **Branch**: `005-deuda-revisiones` (planificación en `orq/11111619-ui-s5-plan`) | **Date**: 2026-11-16 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `specs/005-deuda-revisiones/spec.md`; evidencia por elemento en [research.md](research.md); `.specify/memory/constitution.md` (1.11.0).
+**Input**: Feature specification from `specs/005-deuda-revisiones/spec.md`; evidencia por elemento en [research.md](research.md); `.specify/memory/constitution.md` (1.11.1).
 
-**Estado**: **clarify cerrado** (Paco, 2026-11-16): Q-A a Q-E (Preguntas 23–27) = **A**, todas las recomendadas; ver «Clarifications» en `spec.md`. Nuevo alcance de Paco el mismo día: marca pública «Grim Builds» (US6).
+**Estado**: implementada; puerta de cierre T018 y correcciones de su ronda 1 (T036–T039) en curso (2026-11-17). Clarify cerrado (Paco, 2026-11-16): Q-A a Q-E (Preguntas 23–27) = **A**, todas las recomendadas; ver «Clarifications» en `spec.md`. Nuevo alcance de Paco el mismo día: marca pública «Grim Builds» (US6).
 
 ## Summary
 
@@ -24,11 +24,11 @@ Convertir en trabajo planificado 11 elementos de deuda aplazada: S4-D1 a S4-D7 d
 
 **Project Type**: monorepo pnpm. Huella: `scripts/`, `packages/domain`, `apps/api`, `apps/web`, `apps/web/DESIGN.md` y esta spec.
 
-**Performance Goals**: presupuestos de §6 intactos (FR-020); `/tier-list` es la ruta con menos margen (111 206/112 000 B de JS inicial al cierre de spec004). Ninguna tarea de `apps/web` suma bytes netos; T011 (formateador compartido) debe medirse.
+**Performance Goals**: presupuestos de §6 intactos (FR-020); `/tier-list` es la ruta con menos margen (111 206/112 000 B de JS inicial al cierre de spec004; con las correcciones de US7 Paco aceptó 111 292 B en la Pregunta 32 y al cierre de T018 mide 111 251 B, margen 749 B). Ninguna tarea de `apps/web` suma bytes netos; T011 (formateador compartido) debe medirse.
 
 **Constraints**: CSP sin `unsafe-inline`, paridad EN/ES, WCAG 2.2 AA, lectura sin JS, sin secretos. `check:boundaries` entre `scripts/`, `apps/api`, `apps/web` y `packages/domain`.
 
-**Scale/Scope**: 18 tareas (más las correcciones que propone la revisión de fidelidad); ~25 archivos de código más sus pruebas, y ~39 archivos con la cadena de marca antigua (de los que se tocan los de código, plantillas, traducción, fixtures e imagen; los históricos quedan fuera).
+**Scale/Scope**: 39 tareas (T001–T039: las 18 planificadas, las correcciones de la revisión de fidelidad T020–T033, T034–T035 de marca y T036–T039 de la ronda 1 de la puerta); ~25 archivos de código más sus pruebas, y ~39 archivos con la cadena de marca antigua (de los que se tocan los de código, plantillas, traducción, fixtures e imagen; los históricos quedan fuera).
 
 ## Constitution Check
 
@@ -166,11 +166,11 @@ Respuesta a «cómo se generan y actualizan las referencias y dónde corren en C
 
 | Aspecto                | Decisión                                                                                                                                                                              |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Qué se compara         | `toHaveScreenshot` de página completa: 5 rutas (`/`, `/tier-list`, `/builds/chaman-demoledor-golpe-primigenio`, `/maestrias`, `/maestrias/soldado`) × 375/768/1280 × EN/ES = **30 capturas**. Los estados del tooltip van en la revisión de fidelidad, no en la regresión (dependen de la interacción y multiplican las referencias). |
+| Qué se compara         | `toHaveScreenshot` de página completa: 5 rutas (`/`, `/tier-list`, `/builds/chaman-demoledor-golpe-primigenio`, `/maestrias`, `/maestrias/soldier`) × 375/768/1280 × EN/ES = **30 capturas**. Los estados del tooltip van en la revisión de fidelidad, no en la regresión (dependen de la interacción y multiplican las referencias). |
 | Artefacto              | Construido con `ASSET_SOURCE=own` y `CONTENT_SOURCE=fixture` en su propio directorio (no es el artefacto `game` que miden Lighthouse y axe: no hay PNG del juego en el repositorio, así que `own` es el único determinista). |
 | Entorno fijado         | Chromium del `package.json` en `ubuntu-24.04`; solo las fuentes locales del sitio (esperar `document.fonts.ready`); viewport 375/768/1280 × 900; `deviceScaleFactor: 1`; `locale` en-US/es-419; `timezoneId: 'UTC'`; `reducedMotion: 'reduce'`; `animations: 'disabled'`; `caret: 'hide'`; sin red externa (CSP). |
 | Tolerancia             | `maxDiffPixelRatio: 0.002` y `threshold: 0.2` por captura (valores iniciales; T017 los ajusta con dos ejecuciones iguales y los deja escritos en la configuración). Sin máscaras salvo que una zona resulte no determinista. |
-| Dónde viven las referencias | `e2e/visual-baselines/` (`snapshotPathTemplate` propio; `__screenshots__/` está en `.gitignore`). Unos 30 PNG de página completa: se estima 3–8 MB, que se mide en T017 y se declara; si pasa de lo razonable se reduce el alto o se elige `scale: 'css'` ya fijado. |
+| Dónde viven las referencias | `e2e/visual-baselines/` (`snapshotPathTemplate` propio; `__screenshots__/` está en `.gitignore`). Unos 30 PNG de página completa: se estimaban 3–8 MB; T017 los midió en **17,7 MB** (17 668 946 B, el mayor 1 461 468 B) y Paco los aceptó el 2026-11-17. Se generaron en Docker local equivalente al CI (`scripts/visual-baselines-docker.sh`); el flujo `visual-baselines` queda para regenerarlas y su primera ejecución en GitHub está pendiente. |
 | Cómo se generan        | **Solo en Linux, en el CI**: flujo manual `.github/workflows/visual-baselines.yml` (`workflow_dispatch`) construye el artefacto `own`, ejecuta `pnpm e2e:visual:update` y publica las capturas como artefacto del flujo. Una persona las descarga y las commitea; el CI nunca hace push. Nunca se generan en Windows. |
 | Cómo se actualizan     | Cambio visual deseado → lanzar el flujo en la rama del PR → descargar y commitear las referencias → la diferencia de PNG aparece en la revisión del PR. |
 | Dónde corre en CI      | Trabajo nuevo `visual-regression` en `.github/workflows/ci.yml` (PR), paralelo al trabajo `verify`: `ubuntu-24.04`, mismos pasos de instalación, `pnpm run build` con `ASSET_SOURCE=own`, `playwright install --with-deps chromium`, `pnpm e2e:visual`. Al fallar sube esperada, obtenida y diferencia. |

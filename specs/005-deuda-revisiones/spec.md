@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-16
 
-**Status**: Clarified (Paco, 2026-11-16: P23–P27 = A; ver «Clarifications»). Sin código: solo artefactos SDD.
+**Status**: Implementada; puerta de cierre T018 en curso (2026-11-17). Clarificada por Paco (2026-11-16: P23–P27 = A; P28–P31; 2026-11-17: P32 y aceptación de las referencias visuales de 17,7 MB; ver «Clarifications»).
 
 **Depende de**: `003-catalogo-arboles-maestria` y `004-rediseno-ui-grim-dawn` (ambas cerradas con la puerta de `002-spec-completion-reviews` en `passed`).
 
@@ -214,11 +214,11 @@ Quien revisa un PR necesita que el CI **falle** si cambia, sin quererlo, el aspe
 
 #### Verificación visual (US7, US8)
 
-- **FR-030**: MUST existir un procedimiento reproducible que capture, con Playwright sobre el artefacto prerrenderizado, las cinco rutas públicas (`/`, `/tier-list`, `/builds/chaman-demoledor-golpe-primigenio`, `/maestrias`, `/maestrias/soldado`) en 375, 768 y 1280 px, en EN y ES, y los estados del tooltip del árbol (reposo, ratón, foco de teclado, fijado por toque y volteo en el borde), con salida fuera del control de versiones.
+- **FR-030**: MUST existir un procedimiento reproducible que capture, con Playwright sobre el artefacto prerrenderizado, las cinco rutas públicas (`/`, `/tier-list`, `/builds/chaman-demoledor-golpe-primigenio`, `/maestrias`, `/maestrias/soldier`) en 375, 768 y 1280 px, en EN y ES, y los estados del tooltip del árbol (reposo, ratón, foco de teclado, fijado por toque y volteo en el borde), con salida fuera del control de versiones.
 - **FR-031**: El informe de fidelidad MUST contrastar esas capturas con `apps/web/DESIGN.md` y `apps/web/PRODUCT.md`, usar las capturas de `C:\Users\paco_\Pictures\gdb-referencias` solo cuando existan, funcionar y declararlo cuando esa carpeta esté vacía, y MUST NOT copiar, versionar ni publicar ninguna captura del juego.
 - **FR-032**: El informe MUST listar cada discrepancia con ruta, ancho, idioma, estado, regla incumplida y severidad, y proponer una tarea de corrección por cada una que deba arreglarse; el principal las incorpora a `tasks.md` antes de la regresión visual.
 - **FR-033**: La regresión visual MUST usar `toHaveScreenshot` sobre las cinco rutas, en 375, 768 y 1280 px, en EN y ES, contra el artefacto construido con `ASSET_SOURCE=own`, con el navegador fijado por `package.json`, solo las fuentes locales del sitio, ventana de 900 px de alto, factor de escala 1, animaciones y cursor desactivados, `reducedMotion: reduce`, zona horaria UTC y la tolerancia fijada en `plan.md`.
-- **FR-034**: Las referencias MUST estar versionadas en el repositorio fuera de `__screenshots__/` (ignorado), MUST generarse solo en el entorno del CI (Linux), nunca en una máquina local de Windows, y MUST ser actualizables con un procedimiento documentado que deje la diferencia visible en el PR.
+- **FR-034**: Las referencias MUST estar versionadas en el repositorio fuera de `__screenshots__/` (ignorado), MUST generarse solo en un entorno Linux equivalente al del CI (Ubuntu 24.04, la misma versión de Playwright y el mismo Node): el flujo manual `visual-baselines` de GitHub o, por decisión de Paco (2026-11-17), el contenedor Docker local `mcr.microsoft.com/playwright:v1.65.0-noble` (`scripts/visual-baselines-docker.sh`), nunca con un navegador nativo de Windows o macOS, y MUST ser actualizables con un procedimiento documentado que deje la diferencia visible en el PR.
 - **FR-035**: La regresión visual MUST correr en el CI de PR como un trabajo propio y paralelo a la verificación, sin alterar el artefacto que miden las demás puertas.
 - **FR-036**: La regresión MUST fallar con un mensaje que nombre la ruta, el ancho y el idioma, y adjuntar esperada, obtenida y diferencia.
 - **FR-037**: La regresión MUST ejecutarse después de la marca (T015) y de todos los cambios visuales de S4-D* y de las correcciones de la revisión de fidelidad, para no regenerar las referencias.
@@ -228,7 +228,7 @@ Quien revisa un PR necesita que el CI **falle** si cambia, sin quererlo, el aspe
 
 #### Transversales
 
-- **FR-020**: Ninguna tarea MUST cambiar el comportamiento visible de las páginas públicas (salvo la marca y el aviso de US6, T015 y T014), los presupuestos de §6 (`/tier-list` cerró spec004 con 111 206/112 000 B de JS inicial, 794 B de margen; la línea base se vuelve a medir en T008), la CSP, la paridad EN/ES ni las reglas de derechos; cualquier regresión de presupuesto bloquea la tarea.
+- **FR-020**: Ninguna tarea MUST cambiar el comportamiento visible de las páginas públicas (salvo la marca y el aviso de US6, T015 y T014, y las correcciones de fidelidad de US7 que Paco aceptó, FR-038 a FR-040 y T020–T033), los presupuestos de §6 (`/tier-list` cerró spec004 con 111 206/112 000 B de JS inicial, 794 B de margen; la línea base se vuelve a medir en T008 y, tras las correcciones de US7, la fija la decisión P32: ver SC-008), la CSP, la paridad EN/ES ni las reglas de derechos; cualquier regresión de presupuesto bloquea la tarea.
 - **FR-021**: Cada tarea MUST empezar por una prueba que falla (constitución IX) y MUST registrar comando y salida reales al marcarse.
 - **FR-022**: spec005 MUST numerar sus propias tareas desde T001 y MUST NOT reabrir ni editar `tasks.md`, `plan.md` ni `spec.md` de spec003 o spec004 salvo lo que decida Q-D (el cierre de spec004 está hecho sobre un snapshot).
 
@@ -252,8 +252,8 @@ Quien revisa un PR necesita que el CI **falle** si cambia, sin quererlo, el aspe
 - **SC-006**: Las copias del formateador de fecha larga bajan de 4 a 1.
 - **SC-007**: `pnpm verify` sale con 0, `e2e:a11y` mantiene 0 violaciones de axe y las capturas a 375 y 1280 px, EN y ES, son idénticas a las de antes de spec005.
 - **SC-010**: El informe de fidelidad cubre las 30 combinaciones de ruta, ancho e idioma y los estados del tooltip, y 0 capturas del juego se versionan (comprobado con `git ls-files`).
-- **SC-011**: La regresión visual compara 30 capturas, pasa en dos ejecuciones consecutivas del CI sin cambios y falla en una rama de prueba con un cambio deliberado.
-- **SC-008**: `/tier-list` no baja del margen de JS inicial que cierra spec004 (794 B sobre 112 000 B) ni del de HTML medido en T008; el resto de rutas conserva su margen.
+- **SC-011**: La regresión visual compara 30 capturas, pasa en dos ejecuciones consecutivas sin cambios y falla con un cambio deliberado. Por decisión de Paco (2026-11-17) las referencias se generaron, y las dos pasadas verdes y la roja se ejecutaron, en contenedores Docker locales equivalentes al CI (T017); la **primera ejecución del trabajo `visual-regression` y del flujo `visual-baselines` en GitHub queda pendiente** hasta que Paco permita el push, y se anota como seguimiento, no como cumplida.
+- **SC-008**: `/tier-list` no supera los 112 000 B de JS inicial ni baja del margen de HTML medido en T008; el resto de rutas conserva su margen. La base de JS de `/tier-list` ya no es la de spec004 (111 206 B, margen 794 B): con T020–T031 Paco aceptó 111 292 B (Pregunta 32, 2026-11-17) y la medición real al cierre de T018 es **111 251 B** (margen 749 B), por debajo de esa cifra aceptada.
 - **SC-009**: 0 apariciones de «Grim Dawn Builds» como marca en el código, los catálogos EN/ES, las fixtures visibles, la imagen social y el HTML prerrenderizado (hoy 39 archivos fuera de `specs/` contienen la cadena; los históricos de README, CONTRIBUTING y docs quedan fuera de alcance), y el aviso de no afiliación presente en las rutas de EN y ES.
 
 ## Fuera de alcance
@@ -261,7 +261,7 @@ Quien revisa un PR necesita que el CI **falle** si cambia, sin quererlo, el aspe
 - **A-03 de spec003 (doble fuente del estado de los activos)**: ya resuelto por spec004 T005 (`assertAssetStatusParity`, `scripts/check-assets.mts:118`, ejecutada por `runRelease` en `scripts/build-release.mts:87`; el manifiesto manda y el build de release falla cerrado si la tabla `assets` discrepa). Evidencia completa en [research.md](research.md) §R8.
 - Corregir las discrepancias que encuentre la revisión de fidelidad: cada una será su propia tarea, decidida por el principal tras el informe.
 - Cambios de producto distintos de la marca: pantallas, tipografía, tokens, rutas, contenido editorial o reglas de derechos.
-- Renombrar el repositorio, el paquete, el slug `grim-dawn-builds` o los documentos históricos o de ingeniería (specs 001–004, README, CONTRIBUTING, título de la constitución, cuya renombre exige el procedimiento de enmienda y queda como seguimiento), que citan el nombre del repositorio y no son marca visible.
+- Renombrar el repositorio, el paquete, el slug `grim-dawn-builds` o los documentos históricos o de ingeniería (specs 001–004 y los documentos históricos; el título de la constitución, README y CONTRIBUTING sí cambian de marca por la enmienda 1.11.1, T019, aprobada por Paco el 2026-11-16), que citan el nombre del repositorio y no son marca visible.
 - Los hallazgos de spec003 y spec004 ya corregidos o con otra disposición (T035–T041 de spec003, T047–T054 de spec004).
 - El Q11 (publicación de iconos) y sus riesgos: cerrados en spec004 con la enmienda 1.11.0.
 
@@ -280,13 +280,17 @@ Quien revisa un PR necesita que el CI **falle** si cambia, sin quererlo, el aspe
 - Q: (P30) ¿Qué correcciones de la revisión de fidelidad van antes de T017? → A: A, HIGH y MEDIUM (F-01 a F-15 y F-20) y las LOW por ser baratas (F-16 a F-19); las sugerencias S-01 a S-04 quedan como deuda anotada sin ID en `reviews/fidelity.md` (T020–T033).
 - Q: (P31, F-20) ¿Nombre oficial ES de Nightblade? → A: «Hoja de la Noche», el del juego, con una sola fuente de nombres ES (FR-039; T024).
 - Q: (P29, F-19) ¿Qué se hace con las maestrías sin árbol? → A: A, las cuatro de expansión muestran «árbol no disponible» sin enlace (FR-040; T033, antes de T017).
+- Decisión de Paco (2026-11-17, T017): las 30 referencias visuales se generan en Docker local equivalente al CI y no en GitHub (FR-034, SC-011); la primera ejecución en GitHub queda pendiente.
+- Q: (P32) ¿Se acepta el coste de JS de las correcciones de US7 en `/tier-list`? → A: sí, 111 292 B como base de SC-008 (el presupuesto de 112 000 B no cambia; medido al cierre de T018: 111 251 B).
+- Decisión de Paco (2026-11-17): se aceptan los 17,7 MB (17 668 946 B) de las 30 referencias visuales; el plan estimaba 3–8 MB.
+- Decisión del principal (2026-11-17, opción A): se corrigen todos los hallazgos de la ronda 1 de la puerta T018 en cuatro tareas, T036–T039 (`tasks.md`, Fase 10).
 
 ## Assumptions
 
 - La carpeta `C:\Users\paco_\Pictures\gdb-referencias` está hoy vacía; la revisión de fidelidad no la necesita para funcionar.
 - El CI de PR corre en `ubuntu-24.04`; las referencias visuales se generan allí.
 - El artefacto con `ASSET_SOURCE=own` no lleva los PNG del juego, así que la regresión no depende de activos que el repositorio no versiona.
-- Los presupuestos de §6, la CSP, la paridad EN/ES y la constitución 1.11.0 siguen vigentes sin cambios.
+- Los presupuestos de §6, la CSP, la paridad EN/ES y la constitución 1.11.1 siguen vigentes sin cambios.
 - Las especificaciones 003 y 004 permanecen cerradas; cualquier cambio en sus artefactos requiere decisión de Paco (Q-D).
 - Las pruebas con base de datos real corren en CI (los `*.int.spec.ts`); en local las tareas que las necesiten usan el Postgres del entorno de la corrida o dejan constancia de que solo corren en CI.
 - Con `pnpm verify` completo, el único fallo tolerado es el TBT de Lighthouse; en ese caso se repite `pnpm check:performance` sola y se citan las cifras.

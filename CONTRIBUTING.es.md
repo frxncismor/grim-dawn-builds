@@ -228,6 +228,49 @@ ejecuta `lint:md` solo en modo comprobación; nunca aplica `--fix`.
 
 Gate matrix and language policy: see [docs/quality-gates.md](docs/quality-gates.md).
 
+## Referencias de la regresión visual
+
+El trabajo `visual-regression` del CI de pull request compara 30 capturas de página completa (5 rutas ×
+375/768/1280 × EN/ES) con las referencias de `e2e/visual-baselines/`, con nombre
+`<ruta>-<idioma>-<ancho>.png`. El trabajo construye su propio artefacto con `ASSET_SOURCE=own`, así que no
+interviene ninguna imagen del juego. Cuando falla, sube las imágenes esperada, obtenida y de diferencia como el
+artefacto `visual-regression-report`.
+
+Las referencias se generan **solo en Linux**, nunca con un navegador nativo de Windows o macOS. Hay dos vías
+equivalentes, ambas en Ubuntu 24.04 con la versión de Playwright de `package.json` (`1.65.0`):
+
+### A. Flujo manual de GitHub
+
+1. Sube la rama con el cambio visual previsto.
+2. En GitHub, abre Actions, elige `Visual baselines (Linux)`, escoge la rama y ejecútalo
+   (`workflow_dispatch`). Construye el artefacto `own` y ejecuta `pnpm e2e:visual:update`.
+3. Descarga el artefacto `visual-baselines` de esa ejecución y sustituye los PNG de
+   `e2e/visual-baselines/` por su contenido.
+4. Revisa las diferencias de los PNG en la pull request y haz commit. El flujo nunca hace push.
+
+### B. Docker local (misma familia de imagen, mismo Node que el CI)
+
+Usa la imagen oficial `mcr.microsoft.com/playwright:v1.65.0-noble` (mantén la etiqueta igual a la versión de
+`@playwright/test`). El script instala Node 22.23.5 y pnpm dentro del contenedor, copia el repositorio
+(de `/src` a `/work`) sin `node_modules`, `dist`, `.angular`, `.git`, `test-results`, `playwright-report`, `.env`,
+`.env.*` (salvo `.env.example`, que está versionado) ni `infra/docker/secrets/`, y construye con
+`ASSET_SOURCE=own`, de modo que no entran en el contenedor ni los secretos locales ni los resultados de
+ejecuciones anteriores. La descarga de Node se verifica con un SHA-256 fijado y el script aborta si no coincide.
+La imagen de Playwright se identifica por etiqueta, no por digest. Desde la raíz del repositorio:
+
+```sh
+mkdir -p test-results/visual-out
+docker run --rm --ipc=host   -v "$PWD:/src:ro" -v "$PWD/test-results/visual-out:/out"   -v "$PWD/scripts/visual-baselines-docker.sh:/run.sh:ro"   mcr.microsoft.com/playwright:v1.65.0-noble sh /run.sh update
+cp test-results/visual-out/*.png e2e/visual-baselines/
+```
+
+Compruébalas igual con `sh /run.sh check` (sin montar `/out`). En Windows usa Git Bash con
+`MSYS_NO_PATHCONV=1`. `test-results/` está ignorado por git.
+
+`pnpm e2e:visual` necesita un `dist/` construido (`pnpm build`). Ejecútalo en el host solo para ver
+cómo funciona la comparación: una referencia generada en otra plataforma falla, y
+`pnpm e2e:visual:update` con un navegador del host no debe usarse para hacer commit de referencias.
+
 ## Logs de PostgreSQL en Docker
 
 Desde la raíz, consulta los últimos errores y sigue los eventos nuevos:
