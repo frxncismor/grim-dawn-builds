@@ -193,6 +193,11 @@ jobs:
       - name: Web build (fixture content)
         run: pnpm run build
 
+      # T035: brand gate (T034) and secret scan of the public build; it builds into
+      # its own temporary directory and never touches dist/grim-dawn-builds.
+      - name: Public build check (brand and secrets)
+        run: pnpm run check:public-build
+
       # The local drafts artifact is built into its own directory
       # (dist/e2e-drafts) and never overwrites the public dist/grim-dawn-builds;
       # playwright.config.ts serves both on different ports (4321 and 4322).

@@ -45,6 +45,8 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm run content:validate -- --dir scripts/fixtures/content-valid',
   'pnpm run assets:check',
   'pnpm run build',
+  // T035: brand gate and secret scan of the public build.
+  'pnpm run check:public-build',
   // T-126: real fixture content, catalog freshness and the quality gates.
   'pnpm run content:validate -- --dir fixtures/content',
   'pnpm run catalog:check',
@@ -357,6 +359,14 @@ export function validateCiWorkflow(source: string): string[] {
   return problems;
 }
 
+// T035: first `pnpm run build` and `pnpm run check:public-build` in the verify job.
+function publicCheckAfterBuild(yaml: string): boolean {
+  const lines = yaml.split('\n');
+  const build = lines.indexOf('        run: pnpm run build');
+  const check = lines.indexOf('        run: pnpm run check:public-build');
+  return build !== -1 && check !== -1 && build < check;
+}
+
 describe('PR verification workflow (T-064)', () => {
   it('every job that builds the web artifact fixes ASSET_SOURCE explicitly (T036, S-001/S-003)', () => {
     const text = readFileSync(WORKFLOW_URL, 'utf8').replace(/\r\n/g, '\n');
@@ -395,6 +405,17 @@ describe('PR verification workflow (T-064)', () => {
     assert.deepEqual(validateCiWorkflow(withValidator), []);
   });
 
+  it('rejects the public build check before the web build or missing (T035)', () => {
+    // Swap the two commands: the check then runs before the build.
+    const moved = real
+      .replace('        run: pnpm run build\n', '        run: @@\n')
+      .replace('        run: pnpm run check:public-build\n', '        run: pnpm run build\n')
+      .replace('        run: @@\n', '        run: pnpm run check:public-build\n');
+    assert.notEqual(moved, real, 'the swap must change the workflow');
+    assert.equal(publicCheckAfterBuild(moved), false);
+    assert.equal(publicCheckAfterBuild(real.replace('pnpm run check:public-build', 'true')), false);
+  });
+
   it('runs content, drafts build, e2e/axe and performance in order, with performance last (T-126)', () => {
     const lines = real.split('\n');
     const runLine = (command: string): number => lines.indexOf(`        run: ${command}`);
@@ -409,6 +430,7 @@ describe('PR verification workflow (T-064)', () => {
     );
     const realContent = indexOf('pnpm run content:validate -- --dir fixtures/content');
     const catalog = indexOf('pnpm run catalog:check');
+    const publicBuildCheck = indexOf('pnpm run check:public-build');
     const draftsBuild = indexOf(
       'pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
     );
@@ -422,6 +444,14 @@ describe('PR verification workflow (T-064)', () => {
     assert.ok(fixtureContent < realContent, 'real content validation goes after the fixture one');
     assert.ok(realContent < catalog, 'catalog:check goes after the content validation');
     assert.ok(catalog < draftsBuild, 'the drafts build needs the validated content');
+    assert.ok(
+      publicCheckAfterBuild(real),
+      'the public build check runs after the web build (T035)',
+    );
+    assert.ok(
+      publicBuildCheck < journeys,
+      'the public build check runs before the journeys (T035)',
+    );
     assert.ok(draftsBuild < journeys, 'journeys need the drafts artifact');
     assert.ok(videoBuild < journeys, 'journeys need the video facade preview artifact (T-171)');
     assert.ok(draftsBuild < a11y, 'axe runs on the built artifact');
@@ -611,6 +641,14 @@ describe('PR verification workflow (T-064)', () => {
       () =>
         mutate(
           /\n {6}- name: Build video facade preview artifact\n {8}run: pnpm run e2e:video:build\n/,
+          '\n',
+        ),
+    ],
+    [
+      'public build check removed (T035)',
+      () =>
+        mutate(
+          /\n {6}- name: Public build check[^\n]*\n {8}run: pnpm run check:public-build\n/,
           '\n',
         ),
     ],
