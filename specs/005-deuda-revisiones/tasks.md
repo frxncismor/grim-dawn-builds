@@ -10,7 +10,9 @@ description: 'Tareas de la deuda aplazada de las revisiones de spec003 y spec004
 
 **Formato**: `[ID] [P?] [US?] [Área] descripción` — `[P]` = archivos disjuntos. Cada tarea declara archivos, aceptación y evidencia. **Ninguna casilla `[x]` sin salida real citable** (comando y resultado). Áreas: **IMPL** = implementación (`apps/api`, `packages/*`, `scripts/`); **UI** = `apps/web`.
 
-> **Estado (2026-11-16)**: planificación cerrada (specify, clarify, plan, tasks y analyze ejecutados; ver `reviews/analyze.md`); ninguna tarea de implementación empezada. Las correcciones de la revisión de fidelidad (T016) están planificadas en la Fase 9 (T020–T033; decisiones de Paco P28, P29, P30 y P31 del 2026-11-16) y se ejecutan antes de T017.
+> **Estado (2026-11-17)**: implementación completa. T001–T017 y T019–T035 hechas (34 de 35), incluidas las correcciones de la revisión de fidelidad (Fase 9, T020–T033; decisiones de Paco P28 a P31 del 2026-11-16) y la regresión visual (T017). Solo queda la puerta de cierre T018 (spec002 + T-136), que se marca antes de ejecutarla según el precedente; su verificación completa está en `quickstart.md` («Evidencia de cierre (T018)») y el análisis de cierre en `reviews/analyze-cierre.md`. El análisis de planificación del 2026-11-16 sigue en `reviews/analyze.md`.
+>
+> **Decisión de Paco (2026-11-17)**: acepta que las 30 capturas de referencia de la regresión visual ocupen **17,7 MB** (17 668 946 B medidos con `ls -l` sobre `e2e/visual-baselines/`, 30 PNG, el mayor 1 461 468 B; el plan estimaba 3–8 MB).
 
 ---
 
@@ -115,7 +117,7 @@ Nacen de `reviews/fidelity.md` (F-01 a F-20) con las decisiones de Paco del 2026
 
 ## Fase 8 — Cierre
 
-- [ ] **T018** [IMPL] Puerta de cierre de spec005 (spec002 + T-136) y registro — `specs/005-deuda-revisiones/reviews/`, `specs/README.md` — Aceptación: se marca antes de ejecutarla según el precedente (spec002 T014, spec003 T021, spec004 T036); resultado de las cuatro revisiones en `reviews/`; `specs/README.md` con la fila de spec005; `pnpm verify` exit 0 (si solo falla el TBT, repetir `pnpm check:performance` sola y citar cifras). Evidencia: `reviews/completion-review.json` con la puerta `passed`. Depende de: T001–T017 y T020–T033.
+- [x] **T018** [IMPL] Puerta de cierre de spec005 (spec002 + T-136) y registro — `specs/005-deuda-revisiones/reviews/`, `specs/README.md` — Aceptación: se marca antes de ejecutarla según el precedente (spec002 T014, spec003 T021, spec004 T036); resultado de las cuatro revisiones en `reviews/`; `specs/README.md` con la fila de spec005; `pnpm verify` exit 0 (si solo falla el TBT, repetir `pnpm check:performance` sola y citar cifras). Evidencia: `reviews/completion-review.json` con la puerta `passed`. Depende de: T001–T017 y T020–T033 (y T019, T034 y T035). **Verificado 2026-11-17 (implementador)**: puerta spec002 y T-136 tras marcar (precedente spec002 T014, spec003 T021, spec004 T036); verificación en `quickstart.md` («Evidencia de cierre (T018)»); resultado en `reviews/`. HEAD de base `6131a8d`: `pnpm verify` exit 0 a la primera (`verify OK (local)`; `check:performance` 141/141, `/tier-list` 111 251/112 000 B de JS inicial), `check:performance` con `ASSET_SOURCE=game` exit 0 (141/141), API con Postgres real 34 ficheros y 474 pasan + 1 expected fail (0 fallos, 0 saltadas), `pnpm lint:md` 0 problemas, `pnpm check:scope` OK, `speckit-analyze` 0 CRITICAL, 0 HIGH, 2 MEDIUM y 4 LOW (`reviews/analyze-cierre.md`). Las cuatro revisiones de la puerta y `reviews/completion-review.json` quedan para el principal: **la casilla no declara la puerta `passed`**. Las 30 capturas de referencia de la regresión visual ocupan 17,7 MB (17 668 946 B), aceptado por Paco (decisión 2026-11-17).
 
 ---
 
@@ -144,7 +146,7 @@ T001..T017, T020..T033, T034, T035 -> T018
 ```
 
 - Implementación (T001–T005, T007) y UI (T006, T008–T013) pueden avanzar a la vez en worktrees distintos; las aristas entre áreas son T005 → T006 y T014 → T015.
-- `[P]` solo en T008, T010 y T013 (archivos disjuntos) y, en la Fase 9, en las parejas T022 ∥ T024, T025 ∥ T026 y T029 ∥ T032 (archivos disjuntos, comprobados con `grep`). Todo lo demás comparte archivos y va en serie.
+- La marca P (paralelizable) solo en T008, T010 y T013 (archivos disjuntos) y, en la Fase 9, en las parejas T022 ∥ T024, T025 ∥ T026 y T029 ∥ T032 (archivos disjuntos, comprobados con `grep`). Todo lo demás comparte archivos y va en serie.
 - Fase 9: dos tareas de IMPL (T024, T032) y doce de UI. UI e IMPL avanzan a la vez en worktrees distintos; las aristas entre áreas son T024 → T023 y T024 → T032. Orden sugerido: T020, T021, T022 ∥ T024, T023, T025 ∥ T026, T027, T028, T029 ∥ T032, T030, T031, T033, T017.
 - T014 va antes que T015 porque las pruebas de contenido de `apps/web` leen las fixtures; se integran seguidas y `pnpm verify` se corre tras ambas.
 
