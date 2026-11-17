@@ -31,7 +31,7 @@ a ninguno de los dos archivos, que siguen siendo la fuente de verdad.
 | Manifiesto de activos                                    | `pnpm assets:check`                                                                               | yes                   | yes     | yes        | T-047           |
 | Contraste                                                | `pnpm check:contrast`                                                                             | yes                   | no      | no         | T-135           |
 | Build de la web                                          | `pnpm build`                                                                                      | yes                   | yes     | yes        | T-001           |
-| Guardia del artefacto público                            | `pnpm check:public-build`                                                                         | yes                   | no      | no         | T-084           |
+| Guardia del artefacto público                            | `pnpm check:public-build`                                                                         | yes                   | yes     | yes        | T-084           |
 | Presupuestos de rendimiento                              | `pnpm check:performance`                                                                          | yes                   | yes     | yes        | T-042           |
 | Instalación de dependencias (lockfile congelado)         | `pnpm install --frozen-lockfile`                                                                  | no                    | yes     | yes        | T-064           |
 | Secretos del flujo de trabajo de CI (comando de CI)      | `pnpm exec tsx scripts/check-ci-secrets.mts`                                                      | no                    | yes     | yes        | T-086           |
@@ -51,7 +51,7 @@ a ninguno de los dos archivos, que siguen siendo la fuente de verdad.
 
 `pnpm verify` ejecuta 25 pasos en orden y se detiene en el primer fallo, así que los
 pasos posteriores no informan mientras una puerta anterior está en rojo. El job
-`verify` de CI ejecuta 35 comandos `run:`: los mismos 21 controles que la ejecución
+`verify` de CI ejecuta 36 comandos `run:`: los mismos 22 controles que la ejecución
 local, salvo `pnpm verify` en sí, más 14 comandos que solo existen en el flujo de
 trabajo (instalación de dependencias, la cadena de herramientas de gitleaks, la
 imagen de PostgreSQL fijada, las comprobaciones de contenedores, la validación del
@@ -106,4 +106,4 @@ declarada del hosting divergen.
   está registrado en T-158 (sin fecha). Mientras tanto, un documento público nuevo o
   se entrega en ambos idiomas o registra la deuda en su tarea.
 
-**Guardia del artefacto público (T034).** `pnpm check:public-build` corre después de `pnpm build` y comprueba primero el artefacto `dist/grim-dawn-builds/browser`: falla (nunca salta) si falta, si tiene 5 páginas o menos o si alguna página prerrenderizada conserva la marca antigua «Grim Dawn Builds». El mismo detector vive en `scripts/check-legacy-brand.mts` y, copiado (una prueba comprueba que coinciden), en `apps/web/src/brand.test.mts`, que revisa las fuentes; `pnpm test:scripts` no lee `dist/`. CI no ejecuta esta guardia (solo el `verify` local).
+**Guardia del artefacto público (T034).** `pnpm check:public-build` corre después de `pnpm build` y comprueba primero el artefacto `dist/grim-dawn-builds/browser`: falla (nunca salta) si falta, si tiene 5 páginas o menos o si alguna página prerrenderizada conserva la marca antigua «Grim Dawn Builds». El mismo detector vive en `scripts/check-legacy-brand.mts` y, copiado (una prueba comprueba que coinciden), en `apps/web/src/brand.test.mts`, que revisa las fuentes; `pnpm test:scripts` no lee `dist/`. El job `verify` de CI la ejecuta justo después del build web (T035).
