@@ -7,6 +7,7 @@ import {
   createPortraitResolver,
   resolveMasteryPortrait,
   withCatalogPortraits,
+  withCatalogTrees,
 } from './portraits.server.ts';
 import { parseAssetSource } from './portraits.ts';
 
@@ -195,4 +196,35 @@ test('every mastery tree of the catalog is joined to a catalog mastery by TREE_S
     'a tree has no TREE_SLUG entry (or an entry points to a missing tree)',
   );
   assert.equal(joined.filter((m) => m.portrait).length, trees.length);
+});
+
+test('spec005 T033: a catalog mastery whose tree is not in the data is flagged noTree, the rest are untouched', async () => {
+  const masteries = JSON.parse(await readFile(join(REAL_ROOT, 'masteries.json'), 'utf8')) as {
+    slug: string;
+  }[];
+  const trees = new Set(
+    (await readdir(join(REAL_ROOT, 'mastery-trees')))
+      .filter((name) => name.endsWith('.json'))
+      .map((name) => name.slice(0, -'.json'.length)),
+  );
+  const joined = withCatalogTrees({ masteries }, trees).masteries as {
+    slug: string;
+    noTree?: true;
+  }[];
+  assert.deepEqual(
+    joined
+      .filter((m) => m.noTree)
+      .map((m) => m.slug)
+      .sort(),
+    ['berserker', 'guardian-del-juramento', 'inquisidor', 'nigromante'],
+  );
+  assert.equal(joined.filter((m) => !m.noTree).length, trees.size);
+  // The criterion comes from the data: with one tree fewer, its mastery loses the link too.
+  const fewer = new Set([...trees].filter((t) => t !== 'soldier'));
+  const slugs = (
+    withCatalogTrees({ masteries }, fewer).masteries as { slug: string; noTree?: true }[]
+  )
+    .filter((m) => m.noTree)
+    .map((m) => m.slug);
+  assert.ok(slugs.includes('soldado'));
 });

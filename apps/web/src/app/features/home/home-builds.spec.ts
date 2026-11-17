@@ -35,7 +35,12 @@ describe('home builds (spec004 T016)', () => {
   it('offers one access per mastery that opens the catalog already filtered', () => {
     const home = homeBuilds(catalogInput(), 'en');
     expect(home.masteries.map((m) => m.slug)).toEqual(['chaman', 'soldado', 'arcanista']);
-    expect(home.masteries[0]).toMatchObject({ name: 'Shaman', query: { m: 'chaman' } });
+    expect(home.masteries[0]).toMatchObject({
+      name: 'Shaman',
+      query: { m: 'chaman' },
+      hasTree: true,
+    });
+    expect(home.masteries.every((m) => m.hasTree)).toBe(true);
   });
 
   it('counts the combinations that still have no guide, without listing them', () => {
@@ -74,5 +79,20 @@ describe('home builds (spec004 T016)', () => {
       const guides = [{ ...input.guides[0], published_at }] as never;
       expect(homeBuilds(catalogInput({ guides }), 'es').featuredDate).toBeNull();
     }
+  });
+
+  it('marks a mastery without a tree so the home does not link it (spec005 T033)', () => {
+    const home = homeBuilds(
+      {
+        ...input,
+        masteries: input.masteries.map((m) => (m.slug === 'soldado' ? { ...m, noTree: true } : m)),
+      } as never,
+      'en',
+    );
+    expect(home.masteries.map((m) => [m.slug, m.hasTree])).toEqual([
+      ['chaman', true],
+      ['soldado', false],
+      ['arcanista', true],
+    ]);
   });
 });

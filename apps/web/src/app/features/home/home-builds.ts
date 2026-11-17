@@ -31,6 +31,8 @@ export interface HomeBuilds {
   readonly masteries: readonly {
     readonly slug: string;
     readonly name: string;
+    /** `false` when the mastery has no skill tree: the home shows it without a link (FR-040). */
+    readonly hasTree: boolean;
     readonly query: Readonly<Record<string, string>>;
   }[];
   /** Combinations with no guide (not listed on the home: the catalog folds them). */
@@ -72,6 +74,7 @@ export function homeBuilds(input: CatalogInput, locale: CatalogLocale): HomeBuil
     masteries: catalog.masteries.map((m) => ({
       slug: m.slug,
       name: locale === 'en' ? m.name_en : m.name_es,
+      hasTree: !m.noTree,
       query: { m: m.slug },
     })),
     withoutGuide: catalog.cards.filter((c) => !publicGuideOf(c.entry, c.guide)).length,

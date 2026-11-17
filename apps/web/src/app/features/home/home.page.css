@@ -146,6 +146,27 @@ dd {
   text-decoration: none;
 }
 
+.masteries__no-tree {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  min-block-size: 44px;
+  padding-inline: var(--space-4);
+  border: var(--frame-border);
+  background: var(--color-panel);
+  color: var(--color-ash);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
+}
+
+.masteries__no-tree-note {
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: var(--weight-body);
+  letter-spacing: normal;
+}
+
 .masteries__list a:hover {
   border-color: var(--color-storm);
 }
