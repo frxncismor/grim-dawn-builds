@@ -229,3 +229,53 @@ principal (28.4.0), comando `RUN_DB_TESTS=1 pnpm exec vitest run --maxWorkers=1`
 - `pnpm lint:md` (exit 0): `Linting: 109 files`, `Summary: 0 issues in 0 files`. `pnpm check:scope` (exit 0): `check:scope OK (266 archivos revisados)`.
 - `node scripts/spec-review.mjs prepare --feature specs/005-deuda-revisiones` (exit 0): `"status":"ready"`, `"pendingTasks":[]` con snapshot (su valor definitivo va en el reporte del agente: cambia con cada edición de este archivo).
 - `pnpm exec prettier --check` de `quickstart.md`: conforme.
+
+## Verificación tras las correcciones de la ronda 2 de la puerta (T040–T041)
+
+Fecha: 2026-11-17. HEAD: `b6112df` (`orq/11111619-rev-s5-vr2`, sin cambios locales al empezar). Node 22, `pnpm` 12.18.0, sin
+`HTTP_PROXY`/`HTTPS_PROXY`. Salidas saneadas (rutas omitidas). Un solo proceso pesado a la vez.
+
+| Comando                                                                             | Exit | Resultado                                                                                       |
+| ----------------------------------------------------------------------------------- | ---- | ----------------------------------------------------------------------------------------------- |
+| `pnpm verify`                                                                       | 0    | `verify OK (local)`; `check:performance OK (141/141 comprobaciones)`                            |
+| `ASSET_SOURCE=game pnpm build`                                                      | 0    | `emit-static-assets OK (… 6 retratos y 164 iconos de habilidad con ASSET_SOURCE=game)`          |
+| `ASSET_SOURCE=game pnpm check:performance`                                          | 0    | `check:performance OK (141/141 comprobaciones)`                                                 |
+| `RUN_DB_TESTS=1 pnpm --filter @gd/api exec vitest run --maxWorkers=1`               | 0    | `Test Files 35 passed (35)`; `Tests 494 passed \| 1 expected fail (495)`; 0 fallos y 0 saltadas |
+| `pnpm e2e:a11y` (completo)                                                          | 0    | **171 passed**                                                                                  |
+| `pnpm e2e:journeys` (completo)                                                      | 0\*  | **544 passed** (538 + 6 repetidas), 41 skipped, 0 failed                                        |
+| `e2e:visual` en Docker (`mcr.microsoft.com/playwright:v1.65.0-noble`, modo `check`) | 0    | **30 passed** contra las referencias versionadas, sin regenerar                                 |
+| `pnpm typecheck:e2e`                                                                | 0    | `tsc -p tsconfig.e2e.json` sin errores                                                          |
+| `pnpm lint:md`                                                                      | 0    | `Linting: 110 files`, `Summary: 0 issues in 0 files`                                            |
+| `pnpm check:scope`                                                                  | 0    | `check:scope OK (266 archivos revisados)`                                                       |
+
+\* Primera pasada de `e2e:journeys`: exit 1, **6 failed** (`fachada de video bajo la CSP`, 2 casos × 375/768/1280) con
+`page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4323/`. Causa: faltaba construir la vista previa de vídeo (`pnpm e2e:video:build`,
+puerto 4323), un paso previo mío y no un fallo de código. Tras `pnpm e2e:video:build` (exit 0), `playwright test --grep "@journeys fachada de
+video bajo la CSP"` dio **6 passed**; el resto de la primera pasada fue 538 passed, 41 skipped. Antes de `e2e:journeys` se ejecutó
+`pnpm build` (`own`) y `pnpm e2e:drafts:build` (puerto 4322), ambos exit 0.
+
+Pasos de `pnpm verify` con cifras: `domain:test` 15 archivos, 325 passed y 2 expected fail; `api:test` (sin BD) 25 archivos passed y 10 skipped,
+360 passed, 1 expected fail y 134 skipped; `test` (web) 58 archivos, 677 passed y 2 expected fail; `test:scripts` 807 tests, 805 pass, 0 fail,
+2 skipped; `check:public-build OK (434 archivos; valores y patrones ausentes)`; `format:check` conforme.
+
+`check:initial-js` por ruta (gzip 6; la versión `/es/…` coincide con la inglesa):
+
+| Ruta                                              | JS inicial    | Límite  |
+| ------------------------------------------------- | ------------- | ------- |
+| `/` y `/es`                                       | 0 B           | 90 000  |
+| **`/tier-list` y `/es/tier-list`**                | **111 403 B** | 112 000 |
+| `/maestrias` y `/es/maestrias`                    | 106 192 B     | 112 000 |
+| `/maestrias/soldier` y `/demolition` (+ES)        | 118 455 B     | 150 000 |
+| `/builds/chaman-demoledor-golpe-primigenio` (+ES) | 126 634 B     | 150 000 |
+
+`/tier-list` 111 403 B es la cifra esperada tras T052 frente a F-002 (+60 B sobre 111 343 B, margen 597 B).
+
+### Markdown y alcance (ronda 2)
+
+- `node scripts/spec-review.mjs prepare --feature specs/005-deuda-revisiones` y `pnpm exec prettier --check` de `quickstart.md`: ver el
+  reporte del agente (el valor del snapshot cambia con cada edición de este archivo).
+
+### Limpieza
+
+Sin contenedores (`docker ps -a` vacío; no se usó compose ni se tocó el stack `grim-dawn-builds`), sin procesos de node, Chrome ni Lighthouse con la
+ruta del worktree y sin archivos sueltos (`git status` limpio salvo `tasks.md` y `quickstart.md`).
