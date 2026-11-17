@@ -2,7 +2,13 @@ import { spawnSync } from 'node:child_process';
 import { lstatSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { CONTENT_MOUNT, failurePattern, successPattern } from '@gd/domain';
+import {
+  CONTENT_MOUNT,
+  failureLine,
+  failurePattern,
+  successPattern,
+  type SeedErrorCode,
+} from '@gd/domain';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 interface Result {
@@ -89,7 +95,7 @@ export function launchContentImport(
   const write = options.write ?? console.log;
   const appEnv = env['APP_ENV'];
   if (appEnv !== 'development' && appEnv !== 'test') {
-    write(`${operation} failed: environment`);
+    write(failureLine(operation, 'environment'));
     return 1;
   }
   const root = options.root ?? ROOT;
@@ -160,11 +166,12 @@ export function launchContentImport(
       const stderr = result.error ?? '';
       const code = failurePattern(operation).exec(stderr);
       if (code) {
-        write(`${operation} failed: ${code[1]}`);
+        // The contract's own line, with the identifier detail (FR-012) when the seeder sent one.
+        write(failureLine(operation, code[1] as SeedErrorCode, code[2]));
         return 1;
       }
       // A well-formed failure line with a code outside the contract is named, never echoed or accepted.
-      if (new RegExp(`^${operation} failed: \\S+\\s*$`).test(stderr)) {
+      if (new RegExp(`^${operation} failed: \\S+(?: \\(.*\\))?\\s*$`).test(stderr)) {
         write(`${operation} failed: unknown`);
         return 1;
       }
@@ -193,7 +200,7 @@ export function launchSeed(
 }
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   if (process.argv.length > 2) {
-    console.error('seed failed: arguments');
+    console.error(failureLine('seed', 'arguments'));
     process.exitCode = 1;
   } else process.exitCode = launchSeed(process.env);
 }

@@ -10,6 +10,7 @@ export const CONTENT_MOUNT = '/content';
 /** Closed set of codes a seeder may report after `<operation> failed: `. */
 export const SEED_ERROR_CODES = [
   'already',
+  'arguments',
   'bootstrapped',
   'column',
   'conflicting-resource',
@@ -55,6 +56,26 @@ const SUCCESS_PATTERNS: Record<SeedOperation, RegExp> = {
 /** Pattern the launcher uses to accept a seeder's success line. */
 export const successPattern = (operation: SeedOperation): RegExp => SUCCESS_PATTERNS[operation];
 
-/** Pattern matching `<operation> failed: <code>` with the code captured; derived from the union. */
+/**
+ * Optional detail after the code: an identifier (for example the retired mastery a guide still uses,
+ * FR-012). Closed pattern so a failure line can never carry SQL, row values or free text.
+ */
+const DETAIL_SOURCE = '[a-z0-9][a-z0-9_-]{0,63}';
+const DETAIL_PATTERN = new RegExp(`^${DETAIL_SOURCE}$`);
+
+/** The one failure line a seeder prints and the launcher forwards: `<op> failed: <code>[ (<detail>)]`. */
+export const failureLine = (
+  operation: SeedOperation,
+  code: SeedErrorCode,
+  detail?: string,
+): string =>
+  `${operation} failed: ${code}${detail !== undefined && DETAIL_PATTERN.test(detail) ? ` (${detail})` : ''}`;
+
+/**
+ * Pattern matching `<operation> failed: <code>[ (<detail>)]`; capture 1 is the code and capture 2 the
+ * optional detail. Derived from the union.
+ */
 export const failurePattern = (operation: SeedOperation): RegExp =>
-  new RegExp(`^${operation} failed: (${SEED_ERROR_CODES.join('|')})\\s*$`);
+  new RegExp(
+    `^${operation} failed: (${SEED_ERROR_CODES.join('|')})(?: \\((${DETAIL_SOURCE})\\))?\\s*$`,
+  );
