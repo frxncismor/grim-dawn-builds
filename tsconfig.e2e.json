@@ -9,6 +9,7 @@
   "include": [
     "e2e/**/*.ts",
     "playwright.svg.config.ts",
+    "playwright.fidelity.config.ts",
     "scripts/run-svg-e2e.mts",
     "scripts/serve-svg-preview.mts",
     "scripts/svg-preview.test.mts",
