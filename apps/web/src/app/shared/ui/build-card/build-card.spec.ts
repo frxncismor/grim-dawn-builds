@@ -10,6 +10,7 @@ import type { BuildCardInput as BuildCardData } from './build-card.model';
 const portrait = (src: string, width = 197, height = 41) => ({ src, width, height });
 
 const guide: BuildCardData = {
+  key: 'guia-a',
   variant: 'standard',
   title: 'Chamán + Demoledor: Golpe Primigenio',
   masteries: [
@@ -26,6 +27,7 @@ const guide: BuildCardData = {
 };
 
 const noGuide: BuildCardData = {
+  key: 'sin-guia-a',
   variant: 'compact',
   title: 'Arcanista + Berserker',
   masteries: [{ portrait: null }, { portrait: null }],
@@ -192,21 +194,25 @@ describe('spec004 T052: combination name and language-safe accessible name', () 
     expect(described?.textContent).toContain('Guía editorial en español');
   });
 
-  it('gives every card its own description id', async () => {
+  it('gives every card its own description id, derived from its key', async () => {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
-    const ids = ['A', 'B'].map((combination) => {
+    const idOf = (key: string) => {
       const fixture = TestBed.createComponent(BuildCard);
       fixture.componentRef.setInput(
         'data',
-        buildCardData({ ...guide, combination, combinationLang: 'es' }),
+        buildCardData({ ...guide, key, combination: 'A', combinationLang: 'es' }),
       );
       fixture.detectChanges();
       return (fixture.nativeElement as HTMLElement)
         .querySelector('a')!
         .getAttribute('aria-describedby');
-    });
-    expect(ids[0]).toBeTruthy();
-    expect(ids[0]).not.toBe(ids[1]);
+    };
+    const [a1, b1] = [idOf('a'), idOf('b')];
+    const [b2, a2] = [idOf('b'), idOf('a')];
+    expect(a1).toBe('build-card-combination-a');
+    expect(b1).toBe('build-card-combination-b');
+    expect(a2).toBe(a1);
+    expect(b2).toBe(b1);
   });
 
   it('adds no description when the combination is in the UI language', async () => {

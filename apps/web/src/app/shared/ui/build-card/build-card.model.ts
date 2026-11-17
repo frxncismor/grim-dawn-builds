@@ -13,6 +13,8 @@ export interface BuildCardPortrait {
 
 /** What a page knows about a build; `buildCardData` turns it into what the card draws. */
 export interface BuildCardInput {
+  /** Stable identity of the card within its page (catalog `card.id`, guide slug); derives its ids. */
+  readonly key: string;
   readonly variant: BuildCardVariant;
   readonly title: string;
   /** Language of `title` when it differs from the page's (FR-042); absent or `null` otherwise. */
@@ -51,6 +53,8 @@ export interface BuildCardInput {
  * Everything is already localized and resolved so the component stays markup only.
  */
 export interface BuildCardData {
+  /** Same as `BuildCardInput.key`: the content-derived part of the card's DOM ids. */
+  readonly key: string;
   readonly variant: BuildCardVariant;
   readonly title: string;
   readonly titleLang?: string | null;

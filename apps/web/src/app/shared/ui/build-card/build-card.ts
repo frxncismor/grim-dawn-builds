@@ -1,12 +1,16 @@
-import { ChangeDetectionStrategy, Component, input, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  ViewEncapsulation,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { BuildCardData } from './build-card.model';
 
-let nextCardId = 0;
-
 /**
- * Card of a build (spec004 T015). Markup and CSS only: it has no state, no computed values and
- * no client logic of its own, because `/tier-list` has ~1 kB of initial-JS margin. Every text
+ * Card of a build (spec004 T015). Markup and CSS only: it has no state and no client logic of
+ * its own beyond one computed id derived from `data().key`, because `/tier-list` has ~1 kB of initial-JS margin. Every text
  * arrives localized in `data` (see `build-card.labels.ts`) and the frame, the status shape and
  * the portrait fallback live in CSS and in the data. One destination: the title link covers the
  * whole card. Its CSS is global (`styles/build-card.css`): component CSS would ship inside the JS of
@@ -37,7 +41,9 @@ let nextCardId = 0;
       }
       <h3 class="build-card__title">
         @if (d.href) {
-          <a [routerLink]="d.href" [attr.aria-describedby]="d.srCombination ? descriptionId : null"
+          <a
+            [routerLink]="d.href"
+            [attr.aria-describedby]="d.srCombination ? descriptionId() : null"
             ><span [attr.lang]="d.titleLang">{{ d.title }}</span>
             <span class="build-card__sr">{{ d.srText }}</span></a
           >
@@ -46,7 +52,7 @@ let nextCardId = 0;
             [href]="d.externalHref"
             target="_blank"
             rel="noopener noreferrer"
-            [attr.aria-describedby]="d.srCombination ? descriptionId : null"
+            [attr.aria-describedby]="d.srCombination ? descriptionId() : null"
             ><span [attr.lang]="d.titleLang">{{ d.title }}</span>
             <span class="build-card__sr">{{ d.srText }}</span></a
           >
@@ -62,7 +68,7 @@ let nextCardId = 0;
       </h3>
       @if (d.combination) {
         <!-- prettier-ignore -->
-        <p class="build-card__combination" aria-hidden="true" [id]="descriptionId" [attr.lang]="d.combinationLang">{{ d.combination }}</p>
+        <p class="build-card__combination" aria-hidden="true" [id]="descriptionId()" [attr.lang]="d.combinationLang">{{ d.combination }}</p>
       }
       <!-- prettier-ignore -->
       <p class="build-card__status" aria-hidden="true" [attr.data-status]="d.status">{{ d.statusLabel }}</p>
@@ -77,6 +83,9 @@ let nextCardId = 0;
 })
 export class BuildCard {
   readonly data = input.required<BuildCardData>();
-  /** Id of the visible combination line; a content-language one is the link's description (T040). */
-  readonly descriptionId = `build-card-combination-${nextCardId++}`;
+  /**
+   * Id of the visible combination line; a content-language one is the link's description (T040).
+   * Derived from the card's `key`, so the same card renders the same id in any order or process.
+   */
+  readonly descriptionId = computed(() => `build-card-combination-${this.data().key}`);
 }

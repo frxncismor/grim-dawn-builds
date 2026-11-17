@@ -104,6 +104,7 @@ export class TierPreview {
   readonly disabledGroups = [this.groups[1]];
   readonly cards = {
     placeholder: buildCardData({
+      key: 'preview-placeholder',
       variant: 'compact',
       title: 'Chamán + Demoledor',
       masteries: [],
@@ -116,6 +117,7 @@ export class TierPreview {
       tierLabel: null,
     }),
     own: buildCardData({
+      key: 'preview-own',
       variant: 'standard',
       title: 'Guía propia de prueba',
       masteries: [{ portrait: null }, { portrait: null }],
@@ -128,6 +130,7 @@ export class TierPreview {
       tierLabel: null,
     }),
     external: buildCardData({
+      key: 'preview-external',
       variant: 'standard',
       title: 'Referencia externa de prueba',
       masteries: [],
@@ -145,6 +148,7 @@ export class TierPreview {
       },
     }),
     long: buildCardData({
+      key: 'preview-long',
       variant: 'compact',
       title:
         'Guardián del Juramento + Nigromante · combinación de nombre extenso para comprobar el ajuste de texto',

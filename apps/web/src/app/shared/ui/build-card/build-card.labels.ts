@@ -55,6 +55,7 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
     ? $localize`:@@buildCard.externalLink:External source (new tab)`
     : null;
   return {
+    key: input.key,
     variant: input.variant,
     title: input.title,
     titleLang: input.titleLang,
