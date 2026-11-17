@@ -116,6 +116,7 @@ describe('@gd/domain built output', () => {
       'LINK_ONLY_METADATA_FIELDS',
       'MasteryCombinationSchema',
       'MasterySchema',
+      'MasterySummarySchema',
       'MasteryTreeSchema',
       'PERMISSION_REQUEST_STATUSES',
       'PUBLICATION_GATE_CHECKLIST_POINTS',

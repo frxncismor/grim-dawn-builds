@@ -1,5 +1,9 @@
-import { z } from 'zod';
-import { PublicMasteryTreeSchema, type PublicMasteryTree } from '@gd/domain';
+import {
+  MasterySummarySchema,
+  PublicMasteryTreeSchema,
+  type MasterySummary,
+  type PublicMasteryTree,
+} from '@gd/domain';
 
 /** Opaque on purpose: never carries row values, SQL or schema issues (constitution §XI). */
 export class InvalidCatalogError extends Error {
@@ -36,19 +40,6 @@ export interface SkillNodeRow {
   /** Public icon handle (never the texture path); NULL when the node has no icon. */
   icon_id?: string | null;
 }
-
-const mastery = PublicMasteryTreeSchema.shape.mastery;
-/** Public list entry: one mastery with its node count. */
-export const MasterySummarySchema = z
-  .object({
-    id: mastery.shape.id,
-    slug: mastery.shape.slug,
-    name: mastery.shape.name,
-    game_version: PublicMasteryTreeSchema.shape.game_version,
-    node_count: z.number().int().nonnegative(),
-  })
-  .strict();
-export type MasterySummary = z.infer<typeof MasterySummarySchema>;
 
 /** Rows are projected field by field, so nothing outside the DTO can pass through. */
 export function mapMasteryTree(
