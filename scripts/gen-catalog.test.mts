@@ -15,7 +15,7 @@ const build = await readJson(
 );
 const author: Author = {
   slug: 'grim-dawn-builds',
-  display_name: 'Grim Dawn Builds',
+  display_name: 'Grim Builds',
   bio: null,
   url: null,
   is_placeholder: false,

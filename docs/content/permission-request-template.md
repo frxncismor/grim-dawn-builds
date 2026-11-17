@@ -21,7 +21,7 @@ Asunto: Solicitud de permiso para adaptar «<título de la guía>»
 
 Hola <nombre>:
 
-Te escribo de Grim Dawn Builds (https://github.com/frxncismor/grim-dawn-builds),
+Te escribo de Grim Builds (https://github.com/frxncismor/grim-dawn-builds),
 un proyecto sin ánimo de lucro, no afiliado a Crate Entertainment ni a GrimTools.
 
 Me gustaría solicitar tu permiso para:
@@ -56,7 +56,7 @@ Subject: Permission request to adapt "<guide title>"
 
 Hi <name>,
 
-I am writing from Grim Dawn Builds
+I am writing from Grim Builds
 (https://github.com/frxncismor/grim-dawn-builds), a non-commercial project that is
 not affiliated with Crate Entertainment or GrimTools.
 

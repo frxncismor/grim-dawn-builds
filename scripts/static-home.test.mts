@@ -16,7 +16,7 @@ test('static delivery preserves native content and SEO while removing every Java
   const result = staticHomeHtml(html);
   assertStaticHome(result);
   for (const text of [
-    '<h1>Grim Dawn Builds</h1>',
+    '<h1>Grim Builds</h1>',
     'Contenido propio.',
     'href="/tier-list"',
     'href="#main"',
@@ -141,7 +141,7 @@ test('content pages are emitted without client bootstrap and keep the static con
     const result = staticPageHtml(html.replaceAll('app-home-page', selector), selector);
     assertStaticPage(result, selector);
     for (const text of [
-      '<h1>Grim Dawn Builds</h1>',
+      '<h1>Grim Builds</h1>',
       'href="/tier-list"',
       'href="#main"',
       'application/ld+json',

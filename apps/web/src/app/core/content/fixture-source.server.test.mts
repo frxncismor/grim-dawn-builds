@@ -35,7 +35,7 @@ test('real catalog has 46 public slots, including the published own guide', asyn
     JSON.stringify(catalog),
     /permission_ref|rights_confirmed_by|rights_notes|reviewed_by|skill_nodes/,
   );
-  assert.equal((await publicRepo.getAuthor('grim-dawn-builds'))?.display_name, 'Grim Dawn Builds');
+  assert.equal((await publicRepo.getAuthor('grim-dawn-builds'))?.display_name, 'Grim Builds');
   assert.equal(await publicRepo.getAuthor('por-confirmar'), null);
   const local = createFixtureRepository(root, { INCLUDE_DRAFTS: 'true' });
   const localCatalog = await local.getTierList('principal');

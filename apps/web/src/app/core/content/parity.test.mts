@@ -244,7 +244,7 @@ test('guide is published as own content with internal provenance and no third-pa
   assert.equal(source.slug, 'guia-original');
   assert.equal(source.kind, 'original');
   assert.equal(source.url, null);
-  assert.equal(source.author_name, 'Grim Dawn Builds');
+  assert.equal(source.author_name, 'Grim Builds');
   assert.equal(source.permission_ref, null);
   assert.match(source.notes, /Claude Code/);
   assert.equal(BuildSchema.safeParse({ ...guide, rights_status: 'pending' }).success, false);
