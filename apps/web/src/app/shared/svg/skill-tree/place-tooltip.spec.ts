@@ -296,3 +296,54 @@ describe('placeTooltip', () => {
     expect(() => placeTooltip(input)).not.toThrow();
   });
 });
+
+describe('placeTooltip margin (spec005 T031, F-14)', () => {
+  const phone: Rect = { left: 0, top: 0, width: 375, height: 800 };
+  const wide = { width: 300, height: 120 };
+
+  it('keeps the tooltip at least `margin` px from both sides of the viewport', () => {
+    for (const x of [0, 10, 100, 330, 365]) {
+      const p = placeTooltip({
+        anchor: node(x, 400),
+        tip: wide,
+        viewport: phone,
+        prefer: 'top',
+        gap: 8,
+        margin: 16,
+      });
+      expect(p.left, `nodo en x=${x}`).toBeGreaterThanOrEqual(16);
+      expect(right(box(p, wide)), `nodo en x=${x}`).toBeLessThanOrEqual(375 - 16);
+    }
+  });
+
+  it('keeps the node within 16 px of the tooltip while the margin pushes it sideways', () => {
+    const anchor = node(0, 400);
+    const p = placeTooltip({
+      anchor,
+      tip: wide,
+      viewport: phone,
+      prefer: 'top',
+      gap: 8,
+      margin: 16,
+    });
+    expect(distance(box(p, wide), anchor)).toBeLessThanOrEqual(16);
+  });
+
+  it('flips to the bottom when the margin leaves no room above', () => {
+    const p = placeTooltip({
+      anchor: node(100, 130),
+      tip: wide,
+      viewport: phone,
+      prefer: 'top',
+      gap: 8,
+      margin: 16,
+    });
+    expect(p.side).toBe('bottom');
+    expect(p.top).toBeGreaterThanOrEqual(16);
+  });
+
+  it('defaults to no margin (the previous behaviour)', () => {
+    const p = placeTooltip({ anchor: node(0, 400), tip: wide, viewport: phone, prefer: 'top' });
+    expect(p.left).toBe(0);
+  });
+});

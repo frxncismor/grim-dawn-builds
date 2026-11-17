@@ -9,7 +9,6 @@ gd-tier-list-page {
 }
 
 gd-tier-list-page .catalog-intro {
-  max-inline-size: var(--reading-measure);
   margin-block: 0 var(--space-6);
   padding: var(--space-5);
   border: var(--frame-border);
@@ -48,10 +47,39 @@ gd-tier-list-page summary:focus-visible {
 
 gd-tier-list-page .filter-help {
   margin-block: var(--space-3) var(--space-5);
+  padding-inline: var(--space-4);
+}
+
+gd-tier-list-page .filter-panel > summary[data-count]::after {
+  content: ' (' attr(data-count) ')';
+  font-family: var(--font-mono);
+}
+
+/*
+ * spec005 T026 (F-07): the panel is folded by default so the counter and the first card stay near the
+ * top on a phone; from 48rem up it is shown by CSS alone (no script, no layout shift), and the summary
+ * stops looking like a control.
+ */
+@media (min-width: 48.0625rem) {
+  gd-tier-list-page .filter-panel::details-content {
+    content-visibility: visible;
+    display: block;
+  }
+
+  gd-tier-list-page .filter-panel > summary {
+    list-style: none;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  gd-tier-list-page .filter-panel > summary::-webkit-details-marker {
+    display: none;
+  }
 }
 
 gd-tier-list-page .result-count {
   margin-block: var(--space-5) var(--space-4);
+  max-inline-size: none;
   padding-block-end: var(--space-2);
   border-block-end: var(--frame-border);
   color: var(--color-storm);

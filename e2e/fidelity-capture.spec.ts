@@ -60,6 +60,13 @@ async function shot(
 ): Promise<void> {
   const ancho = widthOf(page);
   const archivo = `${ruta}-${idioma}-${ancho}${estado ? `-${estado}` : ''}.png`;
+  // `content-visibility: auto` salta lo que queda fuera de pantalla y la captura de página completa no
+  // desplaza: se fuerza el pintado para que la lista de habilidades salga entera (T022, F-04).
+  await page.evaluate(() =>
+    document
+      .querySelectorAll<HTMLElement>('.skill-tree__list')
+      .forEach((list) => (list.style.contentVisibility = 'visible')),
+  );
   await page.screenshot({
     path: join(OUT, archivo),
     fullPage,

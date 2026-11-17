@@ -314,6 +314,13 @@
           <context context-type="linenumber">3,7</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="buildPage.onlyInSpanish" datatype="html">
+        <source> This guide is only available in Spanish. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.html</context>
+          <context context-type="linenumber">9,13</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="buildPage.skills" datatype="html">
         <source>Skills</source>
         <context-group purpose="location">
@@ -1629,6 +1636,13 @@
           <context context-type="linenumber">249,251</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="catalog.title" datatype="html">
+        <source>Catalog of mastery combinations</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="catalog.intro" datatype="html">
         <source> All combinations, with their status in view. A slot without a guide is a placeholder: it is not a recommendation or a power ranking. </source>
         <context-group purpose="location">
@@ -2232,13 +2246,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
           <context context-type="linenumber">34,37</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="mastery.eyebrow" datatype="html">
-        <source>Mastery skill tree</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/masteries/mastery.page.html</context>
-          <context context-type="linenumber">4,5</context>
         </context-group>
       </trans-unit>
       <trans-unit id="mastery.summary" datatype="html">

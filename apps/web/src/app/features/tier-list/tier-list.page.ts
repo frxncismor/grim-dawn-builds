@@ -34,10 +34,16 @@ export class TierListPage {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   readonly catalog = this.route.snapshot.data['catalog'] as CatalogSnapshot;
+  /** The catalog title follows the page language; the content's own title is Spanish only (spec005 T020, F-01). */
+  readonly title = $localize`:@@catalog.title:Catalog of mastery combinations`;
   readonly filter = signal<TierFilter>(EMPTY_FILTER);
   readonly groups = catalogGroups(this.catalog);
   /** Game art on a card: Crate is credited and non-affiliation stated (§VII). */
   readonly showsGameArt = this.catalog.masteries.some((m) => m.portrait?.source === 'game');
+  /** Filters in use, shown on the folded panel (spec005 T026, F-07). */
+  readonly activeFilters = computed(
+    () => Object.values(this.filter()).flat().filter(Boolean).length,
+  );
   readonly visible = computed(() => applyFilter(this.catalog.cards, this.filter()));
   private readonly cardContext = catalogCardContext(this.catalog);
   private readonly cardOf = (card: CatalogCard) => ({
@@ -66,10 +72,12 @@ export class TierListPage {
   constructor() {
     const seo = inject(SeoService);
     seo.setPage({
-      title: this.catalog.title,
+      title: this.title,
       description: $localize`:@@catalog.description:Browse Grim Dawn mastery combinations. Filter by damage, style and content status, with visible attribution and review.`,
       path: '/tier-list',
-      structuredData: [catalogItemList(this.catalog, (path) => seo.canonical(path))],
+      structuredData: [
+        catalogItemList({ ...this.catalog, title: this.title }, (path) => seo.canonical(path)),
+      ],
     });
     // Hydrate the complete SSR catalog first, then enhance it with URL filters.
     afterNextRender(() =>

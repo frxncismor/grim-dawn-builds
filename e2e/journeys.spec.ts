@@ -53,6 +53,13 @@ async function expectSingleHeading(page: Page, expected: string | RegExp, scope:
   await expect(heading, `${scope}: h1 inesperado`).toHaveText(expected);
 }
 
+/** spec005 T026: en móvil el panel de filtros llega plegado; se abre solo si hace falta. */
+async function showFilters(page: Page): Promise<void> {
+  const search = page.locator('details.filter-panel input[type="search"]');
+  if (await search.isHidden()) await page.locator('details.filter-panel > summary').click();
+  await expect(search).toBeVisible();
+}
+
 /** A <768 px la navegación vive en el menú `details` de la cabecera (T044): se abre si hace falta. */
 async function openHeaderMenu(page: Page): Promise<void> {
   const summary = page.locator('.site-header summary');
@@ -163,7 +170,7 @@ test.describe('@journeys artefacto público', () => {
 
     await page.getByRole('link', { name: 'Browse the catalog', exact: true }).click();
     await page.waitForURL(/\/tier-list$/);
-    await expectSingleHeading(page, /Catálogo de combinaciones de maestrías/i, 'catálogo');
+    await expectSingleHeading(page, /Catalog of mastery combinations/i, 'catálogo');
 
     const cards = page.locator('gd-build-card');
     expect(await cards.count(), 'el catálogo debe listar combinaciones').toBeGreaterThan(0);
@@ -229,6 +236,7 @@ test.describe('@journeys artefacto público', () => {
 
   test('filtros de /tier-list siguen la URL al recargar y en el historial', async ({ page }) => {
     await open(page, `${PUBLIC_BASE_URL}/tier-list`);
+    await showFilters(page);
     const chip = page.getByRole('button', { name: 'Arcanist', exact: true });
     await expect(chip).toHaveAttribute('aria-pressed', 'false');
     const initial = await resultCount(page);
@@ -244,6 +252,7 @@ test.describe('@journeys artefacto público', () => {
 
     // Recarga completa: el estado se reconstruye desde la query, no desde memoria.
     await page.reload({ waitUntil: 'networkidle' });
+    await showFilters(page);
     await expect(page).toHaveURL(/[?&]m=arcanista/);
     await expect(chip).toHaveAttribute('aria-pressed', 'true');
     expect(await resultCount(page), 'tras recargar, el filtro sigue aplicado').toEqual(filtered);
@@ -342,7 +351,7 @@ test.describe('@journeys sin JavaScript', () => {
     await expectSingleHeading(page, /Grim Dawn guides/i, 'portada sin JavaScript');
     await page.getByRole('link', { name: 'Browse the catalog', exact: true }).click();
     await page.waitForURL(/\/tier-list$/);
-    await expectSingleHeading(page, /Catálogo de combinaciones de maestrías/i, 'catálogo sin JS');
+    await expectSingleHeading(page, /Catalog of mastery combinations/i, 'catálogo sin JS');
     expect(
       await page.locator('gd-build-card').count(),
       'el catálogo completo debe estar en el HTML, sin depender de hidratación',
@@ -578,9 +587,19 @@ test.describe('@journeys snapshot de catálogo solo donde se lee', () => {
       for (const key of SNAPSHOT_KEYS) expect(keys, `${path} debe llevar ${key}`).toContain(key);
     });
 
-  for (const [path, link, listUrl] of [
-    ['/maestrias/demolition', 'Browse the build catalog', /\/tier-list$/],
-    ['/es/maestrias/demolition', 'Explorar el catálogo de builds', /\/es\/tier-list$/],
+  for (const [path, link, listUrl, title] of [
+    [
+      '/maestrias/demolition',
+      'Browse the build catalog',
+      /\/tier-list$/,
+      /^Catalog of mastery combinations$/,
+    ],
+    [
+      '/es/maestrias/demolition',
+      'Explorar el catálogo de builds',
+      /\/es\/tier-list$/,
+      /^Catálogo de combinaciones de maestrías$/,
+    ],
   ] as const)
     test(`${path}: el enlace al catálogo funciona sin snapshot en la página de origen`, async ({
       page,
@@ -589,7 +608,7 @@ test.describe('@journeys snapshot de catálogo solo donde se lee', () => {
       await page.getByRole('link', { name: link, exact: true }).click();
       await page.waitForURL(listUrl);
       await expect(page.locator('h1')).toHaveCount(1);
-      await expect(page.locator('h1')).toHaveText(/Catálogo de combinaciones de maestrías/i);
+      await expect(page.locator('h1')).toHaveText(title);
       expect(await page.locator('gd-build-card').count()).toBeGreaterThan(0);
     });
 });
@@ -610,6 +629,47 @@ interface CspProbe {
   violations: string[];
   external: string[];
 }
+
+/** spec005 T026 (F-06, F-07): el catálogo usa el ancho del contenedor y el panel de filtros se pliega en móvil. */
+test.describe('@journeys catálogo: ancho y panel de filtros plegable', () => {
+  for (const prefix of ['', '/es'])
+    for (const width of [375, 768]) {
+      test(`${prefix}/tier-list a ${width}px: el panel está plegado y el contador y la primera tarjeta quedan arriba`, async ({
+        page,
+      }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await open(page, `${PUBLIC_BASE_URL}${prefix}/tier-list`);
+        const panel = page.locator('details.filter-panel');
+        await expect(panel).not.toHaveAttribute('open', '');
+        await expect(panel.locator('input[type="search"]')).toBeHidden();
+        const top = async (selector: string) =>
+          page
+            .locator(selector)
+            .first()
+            .evaluate((el) => el.getBoundingClientRect().top + scrollY);
+        expect(await top('.result-count'), 'contador').toBeLessThan(1000);
+        expect(await top('gd-build-card'), 'primera tarjeta').toBeLessThan(1000);
+        await panel.locator('summary').click();
+        await expect(panel.locator('input[type="search"]')).toBeVisible();
+      });
+    }
+
+  test('/tier-list a 1280px: filtros visibles sin abrir nada y cabecera, panel y contador comparten ancho', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await open(page, `${PUBLIC_BASE_URL}/tier-list`);
+    await expect(page.locator('details.filter-panel input[type="search"]')).toBeVisible();
+    const width = async (selector: string) =>
+      page
+        .locator(selector)
+        .first()
+        .evaluate((el) => Math.round(el.getBoundingClientRect().width));
+    const intro = await width('.catalog-intro');
+    expect(await width('details.filter-panel')).toBe(intro);
+    expect(await width('.result-count')).toBe(intro);
+  });
+});
 
 async function openVideoPreview(page: Page): Promise<CspProbe> {
   const probe: CspProbe = { violations: [], external: [] };
@@ -1301,4 +1361,183 @@ test.describe('@journeys cabecera de una fila (T044)', () => {
     await expect(page.locator('.site-header summary')).toBeHidden();
     await expect(page.locator('.site-header nav a:visible')).toHaveCount(5);
   });
+});
+
+/**
+ * T025 (spec 005, F-05): la guía no deja contenedores con borde y sin contenido visible (los
+ * marcadores del contenido diferido que nunca se rellenan). Consulta de DOM a los tres anchos y en
+ * los dos idiomas, antes de desplazarse (el estado en que se ve el marcador del `@defer`).
+ */
+test.describe('@journeys T025 guía sin contenedores vacíos con borde', () => {
+  for (const locale of STEP_LOCALES)
+    for (const width of [375, 768, 1280])
+      test(`${width}px ${locale.prefix || '/'}: ningún contenedor con borde sin hijos ni texto`, async ({
+        page,
+      }) => {
+        test.skip(page.viewportSize()?.width !== width, 'se comprueba una vez por ancho');
+        await open(page, `${PUBLIC_BASE_URL}${locale.prefix}${GUIDE_PATH}`);
+        const empty = await page.evaluate(() => {
+          const skip = new Set([
+            'HR',
+            'IMG',
+            'SVG',
+            'INPUT',
+            'VIDEO',
+            'CANVAS',
+            'IFRAME',
+            'PROGRESS',
+          ]);
+          return [...document.querySelectorAll<HTMLElement>('gd-build-page *')]
+            .filter((el) => {
+              if (skip.has(el.tagName.toUpperCase()) || el.closest('svg')) return false;
+              if (el.children.length > 0 || (el.textContent ?? '').trim() !== '') return false;
+              const style = getComputedStyle(el);
+              if (style.display === 'none' || style.visibility === 'hidden') return false;
+              const box = el.getBoundingClientRect();
+              if (box.width === 0 || box.height === 0) return false;
+              return ['Top', 'Right', 'Bottom', 'Left'].some(
+                (side) =>
+                  parseFloat(style.getPropertyValue(`border-${side.toLowerCase()}-width`)) > 0 &&
+                  style.getPropertyValue(`border-${side.toLowerCase()}-style`) !== 'none',
+              );
+            })
+            .map((el) => `${el.tagName.toLowerCase()}.${el.className}`);
+        });
+        expect(empty, 'contenedores con borde y sin contenido visible').toEqual([]);
+      });
+});
+
+/**
+ * T028 (spec 005, F-10, F-17, F-18): Prioridades compacta (≤ 40 % de su alto original: 1 595,7 px a
+ * 1280), un único color para los H2 de la guía, una sola numeración por paso y mayúscula uniforme en el
+ * rótulo de umbral del orden de compra.
+ */
+const PRIORITIES_ORIGINAL_HEIGHT_1280 = 1595.7;
+test.describe('@journeys T028 secciones de la guía', () => {
+  for (const locale of STEP_LOCALES) {
+    test(`${locale.prefix || '/'}: Prioridades mide ≤ 40 % del alto original a 1280`, async ({
+      page,
+    }) => {
+      test.skip(page.viewportSize()?.width !== 1280, 'solo a 1280');
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}${GUIDE_PATH}`);
+      const height = (await page.locator('#prioridades').boundingBox())!.height;
+      expect(height).toBeLessThanOrEqual(PRIORITIES_ORIGINAL_HEIGHT_1280 * 0.4);
+    });
+
+    for (const width of [375, 768, 1280])
+      test(`${width}px ${locale.prefix || '/'}: un solo color de H2, una numeración, umbral en mayúscula`, async ({
+        page,
+      }) => {
+        test.skip(page.viewportSize()?.width !== width, 'una vez por ancho');
+        await open(page, `${PUBLIC_BASE_URL}${locale.prefix}${GUIDE_PATH}`);
+        const colors = await page.evaluate(() => [
+          ...new Set(
+            [...document.querySelectorAll('gd-build-page h2')].map(
+              (h) => getComputedStyle(h).color,
+            ),
+          ),
+        ]);
+        expect(colors, 'colores distintos de H2').toHaveLength(1);
+        const numbered = await page.evaluate(() =>
+          [...document.querySelectorAll('[data-fallback-devotion-step] strong')]
+            .map((el) => el.textContent?.trim() ?? '')
+            .filter((text) => /^\d+\./.test(text)),
+        );
+        expect(numbered, 'pasos con número escrito además del marcador de la lista').toEqual([]);
+        const transforms = await page.evaluate(() =>
+          [...document.querySelectorAll('[data-threshold]')].map(
+            (el) => getComputedStyle(el, '::first-letter').textTransform,
+          ),
+        );
+        expect(transforms.length).toBeGreaterThan(0);
+        expect(new Set(transforms)).toEqual(new Set(['uppercase']));
+      });
+  }
+});
+
+/**
+ * T029 (spec 005, F-11): la guía destacada de la portada usa la escala Display del token, ninguna
+ * tarjeta con marco queda dentro de un contenedor con marco y no hay scroll horizontal a 375.
+ */
+test.describe('@journeys T029 guía destacada de la portada', () => {
+  for (const locale of STEP_LOCALES)
+    test(`${locale.prefix || '/'}: Display, sin marco dentro de marco y sin scroll horizontal`, async ({
+      page,
+    }) => {
+      await open(page, `${PUBLIC_BASE_URL}${locale.prefix}/`);
+      const report = await page.evaluate(() => {
+        const probe = document.createElement('span');
+        probe.style.fontSize = 'var(--text-hero)';
+        document.body.append(probe);
+        const display = getComputedStyle(probe).fontSize;
+        probe.remove();
+        const title = document.querySelector(
+          '.build-card[data-variant="featured"] .build-card__title',
+        );
+        const framed = (el: Element) => {
+          const css = getComputedStyle(el);
+          return (
+            css.borderImageSource !== 'none' ||
+            ['top', 'right', 'bottom', 'left'].some(
+              (side) =>
+                parseFloat(css.getPropertyValue(`border-${side}-width`)) > 0 &&
+                css.getPropertyValue(`border-${side}-style`) !== 'none',
+            )
+          );
+        };
+        const nested = [...document.querySelectorAll('gd-build-card')].filter((card) => {
+          for (let el = card.parentElement; el && el !== document.body; el = el.parentElement)
+            if (framed(el) && el.tagName !== 'LI') return true;
+          return false;
+        });
+        return {
+          display,
+          titleSize: title ? getComputedStyle(title).fontSize : null,
+          nested: nested.length,
+          overflow: document.documentElement.scrollWidth > window.innerWidth,
+        };
+      });
+      expect(report.titleSize).toBe(report.display);
+      expect(report.nested, 'tarjetas dentro de un contenedor con marco').toBe(0);
+      expect(report.overflow, 'scroll horizontal').toBe(false);
+    });
+});
+
+/**
+ * T023 (spec 005, F-02, FR-038; P28 = A): en `/builds/:slug` EN la guía solo existe en español. Hay un
+ * aviso visible al inicio y todo bloque del cuerpo cuelga de un `lang="es"`; en ES no hay aviso ni
+ * `lang` añadido. Por ancho (375/768/1280).
+ */
+test.describe('@journeys T023 guía solo en español en la versión EN', () => {
+  for (const width of [375, 768, 1280]) {
+    test(`${width}px /: aviso visible y ningún bloque sin lang`, async ({ page }) => {
+      test.skip(page.viewportSize()?.width !== width, 'una vez por ancho');
+      await open(page, `${PUBLIC_BASE_URL}${GUIDE_PATH}`);
+      const notice = page.locator('[data-lang-notice]');
+      await expect(notice).toBeVisible();
+      await expect(notice).toContainText('This guide is only available in Spanish');
+      const report = await page.evaluate(() => {
+        const body = document.querySelector('.build-content')!;
+        const unmarked = [...body.children].filter((el) => {
+          const lang = el.closest('[lang]')?.getAttribute('lang') ?? '';
+          return !/^es\b/i.test(lang);
+        });
+        const noticeBox = document.querySelector('[data-lang-notice]')!.getBoundingClientRect();
+        const bodyBox = body.getBoundingClientRect();
+        return {
+          unmarked: unmarked.map((el) => el.tagName.toLowerCase()),
+          noticeFirst: noticeBox.top < bodyBox.top,
+        };
+      });
+      expect(report.unmarked, 'bloques del cuerpo sin lang="es"').toEqual([]);
+      expect(report.noticeFirst, 'el aviso va antes del cuerpo').toBe(true);
+    });
+
+    test(`${width}px /es: sin aviso ni lang añadido`, async ({ page }) => {
+      test.skip(page.viewportSize()?.width !== width, 'una vez por ancho');
+      await open(page, `${PUBLIC_BASE_URL}/es${GUIDE_PATH}`);
+      await expect(page.locator('[data-lang-notice]')).toHaveCount(0);
+      await expect(page.locator('.build-content')).not.toHaveAttribute('lang', /.*/);
+    });
+  }
 });

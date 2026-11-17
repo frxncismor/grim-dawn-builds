@@ -555,7 +555,7 @@ for (const route of T018_CATALOGS) {
 }
 
 for (const catalog of [
-  { path: '/tier-list', name: /Chamán \+ Demoledor.*\. Shaman \+ Demolitionist\. Unverified/i },
+  { path: '/tier-list', name: /^Shaman \+ Demolitionist\s*\. Unverified/i },
   { path: '/es/tier-list', name: /Chamán \+ Demoledor.*\. Sin verificar/i },
 ] as const) {
   test.describe(`@a11y T052 tarjeta del catálogo (${catalog.path})`, () => {
@@ -590,22 +590,26 @@ for (const home of [
         /.*/,
       );
       await expect(link).not.toHaveAttribute('lang', /.*/);
-      // Título editorial (es) + combinación y estado en el idioma de la interfaz (FR-003/FR-004).
+      // EN (T023, FR-038): nombre con las maestrías en inglés y el título editorial en español aparte;
+      // ES: título editorial + combinación y estado en el idioma de la interfaz (FR-003/FR-004).
       await expect(
         link,
         'el nombre accesible incluye la combinación y el estado',
       ).toHaveAccessibleName(
         home.path === '/'
-          ? /Chamán \+ Demoledor.*\. Shaman \+ Demolitionist\. (Unverified|Verified)/i
+          ? /^Shaman \+ Demolitionist\s*\. (Unverified|Verified)/i
           : /Chamán \+ Demoledor.*\. (Sin verificar|Verificado)/i,
       );
       if (home.path === '/')
         await expect(page.locator('[data-variant="featured"] .build-card__combination')).toHaveText(
-          'Shaman + Demolitionist',
+          /Chamán \+ Demoledor/,
         );
-      await expect(link.locator('[lang]'), 'lang solo en el título').toHaveCount(
-        home.path === '/' ? 1 : 0,
-      );
+      if (home.path === '/')
+        await expect(
+          page.locator('[data-variant="featured"] .build-card__combination'),
+          'el título en español lleva lang="es"',
+        ).toHaveAttribute('lang', 'es');
+      await expect(link.locator('[lang]'), 'sin lang dentro del enlace').toHaveCount(0);
       await link.focus();
       const focus = await page.evaluate(() => {
         const card = document.querySelector('[data-variant="featured"]') as HTMLElement;

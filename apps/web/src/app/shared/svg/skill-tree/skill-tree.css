@@ -450,22 +450,23 @@ gd-skill-tree {
  * The textual list sits far below the diagram. The browser skips its style and layout (about 8 ms of
  * the first render) until it nears the viewport; it stays in the accessibility tree and in find in
  * page. The intrinsic height approximates the real one (narrow, tablet and desktop widths) so the
- * page does not jump when it renders; once rendered the browser remembers its real size.
+ * page does not jump when it renders; once rendered the browser remembers its real size. Values measured
+ * on soldier (32 skills, 3519/2111/1676px at 375/768/1280): within 5% of the real height (spec005 T022, F-04).
  */
 .skill-tree__list {
   content-visibility: auto;
-  contain-intrinsic-block-size: auto 245rem;
+  contain-intrinsic-block-size: auto 220rem;
 }
 
 @media (min-width: 40rem) {
   .skill-tree__list {
-    contain-intrinsic-block-size: auto 145rem;
+    contain-intrinsic-block-size: auto 132rem;
   }
 }
 
 @media (min-width: 64rem) {
   .skill-tree__list {
-    contain-intrinsic-block-size: auto 107rem;
+    contain-intrinsic-block-size: auto 105rem;
   }
 }
 
@@ -480,8 +481,8 @@ gd-skill-tree {
   inline-size: max-content;
   /* Bounded by the viewport, not by the (possibly very narrow) stage: at 200 % zoom the stage is
      ~105 px wide and a tooltip squeezed into it grows taller than the viewport (T013 correction). */
-  max-inline-size: min(20rem, calc(100vw - var(--space-4)));
-  max-block-size: calc(100vh - var(--space-4));
+  max-inline-size: min(20rem, calc(100vw - var(--space-4) * 2));
+  max-block-size: calc(100vh - var(--space-4) * 2);
   overflow-y: auto;
   padding: var(--space-3) var(--space-4);
   border: var(--frame-border);
@@ -504,12 +505,16 @@ gd-skill-tree {
 .skill-tree__tooltip-name {
   font-family: var(--font-display);
   font-size: var(--text-base);
+  line-height: 1.3;
 }
 
+/* The other-language name always has its own line, in both languages (spec005 T031, F-13). */
 .skill-tree__tooltip-name span {
-  color: var(--color-ash);
+  display: block;
+  color: var(--color-ash-more);
   font-family: var(--font-body);
   font-size: var(--text-small);
+  line-height: 1.4;
 }
 
 .skill-tree__tooltip-meta {
@@ -546,4 +551,9 @@ gd-skill-tree {
   .skill-tree__scroll-help {
     display: none;
   }
+}
+
+/* Espacio real en el texto (para el nombre accesible) sin ancho: no descentra los rótulos. */
+.skill-tree__gap {
+  font-size: 0;
 }

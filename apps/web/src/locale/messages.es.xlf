@@ -248,7 +248,7 @@
       </trans-unit>
       <trans-unit id="buildAttribution.disclaimerHeading" datatype="html">
         <source>Disclaimer</source>
-        <target state="translated">Descargo</target>
+        <target state="translated">Aviso</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/build/attribution/build-attribution.html</context>
           <context context-type="linenumber">96,97</context>
@@ -356,6 +356,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/build/build.page.html</context>
           <context context-type="linenumber">3,7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="buildPage.onlyInSpanish" datatype="html">
+        <source> This guide is only available in Spanish. </source>
+        <target state="translated"> Esta guía solo está disponible en español. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.html</context>
+          <context context-type="linenumber">9,13</context>
         </context-group>
       </trans-unit>
       <trans-unit id="buildPage.skills" datatype="html">
@@ -1638,6 +1646,14 @@
           <context context-type="linenumber">249,251</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="catalog.title" datatype="html">
+        <source>Catalog of mastery combinations</source>
+        <target state="translated">Catálogo de combinaciones de maestrías</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tier-list/tier-list.page.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="catalog.intro" datatype="html">
         <source> All combinations, with their status in view. A slot without a guide is a placeholder: it is not a recommendation or a power ranking. </source>
         <target state="translated"> Todas las combinaciones, con su estado a la vista. Una ranura sin guía es un placeholder: no es una recomendación ni una clasificación de poder. </target>
@@ -2548,14 +2564,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/ui/layout/language-switcher.html</context>
           <context context-type="linenumber">16,19</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="mastery.eyebrow" datatype="html">
-        <source>Mastery skill tree</source>
-        <target state="translated">Árbol de habilidades de maestría</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/masteries/mastery.page.html</context>
-          <context context-type="linenumber">4,5</context>
         </context-group>
       </trans-unit>
       <trans-unit id="mastery.summary" datatype="html">

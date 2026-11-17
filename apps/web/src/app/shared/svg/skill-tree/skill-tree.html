@@ -190,10 +190,12 @@
                       [attr.y]="40"
                     >
                       @for (line of item.labelLines; track $index) {
-                        <tspan [attr.x]="0" [attr.dy]="$index === 0 ? 0 : 14">
-                          {{ ' ' + line + ' ' }}
-                        </tspan>
+                        @if ($index > 0) {
+                          <tspan class="skill-tree__gap">&ngsp;</tspan>
+                        }
+                        <tspan [attr.x]="0" [attr.dy]="$index === 0 ? 0 : 14">{{ line }}</tspan>
                       }
+                      <tspan class="skill-tree__gap">&ngsp;</tspan>
                     </text>
                     <text
                       class="skill-tree__bar-required"
@@ -201,12 +203,12 @@
                       text-anchor="middle"
                       [attr.y]="40 + 14 * item.labelLines.length"
                     >
-                      <tspan [attr.x]="0">{{ ' ' + kindLabel(item.node.kind) + ' ' }}</tspan>
-                      <tspan [attr.x]="0" dy="14">
-                        {{ ' ' + maxPointsLabel(item.node) + ' ' }}
-                      </tspan>
+                      <tspan [attr.x]="0">{{ kindLabel(item.node.kind) }}</tspan>
+                      <tspan class="skill-tree__gap">&ngsp;</tspan>
+                      <tspan [attr.x]="0" dy="14">{{ maxPointsLabel(item.node) }}</tspan>
                       @if (item.node.circular) {
-                        <tspan [attr.x]="0" dy="14">{{ ' ' + circularLabel() + ' ' }}</tspan>
+                        <tspan class="skill-tree__gap">&ngsp;</tspan>
+                        <tspan [attr.x]="0" dy="14">{{ circularLabel() }}</tspan>
                       }
                     </text>
                   </g>

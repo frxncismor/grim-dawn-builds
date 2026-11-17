@@ -59,13 +59,17 @@ export function catalogCardInput(
   const real = !!guide || external;
   const tier = card.entry.tier;
   const title = guide?.title ?? card.entry.display_name ?? card.combinationName;
+  // T023 (FR-038): a guide that only exists in the content language is named on the card with the
+  // localized mastery names; its editorial title stays beneath it with its own `lang`.
+  const swap = !!guide && !!context.titleLang && title !== card.combinationName;
   return {
     variant: variant ?? (real ? 'standard' : 'compact'),
-    title,
+    title: swap ? card.combinationName : title,
     // Editorial titles are content in its own language; the combination name is localized (FR-042).
-    titleLang: title === card.combinationName ? null : context.titleLang,
+    titleLang: swap || title === card.combinationName ? null : context.titleLang,
     // A title that is not the combination (editorial) must not hide it (FR-003, FR-004).
-    combination: title === card.combinationName ? null : card.combinationName,
+    combination: swap ? title : title === card.combinationName ? null : card.combinationName,
+    combinationLang: swap ? context.titleLang : null,
     masteries: card.masteries.map((slug) => ({ portrait: context.portraits.get(slug) ?? null })),
     status: card.entry.content_status,
     reviewState: guide?.review_state ?? null,

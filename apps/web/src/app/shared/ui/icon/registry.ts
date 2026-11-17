@@ -5,7 +5,7 @@ export const ICONS = {
   'mastery-berserker': 'Berserker',
   'mastery-chaman': 'Chamán',
   'mastery-demoledor': 'Demoledor',
-  'mastery-filo-nocturno': 'Filo Nocturno',
+  'mastery-filo-nocturno': 'Hoja de la Noche',
   'mastery-guardian-del-juramento': 'Guardián del Juramento',
   'mastery-inquisidor': 'Inquisidor',
   'mastery-nigromante': 'Nigromante',

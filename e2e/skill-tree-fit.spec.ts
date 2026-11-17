@@ -58,16 +58,11 @@ for (const locale of LOCALES)
       }
     });
 
-/** T046: DESIGN.md prohíbe el _eyebrow_ de mayúsculas espaciadas sobre el título (`impeccable`: hero-eyebrow-chip). */
+/** T046/T027: DESIGN.md prohíbe el _eyebrow_ sobre el título; el árbol ya no lleva rótulo bajo el H1 (F-09). */
 for (const locale of LOCALES)
-  test(`@journeys el rótulo sobre el título de la maestría (${locale.name}) no es un eyebrow en mayúsculas espaciadas`, async ({
+  test(`@journeys la maestría (${locale.name}) no lleva un eyebrow sobre ni bajo el título`, async ({
     page,
   }) => {
     await page.goto(`${BASE_URL}${locale.prefix}/maestrias/soldier`, { waitUntil: 'networkidle' });
-    const style = await page.locator('p.mastery__eyebrow').evaluate((element) => {
-      const css = getComputedStyle(element);
-      return { transform: css.textTransform, spacing: css.letterSpacing };
-    });
-    expect(style.transform).toBe('none');
-    expect(style.spacing).toBe('normal');
+    await expect(page.locator('.mastery__eyebrow')).toHaveCount(0);
   });

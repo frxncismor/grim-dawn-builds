@@ -56,6 +56,8 @@ const CATALOG_MARGIN_X = 60;
 const CATALOG_HEADER_HEIGHT = 56;
 const CATALOG_MARGIN_BOTTOM = 96;
 const CATALOG_MAX_NODES = 400;
+/** DESIGN «Layout»: the tooltip box keeps the 16 px gutter from every viewport edge (spec005 T031, F-14). */
+const TOOLTIP_MARGIN = 16;
 /** Grace period before the tooltip hides, long enough to move the pointer onto it. */
 const TOOLTIP_HIDE_DELAY_MS = 250;
 
@@ -360,6 +362,7 @@ export class SkillTree implements OnDestroy {
       tip: { width: tipRect.width, height: tipRect.height },
       viewport: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight },
       prefer: 'top',
+      margin: TOOLTIP_MARGIN,
     });
     tip.style.left = `${placed.left - stageRect.left}px`;
     tip.style.top = `${placed.top - stageRect.top}px`;

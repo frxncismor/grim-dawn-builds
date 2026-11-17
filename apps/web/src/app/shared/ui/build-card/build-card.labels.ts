@@ -59,10 +59,12 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
     title: input.title,
     titleLang: input.titleLang,
     combination: input.combination ?? null,
+    combinationLang: input.combinationLang ?? null,
     masteries: input.masteries.map((m) => ({ portrait: m.portrait ?? FALLBACK_PORTRAIT })),
     status: input.status,
     statusLabel,
-    srText: [input.combination, statusLabel, newTab]
+    // A combination in the content language is shown (hidden from AT) but not read inside the link name.
+    srText: [input.combinationLang ? null : input.combination, statusLabel, newTab]
       .map((part) => (part ? '. ' + part : ''))
       .join(''),
     facts,

@@ -17,17 +17,16 @@
   box-shadow: var(--frame-bevel), var(--panel-shadow);
 }
 
-.context-label,
 .group-label {
   color: var(--color-storm);
   font-weight: var(--weight-emphasis);
 }
 
+/* Plain metadata line under the title, not a tracked-caps eyebrow (T027, F-09). */
 .context-label {
   margin-block-end: var(--space-2);
+  color: var(--color-ash);
   font-size: var(--text-small);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .summary h1 {
@@ -40,17 +39,17 @@
   color: var(--color-bone);
 }
 
-/* A pull-quote rule on the summary card, not a card inside it. */
+/* A hairline-topped pull-quote on the summary card, not a card inside it (T027: no side stripe). */
 .callout {
   max-inline-size: var(--reading-measure);
   margin-block-start: var(--space-6);
-  padding: var(--space-2) var(--space-5);
-  border-inline-start: 4px solid var(--color-storm);
+  padding: var(--space-4) 0 var(--space-2);
+  border-block-start: 1px solid var(--color-storm);
 }
 
 .callout h2 {
   margin-block: 0 var(--space-3);
-  color: var(--color-storm);
+  color: var(--color-bone);
 }
 
 .callout p:last-child,
@@ -58,26 +57,33 @@
   margin-block-end: 0;
 }
 
+.priority-lead {
+  margin-block: 0 var(--space-3);
+  color: var(--color-ash);
+  font-size: var(--text-small);
+}
+
+/* One family, one width (T028, F-17): lists fill the block; only the prose keeps the reading measure. */
 .editorial-list {
   display: grid;
-  gap: var(--space-5);
-  max-inline-size: var(--reading-measure);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Rows separated by a hairline, not a stack of identical framed cards (T028, F-10). */
 .editorial-list li {
   min-inline-size: 0;
-  padding: var(--space-4);
-  border: var(--frame-border);
-  background: var(--surface-sheen), var(--color-panel);
-  box-shadow: var(--frame-bevel);
+  padding-block: var(--space-3);
+  border-block-start: var(--frame-border);
+}
+
+.editorial-list li:last-child {
+  border-block-end: var(--frame-border);
 }
 
 .priority-rank {
   display: inline-block;
-  margin-block-end: var(--space-1);
   color: var(--color-ember);
   font-family: var(--font-mono);
   font-size: var(--text-small);
@@ -85,7 +91,6 @@
 }
 
 .priority-list .priority-rank {
-  display: block;
   inline-size: fit-content;
   min-inline-size: var(--space-6);
   padding-inline: var(--space-1);
@@ -112,8 +117,16 @@
 
 .editorial-list strong {
   display: block;
-  margin-block-end: var(--space-1);
   color: var(--color-bone);
+}
+
+/* Notes and guide entries get an internal hierarchy: small kind label, display-face headline, quiet detail. */
+.editorial-list:not(.priority-list) strong {
+  margin-block-end: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--text-large);
+  line-height: var(--line-heading);
+  font-weight: var(--weight-body);
 }
 
 .location {
@@ -121,14 +134,45 @@
 }
 
 .editorial-list p {
-  margin-block-end: 0;
+  max-inline-size: var(--reading-measure);
+  margin-block: 0;
+  color: var(--color-ash);
+}
+
+/* Priorities: a single line per element (rank, name, group, bar). */
+.priority-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-3);
+  row-gap: 0;
+  padding-block: var(--space-2);
+}
+
+.priority-list .group-label,
+.priority-list strong {
+  display: inline;
+  margin: 0;
+}
+
+.priority-list strong {
+  flex: 1 1 10rem;
+}
+
+.priority-list .group-label {
+  order: 3;
+  color: var(--color-ash);
+}
+
+.priority-list p {
+  order: 4;
+  color: var(--color-ash);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
 }
 
 .guide-notes {
   margin-block-start: var(--space-6);
-  padding-block-start: var(--space-5);
-  border-block-start: var(--frame-border);
-  list-style: none;
 }
 
 .empty-state {
@@ -138,26 +182,6 @@
   border: 1px dashed var(--color-ash);
   background: var(--color-panel);
   color: var(--color-ash);
-}
-
-@media (min-width: 48rem) {
-  .editorial-list li {
-    display: grid;
-    grid-template-columns: minmax(8rem, 0.35fr) minmax(0, 1fr);
-    column-gap: var(--space-5);
-    align-items: start;
-  }
-
-  .editorial-list .group-label,
-  .editorial-list .location,
-  .editorial-list .priority-rank {
-    grid-column: 1;
-  }
-
-  .editorial-list strong,
-  .editorial-list p {
-    grid-column: 2;
-  }
 }
 
 @media (max-width: 30rem) {

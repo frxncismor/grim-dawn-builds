@@ -107,14 +107,31 @@ a.mastery-row__name:focus-visible {
 .mastery-row__meta {
   grid-area: meta;
 }
-/* On a phone the 197px button leaves no room for the name beside it: it takes its own line. */
+/*
+ * On a phone the count drops under the name so the name keeps the whole line (F-03): beside it the
+ * name was left with about 95px and broke inside the word. The 197px game button takes its own line.
+ */
 @media (max-width: 35.99rem) {
-  .mastery-row--game {
-    grid-template-columns: minmax(0, 1fr) auto;
+  .mastery-row {
+    grid-template-columns: auto minmax(0, 1fr);
     grid-template-areas:
-      'art art'
-      'name meta';
+      'art name'
+      'art meta';
+    row-gap: var(--space-1);
+    align-items: center;
+  }
+  .mastery-row--game {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'art'
+      'name'
+      'meta';
     row-gap: var(--space-2);
+  }
+  /* The longest name (Demolitionist) is 249px at the heading size and 229px is all a 375px row leaves. */
+  .mastery-row__name {
+    font-size: calc(var(--text-heading) * 0.8);
+    overflow-wrap: normal;
   }
 }
 .masteries__credit {
