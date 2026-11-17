@@ -11,6 +11,7 @@ import { compareMigrations, migrationFingerprint, readExpectedHashes } from './m
 import { prepareSeed, readSeedFixtures, seedContentRoot, type SeedData } from './seed.mjs';
 import {
   SeedError,
+  pruneCatalogNodes,
   retireMasteries,
   writeCatalogRows,
   writeContentRows,
@@ -110,6 +111,7 @@ export async function bootstrapData(
     // Catalog first (idempotent upsert): guide nodes reference it through `skill_node_id` (T031).
     await writeCatalogRows(client, data.catalog);
     await writeContentRows(client, data);
+    await pruneCatalogNodes(client, data.catalog);
     await retireMasteries(
       client,
       data.catalog.map((t) => t.mastery.id),

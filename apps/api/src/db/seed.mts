@@ -1,5 +1,6 @@
 import {
   SeedError,
+  pruneCatalogNodes,
   retireMasteries,
   writeCatalogRows,
   writeContentRows,
@@ -250,6 +251,7 @@ export async function seedCatalog(
   try {
     await requireImporter(client);
     await writeCatalogRows(client, catalog);
+    await pruneCatalogNodes(client, catalog);
     await retireMasteries(
       client,
       catalog.map((t) => t.mastery.id),
@@ -281,6 +283,7 @@ export async function seedData(
     // retires it can land in the same seed (T036, C-003).
     await writeCatalogRows(client, data.catalog);
     await writeContentRows(client, data);
+    await pruneCatalogNodes(client, data.catalog);
     await retireMasteries(
       client,
       data.catalog.map((t) => t.mastery.id),

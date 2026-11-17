@@ -191,6 +191,29 @@ suite('atomic bootstrap on real PostgreSQL (T-072)', SUITE_OPTIONS, () => {
     ).toBe(marker.payload_hash);
   });
 
+  it('prunes catalog nodes after the guides and before stamping the origin (spec006 T005)', async () => {
+    const sql: string[] = [];
+    const spy = {
+      query: (text: string, values?: unknown[]) => {
+        sql.push(text);
+        return importer!.query(text, values);
+      },
+    };
+    await bootstrapData(spy, data);
+    const at = (pred: (s: string) => boolean) => sql.findIndex(pred);
+    const guides = at((s) => s.includes('"build_skill_nodes"') && s.startsWith('INSERT'));
+    const sweep = at((s) =>
+      s.startsWith('DELETE FROM catalog_skill_nodes WHERE mastery_id = $1 AND id <> ALL'),
+    );
+    const stamp = at((s) => s.startsWith('UPDATE "authors" SET origin=\'bootstrap\''));
+    expect(guides).toBeGreaterThan(-1);
+    expect(sweep).toBeGreaterThan(guides);
+    expect(stamp).toBeGreaterThan(sweep);
+    expect(
+      (await importer!.query('SELECT count(*)::int AS n FROM catalog_skill_nodes')).rows[0].n,
+    ).toBe(186);
+  });
+
   it('refuses even one existing catalog row without altering it', async () => {
     await importer!.query(
       "INSERT INTO assets (slug,status,recorded_on,fallback_svg) VALUES ('existing-local-asset','pending','2026-11-09','mastery-generic')",
