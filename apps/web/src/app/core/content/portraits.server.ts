@@ -95,3 +95,21 @@ export function withCatalogPortraits<T extends { readonly masteries: readonly { 
     }),
   } as T;
 }
+
+/**
+ * Server only (spec005 T033, FR-040): flags `noTree` on every catalog mastery whose tree is not in
+ * the data (`treeSlugs`, the slugs of the mastery catalog), so no page links a tree that does not
+ * open. A mastery with no `TREE_SLUG` entry has no tree either. The others stay untouched.
+ */
+export function withCatalogTrees<T extends { readonly masteries: readonly { slug: string }[] }>(
+  catalog: T,
+  treeSlugs: ReadonlySet<string>,
+): T {
+  return {
+    ...catalog,
+    masteries: catalog.masteries.map((m) => {
+      const tree = Object.hasOwn(TREE_SLUG, m.slug) ? TREE_SLUG[m.slug] : undefined;
+      return tree && treeSlugs.has(tree) ? m : { ...m, noTree: true };
+    }),
+  } as T;
+}

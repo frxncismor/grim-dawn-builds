@@ -21,6 +21,11 @@ export interface CatalogInput {
     readonly slug: string;
     readonly name_es: string;
     readonly name_en: string;
+    /**
+     * Set at prerender (spec005 T033) when the mastery has no skill tree in the data: the home
+     * shows it without a link. Absent means "has a tree" (the route opens one).
+     */
+    readonly noTree?: true;
     /** Portrait resolved at prerender (`ASSET_SOURCE`); absent when the mastery has no tree art. */
     readonly portrait?: {
       readonly source?: 'game' | 'own';

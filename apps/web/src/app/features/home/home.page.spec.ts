@@ -69,6 +69,23 @@ describe('native Home from public server snapshot', () => {
     expect(f.nativeElement.querySelector('a[href="/tier-list?m=chaman"]')).not.toBeNull();
     expect(f.nativeElement.textContent).toMatch(/2 of 2 combinations/);
   });
+  it('shows «Skill tree not available» without a link for a mastery with no tree (spec005 T033)', async () => {
+    setup();
+    TestBed.inject(TransferState).set(CATALOG_STATE, {
+      ...input,
+      masteries: input.masteries.map((m) => (m.slug === 'soldado' ? { ...m, noTree: true } : m)),
+    } as never);
+    const f = TestBed.createComponent(HomePage);
+    await f.whenStable();
+    const el: HTMLElement = f.nativeElement;
+    expect(el.querySelector('a[href="/tier-list?m=soldado"]')).toBeNull();
+    const chip = el.querySelector('[data-no-tree="soldado"]');
+    expect(chip?.textContent).toContain('Soldier');
+    expect(chip?.textContent).toContain('Skill tree not available');
+    expect(chip?.closest('a')).toBeNull();
+    expect(el.querySelector('a[href="/tier-list?m=chaman"]')).not.toBeNull();
+    expect(el.querySelectorAll('[data-no-tree]')).toHaveLength(1);
+  });
   it('fails explicitly without the server snapshot', () => {
     setup();
     expect(() => TestBed.createComponent(HomePage)).toThrow('Falta el catálogo prerenderizado.');

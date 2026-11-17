@@ -12,7 +12,11 @@ import { resolve } from 'node:path';
 import { appConfig } from './app.config';
 import { serverRoutes } from './app.routes.server';
 import { MASTERY_CATALOG, MASTERY_PORTRAITS } from './core/content/masteries';
-import { createPortraitResolver, withCatalogPortraits } from './core/content/portraits.server';
+import {
+  createPortraitResolver,
+  withCatalogPortraits,
+  withCatalogTrees,
+} from './core/content/portraits.server';
 import { SKILL_ICON_SOURCE, SKILL_ICONS_STATE } from './core/content/skill-icons';
 import { createSkillIconSource } from './core/content/skill-icons.server';
 import { createMasteryCatalog } from './core/content/masteries.server';
@@ -69,15 +73,22 @@ const serverConfig: ApplicationConfig = {
       useFactory: () => {
         const repository = inject(CONTENT_SOURCE).repository;
         const portraits = inject(MASTERY_PORTRAITS);
+        const masteryCatalog = inject(MASTERY_CATALOG);
         let pending: Promise<PublicSiteData> | undefined;
         return () =>
-          (pending ??= Promise.all([loadPublicSiteData(repository), portraits]).then(
-            ([data, portraitOf]) => ({
-              ...data,
-              // spec004 T042: cards of the home and the catalog draw the mastery portrait.
-              catalog: withCatalogPortraits(data.catalog, portraitOf),
-            }),
-          ));
+          (pending ??= Promise.all([
+            loadPublicSiteData(repository),
+            portraits,
+            masteryCatalog.listSummaries(),
+          ]).then(([data, portraitOf, summaries]) => ({
+            ...data,
+            // spec004 T042: cards of the home and the catalog draw the mastery portrait.
+            // spec005 T033: a mastery with no tree in the data is not linked (FR-040).
+            catalog: withCatalogTrees(
+              withCatalogPortraits(data.catalog, portraitOf),
+              new Set(summaries.filter((s) => s.nodeCount > 0).map((s) => s.slug)),
+            ),
+          })));
       },
     },
     provideAppInitializer(async () => {

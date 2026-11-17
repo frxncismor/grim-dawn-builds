@@ -50,7 +50,16 @@
   <ul class="masteries__list">
     @for (mastery of masteries; track mastery.slug) {
       <li>
-        <a routerLink="/tier-list" [queryParams]="mastery.query">{{ mastery.name }}</a>
+        @if (mastery.hasTree) {
+          <a routerLink="/tier-list" [queryParams]="mastery.query">{{ mastery.name }}</a>
+        } @else {
+          <span class="masteries__no-tree" [attr.data-no-tree]="mastery.slug"
+            >{{ mastery.name
+            }}<span class="masteries__no-tree-note" i18n="@@mastery.treeUnavailable"
+              >Skill tree not available</span
+            ></span
+          >
+        }
       </li>
     }
   </ul>
