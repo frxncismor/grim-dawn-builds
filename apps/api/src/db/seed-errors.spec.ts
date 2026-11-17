@@ -206,6 +206,20 @@ describe('catalog before content, retirement after (C-003)', () => {
     expect(client.commands.at(-1)).toBe('COMMIT');
   });
 
+  it('frees the slugs of departing masteries before the upsert, in seed, bootstrap and catalog (T041)', async () => {
+    for (const run of [
+      (c: ReturnType<typeof fakeClient>) => seedData(c, data()),
+      (c: ReturnType<typeof fakeClient>) => bootstrapData(c, data()),
+      (c: ReturnType<typeof fakeClient>) => seedCatalog(c, data().catalog),
+    ]) {
+      const client = fakeClient();
+      await run(client);
+      const at = (needle: string) => client.commands.findIndex((sql) => sql.includes(needle));
+      expect(at("SET slug = 'released-'")).toBeGreaterThan(-1);
+      expect(at("SET slug = 'released-'")).toBeLessThan(at('INSERT INTO mastery_trees'));
+    }
+  });
+
   it('bootstrapData keeps the same order', async () => {
     const client = fakeClient();
     await bootstrapData(client, data());

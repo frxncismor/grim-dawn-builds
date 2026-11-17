@@ -280,6 +280,28 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', SUITE_OPT
     }
   });
 
+  it('seeds a retired mastery and a new one with the same slug in a single full seed (T041, C-101/F-001)', async () => {
+    await seedData(importer!, data);
+    const base = data.catalog[0]!;
+    const reused = (id: string): SeedData['catalog'][number] => ({
+      ...base,
+      mastery: { ...base.mastery, id, slug: 'reused-slug' },
+      nodes: [{ ...base.nodes[0]!, id: `${id}/root`, parent_id: null }],
+    });
+    try {
+      await seedData(importer!, { ...data, catalog: [...data.catalog, reused('class98')] });
+      await seedData(importer!, { ...data, catalog: [...data.catalog, reused('class99')] });
+      expect(
+        (await admin!.query("SELECT id FROM mastery_trees WHERE slug='reused-slug'")).rows,
+      ).toEqual([{ id: 'class99' }]);
+      expect((await admin!.query("SELECT 1 FROM mastery_trees WHERE id='class98'")).rowCount).toBe(
+        0,
+      );
+    } finally {
+      await seedData(importer!, data);
+    }
+  });
+
   it('refuses bootstrap and editor-owned records without changing stored content', async () => {
     const slug = data.authors[0]!.slug;
     await admin!.query("UPDATE authors SET origin='editor' WHERE slug=$1", [slug]);
@@ -378,6 +400,69 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', SUITE_OPT
           )
         ).rows[0].n,
       ).toBe(0);
+    });
+
+    it('retires a mastery and creates another with the same slug in a single seed (T041, C-101/F-001)', async () => {
+      const reused = (id: string): SeedData['catalog'][number] => {
+        const tree = retiredTree();
+        return {
+          ...tree,
+          mastery: { ...tree.mastery, id, slug: 'reused-slug' },
+          nodes: tree.nodes.map((n) => ({ ...n, id: `${id}/root` })),
+        };
+      };
+      await seedCatalog(importer!, [...data.catalog, reused('class09')]);
+      // class09 disappears and class10 takes its slug: one seed, no UNIQUE(slug) clash.
+      await expect(seedCatalog(importer!, [...data.catalog, reused('class10')])).resolves.toEqual({
+        masteries: 7,
+        nodes: 187,
+      });
+      expect(
+        (await admin!.query("SELECT id FROM mastery_trees WHERE slug='reused-slug'")).rows,
+      ).toEqual([{ id: 'class10' }]);
+      expect(
+        (await admin!.query("SELECT count(*)::int AS n FROM mastery_trees WHERE id='class09'"))
+          .rows[0].n,
+      ).toBe(0);
+      await seedCatalog(importer!, data.catalog);
+    });
+
+    it('swaps the slugs of two kept masteries in a single seed (T041)', async () => {
+      const swapped = structuredClone(data.catalog);
+      const [a, b] = [swapped[0]!.mastery, swapped[1]!.mastery];
+      [a.slug, b.slug] = [b.slug, a.slug];
+      await seedCatalog(importer!, swapped);
+      expect(
+        (
+          await admin!.query('SELECT id, slug FROM mastery_trees WHERE id = ANY($1) ORDER BY id', [
+            [a.id, b.id],
+          ])
+        ).rows,
+      ).toEqual(
+        [a, b].sort((x, y) => x.id.localeCompare(y.id)).map(({ id, slug }) => ({ id, slug })),
+      );
+      await seedCatalog(importer!, data.catalog);
+    });
+
+    it('still names the mastery when a retired one frees a slug but a guide uses it (T041, FR-012)', async () => {
+      const used = (
+        await admin!.query(
+          `SELECT DISTINCT c.mastery_id FROM build_skill_nodes b
+           JOIN catalog_skill_nodes c ON c.id = b.skill_node_id ORDER BY 1`,
+        )
+      ).rows.map((r) => r.mastery_id as string);
+      const retired = used[0]!;
+      const retiredSlug = data.catalog.find((t) => t.mastery.id === retired)!.mastery.slug;
+      const before = await snapshot();
+      const modified = structuredClone(data.catalog).filter((t) => t.mastery.id !== retired);
+      const fresh = retiredTree();
+      fresh.mastery.slug = retiredSlug;
+      modified.push(fresh);
+      await expect(seedCatalog(importer!, modified)).rejects.toMatchObject({
+        code: 'reference',
+        detail: retired,
+      });
+      expect(await snapshot()).toEqual(before);
     });
 
     it('aborts without partial changes and names the mastery when a guide uses a retired one (T007)', async () => {

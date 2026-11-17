@@ -399,6 +399,18 @@ export async function writeCatalogRows(
   client: SeedClient,
   catalog: readonly MasteryTree[],
 ): Promise<void> {
+  // `mastery_trees.slug` is UNIQUE and the upsert below only resolves conflicts by id. Retirement runs
+  // after the upsert (T036, C-003), so a mastery that disappears (or keeps its id but trades slugs)
+  // would still hold a slug an incoming tree claims. Park those slugs under a throwaway one first; a
+  // kept mastery gets its real slug back from the upsert, a retired one is deleted afterwards, and a
+  // retired mastery still used by guides still aborts with `reference (<id>)` (T041, C-101/F-001).
+  if (catalog.length)
+    await client.query(
+      `UPDATE mastery_trees SET slug = 'released-' || id
+       WHERE slug = ANY($2::text[])
+         AND (id, slug) NOT IN (SELECT * FROM unnest($1::text[], $2::text[]))`,
+      [catalog.map((t) => t.mastery.id), catalog.map((t) => t.mastery.slug)],
+    );
   for (const tree of catalog) {
     const m = tree.mastery;
     await client.query(
