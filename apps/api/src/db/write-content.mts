@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import type { BuildDocument, MasteryTree } from '@gd/domain';
+import type { BuildDocument, MasteryTree, SeedErrorCode } from '@gd/domain';
 import type { SeedData } from './seed.mjs';
 
 export class SeedError extends Error {
-  constructor(readonly code: string) {
+  constructor(readonly code: SeedErrorCode) {
     super(code);
     this.name = 'SeedError';
   }
