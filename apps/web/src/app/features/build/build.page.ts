@@ -52,7 +52,7 @@ export interface SkillTreeSlot {
 
 /** Author slug reserved for unconfirmed identities; it never becomes a public link. */
 const PLACEHOLDER_AUTHOR_SLUG = 'por-confirmar';
-const SITE_NAME = 'Grim Dawn Builds';
+const SITE_NAME = 'Grim Builds';
 const TREE_SUFFIXES = ['a', 'b'] as const;
 const HOME_LABEL = $localize`:@@buildPage.breadcrumbHome:Home`;
 

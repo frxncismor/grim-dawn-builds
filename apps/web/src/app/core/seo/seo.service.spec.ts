@@ -31,7 +31,7 @@ describe('SeoService', () => {
       path: '/tier-list?m=chaman#filters',
       structuredData: [webSite()],
     });
-    expect(doc.title).toBe('Catálogo · Grim Dawn Builds');
+    expect(doc.title).toBe('Catálogo · Grim Builds');
     expect(doc.querySelector('meta[name="description"]')?.getAttribute('content')).toBe(
       'Combinaciones con procedencia.',
     );
@@ -70,9 +70,9 @@ describe('SeoService', () => {
     expect(doc.querySelector('meta[name="twitter:card"]')?.getAttribute('content')).toBe(
       'summary_large_image',
     );
-    service.setPage({ title: 'Grim Dawn Builds', description: 'Portada.', path: '/' });
-    service.setPage({ title: 'Grim Dawn Builds', description: 'Portada.', path: '/' });
-    expect(doc.title).toBe('Grim Dawn Builds');
+    service.setPage({ title: 'Grim Builds', description: 'Portada.', path: '/' });
+    service.setPage({ title: 'Grim Builds', description: 'Portada.', path: '/' });
+    expect(doc.title).toBe('Grim Builds');
     expect(doc.querySelectorAll('meta[name="description"]')).toHaveLength(1);
     expect(doc.querySelectorAll('link[rel="canonical"]')).toHaveLength(1);
     expect(doc.querySelector('meta[property="og:type"]')?.getAttribute('content')).toBe('website');
@@ -90,7 +90,7 @@ describe('SeoService', () => {
       '630',
     );
     expect(doc.querySelector('meta[property="og:image:alt"]')?.getAttribute('content')).toContain(
-      'Grim Dawn Builds',
+      'Grim Builds',
     );
     expect(doc.querySelectorAll('meta[property="og:image"]')).toHaveLength(1);
     expect(doc.querySelector('meta[name="twitter:image"]')?.getAttribute('content')).toBe(
@@ -136,7 +136,7 @@ describe('SeoService', () => {
           structuredData: [record],
         }),
       ).toThrow();
-      expect(doc.title).toBe('Original · Grim Dawn Builds');
+      expect(doc.title).toBe('Original · Grim Builds');
     }
     const circular = webSite();
     circular['self'] = circular;
@@ -150,7 +150,7 @@ describe('SeoService', () => {
         }),
       ).toThrow(/estructurados/);
     }
-    expect(doc.title).toBe('Original · Grim Dawn Builds');
+    expect(doc.title).toBe('Original · Grim Builds');
   });
 
   it('does not create metadata from blank content or an external canonical route', () => {

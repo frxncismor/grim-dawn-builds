@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { SeoService } from '../../core/seo/seo.service';
 
 const TITLE = $localize`:@@legal.title:Legal notice`;
-const DESCRIPTION = $localize`:@@legal.description:Ownership, attribution, assets, content takedown and privacy for the Grim Dawn Builds project.`;
+const DESCRIPTION = $localize`:@@legal.description:Ownership, attribution, assets, content takedown and privacy for the Grim Builds project.`;
 
 /**
  * Static legal notice. Every statement is traceable to README.md, CONTRIBUTING.md,

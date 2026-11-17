@@ -75,7 +75,7 @@ describe('mastery page', () => {
       const fixture = create(tree, locale);
       await fixture.whenStable();
       expect(document.title).toContain(name);
-      expect(document.title).toContain('Grim Dawn Builds');
+      expect(document.title).toContain('Grim Builds');
       expect(
         document.head.querySelector('meta[name="description"]')?.getAttribute('content'),
       ).toContain(name);
