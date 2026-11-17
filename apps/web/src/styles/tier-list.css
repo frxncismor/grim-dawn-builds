@@ -56,24 +56,42 @@ gd-tier-list-page .filter-panel > summary[data-count]::after {
 }
 
 /*
- * spec005 T026 (F-07): the panel is folded by default so the counter and the first card stay near the
- * top on a phone; from 48rem up it is shown by CSS alone (no script, no layout shift), and the summary
- * stops looking like a control.
+ * spec005 T026 (F-07), T037 (B-01): the panel is folded by default so the counter and the first card
+ * stay near the top on a phone. From 48.0625rem up, where the browser can force the folded content
+ * visible (`::details-content`), it is shown by CSS alone and the `<summary>` (which would be announced
+ * "collapsed" and do nothing) leaves the tab order and the accessibility tree (`display: none`); the
+ * plain `.filter-title` heading takes its place with the same look. Without that support nothing
+ * changes: the summary stays a working control.
  */
+gd-tier-list-page .filter-title {
+  display: none;
+}
+
 @media (min-width: 48.0625rem) {
-  gd-tier-list-page .filter-panel::details-content {
-    content-visibility: visible;
-    display: block;
-  }
+  @supports selector(::details-content) {
+    gd-tier-list-page .filter-panel::details-content {
+      content-visibility: visible;
+      display: block;
+    }
 
-  gd-tier-list-page .filter-panel > summary {
-    list-style: none;
-    pointer-events: none;
-    cursor: default;
-  }
+    gd-tier-list-page .filter-panel > summary {
+      display: none;
+    }
 
-  gd-tier-list-page .filter-panel > summary::-webkit-details-marker {
-    display: none;
+    gd-tier-list-page .filter-panel > .filter-title {
+      display: block;
+      margin: 0;
+      padding: var(--space-3) var(--space-4);
+      min-block-size: var(--space-7);
+      font-weight: var(--weight-emphasis);
+      color: var(--color-storm);
+      background: var(--surface-sheen), var(--color-panel-2);
+    }
+
+    gd-tier-list-page .filter-panel > .filter-title[data-count]::after {
+      content: ' (' attr(data-count) ')';
+      font-family: var(--font-mono);
+    }
   }
 }
 

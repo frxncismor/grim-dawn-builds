@@ -10,6 +10,14 @@
   <summary i18n="@@catalog.filterHeading" [attr.data-count]="activeFilters() || null">
     Filter catalog
   </summary>
+  <!-- From 48.0625rem the panel is always shown: this heading replaces the inert summary (B-01). -->
+  <p
+    class="filter-title"
+    i18n="@@catalog.filterHeading"
+    [attr.data-count]="activeFilters() || null"
+  >
+    Filter catalog
+  </p>
   <gd-filter-bar [value]="filter()" [groups]="groups" (valueChange)="updateFilter($event)" />
   <p class="filter-help" i18n="@@catalog.filterHelp">
     Filter groups are combined. Within each group, one match is enough. Entries without damage or

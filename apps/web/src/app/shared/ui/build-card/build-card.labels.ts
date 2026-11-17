@@ -63,7 +63,9 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
     masteries: input.masteries.map((m) => ({ portrait: m.portrait ?? FALLBACK_PORTRAIT })),
     status: input.status,
     statusLabel,
-    // A combination in the content language is shown (hidden from AT) but not read inside the link name.
+    // A combination in the content language is read in its own `lang` span (`srCombination`), never
+    // mixed into the UI-language text.
+    srCombination: input.combinationLang && input.combination ? '. ' + input.combination : null,
     srText: [input.combinationLang ? null : input.combination, statusLabel, newTab]
       .map((part) => (part ? '. ' + part : ''))
       .join(''),

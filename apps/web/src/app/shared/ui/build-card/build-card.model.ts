@@ -65,6 +65,11 @@ export interface BuildCardData {
    * The title keeps its own `lang`, so no part of the accessible name mixes languages.
    */
   readonly srText: string;
+  /**
+   * Hidden text read before `srText` when the combination is in the content language
+   * (`combinationLang`): `. combination`, drawn in its own `lang` span so AT still reads it (T037, F-002).
+   */
+  readonly srCombination?: string | null;
   readonly facts: readonly string[];
   readonly href: readonly string[] | null;
   /** Safe external URL of a third-party guide; opens in a new tab. */
