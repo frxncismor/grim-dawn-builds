@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { lstatSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { CONTENT_MOUNT, successPattern } from '@gd/domain';
+import { CONTENT_MOUNT, failurePattern, successPattern } from '@gd/domain';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 interface Result {
@@ -157,13 +157,15 @@ export function launchContentImport(
       ),
     );
     if (result.code !== 0 || !successPattern(operation).test(result.output)) {
-      const code = new RegExp(
-        '^' +
-          operation +
-          ' failed: (invalid-content|role|already|not-empty|migration|credentials|database-failed|bootstrapped)\\s*$',
-      ).exec(result.error ?? '');
+      const stderr = result.error ?? '';
+      const code = failurePattern(operation).exec(stderr);
       if (code) {
         write(`${operation} failed: ${code[1]}`);
+        return 1;
+      }
+      // A well-formed failure line with a code outside the contract is named, never echoed or accepted.
+      if (new RegExp(`^${operation} failed: \\S+\\s*$`).test(stderr)) {
+        write(`${operation} failed: unknown`);
         return 1;
       }
       throw new Error('Seed failed');

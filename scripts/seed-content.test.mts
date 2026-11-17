@@ -1,6 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { bootstrapCompleteLine, CONTENT_MOUNT, seedCompleteLine, successPattern } from '@gd/domain';
+import {
+  bootstrapCompleteLine,
+  CONTENT_MOUNT,
+  SEED_ERROR_CODES,
+  seedCompleteLine,
+  successPattern,
+} from '@gd/domain';
 import {
   contentContainerArguments,
   launchContentImport,
@@ -146,4 +152,63 @@ test('the success pattern accepts the exact line the seeders print', () => {
     assert.equal(code, 0);
     assert.deepEqual(messages, [lines[operation]]);
   }
+});
+
+function launchWithStderr(operation: 'seed' | 'bootstrap', error: string, output = ''): string[] {
+  const messages: string[] = [];
+  const code = launchContentImport(
+    operation,
+    { APP_ENV: 'test' },
+    {
+      root: '/work',
+      validPath: () => true,
+      write: (line) => messages.push(line),
+      run: (args) => {
+        if (args.includes('ps')) return { code: 0, output: 'a'.repeat(64) };
+        if (args[0] === 'inspect') return { code: 0, output: '{"n":{}}' };
+        if (args.includes('printenv')) return { code: 0, output: 'gd_dev' };
+        return { code: 1, output, error };
+      },
+    },
+  );
+  assert.equal(code, 1);
+  return messages;
+}
+
+for (const code of [
+  'column',
+  'conflicting-resource',
+  'database-result',
+  'duplicate',
+  'fixture-read',
+  'owned-content',
+  'reference',
+  'table',
+  'environment',
+  'configuration-or-database',
+]) {
+  test(`the launcher forwards the seeder code ${code} instead of Seed failed`, () => {
+    for (const operation of ['seed', 'bootstrap'] as const)
+      assert.deepEqual(launchWithStderr(operation, `${operation} failed: ${code}\n`), [
+        `${operation} failed: ${code}`,
+      ]);
+  });
+}
+
+test('every code of the domain union is forwarded', () => {
+  for (const code of SEED_ERROR_CODES)
+    assert.deepEqual(launchWithStderr('seed', `seed failed: ${code}\n`), [`seed failed: ${code}`]);
+});
+
+test('a code outside the union is reported as unknown and never as success', () => {
+  const messages = launchWithStderr('seed', 'seed failed: mystery-PRIVATE\n');
+  assert.deepEqual(messages, ['seed failed: unknown']);
+  assert.equal(
+    messages.some((line) => successPattern('seed').test(line) || line.includes('PRIVATE')),
+    false,
+  );
+});
+
+test('stderr that is not a failure line keeps the generic container message', () => {
+  assert.deepEqual(launchWithStderr('seed', 'boom PRIVATE'), ['seed failed: local-container']);
 });
