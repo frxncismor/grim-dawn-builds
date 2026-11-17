@@ -12,3 +12,22 @@ Decisión de Paco (2026-11-17, opción A, vía el principal): de los hallazgos d
    - **Riesgo residual**: la frontera que documenta `CONTRIBUTING{,.es}.md` («neither local secrets … enter the container») no existe del todo; un desarrollador puede confiar en ella.
    - **Plan**: enviar al contenedor solo los archivos seguros por stdin (`git ls-files -co --exclude-standard | tar -cf - -T -`) o montar una copia ya filtrada, y usar `--no-wildcards` en el filtro; si se mantiene el montaje, corregir `CONTRIBUTING{,.es}.md` y el comentario del script.
    - Aplazado por decisión de Paco 2026-11-17 (ronda 2 de T018). Tarea de referencia: T018.
+
+## Ronda 3 de la puerta T018 (decisión del principal, 2026-11-17, opción B)
+
+La ronda 3 dio 0 CRITICAL, 0 HIGH y 0 MEDIUM. Los LOW abiertos L1 a L4 se aplazan con su motivo y la puerta se cierra como `passed`. Tarea de referencia: T018. Al planificarla, cada entrada se convierte en una tarea SDD.
+
+1. **L1 / S5-D1**, id de descripción de `build-card` desde un contador de módulo (F-301 = B-11 = A-101, LOW, `apps/web/src/app/shared/ui/build-card/build-card.ts:5,81`). El HTML prerrenderizado deja de ser determinista: el número depende del orden y del reparto de rutas entre workers.
+   - **Motivo del aplazamiento**: sin impacto en accesibilidad (los ids siguen siendo únicos por página y la hidratación es coherente); `compare:builds` no está en CI ni en `pnpm verify`.
+   - **Plan**: derivar el id de datos estables de la tarjeta (p. ej. el slug o el href) o usar `inject(APP_ID)` o un contador por instancia de render; corregir el docstring «sin estado»; añadir una prueba que renderice dos veces la misma tarjeta y espere el mismo id.
+2. **L2 / S5-D2**, comentarios de `srCombination` desfasados y rama sin enlace muerta (C-201 = A-102, parte de B-12, LOW, `build-card.labels.ts:66` y `build-card.model.ts:69-70`).
+   - **Motivo del aplazamiento**: solo comentarios y una rama sin efecto observable.
+   - **Plan**: actualizar los comentarios al comportamiento actual y retirar la rama muerta.
+3. **L3 / S5-D3**, falta el e2e de la descripción accesible (`aria-describedby`) en `e2e/a11y.spec.ts` (resto de B-12, LOW).
+   - **Motivo del aplazamiento**: el comportamiento está cubierto por pruebas unitarias; falta la comprobación en navegador.
+   - **Plan**: añadir el caso a `e2e/a11y.spec.ts`.
+4. **L4 / S5-D4**, nota `[x]` de T040 contradictoria en `tasks.md:141` («Pendiente: fallo preexistente T052» frente a «resuelta») (B-10, LOW).
+   - **Motivo del aplazamiento**: editar `tasks.md` cambia el snapshot de la puerta ya cerrada.
+   - **Plan**: unificar la nota en la próxima tarea SDD que toque `tasks.md`.
+5. **Base de `/tier-list`**: Paco aceptó el 2026-11-17 **111 403 B** (margen 597 B) como base de SC-008 y P32. El texto «pendiente de confirmación de Paco» de `spec.md`, `plan.md`, `quickstart.md` y `tasks.md` queda superado por esta decisión y se actualizará en la próxima tarea que toque esos archivos.
+6. **Nota**: la fila de spec005 en `specs/README.md` dice «puerta T018 en curso»; se actualiza fuera del snapshot (próxima tarea SDD).
