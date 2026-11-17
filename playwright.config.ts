@@ -85,6 +85,8 @@ export default defineConfig({
     'skill-tooltip.spec.ts',
     'skill-icons.spec.ts',
     'skill-tree-fit.spec.ts',
+    'masteries-fit.spec.ts',
+    'skill-tree-list.spec.ts',
   ],
   workers: 1,
   fullyParallel: false,

@@ -449,8 +449,17 @@ describe('gd-build-page', () => {
     await blocks[1].render(DeferBlockState.Loading);
     fixture.detectChanges();
     expect(root.querySelector('#habilidades')).not.toBeNull();
-    expect(root.querySelector('.build-skeleton')?.getAttribute('aria-hidden')).toBe('true');
+    // T025: no empty bordered skeleton bars; the textual fallback is the only loading content.
+    expect(root.querySelector('.build-skeleton')).toBeNull();
     expect(root.textContent).toContain('Golpe Primigenio');
+  });
+
+  it('says the guide is only in Spanish on the English page and marks the body lang="es" (T023, FR-038)', async () => {
+    const { root } = await render();
+    expect(root.querySelector('[data-lang-notice]')?.textContent).toContain(
+      'This guide is only available in Spanish',
+    );
+    expect(root.querySelector('.build-content')?.getAttribute('lang')).toBe('es');
   });
 
   it('links the textual skill fallback to the mastery catalog, so it reads without JavaScript (T017)', async () => {
@@ -461,6 +470,15 @@ describe('gd-build-page', () => {
     expect(link).not.toBeNull();
     expect(link!.getAttribute('href')).toBe('/maestrias');
     expect(root.querySelectorAll('#habilidades [data-fallback-node]')).toHaveLength(14);
+  });
+
+  it('numbers each devotion step once in the placeholder: the list marker, not a typed number (T028)', async () => {
+    const fixture = await createFixture(publicContent);
+    const root = fixture.nativeElement as HTMLElement;
+    const blocks = await renderDeferred(fixture, DeferBlockState.Placeholder);
+    await blocks[2].render(DeferBlockState.Placeholder);
+    const first = root.querySelector('[data-fallback-devotion-step] strong')?.textContent?.trim();
+    expect(first).not.toMatch(/^\d+\./);
   });
 
   it('keeps every devotion step, including the ones without a constellation, in the placeholder', async () => {

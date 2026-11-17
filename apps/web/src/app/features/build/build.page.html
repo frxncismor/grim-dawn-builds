@@ -4,12 +4,18 @@
   </p>
 }
 
+@if (foreignLang()) {
+  <p class="lang-notice" role="note" data-lang-notice i18n="@@buildPage.onlyInSpanish">
+    This guide is only available in Spanish.
+  </p>
+}
+
 <div class="build-layout">
   <aside class="build-aside">
     <gd-build-toc [content]="content()" />
   </aside>
 
-  <div class="build-content">
+  <div class="build-content" [attr.lang]="foreignLang()">
     <gd-build-sections [content]="content()" section="resumen" />
     <gd-build-summary [content]="content()" [authorPlaceholder]="content().authorIsPlaceholder" />
     @if (content().adaptation; as adaptation) {
@@ -53,7 +59,6 @@
             >Browse the full skill tree of each mastery</a
           >
         </p>
-        <div class="build-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
       </section>
     </ng-template>
 
@@ -87,7 +92,7 @@
           <ol class="fallback-list">
             @for (step of orderedDevotionSteps(); track step.position) {
               <li data-fallback-devotion-step>
-                <strong>{{ step.position }}. {{ step.label }}</strong>
+                <strong>{{ step.label }}</strong>
                 @if (step.title_override !== null && step.title_override !== step.label) {
                   <span class="fallback-tag">{{ '· ' + step.title_override }}</span>
                 }
@@ -99,7 +104,6 @@
         } @else {
           <p role="status" i18n="@@buildPage.noDevotions">No information available</p>
         }
-        <div class="build-skeleton" aria-hidden="true"><span></span><span></span></div>
       </section>
     </ng-template>
 

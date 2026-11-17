@@ -19,6 +19,8 @@ export interface BuildCardInput {
   readonly titleLang?: string | null;
   /** Localized combination name, only when the editorial `title` is not it; absent otherwise. */
   readonly combination?: string | null;
+  /** Language of `combination` when it is the editorial title kept beside a localized name (T023). */
+  readonly combinationLang?: string | null;
   /** `portrait: null` draws the own generic icon at its reserved size (no layout shift). */
   readonly masteries: readonly {
     readonly portrait: BuildCardPortrait | null;
@@ -54,6 +56,7 @@ export interface BuildCardData {
   readonly titleLang?: string | null;
   /** Localized combination name, drawn under a title that is not it; `null` otherwise. */
   readonly combination: string | null;
+  readonly combinationLang?: string | null;
   readonly masteries: readonly { readonly portrait: BuildCardPortrait }[];
   readonly status: ContentStatus;
   readonly statusLabel: string;

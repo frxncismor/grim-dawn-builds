@@ -22,8 +22,12 @@ test('contrast decisions use the unrounded value at the 4.5 threshold', () => {
   assert.ok(contrastRatio('#777777', '#ffffff') < 4.5);
   assert.ok(contrastRatio('#767676', '#ffffff') > 4.5);
   assert.ok(checkTokenContrast(css('#767676')).every((check) => check.pass));
-  assert.ok(checkTokenContrast(css('#777777')).every((check) => !check.pass));
-  assert.equal(checkTokenContrast(css('#000000')).length, 12);
+  const textChecks = (hex: string) =>
+    checkTokenContrast(css(hex)).filter((check) => !check.foreground.includes('(borde)'));
+  assert.ok(textChecks('#777777').every((check) => !check.pass));
+  // T030: 12 text pairs (4.5:1) plus 6 status-border pairs (3:1).
+  assert.equal(checkTokenContrast(css('#000000')).length, 18);
+  assert.equal(textChecks('#000000').length, 12);
 });
 
 test('missing, duplicate and malformed color definitions fail instead of silently passing', () => {

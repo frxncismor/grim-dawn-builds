@@ -1,15 +1,15 @@
 <header class="catalog-intro">
-  <h1 [attr.lang]="catalog.contentLocale !== catalog.locale ? catalog.contentLocale : null">
-    {{ catalog.title }}
-  </h1>
+  <h1>{{ title }}</h1>
   <p i18n="@@catalog.intro">
     All combinations, with their status in view. A slot without a guide is a placeholder: it is not
     a recommendation or a power ranking.
   </p>
   <p><span i18n="@@catalog.version">Game version:</span> {{ catalog.gameVersion }}</p>
 </header>
-<details class="filter-panel" open>
-  <summary i18n="@@catalog.filterHeading">Filter catalog</summary>
+<details class="filter-panel">
+  <summary i18n="@@catalog.filterHeading" [attr.data-count]="activeFilters() || null">
+    Filter catalog
+  </summary>
   <gd-filter-bar [value]="filter()" [groups]="groups" (valueChange)="updateFilter($event)" />
   <p class="filter-help" i18n="@@catalog.filterHelp">
     Filter groups are combined. Within each group, one match is enough. Entries without damage or

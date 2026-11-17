@@ -6,6 +6,7 @@ import {
   inject,
   input,
   linkedSignal,
+  LOCALE_ID,
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
@@ -94,6 +95,14 @@ export class BuildPage {
   private readonly seo = inject(SeoService);
 
   readonly content = input.required<BuildPageContent>();
+  private readonly pageLang = inject(LOCALE_ID).toLowerCase().startsWith('es') ? 'es' : 'en';
+  /**
+   * T023 (FR-038): the guide text exists only in its content language. When the page is in another
+   * language the body carries that `lang` and a notice says so at the top; otherwise neither appears.
+   */
+  readonly foreignLang = computed(() =>
+    this.content().locale === this.pageLang ? null : this.content().locale,
+  );
   readonly activeIds = signal<readonly string[]>([]);
   readonly activeStepPosition = linkedSignal<string, number | undefined>({
     source: () => this.content().slug,

@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
@@ -30,7 +32,6 @@ describe('catalog page with URL state', () => {
     const harness = await start('/tier-list?m=chaman&d=rayo');
     expect(harness.routeNativeElement!.querySelectorAll('gd-build-card')).toHaveLength(1);
     expect(harness.routeNativeElement!.textContent).toContain('1 of 2');
-    expect(harness.routeNativeElement!.querySelector('h1')?.getAttribute('lang')).toBe('es');
     expect(document.querySelector('link[rel=canonical]')?.getAttribute('href')).toBe(
       'https://example.org/tier-list',
     );
@@ -137,5 +138,82 @@ describe('catalog page with URL state', () => {
       TestBed.resetTestingModule();
       expect((await startWith(null, 'en')).querySelector('[data-credit]')).toBeNull();
     });
+  });
+});
+
+describe('spec005 T020 (F-01): the catalog title follows the page language', () => {
+  afterEach(() => TestBed.resetTestingModule());
+  it('renders the localized title in the H1, the document and the structured data, with no lang override', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([
+          {
+            path: 'tier-list',
+            component: TierListPage,
+            resolve: { catalog: () => buildCatalog(input, 'en') },
+          },
+        ]),
+        { provide: SITE_BASE_URL, useValue: 'https://example.org/' },
+      ],
+    });
+    const harness = await RouterTestingHarness.create('/tier-list');
+    await harness.fixture.whenStable();
+    const h1 = harness.routeNativeElement!.querySelector('h1')!;
+    expect(h1.textContent?.trim()).toBe('Catalog of mastery combinations');
+    expect(h1.hasAttribute('lang')).toBe(false);
+    expect(document.title).toContain('Catalog of mastery combinations');
+    const json = JSON.parse(document.querySelector('#gd-page-jsonld')!.textContent!);
+    expect(json.name).toBe('Catalog of mastery combinations');
+  });
+});
+
+describe('spec005 T026 (F-06, F-07): catalog width and the filter panel', () => {
+  afterEach(() => TestBed.resetTestingModule());
+  const css = readFileSync(resolve('src/styles/tier-list.css'), 'utf8');
+  const filtersCss = readFileSync(resolve('src/styles/tier-components.css'), 'utf8');
+  const rule = (source: string, selector: string): string => {
+    const start = source.indexOf(`${selector} {`);
+    expect(start, `rule ${selector}`).toBeGreaterThanOrEqual(0);
+    return source.slice(start, source.indexOf('}', start));
+  };
+  const start = async (url: string) => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([
+          {
+            path: 'tier-list',
+            component: TierListPage,
+            resolve: { catalog: () => buildCatalog(input, 'en') },
+          },
+        ]),
+        { provide: SITE_BASE_URL, useValue: 'https://example.org/' },
+      ],
+    });
+    const harness = await RouterTestingHarness.create(url);
+    await harness.fixture.whenStable();
+    return harness.routeNativeElement as HTMLElement;
+  };
+
+  it('renders the filter panel folded and shows how many filters are active', async () => {
+    const el = await start('/tier-list?m=chaman&d=rayo');
+    const panel = el.querySelector('details.filter-panel')!;
+    expect(panel.hasAttribute('open')).toBe(false);
+    expect(panel.querySelector('summary')?.textContent).toContain('Filter catalog');
+    expect(panel.querySelector('summary')?.getAttribute('data-count')).toBe('2');
+  });
+
+  it('adds no count when no filter is active', async () => {
+    const el = await start('/tier-list');
+    expect(el.querySelector('details.filter-panel summary')?.hasAttribute('data-count')).toBe(
+      false,
+    );
+  });
+
+  it('keeps the panel open from 48rem up with CSS only, and lets header and counter use the container width', () => {
+    expect(rule(css, 'gd-tier-list-page .catalog-intro')).not.toContain('max-inline-size');
+    expect(rule(css, 'gd-tier-list-page .result-count')).toContain('max-inline-size: none');
+    expect(css).toMatch(/@media \(min-width: 48\.0625rem\)[^@]*::details-content/s);
+    expect(rule(filtersCss, 'gd-filter-bar > .filters')).toContain('padding-inline');
+    expect(rule(css, 'gd-tier-list-page .filter-help')).toContain('padding-inline');
   });
 });

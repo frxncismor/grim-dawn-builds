@@ -197,3 +197,8 @@ label:focus-within {
   white-space: nowrap;
   border: 0;
 }
+
+/* The transcribed label sometimes starts in lower case ("barra Chamán → 15"): one case for all (T028, F-18). */
+.step__threshold::first-letter {
+  text-transform: uppercase;
+}

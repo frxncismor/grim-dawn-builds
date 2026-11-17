@@ -99,13 +99,16 @@
 }
 
 .badge[data-review-state='borrador'],
+/* Same visual weight as "Published": solid, visible border and emphasis (T030, F-12); the shape differs. */
 .badge[data-content-status='sin_verificar'] {
-  border-style: dashed;
-  color: var(--color-ash);
+  border-color: var(--color-ash);
+  color: var(--color-bone);
+  font-weight: var(--weight-emphasis);
 }
 
 .badge[data-review-state='publicado'],
 .badge[data-content-status='verificado'] {
   border-color: var(--color-storm);
   color: var(--color-storm);
+  font-weight: var(--weight-emphasis);
 }

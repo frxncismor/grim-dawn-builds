@@ -355,3 +355,142 @@ for (const locale of LOCALES) {
     });
   });
 }
+
+/**
+ * spec005 T031 (F-16): cada línea del rótulo del nodo («Circular», tipo, máximo) queda centrada en el eje
+ * del nodo (±1 px). El texto SVG usa `text-anchor: middle`; se mide la tinta (del primer al último carácter
+ * que no es espacio) con un `Range`, no la caja con sus espacios de relleno.
+ */
+for (const locale of LOCALES)
+  test(`@journeys los rótulos de nodo de soldier (${locale.name}) están centrados en el eje del nodo`, async ({
+    page,
+  }) => {
+    await page.goto(`${BASE_URL}${locale.prefix}/maestrias/soldier`, { waitUntil: 'networkidle' });
+    await page.evaluate(() => document.fonts.ready);
+    const offsets = await page.evaluate(() => {
+      const out: { id: string; text: string; offset: number }[] = [];
+      for (const node of Array.from(document.querySelectorAll('gd-skill-tree [data-skill-id]'))) {
+        const id = node.getAttribute('data-skill-id') ?? '';
+        const shape = node.querySelector('.skill-tree__shape') ?? node;
+        const axis = shape.getBoundingClientRect();
+        const axisX = axis.left + axis.width / 2;
+        for (const line of Array.from(
+          node.querySelectorAll<SVGTSpanElement>(
+            '.skill-tree__name tspan, .skill-tree__bar-required tspan',
+          ),
+        )) {
+          const text = line.firstChild;
+          const value = text?.textContent ?? '';
+          const first = value.search(/\S/);
+          if (!text || first < 0) continue;
+          const range = document.createRange();
+          range.setStart(text, first);
+          range.setEnd(text, value.trimEnd().length);
+          const box = range.getBoundingClientRect();
+          out.push({ id, text: value.trim(), offset: box.left + box.width / 2 - axisX });
+        }
+      }
+      return out;
+    });
+    expect(offsets.length, 'hay rótulos de nodo').toBeGreaterThan(40);
+    const off = offsets.filter((line) => Math.abs(line.offset) > 1);
+    expect(off, `líneas fuera del eje (>1 px): ${JSON.stringify(off.slice(0, 5))}`).toEqual([]);
+  });
+
+/** Luminancia relativa WCAG de un `rgb()`/`rgba()` computado. */
+function luminance(rgb: string): number {
+  const [r, g, b] = (rgb.match(/[\d.]+/g) ?? ['0', '0', '0']).slice(0, 3).map((value) => {
+    const channel = Number(value) / 255;
+    return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/**
+ * spec005 T031 (F-13): el nombre secundario del tooltip va siempre en su propia línea, con interlineado
+ * ≤ 1,5 y contraste ≥ 4,5:1, en el mismo orden en EN y ES (título, nombre secundario, datos).
+ */
+for (const locale of LOCALES)
+  test(`@journeys tooltip de soldier (${locale.name}): el nombre secundario va en su propia línea, legible y con interlineado normal`, async ({
+    page,
+  }) => {
+    const nodes = await openTree(page, locale.prefix, 'soldier');
+    for (const node of nodes.slice(0, 12)) {
+      const shape = await reveal(node);
+      const { x, y } = await centre(shape);
+      await closeTooltip(page);
+      await page.mouse.move(x, y);
+      await expect(page.locator('gd-skill-tree [role="tooltip"]')).toBeVisible();
+      const m = await page.evaluate(() => {
+        const tip = document.querySelector<HTMLElement>('gd-skill-tree [role="tooltip"]')!;
+        const name = tip.querySelector<HTMLElement>('.skill-tree__tooltip-name')!;
+        const second = name.querySelector<HTMLElement>('span')!;
+        const text = Array.from(name.childNodes).find(
+          (n) => n.nodeType === Node.TEXT_NODE && (n.textContent ?? '').trim() !== '',
+        )!;
+        const range = document.createRange();
+        range.selectNodeContents(text);
+        const primary = range.getBoundingClientRect();
+        const ratio = (el: HTMLElement) => {
+          const style = getComputedStyle(el);
+          const size = parseFloat(style.fontSize);
+          return style.lineHeight === 'normal' ? 1.4 : parseFloat(style.lineHeight) / size;
+        };
+        return {
+          secondTop: second.getBoundingClientRect().top,
+          primaryBottom: primary.bottom,
+          nameRatio: ratio(name),
+          secondRatio: ratio(second),
+          fg: getComputedStyle(second).color,
+          bg: getComputedStyle(tip).backgroundColor,
+          after: second.nextElementSibling?.className ?? '',
+        };
+      });
+      const id = await node.getAttribute('data-skill-id');
+      expect(
+        m.secondTop,
+        `${id}: el nombre secundario empieza bajo el título`,
+      ).toBeGreaterThanOrEqual(m.primaryBottom - 1);
+      expect(m.nameRatio, `${id}: interlineado del título`).toBeLessThanOrEqual(1.5);
+      expect(m.secondRatio, `${id}: interlineado del nombre secundario`).toBeLessThanOrEqual(1.5);
+      const [a, b] = [luminance(m.fg), luminance(m.bg)].sort((p, q) => q - p);
+      expect(
+        (a + 0.05) / (b + 0.05),
+        `${id}: contraste del nombre secundario`,
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+/**
+ * spec005 T031 (F-14): la caja del tooltip queda a ≥ 16 px de ambos bordes del viewport (ratón, foco,
+ * y volteo en el borde) y a ≤ 16 px del nodo.
+ */
+for (const locale of LOCALES)
+  for (const mode of ['ratón', 'foco'] as const)
+    test(`@journeys tooltip de soldier (${locale.name}, ${mode}): a ≥ 16 px de los bordes del viewport y a ≤ 16 px del nodo`, async ({
+      page,
+    }) => {
+      const nodes = await openTree(page, locale.prefix, 'soldier');
+      const width = page.viewportSize()!.width;
+      for (const node of nodes) {
+        const shape = await reveal(node);
+        await closeTooltip(page);
+        if (mode === 'ratón') {
+          const { x, y } = await centre(shape);
+          await page.mouse.move(x, y);
+        } else await node.focus();
+        await expect(page.locator('gd-skill-tree [role="tooltip"]')).toBeVisible();
+        await page.waitForTimeout(60);
+        const m = await measure(page, node);
+        const box = await page.evaluate(() => {
+          const r = document
+            .querySelector('gd-skill-tree [role="tooltip"]')!
+            .getBoundingClientRect();
+          return { left: r.left, right: r.right };
+        });
+        const id = await node.getAttribute('data-skill-id');
+        expect(box.left, `${id}: margen izquierdo`).toBeGreaterThanOrEqual(15.5);
+        expect(width - box.right, `${id}: margen derecho`).toBeGreaterThanOrEqual(15.5);
+        expect(m.gap, `${id}: distancia al nodo`).toBeLessThanOrEqual(MAX_GAP);
+      }
+    });

@@ -67,7 +67,29 @@ gd-build-card {
 }
 
 .build-card[data-variant='featured'] .build-card__title {
-  font-size: clamp(1.125rem, 5.2vw, var(--text-heading));
+  /* Display scale of the token: only the home title and the featured guide name use it (T029, F-11). */
+  font-size: var(--text-hero);
+  line-height: 1.15;
+}
+
+/* Wide screens: the name, combination and status on one side, the facts on the other. */
+@media (min-width: 80rem) {
+  .build-card[data-variant='featured'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-6);
+    align-items: start;
+  }
+
+  .build-card[data-variant='featured'] > :not(.build-card__facts) {
+    grid-column: 1;
+  }
+
+  .build-card[data-variant='featured'] .build-card__facts {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    flex-direction: column;
+    align-self: center;
+  }
 }
 
 .build-card[data-variant='compact'] .build-card__title {

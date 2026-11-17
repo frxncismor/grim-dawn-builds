@@ -45,8 +45,14 @@ describe('gd-build-sections', () => {
     expect(rows.map((row) => row.querySelector('[data-headline]')?.textContent?.trim())).toEqual(
       fixture.priorities.map((row) => row.headline),
     );
+    // T028 (F-10): the repeated lead clause is said once and the tail repeating the group is dropped.
+    const root = view.nativeElement as HTMLElement;
+    expect(root.querySelector('[data-priority-lead]')?.textContent?.trim()).toBe('Dato transcrito');
+    expect(root.textContent?.match(/Dato transcrito/g)).toHaveLength(1);
     expect(rows.map((row) => row.querySelector('[data-detail]')?.textContent?.trim())).toEqual(
-      fixture.priorities.map((row) => row.note),
+      fixture.priorities.map((row) =>
+        row.rank === null ? row.note : /^[^:]+:\s*(.*?)(?:,[^,]*)\.$/.exec(row.note)![1],
+      ),
     );
     expect(
       rows.map((row) => row.querySelector('[data-rank]')?.textContent?.trim() ?? null),

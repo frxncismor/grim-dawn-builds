@@ -131,7 +131,7 @@ describe('gd-build-card (spec004 T015)', () => {
   });
 
   it('keeps a very long name complete in the accessible name and in the text', async () => {
-    const title = 'Arcanista de la Tormenta Primigenia + Berserker del Filo Nocturno '
+    const title = 'Arcanista de la Tormenta Primigenia + Berserker de la Hoja de la Noche '
       .repeat(3)
       .trim();
     const el = await render({ ...guide, title });

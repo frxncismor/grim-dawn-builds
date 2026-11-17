@@ -35,6 +35,8 @@ export interface PlaceTooltipInput {
   prefer?: TooltipSide;
   /** Distance between node and tooltip edges, clamped to 0..{@link MAX_GAP}; defaults to 8. */
   gap?: number;
+  /** Gutter kept between the tooltip box and every edge of the bounds (viewport ∩ container); defaults to 0. */
+  margin?: number;
 }
 
 export interface TooltipPlacement {
@@ -96,11 +98,13 @@ export function placeTooltip(input: PlaceTooltipInput): TooltipPlacement {
   const requested =
     input.gap === undefined || !Number.isFinite(input.gap) ? DEFAULT_GAP : input.gap;
   const gap = Math.min(MAX_GAP, Math.max(0, requested));
+  const edge =
+    input.margin === undefined || !Number.isFinite(input.margin) ? 0 : Math.max(0, input.margin);
   const bounds = container ? intersect(viewport, container) : viewport;
-  const minX = bounds.left;
-  const minY = bounds.top;
-  const maxX = bounds.left + bounds.width;
-  const maxY = bounds.top + bounds.height;
+  const minX = bounds.left + edge;
+  const minY = bounds.top + edge;
+  const maxX = bounds.left + bounds.width - edge;
+  const maxY = bounds.top + bounds.height - edge;
 
   const anchorRight = anchor.left + anchor.width;
   const anchorBottom = anchor.top + anchor.height;

@@ -56,12 +56,10 @@ a:focus-visible {
   padding-block: var(--space-6);
 }
 
+/* No frame of its own: the featured card carries the frame, and a card never sits inside another (T029, F-11). */
 .publication {
   margin-block-end: var(--space-6);
-  padding: var(--space-5);
-  border: var(--frame-border);
-  background: var(--surface-sheen), var(--color-panel);
-  box-shadow: var(--frame-bevel);
+  padding-inline: 0;
 }
 
 .criteria {

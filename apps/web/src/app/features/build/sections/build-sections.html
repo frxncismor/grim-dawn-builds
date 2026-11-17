@@ -22,15 +22,18 @@
           <p class="introduction">{{ introduction }}</p>
         }
         @if (orderedPriorities().length) {
+          @if (priorityLead(); as lead) {
+            <p class="priority-lead" data-priority-lead>{{ lead }}</p>
+          }
           <ul class="editorial-list priority-list">
-            @for (priority of orderedPriorities(); track $index) {
+            @for (priority of priorityRows(); track $index) {
               <li data-priority>
                 @if (priority.rank !== null) {
                   <span class="priority-rank" data-rank>{{ priority.rank }}</span>
                 }
                 <span class="group-label" data-group>{{ priority.group_label }}</span>
                 <strong data-headline>{{ priority.headline }}</strong>
-                <p data-detail>{{ priority.note }}</p>
+                <p data-detail>{{ priority.detail }}</p>
               </li>
             }
           </ul>

@@ -111,3 +111,57 @@ test('prefers-reduced-motion turns animation and transition off globally', () =>
   assert.ok(block.includes('animation: none'));
   assert.ok(block.includes('transition: none'));
 });
+
+/**
+ * spec005 T027 (F-08, DESIGN.md «Don't»): no `border-left`/`border-right`/`border-inline-*` thicker
+ * than 1px as an accent stripe. The 2px stripe of `build-toc.css` is the state indicator of the
+ * index (current section, hover, keyboard focus), not decoration, so it is the only allowed file.
+ */
+const STATE_INDICATOR_FILES = /build-toc\.css$/;
+test('no side-stripe accent border thicker than 1px (T027)', () => {
+  const offenders: Finding[] = [];
+  for (const file of files(SRC)) {
+    if (STATE_INDICATOR_FILES.test(file)) continue;
+    for (const { line, text } of cssLines(file, readFileSync(file, 'utf8'))) {
+      const m = /\bborder-(?:left|right|inline(?:-start|-end)?)\s*:\s*(\d+(?:\.\d+)?)px\b/.exec(
+        text,
+      );
+      if (m && Number(m[1]) > 1)
+        offenders.push({ file: relative(ROOT, file), line, text: text.trim() });
+    }
+  }
+  assert.deepEqual(offenders, [], `acentos laterales > 1px:\n${show(offenders)}`);
+});
+
+/**
+ * spec005 T030 (F-12): the content-status badges keep a solid border that reaches 3:1 over their
+ * background ("Unverified" is the key datum of PRODUCT principle 1: same visual weight as "Published"),
+ * and the microtext of the cards and the build summary is never below 12px (0.75rem).
+ */
+test('status badges have a solid, visible border and the microtext is at least 12px (T030)', () => {
+  const summary = readFileSync(
+    join(SRC, 'app', 'features', 'build', 'summary', 'build-summary.css'),
+    'utf8',
+  );
+  const rule = (selector: string) => {
+    const start = summary.indexOf(`${selector} {`);
+    return start < 0 ? '' : summary.slice(start, summary.indexOf('}', start));
+  };
+  const unverified = rule(".badge[data-content-status='sin_verificar']");
+  assert.doesNotMatch(unverified, /border-style:\s*dashed/, 'Unverified: borde sólido');
+  const borderToken = /border(?:-color)?:[^;]*var\((--color-[a-z-]+)\)/.exec(unverified)?.[1];
+  const base = /border:\s*1px solid var\((--color-[a-z-]+)\)/.exec(rule('.badge'))?.[1];
+  const effective = borderToken ?? base ?? '';
+  assert.ok(
+    contrastRatio(token(effective), token('--color-panel-2')) >= 3,
+    `Unverified: el borde (${effective}) debe llegar a 3:1 sobre el panel`,
+  );
+  for (const file of [
+    join(SRC, 'styles', 'build-card.css'),
+    join(SRC, 'app', 'features', 'build', 'summary', 'build-summary.css'),
+  ])
+    for (const m of readFileSync(file, 'utf8').matchAll(/font-size:\s*([\d.]+)(rem|px)/g)) {
+      const px = m[2] === 'rem' ? Number(m[1]) * 16 : Number(m[1]);
+      assert.ok(px >= 12, `${file}: font-size ${m[0]} < 12px`);
+    }
+});
