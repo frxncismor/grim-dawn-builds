@@ -48,6 +48,8 @@
     "e2e:video:build": "pnpm --filter @gd/web exec ng build --configuration video-facade-preview",
     "e2e:a11y": "playwright test --config playwright.config.ts --grep \"@a11y\"",
     "e2e:fidelity": "pnpm build && playwright test --config playwright.fidelity.config.ts",
+    "e2e:visual": "playwright test --config playwright.visual.config.ts",
+    "e2e:visual:update": "playwright test --config playwright.visual.config.ts --update-snapshots",
     "e2e:journeys": "playwright test --config playwright.config.ts --grep \"@journeys\"",
     "typecheck:e2e": "tsc -p tsconfig.e2e.json",
     "compare:builds": "tsx scripts/compare-builds.mts"

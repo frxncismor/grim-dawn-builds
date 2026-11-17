@@ -72,7 +72,7 @@ function mutate(from: string, to: string): string {
 describe('check-ci-secrets (T-086 ST-1)', () => {
   it('el repositorio pasa sin hallazgos ni excepciones', () => {
     const result = scanWorkflowDir(REAL_WORKFLOWS);
-    assert.equal(result.scanned, 2);
+    assert.equal(result.scanned, 3);
     assert.deepEqual(result.findings, []);
   });
 

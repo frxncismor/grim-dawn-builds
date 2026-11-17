@@ -230,6 +230,26 @@ validates only the fixture, because `fixtures/content/builds` does not have cont
 
 Gate matrix and language policy: see [docs/quality-gates.md](docs/quality-gates.md).
 
+## Visual regression references
+
+The `visual-regression` job of the PR CI compares 30 full-page screenshots (5 routes × 375/768/1280 ×
+EN/ES) with the references in `e2e/visual-baselines/`, named `<route>-<language>-<width>.png`. The job
+builds its own `ASSET_SOURCE=own` artifact, so no game image takes part. When it fails it uploads the
+expected, actual and diff images as the `visual-regression-report` artifact.
+
+The references are generated **only on Linux**, with the manual workflow, never on Windows or macOS:
+
+1. Push the branch with the intended visual change.
+2. In GitHub, open Actions, pick `Visual baselines (Linux)`, choose the branch and run it
+   (`workflow_dispatch`). It builds the `own` artifact and runs `pnpm e2e:visual:update`.
+3. Download the `visual-baselines` artifact of that run and replace the PNG files in
+   `e2e/visual-baselines/` with its contents.
+4. Review the PNG differences in the pull request and commit them. The workflow never pushes.
+
+`pnpm e2e:visual` needs a built `dist/` (`pnpm build`). Run it locally only to see the comparison work:
+a reference missing or generated on another platform fails, and `pnpm e2e:visual:update` must not be
+used to commit references from a local machine.
+
 ## PostgreSQL logs in Docker
 
 From the root, query the latest errors and follow new events:
