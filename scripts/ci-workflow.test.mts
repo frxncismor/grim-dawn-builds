@@ -61,6 +61,8 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm run e2e:journeys',
   'pnpm run e2e:a11y',
   'pnpm run check:performance',
+  // spec005 T017: visual regression job (own artifact, Linux baselines).
+  'pnpm run e2e:visual',
   // T-128: backend budgets consume the report produced by the API integration tests.
   'pnpm exec tsx scripts/check-performance.mts --backend',
   // T-066b: static container rules and the Trivy image-scan gate.
@@ -381,13 +383,17 @@ describe('PR verification workflow (T-064)', () => {
       if (!block.some((entry) => /^\s+run: pnpm run build\s*$/.test(entry))) return;
       checked += 1;
       const envLines = block.filter((entry) => /^ {6}ASSET_SOURCE:/.test(entry));
+      // spec005 T017: the visual-regression job is the one `own` build (no game PNG in the repo).
+      const expected = /^ {2}visual-regression:/.test(line)
+        ? 'ASSET_SOURCE: own'
+        : 'ASSET_SOURCE: game';
       assert.deepEqual(
         envLines.map((entry) => entry.trim()),
-        ['ASSET_SOURCE: game'],
-        `${line.trim()} must set ASSET_SOURCE: game at job level`,
+        [expected],
+        `${line.trim()} must set ${expected} at job level`,
       );
     });
-    assert.ok(checked >= 2, 'the verify and dast jobs build the artifact');
+    assert.ok(checked >= 3, 'the verify, dast and visual-regression jobs build the artifact');
   });
 
   // Normalise CRLF so the line-based mutations match on Windows checkouts too.
@@ -538,7 +544,7 @@ describe('PR verification workflow (T-064)', () => {
     assert.ok(zapWeb < evaluate && zapApi < evaluate, 'check-dast decides after both scans');
 
     // The raw ZAP reports are never uploaded: only the redacted checker output is.
-    const dastBlock = lines.slice(jobIndex).join('\n');
+    const dastBlock = blockAfter(lines, jobIndex).join('\n');
     assert.doesNotMatch(dastBlock, /upload-artifact/);
   });
 
@@ -619,7 +625,7 @@ describe('PR verification workflow (T-064)', () => {
       'playwright install removed',
       () =>
         mutate(
-          /\n {6}- name: Install Playwright[^\n]*\n {8}run: pnpm exec playwright install --with-deps chromium\n/,
+          /\n {6}- name: Install Playwright[^\n]*\n {8}run: pnpm exec playwright install --with-deps chromium\n/g,
           '\n',
         ),
     ],
@@ -760,4 +766,65 @@ describe('PR verification workflow (T-064)', () => {
       assert.notDeepEqual(validateCiWorkflow(build()), []);
     });
   }
+});
+
+describe('visual regression (spec005 T017, FR-033 a FR-036)', () => {
+  const real = readFileSync(WORKFLOW_URL, 'utf8').replace(/\r\n/g, '\n');
+  const BASELINES_URL = new URL('../.github/workflows/visual-baselines.yml', import.meta.url);
+  const jobBlock = (text: string, name: string): string[] => {
+    const lines = text.split('\n');
+    const index = lines.findIndex((line) => line === `  ${name}:`);
+    assert.notEqual(index, -1, `missing job ${name}`);
+    return blockAfter(lines, index);
+  };
+  const stepIndex = (block: readonly string[], run: string): number =>
+    block.findIndex((line) => line.trim() === `run: ${run}`);
+
+  it('ci.yml has a visual-regression job with its own own-source build, minimal permissions and a failure report', () => {
+    const block = jobBlock(real, 'visual-regression');
+    // Comments are documentation: only configuration is checked.
+    const text = block.filter((line) => !/^\s*#/.test(line)).join('\n');
+    assert.match(text, /runs-on: ubuntu-24\.04/);
+    assert.match(text, /^ {6}ASSET_SOURCE: own$/m);
+    assert.match(text, /^ {6}CONTENT_SOURCE: fixture$/m);
+    assert.match(text, /timeout-minutes: \d+/);
+    assert.match(text, /permissions:\n {6}contents: read/);
+    const build = stepIndex(block, 'pnpm run build');
+    const browser = stepIndex(block, 'pnpm exec playwright install --with-deps chromium');
+    const visual = stepIndex(block, 'pnpm run e2e:visual');
+    assert.ok(build !== -1 && browser !== -1 && visual !== -1, 'build, browser and e2e:visual');
+    assert.ok(build < visual && browser < visual, 'the comparison runs after build and browser');
+    assert.doesNotMatch(
+      text,
+      /e2e:visual:update|--update-snapshots/,
+      'CI never updates references',
+    );
+    assert.match(text, /if: failure\(\)/);
+    assert.match(text, /actions\/upload-artifact@[0-9a-f]{40} # v\d+\.\d+\.\d+/);
+    assert.match(text, /playwright-report\/visual|test-results\/visual/);
+  });
+
+  it('visual-regression runs in parallel with verify (no needs)', () => {
+    assert.doesNotMatch(jobBlock(real, 'visual-regression').join('\n'), /^ {4}needs:/m);
+  });
+
+  it('visual-baselines.yml is manual, builds own, updates on Linux, uploads and never pushes', () => {
+    const text = readFileSync(BASELINES_URL, 'utf8').replace(/\r\n/g, '\n');
+    const code = text
+      .split('\n')
+      .filter((line) => !/^\s*#/.test(line))
+      .join('\n');
+    assert.match(code, /^on:\n {2}workflow_dispatch:/m);
+    assert.doesNotMatch(code, /pull_request|push:|schedule:/);
+    assert.match(code, /runs-on: ubuntu-24\.04/);
+    assert.match(code, /ASSET_SOURCE: own/);
+    assert.match(code, /CONTENT_SOURCE: fixture/);
+    assert.match(code, /run: pnpm run build/);
+    assert.match(code, /run: pnpm run e2e:visual:update/);
+    assert.match(code, /actions\/upload-artifact@[0-9a-f]{40} # v\d+\.\d+\.\d+/);
+    assert.match(code, /e2e\/visual-baselines/);
+    assert.match(code, /permissions:\n {2}contents: read/);
+    assert.doesNotMatch(code, /git (push|commit)|contents: write|secrets\./);
+    assert.doesNotMatch(code, /\t/);
+  });
 });
