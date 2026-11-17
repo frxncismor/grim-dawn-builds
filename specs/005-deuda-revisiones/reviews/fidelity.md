@@ -74,6 +74,10 @@ Son ideas de ambiente, no incumplimientos. Se dibujan con SVG/CSS propio (DESIGN
 | S-03 | Registro de pasos | Referencia: `20261116160316_1.jpg`. El registro de misiones agrupa lista de objetivos con títulos en un color cálido y filas muy compactas. | Aplicar filas compactas a «Orden real de compra» (relacionado con F-10). Aceptación: cada paso ocupa como máximo 3 líneas a 1280. |
 | S-04 | Acción principal | Referencia: `20261116160217_1.jpg`. El botón principal del menú tiene un marco más ornamentado que los secundarios. | Dar al botón «Browse the catalog» un marco propio algo más trabajado que el de los enlaces secundarios, sin añadir un segundo acento de color. Aceptación: un solo elemento con esa jerarquía por pantalla. |
 
+## Deuda anotada (decisión de Paco, P30 = A, 2026-11-16)
+
+Las sugerencias S-01 a S-04 **no se corrigen en spec005**: quedan como deuda de diseño, sin ID de tarea, para una spec futura. Las discrepancias F-01 a F-20 tienen tarea en la Fase 9 de `tasks.md` (T020–T033; F-19 en T033, con P29 = A).
+
 ## Lo que está bien
 
 - Marca «Grim Builds» visible en la cabecera de las 10 páginas a los tres anchos y aviso de no afiliación y atribución en el pie de todas ellas, en EN y en ES (constitución §VII, PRODUCT «Brand Commitments»).
