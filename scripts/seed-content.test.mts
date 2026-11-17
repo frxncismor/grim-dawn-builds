@@ -1,14 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { bootstrapCompleteLine, CONTENT_MOUNT, seedCompleteLine, successPattern } from '@gd/domain';
 import {
-  CONTENT_MOUNT,
   contentContainerArguments,
   launchContentImport,
   launchSeed,
   seedContainerArguments,
-  successPattern,
 } from './seed-content.mts';
 
 test('seed reports the fixed bootstrap refusal without forwarding arbitrary stderr', () => {
@@ -124,21 +121,10 @@ test('the mount target and the SEED_CONTENT_ROOT the seeder reads are the same p
 });
 
 test('the success pattern accepts the exact line the seeders print', () => {
-  const root = fileURLToPath(new URL('..', import.meta.url));
-  const script = `
-    const s = await import('./apps/api/src/db/seed.mts');
-    const b = await import('./apps/api/src/db/bootstrap.mts');
-    console.log(JSON.stringify({
-      seed: s.seedCompleteLine({ builds: 2, tierLists: 3, masteries: 6, nodes: 186 }),
-      bootstrap: b.bootstrapCompleteLine({ builds: 2, tierLists: 3 }),
-    }));`;
-  const child = spawnSync(
-    process.execPath,
-    ['--import', 'tsx', '--input-type=module', '-e', script],
-    { cwd: root, encoding: 'utf8' },
-  );
-  assert.equal(child.status, 0, child.stderr);
-  const lines = JSON.parse(child.stdout) as Record<'seed' | 'bootstrap', string>;
+  const lines = {
+    seed: seedCompleteLine({ builds: 2, tierLists: 3, masteries: 6, nodes: 186 }),
+    bootstrap: bootstrapCompleteLine({ builds: 2, tierLists: 3 }),
+  };
   for (const operation of ['seed', 'bootstrap'] as const) {
     assert.match(lines[operation], successPattern(operation));
     const messages: string[] = [];

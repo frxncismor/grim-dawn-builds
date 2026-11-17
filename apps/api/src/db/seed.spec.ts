@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
+import { seedCompleteLine } from '@gd/domain';
 import { contractDoc } from '@gd/domain/testing';
 import {
   prepareSeed,
   readSeedFixtures,
   runSeeder,
-  seedCompleteLine,
   seedContentRoot,
   seedCatalog,
   seedData,
