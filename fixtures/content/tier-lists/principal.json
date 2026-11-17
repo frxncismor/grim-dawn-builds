@@ -40,7 +40,7 @@
     },
     {
       "slug": "filo-nocturno",
-      "name_es": "Filo Nocturno",
+      "name_es": "Hoja de la Noche",
       "name_en": "Nightblade",
       "accent_token": "shadow",
       "fallback_icon": "mastery-generic",
@@ -360,7 +360,7 @@
     {
       "entry_kind": "placeholder",
       "combination_slug": "arcanista-filo-nocturno",
-      "display_name": "Arcanista + Filo Nocturno",
+      "display_name": "Arcanista + Hoja de la Noche",
       "build_slug": null,
       "tier": "sin_clasificar",
       "content_status": "placeholder",
@@ -472,7 +472,7 @@
     {
       "entry_kind": "placeholder",
       "combination_slug": "berserker-filo-nocturno",
-      "display_name": "Berserker + Filo Nocturno",
+      "display_name": "Berserker + Hoja de la Noche",
       "build_slug": null,
       "tier": "sin_clasificar",
       "content_status": "placeholder",
@@ -570,7 +570,7 @@
     {
       "entry_kind": "placeholder",
       "combination_slug": "chaman-filo-nocturno",
-      "display_name": "Chamán + Filo Nocturno",
+      "display_name": "Chamán + Hoja de la Noche",
       "build_slug": null,
       "tier": "sin_clasificar",
       "content_status": "placeholder",
@@ -654,7 +654,7 @@
     {
       "entry_kind": "placeholder",
       "combination_slug": "demoledor-filo-nocturno",
-      "display_name": "Demoledor + Filo Nocturno",
+      "display_name": "Demoledor + Hoja de la Noche",
       "build_slug": null,
       "tier": "sin_clasificar",
       "content_status": "placeholder",
@@ -738,7 +738,7 @@
     {
       "entry_kind": "placeholder",
       "combination_slug": "filo-nocturno-guardian-del-juramento",
-      "display_name": "Filo Nocturno + Guardián del Juramento",
+      "display_name": "Hoja de la Noche + Guardián del Juramento",
       "build_slug": null,
       "tier": "sin_clasificar",
       "content_status": "placeholder",
@@ -752,7 +752,7 @@
     {
       "entry_kind": "placeholder",
       "combination_slug": "filo-nocturno-inquisidor",
-      "display_name": "Filo Nocturno + Inquisidor",
+      "display_name": "Hoja de la Noche + Inquisidor",
       "build_slug": null,
       "tier": "sin_clasificar",
       "content_status": "placeholder",
@@ -766,7 +766,7 @@
     {
       "entry_kind": "placeholder",
       "combination_slug": "filo-nocturno-nigromante",
-      "display_name": "Filo Nocturno + Nigromante",
+      "display_name": "Hoja de la Noche + Nigromante",
       "build_slug": null,
       "tier": "sin_clasificar",
       "content_status": "placeholder",
@@ -780,7 +780,7 @@
     {
       "entry_kind": "placeholder",
       "combination_slug": "filo-nocturno-ocultista",
-      "display_name": "Filo Nocturno + Ocultista",
+      "display_name": "Hoja de la Noche + Ocultista",
       "build_slug": null,
       "tier": "sin_clasificar",
       "content_status": "placeholder",
@@ -794,7 +794,7 @@
     {
       "entry_kind": "placeholder",
       "combination_slug": "filo-nocturno-soldado",
-      "display_name": "Filo Nocturno + Soldado",
+      "display_name": "Hoja de la Noche + Soldado",
       "build_slug": null,
       "tier": "sin_clasificar",
       "content_status": "placeholder",

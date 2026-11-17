@@ -63,7 +63,10 @@ const iconIdOf = (texturePath: string): string =>
   `ic-${createHash('sha256').update(texturePath).digest('hex').slice(0, 16)}`;
 
 /** Reads `<dir>/mastery-trees/*.json` (optional); an invalid tree is reported as an issue. */
-function readCatalog(treesDir: string): { catalog: MasteryTree[]; issues: ContentIssue[] } {
+function readCatalog(
+  treesDir: string,
+  esNames: ReadonlyMap<string, string> = new Map(),
+): { catalog: MasteryTree[]; issues: ContentIssue[] } {
   const catalog: MasteryTree[] = [];
   const issues: ContentIssue[] = [];
   if (!existsSync(treesDir)) return { catalog, issues };
@@ -75,6 +78,14 @@ function readCatalog(treesDir: string): { catalog: MasteryTree[]; issues: Conten
       );
       if (parsed.success) {
         catalog.push(parsed.data);
+        // spec005 T024 (P31): one ES name per mastery; `masteries.json` is the source, the tree only mirrors it.
+        const expected = esNames.get(parsed.data.mastery.name.en);
+        if (expected !== undefined && parsed.data.mastery.name.es !== expected)
+          issues.push({
+            file,
+            path: 'mastery.name.es',
+            message: `«${parsed.data.mastery.name.es}» difiere del nombre ES de masteries.json («${expected}»)`,
+          });
         // spec004 T025: the public icon id is derived from the texture, never typed by hand.
         for (const node of parsed.data.nodes) {
           if (node.icon !== undefined && node.icon_id !== iconIdOf(node.icon))
@@ -97,6 +108,23 @@ function readCatalog(treesDir: string): { catalog: MasteryTree[]; issues: Conten
   return { catalog, issues };
 }
 
+/** `name_en` → `name_es` from `<dir>/masteries.json` (optional); the single source of ES mastery names. */
+function readEsNames(dir: string): Map<string, string> {
+  const names = new Map<string, string>();
+  const file = join(dir, 'masteries.json');
+  if (!existsSync(file)) return names;
+  try {
+    const list: unknown = JSON.parse(readFileSync(file, 'utf8'));
+    if (Array.isArray(list))
+      for (const item of list as { name_en?: unknown; name_es?: unknown }[])
+        if (typeof item.name_en === 'string' && typeof item.name_es === 'string')
+          names.set(item.name_en, item.name_es);
+  } catch {
+    // an unreadable masteries.json is reported by the catalog generator, not here
+  }
+  return names;
+}
+
 function parseDirArg(argv: readonly string[]): string {
   const index = argv.indexOf('--dir');
   return index >= 0 && argv[index + 1] ? argv[index + 1] : 'fixtures/content';
@@ -110,7 +138,10 @@ function main(argv: readonly string[]): number {
     return 1;
   }
   const files = readBuildFiles(buildsDir);
-  const { catalog, issues: catalogIssues } = readCatalog(join(dir, 'mastery-trees'));
+  const { catalog, issues: catalogIssues } = readCatalog(
+    join(dir, 'mastery-trees'),
+    readEsNames(dir),
+  );
   const issues = [...catalogIssues, ...validateBuildFiles(files, catalog)];
   if (issues.length === 0) {
     console.log(`content:validate OK (${files.length} builds en ${buildsDir})`);
