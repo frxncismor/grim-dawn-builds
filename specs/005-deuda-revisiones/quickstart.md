@@ -159,3 +159,73 @@ aceptó el 2026-11-17** (nota en `tasks.md`). `git ls-files e2e/visual-baselines
 Se ejecutan **tras marcar T018**, según el precedente (spec002 T014, spec003 T021, spec004 T036). La evidencia va en
 `specs/005-deuda-revisiones/reviews/` (fuera del snapshot que `prepare` firma). Su resultado no se registra aquí. Esta tarea no declara la
 puerta `passed`.
+
+## Verificación tras las correcciones de la ronda 1 de la puerta (T036–T039)
+
+Fecha: 2026-11-17. HEAD: `fe5acaa` (`orq/11111619-rev-s5-vr1`, sin cambios locales al empezar). Node 22, `pnpm` 12.18.0, sin
+`HTTP_PROXY`/`HTTPS_PROXY`. Salidas saneadas (rutas omitidas).
+
+**Desviación registrada**: por orden del principal (carga mínima, un solo proceso pesado a la vez) no se ejecutó `pnpm verify` de una vez
+sino **equivalente a `pnpm verify`, paso a paso por memoria**: los 26 pasos de `VERIFY_STEPS` de `scripts/verify-local.mjs`, uno a uno y en
+el mismo orden, todos exit 0. Único cambio: `api:test` se ejecutó como `pnpm --filter @gd/api exec vitest run --maxWorkers=1`. `domain:test`
+(`pnpm run build && vitest run --coverage`) y `test` (`ng test`) no admiten el flag sin tocar archivos y van tal cual.
+
+| Paso                                                 | Exit | Resultado                                                                         |
+| ---------------------------------------------------- | ---- | --------------------------------------------------------------------------------- |
+| `check-scope`, `check-boundaries`, `check-secrets`   | 0    | OK                                                                                |
+| `check-ci-secrets`                                   | 0    | OK                                                                                |
+| `domain:build`, `domain:typecheck`, `domain:lint`    | 0    | OK                                                                                |
+| `domain:test`                                        | 0    | 15 archivos; 325 passed, 2 expected fail                                          |
+| `api:typecheck`, `api:lint`                          | 0    | OK                                                                                |
+| `api:test` (`--maxWorkers=1`, sin BD)                | 0    | 25 archivos passed, 10 skipped; 359 passed, 1 expected fail, 130 skipped          |
+| `test:rotation`                                      | 0    | 3 skipped (requiere PostgreSQL)                                                   |
+| `lint`                                               | 0    | `ng lint` sin errores                                                             |
+| `typecheck:e2e`                                      | 0    | `tsc -p tsconfig.e2e.json` sin errores                                            |
+| `lint:md`                                            | 0    | `Linting: 109 files`, `Summary: 0 issues in 0 files`                              |
+| `format`                                             | 0    | `All matched files use Prettier code style!`                                      |
+| `test` (web)                                         | 0    | 58 archivos passed; 675 passed, 2 expected fail                                   |
+| `test:scripts`                                       | 0    | 807 tests, 805 pass, 0 fail, 2 skipped                                            |
+| `content:validate`, `catalog:check`, `catalog:nodes` | 0    | 1 build; 10 maestrías y 45 pares; 6 maestrías                                     |
+| `check:locale-parity`                                | 0    | 341 unidades en paridad, 0 fallos                                                 |
+| `assets:check`, `check:contrast`                     | 0    | 170 entradas; 18 pares                                                            |
+| `build` (`own`)                                      | 0    | `emit-static-assets` con 0 retratos y 0 iconos; `check:initial-js` OK en 12 rutas |
+| `check:public-build`                                 | 0    | 434 archivos; marca antigua ausente en 30 páginas prerrenderizadas                |
+| `check:performance` (`own`)                          | 0    | **141/141 comprobaciones** (587 s)                                                |
+| `check:scope`                                        | 0    | OK (incluido en `verify`)                                                         |
+
+`check:initial-js` por ruta (gzip 6; la versión `/es/…` coincide con la inglesa; idéntico con `own` y con `game`):
+
+| Ruta                                              | JS inicial    | Límite  |
+| ------------------------------------------------- | ------------- | ------- |
+| `/` y `/es`                                       | 0 B           | 90 000  |
+| **`/tier-list` y `/es/tier-list`**                | **111 343 B** | 112 000 |
+| `/maestrias` y `/es/maestrias`                    | 106 194 B     | 112 000 |
+| `/maestrias/soldier` y `/demolition` (+ES)        | 118 457 B     | 150 000 |
+| `/builds/chaman-demoledor-golpe-primigenio` (+ES) | 126 636 B     | 150 000 |
+
+`/tier-list` pasa de 111 251 B (T018) a 111 343 B (+92 B): sigue por debajo del límite de 112 000 B (margen 657 B) pero 51 B por encima
+de la base de 111 292 B aceptada en la Pregunta 32; el principal lo decide.
+
+### `ASSET_SOURCE=game`
+
+- `ASSET_SOURCE=game pnpm build`: **exit 0**; `emit-static-assets OK (7 ficheros en assets\mastery-trees, assets\deferred.css, 6 retratos y 164 iconos de habilidad con ASSET_SOURCE=game)`; `check:initial-js` OK en 12 rutas.
+- `ASSET_SOURCE=game pnpm check:performance`: **exit 0**, `check:performance OK (141/141 comprobaciones; informes en <dist>\lighthouse-performance\run-20261117-123052-7b448f)`.
+
+### Pruebas de la API con PostgreSQL real (ronda 1)
+
+Primer intento sin Docker Desktop en marcha (tras el reinicio de Windows): exit 1, 12 archivos con `El fixture PostgreSQL 17 falló: error
+during connect: … dockerDesktopLinuxEngine … cannot find the file specified`; fallo de entorno, no de código. Con el motor arrancado por el
+principal (28.4.0), comando `RUN_DB_TESTS=1 pnpm exec vitest run --maxWorkers=1` en `apps/api`, **exit 0**:
+
+```text
+ Test Files  35 passed (35)
+      Tests  489 passed | 1 expected fail (490)
+```
+
+0 fallos y 0 saltadas. Contenedores efímeros propios (`docker run --rm`); no se tocó el stack `grim-dawn-builds` y `docker ps -a` quedó vacío.
+
+### Markdown y alcance (ronda 1)
+
+- `pnpm lint:md` (exit 0): `Linting: 109 files`, `Summary: 0 issues in 0 files`. `pnpm check:scope` (exit 0): `check:scope OK (266 archivos revisados)`.
+- `node scripts/spec-review.mjs prepare --feature specs/005-deuda-revisiones` (exit 0): `"status":"ready"`, `"pendingTasks":[]` con snapshot (su valor definitivo va en el reporte del agente: cambia con cada edición de este archivo).
+- `pnpm exec prettier --check` de `quickstart.md`: conforme.
