@@ -46,7 +46,7 @@ export const ALLOWED_IDENTICAL_IDS: readonly { readonly id: string; readonly rea
     id: 'skillTree.status.meta',
     reason: 'Meta: estado de build, término del juego y la comunidad',
   },
-  { id: 'layout.brand', reason: 'Marca: Grim Dawn Builds es nombre propio del sitio' },
+  { id: 'layout.brand', reason: 'Marca: Grim Builds es nombre propio del sitio' },
   {
     id: 'catalog.option.elemental',
     reason: 'Elemental: tipo de daño con el mismo término en ambos idiomas',

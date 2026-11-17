@@ -224,7 +224,7 @@ suite('HTTP content contract on real PostgreSQL public views (T-060)', SUITE_OPT
     expect(builds).toHaveLength(1);
     expect(builds[0]?.slug).toBe('chaman-demoledor-golpe-primigenio');
     expect((await repo.findBuild(input.builds[0]!.slug))?.slug).toBe(input.builds[0]!.slug);
-    expect((await repo.getAuthor('grim-dawn-builds'))?.display_name).toBe('Grim Dawn Builds');
+    expect((await repo.getAuthor('grim-dawn-builds'))?.display_name).toBe('Grim Builds');
     expect(await repo.getAuthor('por-confirmar')).toBeNull();
     expect(JSON.stringify(tier)).not.toMatch(
       /permission_ref|rights_confirmed|is_placeholder|rights_notes|reviewed_by/,

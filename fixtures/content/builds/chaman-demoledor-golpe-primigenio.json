@@ -18,13 +18,13 @@
   "rights_confirmed_by": "Paco",
   "rights_confirmed_on": "2026-11-12",
   "content_status": "sin_verificar",
-  "reviewed_by": "Grim Dawn Builds",
+  "reviewed_by": "Grim Builds",
   "reviewed_at": "2026-11-12",
   "rights_notes": "Contenido propio del sitio (own_original): datos factuales del build transcritos internamente. No se reproduce texto ni imagen de terceros y no existe permiso externo que afirmar.",
   "published_at": "2026-11-12",
   "author": {
     "slug": "grim-dawn-builds",
-    "display_name": "Grim Dawn Builds",
+    "display_name": "Grim Builds",
     "bio": "Proyecto responsable del catálogo de combinaciones generado localmente. Las ranuras informativas no son guías ni rankings verificados.",
     "url": null,
     "is_placeholder": false
@@ -35,11 +35,11 @@
       "kind": "original",
       "title": "Datos del build transcritos internamente",
       "url": null,
-      "author_name": "Grim Dawn Builds",
+      "author_name": "Grim Builds",
       "license_note": "Contenido propio del sitio; datos factuales del juego, sin permiso de terceros",
       "permission_ref": null,
       "retrieved_on": "2026-11-12",
-      "notes": "Contenido generado por Claude Code para Grim Dawn Builds el 2026-11-12. No hay fuente externa ni autor tercero que atribuir; los datos se transcribieron del build y no se han verificado contra el juego."
+      "notes": "Contenido generado por Claude Code para Grim Builds el 2026-11-12. No hay fuente externa ni autor tercero que atribuir; los datos se transcribieron del build y no se han verificado contra el juego."
     }
   ],
   "video_url": null,

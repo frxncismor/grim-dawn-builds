@@ -113,10 +113,10 @@ test('JSON-LD con distinto orden de claves: estado 0 porque se compara canónico
   const root = tempRoot();
   try {
     const fixture = writeTree(join(root, 'fixture'), {
-      jsonLd: { '@context': 'https://schema.org', '@type': 'WebSite', name: 'Grim Dawn Builds' },
+      jsonLd: { '@context': 'https://schema.org', '@type': 'WebSite', name: 'Grim Builds' },
     });
     const api = writeTree(join(root, 'api'), {
-      jsonLd: { name: 'Grim Dawn Builds', '@type': 'WebSite', '@context': 'https://schema.org' },
+      jsonLd: { name: 'Grim Builds', '@type': 'WebSite', '@context': 'https://schema.org' },
     });
     const result = await compareTrees(fixture, api);
     assert.equal(result.status, 0);
@@ -130,7 +130,7 @@ test('JSON-LD con un valor distinto: estado 1 y bloque señalado', async () => {
   const root = tempRoot();
   try {
     const fixture = writeTree(join(root, 'fixture'), {
-      jsonLd: { '@type': 'WebSite', name: 'Grim Dawn Builds' },
+      jsonLd: { '@type': 'WebSite', name: 'Grim Builds' },
     });
     const api = writeTree(join(root, 'api'), {
       jsonLd: { '@type': 'WebSite', name: 'Otro sitio' },
