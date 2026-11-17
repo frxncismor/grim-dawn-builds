@@ -188,6 +188,40 @@ describe('mastery catalog seed (spec 003 T024)', () => {
     expect(commands.some((s) => s.includes('INSERT INTO mastery_trees'))).toBe(true);
     expect(commands.some((s) => s.includes('DELETE FROM catalog_skill_nodes'))).toBe(true);
   });
+
+  it('retires masteries absent from the catalog and names the one a guide still uses (T007)', async () => {
+    const commands: string[] = [];
+    const make = (fkViolation: boolean) => ({
+      query: async (sql: string, values?: unknown[]) => {
+        commands.push(sql);
+        if (sql.includes('current_user'))
+          return { rows: [{ role: 'importer', privileged: false }] };
+        if (sql.includes('FROM mastery_trees WHERE id <> ALL'))
+          return { rows: [{ id: 'class09' }] };
+        if (fkViolation && sql.startsWith('DELETE FROM mastery_trees'))
+          throw Object.assign(new Error('violates foreign key constraint secret_name'), {
+            code: '23503',
+          });
+        void values;
+        return { rows: [] };
+      },
+    });
+    const catalog = prepareSeed({ ...raw(), catalog: [tree()] }).catalog;
+    await seedCatalog(make(false), catalog);
+    const nodes = commands.findIndex((s) =>
+      s.startsWith('DELETE FROM catalog_skill_nodes WHERE mastery_id = $1'),
+    );
+    const row = commands.findIndex((s) => s.startsWith('DELETE FROM mastery_trees'));
+    expect(nodes).toBeGreaterThan(0);
+    expect(row).toBeGreaterThan(nodes);
+    commands.length = 0;
+    const failure = await seedCatalog(make(true), catalog).catch((error: unknown) => error);
+    expect(failure).toMatchObject({ name: 'SeedError', code: 'reference' });
+    expect((failure as Error).message).toContain('class09');
+    expect((failure as Error).message).not.toContain('secret_name');
+    expect(commands.at(-1)).toBe('ROLLBACK');
+    expect(commands).not.toContain('COMMIT');
+  });
 });
 
 describe('skill_node_id reaches the database (spec 003 T031)', () => {
