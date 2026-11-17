@@ -1,11 +1,9 @@
-import type { PublicMasteryTree } from '@gd/domain';
+import { MasterySummarySchema, type MasterySummary, type PublicMasteryTree } from '@gd/domain';
 import type { ContentQuery } from '../content/repository.js';
 import {
   InvalidCatalogError,
-  MasterySummarySchema,
   mapMasterySummary,
   mapMasteryTree,
-  type MasterySummary,
   type MasteryTreeRow,
   type SkillNodeRow,
 } from './map-mastery.js';

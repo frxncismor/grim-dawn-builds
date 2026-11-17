@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import type { FastifyInstance } from 'fastify';
-import { PublicMasteryTreeSchema } from '@gd/domain';
-import { MasterySummarySchema } from '../catalog/map-mastery.js';
+import { MasterySummarySchema, PublicMasteryTreeSchema } from '@gd/domain';
 import type { MasteryCatalogRepository } from '../catalog/mastery-repository.js';
 
 /**

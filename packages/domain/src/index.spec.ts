@@ -59,6 +59,7 @@ const PUBLIC_RUNTIME_EXPORTS = [
   'SKILL_KINDS',
   'TIER_BAR_REQUIRED',
   'findDependencyCycle',
+  'MasterySummarySchema',
   'CONTENT_MOUNT',
   'SEED_ERROR_CODES',
   'bootstrapCompleteLine',

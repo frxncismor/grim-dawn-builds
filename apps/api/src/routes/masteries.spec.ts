@@ -1,9 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { MasteryTree } from '@gd/domain';
+import type { MasterySummary, MasteryTree } from '@gd/domain';
 import { buildApp } from '../app.js';
 import { loadConfig } from '../config.js';
 import type { MasteryCatalogRepository } from '../catalog/mastery-repository.js';
-import type { MasterySummary } from '../catalog/map-mastery.js';
 
 const config = () => loadConfig({ LOG_LEVEL: 'silent' });
 const SHA = 'a'.repeat(64);

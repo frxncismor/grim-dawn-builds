@@ -123,3 +123,5 @@ export {
   successPattern,
 } from './seed-contract.js';
 export type { SeedErrorCode, SeedOperation } from './seed-contract.js';
+export { MasterySummarySchema } from './mastery-summary.js';
+export type { MasterySummary } from './mastery-summary.js';
