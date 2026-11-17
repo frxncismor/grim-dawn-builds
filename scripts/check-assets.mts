@@ -3,6 +3,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { checkAssetManifest, classifySkillIconEntry, type AssetIssue } from '@gd/domain';
+import { prerenderedPages } from './artifact-pages.mts';
 
 const WEB_PUBLIC_DIR = 'apps/web/public';
 const OFFICIAL_SUBDIR = 'assets';
@@ -150,15 +151,18 @@ export function assertAssetStatusParity(
  * staging, in the default locale or in any other (`browser/assets/portraits`, `browser/es/…`).
  * The PNGs are the game's art; `own` is the withdrawal path. With `game` there is nothing to check
  * here: `assertGameAssets` already vouches for the manifest and the copy is the emitter's job.
+ * With `own` it fails closed (spec006 FR-003): an artifact with no `browser/` or no page is not valid.
  */
 export function assertNoGamePortraits(artifact: string, source: string): void {
   if (source !== 'own') return;
-  const found = existsSync(artifact)
-    ? readdirSync(artifact, { recursive: true, withFileTypes: true })
-        .filter((entry) => entry.isFile())
-        .map((entry) => join(entry.parentPath, entry.name).split('\\').join('/'))
-        .filter((path) => /\/assets\/(?:portraits|skill-icons)\//.test(path))
-    : [];
+  // Fails closed (spec006 FR-003): no artifact or no page cannot vouch for "no game art".
+  prerenderedPages(join(artifact, 'browser'), {
+    gate: 'ASSET_SOURCE=own: retratos e iconos del juego en el artefacto',
+  });
+  const found = readdirSync(artifact, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => join(entry.parentPath, entry.name).split('\\').join('/'))
+    .filter((path) => /\/assets\/(?:portraits|skill-icons)\//.test(path));
   if (found.length > 0)
     throw new Error(
       `ASSET_SOURCE=own: el artefacto no puede llevar retratos ni iconos de habilidad del juego (${found.length} ficheros).`,
@@ -187,17 +191,7 @@ interface CreditGate {
 function assertCredit(artifact: string, source: string, gate: CreditGate): void {
   if (source !== 'game' && source !== 'own') return;
   const browser = join(artifact, 'browser');
-  if (!existsSync(browser))
-    throw new Error(
-      `ASSET_SOURCE=${source}: ${gate.gateLabel}: el artefacto está vacío (sin carpeta browser/ en ${artifact}).`,
-    );
-  const pages = readdirSync(browser, { recursive: true, withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.html'))
-    .map((entry) => join(entry.parentPath, entry.name));
-  if (pages.length === 0)
-    throw new Error(
-      `ASSET_SOURCE=${source}: ${gate.gateLabel}: el artefacto está vacío (ninguna página .html en browser/).`,
-    );
+  const pages = prerenderedPages(browser, { gate: `ASSET_SOURCE=${source}: ${gate.gateLabel}` });
   const problems: string[] = [];
   for (const page of pages) {
     const html = readFileSync(page, 'utf8');

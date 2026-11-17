@@ -1,5 +1,6 @@
-import { readdir, readFile, stat } from 'node:fs/promises';
-import { join, relative } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { relative } from 'node:path';
+import { prerenderedPages } from './artifact-pages.mts';
 
 /**
  * spec005 T034 (FR-023, FR-026, FR-027): «Grim Dawn Builds» is not the public brand any more. The
@@ -24,35 +25,15 @@ export function hasLegacyBrand(source: string): boolean {
   return OLD_BRAND.test(source) || OLD_BRAND.test(visibleText(source));
 }
 
-async function* htmlFiles(dir: string): AsyncGenerator<string> {
-  for (const entry of (await readdir(dir, { withFileTypes: true })).sort((a, b) =>
-    a.name.localeCompare(b.name),
-  )) {
-    const path = join(dir, entry.name);
-    if (entry.isDirectory()) yield* htmlFiles(path);
-    else if (entry.isFile() && entry.name.endsWith('.html')) yield path;
-  }
-}
-
 /**
  * Fails (never skips) when the built artifact is missing, has {@link MIN_PRERENDERED_PAGES} pages or
  * fewer, or any page still carries the old brand. Returns the number of pages checked.
  */
 export async function assertNoLegacyBrand(browserDir: string): Promise<{ pages: number }> {
-  const isDir = await stat(browserDir).then(
-    (s) => s.isDirectory(),
-    () => false,
-  );
-  if (!isDir)
-    throw new Error(
-      `no hay artefacto compilado en ${browserDir}: ejecuta «pnpm build» antes de esta puerta`,
-    );
-  const pages: string[] = [];
-  for await (const file of htmlFiles(browserDir)) pages.push(file);
-  if (pages.length <= MIN_PRERENDERED_PAGES)
-    throw new Error(
-      `artefacto vacío o incompleto en ${browserDir}: ${pages.length} páginas HTML (se esperan más de ${MIN_PRERENDERED_PAGES})`,
-    );
+  const pages = prerenderedPages(browserDir, {
+    gate: 'puerta de marca antigua (pnpm build antes de esta puerta)',
+    minPages: MIN_PRERENDERED_PAGES + 1,
+  });
   const offenders: string[] = [];
   for (const file of pages)
     if (hasLegacyBrand(await readFile(file, 'utf8'))) offenders.push(relative(browserDir, file));
