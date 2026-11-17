@@ -16,6 +16,28 @@ export interface ContentIssue {
   message: string;
 }
 
+/** Internal editorial notes: never rendered, so identifiers are allowed there. */
+const INTERNAL_TEXT_KEYS = new Set(['rights_notes']);
+/** `clave=valor` or a snake_case identifier inside prose (a string with spaces). */
+const INTERNAL_KEY_IN_TEXT = /\b[a-z]+(?:_[a-z]+)*=|\b[a-z]+(?:_[a-z]+)+\b/;
+
+/** spec005 T032 (F-15): no visible string may carry internal keys such as `content_status=`. */
+function internalKeyIssues(
+  value: unknown,
+  path: string[],
+  key = '',
+): { path: string; match: string }[] {
+  if (typeof value === 'string')
+    return !INTERNAL_TEXT_KEYS.has(key) && /\s/.test(value) && INTERNAL_KEY_IN_TEXT.test(value)
+      ? [{ path: path.join('.'), match: INTERNAL_KEY_IN_TEXT.exec(value)![0] }]
+      : [];
+  if (Array.isArray(value))
+    return value.flatMap((item, i) => internalKeyIssues(item, [...path, String(i)], key));
+  if (value && typeof value === 'object')
+    return Object.entries(value).flatMap(([k, v]) => internalKeyIssues(v, [...path, k], k));
+  return [];
+}
+
 /**
  * Validates build documents against BuildSchema and, once a document is valid, cross-checks
  * each optional `skill_node_id` against the catalog (spec 003, T016). Pure: no I/O.
@@ -28,6 +50,13 @@ export function validateBuildFiles(
   for (const { file, data } of files) {
     const result = BuildSchema.safeParse(data);
     if (result.success) {
+      for (const hit of internalKeyIssues(data, [])) {
+        issues.push({
+          file,
+          path: hit.path,
+          message: `texto visible con clave interna «${hit.match}»; usa la etiqueta visible (p. ej. «Sin verificar»)`,
+        });
+      }
       for (const ref of validateSkillNodeRefs(result.data, catalog)) {
         issues.push({ file, path: ref.path.join('.'), message: ref.message });
       }

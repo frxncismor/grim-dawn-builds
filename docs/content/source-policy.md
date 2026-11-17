@@ -78,7 +78,7 @@ externos que atribuir, ni permiso de terceros que afirmar.
   nula y su `author_name` es «Grim Builds». No es una fuente externa.
 - **Derechos**: `rights_status=own_original`, confirmado por el titular del
   sitio (Paco) el 2026-11-12, con `permission_ref` nulo. La ficha publica con
-  `content_status=sin_verificar`: los datos no se han comprobado todavía contra
+  el estado interno `sin_verificar` (etiqueta visible «Sin verificar»): los datos no se han comprobado todavía contra
   el juego y la propia página lo declara.
 
 Los datos del juego (nombres de habilidades, maestrías y constelaciones) son
