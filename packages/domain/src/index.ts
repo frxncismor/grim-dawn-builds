@@ -117,6 +117,7 @@ export {
   CONTENT_MOUNT,
   SEED_ERROR_CODES,
   bootstrapCompleteLine,
+  failureLine,
   failurePattern,
   isSeedErrorCode,
   seedCompleteLine,

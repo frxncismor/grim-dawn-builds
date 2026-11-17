@@ -147,6 +147,7 @@ describe('@gd/domain built output', () => {
       'checkAssetManifest',
       'classifySkillIconEntry',
       'evaluatePublicationGate',
+      'failureLine',
       'failurePattern',
       'findDependencyCycle',
       'isPermissionGranted',

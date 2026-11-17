@@ -3,6 +3,7 @@ import * as domain from './index.js';
 import {
   SEED_ERROR_CODES,
   bootstrapCompleteLine,
+  failureLine,
   failurePattern,
   isSeedErrorCode,
   seedCompleteLine,
@@ -14,6 +15,7 @@ describe('seed contract', () => {
     expect([...SEED_ERROR_CODES].sort()).toEqual(
       [
         'already',
+        'arguments',
         'bootstrapped',
         'column',
         'conflicting-resource',
@@ -69,9 +71,27 @@ describe('seed contract', () => {
     expect(failurePattern('seed').test('seed failed: ')).toBe(false);
   });
 
+  it('carries an identifier detail through failureLine and failurePattern (FR-012)', () => {
+    expect(failureLine('seed', 'reference')).toBe('seed failed: reference');
+    expect(failureLine('seed', 'reference', 'class09')).toBe('seed failed: reference (class09)');
+    const match = failurePattern('seed').exec(`seed failed: reference (class09)${'\n'}`);
+    expect(match?.[1]).toBe('reference');
+    expect(match?.[2]).toBe('class09');
+    expect(failurePattern('seed').exec('seed failed: reference')?.[2]).toBeUndefined();
+  });
+
+  it('drops a detail that is not a plain identifier and never matches one', () => {
+    for (const bad of ['', 'Class 09', 'x'.repeat(65), 'a;DROP', `a${'\n'}b`, '(x)'])
+      expect(failureLine('seed', 'reference', bad)).toBe('seed failed: reference');
+    expect(failurePattern('seed').test('seed failed: reference (a b)')).toBe(false);
+    expect(failurePattern('seed').test('seed failed: reference ()')).toBe(false);
+    expect(failurePattern('seed').test('seed failed: reference (x) trailing')).toBe(false);
+  });
+
   it('is exported from the package entry', () => {
     expect(domain.SEED_ERROR_CODES).toBe(SEED_ERROR_CODES);
     expect(domain.CONTENT_MOUNT).toBe('/content');
     expect(domain.successPattern).toBe(successPattern);
+    expect(domain.failureLine).toBe(failureLine);
   });
 });

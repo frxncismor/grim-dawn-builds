@@ -243,6 +243,43 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', SUITE_OPT
     ).toEqual({ display_name: 'Editor-owned', origin: 'editor' });
   });
 
+  it('seeds a guide that stops using a mastery together with the catalog that retires it (T036, C-003)', async () => {
+    await seedData(importer!, data);
+    const used = (
+      await admin!.query(
+        `SELECT DISTINCT c.mastery_id FROM build_skill_nodes b
+         JOIN catalog_skill_nodes c ON c.id = b.skill_node_id ORDER BY 1`,
+      )
+    ).rows.map((r) => r.mastery_id as string);
+    const retired = used[0]!;
+    const build = data.builds[0]!;
+    const kept = build.skill_nodes.filter((n) => !n.skill_node_id?.startsWith(`${retired}/`));
+    const keptSlugs = new Set(kept.map((n) => n.slug));
+    const rewritten: SeedData = {
+      ...data,
+      catalog: data.catalog.filter((t) => t.mastery.id !== retired),
+      builds: [
+        {
+          ...build,
+          skill_nodes: kept,
+          priorities: build.priorities.map((p) => ({
+            ...p,
+            skill_node_slugs: p.skill_node_slugs.filter((slug) => keptSlugs.has(slug)),
+          })),
+        },
+      ],
+    };
+    expect(rewritten.builds[0]!.skill_nodes.length).toBeLessThan(build.skill_nodes.length);
+    try {
+      await seedData(importer!, rewritten);
+      expect(
+        (await admin!.query('SELECT 1 FROM mastery_trees WHERE id = $1', [retired])).rowCount,
+      ).toBe(0);
+    } finally {
+      await seedData(importer!, data);
+    }
+  });
+
   it('refuses bootstrap and editor-owned records without changing stored content', async () => {
     const slug = data.authors[0]!.slug;
     await admin!.query("UPDATE authors SET origin='editor' WHERE slug=$1", [slug]);
@@ -361,6 +398,7 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', SUITE_OPT
       );
       expect(failure).toMatchObject({ name: 'SeedError', code: 'reference' });
       expect((failure as Error).message).toContain(retired);
+      expect(failure).toMatchObject({ detail: retired });
       expect((failure as Error).message).not.toMatch(/DELETE|violates|catalog_skill_nodes/i);
       expect(await snapshot()).toEqual(before);
     });

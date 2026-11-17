@@ -212,3 +212,26 @@ test('a code outside the union is reported as unknown and never as success', () 
 test('stderr that is not a failure line keeps the generic container message', () => {
   assert.deepEqual(launchWithStderr('seed', 'boom PRIVATE'), ['seed failed: local-container']);
 });
+
+test('the launcher forwards the identifier detail of a failure (FR-012)', () => {
+  for (const operation of ['seed', 'bootstrap'] as const)
+    assert.deepEqual(launchWithStderr(operation, `${operation} failed: reference (class09)\n`), [
+      `${operation} failed: reference (class09)`,
+    ]);
+});
+
+test('a detail that is not an identifier is never echoed', () => {
+  const messages = launchWithStderr('seed', 'seed failed: reference (DROP TABLE x; PRIVATE)\n');
+  assert.deepEqual(messages, ['seed failed: unknown']);
+  assert.equal(
+    messages.some((line) => line.includes('PRIVATE')),
+    false,
+  );
+});
+
+test('the arguments code is part of the contract and is forwarded', () => {
+  assert.equal(SEED_ERROR_CODES.includes('arguments'), true);
+  assert.deepEqual(launchWithStderr('bootstrap', 'bootstrap failed: arguments\n'), [
+    'bootstrap failed: arguments',
+  ]);
+});

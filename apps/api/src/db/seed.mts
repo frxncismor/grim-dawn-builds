@@ -1,5 +1,6 @@
 import {
   SeedError,
+  retireMasteries,
   writeCatalogRows,
   writeContentRows,
   type SeedClient,
@@ -24,6 +25,7 @@ import {
   type Mastery,
   type MasteryTree,
   type Source,
+  failureLine,
   seedCompleteLine,
   type TierList,
 } from '@gd/domain';
@@ -212,6 +214,8 @@ export async function readSeedFixtures(root = seedContentRoot(process.env)): Pro
   const assets = object(manifest)['assets'];
   if (!Array.isArray(rawMasteries) || !Array.isArray(assets))
     throw new SeedError('invalid-content');
+  // An empty `mastery-trees/` is a missing fixture, never a request to retire every mastery (T036).
+  if (!catalog.length) throw new SeedError('invalid-content');
   return prepareSeed({
     authors,
     sources,
@@ -241,10 +245,15 @@ export async function seedCatalog(
   client: SeedClient,
   catalog: readonly MasteryTree[],
 ): Promise<{ masteries: number; nodes: number }> {
+  if (!catalog.length) throw new SeedError('invalid-content');
   await client.query('BEGIN');
   try {
     await requireImporter(client);
     await writeCatalogRows(client, catalog);
+    await retireMasteries(
+      client,
+      catalog.map((t) => t.mastery.id),
+    );
     await client.query('COMMIT');
     return { masteries: catalog.length, nodes: catalog.reduce((n, t) => n + t.nodes.length, 0) };
   } catch (error) {
@@ -267,9 +276,15 @@ export async function seedData(
       'SELECT EXISTS (SELECT 1 FROM content_origin) AS bootstrapped',
     );
     if (marker.rows[0]?.['bootstrapped'] !== false) throw new SeedError('bootstrapped');
-    // Catalog first: guide nodes reference it through `skill_node_id` (T031).
+    // Catalog first: guide nodes reference it through `skill_node_id` (T031). Retiring masteries goes
+    // last, once the guides were rewritten, so a guide that drops a mastery and the catalog that
+    // retires it can land in the same seed (T036, C-003).
     await writeCatalogRows(client, data.catalog);
     await writeContentRows(client, data);
+    await retireMasteries(
+      client,
+      data.catalog.map((t) => t.mastery.id),
+    );
     await client.query('COMMIT');
     return {
       builds: data.builds.length,
@@ -308,7 +323,7 @@ export async function runSeeder(
 ): Promise<number> {
   const write = overrides.write ?? { out: console.log, err: console.error };
   if (env['APP_ENV'] !== 'development' && env['APP_ENV'] !== 'test') {
-    write.err('seed failed: environment');
+    write.err(failureLine('seed', 'environment'));
     return 1;
   }
   let client: pg.Client | undefined;
@@ -344,7 +359,9 @@ export async function runSeeder(
     return 0;
   } catch (error) {
     write.err(
-      `seed failed: ${error instanceof SeedError ? error.code : 'configuration-or-database'}`,
+      error instanceof SeedError
+        ? failureLine('seed', error.code, error.detail)
+        : failureLine('seed', 'configuration-or-database'),
     );
     return 1;
   } finally {

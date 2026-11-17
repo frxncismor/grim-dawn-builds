@@ -3,10 +3,13 @@ import type { BuildDocument, MasteryTree, SeedErrorCode } from '@gd/domain';
 import type { SeedData } from './seed.mjs';
 
 export class SeedError extends Error {
-  /** `detail` may name a mastery or slug; never SQL text or row values. */
+  /**
+   * `detail` is a plain identifier (a mastery id or slug); never SQL text or row values. The seeder
+   * prints it through `failureLine`, which drops anything that is not an identifier.
+   */
   constructor(
     readonly code: SeedErrorCode,
-    detail?: string,
+    readonly detail?: string,
   ) {
     super(detail ? `${code}: ${detail}` : code);
     this.name = 'SeedError';
@@ -354,9 +357,15 @@ export async function writeContentRows(
 /**
  * A mastery absent from the catalog is retired (spec 005 T007, Q-A = A): its nodes and row are deleted
  * in the caller's transaction. `build_skill_nodes.skill_node_id` is `ON DELETE RESTRICT`, so a guide
- * that still uses one of its nodes makes the delete fail; that aborts the seed and names the mastery.
+ * that still uses one of its nodes makes the delete fail; that aborts the seed and names the mastery
+ * (FR-012: the id travels as `SeedError.detail` to the operator's output).
+ *
+ * Callers that also rewrite guides run this AFTER `writeContentRows`: a guide that stops using a
+ * retired mastery in the same seed has already dropped its nodes by then (T036, C-003). An empty
+ * catalog retires nothing (T036, C-002): it is a missing fixture, not a request to delete them all.
  */
-async function retireMasteries(client: SeedClient, keep: readonly string[]): Promise<void> {
+export async function retireMasteries(client: SeedClient, keep: readonly string[]): Promise<void> {
+  if (!keep.length) return;
   const retired = await client.query(
     'SELECT id FROM mastery_trees WHERE id <> ALL($1::text[]) ORDER BY id',
     [keep],
@@ -373,7 +382,7 @@ async function retireMasteries(client: SeedClient, keep: readonly string[]): Pro
     } catch (error) {
       // 23503 = foreign_key_violation: a guide still references this mastery's nodes.
       if ((error as { code?: unknown } | null)?.code === '23503')
-        throw new SeedError('reference', `retired mastery ${id} is still used by guides`);
+        throw new SeedError('reference', id);
       throw error;
     }
   }
@@ -381,18 +390,15 @@ async function retireMasteries(client: SeedClient, keep: readonly string[]): Pro
 
 /**
  * Game-derived mastery catalog (spec 003). Idempotent refresh per mastery: upsert by id, then drop the
- * nodes no longer in the fixture. Masteries missing from the catalog are retired first (T007). Parent links are cleared first so stale parents can be deleted and
+ * nodes no longer in the fixture. Parent links are cleared first so stale parents can be deleted and
  * re-pointed without tripping the composite FK; nodes are then upserted parents-first (tier order).
+ * Retiring masteries missing from the catalog is a separate step (`retireMasteries`, T007/T036).
  * All values go through pg parameters; table/column names are constants.
  */
 export async function writeCatalogRows(
   client: SeedClient,
   catalog: readonly MasteryTree[],
 ): Promise<void> {
-  await retireMasteries(
-    client,
-    catalog.map((t) => t.mastery.id),
-  );
   for (const tree of catalog) {
     const m = tree.mastery;
     await client.query(

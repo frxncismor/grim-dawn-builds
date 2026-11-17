@@ -4,16 +4,25 @@ import pg from 'pg';
 import { getTableName, is } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import { bootstrapCompleteLine, type SeedErrorCode } from '@gd/domain';
+import { bootstrapCompleteLine, failureLine, type SeedErrorCode } from '@gd/domain';
 import { loadSecrets } from '../config.js';
 import * as schema from './schema.js';
 import { compareMigrations, migrationFingerprint, readExpectedHashes } from './migration-state.js';
 import { prepareSeed, readSeedFixtures, seedContentRoot, type SeedData } from './seed.mjs';
-import { writeCatalogRows, writeContentRows, type SeedClient } from './write-content.mjs';
+import {
+  SeedError,
+  retireMasteries,
+  writeCatalogRows,
+  writeContentRows,
+  type SeedClient,
+} from './write-content.mjs';
 
 export class BootstrapError extends Error {
-  constructor(readonly code: SeedErrorCode) {
-    super(`bootstrap: ${code}`);
+  constructor(
+    readonly code: SeedErrorCode,
+    readonly detail?: string,
+  ) {
+    super(detail ? `bootstrap: ${code}: ${detail}` : `bootstrap: ${code}`);
     this.name = 'BootstrapError';
   }
 }
@@ -101,6 +110,10 @@ export async function bootstrapData(
     // Catalog first (idempotent upsert): guide nodes reference it through `skill_node_id` (T031).
     await writeCatalogRows(client, data.catalog);
     await writeContentRows(client, data);
+    await retireMasteries(
+      client,
+      data.catalog.map((t) => t.mastery.id),
+    );
     for (const table of ['authors', 'sources', 'builds', 'tier_lists', 'tier_entries'])
       await client.query(`UPDATE ${quote(table)} SET origin='bootstrap'`);
     await client.query(
@@ -112,6 +125,8 @@ export async function bootstrapData(
   } catch (error) {
     await client.query('ROLLBACK').catch(() => undefined);
     if (error instanceof BootstrapError) throw error;
+    // Forward the writer's real code (and its identifier) instead of flattening it (T036, F-003).
+    if (error instanceof SeedError) throw new BootstrapError(error.code, error.detail);
     throw new BootstrapError('database-failed');
   }
 }
@@ -139,7 +154,7 @@ export async function runBootstrap(
 ): Promise<number> {
   const write = overrides.write ?? { out: console.log, err: console.error };
   if (!['development', 'test'].includes(env['APP_ENV'] ?? '')) {
-    write.err('bootstrap failed: environment');
+    write.err(failureLine('bootstrap', 'environment'));
     return 1;
   }
   let client: pg.Client | undefined;
@@ -185,7 +200,9 @@ export async function runBootstrap(
     return 0;
   } catch (error) {
     write.err(
-      `bootstrap failed: ${error instanceof BootstrapError ? error.code : 'database-failed'}`,
+      error instanceof BootstrapError
+        ? failureLine('bootstrap', error.code, error.detail)
+        : failureLine('bootstrap', 'database-failed'),
     );
     return 1;
   } finally {
@@ -194,7 +211,7 @@ export async function runBootstrap(
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   if (process.argv.length !== 2) {
-    console.error('bootstrap failed: arguments');
+    console.error(failureLine('bootstrap', 'arguments'));
     process.exitCode = 1;
   } else process.exitCode = await runBootstrap(process.env);
 }
