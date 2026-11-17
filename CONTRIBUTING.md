@@ -253,8 +253,11 @@ two equivalent ways, both on Ubuntu 24.04 with the Playwright version of `packag
 
 Use the official image `mcr.microsoft.com/playwright:v1.65.0-noble` (keep the tag equal to the
 `@playwright/test` version). The script installs Node 22.23.5 and pnpm inside the container, copies the
-repository without `node_modules`, `dist` or `.angular` and builds with `ASSET_SOURCE=own`, so nothing from the
-host enters. From the repository root:
+repository without `node_modules`, `dist`, `.angular`, `.git`, `test-results`, `playwright-report`, `.env`, `.env.*` (except the
+versioned `.env.example`) and `infra/docker/secrets/`, and builds with `ASSET_SOURCE=own`, so neither local
+secrets nor results of earlier runs enter the container. The Node download is checked against a pinned
+SHA-256 and the script aborts on a mismatch. The Playwright image is identified by tag, not by digest. From
+the repository root:
 
 ```sh
 mkdir -p test-results/visual-out

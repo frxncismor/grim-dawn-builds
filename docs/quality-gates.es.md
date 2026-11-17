@@ -47,6 +47,7 @@ a ninguno de los dos archivos, que siguen siendo la fuente de verdad.
 | Instalación de Chromium de Playwright                    | `pnpm exec playwright install --with-deps chromium`                                               | no                    | yes     | yes        | T-126           |
 | Recorridos E2E                                           | `pnpm run e2e:journeys`                                                                           | no                    | yes     | yes        | T-040           |
 | Puerta de accesibilidad (axe)                            | `pnpm run e2e:a11y`                                                                               | no                    | yes     | yes        | T-041           |
+| Regresión visual (referencias de Linux)                  | `pnpm run e2e:visual`                                                                             | no                    | yes     | yes        | T017            |
 | Informe de origen del artefacto                          | `test ! -f dist/build-info.json; echo "CONTENT_SOURCE=…"`                                         | no                    | yes     | yes        | T-126           |
 
 `pnpm verify` ejecuta 25 pasos en orden y se detiene en el primer fallo, así que los
@@ -59,6 +60,14 @@ fixture, el artefacto de borradores, la instalación de Playwright, las suites E
 axe y el informe de origen del artefacto). La comprobación de secretos del flujo de
 trabajo de CI aparece dos veces porque ambos runners invocan el mismo script
 mediante comandos distintos.
+
+La puerta de regresión visual es el job de CI independiente `visual-regression`,
+paralelo a `verify`, así que no es uno de los 36 comandos `run:` anteriores ni se
+ejecuta en `pnpm verify`. Compara 30 capturas con las referencias de
+`e2e/visual-baselines/`, que solo son válidas si se generan en Linux (el flujo manual
+`Visual baselines (Linux)` o la imagen de Docker); con un navegador nativo de Windows
+o macOS falla por diseño. El procedimiento está en
+[CONTRIBUTING.es.md](../CONTRIBUTING.es.md#referencias-de-la-regresión-visual).
 
 ## Cabeceras de seguridad del artefacto (T-166)
 

@@ -47,6 +47,7 @@ not replace either file, which remain the source of truth.
 | Playwright Chromium install                | `pnpm exec playwright install --with-deps chromium`                                               | no                    | yes     | yes      | T-126      |
 | E2E journeys                               | `pnpm run e2e:journeys`                                                                           | no                    | yes     | yes      | T-040      |
 | Accessibility gate (axe)                   | `pnpm run e2e:a11y`                                                                               | no                    | yes     | yes      | T-041      |
+| Visual regression (Linux references)       | `pnpm run e2e:visual`                                                                             | no                    | yes     | yes      | T017       |
 | Artifact source report                     | `test ! -f dist/build-info.json; echo "CONTENT_SOURCE=…"`                                         | no                    | yes     | yes      | T-126      |
 
 `pnpm verify` runs 25 steps in order and stops at the first failure, so later
@@ -57,6 +58,14 @@ the gitleaks toolchain, the pinned PostgreSQL image, the container checks, the
 fixture validation, the drafts artifact, the Playwright install, the E2E and axe
 suites and the artifact source report). The CI workflow secret check appears
 twice because both runners invoke the same script through different commands.
+
+The visual regression gate is the separate CI job `visual-regression`, parallel
+to `verify`, so it is not one of the 36 `run:` commands above and it does not run
+in `pnpm verify`. It compares 30 screenshots with the references in
+`e2e/visual-baselines/`, which are valid only when generated on Linux (the manual
+`Visual baselines (Linux)` workflow or the Docker image); on a native Windows or
+macOS browser it fails by design. The procedure is in
+[CONTRIBUTING.md](../CONTRIBUTING.md#visual-regression-references).
 
 ## Artifact security headers (T-166)
 
