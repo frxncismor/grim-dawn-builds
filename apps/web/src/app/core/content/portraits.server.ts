@@ -8,6 +8,7 @@ import {
   type AssetSource,
   type MasteryPortrait,
 } from './portraits';
+import { TREE_SLUG } from './catalog-trees.server';
 
 const PERMISSION = 'tolerancia_de_facto_sin_permiso';
 const PORTRAIT_PREFIX = 'public/assets/portraits/';
@@ -67,16 +68,6 @@ export async function createPortraitResolver(
   return (slug) => resolveMasteryPortrait(slug, source, entries);
 }
 
-/** Catalog mastery slug (Spanish) to the slug of its tree and portrait (English). */
-const TREE_SLUG: Readonly<Record<string, string>> = {
-  arcanista: 'arcanist',
-  demoledor: 'demolition',
-  'filo-nocturno': 'nightblade',
-  ocultista: 'occult',
-  chaman: 'shaman',
-  soldado: 'soldier',
-};
-
 /**
  * Server only (spec004 T042): puts the portrait of its tree on every catalog mastery that has one,
  * so the home and the catalog cards draw it in the prerendered HTML. The others stay without it.
@@ -92,24 +83,6 @@ export function withCatalogPortraits<T extends { readonly masteries: readonly { 
       if (!tree) return m;
       const { source, src, width, height } = portraitOf(tree);
       return { ...m, portrait: { source, src, width, height } };
-    }),
-  } as T;
-}
-
-/**
- * Server only (spec005 T033, FR-040): flags `noTree` on every catalog mastery whose tree is not in
- * the data (`treeSlugs`, the slugs of the mastery catalog), so no page links a tree that does not
- * open. A mastery with no `TREE_SLUG` entry has no tree either. The others stay untouched.
- */
-export function withCatalogTrees<T extends { readonly masteries: readonly { slug: string }[] }>(
-  catalog: T,
-  treeSlugs: ReadonlySet<string>,
-): T {
-  return {
-    ...catalog,
-    masteries: catalog.masteries.map((m) => {
-      const tree = Object.hasOwn(TREE_SLUG, m.slug) ? TREE_SLUG[m.slug] : undefined;
-      return tree && treeSlugs.has(tree) ? m : { ...m, noTree: true };
     }),
   } as T;
 }

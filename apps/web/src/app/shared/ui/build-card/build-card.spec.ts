@@ -170,6 +170,26 @@ describe('spec004 T052: combination name and language-safe accessible name', () 
     expect(el.querySelector('.build-card__sr')?.hasAttribute('lang')).toBe(false);
   });
 
+  it('spec005 T037 (F-002): a content-language combination is read by AT in its own lang span', async () => {
+    const el = await render({
+      ...guide,
+      title: 'Chamán + Demoledor',
+      titleLang: undefined,
+      combination: 'Guía editorial en español',
+      combinationLang: 'es',
+    });
+    expect(el.querySelector('.build-card__combination')?.getAttribute('aria-hidden')).toBe('true');
+    const link = el.querySelector('a')!;
+    const spoken = link.querySelector('.build-card__sr[lang="es"]');
+    expect(spoken?.textContent).toContain('Guía editorial en español');
+    expect(link.hasAttribute('lang')).toBe(false);
+    // The UI-language part stays free of the foreign text and of any lang.
+    const ui = [...link.querySelectorAll('.build-card__sr:not([lang])')];
+    expect(ui).toHaveLength(1);
+    expect(ui[0]!.textContent).not.toContain('Guía editorial');
+    expect(ui[0]!.textContent).toContain('Unverified');
+  });
+
   it('draws no combination line when the title is the combination', async () => {
     const el = await render(guide);
     expect(el.querySelector('.build-card__combination')).toBeNull();

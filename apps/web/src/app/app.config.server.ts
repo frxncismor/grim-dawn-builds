@@ -12,11 +12,8 @@ import { resolve } from 'node:path';
 import { appConfig } from './app.config';
 import { serverRoutes } from './app.routes.server';
 import { MASTERY_CATALOG, MASTERY_PORTRAITS } from './core/content/masteries';
-import {
-  createPortraitResolver,
-  withCatalogPortraits,
-  withCatalogTrees,
-} from './core/content/portraits.server';
+import { withCatalogTrees } from './core/content/catalog-trees.server';
+import { createPortraitResolver, withCatalogPortraits } from './core/content/portraits.server';
 import { SKILL_ICON_SOURCE, SKILL_ICONS_STATE } from './core/content/skill-icons';
 import { createSkillIconSource } from './core/content/skill-icons.server';
 import { createMasteryCatalog } from './core/content/masteries.server';

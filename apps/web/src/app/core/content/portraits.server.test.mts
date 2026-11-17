@@ -7,8 +7,8 @@ import {
   createPortraitResolver,
   resolveMasteryPortrait,
   withCatalogPortraits,
-  withCatalogTrees,
 } from './portraits.server.ts';
+import { withCatalogTrees } from './catalog-trees.server.ts';
 import { parseAssetSource } from './portraits.ts';
 
 const REAL_ROOT = 'fixtures/content';

@@ -28,6 +28,18 @@ describe('catalog page with URL state', () => {
     await harness.fixture.whenStable();
     return harness;
   };
+  it('spec005 T037 (B-01): the desktop title is a non-interactive heading kept apart from the folding summary', async () => {
+    const harness = await start('/tier-list?d=rayo');
+    const panel = harness.routeNativeElement!.querySelector('details.filter-panel')!;
+    const title = panel.querySelector('.filter-title')!;
+    expect(title.tagName).not.toBe('SUMMARY');
+    expect(title.textContent).toContain('Filter catalog');
+    expect(title.getAttribute('data-count')).toBe('1');
+    expect(title.querySelector('button, a, [tabindex]')).toBeNull();
+    // The summary stays the control for the phone; the stylesheet hides it from desktop.
+    expect(panel.querySelector(':scope > summary')?.textContent).toContain('Filter catalog');
+  });
+
   it('restores a combined query filter, count and canonical structured data', async () => {
     const harness = await start('/tier-list?m=chaman&d=rayo');
     expect(harness.routeNativeElement!.querySelectorAll('gd-build-card')).toHaveLength(1);
@@ -212,7 +224,12 @@ describe('spec005 T026 (F-06, F-07): catalog width and the filter panel', () => 
   it('keeps the panel open from 48rem up with CSS only, and lets header and counter use the container width', () => {
     expect(rule(css, 'gd-tier-list-page .catalog-intro')).not.toContain('max-inline-size');
     expect(rule(css, 'gd-tier-list-page .result-count')).toContain('max-inline-size: none');
-    expect(css).toMatch(/@media \(min-width: 48\.0625rem\)[^@]*::details-content/s);
+    // B-01: only where `::details-content` is supported, and the inert summary leaves the a11y tree.
+    expect(css).toMatch(
+      /@media \(min-width: 48\.0625rem\)\s*\{\s*@supports selector\(::details-content\)[^@]*::details-content/s,
+    );
+    expect(css).toMatch(/\.filter-panel > summary \{\s*display: none;/);
+    expect(css).not.toContain('pointer-events: none');
     expect(rule(filtersCss, 'gd-filter-bar > .filters')).toContain('padding-inline');
     expect(rule(css, 'gd-tier-list-page .filter-help')).toContain('padding-inline');
   });

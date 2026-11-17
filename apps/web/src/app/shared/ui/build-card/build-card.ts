@@ -36,17 +36,32 @@ import type { BuildCardData } from './build-card.model';
       <h3 class="build-card__title">
         @if (d.href) {
           <a [routerLink]="d.href"
-            ><span [attr.lang]="d.titleLang">{{ d.title }}</span
-            ><span class="build-card__sr">{{ d.srText }}</span></a
+            ><span [attr.lang]="d.titleLang">{{ d.title }}</span>
+            @if (d.srCombination) {
+              <span class="build-card__sr" [attr.lang]="d.combinationLang">{{
+                d.srCombination
+              }}</span>
+            }
+            <span class="build-card__sr">{{ d.srText }}</span></a
           >
         } @else if (d.externalHref) {
           <a [href]="d.externalHref" target="_blank" rel="noopener noreferrer"
-            ><span [attr.lang]="d.titleLang">{{ d.title }}</span
-            ><span class="build-card__sr">{{ d.srText }}</span></a
+            ><span [attr.lang]="d.titleLang">{{ d.title }}</span>
+            @if (d.srCombination) {
+              <span class="build-card__sr" [attr.lang]="d.combinationLang">{{
+                d.srCombination
+              }}</span>
+            }
+            <span class="build-card__sr">{{ d.srText }}</span></a
           >
         } @else {
-          <span [attr.lang]="d.titleLang">{{ d.title }}</span
-          ><span class="build-card__sr">{{ d.srText }}</span>
+          <span [attr.lang]="d.titleLang">{{ d.title }}</span>
+          @if (d.srCombination) {
+            <span class="build-card__sr" [attr.lang]="d.combinationLang">{{
+              d.srCombination
+            }}</span>
+          }
+          <span class="build-card__sr">{{ d.srText }}</span>
         }
       </h3>
       @if (d.combination) {
