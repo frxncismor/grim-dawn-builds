@@ -302,6 +302,76 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', SUITE_OPT
       ).toBe(186);
     });
 
+    const retiredTree = (): SeedData['catalog'][number] => ({
+      mastery: { id: 'class09', slug: 'retired-test', name: { en: 'Retired', es: 'Retirada' } },
+      game_version: data.catalog[0]!.game_version,
+      source: { game_version: data.catalog[0]!.game_version, sha256: ['b'.repeat(64)] },
+      nodes: [
+        {
+          id: 'class09/root',
+          name: { en: 'Root', es: 'Raíz' },
+          kind: 'active',
+          circular: false,
+          tier: 1,
+          bar_required: 1,
+          max_points: 5,
+          grid: { col: 1, row: 0 },
+          parent_id: null,
+        },
+      ],
+    });
+
+    it('retires a mastery absent from the catalog together with its nodes when no guide uses it (T007)', async () => {
+      await seedCatalog(importer!, [...data.catalog, retiredTree()]);
+      expect(
+        (await admin!.query("SELECT count(*)::int AS n FROM mastery_trees WHERE id='class09'"))
+          .rows[0].n,
+      ).toBe(1);
+      await expect(seedCatalog(importer!, data.catalog)).resolves.toEqual({
+        masteries: 6,
+        nodes: 186,
+      });
+      expect((await admin!.query('SELECT count(*)::int AS n FROM mastery_trees')).rows[0].n).toBe(
+        6,
+      );
+      expect(
+        (
+          await admin!.query(
+            "SELECT count(*)::int AS n FROM catalog_skill_nodes WHERE mastery_id='class09'",
+          )
+        ).rows[0].n,
+      ).toBe(0);
+    });
+
+    it('aborts without partial changes and names the mastery when a guide uses a retired one (T007)', async () => {
+      const used = (
+        await admin!.query(
+          `SELECT DISTINCT c.mastery_id FROM build_skill_nodes b
+           JOIN catalog_skill_nodes c ON c.id = b.skill_node_id ORDER BY 1`,
+        )
+      ).rows.map((r) => r.mastery_id as string);
+      expect(used.length).toBeGreaterThan(0);
+      const retired = used[0]!;
+      const before = await snapshot();
+      const modified = structuredClone(data.catalog).filter((t) => t.mastery.id !== retired);
+      modified[0]!.mastery.name.en = 'Must not persist';
+      const failure = await seedCatalog(importer!, modified).then(
+        () => undefined,
+        (error: unknown) => error,
+      );
+      expect(failure).toMatchObject({ name: 'SeedError', code: 'reference' });
+      expect((failure as Error).message).toContain(retired);
+      expect((failure as Error).message).not.toMatch(/DELETE|violates|catalog_skill_nodes/i);
+      expect(await snapshot()).toEqual(before);
+    });
+
+    it('does not retire anything when the catalog still lists every mastery (T007)', async () => {
+      const before = await snapshot();
+      await seedCatalog(importer!, data.catalog);
+      await seedCatalog(importer!, data.catalog);
+      expect(await snapshot()).toEqual(before);
+    });
+
     it('rolls the whole catalog back if one tree cannot be written', async () => {
       const before = await snapshot();
       const modified = structuredClone(data.catalog);

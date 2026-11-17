@@ -3,8 +3,12 @@ import type { BuildDocument, MasteryTree, SeedErrorCode } from '@gd/domain';
 import type { SeedData } from './seed.mjs';
 
 export class SeedError extends Error {
-  constructor(readonly code: SeedErrorCode) {
-    super(code);
+  /** `detail` may name a mastery or slug; never SQL text or row values. */
+  constructor(
+    readonly code: SeedErrorCode,
+    detail?: string,
+  ) {
+    super(detail ? `${code}: ${detail}` : code);
     this.name = 'SeedError';
   }
 }
@@ -348,8 +352,36 @@ export async function writeContentRows(
 }
 
 /**
+ * A mastery absent from the catalog is retired (spec 005 T007, Q-A = A): its nodes and row are deleted
+ * in the caller's transaction. `build_skill_nodes.skill_node_id` is `ON DELETE RESTRICT`, so a guide
+ * that still uses one of its nodes makes the delete fail; that aborts the seed and names the mastery.
+ */
+async function retireMasteries(client: SeedClient, keep: readonly string[]): Promise<void> {
+  const retired = await client.query(
+    'SELECT id FROM mastery_trees WHERE id <> ALL($1::text[]) ORDER BY id',
+    [keep],
+  );
+  for (const row of retired.rows) {
+    const id = row['id'];
+    if (typeof id !== 'string') throw new SeedError('database-result');
+    try {
+      await client.query('UPDATE catalog_skill_nodes SET parent_id = NULL WHERE mastery_id = $1', [
+        id,
+      ]);
+      await client.query('DELETE FROM catalog_skill_nodes WHERE mastery_id = $1', [id]);
+      await client.query('DELETE FROM mastery_trees WHERE id = $1', [id]);
+    } catch (error) {
+      // 23503 = foreign_key_violation: a guide still references this mastery's nodes.
+      if ((error as { code?: unknown } | null)?.code === '23503')
+        throw new SeedError('reference', `retired mastery ${id} is still used by guides`);
+      throw error;
+    }
+  }
+}
+
+/**
  * Game-derived mastery catalog (spec 003). Idempotent refresh per mastery: upsert by id, then drop the
- * nodes no longer in the fixture. Parent links are cleared first so stale parents can be deleted and
+ * nodes no longer in the fixture. Masteries missing from the catalog are retired first (T007). Parent links are cleared first so stale parents can be deleted and
  * re-pointed without tripping the composite FK; nodes are then upserted parents-first (tier order).
  * All values go through pg parameters; table/column names are constants.
  */
@@ -357,6 +389,10 @@ export async function writeCatalogRows(
   client: SeedClient,
   catalog: readonly MasteryTree[],
 ): Promise<void> {
+  await retireMasteries(
+    client,
+    catalog.map((t) => t.mastery.id),
+  );
   for (const tree of catalog) {
     const m = tree.mastery;
     await client.query(
