@@ -24,7 +24,7 @@ Convertir en trabajo planificado 11 elementos de deuda aplazada: S4-D1 a S4-D7 d
 
 **Project Type**: monorepo pnpm. Huella: `scripts/`, `packages/domain`, `apps/api`, `apps/web`, `apps/web/DESIGN.md` y esta spec.
 
-**Performance Goals**: presupuestos de §6 intactos (FR-020); `/tier-list` es la ruta con menos margen (111 206/112 000 B de JS inicial al cierre de spec004; con las correcciones de US7 Paco aceptó 111 292 B en la Pregunta 32 y al cierre de T018 mide 111 251 B, margen 749 B). Ninguna tarea de `apps/web` suma bytes netos; T011 (formateador compartido) debe medirse.
+**Performance Goals**: presupuestos de §6 intactos (FR-020); `/tier-list` es la ruta con menos margen (111 206/112 000 B de JS inicial al cierre de spec004; con las correcciones de US7 Paco aceptó 111 292 B en la Pregunta 32; al cierre de T018 medía 111 251 B y, tras T037, mide 111 343 B, margen 657 B, que Paco aceptó el 2026-11-17 como nueva base, ronda 2 de T018, B-08; con la corrección de T052 frente a F-002 en T040 mide 111 403 B, margen 597 B). Las demás tareas de `apps/web` no suman bytes netos; T011 (formateador compartido) debe medirse.
 
 **Constraints**: CSP sin `unsafe-inline`, paridad EN/ES, WCAG 2.2 AA, lectura sin JS, sin secretos. `check:boundaries` entre `scripts/`, `apps/api`, `apps/web` y `packages/domain`.
 

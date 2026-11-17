@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, input, ViewEncapsulation } from '@a
 import { RouterLink } from '@angular/router';
 import type { BuildCardData } from './build-card.model';
 
+let nextCardId = 0;
+
 /**
  * Card of a build (spec004 T015). Markup and CSS only: it has no state, no computed values and
  * no client logic of its own, because `/tier-list` has ~1 kB of initial-JS margin. Every text
@@ -35,23 +37,17 @@ import type { BuildCardData } from './build-card.model';
       }
       <h3 class="build-card__title">
         @if (d.href) {
-          <a [routerLink]="d.href"
+          <a [routerLink]="d.href" [attr.aria-describedby]="d.srCombination ? descriptionId : null"
             ><span [attr.lang]="d.titleLang">{{ d.title }}</span>
-            @if (d.srCombination) {
-              <span class="build-card__sr" [attr.lang]="d.combinationLang">{{
-                d.srCombination
-              }}</span>
-            }
             <span class="build-card__sr">{{ d.srText }}</span></a
           >
         } @else if (d.externalHref) {
-          <a [href]="d.externalHref" target="_blank" rel="noopener noreferrer"
+          <a
+            [href]="d.externalHref"
+            target="_blank"
+            rel="noopener noreferrer"
+            [attr.aria-describedby]="d.srCombination ? descriptionId : null"
             ><span [attr.lang]="d.titleLang">{{ d.title }}</span>
-            @if (d.srCombination) {
-              <span class="build-card__sr" [attr.lang]="d.combinationLang">{{
-                d.srCombination
-              }}</span>
-            }
             <span class="build-card__sr">{{ d.srText }}</span></a
           >
         } @else {
@@ -66,7 +62,7 @@ import type { BuildCardData } from './build-card.model';
       </h3>
       @if (d.combination) {
         <!-- prettier-ignore -->
-        <p class="build-card__combination" aria-hidden="true" [attr.lang]="d.combinationLang">{{ d.combination }}</p>
+        <p class="build-card__combination" aria-hidden="true" [id]="descriptionId" [attr.lang]="d.combinationLang">{{ d.combination }}</p>
       }
       <!-- prettier-ignore -->
       <p class="build-card__status" aria-hidden="true" [attr.data-status]="d.status">{{ d.statusLabel }}</p>
@@ -81,4 +77,6 @@ import type { BuildCardData } from './build-card.model';
 })
 export class BuildCard {
   readonly data = input.required<BuildCardData>();
+  /** Id of the visible combination line; a content-language one is the link's description (T040). */
+  readonly descriptionId = `build-card-combination-${nextCardId++}`;
 }

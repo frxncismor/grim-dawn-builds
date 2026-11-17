@@ -170,7 +170,7 @@ describe('spec004 T052: combination name and language-safe accessible name', () 
     expect(el.querySelector('.build-card__sr')?.hasAttribute('lang')).toBe(false);
   });
 
-  it('spec005 T037 (F-002): a content-language combination is read by AT in its own lang span', async () => {
+  it('spec005 T040 (T052 vs F-002): a content-language combination is described, not part of the link name', async () => {
     const el = await render({
       ...guide,
       title: 'Chamán + Demoledor',
@@ -178,16 +178,40 @@ describe('spec004 T052: combination name and language-safe accessible name', () 
       combination: 'Guía editorial en español',
       combinationLang: 'es',
     });
-    expect(el.querySelector('.build-card__combination')?.getAttribute('aria-hidden')).toBe('true');
     const link = el.querySelector('a')!;
-    const spoken = link.querySelector('.build-card__sr[lang="es"]');
-    expect(spoken?.textContent).toContain('Guía editorial en español');
+    // The accessible name (link text) carries no foreign text and no lang at all.
+    expect(link.querySelector('[lang]')).toBeNull();
     expect(link.hasAttribute('lang')).toBe(false);
-    // The UI-language part stays free of the foreign text and of any lang.
-    const ui = [...link.querySelectorAll('.build-card__sr:not([lang])')];
-    expect(ui).toHaveLength(1);
-    expect(ui[0]!.textContent).not.toContain('Guía editorial');
-    expect(ui[0]!.textContent).toContain('Unverified');
+    expect(link.textContent).not.toContain('Guía editorial');
+    expect(link.textContent).toContain('Unverified');
+    // AT still gets it: aria-describedby points at an element with its own lang.
+    const id = link.getAttribute('aria-describedby');
+    expect(id).toBeTruthy();
+    const described = el.querySelector(`#${id}`);
+    expect(described?.getAttribute('lang')).toBe('es');
+    expect(described?.textContent).toContain('Guía editorial en español');
+  });
+
+  it('gives every card its own description id', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    const ids = ['A', 'B'].map((combination) => {
+      const fixture = TestBed.createComponent(BuildCard);
+      fixture.componentRef.setInput(
+        'data',
+        buildCardData({ ...guide, combination, combinationLang: 'es' }),
+      );
+      fixture.detectChanges();
+      return (fixture.nativeElement as HTMLElement)
+        .querySelector('a')!
+        .getAttribute('aria-describedby');
+    });
+    expect(ids[0]).toBeTruthy();
+    expect(ids[0]).not.toBe(ids[1]);
+  });
+
+  it('adds no description when the combination is in the UI language', async () => {
+    const el = await render({ ...guide, combination: 'Shaman + Demolitionist' });
+    expect(el.querySelector('a')!.hasAttribute('aria-describedby')).toBe(false);
   });
 
   it('draws no combination line when the title is the combination', async () => {
