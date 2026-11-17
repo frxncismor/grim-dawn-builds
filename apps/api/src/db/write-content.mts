@@ -389,6 +389,31 @@ export async function retireMasteries(client: SeedClient, keep: readonly string[
 }
 
 /**
+ * Second half of the node pruning (spec006 T005, F-002): once the guides were rewritten, delete the
+ * nodes the catalog no longer lists. A node some guide still uses fails with 23503 (`ON DELETE
+ * RESTRICT`); it becomes `SeedError('reference', <mastery id>)` and the caller's transaction rolls
+ * back, so nothing is left half-pruned. Callers run it after `writeContentRows`, next to
+ * `retireMasteries`.
+ */
+export async function pruneCatalogNodes(
+  client: SeedClient,
+  catalog: readonly MasteryTree[],
+): Promise<void> {
+  for (const tree of catalog) {
+    try {
+      await client.query(
+        'DELETE FROM catalog_skill_nodes WHERE mastery_id = $1 AND id <> ALL($2::text[])',
+        [tree.mastery.id, tree.nodes.map((n) => n.id)],
+      );
+    } catch (error) {
+      if ((error as { code?: unknown } | null)?.code === '23503')
+        throw new SeedError('reference', tree.mastery.id);
+      throw error;
+    }
+  }
+}
+
+/**
  * Game-derived mastery catalog (spec 003). Idempotent refresh per mastery: upsert by id, then drop the
  * nodes no longer in the fixture. Parent links are cleared first so stale parents can be deleted and
  * re-pointed without tripping the composite FK; nodes are then upserted parents-first (tier order).
@@ -425,10 +450,26 @@ export async function writeCatalogRows(
       'UPDATE catalog_skill_nodes SET parent_id = NULL WHERE mastery_id = $1 AND parent_id IS NOT NULL',
       [m.id],
     );
+    // Only the absent nodes no guide references go now: it frees their grid cells for the upsert
+    // below. An absent node a guide still uses stays until `pruneCatalogNodes`, which runs after the
+    // guides were rewritten (spec006 T005, F-002).
+    const incoming = tree.nodes.map((n) => n.id);
     await client.query(
-      'DELETE FROM catalog_skill_nodes WHERE mastery_id = $1 AND id <> ALL($2::text[])',
-      [m.id, tree.nodes.map((n) => n.id)],
+      `DELETE FROM catalog_skill_nodes c
+       WHERE c.mastery_id = $1 AND c.id <> ALL($2::text[])
+         AND NOT EXISTS (SELECT 1 FROM build_skill_nodes b WHERE b.skill_node_id = c.id)`,
+      [m.id, incoming],
     );
+    // A still-referenced absent node that holds the cell of an incoming node would make the upsert
+    // fail with 23505; name the mastery instead (the guide still uses a node the catalog removed).
+    const blocked = await client.query(
+      `SELECT 1 FROM catalog_skill_nodes c
+       WHERE c.mastery_id = $1 AND c.id <> ALL($2::text[])
+         AND (c.grid_col, c.grid_row) IN (SELECT * FROM unnest($3::int[], $4::int[]))
+       LIMIT 1`,
+      [m.id, incoming, tree.nodes.map((n) => n.grid.col), tree.nodes.map((n) => n.grid.row)],
+    );
+    if (blocked.rows.length) throw new SeedError('reference', m.id);
     for (const n of [...tree.nodes].sort((a, b) => a.tier - b.tier)) {
       await client.query(
         `INSERT INTO catalog_skill_nodes (id, mastery_id, name_en, name_es, kind, circular, tier,

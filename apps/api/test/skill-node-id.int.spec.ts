@@ -200,7 +200,7 @@ suite(SUITE_TITLE, SUITE_OPTIONS, () => {
     const trimmed = structuredClone(data.catalog);
     const shaman = trimmed.find((t) => t.mastery.id === 'class06')!;
     shaman.nodes = shaman.nodes.filter((n) => n.id !== 'class06/savagestrike1b');
-    await expect(seedCatalog(importer!, trimmed)).rejects.toThrow('database-failed');
+    await expect(seedCatalog(importer!, trimmed)).rejects.toThrow('reference: class06');
     const left = await admin!.query(
       "SELECT count(*)::int AS n FROM catalog_skill_nodes WHERE id = 'class06/savagestrike1b'",
     );
