@@ -233,6 +233,14 @@ test('API summaries fail closed in release: 503, network, invalid item or duplic
     ['no name', async () => json([{ slug: 'soldier', node_count: 1 }])],
     ['bad count', async () => json([{ ...summary('soldier'), node_count: -1 }])],
     ['fractional count', async () => json([{ ...summary('soldier'), node_count: 1.5 }])],
+    ['extra field', async () => json([{ ...summary('soldier'), icon: 'ui/secret.tex' }])],
+    ['invalid slug', async () => json([summary('Bad Slug')])],
+    ['negative count', async () => json([{ ...summary('soldier'), node_count: -3 }])],
+    [
+      'missing game_version',
+      async () =>
+        json([{ slug: 'soldier', id: 'class01', name: { en: 'a', es: 'b' }, node_count: 1 }]),
+    ],
     ['duplicate', async () => json([summary('soldier'), summary('soldier')])],
     ['empty', async () => json([])],
   ];
