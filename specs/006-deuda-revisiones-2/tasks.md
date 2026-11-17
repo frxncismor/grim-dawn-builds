@@ -1,0 +1,118 @@
+---
+description: 'Tareas de la segunda tanda de deuda de las revisiones de spec004 y spec005'
+---
+
+# Tasks: Deuda aplazada de las revisiones de spec004 y spec005 (segunda tanda)
+
+**Input**: `specs/006-deuda-revisiones-2/{spec.md,plan.md,research.md,data-model.md,quickstart.md}`
+**Prerequisites**: spec005 cerrada (puerta spec002 `passed`, `cc553c3`). Preguntas P33 y P34 **respondidas por Paco el 2026-11-17**: P33 = A; P34 a, b y d dentro, c fuera (ver «Clarifications» en `spec.md`).
+**Tests**: Sí, primero en rojo y después la implementación (constitución IX, FR-018). T004 es solo documentación.
+
+**Formato**: `[ID] [P?] [US?] [Área] descripción` — `[P]` = archivos disjuntos. Cada tarea declara archivos, aceptación y evidencia. **Ninguna casilla `[x]` sin salida real citable** (comando y resultado). Áreas: **IMPL** = implementación (`apps/api`, `packages/*`, `scripts/`, CI); **UI** = `apps/web` y `e2e/`; **DOCS** = solo artefactos SDD, de UI.
+
+> **Estado (2026-11-17)**: 8 tareas (T001–T008), ninguna hecha. Sin fase de setup: dependencias, `packages/domain` y gitleaks ya están listos en los worktrees de la corrida. Sin fase fundacional: T001 va primera por decisión de Paco, no porque bloquee a las demás.
+
+---
+
+## Fase 1 — US1 Puertas sobre el artefacto (P1, primera por decisión de Paco)
+
+**Objetivo**: ninguna de las cuatro puertas que leen páginas prerrenderizadas pasa en vacío, con un solo criterio. **Prueba independiente**: quickstart «US1».
+
+- [ ] **T001** [US1] [IMPL] Helper único de páginas prerrenderizadas (S4-D1; P33 = A; research D1) — `scripts/artifact-pages.mts` (nuevo), `scripts/artifact-pages.test.mts` (nuevo), `scripts/check-assets.mts` (`assertCredit` `:187-215`, `assertNoGamePortraits` `:154-166`), `scripts/check-assets.test.mts`, `scripts/check-legacy-brand.mts` (`assertNoLegacyBrand` `:41-55`), `scripts/check-legacy-brand.test.mts`, `package.json` (registrar `artifact-pages.test.mts` en `test:scripts`) — Aceptación: `prerenderedPages(browserDir, { gate, minPages })` falla con mensaje que nombra la puerta y la causa si `browser/` no existe, no es un directorio real o tiene menos de `minPages` `.html` (FR-001); las dos puertas de crédito, `assertNoGamePortraits` (solo `own`) y `assertNoLegacyBrand` (`minPages = MIN_PRERENDERED_PAGES + 1`) la usan y no conservan otra copia del criterio (FR-002, SC-002); `assertNoGamePortraits` falla con artefacto ausente o sin páginas en `own` (FR-003; hoy pasa); con artefacto válido salidas idénticas en `game` y `own` (FR-004); las puertas de compare-builds, huella de release, escaneo de secretos, `check:initial-js` y `check:performance` no se tocan. Pruebas rojas primero: `assertNoGamePortraits` sin artefacto y con `browser/` sin `.html` (FR-005). Evidencia: `pnpm test:scripts`, `pnpm assets:check`, `grep -n "pages.length" scripts/check-assets.mts scripts/check-legacy-brand.mts` sin criterio de vacío, `pnpm check:boundaries`. Depende de: nada.
+
+**Checkpoint F1**: las cuatro puertas fallan cerrado; un solo criterio de vacío.
+
+---
+
+## Fase 2 — US2 Tarjeta determinista (P2)
+
+**Objetivo**: el id de la descripción de la tarjeta sale de su contenido. **Prueba independiente**: quickstart «US2 y US3».
+
+- [ ] **T002** [P] [US2] [UI] Id estable de `gd-build-card` (L1 = F-301 = B-11 = A-101; research D2) — `apps/web/src/app/shared/ui/build-card/build-card.{ts,model.ts,labels.ts,spec.ts}`, `apps/web/src/app/features/tier-list/card-data.ts` (+`card-data.spec.ts`), `apps/web/src/app/features/tier-list/tier-preview.component.ts`, `apps/web/src/app/features/home/home-builds.ts` (+su spec) y los specs que construyen `BuildCardInput` — Aceptación: `key` obligatoria en `BuildCardInput` y `BuildCardData` (catálogo `card.id`, portada `guide.slug`, preview literales); `descriptionId = 'build-card-combination-' + key`; sin `let` de módulo en `build-card.ts` y docstring cierto (FR-006, FR-007); prueba roja: dos renders de la misma tarjeta, en orden distinto, dan el mismo id; prueba de unicidad de ids en el catálogo de fixtures; nombre y descripción accesibles sin cambios (FR-010). **Medir** `/tier-list` antes y después (`pnpm build` raíz y `pnpm check:initial-js`): ≤ 112 000 B; si supera, detenerse y escalar. Evidencia: `pnpm test` (web), `pnpm lint`, `pnpm build` dos veces con `diff` vacío de los `id="build-card-combination-…"` de `/tier-list` EN y ES (SC-003), `pnpm e2e:a11y` 0 violaciones, regresión visual en Docker 30 passed sin regenerar (SC-006). Depende de: T001 (orden).
+
+**Checkpoint F2**: HTML de tarjetas determinista; presupuestos y capturas sin cambios.
+
+---
+
+## Fase 3 — US3 Tarjeta al día (P3)
+
+**Objetivo**: comentarios, rama muerta y e2e de la descripción accesible. **Prueba independiente**: quickstart «US2 y US3».
+
+- [ ] **T003** [P] [US3] [UI] Comentarios de `srCombination`, rama sin enlace y e2e de `aria-describedby` (L2 = C-201 = A-102 y L3 = resto de B-12; research D3) — `apps/web/src/app/shared/ui/build-card/build-card.{ts,model.ts,labels.ts,spec.ts}`, `e2e/a11y.spec.ts` — Aceptación: prueba previa con los adaptadores reales que demuestra que `combinationLang` solo aparece con `href` y, con ella, la rama `@else` deja de pintar `srCombination` (si la prueba demuestra lo contrario, la rama se conserva y se prueba); comentarios de `build-card.labels.ts:66-68` y `build-card.model.ts:66-70` al mecanismo `aria-describedby` (FR-008); e2e nuevo en `e2e/a11y.spec.ts`: `/tier-list` enlace de la guía con `toHaveAccessibleDescription` que contiene la combinación ES y el elemento descrito con `lang="es"`; `/es/tier-list` sin descripción (FR-009, SC-004). E2E rojo primero (no existe). Evidencia: `pnpm test` (web), `pnpm typecheck:e2e`, `pnpm e2e:a11y` (0 violaciones, casos nuevos en verde), `pnpm build && pnpm check:initial-js` (≤ 112 000 B). Depende de: T002 (mismos archivos).
+
+**Checkpoint F3**: la tarjeta no tiene ramas ni comentarios que mientan; descripción probada en navegador.
+
+---
+
+## Fase 4 — US4 Registro SDD (P3)
+
+**Objetivo**: los artefactos dicen el estado real. **Prueba independiente**: quickstart «US4».
+
+- [ ] **T004** [P] [US4] [DOCS] Base aceptada de `/tier-list`, nota de T040 y `specs/README.md` (to-do 134; L4 = B-10; P34 c) — `specs/005-deuda-revisiones/spec.md` (SC-008, `:256`), `specs/005-deuda-revisiones/plan.md` (`:27`), `specs/005-deuda-revisiones/quickstart.md` (`:266-271`), `specs/005-deuda-revisiones/tasks.md` (`:141`), `specs/README.md` — Aceptación: la base dice «111 403 B (margen 597 B), aceptada por Paco el 2026-11-17» en los cuatro archivos, sin «pendiente» ni «a la espera» (FR-011); la nota de T040 deja una sola versión del fallo de `e2e:a11y` T052 (resuelto en T040 con `aria-describedby`) (FR-012); `specs/README.md`: spec004 «Cerrada (puerta spec002 passed)» con su commit, spec005 «Cerrada (puerta spec002 passed, `cc553c3`)», sección de spec003 sin S3-T042/S3-T043 como aplazados (resueltos por spec005 T003/T004), y fecha de actualización (FR-013); ningún archivo de `specs/003-*` ni `specs/004-*` cambia (FR-014). Evidencia: `grep -rn "confirmación de Paco\|a la espera" specs/005-deuda-revisiones/{spec,plan,quickstart,tasks}.md` sin líneas de la base, `git diff --stat` solo con esos cinco archivos, `pnpm lint:md` 0 issues (SC-005). Depende de: T001 (orden).
+
+**Checkpoint F4**: registro coherente.
+
+---
+
+## Fase 5 — US5 Siembra, contenedor y arranque en frío (P3; P34 a, b, d)
+
+**Objetivo**: F-002, S-001 y la mediana de `coldStartMs`. **Prueba independiente**: quickstart «US5».
+
+- [ ] **T005** [P] [US5] [IMPL] Poda de nodos del catálogo después de reescribir las guías (F-002; P34 a; research D4) — `apps/api/src/db/write-content.mts` (`writeCatalogRows` `:398-431` y paso nuevo junto a `retireMasteries` `:367`), `apps/api/src/db/seed.mts` (`:252-256`, `:282-287`), `apps/api/src/db/bootstrap.mts` (`:111-116`), `apps/api/src/db/seed.spec.ts`, `apps/api/test/seed.int.spec.ts`, `apps/api/test/bootstrap.int.spec.ts` — Aceptación: antes del upsert solo se borran nodos ausentes sin referencias; después de `writeContentRows` el resto, con 23503 → `SeedError('reference', <maestría>)`; 23505 de celda ocupada por un nodo ausente aún referenciado → `reference`; los tres llamadores siguen el mismo orden (FR-015). Pruebas rojas primero con Postgres real: (1) una guía deja de usar un nodo que el catálogo quita en la misma siembra → OK (hoy 23503); (2) el nodo quitado sigue usado → `reference` con la maestría, sin cambios parciales; (3) un nodo nuevo ocupa la celda de uno quitado sin uso → OK; siembra idempotente sin cambios. Evidencia: `RUN_DB_TESTS=1` sobre `seed.int.spec.ts` y `bootstrap.int.spec.ts` (o la suite de BD completa) con el Postgres de la corrida, `pnpm --filter @gd/api test`, `pnpm --filter @gd/api typecheck`; si no hay Postgres, nota «solo CI» antes de marcar. Depende de: T001.
+- [ ] **T006** [P] [US5] [IMPL] El contenedor de referencias visuales solo recibe archivos versionables (S-001 = S-101 = B-13; P34 b; research D5) — `scripts/visual-baselines-docker.sh`, `scripts/visual-baselines-docker.test.mts` (nuevo), `package.json` (registrar la prueba en `test:scripts`), `CONTRIBUTING.md` (`:252-270`), `CONTRIBUTING.es.md` (misma sección) — Aceptación: el comando documentado envía el árbol por stdin (`git ls-files -co --exclude-standard -z | tar --null -T - -cf - | docker run -i …`) y no monta `$PWD:/src`; el script extrae en `/work` y aborta si hay `.env`, `.env.*` (salvo `.env.example`) o `infra/docker/secrets/`; sin `tar -X` ni patrones con comodines; los dos `CONTRIBUTING` y los comentarios del script describen la frontera real (FR-016). Prueba roja primero: el script no referencia `/src` y contiene la guarda; los `CONTRIBUTING` no montan `$PWD:/src`. Evidencia: `pnpm test:scripts`, `sh -n scripts/visual-baselines-docker.sh`, Docker real: con un `.env` de prueba en el host, `docker run -i … sh -c` que extrae y comprueba `test ! -e /work/.env`, y `check` con 30 passed; `git status e2e/visual-baselines` limpio. Sin Docker, no se marca. Depende de: T005 (serie del área) y T001 (`package.json`).
+- [ ] **T007** [P] [US5] [IMPL] `coldStartMs` como mediana de 3 arranques (to-do 117; P34 d; research D6) — `apps/api/test/performance.int.spec.ts` (`:67`, `:195-224`, `:298`, `:326`, `:523-525`) — Aceptación: 3 arranques en serie, `coldStartMs` = mediana comparada con 5000 ms; la consola lista las 3 muestras; el JSON conserva `coldStartMs` numérico (sin tocar `scripts/check-performance.mts:692`); tiempo del caso 90 s (FR-017). Prueba roja primero: función pura de mediana con un atípico (p. ej. `[900, 7000, 950]` → 950 ≤ 5000). Evidencia: `RUN_DB_TESTS=1 pnpm --filter @gd/api exec vitest run test/performance.int.spec.ts` con el Postgres de la corrida (salida con las 3 muestras), `pnpm --filter @gd/api typecheck`. Depende de: T006 (serie del área).
+
+**Checkpoint F5**: siembra válida no falla; frontera del contenedor real; presupuesto de arranque estable.
+
+---
+
+## Fase 6 — Cierre
+
+- [ ] **T008** [IMPL] Puerta de cierre de spec006 (spec002 + T-136) y registro — `specs/006-deuda-revisiones-2/reviews/`, `specs/006-deuda-revisiones-2/tasks.md`, `specs/README.md` (fila de spec006) — Aceptación: se marca antes de ejecutarla según el precedente (spec002 T014, spec003 T021, spec004 T036, spec005 T018); `node scripts/spec-review.mjs prepare --feature specs/006-deuda-revisiones-2` en `ready`; cuatro revisiones reales (code, architecture, security, best-practices) y T-136 con `speckit-review-complete`; resultado en `reviews/completion-review.json` y `node scripts/spec-review.mjs check` en `passed`; `specs/README.md` con spec006 cerrada y su commit; `pnpm verify` exit 0 (si solo falla el TBT, repetir `pnpm check:performance` sola y citar cifras); `pnpm lint:md` y `pnpm check:scope` OK. Hallazgos de la puerta: decisión del principal/Paco y, si se aplazan, en `reviews/deuda.md`. Evidencia: `reviews/completion-review.json` con la puerta `passed`. Depende de: T001–T007.
+
+---
+
+## Dependencias y orden
+
+```text
+T001 ──┬── UI:   T002 → T003        T004 (cuando quiera)
+       └── IMPL: T005 → T006 → T007
+T002..T007 ── T008
+```
+
+- **T001 primero** (decisión de Paco), integrada antes de abrir lo demás.
+- **UI** y **implementación** avanzan en paralelo, cada una en su worktree: no comparten archivos (`[P]` entre áreas). Dentro de UI, T002 → T003 comparten `build-card.*`; T004 es disjunta y puede ir en paralelo con T002/T003. Dentro de implementación todo va en serie (orden del área y `package.json` compartido por T001 y T006).
+- Única arista entre áreas: `specs/README.md` (T004 de UI antes que T008 de implementación).
+
+### Ejemplos de paralelismo
+
+- Tras integrar T001: UI lanza T002 y, en otro agente, T004; implementación lanza T005.
+- Tras T002: UI lanza T003 mientras implementación sigue con T006.
+
+## Estrategia
+
+1. **MVP**: T001 (la única puerta de derechos que pasa en vacío).
+2. Incremental: T002–T003 (tarjeta), T004 (registro), T005–T007 (datos, seguridad local, rendimiento), cada una verificable sola.
+3. T008 cierra con la puerta.
+
+## Cobertura de requisitos
+
+| Requisito | Tareas |
+| --------- | ------ |
+| FR-001 – FR-005 | T001 |
+| FR-006, FR-007 | T002 |
+| FR-008, FR-009 | T003 |
+| FR-010 | T002, T003 (medida y capturas) |
+| FR-011 – FR-014 | T004 |
+| FR-015 | T005 |
+| FR-016 | T006 |
+| FR-017 | T007 |
+| FR-018 | T001–T003, T005–T007 (prueba roja primero) |
+| FR-019 | T008 y numeración T001–T008 |
+| FR-020 | todas (ninguna toca estilos ni cadenas visibles) |
+| SC-001, SC-002 | T001 |
+| SC-003 | T002 |
+| SC-004 | T003 |
+| SC-005 | T004 |
+| SC-006 | T002, T003 |
+| SC-007 | T005, T006, T007 |

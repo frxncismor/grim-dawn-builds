@@ -10,6 +10,7 @@ Actualizado el 2026-11-17.
 | [003-catalogo-arboles-maestria](003-catalogo-arboles-maestria/tasks.md) | Cerrada (puerta spec002 passed, `1fd7e77`) | 41 de 41      | 0          |
 | [004-rediseno-ui-grim-dawn](004-rediseno-ui-grim-dawn/tasks.md)         | Implementada; puerta spec002 en curso      | 54 de 54      | 0          |
 | [005-deuda-revisiones](005-deuda-revisiones/tasks.md)                   | Implementada; puerta T018 en curso         | 35 de 35      | 0          |
+| [006-deuda-revisiones-2](006-deuda-revisiones-2/tasks.md)               | Planificada (sin implementar)              | 0 de 8        | 8          |
 
 ## 001-mvp-guias-builds
 
@@ -43,3 +44,10 @@ Implementación completa: T001-T035 marcadas (35 de 35); T018 (puerta spec002 + 
 marcada antes de ejecutarla, según el precedente (spec002 T014, spec003 T021, spec004
 T036). Su verificación está en `005-deuda-revisiones/quickstart.md` («Evidencia de
 cierre (T018)») y su resultado va en `005-deuda-revisiones/reviews/`.
+
+## 006-deuda-revisiones-2
+
+Planificada el 2026-11-17 (P33 = A; P34: F-002, S-001 y mediana de `coldStartMs`
+dentro, S3-T042/S3-T043 fuera por estar hechos). T001 (S4-D1, helper único de
+páginas prerrenderizadas) va primero; T008 es la puerta spec002. Las filas de
+spec004 y spec005 se actualizan en T004.
