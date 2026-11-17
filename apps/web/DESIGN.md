@@ -1,11 +1,11 @@
 ---
-name: Grim Dawn Builds
+name: Grim Builds
 description: Guías de build de Grim Dawn con identidad oscura, metálica y ornamentada con sobriedad, hecha con arte propio.
 ---
 
 <!-- SEED: borrador de impeccable `document` en modo seed (spec004 T006), sin aprobar por Paco. Compromete un mundo y sus invariantes; los valores finales de tokens se fijan en T007/T008 y se capturan después con `document` en modo scan. -->
 
-# Design System: Grim Dawn Builds
+# Design System: Grim Builds
 
 > **Estado: borrador con las decisiones de Paco aplicadas (P11–P20), aprobado por Paco el 2026-11-15.** Se escribió sin
 > entrevista directa (ver `PRODUCT.md`). Lo que sale de sus decisiones registradas (spec004 §0 y «Clarifications», Q11–Q15;
@@ -231,6 +231,6 @@ La portada **no lleva ilustración** (P20 = B): la expresividad la llevan la tar
 voz de los textos es **algo ambientada en el universo del juego, sobria y sin ficción añadida** (sin «fanfiction»): el rótulo
 puede evocar, el dato y la instrucción son siempre literales y factuales.
 
-## Pendiente de Paco
+## Marca
 
-Solo el **nombre público de la marca** (ver `PRODUCT.md`); se decide más tarde y no bloquea el sistema visual.
+El nombre público es **«Grim Builds»** (decisión de Paco, 2026-11-16; ver `PRODUCT.md`). No hay decisiones de marca pendientes.

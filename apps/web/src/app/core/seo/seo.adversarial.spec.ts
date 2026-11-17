@@ -104,7 +104,7 @@ describe('adversarial SeoService: JSON-LD', () => {
       ).toThrow('Datos estructurados inválidos.');
     }
 
-    expect(doc.title).toBe('Página segura · Grim Dawn Builds');
+    expect(doc.title).toBe('Página segura · Grim Builds');
     expect(jsonLdScript()?.textContent).toBe(before);
     expect(doc.body.textContent).not.toContain('PRIVATE-CANARY');
   });

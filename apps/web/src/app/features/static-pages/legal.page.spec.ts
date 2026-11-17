@@ -97,7 +97,7 @@ describe('legal notice page', () => {
   it('publishes WebPage structured data with a canonical URL and description', () => {
     render();
 
-    expect(document.title).toBe('Legal notice · Grim Dawn Builds');
+    expect(document.title).toBe('Legal notice · Grim Builds');
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(CANONICAL);
     expect(
       document.querySelector('meta[name="description"]')?.getAttribute('content')?.length ?? 0,

@@ -19,7 +19,7 @@ const guide: BuildCardData = {
   status: 'sin_verificar',
   reviewState: 'publicado',
   damage: ['Fuego', 'Físico'],
-  author: 'Grim Dawn Builds',
+  author: 'Grim Builds',
   gameVersion: '1.3.x',
   href: ['/builds', 'chaman-demoledor-golpe-primigenio'],
   tierLabel: null,
@@ -92,8 +92,7 @@ describe('gd-build-card (spec004 T015)', () => {
 
   it('shows damage, author and game version in the standard variant', async () => {
     const text = (await render(guide)).textContent ?? '';
-    for (const part of ['Fuego', 'Físico', 'Grim Dawn Builds', '1.3.x'])
-      expect(text).toContain(part);
+    for (const part of ['Fuego', 'Físico', 'Grim Builds', '1.3.x']) expect(text).toContain(part);
   });
 
   it('a placeholder has no link, says "No guide" and never shows a tier or a recommendation', async () => {

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
-  <title id="title">Grim Dawn Builds</title>
+  <title id="title">Grim Builds</title>
   <desc id="desc">Catálogo en español. Maestrías, procedencia y estados claros. Geometría original de dos maestrías conectadas.</desc>
   <metadata>Composición y geometría originales del proyecto. Sin arte oficial de Grim Dawn.</metadata>
   <style>
@@ -10,7 +10,7 @@
   </style>
   <rect width="1200" height="630" fill="#0f1218"/>
   <rect x="790" y="0" width="410" height="630" fill="#171c25"/>
-  <text class="title" x="72" y="168" font-size="80">Grim Dawn</text>
+  <text class="title" x="72" y="168" font-size="80">Grim</text>
   <text class="title" x="72" y="272" font-size="80">Builds</text>
   <text class="body" x="72" y="390" font-size="36">Catálogo en español</text>
   <text class="body" x="72" y="448" font-size="28">Maestrías, procedencia</text>

@@ -3,7 +3,7 @@
   <file source-language="en" datatype="plaintext" original="ng2.template">
     <body>
       <trans-unit id="seo.socialAlt" datatype="html">
-        <source>Grim Dawn Builds: English-language catalog, masteries and clear statuses.</source>
+        <source>Grim Builds: English-language catalog, masteries and clear statuses.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/seo/seo.service.ts</context>
           <context context-type="linenumber">25</context>
@@ -1062,7 +1062,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="about.purpose" datatype="html">
-        <source> Grim Dawn Builds is an independent project for browsing mastery combinations and guides with visible provenance. It is not affiliated with Crate Entertainment.
+        <source> Grim Builds is an independent project for browsing mastery combinations and guides with visible provenance. It is not affiliated with Crate Entertainment.
 </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
@@ -1147,7 +1147,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="about.description" datatype="html">
-        <source>Editorial criteria, attribution and content statuses for Grim Dawn Builds.</source>
+        <source>Editorial criteria, attribution and content statuses for Grim Builds.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/static-pages/about.page.ts</context>
           <context context-type="linenumber">20</context>
@@ -1299,7 +1299,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="legal.description" datatype="html">
-        <source>Ownership, attribution, assets, content takedown and privacy for the Grim Dawn Builds project.</source>
+        <source>Ownership, attribution, assets, content takedown and privacy for the Grim Builds project.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/static-pages/legal.page.ts</context>
           <context context-type="linenumber">5</context>
@@ -2165,7 +2165,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="layout.brand" datatype="html">
-        <source>Grim Dawn <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span&gt;"/>Builds<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <source>Grim <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span&gt;"/>Builds<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
           <context context-type="linenumber">5,6</context>
@@ -2207,7 +2207,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="layout.independent" datatype="html">
-        <source>Independent project. Not affiliated with Crate Entertainment.</source>
+        <source>Independent project. Not affiliated with or endorsed by Crate Entertainment or Grim Dawn.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
           <context context-type="linenumber">31,32</context>

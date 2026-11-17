@@ -2,11 +2,10 @@
 
 <!-- impeccable:product-schema 1 -->
 
-> **Estado: aprobado por Paco el 2026-11-15 (spec004 T006).** Pendiente solo la marca pública (se decide más tarde).
+> **Estado: aprobado por Paco el 2026-11-15 (spec004 T006).** Marca pública: «Grim Builds» (decisión de Paco, 2026-11-16, spec005 US6).
 > Historial: borrador redactado sin entrevista directa. `impeccable init` pide entrevistar a la persona usuaria y quien redacta
 > esto no puede hablar con Paco. Cada hecho sale de sus decisiones ya registradas (`specs/004-rediseno-ui-grim-dawn/spec.md`
-> §0 y «Clarifications», Preguntas 1–15 de `preguntas-ui.md`, `README.md`, constitución §VII) o del código. Lo que sigue
-> sin decidir va marcado **`pendiente de Paco`** (solo el nombre público de la marca). P16–P20 aplicadas y todo aprobado.
+> §0 y «Clarifications», Preguntas 1–15 de `preguntas-ui.md`, `README.md`, constitución §VII) o del código. P16–P20 aplicadas y todo aprobado; no queda ninguna decisión pendiente.
 > Sustitución declarada: no es un `init` ejecutado con interlocutor.
 
 ## Platform
@@ -73,8 +72,8 @@ en el producto ni en `apps/web/src` o `apps/web/public`.
   habilidades_, _orden de compra_. Estados de contenido: `verificado`, `sin_verificar`, `placeholder` («sin guía»).
 - **Fuera de alcance**: cambios de modelo de datos, API, autenticación o derechos; maestrías de expansiones y mods; planner
   interactivo; comparador; cuentas o comentarios; texto de localización del juego; publicación y hosting.
-- `pendiente de Paco`: nombre público de la marca (hoy solo existe el nombre del repositorio, «Grim Dawn Builds»; no hay
-  logotipo ni nombre comercial decidido).
+- **Marca pública**: «Grim Builds» (decisión de Paco, 2026-11-16). El nombre del repositorio y el slug `grim-dawn-builds` no
+  cambian. Sin logotipo; el sitio es independiente y no afiliado ni respaldado por Crate Entertainment ni por Grim Dawn.
 
 ## Brand Commitments
 

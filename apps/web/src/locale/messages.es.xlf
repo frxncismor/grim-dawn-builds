@@ -3,8 +3,8 @@
   <file source-language="en" target-language="es" datatype="plaintext" original="ng2.template">
     <body>
       <trans-unit id="seo.socialAlt" datatype="html">
-        <source>Grim Dawn Builds: English-language catalog, masteries and clear statuses.</source>
-        <target state="translated">Grim Dawn Builds: catálogo en español, maestrías y estados claros.</target>
+        <source>Grim Builds: English-language catalog, masteries and clear statuses.</source>
+        <target state="translated">Grim Builds: catálogo en español, maestrías y estados claros.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/seo/seo.service.ts</context>
           <context context-type="linenumber">22</context>
@@ -1211,9 +1211,9 @@
         </context-group>
       </trans-unit>
       <trans-unit id="about.purpose" datatype="html">
-        <source> Grim Dawn Builds is an independent project for browsing mastery combinations and guides with visible provenance. It is not affiliated with Crate Entertainment.
+        <source> Grim Builds is an independent project for browsing mastery combinations and guides with visible provenance. It is not affiliated with Crate Entertainment.
 </source>
-        <target state="translated"> Grim Dawn Builds es un proyecto independiente para consultar combinaciones de maestrías y guías con procedencia visible. No está afiliado a Crate Entertainment.
+        <target state="translated"> Grim Builds es un proyecto independiente para consultar combinaciones de maestrías y guías con procedencia visible. No está afiliado a Crate Entertainment.
 </target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/static-pages/about.page.html</context>
@@ -1309,8 +1309,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="about.description" datatype="html">
-        <source>Editorial criteria, attribution and content statuses for Grim Dawn Builds.</source>
-        <target state="translated">Criterios editoriales, atribución y estados del contenido de Grim Dawn Builds.</target>
+        <source>Editorial criteria, attribution and content statuses for Grim Builds.</source>
+        <target state="translated">Criterios editoriales, atribución y estados del contenido de Grim Builds.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/static-pages/about.page.ts</context>
           <context context-type="linenumber">18</context>
@@ -1483,8 +1483,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="legal.description" datatype="html">
-        <source>Ownership, attribution, assets, content takedown and privacy for the Grim Dawn Builds project.</source>
-        <target state="translated">Titularidad, atribución, activos, retirada de contenido y privacidad del proyecto Grim Dawn Builds.</target>
+        <source>Ownership, attribution, assets, content takedown and privacy for the Grim Builds project.</source>
+        <target state="translated">Titularidad, atribución, activos, retirada de contenido y privacidad del proyecto Grim Builds.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/static-pages/legal.page.ts</context>
           <context context-type="linenumber">5</context>
@@ -2227,8 +2227,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="layout.brand" datatype="html">
-        <source>Grim Dawn <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span&gt;"/>Builds<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
-        <target state="translated">Grim Dawn <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span&gt;"/>Builds<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
+        <source>Grim <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span&gt;"/>Builds<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source>
+        <target state="translated">Grim <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span&gt;"/>Builds<x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
           <context context-type="linenumber">5,6</context>
@@ -2275,8 +2275,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="layout.independent" datatype="html">
-        <source>Independent project. Not affiliated with Crate Entertainment.</source>
-        <target state="translated"> Proyecto independiente. No está afiliado a Crate Entertainment. </target>
+        <source>Independent project. Not affiliated with or endorsed by Crate Entertainment or Grim Dawn.</source>
+        <target state="translated"> Proyecto independiente. No está afiliado ni respaldado por Crate Entertainment ni por Grim Dawn. </target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/ui/layout/site-layout.html</context>
           <context context-type="linenumber">30,31</context>

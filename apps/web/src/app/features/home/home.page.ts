@@ -42,14 +42,14 @@ export class HomePage {
     if (!this.catalog) throw new Error('Falta el catálogo prerenderizado.');
     const seo = inject(SeoService);
     seo.setPage({
-      title: 'Grim Dawn Builds',
+      title: 'Grim Builds',
       description: $localize`:@@home.description:Browse Grim Dawn mastery combinations, with visible provenance and review statuses.`,
       path: '/',
       structuredData: [
         {
           '@context': 'https://schema.org',
           '@type': 'WebSite',
-          name: 'Grim Dawn Builds',
+          name: 'Grim Builds',
           url: seo.canonical('/'),
           inLanguage: siteLocale(inject(LOCALE_ID)) === 'es' ? 'es-419' : 'en',
         },

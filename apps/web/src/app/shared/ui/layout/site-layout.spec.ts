@@ -43,8 +43,13 @@ describe('SiteLayout', () => {
     const fixture = TestBed.createComponent(HostFixture);
     await fixture.whenStable();
     const root: HTMLElement = fixture.nativeElement;
-    expect(root.querySelector('footer')?.textContent).toContain(
-      'Not affiliated with Crate Entertainment',
+    const notice = root.querySelectorAll('footer p');
+    expect(notice).toHaveLength(1);
+    expect(notice[0]!.textContent).toContain(
+      'Not affiliated with or endorsed by Crate Entertainment or Grim Dawn',
+    );
+    expect(root.querySelector('header .brand')?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      'Grim Builds',
     );
     const hrefs = [...root.querySelectorAll('a')].map((link) => link.getAttribute('href'));
     for (const href of ['/', '/tier-list', '/acerca', '/legal']) expect(hrefs).toContain(href);
