@@ -78,15 +78,6 @@ describe('«Grim Dawn Builds» is not the brand any more (FR-023, FR-026)', () =
     const offenders = files.filter((f) => hasLegacyBrand(read(f))).map((f) => relative(ROOT, f));
     assert.deepEqual(offenders, []);
   });
-
-  it('is not in the prerendered HTML, when the artifact exists', (t) => {
-    const browser = join(ROOT, 'dist', 'grim-dawn-builds', 'browser');
-    if (!existsSync(browser)) return t.skip('no artifact built (run pnpm build first)');
-    const pages = [...walk(browser)].filter((f) => f.endsWith('.html'));
-    assert.ok(pages.length > 5, `only ${pages.length} prerendered pages`);
-    const offenders = pages.filter((f) => hasLegacyBrand(read(f))).map((f) => relative(ROOT, f));
-    assert.deepEqual(offenders, []);
-  });
 });
 
 describe('«Grim Builds» is the brand, in both languages (FR-023, FR-024)', () => {

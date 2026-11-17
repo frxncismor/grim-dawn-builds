@@ -102,3 +102,5 @@ declared hosting configuration drift apart.
 - **Translation debt.** Bringing the stable public docs to both languages is
   tracked in T-158 (no date). Until then, a new public doc either ships both
   languages or records the debt in its task.
+
+**Public artifact guard (T034).** `pnpm check:public-build` runs after `pnpm build` and first checks the `dist/grim-dawn-builds/browser` artifact: it fails (it never skips) if the artifact is missing, has 5 pages or fewer, or any prerendered page still carries the old brand «Grim Dawn Builds». The same detector lives in `scripts/check-legacy-brand.mts` and, copied (a test keeps both equal), in `apps/web/src/brand.test.mts`, which checks the sources; `pnpm test:scripts` never reads `dist/`. CI does not run this guard (only the local `verify`).

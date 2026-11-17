@@ -105,3 +105,5 @@ declarada del hosting divergen.
 - **Deuda de traducción.** Llevar los documentos públicos estables a ambos idiomas
   está registrado en T-158 (sin fecha). Mientras tanto, un documento público nuevo o
   se entrega en ambos idiomas o registra la deuda en su tarea.
+
+**Guardia del artefacto público (T034).** `pnpm check:public-build` corre después de `pnpm build` y comprueba primero el artefacto `dist/grim-dawn-builds/browser`: falla (nunca salta) si falta, si tiene 5 páginas o menos o si alguna página prerrenderizada conserva la marca antigua «Grim Dawn Builds». El mismo detector vive en `scripts/check-legacy-brand.mts` y, copiado (una prueba comprueba que coinciden), en `apps/web/src/brand.test.mts`, que revisa las fuentes; `pnpm test:scripts` no lee `dist/`. CI no ejecuta esta guardia (solo el `verify` local).
