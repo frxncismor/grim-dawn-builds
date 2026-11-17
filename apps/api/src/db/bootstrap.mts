@@ -4,6 +4,7 @@ import pg from 'pg';
 import { getTableName, is } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
+import { bootstrapCompleteLine, type SeedErrorCode } from '@gd/domain';
 import { loadSecrets } from '../config.js';
 import * as schema from './schema.js';
 import { compareMigrations, migrationFingerprint, readExpectedHashes } from './migration-state.js';
@@ -11,16 +12,7 @@ import { prepareSeed, readSeedFixtures, seedContentRoot, type SeedData } from '.
 import { writeCatalogRows, writeContentRows, type SeedClient } from './write-content.mjs';
 
 export class BootstrapError extends Error {
-  constructor(
-    readonly code:
-      | 'invalid-content'
-      | 'role'
-      | 'already'
-      | 'not-empty'
-      | 'migration'
-      | 'credentials'
-      | 'database-failed',
-  ) {
+  constructor(readonly code: SeedErrorCode) {
     super(`bootstrap: ${code}`);
     this.name = 'BootstrapError';
   }
@@ -55,9 +47,6 @@ export function bootstrapPayloadHash(data: unknown): string {
     .update(JSON.stringify(canonical(data)))
     .digest('hex');
 }
-
-export const bootstrapCompleteLine = (r: { builds: number; tierLists: number }): string =>
-  `bootstrap complete: ${r.builds} builds, ${r.tierLists} tier lists`;
 
 /** Initial load only. Never adopts, resets or overwrites an editorial database. */
 export async function bootstrapData(

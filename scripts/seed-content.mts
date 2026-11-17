@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { lstatSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { CONTENT_MOUNT, successPattern } from '@gd/domain';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 interface Result {
@@ -14,16 +15,6 @@ export interface Options {
   run?: (args: string[]) => Result;
   validPath?: (path: string, kind: 'file' | 'directory') => boolean;
   write?: (line: string) => void;
-}
-
-/** Where the fixtures are mounted in the container and where the seeder is told to read them. */
-export const CONTENT_MOUNT = '/content';
-
-/** Success line each seeder prints; the format is owned by seedCompleteLine/bootstrapCompleteLine. */
-export function successPattern(operation: 'seed' | 'bootstrap'): RegExp {
-  return operation === 'seed'
-    ? /^seed complete: \d+ builds, \d+ tier lists, \d+ masteries, \d+ nodes\s*$/
-    : /^bootstrap complete: \d+ builds, \d+ tier lists\s*$/;
 }
 
 /** Public configuration and mount paths only; never reads or transports a password value. */

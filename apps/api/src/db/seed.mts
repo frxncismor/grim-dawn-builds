@@ -24,6 +24,7 @@ import {
   type Mastery,
   type MasteryTree,
   type Source,
+  seedCompleteLine,
   type TierList,
 } from '@gd/domain';
 import { loadSecrets } from '../config.js';
@@ -176,13 +177,6 @@ export function seedContentRoot(env: Readonly<Record<string, string | undefined>
     fileURLToPath(new URL('../../../../fixtures/content/', import.meta.url))
   );
 }
-export const seedCompleteLine = (r: {
-  builds: number;
-  tierLists: number;
-  masteries: number;
-  nodes: number;
-}): string =>
-  `seed complete: ${r.builds} builds, ${r.tierLists} tier lists, ${r.masteries} masteries, ${r.nodes} nodes`;
 
 export async function readSeedFixtures(root = seedContentRoot(process.env)): Promise<SeedData> {
   const json = async (path: string): Promise<unknown> => {
