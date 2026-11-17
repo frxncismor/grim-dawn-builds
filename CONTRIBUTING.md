@@ -252,20 +252,22 @@ two equivalent ways, both on Ubuntu 24.04 with the Playwright version of `packag
 ### B. Local Docker (same image family, same Node as the CI)
 
 Use the official image `mcr.microsoft.com/playwright:v1.65.0-noble` (keep the tag equal to the
-`@playwright/test` version). The script installs Node 22.23.5 and pnpm inside the container, copies the
-repository without `node_modules`, `dist`, `.angular`, `.git`, `test-results`, `playwright-report`, `.env`, `.env.*` (except the
-versioned `.env.example`) and `infra/docker/secrets/`, and builds with `ASSET_SOURCE=own`, so neither local
-secrets nor results of earlier runs enter the container. The Node download is checked against a pinned
+`@playwright/test` version). The script installs Node 22.23.5 and pnpm inside the container. The repository is not mounted: the host
+sends only what git tracks or would track (`git ls-files -co --exclude-standard`) as a tar stream on stdin,
+so what `.gitignore` marks (`.env`, `.env.*`, `infra/docker/secrets/`, `node_modules`, `dist`, `.angular`,
+`.git`, `test-results`, `playwright-report`) never leaves the host. As a safety net the script extracts the
+stream into `/work` and aborts if it finds `.env`, `.env.*` (except the versioned `.env.example`) or
+`infra/docker/secrets/`. It builds with `ASSET_SOURCE=own`. The Node download is checked against a pinned
 SHA-256 and the script aborts on a mismatch. The Playwright image is identified by tag, not by digest. From
 the repository root:
 
 ```sh
 mkdir -p test-results/visual-out
-docker run --rm --ipc=host   -v "$PWD:/src:ro" -v "$PWD/test-results/visual-out:/out"   -v "$PWD/scripts/visual-baselines-docker.sh:/run.sh:ro"   mcr.microsoft.com/playwright:v1.65.0-noble sh /run.sh update
+git ls-files -co --exclude-standard -z | tar --null -T - -cf - | docker run -i --rm --ipc=host -v "$PWD/test-results/visual-out:/out" -v "$PWD/scripts/visual-baselines-docker.sh:/run.sh:ro" mcr.microsoft.com/playwright:v1.65.0-noble sh /run.sh update
 cp test-results/visual-out/*.png e2e/visual-baselines/
 ```
 
-Check them the same way with `sh /run.sh check` (no `/out` mount needed). On Windows use Git Bash with
+Check them the same way (same pipe) with `sh /run.sh check` (no `/out` mount needed). On Windows use Git Bash with
 `MSYS_NO_PATHCONV=1`. `test-results/` is ignored by git.
 
 `pnpm e2e:visual` needs a built `dist/` (`pnpm build`). Run it on the host only to see the comparison work:
