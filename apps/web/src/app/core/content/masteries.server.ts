@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { PublicMasteryTreeSchema, type PublicMasteryTree } from '@gd/domain';
+import { MasterySummarySchema, PublicMasteryTreeSchema, type PublicMasteryTree } from '@gd/domain';
 import type { MasteryCatalog, MasterySummary } from './masteries';
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -151,20 +151,10 @@ export class ApiMasteryCatalog implements MasteryCatalog {
     const body = await this.read('api/v1/masteries', false);
     if (!Array.isArray(body)) throw unavailable();
     const summaries = body.map((item: unknown): MasterySummary => {
-      const record = item && typeof item === 'object' ? (item as Record<string, unknown>) : {};
-      const { slug, name, node_count: count } = record;
-      const names = name && typeof name === 'object' ? (name as Record<string, unknown>) : {};
-      if (
-        typeof slug !== 'string' ||
-        !validSlug(slug) ||
-        typeof names['en'] !== 'string' ||
-        typeof names['es'] !== 'string' ||
-        typeof count !== 'number' ||
-        !Number.isInteger(count) ||
-        count < 0
-      )
-        throw unavailable();
-      return { slug, name: { en: names['en'], es: names['es'] }, nodeCount: count };
+      const parsed = MasterySummarySchema.safeParse(item);
+      if (!parsed.success) throw unavailable();
+      const { slug, name, node_count: nodeCount } = parsed.data;
+      return { slug, name, nodeCount };
     });
     if (
       summaries.length === 0 ||
