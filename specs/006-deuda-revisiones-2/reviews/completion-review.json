@@ -1,0 +1,282 @@
+{
+  "schemaVersion": 1,
+  "feature": "specs/006-deuda-revisiones-2",
+  "snapshot": "545c6e5a2ddfac1f4bf853ac310ffc6da2d6a7a6a0c1ea6c8e6ccd651fc665a4",
+  "createdAt": "2026-11-17T22:00:00Z",
+  "implementationActor": "agentes implementadores de la corrida de orquestación 11111619 (OpenCode/Claude Code)",
+  "delegationAvailable": true,
+  "reviews": [
+    {
+      "specialty": "code",
+      "reviewer": "11111619-revisor-cierre-s6-code-r2 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "git diff d18e34a..f0c944f (correcciones de la ronda 1: T009, T010 y registro de deuda)",
+        "Seguimiento de C-001 (r1): apps/api/src/db/write-content.mts:449-499 (aparcado de la fila en la celda entrante) frente a 0009_mastery_catalog.sql (grid_cell_uq, grid_row_ck >= 0, grid_col_ck = tier, FK de parent)",
+        "Llamadores de writeCatalogRows/pruneCatalogNodes: apps/api/src/db/seed.mts:245-299 (seedCatalog, seedData) y apps/api/src/db/bootstrap.mts:100-125; los tres podan antes del COMMIT, así que una fila aparcada nunca se confirma",
+        "apps/api/test/seed.int.spec.ts:292-460 (helpers usedNode/withoutNode/takingCellOf, prueba nueva de renombrado en sitio y prueba previa 'names the mastery ...' que ahora falla en pruneCatalogNodes)",
+        "Seguimiento de C-002 (r1): e2e/a11y.spec.ts:604-638 frente a build-card.ts:27,46,55,85 (data-variant, aria-describedby, prefijo build-card-combination-)",
+        "specs/006-deuda-revisiones-2/reviews/deuda.md (S-001, B-002 aplazados), tasks.md Fase 7, quickstart.md (verificación tras T009-T010)",
+        "Huella completa git diff cc553c3..f0c944f: código ejecutable de T001-T007 revisado de nuevo sobre el estado final (sin cambios desde la ronda 1 salvo write-content.mts y e2e/a11y.spec.ts)",
+        "Coherencia SDD del mecanismo de T009: specs/006-deuda-revisiones-2/{data-model,plan,research}.md"
+      ],
+      "checks": [
+        {
+          "name": "node --import tsx --test scripts/artifact-pages.test.mts scripts/check-assets.test.mts scripts/check-legacy-brand.test.mts scripts/visual-baselines-docker.test.mts",
+          "result": "31 pass, 0 fail"
+        },
+        {
+          "name": "apps/api: pnpm exec vitest run src/db/seed.spec.ts src/db/seed-errors.spec.ts test/seed.int.spec.ts (sin RUN_DB_TESTS)",
+          "result": "2 archivos passed, 1 skipped; 35 passed, 21 skipped (la suite con Postgres se omite sin BD)"
+        },
+        {
+          "name": "apps/api: pnpm run typecheck",
+          "result": "exit 0 (incluye pnpm --filter @gd/domain build, ver limitaciones)"
+        },
+        {
+          "name": "git diff d18e34a..f0c944f -- apps e2e",
+          "result": "solo cambian write-content.mts (guarda blocked → aparcado de fila), seed.int.spec.ts (+1 prueba) y e2e/a11y.spec.ts (+2 casos de portada)"
+        }
+      ],
+      "limitations": [
+        "No se ejecutaron pnpm verify, builds de apps, e2e, Docker ni las suites con Postgres real (RUN_DB_TESTS); su evidencia está en quickstart.md («Verificación tras las correcciones de la ronda 1 de la puerta (T009–T010)») y no se repite.",
+        "El script typecheck de apps/api ejecuta antes `pnpm --filter @gd/domain build`, que regenera packages/domain/dist en el árbol compartido; no se previó al lanzarlo. Es la salida determinista del mismo código (no se tocaron archivos versionados), pero se declara como desviación del encargo.",
+        "No se ejecutó ng test (suite unitaria web) para no regenerar cachés compartidas; build-card y adaptadores no cambiaron desde la ronda 1.",
+        "Revisión de solo lectura sobre HEAD f0c944f; no se recalculó el snapshot de spec-review."
+      ],
+      "findings": [
+        {
+          "id": "C-101",
+          "severity": "LOW",
+          "path": "specs/006-deuda-revisiones-2/data-model.md",
+          "line": 33,
+          "evidence": "El paso 3 dice «Upsert de maestrías y nodos (23505 por celda ocupada por un nodo ausente aún referenciado → SeedError('reference', <maestría>))». Tras T009 (write-content.mts:463-474) ese caso ya no falla en el upsert: la fila se aparca (grid_row + 1000000) y la decisión pasa al paso 5 (pruneCatalogNodes, 23503). Lo mismo describen plan.md:128 y :153 y research.md:116 (D4); ninguno menciona el aparcado ni T009.",
+          "impact": "El modelo de datos de la spec documenta un comportamiento de error que el código ya no tiene; quien retome la siembra (o la deuda S-001/B-002) partiría de una secuencia equivocada. No afecta a la ejecución: el código y las pruebas con BD son coherentes entre sí.",
+          "recommendation": "Actualizar data-model.md paso 3 (y la nota de D4 en plan.md/research.md) a: «antes del upsert, la fila de un nodo ausente aún referenciado que ocupa una celda entrante se aparca fuera de la rejilla; el paso 5 la borra o falla con reference» citando T009.",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por decisión de Paco 2026-11-17 (P36 = A, ronda 2 de la puerta T008); seguimiento S6-D1 en reviews/deuda.md"
+        }
+      ]
+    },
+    {
+      "specialty": "architecture",
+      "reviewer": "11111619-revisor-cierre-s6-architecture-r2 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "Seguimiento de la ronda 1: A-001 (guarda de celda en writeCatalogRows) frente a la corrección T009, git diff d18e34a..f0c944f",
+        "Mecanismo de aparcamiento (grid_row + 1000000) frente a las restricciones de catalog_skill_nodes (0009_mastery_catalog.sql: grid_cell_uq, grid_col = tier, grid_row >= 0, FK compuesta de parent) y a la FK build_skill_nodes ON DELETE restrict (0010)",
+        "Orden writeCatalogRows → writeContentRows → pruneCatalogNodes en las transacciones de seedCatalog, seedData (seed.mts) y bootstrapData (bootstrap.mts); rollback ante SeedError('reference')",
+        "Pruebas nuevas/afectadas de seed.int.spec.ts (renombrado en sitio y celda de un nodo retirado aún usado) y e2e T010 de la portada en e2e/a11y.spec.ts",
+        "Huella completa cc553c3..f0c944f: helper scripts/artifact-pages.mts y sus consumidores, contrato key de BuildCardInput/BuildCardData, frontera del contenedor visual, mediana de coldStartMs",
+        "Coherencia de plan.md, data-model.md, research.md (D4, R8), tasks.md, reviews/deuda.md y specs/README.md con la implementación final"
+      ],
+      "checks": [
+        {
+          "name": "git diff d18e34a..f0c944f -- apps/ e2e/ scripts/",
+          "result": "solo write-content.mts (guarda sustituida por UPDATE de aparcamiento), seed.int.spec.ts (+1 caso) y e2e/a11y.spec.ts (+2 casos); seed.mts y bootstrap.mts sin cambios"
+        },
+        {
+          "name": "pnpm --filter @gd/api exec vitest run src/db/seed.spec.ts",
+          "result": "20 passed"
+        },
+        {
+          "name": "pnpm --filter @gd/api typecheck",
+          "result": "sin errores"
+        },
+        {
+          "name": "pnpm check:boundaries",
+          "result": "check:boundaries OK (382 archivos revisados)"
+        },
+        {
+          "name": "node --import tsx --test scripts/artifact-pages.test.mts scripts/visual-baselines-docker.test.mts scripts/check-assets.test.mts scripts/check-legacy-brand.test.mts",
+          "result": "31 pass, 0 fail"
+        },
+        {
+          "name": "lectura de apps/api/drizzle/0009_mastery_catalog.sql y 0010_skill_node_id.sql",
+          "result": "grid_row solo tiene cota inferior (>= 0); el aparcamiento no cambia grid_col ni tier; la celda aparcada es única porque la original lo era"
+        },
+        {
+          "name": "grep celda|cell|23505 en specs/006-deuda-revisiones-2/{plan,data-model,research}.md",
+          "result": "plan.md:128,153, data-model.md:33 y research.md:116 siguen describiendo el aborto por 23505 previo al upsert"
+        },
+        {
+          "name": "grep 006-deuda-revisiones-2 en specs/README.md frente a tasks.md",
+          "result": "README: 8 de 10 y T009/T010 abiertas; tasks.md: T001–T010 [x]"
+        }
+      ],
+      "limitations": [
+        "No se ejecutaron las pruebas con Postgres real (RUN_DB_TESTS=1), builds, e2e, Docker ni pnpm verify: el encargo los excluye y su evidencia está en quickstart.md («Verificación tras las correcciones de la ronda 1 de la puerta (T009–T010)»).",
+        "La corrección de T009 se evaluó leyendo el SQL, el esquema y la prueba nueva; no se reprodujo con Postgres.",
+        "Revisión de solo lectura en un árbol compartido con otros revisores."
+      ],
+      "findings": [
+        {
+          "id": "A-101",
+          "severity": "LOW",
+          "path": "specs/006-deuda-revisiones-2/data-model.md",
+          "line": 33,
+          "evidence": "T009 sustituyó la guarda por aparcar la fila del nodo ausente (write-content.mts:463-474, UPDATE … grid_row + 1000000) y deja que pruneCatalogNodes decida por FK. El diseño aprobado no se actualizó: data-model.md:33 («23505 por celda ocupada por un nodo ausente aún referenciado → SeedError('reference')» en el paso de upsert), plan.md:128 y :153 (riesgo mitigado con «23505 traducido a reference») y research.md:116 (D4, misma decisión). Es la continuación documental de A-001 (ronda 1), cuyo código sí quedó corregido.",
+          "impact": "La fuente SDD de la poda en dos pasos describe un mecanismo que ya no existe (el error sale ahora de pruneCatalogNodes, tras reescribir guías, y el upsert ya no puede chocar con la celda). Quien mantenga la siembra o planifique la próxima spec desde plan/data-model reintroduciría la guarda o buscaría una traducción de 23505 inexistente. Sin efecto en tiempo de ejecución.",
+          "recommendation": "Actualizar data-model.md:33, plan.md:128/:153 y research.md D4 (:116) para describir el aparcamiento de la celda (grid_row fuera de la rejilla, columna = tier) y que el único punto que da `reference` para nodos sueltos es pruneCatalogNodes; citar T009.",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por decisión de Paco 2026-11-17 (P36 = A, ronda 2 de la puerta T008); seguimiento S6-D1 en reviews/deuda.md"
+        },
+        {
+          "id": "A-102",
+          "severity": "LOW",
+          "path": "specs/README.md",
+          "line": 13,
+          "evidence": "La fila de spec006 dice «8 de 10 | 2» y la sección (:55-57) dice que T009 y T010 están «abiertas», mientras specs/006-deuda-revisiones-2/tasks.md marca T001–T010 [x] y su estado dice «T001–T010 hechas». El README declara en :3-4 que la fuente de verdad es el tasks.md de cada spec. T010 actualizó el README antes de que se integrara T009 y no se volvió a sincronizar.",
+          "impact": "El registro vivo contradice su fuente de verdad (constitución VI, una sola fuente) justo en la spec bajo puerta; el revisor o Paco leen un estado falso.",
+          "recommendation": "Poner la fila de spec006 en «10 de 10 | 0» y reescribir la frase de :55-57 (T009 y T010 hechas; S-001 y B-002 aplazados en reviews/deuda.md); al cerrar la puerta, dejarla en «Cerrada (puerta spec002 passed, <sha>)» como las anteriores.",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por decisión de Paco 2026-11-17 (P36 = A, ronda 2 de la puerta T008); seguimiento S6-D2 en reviews/deuda.md"
+        }
+      ]
+    },
+    {
+      "specialty": "security",
+      "reviewer": "11111619-revisor-cierre-s6-security-r2 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "git diff d18e34a..f0c944f (round-1 fixes T009 and T010): apps/api/src/db/write-content.mts, apps/api/test/seed.int.spec.ts, e2e/a11y.spec.ts, specs/006-deuda-revisiones-2/{quickstart,research,tasks}.md, reviews/deuda.md, specs/README.md",
+        "apps/api/src/db/write-content.mts (writeCatalogRows parking step, pruneCatalogNodes, SeedError mapping)",
+        "apps/api/src/db/seed.mts (seedCatalog and seedData transactions around writeCatalogRows/pruneCatalogNodes)",
+        "apps/api/src/db/bootstrap.mts (bootstrapData transaction and call order)",
+        "apps/api/drizzle/0009_mastery_catalog.sql (catalog_skill_nodes constraints: grid cell UNIQUE, grid_col = tier CHECK, grid_row >= 0 CHECK)",
+        "packages/domain/src/mastery-tree.ts (grid.row validation)",
+        "scripts/artifact-pages.mts and scripts/check-assets.mts (status of round-1 S-001)",
+        "git diff --name-only cc553c3..f0c944f for build chain and CI files (package.json, scripts/visual-baselines-docker.sh; no .github changes)",
+        "git diff cc553c3..f0c944f -- apps/web searched for innerHTML or bypassSecurityTrust usage"
+      ],
+      "checks": [
+        {
+          "name": "node --import tsx --test scripts/artifact-pages.test.mts scripts/check-assets.test.mts scripts/check-legacy-brand.test.mts scripts/visual-baselines-docker.test.mts",
+          "result": "pass: 31 tests, 0 fail"
+        },
+        {
+          "name": "npx vitest run src/db/seed.spec.ts (apps/api)",
+          "result": "pass: 1 file, 20 tests"
+        },
+        {
+          "name": "code read: every caller of writeCatalogRows (seedCatalog, seedData, bootstrapData) runs pruneCatalogNodes in the same BEGIN/COMMIT and ROLLBACKs on any error",
+          "result": "confirmed; a parked row never survives a commit: it is deleted by pruneCatalogNodes or the 23503 → SeedError('reference', <mastery id>) rolls the seed back"
+        },
+        {
+          "name": "code read: parking UPDATE against the schema constraints in 0009_mastery_catalog.sql",
+          "result": "grid_col is untouched (CHECK grid_col = tier holds), grid_row stays >= 0, all values bound as pg parameters ($1..$4); no string interpolation"
+        },
+        {
+          "name": "git diff d18e34a..f0c944f --stat -- scripts package.json .github",
+          "result": "empty: round-1 fixes do not touch the rights gates, the container script, package.json or CI"
+        },
+        {
+          "name": "git diff cc553c3..f0c944f -- apps/web | grep innerHTML/bypassSecurity",
+          "result": "no matches"
+        }
+      ],
+      "limitations": [
+        "No DAST, no dependency audit (pnpm audit) and no secret scan with gitleaks were run in this review.",
+        "Docker was not touched; the stdin tar pipeline was reviewed by reading in round 1 and is unchanged since d18e34a.",
+        "The Postgres integration tests (including the new T009 in-place rename test) and e2e were not run; their recorded output in specs/006-deuda-revisiones-2/quickstart.md was taken into account, not repeated.",
+        "pnpm verify, builds and check:performance were not run, as the brief says.",
+        "Observation, not a finding: the parking offset (grid_row + 1000000) could only collide or overflow with catalog rows near 1e6 or near the int4 limit; the domain schema leaves grid.row unbounded but real rows are below 100, and either case fails with 23505/22003 inside the transaction and rolls back (seedCatalog maps it to database-failed), so it fails closed."
+      ],
+      "findings": [
+        {
+          "id": "S-101",
+          "severity": "LOW",
+          "path": "scripts/check-assets.mts",
+          "line": 162,
+          "evidence": "Round-1 S-001 is still present at HEAD f0c944f: assertNoGamePortraits and prerenderedPages (scripts/artifact-pages.mts:27) keep only entry.isFile() from readdirSync(..., { recursive: true, withFileTypes: true }), so a symlinked folder or .html page inside the artifact is neither scanned nor rejected. Original ID: S-001 (security r1).",
+          "impact": "The unit does not fail closed against links inside the artifact; in the release assertPublicBuild (scripts/check-public-build.mts:82) rejects any symlink on the same staging, so the residual risk is a future caller without that gate.",
+          "recommendation": "Treat any symlink, or any entry that is neither file nor directory, as an invalid artifact in prerenderedPages and in the assertNoGamePortraits scan, with tests for a linked folder and a linked .html page.",
+          "disposition": "deferred",
+          "deferReason": "Deferred by Paco's decision (P35 = A, round 1 of T008), recorded with reason, residual risk and plan in specs/006-deuda-revisiones-2/reviews/deuda.md entry 1 (S-001); reference task T008."
+        }
+      ]
+    },
+    {
+      "specialty": "best-practices",
+      "reviewer": "11111619-revisor-cierre-s6-best-practices-r2 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "Seguimiento de la ronda 1 (B-001, B-002, B-003) sobre git diff d18e34a..f0c944f (8 archivos)",
+        "apps/api/src/db/write-content.mts (T009: aparcar la fila de la celda en lugar de abortar) y sus llamadores en seed.mts y bootstrap.mts",
+        "apps/api/test/seed.int.spec.ts (prueba nueva de renombrado en sitio y la de nodo quitado aún usado)",
+        "apps/api/drizzle/0009_mastery_catalog.sql (restricciones de catalog_skill_nodes frente al aparcado)",
+        "e2e/a11y.spec.ts (bloque T010 de la portada) frente a apps/web/src/app/features/home/{home.page.html,home-builds.ts} y fixtures/content/builds/",
+        "specs/006-deuda-revisiones-2/{tasks,research,quickstart}.md y reviews/deuda.md; specs/README.md",
+        "Huella completa de spec006 (git diff cc553c3..f0c944f, 43 archivos) revisada en la ronda 1; en esta ronda solo se re-revisó lo cambiado y su interacción con lo anterior",
+        "AGENTS.md, CONTRIBUTING.md, constitución, specs/002-spec-completion-reviews/{data-model.md,contracts/review-gate.md}"
+      ],
+      "checks": [
+        {
+          "name": "git rev-parse HEAD",
+          "result": "f0c944f6e2d91ad7927215017527871265b4b9af (coincide con el encargo)"
+        },
+        {
+          "name": "node scripts/spec-review.mjs prepare --feature specs/006-deuda-revisiones-2",
+          "result": "status ready, snapshot 545c6e5a2ddfac1f4bf853ac310ffc6da2d6a7a6a0c1ea6c8e6ccd651fc665a4, pendingTasks [], excludedTasks [] (coincide con el encargo)"
+        },
+        {
+          "name": "pnpm lint:md",
+          "result": "Linting: 120 files; Summary: 0 issues in 0 files"
+        },
+        {
+          "name": "npx prettier --check sobre los archivos tocados en la ronda 2",
+          "result": "OK salvo specs/006-deuda-revisiones-2/tasks.md (tabla de trazabilidad sin alinear); specs/** queda fuera de format:check y specs/005-deuda-revisiones/tasks.md tiene el mismo estado: no es hallazgo"
+        },
+        {
+          "name": "Seguimiento B-003 (research.md §R8)",
+          "result": "corregido: §R8 remite a D2, sin saneado, IDREF válido con ':'; coste sin función de saneado"
+        },
+        {
+          "name": "Seguimiento B-002",
+          "result": "aplazado con motivo, riesgo residual y plan en specs/006-deuda-revisiones-2/reviews/deuda.md (entrada 2); no se reporta de nuevo como abierto"
+        },
+        {
+          "name": "Seguimiento B-001 (specs/README.md)",
+          "result": "corregido a medias: prosa de spec004/spec005 al día, pero la fila y la sección de spec006 quedaron con el estado previo a T009 (ver B-101)"
+        },
+        {
+          "name": "Revisión de T009 frente al esquema",
+          "result": "grid_row + 1000000 respeta catalog_skill_nodes_grid_row_ck (>= 0) y grid_col_ck (= tier); la unicidad (mastery_id, grid_col, grid_row) no choca entre filas aparcadas de filas distintas; los tres caminos que llaman a writeCatalogRows (seed.mts:253, seed.mts:284, bootstrap.mts:112) llaman a pruneCatalogNodes justo después, así que una fila aparcada nunca sobrevive al commit"
+        }
+      ],
+      "limitations": [
+        "No se ejecutaron pnpm verify, builds, e2e, check:performance ni pruebas con BD (prohibido por el encargo; sus resultados están en quickstart.md, sección de T009-T010, y no se repiten).",
+        "No se ejecutaron pruebas unitarias: el cambio de código ejecutable de la ronda 2 es SQL de write-content.mts, cubierto solo por pruebas con Postgres real.",
+        "La afirmación de que la sección «More builds» no se pinta en / se deduce de los fixtures versionados (una sola guía en fixtures/content/builds/) y de home.page.html; no se abrió el artefacto prerenderizado."
+      ],
+      "findings": [
+        {
+          "id": "B-101",
+          "severity": "LOW",
+          "path": "specs/README.md",
+          "line": 13,
+          "evidence": "Reabre parte de B-001 (ronda 1). La fila de spec006 dice «Implementada; puerta spec002 en curso | 8 de 10 | 2» y la sección (línea 57) dice que T009 y T010 están «abiertas», mientras tasks.md marca T001-T010 [x] y su cabecera dice «T001–T010 hechas». El README se actualizó en T010, antes de que se integrara T009, y no se tocó después.",
+          "impact": "El registro vivo de specs contradice su fuente de verdad (tasks.md): quien lo consulte cree que quedan dos tareas pendientes en la puerta. No afecta al código.",
+          "recommendation": "Poner la fila en «Implementada; puerta spec002 en curso | 10 de 10 | 0» y cambiar «abiertas» por «hechas» en la sección de spec006 (o hacerlo al cerrar la puerta junto con «Cerrada (puerta spec002 passed, <commit>)»). Comprobar antes si specs/README.md entra en el snapshot de spec-review.",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por decisión de Paco 2026-11-17 (P36 = A, ronda 2 de la puerta T008); seguimiento S6-D2 en reviews/deuda.md"
+        },
+        {
+          "id": "B-102",
+          "severity": "LOW",
+          "path": "e2e/a11y.spec.ts",
+          "line": 605,
+          "evidence": "El comentario del bloque T010 dice que «su tarjeta destacada y las de «More builds» también describen el enlace» y el caso comprueba que los ids build-card-combination-* de la portada son únicos. Con los fixtures versionados solo hay una guía (fixtures/content/builds/chaman-demoledor-golpe-primigenio.json) y home.page.html:37 solo pinta «More builds» si otherCards.length > 0, así que en / hay como mucho un id: la aserción de unicidad pasa siempre y ninguna tarjeta de «More builds» se comprueba.",
+          "impact": "La prueba parece cubrir más de lo que cubre: si la portada repitiera ids o perdiera la descripción en «More builds» al añadir una segunda guía, este caso no lo detectaría hasta que los fixtures cambien. FR-009 queda cubierto para la tarjeta destacada, que es lo que exigía C-002.",
+          "recommendation": "Ajustar el comentario a lo que de verdad se comprueba (tarjeta destacada) o, si se quiere fijar la unicidad, añadir expect(ids.length).toBeGreaterThan(1) cuando haya más de una guía pública, o cubrirla en home-builds.spec.ts con una entrada de dos guías.",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por decisión de Paco 2026-11-17 (P36 = A, ronda 2 de la puerta T008); seguimiento S6-D3 en reviews/deuda.md"
+        }
+      ]
+    }
+  ]
+}
