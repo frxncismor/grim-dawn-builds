@@ -203,10 +203,13 @@ jobs:
       # playwright.config.ts serves both on different ports (4321 and 4322).
       # The Angular workspace lives in apps/web (T-067), so the CLI runs there and
       # the output path is relative to apps/web.
+      # T-177: `e2e:drafts:build` is `ng build` plus `emit-static-assets` (trees, deferred.css,
+      # portraits and, with ASSET_SOURCE=game, the skill icons), exactly as `pnpm build` does; a bare
+      # `ng build` left the drafts artifact without the game art the journeys expect.
       - name: Build drafts artifact (isolated directory, no overwrite)
         env:
           INCLUDE_DRAFTS: 'true'
-        run: pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts
+        run: pnpm run e2e:drafts:build
 
       # T-171: the video facade e2e (T-167) serves dist/video-facade-preview on 4323.
       - name: Build video facade preview artifact
