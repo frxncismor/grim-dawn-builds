@@ -34,18 +34,18 @@ Cerrar la deuda LOW que dejaron abierta la puerta de spec006 y T-177, sin cambia
 
 _GATE: previo a Fase 0, re-comprobado tras el diseño._
 
-| Principio | Relevancia | Cómo lo cumple |
-| --------- | ---------- | -------------- |
-| I. Contenido verificable y atribuido | Media | T003 no añade guías al contenido público (FR-010); T001 endurece las puertas que vigilan el crédito a Crate. |
-| III. SEO/SSG | Baja | Ningún cambio en HTML de páginas reales (T002 solo cambia un caso que ninguna entrada produce). |
-| IV. Rendimiento | Alta | T002 mide `/tier-list` antes y después; si supera 112 000 B, plan B sin bytes (research D3). |
-| V. Accesibilidad | Alta | T002 garantiza la combinación para AT en toda tarjeta; T003 hace no vacua la prueba de ids; `e2e:a11y` 0 violaciones. |
-| VI. Una sola fuente | Media | T001 reutiliza el criterio único de `scripts/artifact-pages.mts`; la regla de B-002 vive en un solo punto (`buildCardData`), no en el dominio (research §R5 a). |
-| VII. Legalidad y activos | Alta | T001: la puerta «sin arte del juego con `own`» deja de esquivarse con una carpeta enlazada; T004 explica bien por qué la regresión visual usa `own`. |
-| VIII. Simplicidad | Alta | Sin dependencias ni paquetes; un helper pequeño en un módulo existente. |
-| IX. Pruebas proporcionales | Alta | Cada tarea de código empieza en rojo; T003 incluye un control que demuestra que el detector de duplicados no es vacuo. |
-| X. EN/ES | Media | T003 prueba en EN con contenido ES; ninguna cadena nueva. |
-| XII. Secretos | Baja | Sin cambios; T004 no toca variables ni secretos de la CI. |
+| Principio                            | Relevancia | Cómo lo cumple                                                                                                                                                  |
+| ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| I. Contenido verificable y atribuido | Media      | T003 no añade guías al contenido público (FR-010); T001 endurece las puertas que vigilan el crédito a Crate.                                                    |
+| III. SEO/SSG                         | Baja       | Ningún cambio en HTML de páginas reales (T002 solo cambia un caso que ninguna entrada produce).                                                                 |
+| IV. Rendimiento                      | Alta       | T002 mide `/tier-list` antes y después; si supera 112 000 B, plan B sin bytes (research D3).                                                                    |
+| V. Accesibilidad                     | Alta       | T002 garantiza la combinación para AT en toda tarjeta; T003 hace no vacua la prueba de ids; `e2e:a11y` 0 violaciones.                                           |
+| VI. Una sola fuente                  | Media      | T001 reutiliza el criterio único de `scripts/artifact-pages.mts`; la regla de B-002 vive en un solo punto (`buildCardData`), no en el dominio (research §R5 a). |
+| VII. Legalidad y activos             | Alta       | T001: la puerta «sin arte del juego con `own`» deja de esquivarse con una carpeta enlazada; T004 explica bien por qué la regresión visual usa `own`.            |
+| VIII. Simplicidad                    | Alta       | Sin dependencias ni paquetes; un helper pequeño en un módulo existente.                                                                                         |
+| IX. Pruebas proporcionales           | Alta       | Cada tarea de código empieza en rojo; T003 incluye un control que demuestra que el detector de duplicados no es vacuo.                                          |
+| X. EN/ES                             | Media      | T003 prueba en EN con contenido ES; ninguna cadena nueva.                                                                                                       |
+| XII. Secretos                        | Baja       | Sin cambios; T004 no toca variables ni secretos de la CI.                                                                                                       |
 
 Resultado: **sin violaciones**. Re-comprobado tras el diseño: el único riesgo de presupuesto es T002.
 
@@ -90,14 +90,14 @@ specs/007-deuda-revisiones-3/{tasks.md,quickstart.md,reviews/}                  
 
 Regla: `apps/web` y `e2e/` → **UI**; `apps/api`, `packages/*`, `scripts/`, CI → **implementación**; solo docs SDD → **UI**.
 
-| Tarea | Elemento | Área | Archivos principales | Depende de | `[P]` |
-| ----- | -------- | ---- | -------------------- | ---------- | ----- |
-| T001 | S-001 | implementación | `scripts/artifact-pages.mts` (+test), `scripts/check-assets.mts` (+test) | — | `[P]` con T002–T005 |
-| T002 | B-002 | **UI** | `build-card.{ts,labels.ts,model.ts,spec.ts}` | — | `[P]` con T001, T003–T005 |
-| T003 | S6-D3 | **UI** | `features/home/home.page.spec.ts`, `e2e/a11y.spec.ts` | — | `[P]` con T001, T002, T004, T005 |
-| T004 | comentario de CI (T-177) | implementación | `.github/workflows/ci.yml`, `scripts/ci-workflow.test.mts` | — | `[P]` con T001–T003, T005 |
-| T005 | S6-D1, S6-D2 | **UI** (solo docs SDD) | `specs/006-deuda-revisiones-2/{data-model,plan,research}.md`, `specs/README.md` | — | `[P]` con T001–T004 |
-| T006 | cierre | implementación (coordina la puerta) | `specs/007-deuda-revisiones-3/{tasks,quickstart}.md`, `specs/007-deuda-revisiones-3/reviews/`, `specs/README.md` | T001–T005 | no |
+| Tarea | Elemento                 | Área                                | Archivos principales                                                                                             | Depende de | `[P]`                            |
+| ----- | ------------------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------- | -------------------------------- |
+| T001  | S-001                    | implementación                      | `scripts/artifact-pages.mts` (+test), `scripts/check-assets.mts` (+test)                                         | —          | `[P]` con T002–T005              |
+| T002  | B-002                    | **UI**                              | `build-card.{ts,labels.ts,model.ts,spec.ts}`                                                                     | —          | `[P]` con T001, T003–T005        |
+| T003  | S6-D3                    | **UI**                              | `features/home/home.page.spec.ts`, `e2e/a11y.spec.ts`                                                            | —          | `[P]` con T001, T002, T004, T005 |
+| T004  | comentario de CI (T-177) | implementación                      | `.github/workflows/ci.yml`, `scripts/ci-workflow.test.mts`                                                       | —          | `[P]` con T001–T003, T005        |
+| T005  | S6-D1, S6-D2             | **UI** (solo docs SDD)              | `specs/006-deuda-revisiones-2/{data-model,plan,research}.md`, `specs/README.md`                                  | —          | `[P]` con T001–T004              |
+| T006  | cierre                   | implementación (coordina la puerta) | `specs/007-deuda-revisiones-3/{tasks,quickstart}.md`, `specs/007-deuda-revisiones-3/reviews/`, `specs/README.md` | T001–T005  | no                               |
 
 Ninguna tarea cruza áreas ni comparte archivos con otra salvo `specs/README.md` (T005 de UI antes que T006 de implementación). T001 y T004 son del mismo área pero disjuntas (T004 no toca `test:scripts` de `package.json`; ninguna lo toca). T002 y T003 son del mismo área y disjuntas (T003 no toca `build-card.*`). Tres tareas de implementación, muy por debajo del límite de ~8; no hace falta agrupar más.
 
@@ -119,33 +119,33 @@ Ninguna tarea cruza áreas ni comparte archivos con otra salvo `specs/README.md`
 
 ## Decisiones aplicadas (sin Paco)
 
-| Punto | Decisión (planificador, 2026-11-18) | Tareas | Efecto |
-| ----- | ----------------------------------- | ------ | ------ |
-| Dónde vive la regla de B-002 | `buildCardData` (no el dominio) | T002 | Unas decenas de bytes medidos; plan B sin bytes |
-| Datos de 2+ guías para S6-D3 | prueba de componente con 3 guías sintéticas | T003 | Sin cambios en contenido público ni referencias |
-| Enlace simbólico en el artefacto | artefacto inválido, nunca se sigue | T001 | Falla cerrado |
-| A-01, A-03, C-003 | cerrados, solo registro | — | Sin tareas (research §R7–R9) |
+| Punto                            | Decisión (planificador, 2026-11-18)         | Tareas | Efecto                                          |
+| -------------------------------- | ------------------------------------------- | ------ | ----------------------------------------------- |
+| Dónde vive la regla de B-002     | `buildCardData` (no el dominio)             | T002   | Unas decenas de bytes medidos; plan B sin bytes |
+| Datos de 2+ guías para S6-D3     | prueba de componente con 3 guías sintéticas | T003   | Sin cambios en contenido público ni referencias |
+| Enlace simbólico en el artefacto | artefacto inválido, nunca se sigue          | T001   | Falla cerrado                                   |
+| A-01, A-03, C-003                | cerrados, solo registro                     | —      | Sin tareas (research §R7–R9)                    |
 
 ## Desviaciones aprobadas respecto al encargo
 
-Aprobadas por el principal el 2026-11-18 («D1 ok, D2 ok»); numeración de `reviews/analyze.md`.
+Aprobadas por el principal el 2026-11-18 («DV1 ok, DV2 ok»); numeración de `reviews/analyze.md` (DV1 y DV2, para no chocar con D1–D5 de `research.md`).
 
-| ID | Encargo original | Decisión | Motivo | Aprobación | Tarea |
-| -- | ---------------- | -------- | ------ | ---------- | ----- |
-| D1 | S6-D3: que `e2e/a11y.spec.ts` use 2+ guías (fixture o artefacto de borradores). | Caso de componente de `HomePage` con 3 guías sintéticas (`home.page.spec.ts`); el e2e exige ≥ 1 id en lugar de 2+ guías. | El artefacto de borradores no lista guías (la portada solo muestra las publicadas); una guía pública más cambia el sitio y obliga a regenerar las 30 capturas, y un tercer artefacto e2e añade un build y un puerto (research §R3). | Principal, 2026-11-18 | T003 |
-| D2 | B-002: imponer la regla «al dominio o al esquema». | Se impone en `buildCardData` de `apps/web`, no en `packages/domain` ni en el esquema; plan B: unión discriminada de `BuildCardInput` (0 B). | `BuildCardData` es una vista de presentación («not a domain entity»): el dominio no conoce tarjetas, enlaces ni el idioma de la página (research §R5, constitución VI). `buildCardData` es el punto único de todos los adaptadores. | Principal, 2026-11-18 | T002 |
+| ID  | Encargo original                                                                | Decisión                                                                                                                                    | Motivo                                                                                                                                                                                                                              | Aprobación            | Tarea |
+| --- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ----- |
+| DV1 | S6-D3: que `e2e/a11y.spec.ts` use 2+ guías (fixture o artefacto de borradores). | Caso de componente de `HomePage` con 3 guías sintéticas (`home.page.spec.ts`); el e2e exige ≥ 1 id en lugar de 2+ guías.                    | El artefacto de borradores no lista guías (la portada solo muestra las publicadas); una guía pública más cambia el sitio y obliga a regenerar las 30 capturas, y un tercer artefacto e2e añade un build y un puerto (research §R3). | Principal, 2026-11-18 | T003  |
+| DV2 | B-002: imponer la regla «al dominio o al esquema».                              | Se impone en `buildCardData` de `apps/web`, no en `packages/domain` ni en el esquema; plan B: unión discriminada de `BuildCardInput` (0 B). | `BuildCardData` es una vista de presentación («not a domain entity»): el dominio no conoce tarjetas, enlaces ni el idioma de la página (research §R5, constitución VI). `buildCardData` es el punto único de todos los adaptadores. | Principal, 2026-11-18 | T002  |
 
 ## Riesgos
 
-| Riesgo | Prob. | Impacto | Mitigación |
-| ------ | ----- | ------- | ---------- |
-| T001 rechaza un artefacto legítimo (Angular emite algún enlace) | Baja | Alto | `assertPublicBuild` ya rechaza enlaces en el release y pasa hoy; `pnpm verify` y `build:release` en T006. |
-| T001 no puede crear enlaces de archivo en Windows | Media | Bajo | _Junction_ para carpetas; enlace de archivo con `t.skip(motivo)` ante `EPERM`; el CI Linux lo ejecuta. |
-| T002 agota el margen de `/tier-list` (605 B) | Baja | Alto | Medir antes/después con `pnpm build` raíz y `check:initial-js`; si supera, plan B (tipo) o escalar. |
-| T002 cambia el texto accesible de una tarjeta real | Baja | Medio | Ninguna entrada real tiene `combinationLang` sin enlace (`card-data.ts:64-73`); `e2e:a11y` y regresión visual sin cambios. |
-| T003 da un falso verde (prueba vacua otra vez) | Baja | Medio | Control explícito que ve un duplicado y aserción `≥ 2` ids. |
-| T005 desfasa el snapshot de la puerta de spec006 | Alta | Bajo | Esperado (spec006 Edge Cases); no se reabre la puerta. |
-| Docker no disponible en local para la regresión visual | Media | Medio | La tarea lo declara antes de marcarse; no se marca `[x]` sin la salida real. |
+| Riesgo                                                          | Prob. | Impacto | Mitigación                                                                                                                 |
+| --------------------------------------------------------------- | ----- | ------- | -------------------------------------------------------------------------------------------------------------------------- |
+| T001 rechaza un artefacto legítimo (Angular emite algún enlace) | Baja  | Alto    | `assertPublicBuild` ya rechaza enlaces en el release y pasa hoy; `pnpm verify` y `build:release` en T006.                  |
+| T001 no puede crear enlaces de archivo en Windows               | Media | Bajo    | _Junction_ para carpetas; enlace de archivo con `t.skip(motivo)` ante `EPERM`; el CI Linux lo ejecuta.                     |
+| T002 agota el margen de `/tier-list` (605 B)                    | Baja  | Alto    | Medir antes/después con `pnpm build` raíz y `check:initial-js`; si supera, plan B (tipo) o escalar.                        |
+| T002 cambia el texto accesible de una tarjeta real              | Baja  | Medio   | Ninguna entrada real tiene `combinationLang` sin enlace (`card-data.ts:64-73`); `e2e:a11y` y regresión visual sin cambios. |
+| T003 da un falso verde (prueba vacua otra vez)                  | Baja  | Medio   | Control explícito que ve un duplicado y aserción `≥ 2` ids.                                                                |
+| T005 desfasa el snapshot de la puerta de spec006                | Alta  | Bajo    | Esperado (spec006 Edge Cases); no se reabre la puerta.                                                                     |
+| Docker no disponible en local para la regresión visual          | Media | Medio   | La tarea lo declara antes de marcarse; no se marca `[x]` sin la salida real.                                               |
 
 ## Complexity Tracking
 

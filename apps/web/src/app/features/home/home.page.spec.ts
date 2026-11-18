@@ -287,8 +287,15 @@ describe('Home: description ids stay unique with several guides (spec007 T003, S
     const el = await render();
     const ids = idsOf(el);
     // Three public guides: the featured card and the two of «More builds», each with its own line.
-    expect(ids.length).toBeGreaterThanOrEqual(2);
-    expect(new Set(ids).size, `ids de descripción únicos: ${ids.join(', ')}`).toBe(ids.length);
+    expect(ids).toHaveLength(3);
+    expect(new Set(ids).size, `ids de descripción únicos: ${ids.join(', ')}`).toBe(3);
+    // Each card link points at the line of its own card, not at another one.
+    for (const card of el.querySelectorAll('gd-build-card')) {
+      const own = card.querySelector('[id^="build-card-combination-"]')!.id;
+      const link = card.querySelector('a[aria-describedby]');
+      expect(link, `enlace descrito en la tarjeta ${own}`).not.toBeNull();
+      expect(link!.getAttribute('aria-describedby')).toBe(own);
+    }
     // Control: the same check on a page with two cards of the same key must fail (not vacuous).
     el.appendChild(el.querySelector('gd-build-card')!.cloneNode(true));
     const doubled = idsOf(el);
