@@ -260,3 +260,36 @@ test('guide is published as own content with internal provenance and no third-pa
     /rights_notes|rights_confirmed|reviewed_by|permission_ref|is_placeholder/,
   );
 });
+
+test('the sample guide carries its own editorial fields and the public view exposes them (spec009 T005)', async () => {
+  assert.ok(guide.intro && guide.intro.length <= 400);
+  assert.equal(guide.stage, 'ambas');
+  assert.ok(guide.changelog.length >= 1);
+  assert.equal(guide.changelog[0]!.date >= guide.published_at!, true);
+  assert.ok(guide.pros.length > 0 && guide.cons.length > 0);
+  assert.ok(guide.hotbar.length > 0 && guide.key_devotions.length > 0);
+  const nodes = new Set(guide.skill_nodes.map((node) => node.slug));
+  const constellations = new Set(guide.constellations.map((entry) => entry.slug));
+  assert.ok(guide.hotbar.every((value) => nodes.has(value)));
+  assert.ok(guide.key_devotions.every((value) => constellations.has(value)));
+
+  const publicRepo = createFixtureRepository(resolve(root, 'fixtures/content'), {});
+  const publicGuide = await publicRepo.findBuild(slug);
+  assert.ok(publicGuide);
+  for (const field of [
+    'intro',
+    'stage',
+    'changelog',
+    'pros',
+    'cons',
+    'hotbar',
+    'key_devotions',
+  ] as const) {
+    assert.deepEqual(publicGuide[field], guide[field], field);
+  }
+  // Editorial prose is the site's own: it never repeats the original prototype's texts.
+  const editorial = JSON.stringify([guide.intro, guide.changelog, guide.pros, guide.cons]);
+  for (const text of golden.introductions.map((entry) => entry.text)) {
+    assert.equal(editorial.includes(text), false);
+  }
+});

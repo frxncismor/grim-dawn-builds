@@ -49,6 +49,31 @@
     "Esta ficha transcribe solo datos del build: maestrías, habilidades y puntos, devociones y filtro de botín.",
     "No incluye texto ni imágenes de terceros. Los datos no se han verificado contra el juego y la etiqueta «Sin verificar» lo indica."
   ],
+  "intro": "Guía de datos del build Chamán + Demoledor con Golpe Primigenio: qué habilidades se compran, en qué orden y qué devociones lo sostienen.",
+  "stage": "ambas",
+  "changelog": [
+    {
+      "date": "2026-11-12",
+      "text": "Primera publicación de la ficha de datos del build."
+    }
+  ],
+  "pros": [
+    "Daño de rayo y físico en una sola habilidad principal",
+    "Todas las habilidades salen de dos maestrías base"
+  ],
+  "cons": [
+    "Depende de completar las devociones de tormenta",
+    "Los datos aún no se han verificado en el juego"
+  ],
+  "hotbar": [
+    "golpe-primigenio",
+    "golpe-atronador",
+    "torrente",
+    "corriente-de-tormenta",
+    "viento-demoniaco",
+    "tempestad-furiosa"
+  ],
+  "key_devotions": ["tempest", "crossroads", "eel"],
   "masteries": [
     {
       "slug": "chaman",

@@ -90,6 +90,13 @@ const draftBuild = () => ({
   video_url: null,
   footer_disclaimer: 'Cantidades orientativas.',
   hero_callout_title: 'Lee esto primero',
+  intro: 'Introducción propia de la guía.',
+  stage: 'ambas',
+  changelog: [],
+  pros: [],
+  cons: [],
+  hotbar: [],
+  key_devotions: [],
   hero_callout_body: ['La barra de maestría no son puntos invertidos.'],
   masteries: [
     { slug: 'chaman', name_es: 'Chamán', name_en: 'Shaman', role_text: 'Daño principal' },

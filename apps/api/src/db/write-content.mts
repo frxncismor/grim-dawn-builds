@@ -183,6 +183,13 @@ export async function writeContentRows(
       footer_disclaimer: build.footer_disclaimer,
       hero_callout_title: build.hero_callout_title,
       hero_callout_body: build.hero_callout_body,
+      intro: build.intro,
+      stage: build.stage,
+      changelog: JSON.stringify(build.changelog),
+      pros: build.pros,
+      cons: build.cons,
+      hotbar: build.hotbar,
+      key_devotions: build.key_devotions,
     };
     builds.set(build.slug, await root('builds', fields));
   }
