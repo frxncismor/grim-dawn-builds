@@ -126,6 +126,15 @@ Ninguna tarea cruza áreas ni comparte archivos con otra salvo `specs/README.md`
 | Enlace simbólico en el artefacto | artefacto inválido, nunca se sigue | T001 | Falla cerrado |
 | A-01, A-03, C-003 | cerrados, solo registro | — | Sin tareas (research §R7–R9) |
 
+## Desviaciones aprobadas respecto al encargo
+
+Aprobadas por el principal el 2026-11-18 («D1 ok, D2 ok»); numeración de `reviews/analyze.md`.
+
+| ID | Encargo original | Decisión | Motivo | Aprobación | Tarea |
+| -- | ---------------- | -------- | ------ | ---------- | ----- |
+| D1 | S6-D3: que `e2e/a11y.spec.ts` use 2+ guías (fixture o artefacto de borradores). | Caso de componente de `HomePage` con 3 guías sintéticas (`home.page.spec.ts`); el e2e exige ≥ 1 id en lugar de 2+ guías. | El artefacto de borradores no lista guías (la portada solo muestra las publicadas); una guía pública más cambia el sitio y obliga a regenerar las 30 capturas, y un tercer artefacto e2e añade un build y un puerto (research §R3). | Principal, 2026-11-18 | T003 |
+| D2 | B-002: imponer la regla «al dominio o al esquema». | Se impone en `buildCardData` de `apps/web`, no en `packages/domain` ni en el esquema; plan B: unión discriminada de `BuildCardInput` (0 B). | `BuildCardData` es una vista de presentación («not a domain entity»): el dominio no conoce tarjetas, enlaces ni el idioma de la página (research §R5, constitución VI). `buildCardData` es el punto único de todos los adaptadores. | Principal, 2026-11-18 | T002 |
+
 ## Riesgos
 
 | Riesgo | Prob. | Impacto | Mitigación |
