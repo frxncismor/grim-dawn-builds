@@ -16,5 +16,7 @@ La ronda 2 dio 0 CRITICAL, 0 HIGH y 0 MEDIUM. Decisión del principal (A): el ú
    - **Aclaración vigente**: manda la tabla de `plan.md`. DV1 = S6-D3, caso de componente de `HomePage` con 3 guías (T003); DV2 = B-002, regla en `buildCardData` (T002). El origen fue el encargo del orquestador.
    - **Motivo del aplazamiento**: corregir `tasks.md` cambia el snapshot de la puerta.
    - **Plan**: se corrige en la próxima spec que toque spec007.
+   - **Cerrada por spec008 T001**: erratum en [`specs/008-deuda-spec007/erratum.md`](../../008-deuda-spec007/erratum.md).
 2. **Fila de spec007 en `specs/README.md`** («Implementada; puerta spec002 en curso»): queda desfasada por la misma razón (tocar `specs/README.md` cambia el snapshot). Se actualiza fuera del snapshot en la próxima tarea SDD, como S6-D2 en spec006.
+   - **Cerrada por spec008 T001**: fila actualizada en [`specs/README.md`](../../README.md) (spec007 cerrada, `95f18de`); ver [spec008](../../008-deuda-spec007/tasks.md).
 3. **S-101 (security r2) y A-002 (architecture r2)** son el mismo S-003 ya aplazado en la ronda 1 (entrada 1 de este archivo); no son deuda nueva.
