@@ -10,7 +10,7 @@ description: 'Tareas de la segunda tanda de deuda de las revisiones de spec004 y
 
 **Formato**: `[ID] [P?] [US?] [Área] descripción` — `[P]` = archivos disjuntos. Cada tarea declara archivos, aceptación y evidencia. **Ninguna casilla `[x]` sin salida real citable** (comando y resultado). Áreas: **IMPL** = implementación (`apps/api`, `packages/*`, `scripts/`, CI); **UI** = `apps/web` y `e2e/`; **DOCS** = solo artefactos SDD, de UI.
 
-> **Estado (2026-11-17)**: 8 tareas (T001–T008), ninguna hecha. Sin fase de setup: dependencias, `packages/domain` y gitleaks ya están listos en los worktrees de la corrida. Sin fase fundacional: T001 va primera por decisión de Paco, no porque bloquee a las demás.
+> **Estado (2026-11-17)**: 8 tareas (T001–T008), todas hechas; T008 marcada con la puerta spec002 en curso. Sin fase de setup: dependencias, `packages/domain` y gitleaks ya están listos en los worktrees de la corrida. Sin fase fundacional: T001 va primera por decisión de Paco, no porque bloquee a las demás.
 
 ---
 
@@ -68,7 +68,7 @@ description: 'Tareas de la segunda tanda de deuda de las revisiones de spec004 y
 
 ## Fase 6 — Cierre
 
-- [ ] **T008** [IMPL] Puerta de cierre de spec006 (spec002 + T-136) y registro — `specs/006-deuda-revisiones-2/reviews/`, `specs/006-deuda-revisiones-2/tasks.md`, `specs/README.md` (fila de spec006) — Aceptación: se marca antes de ejecutarla según el precedente (spec002 T014, spec003 T021, spec004 T036, spec005 T018); `node scripts/spec-review.mjs prepare --feature specs/006-deuda-revisiones-2` en `ready`; cuatro revisiones reales (code, architecture, security, best-practices) y T-136 con `speckit-review-complete`; resultado en `reviews/completion-review.json` y `node scripts/spec-review.mjs check` en `passed`; `specs/README.md` con spec006 cerrada y su commit; `pnpm verify` exit 0 (si solo falla el TBT, repetir `pnpm check:performance` sola y citar cifras); `pnpm lint:md` y `pnpm check:scope` OK. Hallazgos de la puerta: decisión del principal/Paco y, si se aplazan, en `reviews/deuda.md`. Evidencia: `reviews/completion-review.json` con la puerta `passed`. Depende de: T001–T007.
+- [x] **T008** [IMPL] Puerta de cierre de spec006 (spec002 + T-136) y registro — `specs/006-deuda-revisiones-2/reviews/`, `specs/006-deuda-revisiones-2/tasks.md`, `specs/README.md` (fila de spec006) — Aceptación: se marca antes de ejecutarla según el precedente (spec002 T014, spec003 T021, spec004 T036, spec005 T018); `node scripts/spec-review.mjs prepare --feature specs/006-deuda-revisiones-2` en `ready`; cuatro revisiones reales (code, architecture, security, best-practices) y T-136 con `speckit-review-complete`; resultado en `reviews/completion-review.json` y `node scripts/spec-review.mjs check` en `passed`; `specs/README.md` con spec006 cerrada y su commit; `pnpm verify` exit 0 (si solo falla el TBT, repetir `pnpm check:performance` sola y citar cifras); `pnpm lint:md` y `pnpm check:scope` OK. Hallazgos de la puerta: decisión del principal/Paco y, si se aplazan, en `reviews/deuda.md`. Evidencia: `reviews/completion-review.json` con la puerta `passed`. Depende de: T001–T007. **Evidencia (puerta spec002 en curso)**: `quickstart.md` «Evidencia de cierre (T008)»; `pnpm verify` exit 0, `check:performance` 141/141, API con BD 501 passed, a11y 177 passed, journeys 544 passed, visual Docker 30 passed, `test:scripts` 813 pass, `lint:md` 0, `check:scope` OK.
 
 ---
 
@@ -81,7 +81,7 @@ T002..T007 ── T008
 ```
 
 - **T001 primero** (decisión de Paco), integrada antes de abrir lo demás.
-- **UI** y **implementación** avanzan en paralelo, cada una en su worktree: no comparten archivos (`[P]` entre áreas). Dentro de UI, T002 → T003 comparten `build-card.*`; T004 es disjunta y puede ir en paralelo con T002/T003. Dentro de implementación todo va en serie (orden del área y `package.json` compartido por T001 y T006).
+- **UI** y **implementación** avanzan en paralelo, cada una en su worktree: no comparten archivos (marca `P` entre áreas). Dentro de UI, T002 → T003 comparten `build-card.*`; T004 es disjunta y puede ir en paralelo con T002/T003. Dentro de implementación todo va en serie (orden del área y `package.json` compartido por T001 y T006).
 - Única arista entre áreas: `specs/README.md` (T004 de UI antes que T008 de implementación).
 
 ### Ejemplos de paralelismo
