@@ -239,3 +239,69 @@ describe('Home: the list key is the destination (spec005 T010, S4-D4)', () => {
     expect(warn.mock.calls.flat().join(' ')).not.toContain('NG0955');
   });
 });
+
+describe('Home: description ids stay unique with several guides (spec007 T003, S6-D3)', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  const render = async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: SITE_BASE_URL, useValue: 'https://example.org/project/' },
+        { provide: LOCALE_ID, useValue: 'en' },
+        provideRouter([]),
+      ],
+    });
+    const guide = (slug: string, published_at: string) => ({
+      ...input.guides[0],
+      slug,
+      title: `Guía ${slug}`,
+      published_at,
+    });
+    const entryOf = (combination_slug: string, build_slug: string) => ({
+      ...input.entries[0],
+      combination_slug,
+      build_slug,
+      display_name: `Guía ${build_slug}`,
+    });
+    TestBed.inject(TransferState).set(CATALOG_STATE, {
+      ...input,
+      combinations: [
+        ...input.combinations,
+        { slug: 'soldado-arcanista', mastery_a_slug: 'soldado', mastery_b_slug: 'arcanista' },
+      ],
+      entries: [
+        entryOf('chaman-soldado', 'uno'),
+        entryOf('chaman-arcanista', 'dos'),
+        entryOf('soldado-arcanista', 'tres'),
+      ],
+      guides: [guide('uno', '2026-11-09'), guide('dos', '2026-11-08'), guide('tres', '2026-11-07')],
+    } as never);
+    const f = TestBed.createComponent(HomePage);
+    await f.whenStable();
+    return f.nativeElement as HTMLElement;
+  };
+  const idsOf = (el: HTMLElement) =>
+    [...el.querySelectorAll('gd-build-card [id^="build-card-combination-"]')].map((n) => n.id);
+
+  it('draws one description id per guide, all different, and the detector sees a duplicate', async () => {
+    const el = await render();
+    const ids = idsOf(el);
+    // Three public guides: the featured card and the two of «More builds», each with its own line.
+    expect(ids).toHaveLength(3);
+    expect(new Set(ids).size, `ids de descripción únicos: ${ids.join(', ')}`).toBe(3);
+    // Each card link points at the line of its own card, not at another one.
+    for (const card of el.querySelectorAll('gd-build-card')) {
+      const own = card.querySelector('[id^="build-card-combination-"]')!.id;
+      const link = card.querySelector('a[aria-describedby]');
+      expect(link, `enlace descrito en la tarjeta ${own}`).not.toBeNull();
+      expect(link!.getAttribute('aria-describedby')).toBe(own);
+    }
+    // Control: the same check on a page with two cards of the same key must fail (not vacuous).
+    el.appendChild(el.querySelector('gd-build-card')!.cloneNode(true));
+    const doubled = idsOf(el);
+    expect(doubled.length).toBe(ids.length + 1);
+    expect(new Set(doubled).size, 'control: the duplicate is detected').toBeLessThan(
+      doubled.length,
+    );
+  });
+});

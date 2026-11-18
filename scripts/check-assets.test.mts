@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
@@ -55,6 +55,14 @@ function check(manifest: unknown, withFile = true) {
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+}
+
+/** Skips (never passes in silence) when the platform refuses links; any other error is rethrown by the caller. */
+function skipIfLinksRefused(t: { skip: (reason: string) => void }, error: unknown): boolean {
+  const code = (error as NodeJS.ErrnoException).code;
+  if (code !== 'EPERM' && code !== 'EACCES') return false;
+  t.skip(`la plataforma no permite crear enlaces (${code})`);
+  return true;
 }
 
 test('a valid portrait entry with a matching file passes', () => {
@@ -343,6 +351,54 @@ test('assertNoGamePortraits: with own it fails closed on a missing artifact or a
     // With `game` and any other source there is nothing to check here (FR-004).
     assert.doesNotThrow(() => assertNoGamePortraits(root, 'game'));
     assert.doesNotThrow(() => assertNoGamePortraits(root, ''));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('assertNoGamePortraits: with own a linked assets/portraits folder fails; with game it is not checked (spec007 T001, FR-002)', (t) => {
+  const root = mkdtempSync(join(tmpdir(), 'gd-portraits-link-'));
+  try {
+    mkdirSync(join(root, 'real'));
+    writeFileSync(join(root, 'real', 'soldier.png'), PNG);
+    mkdirSync(join(root, 'browser', 'assets'), { recursive: true });
+    writeFileSync(join(root, 'browser', 'index.html'), '<html></html>');
+    try {
+      symlinkSync(join(root, 'real'), join(root, 'browser', 'assets', 'portraits'), 'junction');
+    } catch (error) {
+      if (skipIfLinksRefused(t, error)) return;
+      throw error;
+    }
+    assert.throws(
+      () => assertNoGamePortraits(root, 'own'),
+      /el artefacto es inv[aá]lido \(enlace o entrada no regular: .*assets\/portraits\)/,
+    );
+    assert.doesNotThrow(() => assertNoGamePortraits(root, 'game'));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('assertNoGamePortraits: with own a linked folder outside browser/ fails too, the whole-artifact walk (spec007 T007, FR-002)', (t) => {
+  const root = mkdtempSync(join(tmpdir(), 'gd-portraits-outside-'));
+  try {
+    mkdirSync(join(root, 'real', 'assets', 'portraits'), { recursive: true });
+    writeFileSync(join(root, 'real', 'assets', 'portraits', 'soldier.png'), PNG);
+    mkdirSync(join(root, 'browser'), { recursive: true });
+    writeFileSync(join(root, 'browser', 'index.html'), '<html></html>');
+    mkdirSync(join(root, 'server'), { recursive: true });
+    try {
+      symlinkSync(join(root, 'real'), join(root, 'server', 'linked'), 'junction');
+    } catch (error) {
+      if (skipIfLinksRefused(t, error)) return;
+      throw error;
+    }
+    // `browser/` itself is clean, so only the walk of the whole artifact can see the link.
+    assert.throws(
+      () => assertNoGamePortraits(root, 'own'),
+      /el artefacto es inv[aá]lido \(enlace o entrada no regular: .*server\/linked\)/,
+    );
+    assert.doesNotThrow(() => assertNoGamePortraits(root, 'game'));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

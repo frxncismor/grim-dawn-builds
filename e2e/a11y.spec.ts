@@ -623,6 +623,9 @@ test.describe('@a11y T010 descripción de las tarjetas de la portada', () => {
     const ids = await page
       .locator('gd-build-card [id^="build-card-combination-"]')
       .evaluateAll((nodes) => nodes.map((node) => node.id));
+    // Con el contenido de pruebas solo hay una guía pública: la unicidad con 2+ guías la prueba
+    // `home.page.spec.ts` (spec007 T003). Aquí se exige al menos un id para que no pase con cero.
+    expect(ids.length, 'la portada dibuja al menos una línea de combinación').toBeGreaterThan(0);
     expect(new Set(ids).size, `ids de descripción únicos en la portada: ${ids.join(', ')}`).toBe(
       ids.length,
     );

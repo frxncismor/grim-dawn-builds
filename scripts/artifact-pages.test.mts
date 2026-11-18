@@ -27,7 +27,7 @@ test('prerenderedPages: a missing folder fails naming the gate and the cause (FR
     ),
   ));
 
-test('prerenderedPages: a file or a symlink instead of a folder is invalid', () =>
+test('prerenderedPages: a file or a symlink instead of a folder is invalid', (t) =>
   withDir((dir) => {
     writeFileSync(join(dir, 'browser'), 'x');
     assert.throws(
@@ -39,8 +39,11 @@ test('prerenderedPages: a file or a symlink instead of a folder is invalid', () 
     const link = join(dir, 'link');
     try {
       symlinkSync(join(dir, 'real'), link, 'junction');
-    } catch {
-      return; // the platform refuses links: nothing to prove here
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== 'EPERM' && code !== 'EACCES') throw error;
+      t.skip(`la plataforma no permite crear enlaces (${code})`);
+      return;
     }
     assert.throws(
       () => prerenderedPages(link, { gate: 'puerta-x' }),
@@ -71,5 +74,44 @@ test('prerenderedPages: returns every .html, nested, in a stable order', () =>
     assert.deepEqual(
       pages.map((file) => file.slice(browser.length + 1).replaceAll('\\', '/')),
       ['a/b/index.html', 'es/index.html', 'index.html'],
+    );
+  }));
+
+test('prerenderedPages: a linked folder under browser/ is invalid, junction included (spec007 T001, FR-001)', (t) =>
+  withDir((dir) => {
+    mkdirSync(join(dir, 'real'));
+    page(join(dir, 'real'), 'index.html');
+    page(join(dir, 'browser'), 'index.html');
+    try {
+      symlinkSync(join(dir, 'real'), join(dir, 'browser', 'es'), 'junction');
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== 'EPERM' && code !== 'EACCES') throw error;
+      t.skip(`la plataforma no permite crear enlaces (${code})`);
+      return;
+    }
+    assert.throws(
+      () => prerenderedPages(join(dir, 'browser'), { gate: 'puerta-x' }),
+      /puerta-x: el artefacto es inválido \(enlace o entrada no regular: browser\/es\)/,
+    );
+  }));
+
+test('prerenderedPages: a linked .html page under browser/ is invalid (spec007 T001, FR-001)', (t) =>
+  withDir((dir) => {
+    page(join(dir, 'real'), 'x.html');
+    page(join(dir, 'browser'), 'index.html');
+    try {
+      symlinkSync(join(dir, 'real', 'x.html'), join(dir, 'browser', 'linked.html'), 'file');
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code === 'EPERM' || code === 'EACCES') {
+        t.skip(`la plataforma no permite enlaces simbólicos de archivo (${code})`);
+        return;
+      }
+      throw error;
+    }
+    assert.throws(
+      () => prerenderedPages(join(dir, 'browser'), { gate: 'puerta-x' }),
+      /puerta-x: el artefacto es inválido \(enlace o entrada no regular: browser\/linked\.html\)/,
     );
   }));

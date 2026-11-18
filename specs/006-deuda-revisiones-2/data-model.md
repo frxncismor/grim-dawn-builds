@@ -30,7 +30,7 @@ Sin cambios de tablas. Orden en la transacción de `seed`, `bootstrap` y `seedCa
 
 1. Aparcar slugs (como hoy).
 2. Borrar nodos ausentes de las fixtures **sin** referencias en `build_skill_nodes`.
-3. Upsert de maestrías y nodos (23505 por celda ocupada por un nodo ausente aún referenciado → `SeedError('reference', <maestría>)`).
+3. Upsert de maestrías y nodos (23505 por celda ocupada por un nodo ausente aún referenciado → `SeedError('reference', <maestría>)`). **Histórico, sustituido por T009**: un nodo ausente aún usado en una celda entrante se aparca fuera de la rejilla (`grid_row + 1000000`, `apps/api/src/db/write-content.mts:463-474`) y el paso 5 (`pruneCatalogNodes`) decide por la FK: 23503 → `SeedError('reference', <maestría>)`; el 23505 ya no se produce aquí.
 4. `writeContentRows` (salvo `seedCatalog`).
 5. Borrar los nodos ausentes restantes (23503 → `SeedError('reference', <maestría>)`).
 6. `retireMasteries` (como hoy).

@@ -63,7 +63,7 @@ import type { BuildCardData } from './build-card.model';
       </h3>
       @if (d.combination) {
         <!-- prettier-ignore -->
-        <p class="build-card__combination" aria-hidden="true" [id]="descriptionId()" [attr.lang]="d.combinationLang">{{ d.combination }}</p>
+        <p class="build-card__combination" [attr.aria-hidden]="d.combinationLang && !d.srCombination ? null : 'true'" [id]="descriptionId()" [attr.lang]="d.combinationLang">{{ d.combination }}</p>
       }
       <!-- prettier-ignore -->
       <p class="build-card__status" aria-hidden="true" [attr.data-status]="d.status">{{ d.statusLabel }}</p>

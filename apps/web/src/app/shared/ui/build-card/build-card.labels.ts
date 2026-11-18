@@ -51,6 +51,8 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
           gameVersion,
         ]
   ).filter((fact): fact is string => !!fact);
+  // The rule lives here, for every adapter: only a card that is a link can describe itself by the combination.
+  const linked = !!(input.href || external?.url);
   const newTab = external?.url
     ? $localize`:@@buildCard.externalLink:External source (new tab)`
     : null;
@@ -66,7 +68,9 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
     statusLabel,
     // A combination in the content language stays out of the link text: the link is described by the
     // visible `.build-card__combination` line (`aria-describedby`, own `lang`), see `build-card.ts`.
-    srCombination: input.combinationLang && input.combination ? '. ' + input.combination : null,
+    // A card with no link has no description to point at, so its line is exposed instead (spec007 T002).
+    srCombination:
+      linked && input.combinationLang && input.combination ? '. ' + input.combination : null,
     srText: [input.combinationLang ? null : input.combination, statusLabel, newTab]
       .map((part) => (part ? '. ' + part : ''))
       .join(''),
