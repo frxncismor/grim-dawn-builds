@@ -219,6 +219,7 @@ test('assertNoGamePortraits: with own an artifact with skill icons fails, with g
     for (const locale of ['', 'es/']) {
       mkdirSync(join(root, 'browser', locale, 'assets', 'skill-icons'), { recursive: true });
     }
+    writeFileSync(join(root, 'browser', 'index.html'), '<html></html>');
     assert.doesNotThrow(() => assertNoGamePortraits(root, 'game'));
     assert.doesNotThrow(() => assertNoGamePortraits(root, 'own'));
     writeFileSync(join(root, 'browser', 'es', 'assets', 'skill-icons', `${ICON}.png`), PNG);
@@ -324,6 +325,24 @@ test('credit gates: the credit only goes with the game art — own fails with a 
     );
     assert.throws(() => assertPortraitCredit(root, 'own'), /index\.html.*data-credit/);
     assert.throws(() => assertSkillIconCredit(root, 'own'), /index\.html.*data-game-art-credit/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('assertNoGamePortraits: with own it fails closed on a missing artifact or a browser/ without pages (spec006 T001, FR-003, FR-005)', () => {
+  const root = mkdtempSync(join(tmpdir(), 'gd-portraits-empty-'));
+  try {
+    // No `browser/` folder at all.
+    assert.throws(() => assertNoGamePortraits(root, 'own'), /sin carpeta browser/);
+    assert.throws(() => assertNoGamePortraits(join(root, 'nope'), 'own'), /sin carpeta browser/);
+    // `browser/` with files but no HTML page.
+    mkdirSync(join(root, 'browser'), { recursive: true });
+    writeFileSync(join(root, 'browser', 'main.js'), 'console.log(1);');
+    assert.throws(() => assertNoGamePortraits(root, 'own'), /ninguna p[aá]gina \.html/);
+    // With `game` and any other source there is nothing to check here (FR-004).
+    assert.doesNotThrow(() => assertNoGamePortraits(root, 'game'));
+    assert.doesNotThrow(() => assertNoGamePortraits(root, ''));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

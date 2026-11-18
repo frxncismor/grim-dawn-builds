@@ -55,6 +55,7 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
     ? $localize`:@@buildCard.externalLink:External source (new tab)`
     : null;
   return {
+    key: input.key,
     variant: input.variant,
     title: input.title,
     titleLang: input.titleLang,
@@ -63,8 +64,8 @@ export function buildCardData(input: BuildCardInput): BuildCardData {
     masteries: input.masteries.map((m) => ({ portrait: m.portrait ?? FALLBACK_PORTRAIT })),
     status: input.status,
     statusLabel,
-    // A combination in the content language is read in its own `lang` span (`srCombination`), never
-    // mixed into the UI-language text.
+    // A combination in the content language stays out of the link text: the link is described by the
+    // visible `.build-card__combination` line (`aria-describedby`, own `lang`), see `build-card.ts`.
     srCombination: input.combinationLang && input.combination ? '. ' + input.combination : null,
     srText: [input.combinationLang ? null : input.combination, statusLabel, newTab]
       .map((part) => (part ? '. ' + part : ''))

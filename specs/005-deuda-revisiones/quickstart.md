@@ -204,7 +204,7 @@ el mismo orden, todos exit 0. Único cambio: `api:test` se ejecutó como `pnpm -
 | `/builds/chaman-demoledor-golpe-primigenio` (+ES) | 126 636 B     | 150 000 |
 
 `/tier-list` pasa de 111 251 B (T018) a 111 343 B (+92 B): sigue por debajo del límite de 112 000 B (margen 657 B) pero 51 B por encima
-de la base de 111 292 B aceptada en la Pregunta 32. **Decisión de Paco (2026-11-17, ronda 2 de T018, B-08): se acepta 111 343 B como nueva base de SC-008 y P32** (T040). La corrección de B-06 (T040) es solo CSS y no cambia la cifra: `check:initial-js` mide 111 343/112 000 tras ella. La corrección posterior de T052 frente a F-002 (título editorial como descripción del enlace) sube `/tier-list` y `/es/tier-list` a **111 403 B** (+60 B, margen 597 B), sin otra ruta cambiada de forma relevante.
+de la base de 111 292 B aceptada en la Pregunta 32. **Decisión de Paco (2026-11-17, ronda 2 de T018, B-08): se acepta 111 343 B como nueva base de SC-008 y P32** (T040). La corrección de B-06 (T040) es solo CSS y no cambia la cifra: `check:initial-js` mide 111 343/112 000 tras ella. La corrección posterior de T052 frente a F-002 (título editorial como descripción del enlace) sube `/tier-list` y `/es/tier-list` a **111 403 B** (+60 B), **111 403 B (margen 597 B), aceptada por Paco el 2026-11-17**, sin otra ruta cambiada de forma relevante.
 
 ### `ASSET_SOURCE=game`
 

@@ -261,6 +261,25 @@ describe('skill_node_id reaches the database (spec 003 T031)', () => {
     return queries;
   };
 
+  it('prunes absent catalog nodes after the guides and before retiring masteries (spec006 T005)', async () => {
+    const queries = await run('class06/root');
+    const at = (needle: string) => queries.findIndex((q) => q.sql.includes(needle));
+    const guideAt = at('INSERT INTO "build_skill_nodes"');
+    const sweepAt = queries.findIndex((q) =>
+      q.sql.startsWith('DELETE FROM catalog_skill_nodes WHERE mastery_id = $1 AND id <> ALL'),
+    );
+    const retireAt = at('FROM mastery_trees WHERE id <> ALL');
+    expect(sweepAt).toBeGreaterThan(guideAt);
+    expect(retireAt).toBeGreaterThan(sweepAt);
+    // Before the upsert only the nodes no guide references are removed (frees their grid cells).
+    const earlyAt = queries.findIndex(
+      (q) =>
+        q.sql.includes('DELETE FROM catalog_skill_nodes') && q.sql.includes('build_skill_nodes'),
+    );
+    expect(earlyAt).toBeGreaterThan(-1);
+    expect(earlyAt).toBeLessThan(at('INSERT INTO catalog_skill_nodes'));
+  });
+
   it('loads the catalog before the guides so the node reference can resolve', async () => {
     const queries = await run('class06/root');
     const catalogAt = queries.findIndex((q) => q.sql.includes('INSERT INTO catalog_skill_nodes'));

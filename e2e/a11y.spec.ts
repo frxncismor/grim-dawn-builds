@@ -572,6 +572,71 @@ for (const catalog of [
   });
 }
 
+/**
+ * spec006 T003 (FR-008, FR-009, SC-004): la combinación en el idioma del contenido no entra en el
+ * nombre del enlace; es su descripción (`aria-describedby`) y el elemento descrito lleva su `lang`.
+ */
+test.describe('@a11y T003 descripción de la tarjeta del catálogo', () => {
+  test('/tier-list: el enlace de la guía se describe con la combinación en español', async ({
+    page,
+  }) => {
+    await page.goto(`${BASE_URL}/tier-list`, { waitUntil: 'networkidle' });
+    await settle(page);
+    const link = page.locator('gd-build-card a[href*="/builds/"]').first();
+    await expect(link).toHaveAccessibleDescription(/Chamán \+ Demoledor/);
+    const describedBy = await link.getAttribute('aria-describedby');
+    expect(describedBy, 'el enlace apunta a la línea de la combinación').toBeTruthy();
+    const described = page.locator(`[id="${describedBy}"]`);
+    await expect(described).toHaveCount(1);
+    await expect(described).toHaveAttribute('lang', 'es');
+    await expect(described).toHaveText(/Chamán \+ Demoledor/);
+  });
+
+  test('/es/tier-list: el enlace de la guía no tiene descripción', async ({ page }) => {
+    await page.goto(`${BASE_URL}/es/tier-list`, { waitUntil: 'networkidle' });
+    await settle(page);
+    const link = page.locator('gd-build-card a[href*="/builds/"]').first();
+    await expect(link).not.toHaveAttribute('aria-describedby', /.*/);
+    await expect(link).toHaveAccessibleDescription('');
+  });
+});
+
+/**
+ * spec006 T010 (C-002, FR-009): la portada usa otra clave (`guide.slug`) y otro camino de datos que
+ * el catálogo; su tarjeta destacada y las de «More builds» también describen el enlace con la
+ * combinación en español (`aria-describedby`) y los ids no se repiten.
+ */
+test.describe('@a11y T010 descripción de las tarjetas de la portada', () => {
+  test('/: los enlaces de guía se describen con la combinación en español y los ids son únicos', async ({
+    page,
+  }) => {
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await settle(page);
+    const link = page.locator('gd-build-card [data-variant="featured"] a');
+    await expect(link).toHaveAccessibleDescription(/Chamán \+ Demoledor/);
+    const describedBy = await link.getAttribute('aria-describedby');
+    expect(describedBy, 'el enlace apunta a la línea de la combinación').toBeTruthy();
+    const described = page.locator(`[id="${describedBy}"]`);
+    await expect(described).toHaveCount(1);
+    await expect(described).toHaveAttribute('lang', 'es');
+    await expect(described).toHaveText(/Chamán \+ Demoledor/);
+    const ids = await page
+      .locator('gd-build-card [id^="build-card-combination-"]')
+      .evaluateAll((nodes) => nodes.map((node) => node.id));
+    expect(new Set(ids).size, `ids de descripción únicos en la portada: ${ids.join(', ')}`).toBe(
+      ids.length,
+    );
+  });
+
+  test('/es: el enlace destacado no tiene descripción', async ({ page }) => {
+    await page.goto(`${BASE_URL}/es`, { waitUntil: 'networkidle' });
+    await settle(page);
+    const link = page.locator('gd-build-card [data-variant="featured"] a');
+    await expect(link).not.toHaveAttribute('aria-describedby', /.*/);
+    await expect(link).toHaveAccessibleDescription('');
+  });
+});
+
 for (const home of [
   { name: 'portada', path: '/' },
   { name: 'portada es', path: '/es' },

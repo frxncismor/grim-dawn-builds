@@ -17,6 +17,12 @@ describe('home builds (spec004 T016)', () => {
     expect(home.featured?.damage).toEqual(['Lightning']);
   });
 
+  it('keys each card by its guide slug (spec006 T002)', () => {
+    const home = homeBuilds(catalogInput(), 'es');
+    expect(home.featured?.key).toBe('tormenta');
+    expect(home.others.map((c) => c.key)).toEqual(home.others.map((c) => c.href![1]));
+  });
+
   it('has no featured card and no builds when no guide is public', () => {
     const empty = catalogInput({ guides: [] });
     const home = homeBuilds(empty, 'es');

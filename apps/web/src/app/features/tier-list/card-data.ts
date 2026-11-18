@@ -63,6 +63,7 @@ export function catalogCardInput(
   // localized mastery names; its editorial title stays beneath it with its own `lang`.
   const swap = !!guide && !!context.titleLang && title !== card.combinationName;
   return {
+    key: card.id,
     variant: variant ?? (real ? 'standard' : 'compact'),
     title: swap ? card.combinationName : title,
     // Editorial titles are content in its own language; the combination name is localized (FR-042).

@@ -52,14 +52,17 @@ describe('post-build brand gate (T034, FR-027)', () => {
   it('fails (never skips) when the artifact is missing', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'gd-brand-'));
     await rm(dir, { recursive: true, force: true });
-    await assert.rejects(assertNoLegacyBrand(dir), /no hay artefacto compilado.*pnpm build/);
+    await assert.rejects(
+      assertNoLegacyBrand(dir),
+      /puerta de marca antigua.*pnpm build.*sin carpeta browser/,
+    );
   });
 
   it('fails when the artifact is empty or has 5 pages or fewer', async () => {
-    await using({}, (dir) => assert.rejects(assertNoLegacyBrand(dir), /vacío o incompleto/));
+    await using({}, (dir) => assert.rejects(assertNoLegacyBrand(dir), /ninguna página \.html/));
     await using(
       { 'index.html': 'x', 'a.html': 'x', 'b.html': 'x', 'c.html': 'x', 'd.html': 'x' },
-      (dir) => assert.rejects(assertNoLegacyBrand(dir), /5 páginas/),
+      (dir) => assert.rejects(assertNoLegacyBrand(dir), /5 páginas \.html.*al menos 6/),
     );
   });
 });

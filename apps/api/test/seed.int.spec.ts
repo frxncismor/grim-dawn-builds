@@ -280,6 +280,186 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', SUITE_OPT
     }
   });
 
+  describe('node pruning runs after the guides are rewritten (spec006 T005, FR-015)', () => {
+    const catalogState = async () =>
+      (
+        await admin!.query(`SELECT
+          (SELECT json_agg(t ORDER BY id) FROM (SELECT id, slug, name_en, game_version FROM mastery_trees) t) AS trees,
+          (SELECT json_agg(n ORDER BY id) FROM (SELECT id, mastery_id, name_en, grid_col, grid_row, parent_id FROM catalog_skill_nodes) n) AS nodes,
+          (SELECT count(*)::int FROM build_skill_nodes) AS guide_nodes`)
+      ).rows[0];
+    /** A node some guide uses, with a parent, so dropping it keeps the tree valid after re-pointing. */
+    const usedNode = () => {
+      const used = new Set(data.builds.flatMap((b) => b.skill_nodes.map((n) => n.skill_node_id)));
+      for (const tree of data.catalog) {
+        const node = tree.nodes.find((n) => used.has(n.id) && n.parent_id !== null && n.tier >= 2);
+        if (node) return { tree, node };
+      }
+      throw new Error('fixtures have no used node with a parent');
+    };
+    const unusedNode = () => {
+      const used = new Set(data.builds.flatMap((b) => b.skill_nodes.map((n) => n.skill_node_id)));
+      for (const tree of data.catalog) {
+        const node = tree.nodes.find((n) => !used.has(n.id) && n.parent_id !== null && n.tier >= 3);
+        if (node && !tree.nodes.some((k) => k.parent_id === node.id)) return { tree, node };
+      }
+      throw new Error('fixtures have no unused leaf node');
+    };
+    const withoutNode = (id: string): SeedData['catalog'] => {
+      const catalog = structuredClone(data.catalog);
+      for (const tree of catalog) {
+        const victim = tree.nodes.find((n) => n.id === id);
+        if (!victim) continue;
+        for (const kid of tree.nodes.filter((n) => n.parent_id === id))
+          kid.parent_id = victim.parent_id;
+        tree.nodes = tree.nodes.filter((n) => n.id !== id);
+      }
+      return catalog;
+    };
+    const takingCellOf = (
+      catalog: SeedData['catalog'],
+      mastery: string,
+      cell: { col: number; row: number },
+      tier: number,
+      barRequired: number,
+    ) => {
+      const tree = catalog.find((t) => t.mastery.id === mastery)!;
+      tree.nodes.push({
+        id: `${mastery}/fresh-test-node`,
+        name: { en: 'Fresh', es: 'Nuevo' },
+        kind: 'passive',
+        circular: false,
+        tier,
+        bar_required: barRequired,
+        max_points: 1,
+        grid: cell,
+        parent_id: null,
+      });
+    };
+
+    it('seeds a guide that drops a node the catalog removes in the same seed (US5 1)', async () => {
+      await seedData(importer!, data);
+      const { node } = usedNode();
+      const build = data.builds[0]!;
+      const kept = build.skill_nodes.filter((n) => n.skill_node_id !== node.id);
+      const keptSlugs = new Set(kept.map((n) => n.slug));
+      const rewritten: SeedData = {
+        ...data,
+        catalog: withoutNode(node.id),
+        builds: [
+          {
+            ...build,
+            skill_nodes: kept,
+            priorities: build.priorities.map((p) => ({
+              ...p,
+              skill_node_slugs: p.skill_node_slugs.filter((slug) => keptSlugs.has(slug)),
+            })),
+          },
+        ],
+      };
+      expect(kept.length).toBeLessThan(build.skill_nodes.length);
+      try {
+        await seedData(importer!, rewritten);
+        expect(
+          (await admin!.query('SELECT 1 FROM catalog_skill_nodes WHERE id = $1', [node.id]))
+            .rowCount,
+        ).toBe(0);
+        const after = await catalogState();
+        await seedData(importer!, rewritten);
+        expect(await catalogState()).toEqual(after);
+      } finally {
+        await seedData(importer!, data);
+      }
+    });
+
+    it('names the mastery and changes nothing when a removed node is still used (US5 2)', async () => {
+      await seedData(importer!, data);
+      const { tree, node } = usedNode();
+      const before = await catalogState();
+      const modified: SeedData = { ...data, catalog: withoutNode(node.id) };
+      modified.catalog[0]!.mastery.name.en = 'Must not persist';
+      await expect(seedData(importer!, modified)).rejects.toMatchObject({
+        name: 'SeedError',
+        code: 'reference',
+        detail: tree.mastery.id,
+      });
+      expect(await catalogState()).toEqual(before);
+    });
+
+    it('lets a new node take the cell of a removed node nobody uses (US5 3)', async () => {
+      await seedData(importer!, data);
+      const { tree, node } = unusedNode();
+      const catalog = withoutNode(node.id);
+      takingCellOf(catalog, tree.mastery.id, node.grid, node.tier, node.bar_required);
+      try {
+        await seedData(importer!, { ...data, catalog });
+        expect(
+          (
+            await admin!.query(
+              'SELECT id FROM catalog_skill_nodes WHERE mastery_id=$1 AND grid_col=$2 AND grid_row=$3',
+              [tree.mastery.id, node.grid.col, node.grid.row],
+            )
+          ).rows,
+        ).toEqual([{ id: `${tree.mastery.id}/fresh-test-node` }]);
+        const after = await catalogState();
+        await seedData(importer!, { ...data, catalog });
+        expect(await catalogState()).toEqual(after);
+      } finally {
+        await seedData(importer!, data);
+      }
+    });
+
+    it('renames a used node in place: the catalog swaps it for a new id in the same cell and the guide follows (spec006 T009, F-001)', async () => {
+      await seedData(importer!, data);
+      const { tree, node } = usedNode();
+      const catalog = withoutNode(node.id);
+      takingCellOf(catalog, tree.mastery.id, node.grid, node.tier, node.bar_required);
+      const fresh = `${tree.mastery.id}/fresh-test-node`;
+      const builds = data.builds.map((b) => ({
+        ...b,
+        skill_nodes: b.skill_nodes.map((n) =>
+          n.skill_node_id === node.id ? { ...n, skill_node_id: fresh } : n,
+        ),
+      }));
+      const renamed: SeedData = { ...data, catalog, builds };
+      try {
+        await seedData(importer!, renamed);
+        const cell = await admin!.query(
+          'SELECT id FROM catalog_skill_nodes WHERE mastery_id=$1 AND grid_col=$2 AND grid_row=$3',
+          [tree.mastery.id, node.grid.col, node.grid.row],
+        );
+        expect(cell.rows).toEqual([{ id: fresh }]);
+        expect(
+          (await admin!.query('SELECT 1 FROM catalog_skill_nodes WHERE id = $1', [node.id]))
+            .rowCount,
+        ).toBe(0);
+        expect(
+          (await admin!.query('SELECT 1 FROM build_skill_nodes WHERE skill_node_id = $1', [fresh]))
+            .rowCount,
+        ).toBeGreaterThan(0);
+        const after = await catalogState();
+        await seedData(importer!, renamed);
+        expect(await catalogState()).toEqual(after);
+      } finally {
+        await seedData(importer!, data);
+      }
+    });
+
+    it('names the mastery when a new node wants the cell of a removed node that is still used', async () => {
+      await seedData(importer!, data);
+      const { tree, node } = usedNode();
+      const before = await catalogState();
+      const catalog = withoutNode(node.id);
+      takingCellOf(catalog, tree.mastery.id, node.grid, node.tier, node.bar_required);
+      await expect(seedData(importer!, { ...data, catalog })).rejects.toMatchObject({
+        name: 'SeedError',
+        code: 'reference',
+        detail: tree.mastery.id,
+      });
+      expect(await catalogState()).toEqual(before);
+    });
+  });
+
   it('seeds a retired mastery and a new one with the same slug in a single full seed (T041, C-101/F-001)', async () => {
     await seedData(importer!, data);
     const base = data.catalog[0]!;

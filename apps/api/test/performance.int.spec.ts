@@ -56,6 +56,7 @@ const PUBLISHED_SLUG = 'rendimiento-publicado';
 const TIER_LIST_SLUG = 'principal';
 const SAMPLE_COUNT = 40;
 const WARMUP_REQUESTS = 5;
+const COLD_START_RUNS = 3;
 const REPORT_PATH =
   process.env['GD_PERFORMANCE_REPORT'] ?? join(ROOT, 'dist/performance/backend.json');
 
@@ -112,12 +113,29 @@ export function percentile95(samples: readonly number[]): number {
   return sorted[index]!;
 }
 
+/** Mediana: con n par promedia los dos centrales; un atípico no la mueve. */
+export function median(samples: readonly number[]): number {
+  if (!samples.length) throw new Error('la mediana necesita al menos una muestra');
+  const sorted = [...samples].sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle]! : (sorted[middle - 1]! + sorted[middle]!) / 2;
+}
+
 it('percentil 95 por rango más cercano, sin interpolar', () => {
   expect(percentile95(Array.from({ length: 100 }, (_, index) => index + 1))).toBe(95);
   expect(percentile95([7, 1, 3])).toBe(7);
   expect(percentile95([4, 1, 3, 2])).toBe(4);
   expect(percentile95([2.5])).toBe(2.5);
   expect(() => percentile95([])).toThrow();
+});
+
+it('mediana de arranques en frío, robusta a un atípico', () => {
+  expect(median([900, 7000, 950])).toBe(950);
+  expect(median([950, 900, 7000])).toBeLessThanOrEqual(BUDGETS.coldStartMs);
+  expect(median([3, 1, 2])).toBe(2);
+  expect(median([2.5])).toBe(2.5);
+  expect(median([4, 1, 3, 2])).toBe(2.5);
+  expect(() => median([])).toThrow();
 });
 
 let container: string | undefined;
@@ -132,6 +150,7 @@ let postgresVersion = '';
 let catalog: Record<string, number> = {};
 const routeResults: RouteResult[] = [];
 let coldStartMs: number | null = null;
+let coldStartSamplesMs: number[] = [];
 let memory: MemoryUsage | null = null;
 
 const queries = vi.spyOn(pg.Client.prototype, 'query');
@@ -283,7 +302,7 @@ function writeReport(): void {
           warmupRequests: WARMUP_REQUESTS,
           percentile: 'nearest-rank ceil(0.95*n)-1',
           queries: 'contador de pg.Client.prototype.query por petición',
-          coldStart: 'spawn de node --import tsx src/server.ts hasta el primer /ready 200',
+          coldStart: `mediana de ${COLD_START_RUNS} arranques en serie: spawn de node --import tsx src/server.ts hasta el primer /ready 200`,
           memory: 'process.memoryUsage() del proceso que aloja la API tras las pruebas',
         },
         environment: {
@@ -295,7 +314,7 @@ function writeReport(): void {
           warmupRequests: WARMUP_REQUESTS,
         },
         budgets: BUDGETS,
-        results: { coldStartMs, memory, routes: routeResults },
+        results: { coldStartMs, coldStartSamplesMs, memory, routes: routeResults },
       },
       null,
       2,
@@ -323,7 +342,7 @@ function printSummary(): void {
       `  Muestras por ruta: ${SAMPLE_COUNT} tras ${WARMUP_REQUESTS} de calentamiento; p95 por rango más cercano`,
       '  Ruta                                  Muestras  p95        Máximo     Consultas  Límite',
       ...rows.map((row) => `  ${row}`),
-      `  Arranque en frío: ${coldStartMs.toFixed(0)} ms (≤ ${BUDGETS.coldStartMs} ms)`,
+      `  Arranque en frío: mediana ${coldStartMs.toFixed(0)} ms de ${coldStartSamplesMs.length} arranques [${coldStartSamplesMs.map((sample) => sample.toFixed(0)).join(', ')}] ms (≤ ${BUDGETS.coldStartMs} ms)`,
       `  Memoria: RSS ${(memory.rssBytes / (1024 * 1024)).toFixed(1)} MB, heap ${(memory.heapUsedBytes / (1024 * 1024)).toFixed(1)} MB (objetivo ≤ ${BUDGETS.runtimeTargetBytes / (1024 * 1024)} MB)`,
       '',
     ].join('\n'),
@@ -519,10 +538,16 @@ suite('presupuestos backend medibles sobre PostgreSQL 17 real (T-128)', () => {
     expect(catalog['builds']).toBeGreaterThanOrEqual(2);
   });
 
-  it('arranca en frío hasta el primer /ready 200 dentro de 5 s', async () => {
-    coldStartMs = await measureColdStart();
+  it('arranca en frío (mediana de 3) hasta el primer /ready 200 dentro de 5 s', async () => {
+    coldStartSamplesMs = [];
+    for (let run = 0; run < COLD_START_RUNS; run += 1)
+      coldStartSamplesMs.push(await measureColdStart());
+    coldStartMs = median(coldStartSamplesMs);
+    console.log(
+      `Arranque en frío: muestras [${coldStartSamplesMs.map((sample) => sample.toFixed(0)).join(', ')}] ms, mediana ${coldStartMs.toFixed(0)} ms`,
+    );
     expect(coldStartMs).toBeLessThanOrEqual(BUDGETS.coldStartMs);
-  }, 60_000);
+  }, 90_000);
 
   it('cumple p95 por ruta y ≤ 6 consultas SQL por petición', async () => {
     for (const plan of ROUTES) routeResults.push(await measureRoute(plan));

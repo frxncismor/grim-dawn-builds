@@ -13,6 +13,8 @@ export interface BuildCardPortrait {
 
 /** What a page knows about a build; `buildCardData` turns it into what the card draws. */
 export interface BuildCardInput {
+  /** Stable identity of the card within its page (catalog `card.id`, guide slug); derives its ids. */
+  readonly key: string;
   readonly variant: BuildCardVariant;
   readonly title: string;
   /** Language of `title` when it differs from the page's (FR-042); absent or `null` otherwise. */
@@ -51,6 +53,8 @@ export interface BuildCardInput {
  * Everything is already localized and resolved so the component stays markup only.
  */
 export interface BuildCardData {
+  /** Same as `BuildCardInput.key`: the content-derived part of the card's DOM ids. */
+  readonly key: string;
   readonly variant: BuildCardVariant;
   readonly title: string;
   readonly titleLang?: string | null;
@@ -66,8 +70,10 @@ export interface BuildCardData {
    */
   readonly srText: string;
   /**
-   * Hidden text read before `srText` when the combination is in the content language
-   * (`combinationLang`): `. combination`, drawn in its own `lang` span so AT still reads it (T037, F-002).
+   * Set when the combination is in the content language (`combinationLang`) and the card is a link.
+   * It is never drawn: it only tells the link to point `aria-describedby` at the visible
+   * `.build-card__combination` line, which carries its own `lang`, so AT reads it as the link's
+   * description without it entering the accessible name (spec005 T040; a card with no link never has one).
    */
   readonly srCombination?: string | null;
   readonly facts: readonly string[];

@@ -6,10 +6,22 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { BuildCard } from './build-card';
 import { buildCardData } from './build-card.labels';
 import type { BuildCardInput as BuildCardData } from './build-card.model';
+import { homeBuilds } from '../../../features/home/home-builds';
+import { catalogCardContext, catalogCardInput } from '../../../features/tier-list/card-data';
+import {
+  buildCatalog,
+  type CatalogCard,
+  type CatalogInput,
+} from '../../../features/tier-list/catalog.model';
+import {
+  entry as ownEntry,
+  input as catalogInput,
+} from '../../../features/tier-list/catalog.test-data';
 
 const portrait = (src: string, width = 197, height = 41) => ({ src, width, height });
 
 const guide: BuildCardData = {
+  key: 'guia-a',
   variant: 'standard',
   title: 'Chamán + Demoledor: Golpe Primigenio',
   masteries: [
@@ -26,6 +38,7 @@ const guide: BuildCardData = {
 };
 
 const noGuide: BuildCardData = {
+  key: 'sin-guia-a',
   variant: 'compact',
   title: 'Arcanista + Berserker',
   masteries: [{ portrait: null }, { portrait: null }],
@@ -192,21 +205,25 @@ describe('spec004 T052: combination name and language-safe accessible name', () 
     expect(described?.textContent).toContain('Guía editorial en español');
   });
 
-  it('gives every card its own description id', async () => {
+  it('gives every card its own description id, derived from its key', async () => {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
-    const ids = ['A', 'B'].map((combination) => {
+    const idOf = (key: string) => {
       const fixture = TestBed.createComponent(BuildCard);
       fixture.componentRef.setInput(
         'data',
-        buildCardData({ ...guide, combination, combinationLang: 'es' }),
+        buildCardData({ ...guide, key, combination: 'A', combinationLang: 'es' }),
       );
       fixture.detectChanges();
       return (fixture.nativeElement as HTMLElement)
         .querySelector('a')!
         .getAttribute('aria-describedby');
-    });
-    expect(ids[0]).toBeTruthy();
-    expect(ids[0]).not.toBe(ids[1]);
+    };
+    const [a1, b1] = [idOf('a'), idOf('b')];
+    const [b2, a2] = [idOf('b'), idOf('a')];
+    expect(a1).toBe('build-card-combination-a');
+    expect(b1).toBe('build-card-combination-b');
+    expect(a2).toBe(a1);
+    expect(b2).toBe(b1);
   });
 
   it('adds no description when the combination is in the UI language', async () => {
@@ -275,5 +292,58 @@ describe('spec005 T009 (S4-D3, Q-C = A): the status is announced once', () => {
   it('still announces the status of a card with no link', async () => {
     const el = await render(noGuide);
     expect(times(announced(el.querySelector('article')!), 'No guide')).toBe(1);
+  });
+});
+
+describe('spec006 T003 (L2): a content-language combination only exists on a linked card', () => {
+  afterEach(() => TestBed.resetTestingModule());
+  // One third-party link and one combination with no guide, next to the own guide.
+  const external = {
+    ...ownEntry,
+    entry_kind: 'enlace_externo',
+    display_name: 'Guía externa',
+    build_slug: null,
+    tier: 'S',
+    rights_status: 'link_only',
+    external_url: 'https://example.invalid/guia',
+    external_author: 'Autor externo',
+    combination_slug: 'chaman-arcanista',
+  };
+  const full = {
+    ...catalogInput,
+    entries: [...catalogInput.entries, external],
+  } as unknown as CatalogInput;
+
+  const inputsOf = (locale: 'en' | 'es'): BuildCardData[] => {
+    const snapshot = buildCatalog(full, locale);
+    const ctx = catalogCardContext(snapshot);
+    const cards: CatalogCard[] = [...snapshot.cards];
+    const home = homeBuilds(full, locale);
+    return [
+      ...cards.map((card) => catalogCardInput(card, ctx)),
+      ...(home.featured ? [home.featured] : []),
+      ...home.others,
+    ];
+  };
+
+  it.each(['en', 'es'] as const)(
+    'the real adapters (%s) set combinationLang only with a href',
+    (locale) => {
+      const inputs = inputsOf(locale);
+      expect(inputs.some((i) => i.href === null)).toBe(true);
+      expect(inputs.some((i) => i.external)).toBe(true);
+      for (const i of inputs.filter((x) => x.combinationLang))
+        expect(i.href, `${i.key} has a combinationLang`).not.toBeNull();
+      // The English page does produce one, so the check above is not vacuous.
+      if (locale === 'en') expect(inputs.some((i) => i.combinationLang)).toBe(true);
+    },
+  );
+
+  it.each(['en', 'es'] as const)('a card with no link draws no srCombination (%s)', (locale) => {
+    for (const i of inputsOf(locale).filter((x) => x.href === null)) {
+      const data = buildCardData(i);
+      expect(data.srCombination ?? null, i.key).toBeNull();
+      expect(i.combinationLang ?? null, i.key).toBeNull();
+    }
   });
 });
