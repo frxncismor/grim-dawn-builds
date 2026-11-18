@@ -460,16 +460,18 @@ export async function writeCatalogRows(
          AND NOT EXISTS (SELECT 1 FROM build_skill_nodes b WHERE b.skill_node_id = c.id)`,
       [m.id, incoming],
     );
-    // A still-referenced absent node that holds the cell of an incoming node would make the upsert
-    // fail with 23505; name the mastery instead (the guide still uses a node the catalog removed).
-    const blocked = await client.query(
-      `SELECT 1 FROM catalog_skill_nodes c
-       WHERE c.mastery_id = $1 AND c.id <> ALL($2::text[])
-         AND (c.grid_col, c.grid_row) IN (SELECT * FROM unnest($3::int[], $4::int[]))
-       LIMIT 1`,
+    // An absent node some guide used before this seed may hold the cell of an incoming node (an
+    // in-place rename: the guide moves to the new id later in the same seed). The previous guides say
+    // nothing about the final state, so do not decide here: park the node's row out of the grid
+    // (`grid_row` has no upper bound; its column stays equal to its tier) so the upsert below can take
+    // the cell. `pruneCatalogNodes` then deletes it once the guides were rewritten, or fails with
+    // 23503 → `reference` if a final guide still uses it, rolling the whole seed back (spec006 T009).
+    await client.query(
+      `UPDATE catalog_skill_nodes SET grid_row = grid_row + 1000000
+       WHERE mastery_id = $1 AND id <> ALL($2::text[])
+         AND (grid_col, grid_row) IN (SELECT * FROM unnest($3::int[], $4::int[]))`,
       [m.id, incoming, tree.nodes.map((n) => n.grid.col), tree.nodes.map((n) => n.grid.row)],
     );
-    if (blocked.rows.length) throw new SeedError('reference', m.id);
     for (const n of [...tree.nodes].sort((a, b) => a.tier - b.tier)) {
       await client.query(
         `INSERT INTO catalog_skill_nodes (id, mastery_id, name_en, name_es, kind, circular, tier,

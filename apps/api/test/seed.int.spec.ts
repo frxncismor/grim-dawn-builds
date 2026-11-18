@@ -409,6 +409,42 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', SUITE_OPT
       }
     });
 
+    it('renames a used node in place: the catalog swaps it for a new id in the same cell and the guide follows (spec006 T009, F-001)', async () => {
+      await seedData(importer!, data);
+      const { tree, node } = usedNode();
+      const catalog = withoutNode(node.id);
+      takingCellOf(catalog, tree.mastery.id, node.grid, node.tier, node.bar_required);
+      const fresh = `${tree.mastery.id}/fresh-test-node`;
+      const builds = data.builds.map((b) => ({
+        ...b,
+        skill_nodes: b.skill_nodes.map((n) =>
+          n.skill_node_id === node.id ? { ...n, skill_node_id: fresh } : n,
+        ),
+      }));
+      const renamed: SeedData = { ...data, catalog, builds };
+      try {
+        await seedData(importer!, renamed);
+        const cell = await admin!.query(
+          'SELECT id FROM catalog_skill_nodes WHERE mastery_id=$1 AND grid_col=$2 AND grid_row=$3',
+          [tree.mastery.id, node.grid.col, node.grid.row],
+        );
+        expect(cell.rows).toEqual([{ id: fresh }]);
+        expect(
+          (await admin!.query('SELECT 1 FROM catalog_skill_nodes WHERE id = $1', [node.id]))
+            .rowCount,
+        ).toBe(0);
+        expect(
+          (await admin!.query('SELECT 1 FROM build_skill_nodes WHERE skill_node_id = $1', [fresh]))
+            .rowCount,
+        ).toBeGreaterThan(0);
+        const after = await catalogState();
+        await seedData(importer!, renamed);
+        expect(await catalogState()).toEqual(after);
+      } finally {
+        await seedData(importer!, data);
+      }
+    });
+
     it('names the mastery when a new node wants the cell of a removed node that is still used', async () => {
       await seedData(importer!, data);
       const { tree, node } = usedNode();
