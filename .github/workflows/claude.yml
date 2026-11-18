@@ -12,10 +12,13 @@ on:
 
 jobs:
   claude:
+    # T-176: en los eventos de PR (review) el job solo corre en PRs del propio repositorio (los forks no
+    # reciben secretos). `issue_comment` e `issues` no tienen `pull_request.head`: la guarda los dejaría
+    # siempre saltados, así que no la llevan; ahí actúa el control de permisos del autor de la acción.
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude') && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
