@@ -10,7 +10,7 @@ description: 'Tareas de la segunda tanda de deuda de las revisiones de spec004 y
 
 **Formato**: `[ID] [P?] [US?] [Área] descripción` — `[P]` = archivos disjuntos. Cada tarea declara archivos, aceptación y evidencia. **Ninguna casilla `[x]` sin salida real citable** (comando y resultado). Áreas: **IMPL** = implementación (`apps/api`, `packages/*`, `scripts/`, CI); **UI** = `apps/web` y `e2e/`; **DOCS** = solo artefactos SDD, de UI.
 
-> **Estado (2026-11-17)**: 8 tareas (T001–T008), todas hechas; T008 marcada con la puerta spec002 en curso. Sin fase de setup: dependencias, `packages/domain` y gitleaks ya están listos en los worktrees de la corrida. Sin fase fundacional: T001 va primera por decisión de Paco, no porque bloquee a las demás.
+> **Estado (2026-11-17)**: 10 tareas (T001–T010): T001–T008 hechas (T008 marcada con la puerta spec002 en curso); T009 abierta y T010 hecha, correcciones de la ronda 1 de la puerta (decisión de Paco P35 = A). Sin fase de setup: dependencias, `packages/domain` y gitleaks ya están listos en los worktrees de la corrida. Sin fase fundacional: T001 va primera por decisión de Paco, no porque bloquee a las demás.
 
 ---
 
@@ -72,12 +72,23 @@ description: 'Tareas de la segunda tanda de deuda de las revisiones de spec004 y
 
 ---
 
+## Fase 7 — Correcciones de la ronda 1 de la puerta (T008)
+
+**Objetivo**: corregir los hallazgos de la ronda 1 de la puerta spec002 que Paco decidió arreglar (P35 = A, 2026-11-17); S-001 y B-002 se aplazan en `reviews/deuda.md`. **Prueba independiente**: quickstart «US3» (T010) y la suite de BD de la API (T009). No se reabren T001–T008.
+
+- [ ] **T009** [IMPL] Guarda de celda de `pruneCatalogNodes` con las guías previas (F-001 = A-001 = C-001, ronda 1; P35 = A) — `apps/api/src/db/write-content.mts` (`:465`), `apps/api/test/seed.int.spec.ts` (y `bootstrap.int.spec.ts` si el caso aplica) — Aceptación: renombrar un nodo en la misma celda a la vez que la guía cambia de nodo es una siembra válida: la guarda de celda no usa las referencias de las guías previas a la reescritura y no aborta un renombrado en sitio coherente; un nodo quitado que sigue referenciado por una guía final sigue dando `SeedError('reference', <maestría>)` sin cambios parciales (FR-015 intacto). Prueba roja primero con Postgres real: el renombrado en la misma celda con cambio de guía. Evidencia: `RUN_DB_TESTS=1` sobre `seed.int.spec.ts` y `bootstrap.int.spec.ts`, `pnpm --filter @gd/api test`, `pnpm --filter @gd/api typecheck`. Depende de: T008 (ronda 1 de la puerta). **La implementa otro agente tras T010.**
+- [x] **T010** [UI] e2e de la descripción en la portada y coherencia del registro (C-002, B-003, B-001 de la ronda 1; P35 = A) — `e2e/a11y.spec.ts` (`:579`), `specs/006-deuda-revisiones-2/research.md` (§R8 `:55`, `:57`), `specs/README.md` (fila y sección de spec006) — Aceptación: C-002, e2e nuevo de la descripción accesible en `/` (tarjeta de guía con `aria-describedby`, `toHaveAccessibleDescription` con la combinación ES y elemento descrito con `lang="es"`) y `/es` (sin descripción) (FR-009); B-003, §R8 remite a D2 (id sin saneado, IDREF válido con `:`) sin contradecir la implementación de T002; B-001, fila de spec006 en `specs/README.md` «Implementada; puerta spec002 en curso» con el recuento real y su sección al día. E2E rojo primero (no existe). Evidencia: `pnpm typecheck:e2e`, `pnpm e2e:a11y --workers=2` (0 violaciones, casos nuevos en verde), `pnpm lint`, `pnpm lint:md`, `pnpm check:scope`, `node scripts/spec-review.mjs prepare --feature specs/006-deuda-revisiones-2`. Depende de: T008 (ronda 1). Evidencia real: e2e rojo (`No tests found`) a verde (6 passed en 3 viewports); `pnpm typecheck:e2e` OK; `pnpm e2e:a11y --workers=2` 183 passed, 0 violaciones; `pnpm lint` OK; `pnpm check:scope` OK (267 archivos); `pnpm lint:md` y `spec-review prepare` en el reporte.
+
+**Checkpoint F7**: hallazgos corregidos de la ronda 1 cerrados o aplazados con motivo; la puerta se repite sobre el resultado.
+
+---
+
 ## Dependencias y orden
 
 ```text
 T001 ──┬── UI:   T002 → T003        T004 (cuando quiera)
        └── IMPL: T005 → T006 → T007
-T002..T007 ── T008
+T002..T007 ── T008 ── T009 (IMPL), T010 (UI), en paralelo
 ```
 
 - **T001 primero** (decisión de Paco), integrada antes de abrir lo demás.
@@ -107,6 +118,8 @@ T002..T007 ── T008
 | FR-015 | T005 |
 | FR-016 | T006 |
 | FR-017 | T007 |
+| FR-009 (portada), ronda 1 | T010 |
+| FR-015 (guarda de celda), ronda 1 | T009 |
 | FR-018 | T001–T003, T005–T007 (prueba roja primero) |
 | FR-019 | T008 y numeración T001–T008 |
 | FR-020 | todas (ninguna toca estilos ni cadenas visibles) |
