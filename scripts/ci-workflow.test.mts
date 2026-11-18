@@ -54,7 +54,8 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm run catalog:nodes',
   // T-150: the en/es catalogs must match in PR verification too.
   'pnpm run check:locale-parity',
-  'pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
+  // T-177: ng build plus emit-static-assets (portraits, skill icons, trees, deferred.css).
+  'pnpm run e2e:drafts:build',
   // T-171: the video facade preview artifact must exist before the journeys run.
   'pnpm run e2e:video:build',
   'pnpm exec playwright install --with-deps chromium',
@@ -437,9 +438,7 @@ describe('PR verification workflow (T-064)', () => {
     const realContent = indexOf('pnpm run content:validate -- --dir fixtures/content');
     const catalog = indexOf('pnpm run catalog:check');
     const publicBuildCheck = indexOf('pnpm run check:public-build');
-    const draftsBuild = indexOf(
-      'pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
-    );
+    const draftsBuild = indexOf('pnpm run e2e:drafts:build');
     const videoBuild = indexOf('pnpm run e2e:video:build');
     const journeys = indexOf('pnpm run e2e:journeys');
     const a11y = indexOf('pnpm run e2e:a11y');
@@ -638,9 +637,13 @@ describe('PR verification workflow (T-064)', () => {
         ),
     ],
     [
-      'drafts build overwrites the public artifact',
+      // T-177: a bare ng build skips emit-static-assets, so the artifact has no game art.
+      'drafts build is a bare ng build without emit-static-assets (T-177)',
       () =>
-        mutate('--output-path ../../dist/e2e-drafts', '--output-path ../../dist/grim-dawn-builds'),
+        mutate(
+          'run: pnpm run e2e:drafts:build',
+          'run: pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
+        ),
     ],
     [
       'video facade preview build removed (T-171)',

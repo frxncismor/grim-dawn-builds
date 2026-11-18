@@ -3646,3 +3646,21 @@ en el job, y la puerta solo acepta la referencia si el job que la contiene lleva
 esa guarda exacta (sola o con `&&`; con `||` cada alternativa la lleva).
 
 **Aceptación**: ver T-176 en `tasks.md`.
+
+### 17.64 T-177: artefacto de borradores y retrato de portada con `ASSET_SOURCE=game`
+
+**Problema**: con T-176 el check «Verify pull request» llega por primera vez a
+`e2e:journeys` y fallan 12 pruebas con `ASSET_SOURCE: game`.
+
+**Causa** (reproducida en local con las variables y el orden de la CI): (1) el
+paso de CI que construye los borradores ejecuta solo `ng build`; el paso
+posterior `emit-static-assets` (árboles, `deferred.css`, retratos e iconos de
+habilidad) lo hace `pnpm e2e:drafts:build`, y sin él el artefacto no sirve el
+arte del juego; (2) la prueba de la tarjeta de portada fija los SVG propios
+aunque el artefacto sea `game`. El arte del juego está versionado
+(constitución §VII), así que no hay decisión de producto.
+
+**Decisión**: la CI usa `pnpm run e2e:drafts:build` y la prueba espera el
+retrato según `ASSET_SOURCE`, sin omisiones condicionales.
+
+**Aceptación**: ver T-177 en `tasks.md`.

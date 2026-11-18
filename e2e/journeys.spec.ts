@@ -1287,10 +1287,15 @@ for (const locale of [
       const sources = await card
         .locator('img')
         .evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')));
-      expect(sources, 'retrato propio de Chamán y de Demoledor, no el genérico').toEqual([
-        'assets/icons/mastery-chaman.svg',
-        'assets/icons/mastery-demoledor.svg',
-      ]);
+      // T-177: the artifact serves the art chosen by ASSET_SOURCE (default own, as in the build).
+      expect(
+        sources,
+        'retrato de Chamán y de Demoledor según ASSET_SOURCE, no el genérico',
+      ).toEqual(
+        process.env['ASSET_SOURCE'] === 'game'
+          ? ['assets/portraits/shaman.png', 'assets/portraits/demolition.png']
+          : ['assets/icons/mastery-chaman.svg', 'assets/icons/mastery-demoledor.svg'],
+      );
       const text = (await card.textContent()) ?? '';
       expect(text).toContain(locale.version);
       expect(text, 'el valor del contenido no se muestra tal cual').not.toMatch(
