@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
@@ -343,6 +343,28 @@ test('assertNoGamePortraits: with own it fails closed on a missing artifact or a
     // With `game` and any other source there is nothing to check here (FR-004).
     assert.doesNotThrow(() => assertNoGamePortraits(root, 'game'));
     assert.doesNotThrow(() => assertNoGamePortraits(root, ''));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('assertNoGamePortraits: with own a linked assets/portraits folder fails; with game it is not checked (spec007 T001, FR-002)', () => {
+  const root = mkdtempSync(join(tmpdir(), 'gd-portraits-link-'));
+  try {
+    mkdirSync(join(root, 'real'));
+    writeFileSync(join(root, 'real', 'soldier.png'), PNG);
+    mkdirSync(join(root, 'browser', 'assets'), { recursive: true });
+    writeFileSync(join(root, 'browser', 'index.html'), '<html></html>');
+    try {
+      symlinkSync(join(root, 'real'), join(root, 'browser', 'assets', 'portraits'), 'junction');
+    } catch {
+      return; // the platform refuses links: nothing to prove here
+    }
+    assert.throws(
+      () => assertNoGamePortraits(root, 'own'),
+      /el artefacto es inv[aá]lido \(enlace o entrada no regular: .*assets\/portraits\)/,
+    );
+    assert.doesNotThrow(() => assertNoGamePortraits(root, 'game'));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

@@ -384,7 +384,7 @@ describe('PR verification workflow (T-064)', () => {
       if (!block.some((entry) => /^\s+run: pnpm run build\s*$/.test(entry))) return;
       checked += 1;
       const envLines = block.filter((entry) => /^ {6}ASSET_SOURCE:/.test(entry));
-      // spec005 T017: the visual-regression job is the one `own` build (no game PNG in the repo).
+      // spec005 T017: the visual-regression job is the one `own` build (its references are generated with `own`; `own` is the default and the withdrawal path, constitution VII).
       const expected = /^ {2}visual-regression:/.test(line)
         ? 'ASSET_SOURCE: own'
         : 'ASSET_SOURCE: game';
