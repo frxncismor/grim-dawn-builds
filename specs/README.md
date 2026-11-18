@@ -12,6 +12,7 @@ Actualizado el 2026-11-18 (T007 de spec007).
 | [005-deuda-revisiones](005-deuda-revisiones/tasks.md)                   | Cerrada (puerta spec002 passed, `cc553c3`) | 41 de 41      | 0          |
 | [006-deuda-revisiones-2](006-deuda-revisiones-2/tasks.md)               | Cerrada (puerta spec002 passed, `c626f26`) | 10 de 10      | 0          |
 | [007-deuda-revisiones-3](007-deuda-revisiones-3/tasks.md)               | Implementada; puerta spec002 en curso      | 7 de 7        | 0          |
+| [008-deuda-spec007](008-deuda-spec007/tasks.md)                         | Planificada                                | 0 de 4        | 4          |
 
 ## 001-mvp-guias-builds
 
