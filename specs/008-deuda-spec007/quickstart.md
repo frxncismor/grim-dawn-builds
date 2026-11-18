@@ -42,3 +42,29 @@ node scripts/spec-review.mjs check --feature specs/008-deuda-spec007
 ```
 
 Esperado: `pnpm verify` exit 0; `prepare` en `ready`; `check` en `passed`. La tabla «Evidencia de cierre (T004)» se añade aquí al cerrar.
+
+## Evidencia de cierre (T004)
+
+Fecha: 2026-11-18. HEAD de base: `9252955` (`orq/11111619-ui-s8-vr`, sin cambios locales al empezar; T001–T003 integradas). `pnpm` 12.18.0, sin
+`HTTP_PROXY`/`HTTPS_PROXY`, un solo proceso pesado a la vez. Salidas saneadas (rutas omitidas). Todos los pasos pasaron a la
+primera: no hizo falta repetir ninguno. Tras el build `game` se reconstruyó `own` con `pnpm build` antes de los e2e. Sin cambios en
+`apps/`; la regresión visual se corrió igualmente.
+
+| Comando                                                               | Exit | Extracto                                                                                                  |
+| --------------------------------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------------- |
+| `pnpm verify` (`ASSET_SOURCE=own`)                                    | 0    | `verify OK (local)`; `check:performance OK (141/141 comprobaciones)`; web 325 passed; `test:scripts` 830  |
+| `check:initial-js` dentro de `verify`                                 | 0    | `/` 0/90000; `/tier-list` y `/es/tier-list` 111422/112000 B; `/maestrias` y `/es/maestrias` 106194/112000 |
+| `ASSET_SOURCE=game pnpm build`                                        | 0    | `emit-static-assets OK (… 6 retratos y 164 iconos de habilidad con ASSET_SOURCE=game)`                    |
+| `ASSET_SOURCE=game pnpm check:performance`                            | 0    | `check:performance OK (141/141 comprobaciones)`                                                           |
+| `RUN_DB_TESTS=1 pnpm --filter @gd/api exec vitest run --maxWorkers=2` | 0    | `Test Files 35 passed (35)`; `Tests 502 passed, 1 expected fail (503)`; 0 saltadas                        |
+| `pnpm build` (`own`), `pnpm e2e:drafts:build`, `pnpm e2e:video:build` | 0    | build OK (los tres)                                                                                       |
+| `pnpm e2e:a11y --workers=2`                                           | 0    | `183 passed`, 0 fallos                                                                                    |
+| `pnpm e2e:journeys --workers=2`                                       | 0    | `544 passed`, `41 skipped`, 0 fallos                                                                      |
+| `e2e:visual` en Docker (árbol por stdin, `sh /run.sh check`)          | 0    | `30 passed`; `git status e2e/visual-baselines` limpio                                                     |
+| `pnpm test:scripts`                                                   | 0    | `tests 830`, `pass 827`, `fail 0`, `skipped 3`                                                            |
+| `pnpm typecheck:e2e`                                                  | 0    | sin errores                                                                                               |
+| `pnpm lint:md`                                                        | 0    | `Summary: 0 issues in 0 files`                                                                            |
+| `pnpm check:scope`                                                    | 0    | `check:scope OK (269 archivos revisados)`                                                                 |
+
+`/tier-list` queda en 111 422 B, por debajo del tope de 112 000 B (sin cambios: spec008 no toca `apps/web`). Las pruebas con BD
+usaron sus contenedores efímeros; no se tocó el stack `grim-dawn-builds`.

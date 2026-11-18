@@ -10,7 +10,7 @@ description: 'Tareas de la deuda de spec007: erratum DV1/DV2, registro y recorri
 
 **Formato**: `[ID] [P?] [US?] [Área] descripción` — `[P]` = archivos disjuntos. Cada tarea declara archivos, aceptación y evidencia. **Ninguna casilla `[x]` sin salida real citable** (comando y resultado). Áreas: **IMPL** = implementación (`scripts/`); **DOCS** = solo artefactos SDD, de UI.
 
-> **Estado (2026-11-18)**: 4 tareas (T001–T004), ninguna hecha. Sin fase de setup: dependencias, `packages/domain` y gitleaks ya están listos en los worktrees de la corrida. Sin fase fundacional: T001 y T002 son independientes; T003 depende de T002 y T004 (cierre) de todas.
+> **Estado (2026-11-18)**: 4 tareas (T001–T004), todas hechas (T004 con la puerta spec002 en curso). Sin fase de setup: dependencias, `packages/domain` y gitleaks ya están listos en los worktrees de la corrida. Sin fase fundacional: T001 y T002 son independientes; T003 depende de T002 y T004 (cierre) de todas.
 
 ---
 
@@ -37,7 +37,7 @@ description: 'Tareas de la deuda de spec007: erratum DV1/DV2, registro y recorri
 
 ## Fase 3 — Cierre
 
-- [ ] **T004** [IMPL] Verificación de integración y puerta de cierre de spec008 (spec002 + T-136) — `specs/008-deuda-spec007/quickstart.md` (evidencia), `specs/008-deuda-spec007/reviews/`, `specs/008-deuda-spec007/tasks.md`, `specs/README.md` (fila de spec008), `specs/007-deuda-revisiones-3/reviews/deuda.md` (`:5-9`, `:20`) — Aceptación: se marca antes de ejecutar la puerta según el precedente (spec002 T014, spec003 T021, spec004 T036, spec005 T018, spec006 T008, spec007 T006); primero la verificación de integración sobre el resultado de T001–T003: `pnpm verify` exit 0 (`ASSET_SOURCE=own`; si solo falla el TBT, repetir `pnpm check:performance` y citar cifras), `ASSET_SOURCE=game pnpm build`, `pnpm build:release` o, si no hay API/BD, declararlo y citar `node --import tsx --test scripts/build-release.test.mts`, `pnpm lint:md` y `pnpm check:scope` OK, con su tabla en `quickstart.md` («Evidencia de cierre (T004)»); sin cambios en `apps/`, la regresión visual no es obligatoria (declararlo); después `node scripts/spec-review.mjs prepare --feature specs/008-deuda-spec007` en `ready`, cuatro revisiones reales (code, architecture, security, best-practices) y T-136 con `speckit-review-complete`, resultado en `reviews/completion-review.json` y `node scripts/spec-review.mjs check` en `passed` (SC-004); `specs/README.md` con spec008 cerrada y su commit; en `specs/007-deuda-revisiones-3/reviews/deuda.md`, la entrada S-003 = A-002 (ronda 1) y la 3 de la ronda 2 dicen «Cerrada por spec008 T002–T003» con enlace (FR-008). Hallazgos de la puerta: decisión del principal/Paco y, si se aplazan, en `reviews/deuda.md`. Evidencia: tabla de `quickstart.md` y `reviews/completion-review.json` con la puerta `passed`. Depende de: T001–T003.
+- [x] **T004** [IMPL] Verificación de integración y puerta de cierre de spec008 (spec002 + T-136) — `specs/008-deuda-spec007/quickstart.md` (evidencia), `specs/008-deuda-spec007/reviews/`, `specs/008-deuda-spec007/tasks.md`, `specs/README.md` (fila de spec008), `specs/007-deuda-revisiones-3/reviews/deuda.md` (`:5-9`, `:20`) — Aceptación: se marca antes de ejecutar la puerta según el precedente (spec002 T014, spec003 T021, spec004 T036, spec005 T018, spec006 T008, spec007 T006); primero la verificación de integración sobre el resultado de T001–T003: `pnpm verify` exit 0 (`ASSET_SOURCE=own`; si solo falla el TBT, repetir `pnpm check:performance` y citar cifras), `ASSET_SOURCE=game pnpm build`, `pnpm build:release` o, si no hay API/BD, declararlo y citar `node --import tsx --test scripts/build-release.test.mts`, `pnpm lint:md` y `pnpm check:scope` OK, con su tabla en `quickstart.md` («Evidencia de cierre (T004)»); sin cambios en `apps/`, la regresión visual no es obligatoria (declararlo); después `node scripts/spec-review.mjs prepare --feature specs/008-deuda-spec007` en `ready`, cuatro revisiones reales (code, architecture, security, best-practices) y T-136 con `speckit-review-complete`, resultado en `reviews/completion-review.json` y `node scripts/spec-review.mjs check` en `passed` (SC-004); `specs/README.md` con spec008 cerrada y su commit; en `specs/007-deuda-revisiones-3/reviews/deuda.md`, la entrada S-003 = A-002 (ronda 1) y la 3 de la ronda 2 dicen «Cerrada por spec008 T002–T003» con enlace (FR-008). Hallazgos de la puerta: decisión del principal/Paco y, si se aplazan, en `reviews/deuda.md`. Evidencia: tabla de `quickstart.md` y `reviews/completion-review.json` con la puerta `passed`. Depende de: T001–T003.
 
 ---
 
@@ -48,7 +48,7 @@ UI:   T001                 ─┐
 IMPL: T002 ── T003         ─┴── T004 (IMPL, cierre)
 ```
 
-- T001 y T002 son independientes y de áreas distintas (`[P]`); T003 espera a T002 (mismo agente de implementación, en serie); T004 espera a las tres.
+- T001 y T002 son independientes y de áreas distintas (marca `P`); T003 espera a T002 (mismo agente de implementación, en serie); T004 espera a las tres.
 - Aristas entre áreas: `specs/README.md` y `specs/007-deuda-revisiones-3/reviews/deuda.md` (T001 de UI antes que T004 de implementación; tocan entradas distintas).
 - Las líneas de `tasks.md` de UI (T001) y de implementación (T002–T004) están en fases distintas, separadas por el checkpoint: no chocan al integrar.
 
