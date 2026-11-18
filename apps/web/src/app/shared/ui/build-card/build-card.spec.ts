@@ -6,6 +6,17 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { BuildCard } from './build-card';
 import { buildCardData } from './build-card.labels';
 import type { BuildCardInput as BuildCardData } from './build-card.model';
+import { homeBuilds } from '../../../features/home/home-builds';
+import { catalogCardContext, catalogCardInput } from '../../../features/tier-list/card-data';
+import {
+  buildCatalog,
+  type CatalogCard,
+  type CatalogInput,
+} from '../../../features/tier-list/catalog.model';
+import {
+  entry as ownEntry,
+  input as catalogInput,
+} from '../../../features/tier-list/catalog.test-data';
 
 const portrait = (src: string, width = 197, height = 41) => ({ src, width, height });
 
@@ -281,5 +292,58 @@ describe('spec005 T009 (S4-D3, Q-C = A): the status is announced once', () => {
   it('still announces the status of a card with no link', async () => {
     const el = await render(noGuide);
     expect(times(announced(el.querySelector('article')!), 'No guide')).toBe(1);
+  });
+});
+
+describe('spec006 T003 (L2): a content-language combination only exists on a linked card', () => {
+  afterEach(() => TestBed.resetTestingModule());
+  // One third-party link and one combination with no guide, next to the own guide.
+  const external = {
+    ...ownEntry,
+    entry_kind: 'enlace_externo',
+    display_name: 'Guía externa',
+    build_slug: null,
+    tier: 'S',
+    rights_status: 'link_only',
+    external_url: 'https://example.invalid/guia',
+    external_author: 'Autor externo',
+    combination_slug: 'chaman-arcanista',
+  };
+  const full = {
+    ...catalogInput,
+    entries: [...catalogInput.entries, external],
+  } as unknown as CatalogInput;
+
+  const inputsOf = (locale: 'en' | 'es'): BuildCardData[] => {
+    const snapshot = buildCatalog(full, locale);
+    const ctx = catalogCardContext(snapshot);
+    const cards: CatalogCard[] = [...snapshot.cards];
+    const home = homeBuilds(full, locale);
+    return [
+      ...cards.map((card) => catalogCardInput(card, ctx)),
+      ...(home.featured ? [home.featured] : []),
+      ...home.others,
+    ];
+  };
+
+  it.each(['en', 'es'] as const)(
+    'the real adapters (%s) set combinationLang only with a href',
+    (locale) => {
+      const inputs = inputsOf(locale);
+      expect(inputs.some((i) => i.href === null)).toBe(true);
+      expect(inputs.some((i) => i.external)).toBe(true);
+      for (const i of inputs.filter((x) => x.combinationLang))
+        expect(i.href, `${i.key} has a combinationLang`).not.toBeNull();
+      // The English page does produce one, so the check above is not vacuous.
+      if (locale === 'en') expect(inputs.some((i) => i.combinationLang)).toBe(true);
+    },
+  );
+
+  it.each(['en', 'es'] as const)('a card with no link draws no srCombination (%s)', (locale) => {
+    for (const i of inputsOf(locale).filter((x) => x.href === null)) {
+      const data = buildCardData(i);
+      expect(data.srCombination ?? null, i.key).toBeNull();
+      expect(i.combinationLang ?? null, i.key).toBeNull();
+    }
   });
 });

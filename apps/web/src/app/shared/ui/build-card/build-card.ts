@@ -58,11 +58,6 @@ import type { BuildCardData } from './build-card.model';
           >
         } @else {
           <span [attr.lang]="d.titleLang">{{ d.title }}</span>
-          @if (d.srCombination) {
-            <span class="build-card__sr" [attr.lang]="d.combinationLang">{{
-              d.srCombination
-            }}</span>
-          }
           <span class="build-card__sr">{{ d.srText }}</span>
         }
       </h3>
