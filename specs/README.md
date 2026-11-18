@@ -1,7 +1,7 @@
 # Estado de las specs
 
 Registro vivo del avance por spec (fuente de verdad: el `tasks.md` de cada una).
-Actualizado el 2026-11-17 (T010 de spec006).
+Actualizado el 2026-11-18 (T005 de spec007).
 
 | Spec                                                                    | Estado                                     | Tareas hechas | Pendientes |
 | ----------------------------------------------------------------------- | ------------------------------------------ | ------------- | ---------- |
@@ -10,7 +10,7 @@ Actualizado el 2026-11-17 (T010 de spec006).
 | [003-catalogo-arboles-maestria](003-catalogo-arboles-maestria/tasks.md) | Cerrada (puerta spec002 passed, `1fd7e77`) | 41 de 41      | 0          |
 | [004-rediseno-ui-grim-dawn](004-rediseno-ui-grim-dawn/tasks.md)         | Cerrada (puerta spec002 passed, `f41d844`) | 54 de 54      | 0          |
 | [005-deuda-revisiones](005-deuda-revisiones/tasks.md)                   | Cerrada (puerta spec002 passed, `cc553c3`) | 41 de 41      | 0          |
-| [006-deuda-revisiones-2](006-deuda-revisiones-2/tasks.md)               | Implementada; puerta spec002 en curso      | 8 de 10       | 2          |
+| [006-deuda-revisiones-2](006-deuda-revisiones-2/tasks.md)               | Cerrada (puerta spec002 passed, `c626f26`) | 10 de 10      | 0          |
 | [007-deuda-revisiones-3](007-deuda-revisiones-3/tasks.md)               | Planificada (2026-11-18)                   | 0 de 6        | 6          |
 
 ## 001-mvp-guias-builds
@@ -50,9 +50,10 @@ spec002 `passed`, `cc553c3`).
 
 ## 006-deuda-revisiones-2
 
-Planificada el 2026-11-17 (P33 = A; P34: F-002, S-001 y mediana de `coldStartMs`
-dentro, S3-T042/S3-T043 fuera por estar hechos). T001 (S4-D1, helper único de
-páginas prerrenderizadas) va primero; T008 es la puerta spec002. Implementación
-T001-T008 marcada (T008 antes de ejecutar la puerta, según el precedente). La ronda 1
-de la puerta añadió T009 (guarda de celda de la poda, API) y T010 (e2e de la portada y
-registro), abiertas; S-001 y B-002 se aplazan en `006-deuda-revisiones-2/reviews/deuda.md`.
+Cerrada. T001-T010 hechas (10 de 10). Puerta spec002 y T-136 passed en `c626f26`
+(fusionada en `mvp/1` en `81179fc`, PR #12). Planificada el 2026-11-17 (P33 = A; P34:
+F-002, S-001 y mediana de `coldStartMs` dentro, S3-T042/S3-T043 fuera por estar hechos).
+La ronda 1 de la puerta añadió T009 (guarda de celda de la poda, API) y T010 (e2e de la
+portada y registro). Los aplazados S-001, B-002, S6-D1, S6-D2 y S6-D3 pasan a
+[spec007](007-deuda-revisiones-3/tasks.md); S-001 y B-002 constan en
+`006-deuda-revisiones-2/reviews/deuda.md`.
