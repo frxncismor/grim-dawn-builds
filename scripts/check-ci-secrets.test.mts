@@ -72,7 +72,7 @@ function mutate(from: string, to: string): string {
 describe('check-ci-secrets (T-086 ST-1)', () => {
   it('el repositorio pasa sin hallazgos ni excepciones', () => {
     const result = scanWorkflowDir(REAL_WORKFLOWS);
-    assert.equal(result.scanned, 3);
+    assert.equal(result.scanned, 5);
     assert.deepEqual(result.findings, []);
   });
 
@@ -108,6 +108,53 @@ describe('check-ci-secrets (T-086 ST-1)', () => {
 
     it('no falla si el workflow no se dispara por pull_request', () => {
       assert.deepEqual(rulesOf(withToken(CLEAN.replace('  pull_request:', '  push:'))), []);
+    });
+
+    const GUARD = 'github.event.pull_request.head.repo.full_name == github.repository';
+    const guarded = (condition: string, job = 'verify'): string =>
+      withToken(CLEAN).replace(`  ${job}:\n`, `  ${job}:\n    if: ${condition}\n`);
+
+    it('acepta la referencia en un job con la guarda exacta de forks (T-176)', () => {
+      assert.deepEqual(rulesOf(guarded(GUARD)), []);
+    });
+
+    it('acepta la guarda combinada con && y con la expresión ${{ }} (T-176)', () => {
+      assert.deepEqual(rulesOf(guarded(`github.actor != 'bot' && ${GUARD}`)), []);
+      assert.deepEqual(rulesOf(guarded('${{ ' + GUARD + ' }}')), []);
+    });
+
+    it('falla sin la guarda (T-176)', () => {
+      assert.deepEqual(rulesOf(withToken(CLEAN)), ['secret-in-job']);
+    });
+
+    it('falla si la guarda está en otro job del mismo workflow (T-176)', () => {
+      assert.deepEqual(rulesOf(guarded(GUARD, 'dast')), ['secret-in-job']);
+    });
+
+    it('falla con guardas parecidas pero no exactas (T-176)', () => {
+      for (const condition of [
+        GUARD.replace('==', '!='),
+        GUARD.replace('head.repo.full_name', 'base.repo.full_name'),
+        GUARD.replace('github.repository', 'github.repository_owner'),
+        `${GUARD} || github.event_name == 'pull_request'`,
+        `!(${GUARD})`,
+        `contains('${GUARD}', 'x')`,
+      ]) {
+        assert.deepEqual(rulesOf(guarded(condition)), ['secret-in-job'], condition);
+      }
+    });
+
+    it('con || exige la guarda en cada alternativa (T-176)', () => {
+      assert.deepEqual(rulesOf(guarded(`(${GUARD} && a) || (${GUARD} && b)`)), []);
+      assert.deepEqual(rulesOf(guarded(`(${GUARD} && a) || b`)), ['secret-in-job']);
+    });
+
+    it('acepta la guarda en un if en bloque (T-176)', () => {
+      const text = withToken(CLEAN).replace(
+        '  verify:\n',
+        `  verify:\n    if: |\n      ${GUARD} &&\n      true\n`,
+      );
+      assert.deepEqual(rulesOf(text), []);
     });
   });
 

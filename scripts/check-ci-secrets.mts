@@ -84,6 +84,7 @@ interface Scope {
 
 const KEY_LINE = /^([A-Za-z_][\w.-]*)\s*:(?:\s+(.*))?$/;
 const BLOCK_SCALAR = /^[|>][+-]?\d*$/;
+const FORK_GUARD = 'github.event.pull_request.head.repo.full_name == github.repository';
 const SECRET_REF = /\$\{\{\s*secrets\./;
 const SECRET_VAR = /\$\{?([A-Za-z_]\w*)\}?/g;
 const PRINT_COMMAND = /\b(?:echo|printf|cat)\b/;
@@ -250,6 +251,75 @@ function isLoopbackTarget(value: string): boolean {
   return LOOPBACK_HOSTS.has(host.toLowerCase());
 }
 
+/** Parte `text` en la profundidad 0 (fuera de paréntesis y comillas) por el operador dado. */
+function splitTop(text: string, operator: '&&' | '||'): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let quote = '';
+  let start = 0;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quote !== '') {
+      if (ch === quote) quote = '';
+    } else if (ch === "'" || ch === '"') quote = ch;
+    else if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    else if (depth === 0 && text.startsWith(operator, i)) {
+      parts.push(text.slice(start, i));
+      start = i + operator.length;
+      i += operator.length - 1;
+    }
+  }
+  parts.push(text.slice(start));
+  return parts.map((p) => p.trim());
+}
+
+const unwrapParens = (expr: string): string | undefined =>
+  expr.startsWith('(') && expr.endsWith(')') && splitTop(expr, '&&').length === 1
+    ? expr.slice(1, -1).trim()
+    : undefined;
+
+/**
+ * La condición exige la guarda de forks en todas sus ramas: un término `&&` es exactamente
+ * la guarda (o un grupo que la exige) y cada alternativa de un `||` la exige también.
+ */
+function requiresForkGuard(expr: string): boolean {
+  const inner = unwrapParens(expr.trim());
+  if (inner !== undefined) return requiresForkGuard(inner);
+  const alternatives = splitTop(expr, '||');
+  if (alternatives.length > 1) return alternatives.every(requiresForkGuard);
+  return splitTop(expr, '&&').some(
+    (term) => term === FORK_GUARD || (unwrapParens(term) !== undefined && requiresForkGuard(term)),
+  );
+}
+
+/** Jobs cuyo `if:` exige la guarda de forks (el `if` de otro job no cuenta). */
+function guardedJobs(entries: readonly Entry[]): Set<string> {
+  const guarded = new Set<string>();
+  for (const entry of entries) {
+    if (entry.key !== 'if' || entry.ancestors.length !== 2 || entry.ancestors[0] !== 'jobs')
+      continue;
+    const text = textOf(entry)
+      .map((t) => t.text.trim())
+      .join(' ')
+      .replace(/^\$\{\{\s*([\s\S]*?)\s*\}\}$/, '$1')
+      .trim();
+    if (requiresForkGuard(text)) guarded.add(entry.ancestors[1]);
+  }
+  return guarded;
+}
+
+/** Job que contiene la línea: la última clave de job abierta antes de ella. */
+function jobAtLine(entries: readonly Entry[], line: number): string | undefined {
+  let job: string | undefined;
+  for (const e of entries) {
+    if (e.line > line) break;
+    if (e.ancestors.length === 1 && e.ancestors[0] === 'jobs') job = e.key;
+    else if (e.ancestors.length === 0) job = undefined;
+  }
+  return job;
+}
+
 function checkWorkflow(file: string, text: string): CiFinding[] {
   const { lines, entries } = parse(text);
   const findings: CiFinding[] = [];
@@ -258,6 +328,7 @@ function checkWorkflow(file: string, text: string): CiFinding[] {
   };
 
   const events = triggerEvents(entries);
+  const forkGuarded = guardedJobs(entries);
   const envEntries = entries.filter((e) => parentOf(e) === 'env');
   const steps = buildSteps(entries);
   const runLines: RunLine[] = [];
@@ -275,11 +346,16 @@ function checkWorkflow(file: string, text: string): CiFinding[] {
         'trigger pull_request_target: ejecuta con secretos desde forks; use pull_request',
       );
     }
-    if (events.includes('pull_request') && SECRET_REF.test(content)) {
+    if (
+      events.includes('pull_request') &&
+      SECRET_REF.test(content) &&
+      !forkGuarded.has(jobAtLine(entries, line) ?? '')
+    ) {
       report(
         line,
         'secret-in-job',
-        'referencia a secreto en un workflow disparado por pull_request (los forks no reciben secretos)',
+        'referencia a secreto en un workflow disparado por pull_request (los forks no reciben secretos); solo se admite en un job con if: ' +
+          FORK_GUARD,
       );
     }
   }

@@ -3633,3 +3633,16 @@ shim de git más ese `sh`, de modo que gitleaks sigue inalcanzable. Si falta `sh
 en Windows fuera de CI, el caso se omite con motivo; en CI o Linux no se omite.
 
 **Aceptación**: ver T-175 en `tasks.md`.
+
+### 17.63 T-176: guarda de forks para secretos en workflows de PR
+
+**Problema**: `check-ci-secrets` rechaza toda referencia a `secrets.*` en un
+workflow disparado por `pull_request`; `claude-code-review.yml` (PR #10) la usa y
+la CI del PR #11 falla con `[secret-in-job]`.
+
+**Decisión** (Paco, 2026-11-18, opción A): el workflow no usa el secreto en PRs de
+forks, con `if: github.event.pull_request.head.repo.full_name == github.repository`
+en el job, y la puerta solo acepta la referencia si el job que la contiene lleva
+esa guarda exacta (sola o con `&&`; con `||` cada alternativa la lleva).
+
+**Aceptación**: ver T-176 en `tasks.md`.
