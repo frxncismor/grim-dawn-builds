@@ -64,6 +64,48 @@
       "when": 1794550000000,
       "tag": "0008_public_asset_view",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794602637686,
+      "tag": "0009_mastery_catalog",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794623084061,
+      "tag": "0010_skill_node_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794625377720,
+      "tag": "0011_asset_withdrawn",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794678677846,
+      "tag": "0012_skill_node_id_unique_and_revalidation",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794681186836,
+      "tag": "0013_public_skill_nodes_without_icon",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1794801720107,
+      "tag": "0014_public_skill_icon_id",
+      "breakpoints": true
     }
   ]
 }

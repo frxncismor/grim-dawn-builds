@@ -19,10 +19,10 @@ export interface SeoPage {
   image?: { path: string; alt: string; width: number; height: number };
   structuredData?: readonly JsonLdRecord[];
 }
-const SITE_NAME = 'Grim Dawn Builds';
+const SITE_NAME = 'Grim Builds';
 const DEFAULT_SOCIAL_IMAGE = {
   path: '/og/site.png',
-  alt: $localize`:@@seo.socialAlt:Grim Dawn Builds: English-language catalog, masteries and clear statuses.`,
+  alt: $localize`:@@seo.socialAlt:Grim Builds: English-language catalog, masteries and clear statuses.`,
   width: 1200,
   height: 630,
 };

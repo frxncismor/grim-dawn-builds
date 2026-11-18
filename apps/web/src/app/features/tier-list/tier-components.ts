@@ -1,153 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import type { PublicBuild, PublicSource, TierEntry } from '@gd/domain';
-import type { ContentStatus } from '@gd/domain/vocabulary';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { EMPTY_FILTER, type TierFilter } from './filter';
-
-@Component({
-  selector: 'gd-content-badge',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<span class="badge"
-    ><img
-      class="badge-icon"
-      [src]="iconSrc()"
-      alt=""
-      aria-hidden="true"
-      (error)="imageFailed()"
-    /><span>{{ label() }}</span></span
-  >`,
-  styleUrl: './tier-components.css',
-})
-export class ContentBadge {
-  readonly status = input.required<ContentStatus>();
-  private readonly failed = signal(false);
-  imageFailed(): void {
-    this.failed.set(true);
-  }
-  readonly iconSrc = computed(() => {
-    if (this.failed()) return 'assets/icons/generic.svg';
-    return `assets/icons/status-${this.status().replace('_', '-')}.svg`;
-  });
-  readonly label = computed(
-    () =>
-      ({
-        verificado: $localize`:@@catalog.verified:Verified`,
-        sin_verificar: $localize`:@@catalog.unverified:Unverified`,
-        placeholder: $localize`:@@catalog.placeholder:Placeholder`,
-      })[this.status()],
-  );
-}
-
-@Component({
-  selector: 'gd-external-attribution',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<div class="attribution">
-    <p><span i18n="@@catalog.externalAuthor">Original author:</span> {{ author() }}</p>
-    @if (source(); as source) {
-      <p>{{ source.title }} · {{ source.license_note }}</p>
-    }
-    @if (safeUrl(); as href) {
-      <a [href]="href" target="_blank" rel="noopener noreferrer" i18n="@@catalog.externalLink"
-        >View external source (new tab)</a
-      >
-    }
-    <p class="notice" i18n="@@catalog.externalWarning">
-      Link to a third-party site. The content remains at its original source.
-    </p>
-  </div>`,
-  styleUrl: './tier-components.css',
-})
-export class ExternalAttribution {
-  readonly url = input<string | null>(null);
-  readonly author = input.required<string>();
-  readonly source = input<Pick<PublicSource, 'title' | 'license_note'> | null>(null);
-  readonly safeUrl = computed(() => {
-    try {
-      const raw = this.url();
-      if (!raw || !/^https?:\/\//i.test(raw)) return null;
-      const url = new URL(raw);
-      return url.username || url.password ? null : url.href;
-    } catch {
-      return null;
-    }
-  });
-}
-
-@Component({
-  selector: 'gd-tier-card',
-  imports: [ContentBadge, ExternalAttribution, RouterLink],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<article>
-    <gd-content-badge [status]="entry().content_status" />
-    <h3>
-      @if (publicGuide(); as guide) {
-        <a [routerLink]="['/builds', guide.slug]">{{ guide.title }}</a>
-      } @else {
-        {{ entry().display_name || combinationName() }}
-      }
-    </h3>
-    @if (
-      (publicGuide()?.title || entry().display_name || combinationName()) !== combinationName()
-    ) {
-      <p class="combination">{{ combinationName() }}</p>
-    }
-    @if (gameVersion()) {
-      <p><span i18n="@@catalog.cardVersion">Version:</span> {{ gameVersion() }}</p>
-      @if (entry().entry_kind !== 'enlace_externo') {
-        <p>{{ tierLabel() }}</p>
-      }
-      <p>
-        @if (entry().evaluated_on; as date) {
-          <span i18n="@@catalog.reviewDate">Last reviewed:</span>
-          <time [attr.datetime]="date">{{ date }}</time>
-        } @else {
-          <span i18n="@@catalog.noReviewDate">Review date not reported</span>
-        }
-      </p>
-    }
-    @if (entry().entry_kind === 'enlace_externo') {
-      <gd-external-attribution
-        [url]="entry().external_url"
-        [author]="entry().external_author || ''"
-        [source]="source()"
-      />
-    } @else if (!publicGuide()) {
-      <p class="notice" i18n="@@catalog.comingSoon">Guide coming soon</p>
-    }
-  </article>`,
-  styleUrl: './tier-components.css',
-})
-export class TierCard {
-  readonly gameVersion = input<string | null>(null);
-  readonly tierLabel = computed(() =>
-    this.entry().tier === 'sin_clasificar'
-      ? $localize`:@@catalog.unranked:Unranked`
-      : $localize`:@@catalog.tier:Tier ${this.entry().tier}`,
-  );
-  readonly entry = input.required<TierEntry>();
-  readonly combinationName = input.required<string>();
-  readonly guide = input<Pick<
-    PublicBuild,
-    'slug' | 'title' | 'review_state' | 'rights_status'
-  > | null>(null);
-  readonly source = input<Pick<PublicSource, 'title' | 'license_note'> | null>(null);
-  readonly publicGuide = computed(() => {
-    const entry = this.entry(),
-      guide = this.guide();
-    if (
-      entry.entry_kind !== 'build_propia' ||
-      entry.review_state !== 'publicado' ||
-      !guide ||
-      guide.slug !== entry.build_slug ||
-      !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(guide.slug) ||
-      guide.review_state !== 'publicado' ||
-      !['own_original', 'licensed', 'permission_granted'].includes(guide.rights_status) ||
-      !['own_original', 'licensed', 'permission_granted'].includes(entry.rights_status)
-    )
-      return null;
-    return guide;
-  });
-}
 
 @Component({
   selector: 'gd-tier-row',
@@ -156,7 +8,6 @@ export class TierCard {
     <h2>{{ label() }}</h2>
     <div class="catalog-grid"><ng-content /></div>
   </section>`,
-  styleUrl: './tier-components.css',
 })
 export class TierRow {
   readonly label = input.required<string>();
@@ -174,7 +25,6 @@ export class TierRow {
   >
     {{ label() }}
   </button>`,
-  styleUrl: './tier-components.css',
 })
 export class FilterChip {
   readonly label = input.required<string>();
@@ -220,7 +70,6 @@ export interface FilterGroup {
       Clear filters
     </button>
   </div>`,
-  styleUrl: './tier-components.css',
 })
 export class FilterBar {
   readonly value = input<TierFilter>(EMPTY_FILTER);
@@ -265,7 +114,6 @@ export class FilterBar {
       Clear filters
     </button>
   </section>`,
-  styleUrl: './tier-components.css',
 })
 export class EmptyState {
   readonly filtersReset = output<void>();

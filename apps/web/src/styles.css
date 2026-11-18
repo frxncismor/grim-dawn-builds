@@ -1,3 +1,7 @@
 @import './styles/fonts.css';
 @import './styles/tokens.css';
 @import './styles/base.css';
+@import './styles/build-card.css';
+@import './styles/tier-list.css';
+@import './styles/tier-components.css';
+@import './styles/accessibility.css';

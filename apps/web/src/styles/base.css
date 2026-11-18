@@ -31,6 +31,7 @@ h4 {
   margin-block: var(--space-6) var(--space-3);
   font-family: var(--font-display);
   font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
   line-height: var(--line-heading);
   text-wrap: balance;
 }
@@ -107,9 +108,7 @@ button {
 button:hover:enabled {
   border-color: var(--color-storm);
   background: var(--surface-sheen), var(--color-panel-2);
-  box-shadow:
-    var(--frame-bevel),
-    0 3px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--frame-bevel), var(--shadow-lift);
 }
 
 button:active:enabled {
@@ -146,7 +145,17 @@ video {
   background: var(--color-storm);
 }
 
+/* Cross-document view transitions (spec004 FR-025, Q15 = A): CSS only, progressive enhancement.
+   Browsers without support navigate exactly as before. */
+@view-transition {
+  navigation: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+
   *,
   *::before,
   *::after {
@@ -159,5 +168,72 @@ video {
 @media (forced-colors: active) {
   :focus-visible {
     outline-color: Highlight;
+  }
+}
+
+/* spec004 T008: own 9-slice frames (decorative; the content keeps its own semantics). */
+.frame-panel,
+.frame-featured,
+.frame-compact {
+  border-style: solid;
+  border-width: var(--frame-width);
+  border-image-slice: 16;
+  border-image-repeat: stretch;
+  background-image: var(--texture-surface);
+}
+
+.frame-panel {
+  border-image-source: var(--frame-image-panel);
+}
+
+.frame-featured {
+  border-image-source: var(--frame-image-featured);
+}
+
+.frame-compact {
+  border-image-source: var(--frame-image-compact);
+}
+
+/* Cabecera de una fila (T044): menú `details` sin JS a <48rem. Mínimo: este CSS va en el HTML. */
+@media (max-width: 47.99rem) {
+  header summary {
+    display: block;
+    padding: var(--space-3);
+  }
+
+  header details[open]::details-content {
+    position: absolute;
+    inset: 100% 0 auto;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-3);
+    border: var(--frame-border-active);
+    background: var(--color-panel);
+  }
+
+  header details nav {
+    flex-direction: column;
+  }
+
+  .site-header details nav a[href] {
+    min-block-size: var(--space-7);
+  }
+}
+
+@media (min-width: 48rem) {
+  @supports selector(::details-content) {
+    header details {
+      flex: 1;
+    }
+
+    header summary {
+      display: none;
+    }
+
+    header details::details-content {
+      content-visibility: visible;
+      display: flex;
+      justify-content: space-between;
+    }
   }
 }

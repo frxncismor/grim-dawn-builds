@@ -15,7 +15,7 @@ test('server loader reads real fixture files without publishing their draft cont
 });
 
 test('real catalog has 46 public slots, including the published own guide', async () => {
-  const root = join(import.meta.dirname, '../../../../../../content');
+  const root = join(import.meta.dirname, '../../../../../../fixtures/content');
   const publicRepo = createFixtureRepository(root, {});
   const catalog = await publicRepo.getTierList('principal');
   assert.equal(PublicTierListSchema.safeParse(catalog).success, true);
@@ -35,7 +35,7 @@ test('real catalog has 46 public slots, including the published own guide', asyn
     JSON.stringify(catalog),
     /permission_ref|rights_confirmed_by|rights_notes|reviewed_by|skill_nodes/,
   );
-  assert.equal((await publicRepo.getAuthor('grim-dawn-builds'))?.display_name, 'Grim Dawn Builds');
+  assert.equal((await publicRepo.getAuthor('grim-dawn-builds'))?.display_name, 'Grim Builds');
   assert.equal(await publicRepo.getAuthor('por-confirmar'), null);
   const local = createFixtureRepository(root, { INCLUDE_DRAFTS: 'true' });
   const localCatalog = await local.getTierList('principal');
@@ -53,7 +53,7 @@ test('server configuration refuses release, unknown sources and accidental draft
     { INCLUDE_DRAFTS: '1' },
     { BUILD_MODE: 'typo' },
   ]) {
-    assert.throws(() => createFixtureRepository('content', env));
+    assert.throws(() => createFixtureRepository('fixtures/content', env));
   }
 });
 

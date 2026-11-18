@@ -4,31 +4,37 @@ import pg from 'pg';
 import { getTableName, is } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
+import { bootstrapCompleteLine, failureLine, type SeedErrorCode } from '@gd/domain';
 import { loadSecrets } from '../config.js';
 import * as schema from './schema.js';
 import { compareMigrations, migrationFingerprint, readExpectedHashes } from './migration-state.js';
-import { prepareSeed, readSeedFixtures, type SeedData } from './seed.mjs';
-import { writeContentRows, type SeedClient } from './write-content.mjs';
+import { prepareSeed, readSeedFixtures, seedContentRoot, type SeedData } from './seed.mjs';
+import {
+  SeedError,
+  retireMasteries,
+  writeCatalogRows,
+  writeContentRows,
+  type SeedClient,
+} from './write-content.mjs';
 
 export class BootstrapError extends Error {
   constructor(
-    readonly code:
-      | 'invalid-content'
-      | 'role'
-      | 'already'
-      | 'not-empty'
-      | 'migration'
-      | 'credentials'
-      | 'database-failed',
+    readonly code: SeedErrorCode,
+    readonly detail?: string,
   ) {
-    super(`bootstrap: ${code}`);
+    super(detail ? `bootstrap: ${code}: ${detail}` : `bootstrap: ${code}`);
     this.name = 'BootstrapError';
   }
 }
+/**
+ * Tables outside the editorial bootstrap: the provenance marker itself and the game-derived mastery
+ * catalog (spec 003), which is refreshed by the importer on every game build and is never editorial.
+ */
+const NON_EDITORIAL_TABLES = new Set(['content_origin', 'mastery_trees', 'catalog_skill_nodes']);
 export function contentTableNames(): string[] {
   return Object.values(schema)
     .flatMap((value) => (is(value, PgTable) ? [getTableName(value)] : []))
-    .filter((name) => name !== 'content_origin')
+    .filter((name) => !NON_EDITORIAL_TABLES.has(name))
     .sort();
 }
 const quote = (name: string) => {
@@ -101,7 +107,13 @@ export async function bootstrapData(
       ).ready
     )
       throw new BootstrapError('migration');
+    // Catalog first (idempotent upsert): guide nodes reference it through `skill_node_id` (T031).
+    await writeCatalogRows(client, data.catalog);
     await writeContentRows(client, data);
+    await retireMasteries(
+      client,
+      data.catalog.map((t) => t.mastery.id),
+    );
     for (const table of ['authors', 'sources', 'builds', 'tier_lists', 'tier_entries'])
       await client.query(`UPDATE ${quote(table)} SET origin='bootstrap'`);
     await client.query(
@@ -113,6 +125,8 @@ export async function bootstrapData(
   } catch (error) {
     await client.query('ROLLBACK').catch(() => undefined);
     if (error instanceof BootstrapError) throw error;
+    // Forward the writer's real code (and its identifier) instead of flattening it (T036, F-003).
+    if (error instanceof SeedError) throw new BootstrapError(error.code, error.detail);
     throw new BootstrapError('database-failed');
   }
 }
@@ -140,7 +154,7 @@ export async function runBootstrap(
 ): Promise<number> {
   const write = overrides.write ?? { out: console.log, err: console.error };
   if (!['development', 'test'].includes(env['APP_ENV'] ?? '')) {
-    write.err('bootstrap failed: environment');
+    write.err(failureLine('bootstrap', 'environment'));
     return 1;
   }
   let client: pg.Client | undefined;
@@ -149,7 +163,9 @@ export async function runBootstrap(
     if (!config.success) throw new BootstrapError('credentials');
     let data: SeedData;
     try {
-      data = prepareSeed(await (overrides.read ?? readSeedFixtures)());
+      data = prepareSeed(
+        await (overrides.read ?? (() => readSeedFixtures(seedContentRoot(env))))(),
+      );
     } catch {
       throw new BootstrapError('invalid-content');
     }
@@ -180,11 +196,13 @@ export async function runBootstrap(
     });
     await client.connect();
     const result = await bootstrapData(client, data);
-    write.out(`bootstrap complete: ${result.builds} builds, ${result.tierLists} tier lists`);
+    write.out(bootstrapCompleteLine(result));
     return 0;
   } catch (error) {
     write.err(
-      `bootstrap failed: ${error instanceof BootstrapError ? error.code : 'database-failed'}`,
+      error instanceof BootstrapError
+        ? failureLine('bootstrap', error.code, error.detail)
+        : failureLine('bootstrap', 'database-failed'),
     );
     return 1;
   } finally {
@@ -193,7 +211,7 @@ export async function runBootstrap(
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   if (process.argv.length !== 2) {
-    console.error('bootstrap failed: arguments');
+    console.error(failureLine('bootstrap', 'arguments'));
     process.exitCode = 1;
   } else process.exitCode = await runBootstrap(process.env);
 }

@@ -107,55 +107,6 @@ describe('gd-build-attribution', () => {
     expect(root.querySelector('[data-author-bio]')).toBeNull();
   });
 
-  it.each([
-    ['borrador', 'Draft'],
-    ['en_revision', 'In review'],
-    ['publicado', 'Published'],
-  ] as const)('shows the review state %s as text', async (review_state, label) => {
-    const { root } = await render({ ...base, review_state });
-    const badge = root.querySelector('[data-review-state]');
-    expect(badge?.getAttribute('data-review-state')).toBe(review_state);
-    expect(badge?.textContent?.trim()).toBe(label);
-  });
-
-  it.each([
-    ['verificado', 'Verified'],
-    ['sin_verificar', 'Unverified'],
-    ['placeholder', 'Placeholder'],
-  ] as const)('shows the content status %s as text', async (content_status, label) => {
-    const { root } = await render({ ...base, content_status });
-    const badge = root.querySelector('[data-content-status]');
-    expect(badge?.getAttribute('data-content-status')).toBe(content_status);
-    expect(badge?.textContent?.trim()).toBe(label);
-  });
-
-  it('labels both masks with text in addition to their badge shape', async () => {
-    const { root } = await render();
-    const review = root.querySelector('[data-review-state]');
-    const content = root.querySelector('[data-content-status]');
-    expect(review?.classList.contains('badge')).toBe(true);
-    expect(content?.classList.contains('badge')).toBe(true);
-    expect(review?.textContent?.trim()).not.toBe('');
-    expect(content?.textContent?.trim()).not.toBe('');
-    expect(root.textContent).toContain('Review state');
-    expect(root.textContent).toContain('Content status');
-  });
-
-  it('formats published_at in UTC or shows «No date» when null', async () => {
-    const dated = await render();
-    const published = dated.root.querySelector('[data-published]')?.textContent ?? '';
-    expect(published).toContain('March 5, 2026');
-    expect(published).not.toContain('No date');
-
-    const spanish = await render(base, false, 'browser', 'es');
-    expect(spanish.root.querySelector('[data-published]')?.textContent).toContain(
-      '5 de marzo de 2026',
-    );
-
-    const undated = await render({ ...base, published_at: null });
-    expect(undated.root.querySelector('[data-published]')?.textContent?.trim()).toBe('No date');
-  });
-
   it('keeps the received source order and never mutates the array', async () => {
     const reversed = Object.freeze(
       [...base.sources].reverse().map((source) => Object.freeze({ ...source })),
@@ -265,7 +216,8 @@ describe('gd-build-attribution', () => {
     expect(root.textContent).toContain('Ana la Forjadora');
     expect(root.textContent).not.toContain('RolInventado');
     expect(root.textContent).not.toContain('31 de diciembre de 1999');
-    expect(root.textContent).toContain('March 5, 2026');
+    // The publication date moved to the build summary (spec004 T020).
+    expect(root.textContent).not.toContain('March 5, 2026');
   });
 
   it('escapes hostile editorial strings as text without injecting markup', async () => {

@@ -2,8 +2,30 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { readFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { MasteryTreeSchema } from '@gd/domain';
 import { validateBuildFiles } from './validate-content.mts';
+
+const fixtureJson = (path: string): any =>
+  JSON.parse(readFileSync(new URL('../fixtures/content/' + path, import.meta.url), 'utf8'));
+const guide = fixtureJson('builds/chaman-demoledor-golpe-primigenio.json');
+const catalog = ['shaman', 'demolition'].map((s) =>
+  MasteryTreeSchema.parse(fixtureJson('mastery-trees/' + s + '.json')),
+);
+const withRef = (skill_node_id: string) => ({
+  ...guide,
+  skill_nodes: guide.skill_nodes.map((n: any, i: number) =>
+    i === 0 ? { ...n, skill_node_id } : n,
+  ),
+});
+
+const withDuplicateRef = () => ({
+  ...guide,
+  skill_nodes: guide.skill_nodes.map((n: any, i: number) =>
+    i < 2 ? { ...n, skill_node_id: catalog[0]!.nodes[0]!.id } : n,
+  ),
+});
 
 const validDraft: Record<string, unknown> = JSON.parse(
   readFileSync(
@@ -35,6 +57,69 @@ describe('validateBuildFiles', () => {
   });
 });
 
+describe('claves internas en texto visible (spec005 T032)', () => {
+  it('la guía versionada no muestra claves internas en ninguna cadena visible', () => {
+    assert.deepEqual(validateBuildFiles([{ file: 'g.json', data: guide }], catalog), []);
+  });
+
+  it('falla nombrando el campo si una cadena visible lleva content_status= o un identificador', () => {
+    const data = {
+      ...guide,
+      hero_callout_body: [
+        ...guide.hero_callout_body.slice(0, 1),
+        'Dato: content_status=sin_verificar',
+      ],
+    };
+    const issues = validateBuildFiles([{ file: 'g.json', data }], catalog);
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0]!.path, 'hero_callout_body.1');
+    assert.match(issues[0]!.message, /content_status=/);
+  });
+
+  it('no marca identificadores de campos internos (rights_notes, slugs)', () => {
+    const data = { ...guide, rights_notes: 'Es own_original, no se muestra.' };
+    assert.deepEqual(validateBuildFiles([{ file: 'g.json', data }], catalog), []);
+  });
+});
+
+describe('validateBuildFiles con catálogo (T016)', () => {
+  const run = (data: unknown) => validateBuildFiles([{ file: 'builds/g.json', data }], catalog);
+
+  it('la guía actual sigue válida sin skill_node_id', () => {
+    assert.deepEqual(run(guide), []);
+  });
+
+  it('acepta una referencia válida', () => {
+    assert.deepEqual(run(withRef(catalog[0]!.nodes[0]!.id)), []);
+  });
+
+  it('un id inexistente falla con archivo, nodo y motivo', () => {
+    const issues = run(withRef('class06/no-existe'));
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0]!.file, 'builds/g.json');
+    assert.equal(issues[0]!.path, 'skill_nodes.0.skill_node_id');
+    assert.match(issues[0]!.message, /golpe-primigenio.*no existe en el catálogo/);
+  });
+
+  it('un skill_node_id repetido en la guía falla nombrando el primer nodo (T035)', () => {
+    const issues = run(withDuplicateRef());
+    assert.ok(
+      issues.some((i) => i.path === 'skill_nodes.1.skill_node_id' && /repetido/.test(i.message)),
+    );
+  });
+
+  it('un id de otra maestría falla', () => {
+    const issues = run(withRef(catalog[1]!.nodes[0]!.id));
+    assert.equal(issues.length, 1);
+    assert.match(issues[0]!.message, /otra maestría/);
+  });
+
+  it('un id con formato inválido falla por esquema', () => {
+    const issues = run(withRef('golpe-primigenio'));
+    assert.ok(issues.some((i) => i.path === 'skill_nodes.0.skill_node_id'));
+  });
+});
+
 describe('content:validate CLI', () => {
   const run = (dir: string) =>
     spawnSync(
@@ -57,5 +142,68 @@ describe('content:validate CLI', () => {
   it('exits 1 when the builds folder is missing', () => {
     const result = run(join('scripts', 'fixtures', 'no-such-dir'));
     assert.equal(result.status, 1);
+  });
+
+  it('points an invalid catalog tree to `pnpm catalog:nodes`', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'content-tree-'));
+    mkdirSync(join(dir, 'builds'));
+    mkdirSync(join(dir, 'mastery-trees'));
+    writeFileSync(join(dir, 'mastery-trees', 'broken.json'), JSON.stringify({ slug: 'broken' }));
+    const result = run(dir);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /broken\.json/);
+    assert.match(result.stderr, /pnpm catalog:nodes/);
+    assert.doesNotMatch(result.stderr, /catalog:check/);
+  });
+
+  it('exits 1 naming the node when its icon_id is not the one derived from its texture (spec004 T025)', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'content-icon-'));
+    cpSync(join('fixtures', 'content', 'builds'), join(dir, 'builds'), { recursive: true });
+    mkdirSync(join(dir, 'mastery-trees'));
+    const tree = fixtureJson('mastery-trees/demolition.json');
+    const target = tree.nodes.find((n: any) => n.icon);
+    target.icon_id = 'ic-0000000000000000';
+    writeFileSync(join(dir, 'mastery-trees', 'demolition.json'), JSON.stringify(tree));
+    const result = run(dir);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /icon_id/);
+    assert.match(result.stderr, new RegExp(target.id));
+  });
+
+  it('exits 1 naming the tree when its ES name differs from masteries.json (spec005 T024)', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'content-names-'));
+    cpSync(join('fixtures', 'content', 'builds'), join(dir, 'builds'), { recursive: true });
+    cpSync(join('fixtures', 'content', 'masteries.json'), join(dir, 'masteries.json'));
+    mkdirSync(join(dir, 'mastery-trees'));
+    const tree = fixtureJson('mastery-trees/nightblade.json');
+    tree.mastery.name.es = 'Nombre Distinto';
+    writeFileSync(join(dir, 'mastery-trees', 'nightblade.json'), JSON.stringify(tree));
+    const result = run(dir);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /nightblade\.json/);
+    assert.match(result.stderr, /name\.es/);
+    assert.match(result.stderr, /Hoja de la Noche|masteries\.json/);
+  });
+
+  it('names Nightblade «Hoja de la Noche» in the single ES source (spec005 T024, P31)', () => {
+    const night = fixtureJson('masteries.json').find((m: any) => m.name_en === 'Nightblade');
+    assert.equal(night.name_es, 'Hoja de la Noche');
+  });
+
+  it('accepts the versioned catalog: every texture has its derived icon_id', () => {
+    const result = run(join('fixtures', 'content'));
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  });
+
+  it('exits 1 naming the node when skill_node_id is not in the catalog', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'content-ref-'));
+    mkdirSync(join(dir, 'builds'));
+    cpSync(join('fixtures', 'content', 'mastery-trees'), join(dir, 'mastery-trees'), {
+      recursive: true,
+    });
+    writeFileSync(join(dir, 'builds', 'g.json'), JSON.stringify(withRef('class06/no-existe')));
+    const result = run(dir);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /golpe-primigenio.*no existe en el catálogo/);
   });
 });

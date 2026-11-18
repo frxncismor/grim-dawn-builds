@@ -87,5 +87,42 @@ export type {
   PublicationOutcome,
 } from './publication-gate.js';
 export { publicFilter } from './visibility.js';
-export { checkAssetManifest } from './asset.js';
-export type { AssetIssue } from './asset.js';
+export {
+  checkAssetManifest,
+  classifySkillIconEntry,
+  SkillIconAssetSchema,
+  skillIconFilePath,
+} from './asset.js';
+export type { AssetIssue, SkillIconClass } from './asset.js';
+export {
+  CatalogSkillNodeSchema,
+  ICON_ID_PATTERN,
+  MasteryTreeSchema,
+  PublicMasteryTreeSchema,
+  PublicSkillNodeSchema,
+  SKILL_KINDS,
+  TIER_BAR_REQUIRED,
+  findDependencyCycle,
+} from './mastery-tree.js';
+export type {
+  CatalogSkillNode,
+  MasteryTree,
+  PublicMasteryTree,
+  PublicSkillNode,
+  SkillKind,
+} from './mastery-tree.js';
+export { validateSkillNodeRefs } from './skill-node-refs.js';
+export type { SkillNodeRefIssue } from './skill-node-refs.js';
+export {
+  CONTENT_MOUNT,
+  SEED_ERROR_CODES,
+  bootstrapCompleteLine,
+  failureLine,
+  failurePattern,
+  isSeedErrorCode,
+  seedCompleteLine,
+  successPattern,
+} from './seed-contract.js';
+export type { SeedErrorCode, SeedOperation } from './seed-contract.js';
+export { MasterySummarySchema } from './mastery-summary.js';
+export type { MasterySummary } from './mastery-summary.js';

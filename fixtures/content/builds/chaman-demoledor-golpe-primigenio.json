@@ -1,0 +1,1177 @@
+{
+  "slug": "chaman-demoledor-golpe-primigenio",
+  "locale": "es",
+  "title": "Chamán + Demoledor",
+  "eyebrow": "Datos del build · Chamán + Demoledor",
+  "subtitle": "Ficha de datos del build: maestrías, habilidades, devociones y filtro de botín.",
+  "summary": "Datos factuales del build Chamán + Demoledor con Golpe Primigenio. Contenido propio del sitio, sin texto ni imágenes de terceros.",
+  "title_a_mastery_slug": "chaman",
+  "title_b_mastery_slug": "demoledor",
+  "damage_types": ["rayo"],
+  "playstyle": "melee",
+  "content_tags": ["campana"],
+  "author_slug": "grim-dawn-builds",
+  "source_slugs": ["guia-original"],
+  "game_version": "Sin confirmar",
+  "review_state": "publicado",
+  "rights_status": "own_original",
+  "rights_confirmed_by": "Paco",
+  "rights_confirmed_on": "2026-11-12",
+  "content_status": "sin_verificar",
+  "reviewed_by": "Grim Builds",
+  "reviewed_at": "2026-11-12",
+  "rights_notes": "Contenido propio del sitio (own_original): datos factuales del build transcritos internamente. No se reproduce texto ni imagen de terceros y no existe permiso externo que afirmar.",
+  "published_at": "2026-11-12",
+  "author": {
+    "slug": "grim-dawn-builds",
+    "display_name": "Grim Builds",
+    "bio": "Proyecto responsable del catálogo de combinaciones generado localmente. Las ranuras informativas no son guías ni rankings verificados.",
+    "url": null,
+    "is_placeholder": false
+  },
+  "sources": [
+    {
+      "slug": "guia-original",
+      "kind": "original",
+      "title": "Datos del build transcritos internamente",
+      "url": null,
+      "author_name": "Grim Builds",
+      "license_note": "Contenido propio del sitio; datos factuales del juego, sin permiso de terceros",
+      "permission_ref": null,
+      "retrieved_on": "2026-11-12",
+      "notes": "Contenido generado por Claude Code para Grim Builds el 2026-11-12. No hay fuente externa ni autor tercero que atribuir; los datos se transcribieron del build y no se han verificado contra el juego."
+    }
+  ],
+  "video_url": null,
+  "footer_disclaimer": "Ficha de datos del build. El reparto de puntos y el orden son orientativos y no se han verificado contra el juego; ajusta el build a tu equipo.",
+  "hero_callout_title": "Datos del build",
+  "hero_callout_body": [
+    "Esta ficha transcribe solo datos del build: maestrías, habilidades y puntos, devociones y filtro de botín.",
+    "No incluye texto ni imágenes de terceros. Los datos no se han verificado contra el juego y la etiqueta «Sin verificar» lo indica."
+  ],
+  "masteries": [
+    {
+      "slug": "chaman",
+      "name_es": "Chamán",
+      "name_en": "Shaman",
+      "role_text": "Maestría principal del build."
+    },
+    {
+      "slug": "demoledor",
+      "name_es": "Demoledor",
+      "name_en": "Demolitionist",
+      "role_text": "Maestría secundaria del build."
+    }
+  ],
+  "skill_nodes": [
+    {
+      "slug": "golpe-primigenio",
+      "mastery_slug": "chaman",
+      "skill_node_id": "class06/savagestrike1",
+      "name_es": "Golpe Primigenio",
+      "name_en": "Primal Strike",
+      "bar_required": 5,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Chamán; requiere barra 5.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 40,
+        "y": 40
+      }
+    },
+    {
+      "slug": "golpe-atronador",
+      "mastery_slug": "chaman",
+      "skill_node_id": "class06/savagestrike1b",
+      "name_es": "Golpe Atronador",
+      "name_en": "Thunderous Strike",
+      "bar_required": 10,
+      "parent_slug": "golpe-primigenio",
+      "status": "recomendada",
+      "tag": "Transmutador",
+      "rationale": "Habilidad del árbol de Chamán; requiere barra 10.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 220,
+        "y": 132
+      }
+    },
+    {
+      "slug": "torrente",
+      "mastery_slug": "chaman",
+      "skill_node_id": "class06/savagestrike2",
+      "name_es": "Torrente",
+      "name_en": "Torrent",
+      "bar_required": 15,
+      "parent_slug": "golpe-primigenio",
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Chamán; requiere barra 15.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 220,
+        "y": 224
+      }
+    },
+    {
+      "slug": "corriente-de-tormenta",
+      "mastery_slug": "chaman",
+      "skill_node_id": "class06/savagestrike3",
+      "name_es": "Corriente de Tormenta",
+      "name_en": "Storm Surge",
+      "bar_required": 25,
+      "parent_slug": "golpe-primigenio",
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Chamán; requiere barra 25.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 220,
+        "y": 316
+      }
+    },
+    {
+      "slug": "viento-demoniaco",
+      "mastery_slug": "chaman",
+      "skill_node_id": "class06/squall1",
+      "name_es": "Viento Demoníaco",
+      "name_en": "Wind Devil",
+      "bar_required": 10,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Chamán; requiere barra 10.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 40,
+        "y": 408
+      }
+    },
+    {
+      "slug": "tempestad-furiosa",
+      "mastery_slug": "chaman",
+      "skill_node_id": "class06/squall2",
+      "name_es": "Tempestad Furiosa",
+      "name_en": "Raging Tempest",
+      "bar_required": 20,
+      "parent_slug": "viento-demoniaco",
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Chamán; requiere barra 20.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 220,
+        "y": 500
+      }
+    },
+    {
+      "slug": "totem-wendigo",
+      "mastery_slug": "chaman",
+      "skill_node_id": "class06/totem1",
+      "name_es": "Tótem Wendigo",
+      "name_en": "Wendigo Totem",
+      "bar_required": 20,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Chamán; requiere barra 20.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 40,
+        "y": 592
+      }
+    },
+    {
+      "slug": "pacto-de-mogdrogen",
+      "mastery_slug": "chaman",
+      "skill_node_id": "class06/natureblessing1",
+      "name_es": "Pacto de Mogdrogen",
+      "name_en": "Mogdrogen's Pact",
+      "bar_required": 5,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Chamán; requiere barra 5.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 40,
+        "y": 684
+      }
+    },
+    {
+      "slug": "pacto-de-clamatormentas",
+      "mastery_slug": "chaman",
+      "skill_node_id": "class06/stormcaller1",
+      "name_es": "Pacto de Clamatormentas",
+      "name_en": "Stormcaller's Pact",
+      "bar_required": 50,
+      "parent_slug": "pacto-de-mogdrogen",
+      "status": "meta",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Chamán; requiere barra 50.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 220,
+        "y": 776
+      }
+    },
+    {
+      "slug": "tocado-por-las-llamas",
+      "mastery_slug": "demoledor",
+      "skill_node_id": "class02/blastshield1",
+      "name_es": "Tocado por las Llamas",
+      "name_en": "Flame Touched",
+      "bar_required": 5,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Demoledor; requiere barra 5.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 40,
+        "y": 40
+      }
+    },
+    {
+      "slug": "llama-vengativa",
+      "mastery_slug": "demoledor",
+      "skill_node_id": "class02/vindictiveflame1",
+      "name_es": "Llama Vengativa",
+      "name_en": "Vindictive Flame",
+      "bar_required": 10,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Demoledor; requiere barra 10.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 40,
+        "y": 132
+      }
+    },
+    {
+      "slug": "granada-cegadora",
+      "mastery_slug": "demoledor",
+      "skill_node_id": "class02/flashbang1",
+      "name_es": "Granada Cegadora",
+      "name_en": "Flashbang",
+      "bar_required": 1,
+      "parent_slug": null,
+      "status": "recomendada",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Demoledor; requiere barra 1.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 40,
+        "y": 224
+      }
+    },
+    {
+      "slug": "escudo-explosivo",
+      "mastery_slug": "demoledor",
+      "skill_node_id": "class02/passive1",
+      "name_es": "Escudo Explosivo",
+      "name_en": "Blast Shield",
+      "bar_required": 32,
+      "parent_slug": "granada-cegadora",
+      "status": "meta",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Demoledor; requiere barra 32.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 220,
+        "y": 316
+      }
+    },
+    {
+      "slug": "mina-de-termita",
+      "mastery_slug": "demoledor",
+      "skill_node_id": "class02/thermitemines1",
+      "name_es": "Mina de Termita",
+      "name_en": "Thermite Mine",
+      "bar_required": 32,
+      "parent_slug": null,
+      "status": "meta",
+      "tag": null,
+      "rationale": "Habilidad del árbol de Demoledor; requiere barra 32.",
+      "max_points_hint": null,
+      "points_label": null,
+      "layout": {
+        "x": 40,
+        "y": 408
+      }
+    }
+  ],
+  "priorities": [
+    {
+      "rank": 1,
+      "group_label": "Chamán",
+      "headline": "Golpe Atronador",
+      "note": "Dato transcrito: barra 10, nodo del árbol de Chamán.",
+      "skill_node_slugs": ["golpe-atronador"]
+    },
+    {
+      "rank": 2,
+      "group_label": "Chamán",
+      "headline": "Torrente",
+      "note": "Dato transcrito: barra 15, nodo del árbol de Chamán.",
+      "skill_node_slugs": ["torrente"]
+    },
+    {
+      "rank": 3,
+      "group_label": "Chamán",
+      "headline": "Tempestad Furiosa",
+      "note": "Dato transcrito: barra 20, nodo del árbol de Chamán.",
+      "skill_node_slugs": ["tempestad-furiosa"]
+    },
+    {
+      "rank": 4,
+      "group_label": "Chamán",
+      "headline": "Viento Demoníaco",
+      "note": "Dato transcrito: barra 10, nodo del árbol de Chamán.",
+      "skill_node_slugs": ["viento-demoniaco"]
+    },
+    {
+      "rank": 5,
+      "group_label": "Chamán",
+      "headline": "Tótem Wendigo",
+      "note": "Dato transcrito: barra 20, nodo del árbol de Chamán.",
+      "skill_node_slugs": ["totem-wendigo"]
+    },
+    {
+      "rank": 6,
+      "group_label": "Demoledor",
+      "headline": "Tocado por las Llamas",
+      "note": "Dato transcrito: barra 5, nodo del árbol de Demoledor.",
+      "skill_node_slugs": ["tocado-por-las-llamas"]
+    },
+    {
+      "rank": 7,
+      "group_label": "Demoledor",
+      "headline": "Llama Vengativa",
+      "note": "Dato transcrito: barra 10, nodo del árbol de Demoledor.",
+      "skill_node_slugs": ["llama-vengativa"]
+    },
+    {
+      "rank": 8,
+      "group_label": "Chamán",
+      "headline": "Corriente de Tormenta",
+      "note": "Dato transcrito: barra 25, nodo del árbol de Chamán.",
+      "skill_node_slugs": ["corriente-de-tormenta"]
+    },
+    {
+      "rank": 9,
+      "group_label": "Chamán",
+      "headline": "Golpe Primigenio",
+      "note": "Dato transcrito: barra 5, nodo del árbol de Chamán.",
+      "skill_node_slugs": ["golpe-primigenio"]
+    },
+    {
+      "rank": null,
+      "group_label": "Devoción",
+      "headline": "Ruta de devoción",
+      "note": "Pasos de devoción incluidos en esta ficha; la afinidad no se ha verificado.",
+      "skill_node_slugs": []
+    },
+    {
+      "rank": null,
+      "group_label": "Aún no",
+      "headline": "Nodos no incluidos en la ruta principal",
+      "note": "Nodos marcados como meta; requieren una barra de maestría alta.",
+      "skill_node_slugs": ["pacto-de-clamatormentas", "escudo-explosivo", "mina-de-termita"]
+    }
+  ],
+  "purchase_steps": [
+    {
+      "position": 1,
+      "threshold_label": "Barra Chamán → 10",
+      "mastery_slug": "chaman",
+      "title": "Paso 1",
+      "body": "Puntos del paso para la barra de Chamán; dato transcrito, sin verificar contra el juego.",
+      "highlights": [
+        {
+          "skill_node_slug": "golpe-atronador",
+          "points": 1
+        },
+        {
+          "skill_node_slug": "viento-demoniaco",
+          "points": 1
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "threshold_label": "barra Chamán → 15",
+      "mastery_slug": "chaman",
+      "title": "Paso 2",
+      "body": "Puntos del paso para la barra de Chamán; dato transcrito, sin verificar contra el juego.",
+      "highlights": [
+        {
+          "skill_node_slug": "torrente",
+          "points": null
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "threshold_label": "barra Chamán → 20",
+      "mastery_slug": "chaman",
+      "title": "Paso 3",
+      "body": "Puntos del paso para la barra de Chamán; dato transcrito, sin verificar contra el juego.",
+      "highlights": [
+        {
+          "skill_node_slug": "tempestad-furiosa",
+          "points": null
+        },
+        {
+          "skill_node_slug": "totem-wendigo",
+          "points": 1
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "threshold_label": "barra Demoledor → 10",
+      "mastery_slug": "demoledor",
+      "title": "Paso 4",
+      "body": "Puntos del paso para la barra de Demoledor; dato transcrito, sin verificar contra el juego.",
+      "highlights": [
+        {
+          "skill_node_slug": "tocado-por-las-llamas",
+          "points": 12
+        },
+        {
+          "skill_node_slug": "llama-vengativa",
+          "points": 1
+        }
+      ]
+    },
+    {
+      "position": 5,
+      "threshold_label": "barra Chamán → 25",
+      "mastery_slug": "chaman",
+      "title": "Paso 5",
+      "body": "Puntos del paso para la barra de Chamán; dato transcrito, sin verificar contra el juego.",
+      "highlights": [
+        {
+          "skill_node_slug": "corriente-de-tormenta",
+          "points": null
+        },
+        {
+          "skill_node_slug": "golpe-primigenio",
+          "points": null
+        }
+      ]
+    },
+    {
+      "position": 6,
+      "threshold_label": "Nivel 60+ · la decisión",
+      "mastery_slug": null,
+      "title": "Paso 6",
+      "body": "Decisión de nivel alto: aplica estos puntos cuando tengas la barra necesaria. Dato transcrito, sin verificar.",
+      "highlights": [
+        {
+          "skill_node_slug": "pacto-de-clamatormentas",
+          "points": null
+        },
+        {
+          "skill_node_slug": "escudo-explosivo",
+          "points": null
+        },
+        {
+          "skill_node_slug": "mina-de-termita",
+          "points": null
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "kind": "devociones",
+      "label": "Devociones",
+      "headline": "Pasos transcritos",
+      "detail": "Los pasos de devoción se transcriben como datos; la afinidad no se ha verificado.",
+      "position": 1
+    },
+    {
+      "kind": "nombres",
+      "label": "Nombres",
+      "headline": "Nombres en inglés",
+      "detail": "Se conservan los nombres en inglés para localizar constelaciones y habilidades en el juego.",
+      "position": 2
+    },
+    {
+      "kind": "atributos",
+      "label": "Atributos",
+      "headline": "Sin reparto de atributos",
+      "detail": "Esta ficha no incluye reparto de atributos.",
+      "position": 3
+    },
+    {
+      "kind": "arma",
+      "label": "Arma",
+      "headline": "Arma a dos manos",
+      "detail": "El build usa un arma a dos manos; no se transcriben objetos ni afijos concretos.",
+      "position": 4
+    },
+    {
+      "kind": "mas_adelante",
+      "label": "Más adelante",
+      "headline": "Pendiente de revisión",
+      "detail": "La progresión no se ha revisado contra el juego.",
+      "position": 5
+    },
+    {
+      "kind": "rotacion",
+      "label": "Rotación",
+      "headline": "Sin rotación transcrita",
+      "detail": "Esta ficha no incluye una rotación de habilidades.",
+      "position": 6
+    },
+    {
+      "kind": "general",
+      "label": "Omitir · Demoledor",
+      "headline": "Templar · Golpe de Fuego · Granada",
+      "detail": "Habilidades de Demoledor que no forman parte de los datos transcritos.",
+      "position": 7
+    },
+    {
+      "kind": "general",
+      "label": "Guía Espiritual · Coste",
+      "headline": "Coste de reasignación",
+      "detail": "Reasignar puntos tiene un coste en recursos del juego; consulta el coste actual en el juego.",
+      "position": 8
+    },
+    {
+      "kind": "general",
+      "label": "Guía Espiritual · Aviso",
+      "headline": "Puntos de reembolso",
+      "detail": "Los puntos de reembolso son datos del juego y pueden cambiar; no se afirma su ubicación exacta.",
+      "position": 9
+    },
+    {
+      "kind": "general",
+      "label": "Qué subir ya mismo",
+      "headline": "Introducción 1",
+      "detail": "Resumen de prioridades transcrito del build; sin verificar.",
+      "position": 10
+    },
+    {
+      "kind": "general",
+      "label": "Orden real de compra",
+      "headline": "Introducción 1",
+      "detail": "Orden de compra basado en la barra de maestría; sin verificar.",
+      "position": 11
+    },
+    {
+      "kind": "general",
+      "label": "Filtro de botín",
+      "headline": "Introducción 1",
+      "detail": "Reglas del filtro de botín transcritas como datos; sin verificar.",
+      "position": 12
+    },
+    {
+      "kind": "general",
+      "label": "El Guía Espiritual",
+      "headline": "Introducción 1",
+      "detail": "Los puntos de reembolso permiten recuperar puntos de habilidad y devoción.",
+      "position": 13
+    },
+    {
+      "kind": "general",
+      "label": "Ruta de devoción",
+      "headline": "Introducción 1",
+      "detail": "Orden de constelaciones transcrito del build; la afinidad no se ha verificado.",
+      "position": 14
+    },
+    {
+      "kind": "general",
+      "label": "Filtro de botín",
+      "headline": "Aprieta el filtro poco a poco",
+      "detail": "Ajusta las columnas del filtro a tu equipo; esta ficha no afirma qué objetos concretos son mejores.",
+      "position": 15
+    },
+    {
+      "kind": "general",
+      "label": "Esquemas de habilidades y devociones",
+      "headline": "Representación esquemática",
+      "detail": "Las posiciones de los esquemas son orientativas y no reproducen el mapa oficial del juego.",
+      "position": 16
+    },
+    {
+      "kind": "general",
+      "label": "Referencias de devoción",
+      "headline": "Vínculos de devoción",
+      "detail": "Los vínculos entre poderes y habilidades se transcriben como datos; no se ha verificado su efecto.",
+      "position": 17
+    },
+    {
+      "kind": "general",
+      "label": "Qué tocar en cada árbol",
+      "headline": "Leyenda",
+      "detail": "La barra N indica los puntos de maestría necesarios para desbloquear la habilidad.",
+      "position": 18
+    }
+  ],
+  "loot_filter_columns": [
+    {
+      "position": 1,
+      "name": "1ª columna · Calidad",
+      "subtitle": "Rarezas visibles",
+      "rules": [
+        {
+          "action": "desmarcar",
+          "label": "Desmarca: Común",
+          "detail": "Dato del filtro: oculta la rareza común.",
+          "position": 1
+        },
+        {
+          "action": "marcar",
+          "label": "Marca: únicos",
+          "detail": "Dato del filtro: muestra siempre los objetos únicos.",
+          "position": 2
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "name": "2ª columna · Tipo",
+      "subtitle": "Piezas visibles",
+      "rules": [
+        {
+          "action": "marcar",
+          "label": "Marca: armas y armadura",
+          "detail": "Dato del filtro: muestra armas cuerpo a cuerpo a dos manos, armadura, anillos, amuletos, medallas, reliquias y componentes.",
+          "position": 1
+        },
+        {
+          "action": "desmarcar",
+          "label": "Desmarca: una mano, escudos y distancia",
+          "detail": "Dato del filtro: oculta armas a una mano, escudos y armas a distancia.",
+          "position": 2
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "name": "3ª columna · Daño",
+      "subtitle": "Tipos de daño",
+      "rules": [
+        {
+          "action": "marcar",
+          "label": "Marca: rayo y elemental",
+          "detail": "Dato del filtro: muestra rayo, elemental, electrocución y físico.",
+          "position": 1
+        },
+        {
+          "action": "desmarcar",
+          "label": "Desmarca: otros daños",
+          "detail": "Dato del filtro: oculta frío, ácido, vitalidad, sangrado, caos, éter y mascotas.",
+          "position": 2
+        },
+        {
+          "action": "aviso",
+          "label": "Aviso: lógica del filtro",
+          "detail": "Dato del filtro: las casillas marcadas se combinan como alternativa, no como requisito conjunto.",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "name": "4ª columna · Personaje",
+      "subtitle": "Maestrías y resistencias",
+      "rules": [
+        {
+          "action": "marcar",
+          "label": "Marca: Chamán, Demoledor y resistencias",
+          "detail": "Dato del filtro: muestra objetos con bonificaciones a Chamán o Demoledor y a resistencias.",
+          "position": 1
+        }
+      ]
+    }
+  ],
+  "guide_npcs": [
+    {
+      "position": 1,
+      "group_label": "Acto 1",
+      "name": "Sahdina",
+      "location": "Cruce del Diablo",
+      "detail": "Punto de reembolso de puntos de habilidad y devoción."
+    },
+    {
+      "position": 2,
+      "group_label": "Después",
+      "name": "Novi",
+      "location": "Refugio del Aquelarre",
+      "detail": "Punto de reembolso de puntos de habilidad y devoción."
+    },
+    {
+      "position": 3,
+      "group_label": "Después",
+      "name": "Rena",
+      "location": "Distrito Yelmo de Acero",
+      "detail": "Punto de reembolso de puntos de habilidad y devoción."
+    },
+    {
+      "position": 4,
+      "group_label": "Después",
+      "name": "Bagalla",
+      "location": "Cónclave de los Tres",
+      "detail": "Punto de reembolso de puntos de habilidad y devoción."
+    }
+  ],
+  "constellations": [
+    {
+      "slug": "crossroads",
+      "name_en": "Crossroads",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "crossroads",
+            "x": 60,
+            "y": 60
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "eel",
+      "name_en": "Eel",
+      "name_es": null,
+      "tier_level": 1,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "eel",
+            "x": 240,
+            "y": 60
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "empty-throne",
+      "name_en": "Empty Throne",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": {
+        "ascendente": 5
+      },
+      "layout": {
+        "nodes": [
+          {
+            "id": "empty-throne",
+            "x": 420,
+            "y": 60
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "lizard",
+      "name_en": "Lizard",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "lizard",
+            "x": 60,
+            "y": 180
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "tempest",
+      "name_en": "Tempest",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "tempest",
+            "x": 240,
+            "y": 180
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "scholars-light",
+      "name_en": "Scholar's Light",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "scholars-light",
+            "x": 420,
+            "y": 180
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "rhowans-crown",
+      "name_en": "Rhowan's Crown",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "rhowans-crown",
+            "x": 60,
+            "y": 300
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "ghoul",
+      "name_en": "Ghoul",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "ghoul",
+            "x": 240,
+            "y": 300
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "behemoth",
+      "name_en": "Behemoth",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "behemoth",
+            "x": 420,
+            "y": 300
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "kraken",
+      "name_en": "Kraken",
+      "name_es": null,
+      "tier_level": 2,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "kraken",
+            "x": 60,
+            "y": 420
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "ultos",
+      "name_en": "Ultos, Shepherd of Storms",
+      "name_es": null,
+      "tier_level": 3,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "ultos",
+            "x": 240,
+            "y": 420
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "quill",
+      "name_en": "Quill",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "quill",
+            "x": 420,
+            "y": 420
+          }
+        ],
+        "edges": []
+      }
+    },
+    {
+      "slug": "owl",
+      "name_en": "Owl",
+      "name_es": null,
+      "tier_level": null,
+      "affinity_required": null,
+      "affinity_granted": null,
+      "layout": {
+        "nodes": [
+          {
+            "id": "owl",
+            "x": 60,
+            "y": 540
+          }
+        ],
+        "edges": []
+      }
+    }
+  ],
+  "devotion_steps": [
+    {
+      "position": 1,
+      "label": "Ya lo tienes",
+      "constellation_slug": "eel",
+      "title_override": "Eel",
+      "body": "Constelación Eel; dato transcrito, sin verificar afinidad ni efecto.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 2,
+      "label": "Paso 2",
+      "constellation_slug": "empty-throne",
+      "title_override": "Empty Throne",
+      "body": "Constelación Empty Throne; dato transcrito, sin verificar afinidad ni efecto.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 3,
+      "label": "Paso 3",
+      "constellation_slug": "lizard",
+      "title_override": "Lizard",
+      "body": "Constelación Lizard; dato transcrito, sin verificar afinidad ni efecto.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 4,
+      "label": "Paso 4",
+      "constellation_slug": "tempest",
+      "title_override": "Tempest",
+      "body": "Constelación Tempest; dato transcrito, sin verificar afinidad ni efecto.",
+      "bindings": [
+        {
+          "power_en": "Reckless Tempest",
+          "skill_node_slug": "viento-demoniaco"
+        }
+      ],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 5,
+      "label": "Paso 5",
+      "constellation_slug": "scholars-light",
+      "title_override": "Scholar's Light",
+      "body": "Constelación Scholar's Light; dato transcrito, sin verificar afinidad ni efecto.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 6,
+      "label": "Paso 6",
+      "constellation_slug": "rhowans-crown",
+      "title_override": "Rhowan's Crown",
+      "body": "Constelación Rhowan's Crown; dato transcrito, sin verificar afinidad ni efecto.",
+      "bindings": [
+        {
+          "power_en": "Elemental Storm",
+          "skill_node_slug": null,
+          "skill_name_es": "Tótem de Tormenta"
+        }
+      ],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 7,
+      "label": "Paso 7",
+      "constellation_slug": "ghoul",
+      "title_override": "Ghoul · Behemoth",
+      "body": "Constelación Ghoul · Behemoth; dato transcrito, sin verificar afinidad ni efecto.",
+      "bindings": [
+        {
+          "power_en": "Ghoul",
+          "skill_node_slug": "pacto-de-mogdrogen"
+        },
+        {
+          "power_en": "Behemoth",
+          "skill_node_slug": "pacto-de-clamatormentas"
+        }
+      ],
+      "accent": "ember",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 8,
+      "label": "Paso 8",
+      "constellation_slug": "kraken",
+      "title_override": "Kraken",
+      "body": "Constelación Kraken; dato transcrito, sin verificar afinidad ni efecto.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 9,
+      "label": "Paso 9",
+      "constellation_slug": "ultos",
+      "title_override": "Ultos, Shepherd of Storms",
+      "body": "Constelación Ultos, Shepherd of Storms; dato transcrito, sin verificar afinidad ni efecto.",
+      "bindings": [
+        {
+          "power_en": "Hand of Ultos",
+          "skill_node_slug": "golpe-primigenio"
+        }
+      ],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "ruta"
+    },
+    {
+      "position": 10,
+      "label": "Antes de gastar",
+      "constellation_slug": null,
+      "title_override": "Sin constelación",
+      "body": "Paso de verificación sin constelación asignada; dato transcrito, sin verificar.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "verificacion"
+    },
+    {
+      "position": 11,
+      "label": "Limpieza",
+      "constellation_slug": null,
+      "title_override": "Sin constelación",
+      "body": "Paso de limpieza sin constelación asignada; dato transcrito, sin verificar.",
+      "bindings": [],
+      "accent": "storm",
+      "verification": "sin_verificar",
+      "kind": "limpieza"
+    }
+  ],
+  "sections_meta": [
+    {
+      "section_key": "resumen",
+      "position": 1,
+      "visible": true
+    },
+    {
+      "section_key": "prioridades",
+      "position": 2,
+      "visible": true
+    },
+    {
+      "section_key": "habilidades",
+      "position": 3,
+      "visible": true
+    },
+    {
+      "section_key": "orden",
+      "position": 4,
+      "visible": true
+    },
+    {
+      "section_key": "notas",
+      "position": 5,
+      "visible": true
+    },
+    {
+      "section_key": "filtro-de-botin",
+      "position": 6,
+      "visible": true
+    },
+    {
+      "section_key": "guia-espiritual",
+      "position": 7,
+      "visible": true
+    },
+    {
+      "section_key": "devociones",
+      "position": 8,
+      "visible": true
+    },
+    {
+      "section_key": "video",
+      "position": 9,
+      "visible": false
+    },
+    {
+      "section_key": "fuentes",
+      "position": 10,
+      "visible": true
+    }
+  ]
+}

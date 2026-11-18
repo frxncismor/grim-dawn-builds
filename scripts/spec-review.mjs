@@ -47,6 +47,18 @@ function excludedFromSnapshot(relative) {
   return relative === '.specify/feature.json' || /^specs\/.+\/reviews(?:\/|$)/.test(relative);
 }
 
+// Git's own heuristic: a NUL byte in the first 8000 bytes marks a file as binary.
+function isBinary(bytes) {
+  return bytes.subarray(0, 8000).includes(0);
+}
+
+// Text files hash with CRLF folded to LF so the snapshot does not depend on the checkout's
+// line-ending conversion (core.autocrlf); binaries are hashed byte-for-byte.
+function snapshotBytes(bytes) {
+  if (isBinary(bytes) || !bytes.includes(0x0d)) return bytes;
+  return Buffer.from(bytes.toString('latin1').replaceAll('\r\n', '\n'), 'latin1');
+}
+
 function snapshotFor(root) {
   const listed = execFileSync('git', ['ls-files', '-co', '--exclude-standard', '-z'], {
     cwd: root,
@@ -75,7 +87,7 @@ function snapshotFor(root) {
       hash.update('deleted\0');
       continue;
     }
-    const bytes = readFileSync(safe.absolute);
+    const bytes = snapshotBytes(readFileSync(safe.absolute));
     hash.update(String(bytes.byteLength), 'utf8');
     hash.update('\0');
     hash.update(bytes);

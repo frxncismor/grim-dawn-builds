@@ -9,11 +9,13 @@ import { generateCatalog } from './gen-catalog.mts';
 
 const root = resolve(import.meta.dirname, '..');
 const readJson = async (path: string) => JSON.parse(await readFile(path, 'utf8'));
-const masteries = await readJson(join(root, 'content/masteries.json'));
-const build = await readJson(join(root, 'content/builds/chaman-demoledor-golpe-primigenio.json'));
+const masteries = await readJson(join(root, 'fixtures/content/masteries.json'));
+const build = await readJson(
+  join(root, 'fixtures/content/builds/chaman-demoledor-golpe-primigenio.json'),
+);
 const author: Author = {
   slug: 'grim-dawn-builds',
-  display_name: 'Grim Dawn Builds',
+  display_name: 'Grim Builds',
   bio: null,
   url: null,
   is_placeholder: false,

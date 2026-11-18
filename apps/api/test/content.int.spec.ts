@@ -43,7 +43,10 @@ function docker(args: string[]): string {
   return result.stdout.trim();
 }
 
-suite('HTTP content contract on real PostgreSQL public views (T-060)', () => {
+// T055: cases shell out to docker exec/psql or spawn the API against a real PostgreSQL; under CPU
+// load they can exceed vitest's default 5 s testTimeout, so the suite carries its own timeout.
+const SUITE_OPTIONS = { timeout: 30_000 };
+suite('HTTP content contract on real PostgreSQL public views (T-060)', SUITE_OPTIONS, () => {
   const queries = vi.spyOn(pg.Client.prototype, 'query');
   beforeAll(async () => {
     if (!image || !/@sha256:[a-f0-9]{64}$/.test(image))
@@ -206,7 +209,7 @@ suite('HTTP content contract on real PostgreSQL public views (T-060)', () => {
   runContentRepositoryContract('PostgreSQL/api_ro over HTTP', factory, { localDrafts: false });
 
   it('serves the complete real catalog with its published own guide', async () => {
-    const input = await readSeedFixtures(join(root, 'content'));
+    const input = await readSeedFixtures(join(root, 'fixtures/content'));
     const repo = await factory(
       input.builds,
       { includeDrafts: false },
@@ -221,7 +224,7 @@ suite('HTTP content contract on real PostgreSQL public views (T-060)', () => {
     expect(builds).toHaveLength(1);
     expect(builds[0]?.slug).toBe('chaman-demoledor-golpe-primigenio');
     expect((await repo.findBuild(input.builds[0]!.slug))?.slug).toBe(input.builds[0]!.slug);
-    expect((await repo.getAuthor('grim-dawn-builds'))?.display_name).toBe('Grim Dawn Builds');
+    expect((await repo.getAuthor('grim-dawn-builds'))?.display_name).toBe('Grim Builds');
     expect(await repo.getAuthor('por-confirmar')).toBeNull();
     expect(JSON.stringify(tier)).not.toMatch(
       /permission_ref|rights_confirmed|is_placeholder|rights_notes|reviewed_by/,

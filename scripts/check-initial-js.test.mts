@@ -13,6 +13,10 @@ import {
   measureInitialRoutes,
   CATALOG_JS_LIMIT,
   INITIAL_JS_LIMIT,
+  BUILD_BUDGET_SLUGS,
+  BUILD_JS_LIMIT,
+  MASTERY_BUDGET_SLUGS,
+  MASTERY_JS_LIMIT,
 } from './check-initial-js.mts';
 
 const stats = () => ({
@@ -149,6 +153,147 @@ test('measures real gzip bytes and CLI blocks above the unchanged 90000-byte lim
     await rm(join(root, 'browser/shared.js'));
     await assert.rejects(measureInitialJs(root));
     assert.throws(() => execFileSync(process.execPath, args, { stdio: 'pipe' }));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('mastery tree pages (T013) are measured per slug and locale against the tree-page budget', async () => {
+  assert.equal(MASTERY_JS_LIMIT, 150000);
+  assert.deepEqual([...MASTERY_BUDGET_SLUGS], ['demolition', 'soldier']);
+  const root = await mkdtemp(join(tmpdir(), 'gd-initial-js-mastery-'));
+  try {
+    const meta = stats();
+    (meta.outputs as Record<string, unknown>)['tier.js'] = {
+      entryPoint: 'src/app/features/tier-list/tier-list.page.ts',
+      imports: [{ path: 'shared.js', kind: 'import-statement' }],
+    };
+    (meta.outputs as Record<string, unknown>)['mastery.js'] = {
+      entryPoint: 'src/app/features/masteries/mastery.page.ts',
+      imports: [{ path: 'shared.js', kind: 'import-statement' }],
+    };
+    await writeFile(join(root, 'stats.json'), JSON.stringify(meta));
+    const pages = ['', 'es/'].flatMap((prefix) =>
+      ['tier-list', ...MASTERY_BUDGET_SLUGS.map((slug) => `maestrias/${slug}`)].map(
+        (page) => `${prefix}${page}`,
+      ),
+    );
+    for (const dir of ['browser', ...['', 'es/'].map((p) => `browser/${p}`)])
+      await mkdir(join(root, dir), { recursive: true });
+    for (const page of pages) await mkdir(join(root, 'browser', page), { recursive: true });
+    for (const prefix of ['', 'es/']) {
+      await writeFile(join(root, 'browser', prefix, 'index.html'), html);
+      for (const page of ['tier-list', ...MASTERY_BUDGET_SLUGS.map((s) => `maestrias/${s}`)])
+        await writeFile(join(root, 'browser', prefix, page, 'index.html'), html);
+    }
+    for (const name of ['main.js', 'polyfills.js', 'shared.js', 'mastery.js', 'home.js', 'tier.js'])
+      await writeFile(join(root, 'browser', name), 'console.log(1)');
+    const results = await measureInitialRoutes(root, [[], ['es']]);
+    const mastery = results.filter((r) => r.route.includes('/maestrias/'));
+    assert.deepEqual(mastery.map((r) => r.route).sort(), [
+      '/es/maestrias/demolition',
+      '/es/maestrias/soldier',
+      '/maestrias/demolition',
+      '/maestrias/soldier',
+    ]);
+    for (const r of mastery) {
+      assert.equal(r.limitBytes, MASTERY_JS_LIMIT);
+      assert.ok(r.files.some((f) => f.file === 'mastery.js'));
+      assert.ok(r.totalGzipBytes <= r.limitBytes);
+    }
+    // The existing limits are untouched.
+    assert.equal(results.find((r) => r.route === '/')?.limitBytes, INITIAL_JS_LIMIT);
+    assert.equal(results.find((r) => r.route === '/tier-list')?.limitBytes, CATALOG_JS_LIMIT);
+    await writeFile(join(root, 'browser/shared.js'), randomBytes(260000));
+    const over = await measureInitialRoutes(root, [[]]);
+    assert.ok(
+      over
+        .filter((r) => r.route.startsWith('/maestrias/'))
+        .every((r) => r.totalGzipBytes > MASTERY_JS_LIMIT),
+    );
+    // A configured budget page missing from the artifact fails closed instead of being skipped.
+    await rm(join(root, 'browser/maestrias/soldier/index.html'));
+    await assert.rejects(measureInitialRoutes(root, [[]]));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('the mastery index (T027) is measured at /maestrias and /es/maestrias against the existing catalog limit', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gd-initial-js-index-'));
+  try {
+    const meta = stats();
+    (meta.outputs as Record<string, unknown>)['index.js'] = {
+      entryPoint: 'src/app/features/masteries/index.page.ts',
+      imports: [{ path: 'shared.js', kind: 'import-statement' }],
+    };
+    await writeFile(join(root, 'stats.json'), JSON.stringify(meta));
+    for (const prefix of ['', 'es/']) {
+      await mkdir(join(root, 'browser', prefix, 'maestrias'), { recursive: true });
+      await writeFile(join(root, 'browser', prefix, 'index.html'), html);
+      await writeFile(join(root, 'browser', prefix, 'maestrias', 'index.html'), html);
+    }
+    for (const name of ['main.js', 'polyfills.js', 'shared.js', 'index.js', 'home.js'])
+      await writeFile(join(root, 'browser', name), 'console.log(1)');
+    const results = await measureInitialRoutes(root, [[], ['es']]);
+    const index = results.filter((r) => /\/maestrias$/.test(r.route));
+    assert.deepEqual(index.map((r) => r.route).sort(), ['/es/maestrias', '/maestrias']);
+    for (const r of index) {
+      assert.equal(r.limitBytes, CATALOG_JS_LIMIT);
+      assert.ok(r.files.some((f) => f.file === 'index.js'));
+    }
+    assert.equal(results.find((r) => r.route === '/')?.limitBytes, INITIAL_JS_LIMIT);
+    // A budgeted index page missing from the artifact fails closed instead of being skipped.
+    await rm(join(root, 'browser/es/maestrias/index.html'));
+    await assert.rejects(measureInitialRoutes(root, [[], ['es']]));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('guide pages (spec004 T020) are measured per slug and locale against the guide budget of plan §6', async () => {
+  assert.equal(BUILD_JS_LIMIT, 150000);
+  assert.deepEqual([...BUILD_BUDGET_SLUGS], ['chaman-demoledor-golpe-primigenio']);
+  const root = await mkdtemp(join(tmpdir(), 'gd-initial-js-build-'));
+  try {
+    const meta = stats();
+    (meta.outputs as Record<string, unknown>)['build.js'] = {
+      entryPoint: 'src/app/features/build/build-route.page.ts',
+      imports: [{ path: 'shared.js', kind: 'import-statement' }],
+    };
+    await writeFile(join(root, 'stats.json'), JSON.stringify(meta));
+    for (const prefix of ['', 'es/']) {
+      await mkdir(join(root, 'browser', prefix), { recursive: true });
+      await writeFile(join(root, 'browser', prefix, 'index.html'), html);
+      for (const slug of BUILD_BUDGET_SLUGS) {
+        await mkdir(join(root, 'browser', prefix, 'builds', slug), { recursive: true });
+        await writeFile(join(root, 'browser', prefix, 'builds', slug, 'index.html'), html);
+      }
+    }
+    for (const name of ['main.js', 'polyfills.js', 'shared.js', 'build.js', 'home.js'])
+      await writeFile(join(root, 'browser', name), 'console.log(1)');
+    const results = await measureInitialRoutes(root, [[], ['es']]);
+    const guides = results.filter((r) => r.route.includes('/builds/'));
+    assert.deepEqual(guides.map((r) => r.route).sort(), [
+      '/builds/chaman-demoledor-golpe-primigenio',
+      '/es/builds/chaman-demoledor-golpe-primigenio',
+    ]);
+    for (const r of guides) {
+      assert.equal(r.limitBytes, BUILD_JS_LIMIT);
+      assert.ok(r.files.some((f) => f.file === 'build.js'));
+      assert.ok(r.totalGzipBytes <= r.limitBytes);
+    }
+    assert.equal(results.find((r) => r.route === '/')?.limitBytes, INITIAL_JS_LIMIT);
+    await writeFile(join(root, 'browser/shared.js'), randomBytes(260000));
+    const over = await measureInitialRoutes(root, [[]]);
+    assert.ok(
+      over
+        .filter((r) => r.route.startsWith('/builds/'))
+        .every((r) => r.totalGzipBytes > BUILD_JS_LIMIT),
+    );
+    // A configured guide missing from the artifact fails closed instead of being skipped.
+    await rm(join(root, 'browser/builds', BUILD_BUDGET_SLUGS[0], 'index.html'));
+    await assert.rejects(measureInitialRoutes(root, [[]]));
   } finally {
     await rm(root, { recursive: true, force: true });
   }

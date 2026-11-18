@@ -6,20 +6,24 @@ import {
   inject,
   input,
   linkedSignal,
+  LOCALE_ID,
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import type { LinkOnlyMetadata, PublicBuild } from '@gd/domain';
 import { SeoService, type JsonLdRecord } from '../../core/seo/seo.service';
+import { DeferredStyles } from '../../core/styles/deferred-styles';
 import { BuildAttribution } from './attribution/build-attribution';
 import { DevotionSection } from './devotion-section/devotion-section';
 import { LootFilter } from './loot-filter/loot-filter';
 import { PurchaseStepper, type PurchaseStepSelection } from './purchase-stepper/purchase-stepper';
 import { BuildSections } from './sections/build-sections';
 import { SourceAttribution } from './source-attribution/source-attribution';
+import { BuildSummary } from './summary/build-summary';
 import { BuildToc } from './toc/build-toc';
 import { VideoFacade } from './video-facade/video-facade';
-import { SkillTree } from '../../shared/svg/skill-tree/skill-tree';
+import { BuildSkills } from './skills/build-skills';
 
 type SkillNode = PublicBuild['skill_nodes'][number];
 type Mastery = PublicBuild['masteries'][number];
@@ -49,7 +53,7 @@ export interface SkillTreeSlot {
 
 /** Author slug reserved for unconfirmed identities; it never becomes a public link. */
 const PLACEHOLDER_AUTHOR_SLUG = 'por-confirmar';
-const SITE_NAME = 'Grim Dawn Builds';
+const SITE_NAME = 'Grim Builds';
 const TREE_SUFFIXES = ['a', 'b'] as const;
 const HOME_LABEL = $localize`:@@buildPage.breadcrumbHome:Home`;
 
@@ -71,7 +75,8 @@ function publicHttpUrl(value: string | null | undefined): string | null {
   standalone: true,
   imports: [
     BuildSections,
-    SkillTree,
+    BuildSummary,
+    BuildSkills,
     PurchaseStepper,
     LootFilter,
     DevotionSection,
@@ -79,6 +84,7 @@ function publicHttpUrl(value: string | null | undefined): string | null {
     BuildAttribution,
     BuildToc,
     NgTemplateOutlet,
+    RouterLink,
     SourceAttribution,
   ],
   templateUrl: './build.page.html',
@@ -89,6 +95,14 @@ export class BuildPage {
   private readonly seo = inject(SeoService);
 
   readonly content = input.required<BuildPageContent>();
+  private readonly pageLang = inject(LOCALE_ID).toLowerCase().startsWith('es') ? 'es' : 'en';
+  /**
+   * T023 (FR-038): the guide text exists only in its content language. When the page is in another
+   * language the body carries that `lang` and a notice says so at the top; otherwise neither appears.
+   */
+  readonly foreignLang = computed(() =>
+    this.content().locale === this.pageLang ? null : this.content().locale,
+  );
   readonly activeIds = signal<readonly string[]>([]);
   readonly activeStepPosition = linkedSignal<string, number | undefined>({
     source: () => this.content().slug,
@@ -114,6 +128,7 @@ export class BuildPage {
   readonly hasVideo = computed(() => (this.content().video_url ?? '').trim().length > 0);
 
   constructor() {
+    inject(DeferredStyles).ensure();
     effect(() => {
       const content = this.content();
       this.seo.setPage({

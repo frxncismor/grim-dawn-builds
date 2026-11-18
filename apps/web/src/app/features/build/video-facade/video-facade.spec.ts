@@ -64,8 +64,17 @@ describe('gd-video-facade', () => {
     const { fixture, root } = await render({ ...content, video_url });
     expect(fixture.componentInstance.hasRenderableVideo()).toBe(false);
     expect(root.querySelector('[role="alert"]')?.textContent?.trim()).toBeTruthy();
-    expect(root.querySelector('iframe, a, button')).toBeNull();
+    expect(root.querySelector('iframe, a, button, lite-youtube')).toBeNull();
   });
+
+  async function mounted(value: VideoFacadeContent = content) {
+    const result = await render(value);
+    await vi.waitFor(() => {
+      result.fixture.detectChanges();
+      if (!result.root.querySelector('lite-youtube')) throw new Error('player not mounted');
+    });
+    return result;
+  }
 
   it.each([
     content.video_url!,
@@ -73,35 +82,25 @@ describe('gd-video-facade', () => {
     'https://youtu.be/SampleID_01?si=example',
     'https://youtube.com/embed/SampleID_01',
     embed,
-  ])('normalizes %s only after explicit activation', async (video_url) => {
+  ])('normalizes %s and adds the iframe only after activation', async (video_url) => {
     const fetch = vi.spyOn(globalThis, 'fetch');
     const storage = vi.spyOn(Storage.prototype, 'getItem');
     const writeStorage = vi.spyOn(Storage.prototype, 'setItem');
-    const { fixture, root } = await render({ ...content, video_url });
-    expect(fixture.componentInstance.hasRenderableVideo()).toBe(true);
+    const { fixture, root } = await mounted({ ...content, video_url });
+    const player = root.querySelector('lite-youtube')!;
+    expect(player.getAttribute('videoid')).toBe('SampleID_01');
+    expect((player as HTMLElement).style.backgroundImage).not.toContain('ytimg');
     expect(root.querySelector('iframe')).toBeNull();
     const link = root.querySelector('a')!;
     expect(link.href).toBe(video_url);
     expect(link.target).toBe('_blank');
     expect(link.rel).toBe('noopener noreferrer');
-    const button = root.querySelector('button')!;
-    expect(button.disabled).toBe(false);
-    button.click();
-    button.click();
+    root.querySelector<HTMLButtonElement>('lite-youtube button')!.click();
     fixture.detectChanges();
-    const frames = root.querySelectorAll('iframe');
-    expect(frames).toHaveLength(1);
-    const frame = frames[0];
-    expect(frame.src).toBe(embed);
-    expect(frame.title).toContain(content.title);
-    expect(frame.getAttribute('loading')).toBe('lazy');
-    expect(frame.getAttribute('referrerpolicy')).toBe('strict-origin-when-cross-origin');
-    expect(frame.getAttribute('sandbox')).toBe(
-      'allow-scripts allow-same-origin allow-presentation',
-    );
-    expect(frame.hasAttribute('allowfullscreen')).toBe(true);
+    await vi.waitFor(() => expect(root.querySelectorAll('iframe')).toHaveLength(1));
+    expect(root.querySelector('iframe')!.src).toContain(`${embed}?`);
     expect(root.querySelector('[role="status"]')?.textContent?.trim()).toBeTruthy();
-    frame.dispatchEvent(new Event('load'));
+    root.querySelector('iframe')!.dispatchEvent(new Event('load'));
     fixture.detectChanges();
     expect(root.querySelector('[role="status"]')?.textContent?.trim()).toBeFalsy();
     expect(fetch).not.toHaveBeenCalled();
@@ -109,42 +108,89 @@ describe('gd-video-facade', () => {
     expect(writeStorage).not.toHaveBeenCalled();
   });
 
-  it('keeps the button disabled on the server and exposes the fallback', async () => {
+  it('renders no player on the server and exposes the fallback', async () => {
     const { root } = await render(content, 'server');
-    expect(root.querySelector('button')?.disabled).toBe(true);
-    expect(root.querySelector('iframe')).toBeNull();
+    expect(root.querySelector('button, iframe, lite-youtube')).toBeNull();
     expect(root.textContent).toContain('JavaScript');
     expect(root.querySelector('a')?.href).toBe(content.video_url);
   });
 
   it('announces a detected frame block, preserving the fallback', async () => {
-    const { fixture, root } = await render();
-    root.querySelector('button')!.click();
+    const { fixture, root } = await mounted();
+    root.querySelector<HTMLButtonElement>('lite-youtube button')!.click();
     fixture.detectChanges();
-    const violation = Object.assign(new Event('securitypolicyviolation'), {
-      effectiveDirective: 'frame-src',
-      blockedURI: 'https://www.youtube-nocookie.com',
-      disposition: 'enforce',
-    });
-    document.dispatchEvent(violation);
+    document.dispatchEvent(
+      Object.assign(new Event('securitypolicyviolation'), {
+        effectiveDirective: 'frame-src',
+        blockedURI: 'https://www.youtube-nocookie.com',
+        disposition: 'enforce',
+      }),
+    );
     fixture.detectChanges();
     expect(root.querySelector('[role="alert"]')?.textContent?.trim()).toBeTruthy();
-    expect(root.querySelector('iframe')).toBeNull();
+    expect(root.querySelector('iframe, lite-youtube')).toBeNull();
     expect(root.querySelector('a')?.href).toBe(content.video_url);
   });
 
-  it('resets on a different slug and renders hostile titles as text', async () => {
-    const { fixture, root } = await render();
-    root.querySelector('button')!.click();
+  it('falls back with an error when the frame never loads', async () => {
+    const { fixture, root } = await mounted();
+    vi.useFakeTimers();
+    try {
+      root.querySelector<HTMLButtonElement>('lite-youtube button')!.click();
+      fixture.detectChanges();
+      vi.advanceTimersByTime(10_000);
+      fixture.detectChanges();
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(root.querySelector('[role="alert"]')?.textContent?.trim()).toBeTruthy();
+    expect(root.querySelector('iframe, lite-youtube')).toBeNull();
+    expect(root.querySelector('a')?.href).toBe(content.video_url);
+  });
+
+  it('names the iframe after the video, never loads the YouTube API and skips preconnects', async () => {
+    const { fixture, root } = await mounted();
+    const player = root.querySelector('lite-youtube')!;
+    expect(Reflect.get(player, 'needsYTApi')).toBe(false);
+    player.dispatchEvent(new Event('pointerover'));
+    expect(document.head.querySelector('link[rel="preconnect"]')).toBeNull();
+    root.querySelector<HTMLButtonElement>('lite-youtube button')!.click();
     fixture.detectChanges();
-    expect(root.querySelector('iframe')).not.toBeNull();
+    await vi.waitFor(() => expect(root.querySelector('iframe')!.title).toContain(content.title));
+    expect(document.querySelector('script[src*="youtube"]')).toBeNull();
+  });
+
+  it('does not let a stale timeout fail the next video after a slug change', async () => {
+    const { fixture, root } = await mounted();
+    vi.useFakeTimers();
+    try {
+      root.querySelector<HTMLButtonElement>('lite-youtube button')!.click();
+      fixture.detectChanges();
+      vi.advanceTimersByTime(5_000);
+      fixture.componentRef.setInput('content', { ...content, slug: 'otra' });
+      fixture.detectChanges();
+      vi.advanceTimersByTime(6_000);
+      fixture.detectChanges();
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(root.querySelector('[role="alert"]')).toBeNull();
+  });
+
+  it('resets on a different slug and renders hostile titles as text', async () => {
+    const { fixture, root } = await mounted();
+    root.querySelector<HTMLButtonElement>('lite-youtube button')!.click();
+    fixture.detectChanges();
     const title = '<img src=x onerror=alert(1)>';
     fixture.componentRef.setInput('content', { ...content, slug: 'otra', title });
     fixture.detectChanges();
-    expect(root.querySelector('iframe, img')).toBeNull();
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(root.querySelector('iframe')).toBeNull();
+      expect(root.querySelector('lite-youtube')).not.toBeNull();
+    });
+    expect(root.querySelector('img')).toBeNull();
     expect(root.textContent).toContain(title);
-    root.querySelector('button')!.click();
-    fixture.detectChanges();
-    expect(root.querySelector('iframe')?.title).toContain(title);
+    expect(root.querySelector('lite-youtube')!.getAttribute('title')).toBe(title);
   });
 });

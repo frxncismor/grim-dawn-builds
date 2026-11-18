@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <!-- Own skill icons (spec004 T024): one engraved line symbol per skill type, drawn for this project. -->
+  <symbol id="skill-active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.5 21.5 12 12 21.5 2.5 12Z"/>
+    <path d="M12 7.5v9M7.5 12h9"/>
+  </symbol>
+  <symbol id="skill-modifier" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 8.5 12 4.5l8 4M4 13l8 4 8-4M4 17.5l8 4 8-4"/>
+  </symbol>
+  <symbol id="skill-transmuter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.5 10a7.5 7.5 0 0 1 13-3.5M19 3.5v4h-4"/>
+    <path d="M19.5 14a7.5 7.5 0 0 1-13 3.5M5 20.5v-4h4"/>
+  </symbol>
+  <symbol id="skill-passive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.5 20 7v10l-8 4.5L4 17V7Z"/>
+    <path d="M9 12h6"/>
+  </symbol>
+  <symbol id="skill-mastery" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.5 19.5 6v6c0 4.5-3 7.8-7.5 9.5C7.5 19.8 4.5 16.5 4.5 12V6Z"/>
+    <path d="m8.5 12 3.5-3.5 3.5 3.5-3.5 3.5Z"/>
+  </symbol>

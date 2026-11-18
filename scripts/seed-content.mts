@@ -2,6 +2,13 @@ import { spawnSync } from 'node:child_process';
 import { lstatSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import {
+  CONTENT_MOUNT,
+  failureLine,
+  failurePattern,
+  successPattern,
+  type SeedErrorCode,
+} from '@gd/domain';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 interface Result {
@@ -56,6 +63,8 @@ export function contentContainerArguments(
     '--env',
     `APP_ENV=${appEnv}`,
     '--env',
+    `SEED_CONTENT_ROOT=${CONTENT_MOUNT}`,
+    '--env',
     'DB_HOST=db',
     '--env',
     `POSTGRES_DB=${database}`,
@@ -64,7 +73,7 @@ export function contentContainerArguments(
     '--env',
     'DB_PASSWORD_IMPORTER_FILE=/run/secrets/db_password_importer',
     '--mount',
-    `type=bind,source=${join(root, 'content')},target=/content,readonly`,
+    `type=bind,source=${join(root, 'fixtures/content')},target=${CONTENT_MOUNT},readonly`,
     '--mount',
     `type=bind,source=${join(root, 'infra/docker/secrets/db_password_importer.txt')},target=/run/secrets/db_password_importer,readonly`,
     'gd-api:local',
@@ -86,7 +95,7 @@ export function launchContentImport(
   const write = options.write ?? console.log;
   const appEnv = env['APP_ENV'];
   if (appEnv !== 'development' && appEnv !== 'test') {
-    write(`${operation} failed: environment`);
+    write(failureLine(operation, 'environment'));
     return 1;
   }
   const root = options.root ?? ROOT;
@@ -114,7 +123,7 @@ export function launchContentImport(
     });
   try {
     if (
-      !validPath(join(root, 'content'), 'directory') ||
+      !validPath(join(root, 'fixtures/content'), 'directory') ||
       !validPath(join(root, 'infra/docker/secrets/db_password_importer.txt'), 'file')
     )
       throw new Error('Seed input unavailable');
@@ -153,19 +162,17 @@ export function launchContentImport(
         appEnv,
       ),
     );
-    if (
-      result.code !== 0 ||
-      !new RegExp('^' + operation + ' complete: \\d+ builds, \\d+ tier lists\\s*$').test(
-        result.output,
-      )
-    ) {
-      const code = new RegExp(
-        '^' +
-          operation +
-          ' failed: (invalid-content|role|already|not-empty|migration|credentials|database-failed|bootstrapped)\\s*$',
-      ).exec(result.error ?? '');
+    if (result.code !== 0 || !successPattern(operation).test(result.output)) {
+      const stderr = result.error ?? '';
+      const code = failurePattern(operation).exec(stderr);
       if (code) {
-        write(`${operation} failed: ${code[1]}`);
+        // The contract's own line, with the identifier detail (FR-012) when the seeder sent one.
+        write(failureLine(operation, code[1] as SeedErrorCode, code[2]));
+        return 1;
+      }
+      // A well-formed failure line with a code outside the contract is named, never echoed or accepted.
+      if (new RegExp(`^${operation} failed: \\S+(?: \\(.*\\))?\\s*$`).test(stderr)) {
+        write(`${operation} failed: unknown`);
         return 1;
       }
       throw new Error('Seed failed');
@@ -193,7 +200,7 @@ export function launchSeed(
 }
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   if (process.argv.length > 2) {
-    console.error('seed failed: arguments');
+    console.error(failureLine('seed', 'arguments'));
     process.exitCode = 1;
   } else process.exitCode = launchSeed(process.env);
 }

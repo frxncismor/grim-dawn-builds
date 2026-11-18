@@ -29,6 +29,15 @@ export function createPublicBuildEnv(
     }
     output[key] = value;
   }
+  // Constitution §VII: the default of `ASSET_SOURCE` is `own`. Release never falls back to a value
+  // on its own, in either direction: the owner decides `game` (the six mastery buttons, 1.10.0) or
+  // `own` (the withdrawal path) explicitly, and a missing value is an error (S-003). Fixture builds
+  // keep the default `own`.
+  if (mode === 'release') {
+    const source = input['ASSET_SOURCE'];
+    if (source !== 'game' && source !== 'own') throw new Error('public-build: invalid-environment');
+    output['ASSET_SOURCE'] = source;
+  }
   return {
     ...output,
     CONTENT_SOURCE: mode === 'fixture' ? 'fixture' : 'api',

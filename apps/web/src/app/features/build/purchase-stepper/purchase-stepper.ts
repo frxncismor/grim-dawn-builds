@@ -35,6 +35,7 @@ const NO_NUMBER_MESSAGE = $localize`:@@purchaseStepper.noNumber:No point value`;
 const UNSUPPORTED_STORAGE_MESSAGE = $localize`:@@purchaseStepper.storageUnavailable:Saving is not available in this browser. The checklist will keep working in this view.`;
 const REMOVE_FAILED_MESSAGE = $localize`:@@purchaseStepper.removeFailed:Saved progress could not be deleted; it was only cleared in this view.`;
 const OPT_OUT_REMOVE_FAILED_MESSAGE = $localize`:@@purchaseStepper.optOutRemoveFailed:Saving was turned off in this view, but the record could not be removed from the browser.`;
+const CLEARED_SELECTION_MESSAGE = $localize`:@@purchaseStepper.selectionCleared:Step highlight cleared.`;
 const CLEARED_MESSAGE = $localize`:@@purchaseStepper.cleared:Progress cleared in this view and in this browser.`;
 
 @Component({
@@ -53,6 +54,8 @@ export class PurchaseStepper {
   readonly completedPositions = signal<ReadonlySet<number>>(new Set());
   readonly persistenceEnabled = signal(false);
   readonly storageMessage = signal('');
+  /** Polite announcement of the chosen step (spec004 T022); empty until the reader chooses one. */
+  readonly announcement = signal('');
 
   readonly orderedSteps = computed(() =>
     [...this.content().purchase_steps].sort((a, b) => a.position - b.position),
@@ -95,6 +98,7 @@ export class PurchaseStepper {
       this.completedPositions.set(new Set());
       this.persistenceEnabled.set(false);
       this.storageMessage.set('');
+      this.announcement.set('');
       this.selectionChange.emit({ position: null, activeIds: [] });
       if (this.isBrowser && this.browserReady()) this.restoreProgress();
     });
@@ -140,12 +144,33 @@ export class PurchaseStepper {
 
   selectStep(step: PurchaseStepperContent['purchase_steps'][number]): void {
     if (!this.controlsEnabled()) return;
+    // The button is a toggle (`aria-pressed`): choosing the chosen step again clears the highlight.
+    if (this.selectedPosition() === step.position) {
+      this.selectedPosition.set(null);
+      this.announcement.set(CLEARED_SELECTION_MESSAGE);
+      this.selectionChange.emit({ position: null, activeIds: [] });
+      return;
+    }
     this.selectedPosition.set(step.position);
     const available = new Set(this.content().skill_nodes.map((node) => node.slug));
     const activeIds = [
       ...new Set(step.highlights.map((highlight) => highlight.skill_node_slug)),
     ].filter((slug) => available.has(slug));
+    this.announcement.set(this.announceStep(step, activeIds.length));
     this.selectionChange.emit({ position: step.position, activeIds });
+  }
+
+  private announceStep(
+    step: PurchaseStepperContent['purchase_steps'][number],
+    count: number,
+  ): string {
+    const position = step.position;
+    const title = step.title;
+    if (count === 0)
+      return $localize`:@@purchaseStepper.announceNone:Step ${position}:position:: ${title}:title:. There are no skills of this step in the trees.`;
+    if (count === 1)
+      return $localize`:@@purchaseStepper.announceOne:Step ${position}:position:: ${title}:title:. 1 skill highlighted in the trees.`;
+    return $localize`:@@purchaseStepper.announceMany:Step ${position}:position:: ${title}:title:. ${count}:count: skills highlighted in the trees.`;
   }
 
   onCompletedChange(position: number, event: Event): void {

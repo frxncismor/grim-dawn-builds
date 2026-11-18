@@ -10,6 +10,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
  */
 export const ALLOWED_IDENTICAL_IDS: readonly { readonly id: string; readonly reason: string }[] = [
   {
+    id: 'skillTree.circular',
+    reason:
+      'Circular: adjetivo idéntico en ambos idiomas; «De tipo circular» no cabe en la columna',
+  },
+  {
     id: 'buildAttribution.contentPlaceholder',
     reason: 'Placeholder: término de UI idéntico en ambos idiomas',
   },
@@ -41,7 +46,7 @@ export const ALLOWED_IDENTICAL_IDS: readonly { readonly id: string; readonly rea
     id: 'skillTree.status.meta',
     reason: 'Meta: estado de build, término del juego y la comunidad',
   },
-  { id: 'layout.brand', reason: 'Marca: Grim Dawn Builds es nombre propio del sitio' },
+  { id: 'layout.brand', reason: 'Marca: Grim Builds es nombre propio del sitio' },
   {
     id: 'catalog.option.elemental',
     reason: 'Elemental: tipo de daño con el mismo término en ambos idiomas',

@@ -126,7 +126,6 @@ describe('adversarial gd-build-attribution: inert markup', () => {
       sources: [{ ...BASE.sources[0], title: huge, retrieved_on: 'not-a-date' }],
     });
     expect(root.textContent?.length).toBeGreaterThan(50_000);
-    expect(root.querySelector('[data-published]')?.textContent).toContain('not-a-date');
     expect(root.textContent).toContain('not-a-date');
     expect(root.querySelector('script')).toBeNull();
   });

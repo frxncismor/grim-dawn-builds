@@ -1,6 +1,7 @@
 import pg from 'pg';
 import type { PublicAuthor, PublicBuild, PublicTierList } from '@gd/domain';
 import { PublicBuildSchema } from '@gd/domain';
+import { PostgresMasteryRepository } from '../catalog/mastery-repository.js';
 import { loadReadinessConfig } from '../db/readiness.mjs';
 import {
   mapAssets,
@@ -169,6 +170,8 @@ export function createDatabaseContentRepository(env: Readonly<Record<string, str
   };
   return {
     repository: new PostgresContentRepository(database),
+    /** Catalog reader sharing the same `api_ro` pool (spec 003 T023). */
+    masteries: new PostgresMasteryRepository(database),
     close: async () => {
       await pool?.end();
     },

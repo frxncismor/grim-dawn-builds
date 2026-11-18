@@ -795,6 +795,32 @@ describe('TierEntrySchema', () => {
 });
 
 describe('AssetSchema', () => {
+  it('requires a withdrawn asset to drop its file', () => {
+    const withdrawn = { ...pending(), status: 'withdrawn' };
+    expect(AssetSchema.safeParse(withdrawn).success).toBe(true);
+    expect(
+      AssetSchema.safeParse({ ...withdrawn, file_path: 'public/assets/portraits/x.png' }).success,
+    ).toBe(false);
+  });
+
+  it('accepts optional game provenance and rejects a malformed one', () => {
+    const provenance = {
+      game_version: 'steam-build-1',
+      source_path: 'ui/skills/x.tex',
+      sha256: 'a'.repeat(64),
+      width: 197,
+      height: 41,
+    };
+    expect(AssetSchema.safeParse({ ...pending(), provenance }).success).toBe(true);
+    for (const bad of [
+      { ...provenance, sha256: 'xyz' },
+      { ...provenance, width: 0 },
+      { ...provenance, game_version: '' },
+    ]) {
+      expect(AssetSchema.safeParse({ ...pending(), provenance: bad }).success).toBe(false);
+    }
+  });
+
   const pending = () => ({
     slug: 'icono-rayo',
     status: 'pending',
@@ -982,7 +1008,7 @@ describe('documented vocabularies and formats', () => {
   });
 
   it('accepts the documented asset statuses and rejects an unknown one', () => {
-    for (const status of ['pending', 'rejected']) {
+    for (const status of ['pending', 'rejected', 'withdrawn']) {
       expect(AssetSchema.safeParse({ ...assetBase(), status }).success).toBe(true);
     }
     expect(AssetSchema.safeParse({ ...assetBase(), status: 'draft' }).success).toBe(false);
@@ -1808,4 +1834,33 @@ describe('rejection diagnostics', () => {
       }).success,
     ).toBe(false);
   });
+});
+
+describe('skill_node_id opcional en los nodos de la guía (spec 003, T016)', () => {
+  const withRef = (skill_node_id: string) => ({
+    ...draftBuild(),
+    skill_nodes: draftBuild().skill_nodes.map((node, i) =>
+      i === 0 ? { ...node, skill_node_id } : node,
+    ),
+  });
+
+  it('la guía existente valida sin skill_node_id (SC-007)', () => {
+    expect(BuildSchema.safeParse(draftBuild()).success).toBe(true);
+  });
+
+  it('acepta un id con forma de catálogo', () => {
+    expect(BuildSchema.safeParse(withRef('class06/primal-strike')).success).toBe(true);
+  });
+
+  it.each(['golpe-primigenio', 'CLASS06/x', 'class06/', 'class6/x', ''])(
+    'rechaza el id con formato inválido %j con el campo en la ruta',
+    (bad) => {
+      const result = BuildSchema.safeParse(withRef(bad));
+      expect(result.success).toBe(false);
+      if (!result.success)
+        expect(
+          result.error.issues.some((i) => i.path.join('.') === 'skill_nodes.0.skill_node_id'),
+        ).toBe(true);
+    },
+  );
 });

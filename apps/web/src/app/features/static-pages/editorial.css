@@ -1,7 +1,16 @@
 :host {
   display: block;
-  max-inline-size: var(--reading-measure);
-  padding-block: var(--space-6) var(--space-8);
+  max-inline-size: calc(var(--reading-measure) + var(--space-6) * 2);
+  margin-block: var(--space-6) var(--space-8);
+  padding: var(--space-3) var(--space-5) var(--space-5);
+  /* spec004 T030: reading pages take the quiet own frame; the text keeps its measure. */
+  border-style: solid;
+  border-width: var(--frame-width);
+  border-image-source: var(--frame-image-compact);
+  border-image-slice: 16;
+  border-image-repeat: stretch;
+  background-color: var(--color-panel);
+  background-image: var(--texture-surface);
 }
 h1 {
   font-size: var(--text-heading);
@@ -28,4 +37,13 @@ li p {
 a:focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-offset);
+}
+
+@media (prefers-contrast: more) {
+  :host {
+    border-image: none;
+    border-width: 2px;
+    border-color: var(--color-ash);
+    background-image: none;
+  }
 }

@@ -1,0 +1,641 @@
+{
+  "mastery": {
+    "id": "class04",
+    "slug": "nightblade",
+    "name": {
+      "en": "Nightblade",
+      "es": "Hoja de la Noche"
+    }
+  },
+  "game_version": "steam-build-25813250",
+  "source": {
+    "game_version": "steam-build-25813250",
+    "sha256": [
+      "9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603",
+      "82defd8a0fddf71e8491b7494fada51b034b1af14ffc0a6cf9c8aabdf8700c25",
+      "e6f785d155d0791b3100092762111f59a06faa9e1a86d91898ec98317e395752"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "class04/wpattack0",
+      "name": {
+        "en": "Dual Blades",
+        "es": "Cuchillas Dobles"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 39
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_dualblades1up.tex",
+      "icon_id": "ic-9b22d228fcd492ed"
+    },
+    {
+      "id": "class04/eviscerate1",
+      "name": {
+        "en": "Amarasta's Blade Burst",
+        "es": "Explosión de Cuchillas de Amarasta"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 179
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_lethalgambit1up.tex",
+      "icon_id": "ic-462b10a1aa09b67e"
+    },
+    {
+      "id": "class04/veilofshadows1",
+      "name": {
+        "en": "Veil of Shadow",
+        "es": "Velo de Sombras"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 389
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_veilofshadows1up.tex",
+      "icon_id": "ic-9688e2e435876104"
+    },
+    {
+      "id": "class04/wpattack1",
+      "name": {
+        "en": "Belgothian's Shears",
+        "es": "Cizalla de Belgothian"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 39
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_dualblades2up.tex",
+      "icon_id": "ic-9d4d0ed81d602f0a"
+    },
+    {
+      "id": "class04/phantomblade",
+      "name": {
+        "en": "Phantasmal Blades",
+        "es": "Cuchillas Fantasmales"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 109
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_phantomblades1up.tex",
+      "icon_id": "ic-de27abc2b6726608"
+    },
+    {
+      "id": "class04/nightbladeenchant1",
+      "name": {
+        "en": "Pneumatic Burst",
+        "es": "Explosión Neumática"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant1up.tex",
+      "icon_id": "ic-9843c12abf866eef"
+    },
+    {
+      "id": "class04/wpattack4",
+      "name": {
+        "en": "Nidalla's Hidden Hand",
+        "es": "Mano Oculta de Nidalla"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 39
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": "class04/wpattack1",
+      "icon": "ui/skills/icons/class04/skillicon_dualblades5up.tex",
+      "icon_id": "ic-d32f08ce020107c5"
+    },
+    {
+      "id": "class04/phantomblade_mod0",
+      "name": {
+        "en": "Frenetic Throw",
+        "es": "Lanzamiento Frenético"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 142
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class04/phantomblade",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
+    },
+    {
+      "id": "class04/shadowstrike",
+      "name": {
+        "en": "Shadow Strike",
+        "es": "Golpe de las Sombras"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 249
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_shadowstrike1up.tex",
+      "icon_id": "ic-f310ad8dfa43d37a"
+    },
+    {
+      "id": "class04/nightbladeenchant1b",
+      "name": {
+        "en": "Breath of Belgothian",
+        "es": "Aliento de Belgothian"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 351
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class04/nightbladeenchant1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
+    },
+    {
+      "id": "class04/passive1",
+      "name": {
+        "en": "Phantasmal Armor",
+        "es": "Armadura Fantasmal"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_passive1up.tex",
+      "icon_id": "ic-b22a2c06b74a5ad2"
+    },
+    {
+      "id": "class04/wpattack2",
+      "name": {
+        "en": "Amarasta's Quick Cut",
+        "es": "Corte Rápido de Amarasta"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 39
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_dualblades3up.tex",
+      "icon_id": "ic-fecf79ccfb903a68"
+    },
+    {
+      "id": "class04/phantomblade_mod1",
+      "name": {
+        "en": "Heart Seeker",
+        "es": "Busca Corazones"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/phantomblade",
+      "icon": "ui/skills/icons/class04/skillicon_phantomblades2up.tex",
+      "icon_id": "ic-0d1fcca44e47d307"
+    },
+    {
+      "id": "class04/eviscerate2",
+      "name": {
+        "en": "Lethal Assault",
+        "es": "Asalto Letal"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/eviscerate1",
+      "icon": "ui/skills/icons/class04/skillicon_lethalgambit2up.tex",
+      "icon_id": "ic-b8223b5bf6fff74d"
+    },
+    {
+      "id": "class04/nightbladeenchant2",
+      "name": {
+        "en": "Shadow Dance",
+        "es": "Danza Sombría"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/nightbladeenchant1",
+      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant2up.tex",
+      "icon_id": "ic-d40afdb17e0f2388"
+    },
+    {
+      "id": "class04/veilofshadows2",
+      "name": {
+        "en": "Night's Chill",
+        "es": "Frialdad Nocturna"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 389
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": "class04/veilofshadows1",
+      "icon": "ui/skills/icons/class04/skillicon_veilofshadows2up.tex",
+      "icon_id": "ic-08f7abeea2ee16c3"
+    },
+    {
+      "id": "class04/ringofsteel",
+      "name": {
+        "en": "Ring of Steel",
+        "es": "Anillo de Acero"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 179
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_ringofsteel1up.tex",
+      "icon_id": "ic-f66b9d3ad5b7a13c"
+    },
+    {
+      "id": "class04/bladebarrier1",
+      "name": {
+        "en": "Blade Barrier",
+        "es": "Barrera de cuchillas"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_bladebarrier1up.tex",
+      "icon_id": "ic-aa0a92fc81399c3a"
+    },
+    {
+      "id": "class04/passive2",
+      "name": {
+        "en": "Anatomy of Murder",
+        "es": "Anatomía del Asesinato"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_passive2up.tex",
+      "icon_id": "ic-3444a94ecbfc13ff"
+    },
+    {
+      "id": "class04/wpattack3",
+      "name": {
+        "en": "Whirling Death",
+        "es": "Giro Mortal"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 39
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_dualblades4up.tex",
+      "icon_id": "ic-5618a0eedcc2ec8a"
+    },
+    {
+      "id": "class04/ringofsteel_mod0",
+      "name": {
+        "en": "Ring of Frost",
+        "es": "Anillo de Escarcha"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 141
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class04/ringofsteel",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
+    },
+    {
+      "id": "class04/shadowstrike_mod1",
+      "name": {
+        "en": "Nidalla's Justifiable Ends",
+        "es": "Final Justificable de Nidalla"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/shadowstrike",
+      "icon": "ui/skills/icons/class04/skillicon_shadowstrike2up.tex",
+      "icon_id": "ic-b96f21431bccb83a"
+    },
+    {
+      "id": "class04/bladetrap1",
+      "name": {
+        "en": "Blade Trap",
+        "es": "Trampa de Cuchillas"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_bladetrap1up.tex",
+      "icon_id": "ic-51abc4e672214ff8"
+    },
+    {
+      "id": "class04/phantomblade_mod2",
+      "name": {
+        "en": "Nether Edge",
+        "es": "Filo del Inframundo"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/phantomblade",
+      "icon": "ui/skills/icons/class04/skillicon_phantomblades3up.tex",
+      "icon_id": "ic-515fe2bde60c1db0"
+    },
+    {
+      "id": "class04/nightbladeenchant3",
+      "name": {
+        "en": "Elemental Awakening",
+        "es": "Despertar Elemental"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/nightbladeenchant1",
+      "icon": "ui/skills/icons/class04/skillicon_nightbladeenchant3up.tex",
+      "icon_id": "ic-5e8c63c641d3b903"
+    },
+    {
+      "id": "class04/passive3",
+      "name": {
+        "en": "Merciless Repertoire",
+        "es": "Repertorio Despiadado"
+      },
+      "kind": "passive",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_passive3up.tex",
+      "icon_id": "ic-4fe7b554eb3c5d20"
+    },
+    {
+      "id": "class04/ringofsteel_mod1",
+      "name": {
+        "en": "Circle of Slaughter",
+        "es": "Círculo de Masacre"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/ringofsteel",
+      "icon": "ui/skills/icons/class04/skillicon_ringofsteel2up.tex",
+      "icon_id": "ic-ebe124d178b062fb"
+    },
+    {
+      "id": "class04/bladetrap2",
+      "name": {
+        "en": "Devouring Blades",
+        "es": "Cuchillas Devoradoras"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/bladetrap1",
+      "icon": "ui/skills/icons/class04/skillicon_bladetrap2up.tex",
+      "icon_id": "ic-6e2c64e748078fe3"
+    },
+    {
+      "id": "class04/wpattack5",
+      "name": {
+        "en": "Execution",
+        "es": "Ejecución"
+      },
+      "kind": "active",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 39
+      },
+      "max_points": 8,
+      "ultimate_points": 18,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_dualblades6up.tex",
+      "icon_id": "ic-1f81e87747e45bd3"
+    },
+    {
+      "id": "class04/summon_bladespirit",
+      "name": {
+        "en": "Blade Spirit",
+        "es": "Hoja Espiritual"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 109
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class04/skillicon_bladespirit1up.tex",
+      "icon_id": "ic-6177ebedd141adaa"
+    },
+    {
+      "id": "class04/shadowstrike_mod2",
+      "name": {
+        "en": "Nightfall",
+        "es": "Anochecer"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class04/shadowstrike",
+      "icon": "ui/skills/icons/class04/skillicon_shadowstrike3up.tex",
+      "icon_id": "ic-f6b63125fa7b7af7"
+    }
+  ]
+}

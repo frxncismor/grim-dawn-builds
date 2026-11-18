@@ -25,13 +25,13 @@ not replace either file, which remain the source of truth.
 | Format check                               | `pnpm format:check`                                                                               | yes                   | yes     | yes      | T-002      |
 | Web unit tests                             | `pnpm test`                                                                                       | yes                   | yes     | yes      | T-002      |
 | Script tests                               | `pnpm test:scripts`                                                                               | yes                   | yes     | yes      | T-004      |
-| Content validation (repository content)    | `pnpm run content:validate -- --dir content`                                                      | yes                   | yes     | yes      | T-009      |
+| Content validation (repository content)    | `pnpm run content:validate -- --dir fixtures/content`                                             | yes                   | yes     | yes      | T-009      |
 | Catalog check                              | `pnpm run catalog:check`                                                                          | yes                   | yes     | yes      | T-016      |
 | Locale parity                              | `pnpm run check:locale-parity`                                                                    | yes                   | yes     | yes      | T-138      |
 | Assets manifest                            | `pnpm assets:check`                                                                               | yes                   | yes     | yes      | T-047      |
 | Contrast                                   | `pnpm check:contrast`                                                                             | yes                   | no      | no       | T-135      |
 | Web build                                  | `pnpm build`                                                                                      | yes                   | yes     | yes      | T-001      |
-| Public artifact guard                      | `pnpm check:public-build`                                                                         | yes                   | no      | no       | T-084      |
+| Public artifact guard                      | `pnpm check:public-build`                                                                         | yes                   | yes     | yes      | T-084      |
 | Performance budgets                        | `pnpm check:performance`                                                                          | yes                   | yes     | yes      | T-042      |
 | Dependency install (frozen lockfile)       | `pnpm install --frozen-lockfile`                                                                  | no                    | yes     | yes      | T-064      |
 | CI workflow secrets (CI command)           | `pnpm exec tsx scripts/check-ci-secrets.mts`                                                      | no                    | yes     | yes      | T-086      |
@@ -42,20 +42,30 @@ not replace either file, which remain the source of truth.
 | API image build (no push)                  | `docker build --file apps/api/Dockerfile --tag gd-api:ci .`                                       | no                    | yes     | yes      | T-065      |
 | API image runs as non-root                 | `test "$(docker run --rm gd-api:ci id -u)" != "0"`                                                | no                    | yes     | yes      | T-065      |
 | Content validation (fixture)               | `pnpm run content:validate -- --dir scripts/fixtures/content-valid`                               | no                    | yes     | yes      | T-064      |
-| Drafts artifact build (isolated)           | `pnpm exec ng build --output-path dist/e2e-drafts`                                                | no                    | yes     | yes      | T-126      |
+| Drafts artifact build (isolated)           | `pnpm e2e:drafts:build`                                                                           | no                    | yes     | yes      | T-126      |
+| Video facade preview build                 | `pnpm e2e:video:build`                                                                            | no                    | yes     | yes      | T-171      |
 | Playwright Chromium install                | `pnpm exec playwright install --with-deps chromium`                                               | no                    | yes     | yes      | T-126      |
 | E2E journeys                               | `pnpm run e2e:journeys`                                                                           | no                    | yes     | yes      | T-040      |
 | Accessibility gate (axe)                   | `pnpm run e2e:a11y`                                                                               | no                    | yes     | yes      | T-041      |
+| Visual regression (Linux references)       | `pnpm run e2e:visual`                                                                             | no                    | yes     | yes      | T017       |
 | Artifact source report                     | `test ! -f dist/build-info.json; echo "CONTENT_SOURCE=…"`                                         | no                    | yes     | yes      | T-126      |
 
 `pnpm verify` runs 25 steps in order and stops at the first failure, so later
-steps do not report while an earlier gate is red. The `verify` job in CI runs 35
-`run:` commands: the same 21 controls as the local run, except `pnpm verify` in
+steps do not report while an earlier gate is red. The `verify` job in CI runs 36
+`run:` commands: the same 22 controls as the local run, except `pnpm verify` in
 itself, plus 14 commands that only exist in the workflow (dependency install,
 the gitleaks toolchain, the pinned PostgreSQL image, the container checks, the
 fixture validation, the drafts artifact, the Playwright install, the E2E and axe
 suites and the artifact source report). The CI workflow secret check appears
 twice because both runners invoke the same script through different commands.
+
+The visual regression gate is the separate CI job `visual-regression`, parallel
+to `verify`, so it is not one of the 36 `run:` commands above and it does not run
+in `pnpm verify`. It compares 30 screenshots with the references in
+`e2e/visual-baselines/`, which are valid only when generated on Linux (the manual
+`Visual baselines (Linux)` workflow or the Docker image); on a native Windows or
+macOS browser it fails by design. The procedure is in
+[CONTRIBUTING.md](../CONTRIBUTING.md#visual-regression-references).
 
 ## Artifact security headers (T-166)
 
@@ -90,8 +100,9 @@ declared hosting configuration drift apart.
 - **Rule.** Public docs are English primary, with a Spanish counterpart named
   `*.es.md`.
 - **Current coverage.** `README.md`, `CONTRIBUTING.md`, `docs/quality-gates.md` and
-  all the documents under `docs/orchestration/` ship both languages. The docs under
-  `docs/content/` are still Spanish-only and are outside T-158's scope.
+  all the documents under `docs/orchestration/` ship both languages. Under
+  `docs/content/`, `mastery-catalog.md` ships both languages (spec 003, T019/T020);
+  the other documents there are still Spanish-only and are outside T-158's scope.
 - **Internal SDD artifacts** (`specs/**`, `handoff.md`, `plan.md`, `tasks.md`):
   Spanish only, as the constitution allows; no parity required.
 - **What the automation checks.** `pnpm check:locale-parity` compares the Angular
@@ -100,3 +111,5 @@ declared hosting configuration drift apart.
 - **Translation debt.** Bringing the stable public docs to both languages is
   tracked in T-158 (no date). Until then, a new public doc either ships both
   languages or records the debt in its task.
+
+**Public artifact guard (T034).** `pnpm check:public-build` runs after `pnpm build` and first checks the `dist/grim-dawn-builds/browser` artifact: it fails (it never skips) if the artifact is missing, has 5 pages or fewer, or any prerendered page still carries the old brand «Grim Dawn Builds». The same detector lives in `scripts/check-legacy-brand.mts` and, copied (a test keeps both equal), in `apps/web/src/brand.test.mts`, which checks the sources; `pnpm test:scripts` never reads `dist/`. The `verify` job in CI runs it right after the web build (T035).

@@ -1,172 +1,12 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { PublicBuild, TierEntry } from '@gd/domain';
-import {
-  ContentBadge,
-  TierCard,
-  ExternalAttribution,
-  FilterChip,
-  FilterBar,
-  EmptyState,
-} from './tier-components';
+import { FilterChip, FilterBar, EmptyState, TierRow } from './tier-components';
 import { EMPTY_FILTER } from './filter';
 
-const placeholder: TierEntry = {
-  entry_kind: 'placeholder',
-  combination_slug: 'chaman-demoledor',
-  display_name: 'Chamán + Demoledor',
-  build_slug: null,
-  tier: 'sin_clasificar',
-  content_status: 'placeholder',
-  rights_status: 'own_original',
-  review_state: 'publicado',
-  external_url: null,
-  external_author: null,
-  source_slug: null,
-  evaluated_on: null,
-};
 describe('controlled catalog components', () => {
   afterEach(() => TestBed.resetTestingModule());
-  it('renders an honest placeholder without a link or fabricated ranking', async () => {
-    TestBed.configureTestingModule({ providers: [provideRouter([])] });
-    const f = TestBed.createComponent(TierCard);
-    f.componentRef.setInput('entry', placeholder);
-    f.componentRef.setInput('combinationName', 'Chamán + Demoledor');
-    await f.whenStable();
-    expect(f.nativeElement.textContent).toContain('Guide coming soon');
-    expect(f.nativeElement.textContent).toContain('Placeholder');
-    expect(f.nativeElement.querySelector('a')).toBeNull();
-    expect(f.nativeElement.querySelector('img').src).toContain(
-      '/assets/icons/status-placeholder.svg',
-    );
-  });
-  it('links only a matching public guide; a pending or mismatching guide has no href', async () => {
-    TestBed.configureTestingModule({ providers: [provideRouter([])] });
-    const f = TestBed.createComponent(TierCard);
-    f.componentRef.setInput('entry', {
-      ...placeholder,
-      entry_kind: 'build_propia',
-      build_slug: 'own-guide',
-      content_status: 'verificado',
-    });
-    f.componentRef.setInput('combinationName', 'Chamán');
-    const guide = {
-      slug: 'own-guide',
-      title: 'Guía propia',
-      review_state: 'publicado',
-      rights_status: 'own_original',
-    } as PublicBuild;
-    f.componentRef.setInput('guide', guide);
-    await f.whenStable();
-    expect(f.nativeElement.querySelector('a').getAttribute('href')).toBe('/builds/own-guide');
-    f.componentRef.setInput('guide', { ...guide, rights_status: 'pending' });
-    await f.whenStable();
-    expect(f.nativeElement.querySelector('a')).toBeNull();
-    f.componentRef.setInput('guide', { ...guide, slug: 'different' });
-    await f.whenStable();
-    expect(f.nativeElement.querySelector('a')).toBeNull();
-  });
-  it('link-only shows factual attribution and warning, with no guide body or image', async () => {
-    TestBed.configureTestingModule({ providers: [provideRouter([])] });
-    const f = TestBed.createComponent(TierCard);
-    f.componentRef.setInput('combinationName', 'Chamán');
-    f.componentRef.setInput('entry', {
-      ...placeholder,
-      entry_kind: 'enlace_externo',
-      rights_status: 'link_only',
-      content_status: 'sin_verificar',
-      external_url: 'https://example.org/guide',
-      external_author: 'Autora de prueba',
-      source_slug: 'demo',
-    });
-    f.componentRef.setInput('source', {
-      title: 'Fuente propia de prueba',
-      license_note: 'Solo enlace',
-    });
-    await f.whenStable();
-    const a = f.nativeElement.querySelector('a');
-    expect(a.href).toBe('https://example.org/guide');
-    expect(a.rel).toContain('noopener');
-    expect(a.rel).toContain('noreferrer');
-    expect(f.nativeElement.textContent).toContain('Autora de prueba');
-    expect(f.nativeElement.textContent).toContain('Solo enlace');
-    expect(f.nativeElement.textContent).toContain('third-party site');
-    expect(f.nativeElement.querySelectorAll('img').length).toBe(1); // own status glyph only
-    expect(f.nativeElement.querySelector('a[href^="/builds/"]')).toBeNull();
-  });
-  it('link-only never renders a ranking, guide text or source image', async () => {
-    TestBed.configureTestingModule({ providers: [provideRouter([])] });
-    const f = TestBed.createComponent(TierCard);
-    f.componentRef.setInput('combinationName', 'Chamán + Demoledor');
-    f.componentRef.setInput('gameVersion', '1.2.0.5');
-    f.componentRef.setInput('entry', {
-      ...placeholder,
-      entry_kind: 'enlace_externo',
-      display_name: 'Guía enlazada',
-      // Defensive: even if a ranking slipped into the data, the card must not show it.
-      tier: 'S',
-      rights_status: 'link_only',
-      content_status: 'sin_verificar',
-      external_url: 'https://example.org/guide',
-      external_author: 'Autora de prueba',
-      source_slug: 'demo',
-    });
-    f.componentRef.setInput('source', {
-      title: 'Fuente propia de prueba',
-      license_note: 'Solo enlace',
-    });
-    await f.whenStable();
-    const text: string = f.nativeElement.textContent;
-    expect(text).toContain('Guía enlazada');
-    expect(text).toContain('Autora de prueba');
-    expect(text).toContain('Fuente propia de prueba');
-    expect(text).not.toContain('Tier S');
-    expect(text).not.toContain('Unranked');
-    expect(text).not.toContain('Guide coming soon');
-    expect(f.nativeElement.querySelector('a[href^="/builds/"]')).toBeNull();
-    const images: HTMLImageElement[] = [...f.nativeElement.querySelectorAll('img')];
-    expect(images.length).toBe(1);
-    expect(images.every((img) => img.getAttribute('src')?.startsWith('assets/icons/status-'))).toBe(
-      true,
-    );
-  });
-  it('unsafe and credential-bearing external URLs remain text', async () => {
-    const f = TestBed.createComponent(ExternalAttribution);
-    const credentialUrl = new URL('https://example.org');
-    credentialUrl.username = 'synthetic-user';
-    credentialUrl.password = crypto.randomUUID();
-    for (const url of [
-      'javascript:alert(1)',
-      '//example.org',
-      credentialUrl.href,
-      'data:text/html,hello',
-    ]) {
-      f.componentRef.setInput('url', url);
-      f.componentRef.setInput('author', 'Autora');
-      await f.whenStable();
-      expect(f.nativeElement.querySelector('a')).toBeNull();
-      expect(f.nativeElement.textContent).toContain('Autora');
-    }
-  });
-  it('status always includes text and a decorative own icon', async () => {
-    const f = TestBed.createComponent(ContentBadge);
-    for (const [status, label] of [
-      ['verificado', 'Verified'],
-      ['sin_verificar', 'Unverified'],
-      ['placeholder', 'Placeholder'],
-    ]) {
-      f.componentRef.setInput('status', status);
-      await f.whenStable();
-      expect(f.nativeElement.textContent).toContain(label);
-      const icon = f.nativeElement.querySelector('img');
-      expect(icon?.getAttribute('aria-hidden')).toBe('true');
-      expect(icon?.getAttribute('alt')).toBe('');
-      expect(icon?.getAttribute('src')).toContain(
-        `assets/icons/status-${status.replace('_', '-')}.svg`,
-      );
-    }
-  });
   it('chip announces selection and honors native disabled', async () => {
     const f = TestBed.createComponent(FilterChip);
     f.componentRef.setInput('label', 'Rayo');
@@ -221,5 +61,82 @@ describe('controlled catalog components', () => {
     expect(f.nativeElement.textContent).toContain('No results');
     f.nativeElement.querySelector('button').click();
     expect(resets).toBe(1);
+  });
+});
+
+describe('catalog component CSS is scoped to each host (spec005 T008, S4-D2)', () => {
+  afterEach(() => TestBed.resetTestingModule());
+  const css = readFileSync(resolve('src/styles/tier-components.css'), 'utf8');
+
+  /** Every style-rule selector of the sheet, with state pseudo-classes removed so `matches` sees them. */
+  const selectors: string[] = [];
+  let buffer = '';
+  for (const ch of css.replace(/\/\*[\s\S]*?\*\//g, '')) {
+    if (ch === '{') {
+      const prelude = buffer.trim();
+      if (!prelude.startsWith('@'))
+        selectors.push(
+          ...prelude
+            .split(/,(?![^(]*\))/)
+            .map((sel) =>
+              sel.replace(/:(hover|active|focus-visible|disabled|enabled)/g, '').trim(),
+            ),
+        );
+      buffer = '';
+    } else if (ch === '}' || ch === ';') buffer = '';
+    else buffer += ch;
+  }
+  const reaches = (el: Element) => selectors.some((sel) => el.matches(sel));
+
+  it('does not reach a gd-build-card projected into gd-tier-row', () => {
+    const host = document.createElement('div');
+    host.innerHTML = `<gd-tier-row><section><h2>Fila</h2><div class="catalog-grid">
+      <gd-build-card><article class="build-card">
+        <button class="chip" aria-pressed="true">Botón</button>
+        <input type="search" /><fieldset><legend>Leyenda</legend><div class="chips"></div></fieldset>
+        <div class="filters"><div class="search"></div></div><section class="empty"><button>Vacío</button></section>
+      </article></gd-build-card></div></section></gd-tier-row>`;
+    document.body.append(host);
+    const card = host.querySelector('gd-build-card')!;
+    expect(selectors.length).toBeGreaterThan(10);
+    expect([card, ...card.querySelectorAll('*')].filter(reaches)).toEqual([]);
+    expect(reaches(host.querySelector('.catalog-grid')!)).toBe(true);
+    host.remove();
+  });
+
+  it('still reaches the elements each component renders itself', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    // TestBed mounts each component on a `div`; re-home its content under the real host tag.
+    const own = async <T>(
+      tag: string,
+      type: new () => T,
+      setup?: (f: ReturnType<typeof TestBed.createComponent<T>>) => void,
+    ) => {
+      const f = TestBed.createComponent(type);
+      setup?.(f);
+      await f.whenStable();
+      const el = document.createElement(tag);
+      el.append(...f.nativeElement.childNodes);
+      host.append(el);
+      return el;
+    };
+    const chip = await own('gd-filter-chip', FilterChip, (f) =>
+      f.componentRef.setInput('label', 'Rayo'),
+    );
+    const bar = await own('gd-filter-bar', FilterBar);
+    const empty = await own('gd-empty-state', EmptyState);
+    const row = await own('gd-tier-row', TierRow, (f) => f.componentRef.setInput('label', 'S'));
+    const owned = [
+      chip.querySelector('button.chip'),
+      bar.querySelector('input'),
+      bar.querySelector('.filters > button'),
+      empty.querySelector('button'),
+      empty.querySelector('.empty'),
+      row.querySelector('.catalog-grid'),
+    ];
+    expect(owned.map((el) => el?.outerHTML.slice(0, 40) ?? null).join('|')).not.toContain('null');
+    expect(owned.filter((el) => !reaches(el!)).map((el) => el!.outerHTML.slice(0, 60))).toEqual([]);
+    host.remove();
   });
 });

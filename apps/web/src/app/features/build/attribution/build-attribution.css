@@ -10,7 +10,7 @@ section {
 
 h2 {
   margin: 0 0 var(--space-3);
-  color: var(--color-storm);
+  color: var(--color-bone);
 }
 
 h3 {
@@ -33,8 +33,17 @@ h3 {
   margin: 0;
   color: var(--color-ash);
   font-size: var(--text-small);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+}
+
+/* The author label is a metadata key beside its value, not an eyebrow over it (T027, F-09). */
+.author {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: var(--space-3);
+}
+
+.author > :nth-child(n + 3) {
+  grid-column: 1 / -1;
 }
 
 .author__name {
@@ -76,47 +85,9 @@ h3 {
   line-height: var(--line-heading);
 }
 
-.badge--pending,
-.badge[data-content-status='placeholder'] {
+.badge--pending {
   border-color: var(--color-ember);
   color: var(--color-ember);
-}
-
-.badge[data-review-state='borrador'],
-.badge[data-content-status='sin_verificar'] {
-  border-style: dashed;
-  color: var(--color-ash);
-}
-
-.badge[data-review-state='publicado'],
-.badge[data-content-status='verificado'] {
-  border-color: var(--color-storm);
-  color: var(--color-storm);
-}
-
-.facts {
-  display: grid;
-  gap: var(--space-2) var(--space-5);
-  margin: var(--space-4) 0;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
-}
-
-.facts__item {
-  display: grid;
-  gap: var(--space-1);
-  align-content: start;
-  padding-block-start: var(--space-2);
-  border-block-start: var(--frame-border);
-}
-
-.facts dt {
-  color: var(--color-ash);
-  font-size: var(--text-small);
-}
-
-.facts dd {
-  margin: 0;
-  color: var(--color-bone);
 }
 
 .sources {
@@ -193,7 +164,6 @@ h3 {
   margin-block-start: var(--space-5);
   padding: var(--space-3) var(--space-4);
   border: var(--frame-border);
-  border-inline-start: 3px solid var(--color-storm-dim);
   background: var(--color-panel);
   color: var(--color-ash);
 }

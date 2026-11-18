@@ -168,7 +168,7 @@ apps/api/            Fastify + Drizzle + Dockerfile
   src/db/{migrate,seed}.mts   migrador one-shot y seed (guardado por APP_ENV)
 packages/domain/     Zod + tipos + reglas puras (publicFilter, rights, assets, tier checks), sin Angular/Fastify/Drizzle/E-S
 infra/docker/        compose.yaml, compose.debug.yaml, .env.example
-content/             FIXTURES de pruebas/desarrollo y material de importación (no fuente de producción; renombrable a fixtures/content, T-075 opcional)
+fixtures/content/    FIXTURES de pruebas/desarrollo y material de importación (no fuente de producción; reubicado desde `content/` por T-075, seleccionada 2026-11-13)
 scripts/             validate-content, check-assets, gen-*, verify-local, check-release (importan de @gd/domain)
 pnpm-workspace.yaml  packages: [apps/*, packages/*]  (conservar allowBuilds)
 ```
@@ -474,7 +474,7 @@ Componente `SourceAttribution` (bloque «Esta build fue adaptada de: …») usan
 
 Revisada Constitución v1.8.0, sin enmiendas. I/II/VII: guía pendiente como fixture local, permisos no supuestos, fallback propio, adaptaciones sintéticas para checks. III: HTML prerender y SEO, borradores locales noindex aislados del release. IV/IX: T-003/T-040–T-042/T-126/T-128 verifican rendimiento, e2e y accesibilidad local y en CI; quedan corregidas las menciones anteriores de CI de rendimiento diferida. V/X: WCAG 2.2 AA, teclado/NVDA y español/i18n. VI/XI: dominio completo, BD única producción, API solo vistas, release fail-closed. VIII: raíz Angular conservada y sin nuevos servicios/auth. XII: credenciales por rol/archivo, sin secretos en repo/build/logs. La revisión posterior al diseño no encuentra excepción constitucional autorizada ni necesaria.
 
-El cierre exige requisitos activos completos, incluidos UI y fase 8; `pnpm verify` actual o T-057 aislada no bastan. T-044/T-110 conservan bloqueos externos de publicación y aceptan borrador/link-only; no impiden entregar el resto verificado. T-067/T-075 siguen opcionales; hosting/ingesta/comunidad permanecen diferidos. La implementación trabaja una tarea por vez; los controles finales se registran con evidencia de ejecución, no por mera presencia de archivos o checks históricos.
+El cierre exige requisitos activos completos, incluidos UI y fase 8; `pnpm verify` actual o T-057 aislada no bastan. T-044/T-110 conservan bloqueos externos de publicación y aceptan borrador/link-only; no impiden entregar el resto verificado. T-067 sigue opcional (T-075 fue seleccionada por el usuario el 2026-11-13, ya no es opcional); hosting/ingesta/comunidad permanecen diferidos. La implementación trabaja una tarea por vez; los controles finales se registran con evidencia de ejecución, no por mera presencia de archivos o checks históricos.
 
 ### 17.2 Contrato, dependencias y decisiones cerradas
 
@@ -3546,3 +3546,121 @@ servirla en ninguna red distinta de la local.
 
 **Consecuencia**: §11 conserva su redacción y remite a esta decisión; el estado
 definitivo del MVP es local y no queda ninguna tarea de hosting abierta.
+
+### 17.59 T-167: fachada con `lite-youtube-embed` bajo CSP
+
+**Origen**: MEDIUM-2 de la revisión de spec001. La CSP del repo no declaraba
+`frame-src`, de modo que el iframe de §17.40 caía bajo `default-src 'self'` y
+quedaba bloqueado; además la fachada se quedaba en `loading` si el iframe no
+cargaba.
+
+**Cambio de enfoque (sustituye lo descrito en §17.40 para el iframe)**: el
+`<iframe>` propio se sustituye por el custom element `lite-youtube` del paquete
+npm `lite-youtube-embed`, importado de forma diferida (`import()`) solo en
+navegador, tras la hidratación, para no subir el JS inicial. §17.40 mantiene
+vigentes la validación estricta de URL, la normalización a
+`youtube-nocookie.com/embed/<id>`, la ausencia de video, el reinicio por slug y la
+semántica; solo cambia el mecanismo de activación y de carga.
+
+- **Sin peticiones antes de activar**: póster local (sin petición a
+  `i.ytimg.com`) y sin cookies de terceros; el iframe solo se crea tras la
+  activación por clic o teclado.
+- **Sin YouTube IFrame API**: `needsYTApi=false`; el script de YouTube queda fuera
+  de la CSP.
+- **CSP**: `frame-src https://www.youtube-nocookie.com` en
+  `scripts/serve-artifact.mts` y en `infra/hosting/security-headers.conf`, en
+  sincronía (la prueba de sincronía existente debe pasar).
+- **Fallback**: estados `loading` → `loaded` al emitir `load` el iframe; →
+  `error` si no hay `load` en 10 s o si se dispara `securitypolicyviolation` de
+  `frame-src`. El enlace «Open on YouTube» se conserva siempre.
+- **Accesibilidad e i18n**: la activación del botón de `lite-youtube` tiene nombre
+  accesible localizado (`@@videoFacade.activate`); `@@videoFacade.playerTitle` se
+  retira si ya no se usa, con paridad de catálogos.
+- **Pruebas**: unitarias del componente, `scripts/serve-artifact.test.mts` y e2e de
+  la fachada **bajo la CSP real** del servidor de artefacto (0 violaciones, iframe
+  `youtube-nocookie.com/embed/<id>` interceptado con `page.route`, y caso de
+  fallback).
+
+**Archivos exactos**: `apps/web/package.json`, `pnpm-lock.yaml`
+(`lite-youtube-embed`), `apps/web/src/app/features/build/video-facade/**`
+(incluido `lite-youtube-embed.d.ts`), `scripts/serve-artifact.mts`,
+`scripts/serve-artifact.test.mts`, `infra/hosting/security-headers.conf`, `e2e/**`
+y los catálogos de `apps/web/src/locale/**` si aplica. Esto añade una dependencia
+que §17.40 excluía («sin dependencias nuevas»); la excepción es de T-167.
+
+### 17.60 T-171: artefactos e2e locales y en CI
+
+**Problema**: sin artefactos, `pnpm e2e:journeys` falla 12 pruebas (6 por
+`dist/e2e-drafts`, 6 por `dist/video-facade-preview`, T-167). El comando
+documentado `pnpm exec ng build --output-path dist/e2e-drafts` falla desde la raíz
+(`not available ... outside a workspace`: el workspace Angular vive en `apps/web`,
+T-067), y la CI no construye `video-facade-preview`, por lo que su paso de journeys
+fallaría en las 6 pruebas de la fachada.
+
+**Decisión**: scripts `e2e:drafts:build` (con `INCLUDE_DRAFTS=true` mediante un
+pequeño `scripts/build-e2e-drafts.mts` portable, sin dependencias nuevas) y
+`e2e:video:build`; la CI añade un paso que ejecuta `pnpm run e2e:video:build` tras
+«Build drafts artifact» y antes de journeys; `ci-workflow.test.mts` lo comprueba con
+su caso de mutación; docs y relevo corrigen el comando y fijan el orden local
+(`@gd/domain build` → `build` → `e2e:drafts:build` → `e2e:video:build` → e2e).
+
+**Aceptación**: ver T-171 en `tasks.md`.
+
+### 17.61 T-174: import del adaptador API tras T-067
+
+**Problema**: `pnpm test:api-adapter` falla al cargar
+`tests/integration/api-content.int.spec.ts`: importa
+`../../src/app/core/content/api.repository`, ruta anterior a T-067. El adaptador
+vive ahora en `apps/web/src/app/core/content/api.repository.ts`.
+
+**Decisión**: ajustar el import a `../../apps/web/src/app/core/content/api.repository`
+(cambio mínimo; la prueba sigue siendo de integración en la raíz y no se mueve a
+`apps/web`). No hay otras rutas obsoletas que afecten a `test:api-adapter`.
+
+**Aceptación**: ver T-174 en `tasks.md`.
+
+### 17.62 T-175: secret-scan independiente del PATH
+
+**Problema**: `scripts/secret-scan.test.mts` resuelve `git` solo desde el PATH y
+git (Windows) necesita `sh` en el PATH para lanzar `.githooks/pre-commit`; con un
+PATH reducido la suite falla al cargar o el caso de la herramienta ausente
+cambia de resultado.
+
+**Decisión**: localizar `git.exe` en el PATH o, si falta, en las rutas estándar de
+Git for Windows; resolver el `sh.exe` de ese Git (`usr/bin` o `bin`) y anteponerlo
+al PATH de los `spawnSync` de git. En el caso «tool absent» el PATH es solo el
+shim de git más ese `sh`, de modo que gitleaks sigue inalcanzable. Si falta `sh`
+en Windows fuera de CI, el caso se omite con motivo; en CI o Linux no se omite.
+
+**Aceptación**: ver T-175 en `tasks.md`.
+
+### 17.63 T-176: guarda de forks para secretos en workflows de PR
+
+**Problema**: `check-ci-secrets` rechaza toda referencia a `secrets.*` en un
+workflow disparado por `pull_request`; `claude-code-review.yml` (PR #10) la usa y
+la CI del PR #11 falla con `[secret-in-job]`.
+
+**Decisión** (Paco, 2026-11-18, opción A): el workflow no usa el secreto en PRs de
+forks, con `if: github.event.pull_request.head.repo.full_name == github.repository`
+en el job, y la puerta solo acepta la referencia si el job que la contiene lleva
+esa guarda exacta (sola o con `&&`; con `||` cada alternativa la lleva).
+
+**Aceptación**: ver T-176 en `tasks.md`.
+
+### 17.64 T-177: artefacto de borradores y retrato de portada con `ASSET_SOURCE=game`
+
+**Problema**: con T-176 el check «Verify pull request» llega por primera vez a
+`e2e:journeys` y fallan 12 pruebas con `ASSET_SOURCE: game`.
+
+**Causa** (reproducida en local con las variables y el orden de la CI): (1) el
+paso de CI que construye los borradores ejecuta solo `ng build`; el paso
+posterior `emit-static-assets` (árboles, `deferred.css`, retratos e iconos de
+habilidad) lo hace `pnpm e2e:drafts:build`, y sin él el artefacto no sirve el
+arte del juego; (2) la prueba de la tarjeta de portada fija los SVG propios
+aunque el artefacto sea `game`. El arte del juego está versionado
+(constitución §VII), así que no hay decisión de producto.
+
+**Decisión**: la CI usa `pnpm run e2e:drafts:build` y la prueba espera el
+retrato según `ASSET_SOURCE`, sin omisiones condicionales.
+
+**Aceptación**: ver T-177 en `tasks.md`.

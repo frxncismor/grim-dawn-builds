@@ -4,13 +4,20 @@
   </p>
 }
 
+@if (foreignLang()) {
+  <p class="lang-notice" role="note" data-lang-notice i18n="@@buildPage.onlyInSpanish">
+    This guide is only available in Spanish.
+  </p>
+}
+
 <div class="build-layout">
   <aside class="build-aside">
     <gd-build-toc [content]="content()" />
   </aside>
 
-  <div class="build-content">
+  <div class="build-content" [attr.lang]="foreignLang()">
     <gd-build-sections [content]="content()" section="resumen" />
+    <gd-build-summary [content]="content()" [authorPlaceholder]="content().authorIsPlaceholder" />
     @if (content().adaptation; as adaptation) {
       <gd-source-attribution [attribution]="adaptation" />
     }
@@ -47,21 +54,18 @@
             }
           </section>
         }
-        <div class="build-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+        <p class="fallback-role">
+          <a data-masteries-link routerLink="/maestrias" i18n="@@buildPage.masteriesLink"
+            >Browse the full skill tree of each mastery</a
+          >
+        </p>
       </section>
     </ng-template>
 
     @defer (on viewport) {
       <section class="build-block" id="habilidades" aria-labelledby="habilidades-title">
         <h2 id="habilidades-title" i18n="@@buildPage.skills">Skills</h2>
-        @for (slot of treeSlots(); track slot.treeId) {
-          <gd-skill-tree
-            [treeId]="slot.treeId"
-            [mastery]="slot.mastery"
-            [nodes]="slot.nodes"
-            [activeIds]="activeIds()"
-          />
-        }
+        <gd-build-skills [slots]="treeSlots()" [activeIds]="activeIds()" />
       </section>
     } @placeholder (minimum 500ms) {
       <div class="defer-placeholder">
@@ -88,7 +92,7 @@
           <ol class="fallback-list">
             @for (step of orderedDevotionSteps(); track step.position) {
               <li data-fallback-devotion-step>
-                <strong>{{ step.position }}. {{ step.label }}</strong>
+                <strong>{{ step.label }}</strong>
                 @if (step.title_override !== null && step.title_override !== step.label) {
                   <span class="fallback-tag">{{ '· ' + step.title_override }}</span>
                 }
@@ -100,7 +104,6 @@
         } @else {
           <p role="status" i18n="@@buildPage.noDevotions">No information available</p>
         }
-        <div class="build-skeleton" aria-hidden="true"><span></span><span></span></div>
       </section>
     </ng-template>
 

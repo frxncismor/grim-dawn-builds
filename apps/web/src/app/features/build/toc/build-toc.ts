@@ -4,6 +4,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
+  untracked,
   DestroyRef,
   ElementRef,
   inject,
@@ -15,6 +17,7 @@ import {
 import { NavigationEnd, Router } from '@angular/router';
 import type { PublicBuild } from '@gd/domain';
 import { normalizeYouTubeEmbedUrl } from '../video-facade/video-facade';
+import { TocObserver } from './toc-observer';
 
 export type BuildTocContent = Pick<
   PublicBuild,
@@ -99,6 +102,7 @@ function hasBackingData(section: CanonicalSection, content: BuildTocContent): bo
 @Component({
   selector: 'gd-build-toc',
   standalone: true,
+  imports: [TocObserver],
   templateUrl: './build-toc.html',
   styleUrl: './build-toc.css',
   // Anchor destinations are siblings, including sections owned by other components.
@@ -115,6 +119,8 @@ export class BuildToc {
   private scrollPaddingPrevious: { element: HTMLElement; value: string } | null = null;
 
   readonly content = input.required<BuildTocContent>();
+  /** Section being read; set only by the deferred observer, so the anchors never depend on it. */
+  protected readonly active = signal<string | null>(null);
 
   protected readonly entries = computed(() => {
     const content = this.content();
@@ -133,7 +139,14 @@ export class BuildToc {
     return result;
   });
 
+  protected readonly entryIds = computed(() => this.entries().map((entry) => entry.id));
+
   constructor() {
+    // Another guide has other sections: the section being read starts over.
+    effect(() => {
+      this.entryIds();
+      untracked(() => this.active.set(null));
+    });
     const subscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.hrefBase.set(event.urlAfterRedirects.split('#')[0]);

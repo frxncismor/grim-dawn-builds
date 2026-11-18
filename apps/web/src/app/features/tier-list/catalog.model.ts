@@ -21,6 +21,18 @@ export interface CatalogInput {
     readonly slug: string;
     readonly name_es: string;
     readonly name_en: string;
+    /**
+     * Set at prerender (spec005 T033) when the mastery has no skill tree in the data: the home
+     * shows it without a link. Absent means "has a tree" (the route opens one).
+     */
+    readonly noTree?: true;
+    /** Portrait resolved at prerender (`ASSET_SOURCE`); absent when the mastery has no tree art. */
+    readonly portrait?: {
+      readonly source?: 'game' | 'own';
+      readonly src: string;
+      readonly width: number;
+      readonly height: number;
+    };
   }[];
   readonly combinations: readonly MasteryCombination[];
   readonly entries: readonly TierEntry[];
@@ -36,6 +48,8 @@ export interface CatalogCard extends CatalogItem {
   gameVersion: string;
   guide: Pick<PublicBuild, 'slug' | 'title' | 'review_state' | 'rights_status'> | null;
   source: Pick<PublicSource, 'title' | 'license_note'> | null;
+  /** Author of the entry's source (own guides: the site author); `null` when unknown. */
+  author: string | null;
 }
 export interface CatalogSnapshot {
   /** Active UI locale this snapshot was built for. */
@@ -108,6 +122,7 @@ export function buildCatalog(input: CatalogInput, locale: CatalogLocale = 'en'):
             }
           : null,
         source: source ? { title: source.title, license_note: source.license_note } : null,
+        author: source?.author_name ?? null,
       };
     });
   });

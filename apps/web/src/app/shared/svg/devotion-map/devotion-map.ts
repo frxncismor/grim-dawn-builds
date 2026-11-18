@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  signal,
+  ViewEncapsulation,
+} from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import type { PublicBuild } from '@gd/domain';
 import { createKeyboardNav } from '../keyboard-nav';
@@ -99,7 +106,8 @@ interface MapView {
   standalone: true,
   imports: [NgTemplateOutlet],
   templateUrl: './devotion-map.html',
-  styleUrl: './devotion-map.css',
+  // Styles live in src/styles/deferred.css, served by DeferredStyles: a deferred component's inline <style> is blocked by the CSP (T033).
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DevotionMap {

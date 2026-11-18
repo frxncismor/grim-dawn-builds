@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "feature": "specs/004-rediseno-ui-grim-dawn",
+  "snapshot": "0663ab5ecf480cf56273b7a5ad49cd55f6f0d257b108861f267961d767f0bd04",
+  "createdAt": "2026-11-16T17:07:18Z",
+  "implementationActor": "agentes implementadores de la corrida de orquestación 11111619 (OpenCode/Claude Code)",
+  "delegationAvailable": true,
+  "reviews": [
+    {
+      "specialty": "code",
+      "reviewer": "11111619-revisor-cierre-s4-code-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "git diff --stat 1fd7e77..445c2ac (362 archivos); prioridad al código ejecutable",
+        "T052: apps/web/src/app/features/home/{home-builds.ts,home.page.ts,home.page.html}, apps/web/src/app/shared/ui/build-card/{build-card.ts,build-card.labels.ts,build-card.model.ts}, apps/web/src/app/features/tier-list/{card-data.ts,public-guide.ts,catalog.model.ts,tier-list.page.ts,tier-list.page.html,tier-components.ts}",
+        "CSS global con prefijos: apps/web/src/styles.css, apps/web/src/styles/{tier-list.css,tier-components.css,build-card.css,base.css,accessibility.css} contra el CSS de componente previo (git show 1fd7e77:apps/web/src/app/features/tier-list/tier-components.css) y búsqueda de <header> con <summary> en plantillas",
+        "T053: scripts/check-assets.mts (assertSkillIconCredit, assertPortraitCredit, assertNoGamePortraits), scripts/build-release.mts (runRelease), apps/web/tools/emit-skill-icons.mts, apps/web/src/app/core/content/skill-icons.server.ts, packages/domain/src/asset.ts (classifySkillIconEntry, SkillIconAssetSchema)",
+        "T054: apps/web/src/app/shared/svg/skill-tree/skill-tree.ts (positionTooltip, pendingRender, followViewport, stopFollowing, ngOnDestroy), place-tooltip.ts, skill-tree.html (crédito data-game-art-credit)",
+        "Rondas previas: apps/web/src/app/features/build/toc/toc-observer.ts, apps/web/src/app/features/build/summary/build-summary.ts (formato de fecha), scripts/check-initial-js.mts, scripts/check-performance.mts, scripts/static-home.mts",
+        "Pruebas de la ronda 2: home-builds.spec.ts, home.page.spec.ts (lista de casos)"
+      ],
+      "checks": [
+        {
+          "name": "node --import tsx --test scripts/check-assets.test.mts scripts/build-release.test.mts apps/web/tools/emit-skill-icons.test.mts apps/web/src/app/core/content/skill-icons.server.test.mts apps/web/src/app/core/content/portraits.server.test.mts",
+          "result": "pass: tests 45, pass 45, fail 0, skipped 0"
+        },
+        {
+          "name": "cd apps/web && pnpm exec ng test --watch=false --include 'src/app/shared/ui/build-card/**/*.spec.ts' --include 'src/app/features/home/**/*.spec.ts' --include 'src/app/features/tier-list/**/*.spec.ts' --include 'src/app/shared/svg/skill-tree/**/*.spec.ts'",
+          "result": "pass: Test Files 19 passed (19); Tests 258 passed (258)"
+        }
+      ],
+      "limitations": [
+        "No ejecuté pnpm verify, el build de producción (own/game), check:performance, check:initial-js, e2e (Playwright) ni la API con BD: me apoyo en la evidencia del verify de integración de quickstart.md sin haberla reproducido.",
+        "La huella tiene 362 archivos; revisé a fondo el código ejecutable de las correcciones T052-T054 y por muestreo el resto (scripts de presupuesto, TOC, resumen). No revisé línea a línea assets binarios, manifiesto, fixtures de árboles, migración ni locales XLF.",
+        "La ausencia de fugas del CSS global se comprobó por lectura de selectores y búsqueda en plantillas, no con capturas."
+      ],
+      "findings": [
+        {
+          "id": "C-001",
+          "severity": "LOW",
+          "path": "apps/web/src/app/features/home/home.page.html",
+          "line": 41,
+          "evidence": "@for (card of otherCards; track card.title): el título editorial no es único (ni el dominio ni homeBuilds lo garantizan); el resto de listas de tarjetas usa track card.id (tier-list.page.html).",
+          "impact": "Dos guías públicas con el mismo título producen claves de track duplicadas: Angular avisa NG0955 en desarrollo y la identidad de los elementos queda ambigua. Sin efecto visible hoy en la portada estática (sin JS en cliente).",
+          "recommendation": "Trackear por un valor único, p. ej. card.href (slug de la guía) o $index.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en la puerta T036 por decisión del principal (2026-11-16, opción A, como en spec003): LOW sin impacto observable (verify, check:performance 141/141 own/game, puertas de crédito y e2e:a11y en verde; capturas idénticas). Seguimiento en specs/004-rediseno-ui-grim-dawn/reviews/deuda.md y en el to-do del proyecto: S4-D4: track por card.href en home.page.html."
+        }
+      ]
+    },
+    {
+      "specialty": "architecture",
+      "reviewer": "11111619-revisor-cierre-s4-architecture-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "specs/004-rediseno-ui-grim-dawn/{plan,tasks}.md (diseño, estructura prevista, T047-T055)",
+        "specs/002-spec-completion-reviews/data-model.md y contracts/review-gate.md",
+        ".agents/skills/review-architecture/SKILL.md",
+        "git diff 1fd7e77..445c2ac --stat (362 archivos) y commits de la ronda 2: 5a758ef (T052), 0229157 (T053), 6f645f6 (T054)",
+        "apps/web/src/styles.css, apps/web/src/styles/{build-card,tier-list,tier-components}.css (CSS global con prefijos)",
+        "apps/web/src/app/features/tier-list/{tier-list.page.ts,tier-list.page.html,tier-components.ts,card-data.ts}",
+        "apps/web/src/app/features/home/{home-builds.ts,home.page.ts,home.page.html}",
+        "apps/web/src/app/shared/ui/build-card/{build-card.ts,build-card.model.ts,build-card.labels.ts}",
+        "apps/web/src/app/features/build/{summary/build-summary.ts,attribution/build-attribution.ts} (formato de fecha)",
+        "scripts/{check-assets.mts,build-release.mts}, apps/web/tools/emit-skill-icons.mts (puerta de crédito y retirada)",
+        "apps/web/src/app/shared/svg/skill-tree/{skill-tree.ts,skill-tree.html} (ciclo de vida del tooltip y crédito de iconos)"
+      ],
+      "checks": [
+        "node scripts/spec-review.mjs prepare --feature specs/004-rediseno-ui-grim-dawn -> status ready, snapshot 0663ab5ecf480cf56273b7a5ad49cd55f6f0d257b108861f267961d767f0bd04, pendingTasks []",
+        "node --import tsx --test scripts/check-assets.test.mts scripts/build-release.test.mts apps/web/tools/emit-skill-icons.test.mts -> 30 tests, 30 pass, 0 fail",
+        "grep de consumidores de gd-tier-row/gd-filter-bar/gd-empty-state fuera de tier-list.page.html -> ninguno (el CSS global con prefijo no alcanza otras páginas)",
+        "grep de clases .catalog-grid/.chips/.empty/.search/.filters fuera de tier-list -> ninguna coincidencia que choque con los selectores con prefijo",
+        "grep de productores de BuildCardInput.masteries[].name fuera de specs -> ninguno",
+        "grep de Intl.DateTimeFormat en apps/web/src -> 4 copias con las mismas opciones (build-attribution, source-attribution, build-summary, home.page)"
+      ],
+      "limitations": [
+        "No ejecuté pnpm verify, check:performance, build de release ni e2e: confío en la evidencia registrada en quickstart.md y en las notas de T052-T054; el presupuesto de CSS crítico (3 231/5 931 B de 20 000) no lo medí yo.",
+        "Revisión centrada en código ejecutable de la ronda 2 y en los límites de web/scripts; el resto de la huella (≈350 archivos, incluida la migración 0014 y el dominio) se recorrió por --stat y por plan/tasks, sin lectura línea a línea.",
+        "No inspeccioné visualmente las páginas renderizadas."
+      ],
+      "findings": [
+        {
+          "id": "A-001",
+          "severity": "LOW",
+          "path": "specs/004-rediseno-ui-grim-dawn/plan.md",
+          "line": 76,
+          "evidence": "La estructura prevista de apps/web/src/styles/ lista tokens.css, fonts.css, base.css, lang.css y deferred.css. La implementación añade build-card.css, tier-list.css y tier-components.css como hojas globales importadas en styles.css, y quita styleUrl de TierListPage, TierRow, FilterChip, FilterBar y EmptyState (T052) para que su CSS no entre en el JS inicial de /tier-list. Ninguna «Design decision» del plan recoge esta regla.",
+          "impact": "Es una decisión de arquitectura que mantiene /tier-list en 111 206/112 000 B, pero hoy solo está en los comentarios de los CSS y en la nota de T052. Un cambio futuro que vuelva a poner styleUrl en esos componentes, cosa normal en Angular, rompe el presupuesto sin que el plan avise. Además, cada página del sitio carga ese CSS por render-blocking.",
+          "recommendation": "Añadir a plan.md (estructura y decisiones de diseño) la regla «CSS de componentes de rutas con poco margen de JS va en hojas globales con prefijo de etiqueta», con sus tres hojas y el coste en CSS crítico.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en la puerta T036 por decisión del principal (2026-11-16, opción A, como en spec003): LOW sin impacto observable (verify, check:performance 141/141 own/game, puertas de crédito y e2e:a11y en verde; capturas idénticas). Seguimiento en specs/004-rediseno-ui-grim-dawn/reviews/deuda.md y en el to-do del proyecto: S4-D7: documentar en plan.md la regla de hojas globales con prefijo."
+        },
+        {
+          "id": "A-002",
+          "severity": "LOW",
+          "path": "apps/web/src/styles/tier-components.css",
+          "line": 54,
+          "evidence": "Las reglas pasan de encapsulación emulada a selectores descendientes agrupados: «:is(gd-tier-row, gd-filter-chip, gd-filter-bar, gd-empty-state) button|input|.chip|.empty|.filters». El comentario de la línea 4 dice que «nothing leaks to other pages». Sin embargo, gd-tier-row proyecta gd-build-card con <ng-content />, así que ahora sus reglas de button/input/:focus-visible/:hover alcanzan el contenido proyectado y los componentes anidados. Además, cada regla se aplica a las cuatro etiquetas aunque pertenezca a una sola (por ejemplo .filters o .chips solo son de gd-filter-bar).",
+          "impact": "Hoy no hay ningún defecto visible: la tarjeta no tiene button ni input. Pero se pierde el límite de estilos que daba la encapsulación: cualquier botón que se añada a gd-build-card (o a otro contenido proyectado en la fila) heredará en silencio min-block-size, hover y focus del catálogo, y la propiedad de cada regla queda difusa.",
+          "recommendation": "Acotar cada bloque a la etiqueta que lo posee (gd-filter-bar .chips, gd-tier-row > section > .catalog-grid, etc.) y evitar los selectores de elemento genéricos bajo gd-tier-row, o excluir el contenido proyectado (por ejemplo, :not(gd-build-card *)). Corregir también el comentario.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en la puerta T036 por decisión del principal (2026-11-16, opción A, como en spec003): LOW sin impacto observable (verify, check:performance 141/141 own/game, puertas de crédito y e2e:a11y en verde; capturas idénticas). Seguimiento en specs/004-rediseno-ui-grim-dawn/reviews/deuda.md y en el to-do del proyecto: S4-D2: acotar los selectores de tier-components.css a sus hosts, sin alcanzar las gd-build-card proyectadas, y corregir el comentario. Hoy no hay efecto visible (capturas 375/1280 EN/ES idénticas)."
+        },
+        {
+          "id": "A-003",
+          "severity": "LOW",
+          "path": "scripts/check-assets.mts",
+          "line": 201,
+          "evidence": "assertSkillIconCredit (T053) copia assertPortraitCredit (T047) línea a línea: recorre browser/**/*.html, hace includes del marcador, aplica una regex de ruta y aplica la misma regla own/game. Solo cambian el patrón (skill-icons y portraits), el marcador (data-game-art-credit y data-credit) y el mensaje. El docstring de las dos dice «and only then», pero con game ninguna falla cuando una página tiene el crédito sin el arte.",
+          "impact": "Son dos puertas legales de §VII con la misma semántica y dos implementaciones. Un ajuste futuro (otra carpeta de arte, otro locale, cambio del marcador) puede aplicarse a una y no a la otra. Además, el contrato documentado («solo entonces») no coincide con el código para game.",
+          "recommendation": "Extraer un helper parametrizado (pattern, marker, label) que usen las dos funciones. Después, decidir si el «only then» con game se aplica de verdad (y probarlo) o quitarlo del docstring.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en la puerta T036 por decisión del principal (2026-11-16, opción A, como en spec003): LOW sin impacto observable (verify, check:performance 141/141 own/game, puertas de crédito y e2e:a11y en verde; capturas idénticas). Seguimiento en specs/004-rediseno-ui-grim-dawn/reviews/deuda.md y en el to-do del proyecto: S4-D1 (prioridad 1): helper único para las puertas de crédito que falle si el artefacto no tiene browser/ o páginas HTML, y prueba del docstring."
+        },
+        {
+          "id": "A-004",
+          "severity": "LOW",
+          "path": "apps/web/src/app/features/home/home.page.ts",
+          "line": 31,
+          "evidence": "T052 añade un cuarto Intl.DateTimeFormat(LOCALE_ID, {day:'numeric', month:'long', year:'numeric', timeZone:'UTC'}) en HomePage. Las otras tres copias, con las mismas opciones, están en build-summary.ts:78, build-attribution.ts:70 y source-attribution.ts:53. La validación de published_at también está repartida: home-builds.ts:12 (calendarDate) devuelve null si la fecha no es un día real, mientras que formatDate en build-attribution muestra el valor crudo.",
+          "impact": "FR-042 pide que la portada muestre la fecha «igual que el resumen de la guía». Hoy eso depende de copias manuales, y una misma fecha inválida se trata distinto en la portada y en la guía. Es un riesgo de deriva de mantenimiento, no un fallo actual.",
+          "recommendation": "Mover a apps/web/src/app/shared/ un formateador común (por ejemplo, longUtcDate(locale, iso)) con una sola política de validación, y usarlo en las cuatro vistas.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en la puerta T036 por decisión del principal (2026-11-16, opción A, como en spec003): LOW sin impacto observable (verify, check:performance 141/141 own/game, puertas de crédito y e2e:a11y en verde; capturas idénticas). Seguimiento en specs/004-rediseno-ui-grim-dawn/reviews/deuda.md y en el to-do del proyecto: S4-D5: formateador común de fecha larga UTC en shared/."
+        },
+        {
+          "id": "A-005",
+          "severity": "LOW",
+          "path": "apps/web/src/app/shared/ui/build-card/build-card.model.ts",
+          "line": 25,
+          "evidence": "BuildCardInput.masteries[].name pasa a opcional, con el comentario «Not drawn ... kept for callers that still pass it». Tras T052, card-data.ts ya no lo rellena y ningún productor fuera de los specs lo pasa (grep).",
+          "impact": "Es un campo muerto en el contrato público del componente compartido. Sugiere que la tarjeta usa el nombre de maestría, y un consumidor nuevo podría rellenarlo esperando un efecto que no existe.",
+          "recommendation": "Quitar name del tipo y de los specs que aún lo pasen.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en la puerta T036 por decisión del principal (2026-11-16, opción A, como en spec003): LOW sin impacto observable (verify, check:performance 141/141 own/game, puertas de crédito y e2e:a11y en verde; capturas idénticas). Seguimiento en specs/004-rediseno-ui-grim-dawn/reviews/deuda.md y en el to-do del proyecto: S4-D6: quitar BuildCardInput.masteries[].name."
+        }
+      ]
+    },
+    {
+      "specialty": "security",
+      "reviewer": "11111619-revisor-cierre-s4-security-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "git diff 1fd7e77..445c2ac (362 archivos; prioridad al código ejecutable)",
+        ".specify/memory/constitution.md (enmienda 1.11.0 §VII)",
+        "packages/domain/src/asset.ts, mastery-tree.ts, index.ts (SkillIconAssetSchema, classifySkillIconEntry, ICON_ID_PATTERN)",
+        "apps/api/drizzle/0014_public_skill_icon_id.sql, apps/api/src/db/schema.ts, apps/api/src/db/write-content.mts, apps/api/src/catalog/{map-mastery,mastery-repository}.ts",
+        "apps/web/src/app/app.config.server.ts, core/content/{skill-icons,skill-icons.server,portraits.server,masteries,mastery.resolver}.ts",
+        "apps/web/tools/{emit-skill-icons,emit-static-assets}.mts, apps/web/angular.json",
+        "scripts/{check-assets,build-release,extract-textures,extract-mastery-trees,static-home,check-initial-js,verify-local}.mts|mjs",
+        "apps/web/src/app/shared/svg/skill-tree/{skill-tree.ts,skill-tree.html,place-tooltip.ts}",
+        "apps/web/src/app/shared/ui/build-card/*, features/tier-list/{card-data,public-guide}.ts, features/home/home-builds.ts, features/build/summary/*, features/static-pages/not-found.page.ts",
+        "apps/web/public/assets/ui/*.svg, apps/web/public/fonts/* y docs/fonts.md (licencia y hashes)",
+        "fixtures/content/assets/manifest.json (164 entradas de iconos) y apps/web/public/assets/skill-icons/ (164 PNG)",
+        ".github/workflows/ci.yml, package.json, playwright.config.ts, lighthouserc.json",
+        "dist/grim-dawn-builds/browser existente (búsqueda de rutas internas de textura y de skill-icons)"
+      ],
+      "checks": [
+        "node scripts/spec-review.mjs prepare --feature specs/004-rediseno-ui-grim-dawn -> status ready, snapshot 0663ab5ecf480cf56273b7a5ad49cd55f6f0d257b108861f267961d767f0bd04 (coincide con el encargo)",
+        "pnpm run assets:check -> assets:check OK (170 entradas)",
+        "node --import tsx --test scripts/check-assets.test.mts scripts/build-release.test.mts scripts/skill-icon-manifest.test.mts apps/web/tools/emit-skill-icons.test.mts apps/web/src/app/core/content/skill-icons.server.test.mts scripts/extract-textures.test.mts scripts/static-home.test.mts scripts/check-public-build.test.mts apps/web/src/app/core/content/portraits.server.test.mts -> 95 tests, 95 pass, 0 fail",
+        "pnpm --filter @gd/domain test -> 13 files, 310 passed | 2 expected fail; cobertura líneas 100 %",
+        "pnpm run check:secrets -> OK (863 archivos rastreados)",
+        "pnpm run check:ci-secrets -> OK (2 workflows)",
+        "grep de asignaciones de secretos en el diff añadido -> sin coincidencias reales",
+        "sha256sum de apps/web/public/fonts/cinzel-*.woff2 -> coinciden con docs/fonts.md",
+        "git diff --name-status de binarios -> solo 164 PNG en skill-icons y fuentes Cinzel (OFL); ningún .tex/.arc/.arz/.dbr rastreado",
+        "grep en dist/grim-dawn-builds/browser de ui/skills/, .tex, source_path, skillicon_ -> solo nombres de campo del esquema zod en un chunk; sin rutas de textura; sin assets/skill-icons en el artefacto (own)"
+      ],
+      "limitations": [
+        "No se ejecutó DAST ni escaneo dinámico de cabeceras/CSP; la CSP (infra/hosting/security-headers.conf, scripts/serve-artifact.mts) no cambia en este rango y solo se revisó estáticamente que el código nuevo no la debilita (posición del tooltip por CSSOM, sin atributos style ni innerHTML).",
+        "No se ejecutó auditoría de dependencias (pnpm audit) ni SCA; el rango no añade dependencias npm.",
+        "No se ejecutó pnpm verify, el build con ASSET_SOURCE=game, check:performance ni la API con BD; se aceptan como evidencia del implementador en quickstart.md, no reejecutada aquí.",
+        "No se revisó el valor jurídico de la tolerancia de facto de Crate: es un riesgo asumido y documentado por el dueño (constitución 1.11.0, research.md §R10), no un defecto técnico.",
+        "Revisión de alcance local: no sustituye una auditoría de seguridad."
+      ],
+      "findings": []
+    },
+    {
+      "specialty": "best-practices",
+      "reviewer": "11111619-revisor-cierre-s4-best-practices-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "git diff 1fd7e77..445c2ac (362 archivos; prioridad: código ejecutable de la ronda 2)",
+        "T052: apps/web/src/app/shared/ui/build-card/{build-card.ts,build-card.labels.ts,build-card.model.ts,build-card.spec.ts}",
+        "T052: apps/web/src/app/features/home/{home-builds.ts,home.page.ts,home.page.html,*.spec.ts} y borrado de featured-guide.ts",
+        "T052: apps/web/src/app/features/tier-list/{card-data.ts,tier-components.ts,tier-list.page.ts,tier-list.page.html}",
+        "T052: apps/web/src/styles.css, apps/web/src/styles/{build-card,tier-list,tier-components}.css",
+        "T053: scripts/check-assets.mts (assertSkillIconCredit), scripts/build-release.mts, apps/web/tools/emit-skill-icons.mts",
+        "T054: apps/web/src/app/shared/svg/skill-tree/skill-tree.ts y skill-tree.tooltip.spec.ts, e2e/skill-tooltip.spec.ts",
+        "SDD: specs/004-rediseno-ui-grim-dawn/tasks.md (T047-T055, trazabilidad), AGENTS.md, CONTRIBUTING.md",
+        "i18n EN/ES: apps/web/src/locale/messages.*.xlf (paridad)"
+      ],
+      "checks": [
+        "pnpm check:locale-parity -> OK: 340 unidades en paridad, 0 fallos (exit 0)",
+        "pnpm format:check -> All matched files use Prettier code style!",
+        "pnpm lint:md -> 95 files, 0 issues",
+        "pnpm check:boundaries -> OK (363 archivos revisados)",
+        "pnpm test (web, vitest) -> 57 files, 653 passed | 2 expected fail",
+        "node --import tsx --test scripts/check-assets.test.mts scripts/build-release.test.mts apps/web/tools/emit-skill-icons.test.mts -> 30 pass, 0 fail",
+        "Inspección de dist/grim-dawn-builds/browser (build previo existente, no regenerado): styles-*.css 14 330 B, cargado en todas las rutas; contiene las reglas gd-tier-list-page"
+      ],
+      "limitations": [
+        "No se ejecutaron build, check:performance, check:initial-js, e2e (Playwright/axe) ni la API con BD: se confía en la evidencia citada en tasks.md y quickstart.md (verify exit 0, 141/141, 470 passed) para no regenerar dist/ ni interferir con revisores en paralelo.",
+        "El código de spec004 anterior a la ronda 2 (T001-T051) se revisó por muestreo; ya pasó por las rondas 1 y 2 de la puerta.",
+        "Sin lectores de pantalla reales: el nombre accesible compuesto se valoró por DOM y pruebas unitarias."
+      ],
+      "findings": [
+        {
+          "id": "B-001",
+          "severity": "LOW",
+          "path": "apps/web/src/styles/tier-components.css",
+          "line": 4,
+          "evidence": "Al pasar de CSS de componente (encapsulación emulada) a global, las reglas usan selectores descendientes ':is(gd-tier-row, ...) input|button|.chip|.empty' (líneas 29, 73...). gd-tier-row proyecta con <ng-content/> las gd-build-card, que en el DOM quedan dentro de gd-tier-row; el comentario afirma que 'nothing leaks'.",
+          "impact": "Hoy la tarjeta no tiene button/input/.chip, así que no hay fuga visible; pero cualquier botón o input que se añada a la tarjeta (o a otro contenido proyectado) heredará estilos de filtro, cosa que la encapsulación previa impedía. Riesgo de mantenimiento latente y comentario engañoso.",
+          "recommendation": "Acotar a los propios hosts con combinador hijo o clases de la plantilla del componente (p. ej. 'gd-filter-bar .filters', 'gd-filter-chip > button') en lugar del :is() con los cuatro tags para todo, y corregir el comentario.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en la puerta T036 por decisión del principal (2026-11-16, opción A, como en spec003): LOW sin impacto observable (verify, check:performance 141/141 own/game, puertas de crédito y e2e:a11y en verde; capturas idénticas). Seguimiento en specs/004-rediseno-ui-grim-dawn/reviews/deuda.md y en el to-do del proyecto: S4-D2, el mismo tema que A-002."
+        },
+        {
+          "id": "B-002",
+          "severity": "LOW",
+          "path": "scripts/check-assets.mts",
+          "line": 201,
+          "evidence": "assertSkillIconCredit es una copia casi literal de assertPortraitCredit (línea 175): mismo recorrido de páginas, misma salida silenciosa si falta 'browser/' (líneas 177 y 204) y misma detección por subcadena (html.includes).",
+          "impact": "Dos puertas de §VII duplicadas: un ajuste (p. ej. fallar cerrado si no hay páginas, o detectar el atributo y no la subcadena) puede aplicarse a una y no a la otra. Ambas pasan en vacío si cambia la ruta de prerender.",
+          "recommendation": "Extraer un helper común parametrizado (patrón de asset, marcador de crédito, mensajes) y que falle si el artefacto no tiene páginas HTML con source game/own.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en la puerta T036 por decisión del principal (2026-11-16, opción A, como en spec003): LOW sin impacto observable (verify, check:performance 141/141 own/game, puertas de crédito y e2e:a11y en verde; capturas idénticas). Seguimiento en specs/004-rediseno-ui-grim-dawn/reviews/deuda.md y en el to-do del proyecto: S4-D1 (prioridad 1), el mismo tema que A-003: las puertas de crédito pasan en vacío sin browser/."
+        },
+        {
+          "id": "B-003",
+          "severity": "LOW",
+          "path": "specs/004-rediseno-ui-grim-dawn/tasks.md",
+          "line": 111,
+          "evidence": "T052 declara como huella 'apps/web/src/app/features/{tier-list,home}/', pero el commit 5a758ef también cambia apps/web/src/app/shared/ui/build-card/*, apps/web/src/styles.css, apps/web/src/styles/{build-card,tier-list,tier-components}.css y e2e/{a11y,journeys}.spec.ts.",
+          "impact": "Trazabilidad tarea-cambio incompleta: quien busque por tasks.md qué tocó T052 no ve el cambio de CSS global ni del componente compartido, justo lo de más riesgo de la ronda.",
+          "recommendation": "Ampliar la lista de archivos de T052 en tasks.md con las rutas reales.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado por decisión del principal (2026-11-16, opción A, como en spec003): LOW sin impacto observable (verify, check:performance 141/141 own/game, puertas de crédito y e2e:a11y en verde; capturas idénticas). Seguimiento en specs/004-rediseno-ui-grim-dawn/reviews/deuda.md y en el to-do del proyecto: S4-D7: completar en tasks.md la huella de T052."
+        }
+      ]
+    }
+  ]
+}

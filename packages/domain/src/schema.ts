@@ -1,11 +1,12 @@
 import { z } from 'zod';
 import { CONTENT_STATUSES, TIERS } from './vocabulary.js';
+import { skillNodeIdSchema } from './mastery-tree.js';
 
 export { CONTENT_STATUSES, TIERS } from './vocabulary.js';
 export type { ContentStatus, Tier } from './vocabulary.js';
 
 /**
- * Content contract for `content/` JSON files.
+ * Content contract for `fixtures/content/` JSON files.
  * Framework-independent: no Angular imports, so the same rules run in scripts and in the app.
  * Shapes and enums follow specs/001-mvp-guias-builds/data-model.md.
  */
@@ -33,7 +34,7 @@ export const ENTRY_KINDS = [
   'build_propia',
   'build_adaptada',
 ] as const;
-export const ASSET_STATUSES = ['pending', 'approved', 'rejected'] as const;
+export const ASSET_STATUSES = ['pending', 'approved', 'rejected', 'withdrawn'] as const;
 
 export type ReviewState = (typeof REVIEW_STATES)[number];
 export type RightsStatus = (typeof RIGHTS_STATUSES)[number];
@@ -145,6 +146,8 @@ const SkillNodeSchema = z
     max_points_hint: z.number().int().positive().nullable(),
     points_label: nullableText,
     layout: z.object({ x: z.number().finite(), y: z.number().finite() }).strict(),
+    /** Reference to the canonical catalog node (spec 003, FR-015); optional so existing guides stay valid. */
+    skill_node_id: skillNodeIdSchema.optional(),
   })
   .strict();
 const PrioritySchema = z
@@ -530,6 +533,16 @@ export const AssetSchema = z
     proof_ref: nullableText,
     recorded_on: isoDate,
     fallback_svg: z.string().min(1),
+    /** Where a derived game asset comes from; checked against the file on disk (T015). */
+    provenance: z
+      .object({
+        game_version: z.string().min(1),
+        source_path: z.string().min(1),
+        sha256: z.string().regex(/^[0-9a-f]{64}$/),
+        width: z.number().int().positive(),
+        height: z.number().int().positive(),
+      })
+      .optional(),
   })
   .superRefine((asset, ctx) => {
     if (asset.file_path && asset.status !== 'approved')

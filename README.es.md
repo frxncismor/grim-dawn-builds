@@ -1,4 +1,4 @@
-# Grim Dawn Builds
+# Grim Builds
 
 [English](README.md) · **Español**
 
@@ -112,9 +112,29 @@ Comandos focalizados durante el desarrollo:
 Build de release (exige la API arriba y `CONTENT_SOURCE=api`):
 
 ```bash
-pnpm build:release
+ASSET_SOURCE=game pnpm build:release   # PowerShell: $env:ASSET_SOURCE = 'game'
 pnpm check:release
 ```
+
+`build:release` exige un `ASSET_SOURCE` explícito (`game` u `own`) y falla con un error
+claro si falta: el valor por defecto de §VII es `own`, así que el release nunca adivina.
+Este y los jobs de CI que construyen el artefacto medido usan
+`ASSET_SOURCE=game`: en `/maestrias` se sirven los seis botones de maestría de Grim Dawn
+(© Crate Entertainment, sin permiso escrito; ver `fixtures/content/assets/NOTICE.md`).
+El release falla cerrado antes de construir si el manifiesto de activos no aprueba los
+seis. Con `game` también se sirven los iconos de habilidad de las seis maestrías base: 164
+PNG de 32×32 sin modificar (spec004 T027/T028, constitución §VII 1.11.0), una entrada
+`approved` del manifiesto por icono con `proof_ref`
+`specs/004-rediseno-ui-grim-dawn/research.md#r10`, con crédito visible a Crate en el árbol de
+maestría y en la guía (`apps/web/tools/emit-skill-icons.mts`). Con `own` usan los propios. El
+build local por defecto sigue en `ASSET_SOURCE=own`. Los seis PNG de `apps/web/public/assets/portraits/` no están en el
+glob de activos de Angular: `pnpm build` los copia al artefacto solo con
+`ASSET_SOURCE=game` (`apps/web/tools/emit-portraits.mts`), y el release rechaza un
+artefacto `own` que lleve alguno. Los 164 iconos de habilidad
+(`apps/web/public/assets/skill-icons/`) siguen la misma regla. Para retirar el arte (retratos
+e iconos), según documenta `fixtures/content/assets/NOTICE.md`: entradas del manifiesto a
+`status: withdrawn`, borrar los PNG, registrarlo en `handoff.md` y publicar con
+`ASSET_SOURCE=own` en el mismo cambio.
 
 ## Vista previa del artefacto estático y flujo editorial
 
@@ -145,11 +165,12 @@ valores por defecto seguros como referencia; los secretos reales viven solo en
 archivos ignorados por git, según
 [la gestión de secretos](docs/security/secrets.md).
 
-| Variable         | Valores aceptados                                           | Efecto en el build y la vista previa                                                                                        |
-| ---------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `BASE_URL`       | URL absoluta `http(s)` sin credenciales, query ni fragmento | Fija las URLs absolutas de canonical y Open Graph, `sitemap.xml` y `robots.txt`. Por defecto `http://localhost:4200/`.      |
-| `INCLUDE_DRAFTS` | `true` o `false`                                            | Añade la guía local `borrador` cuando vale `true`. Los builds público y de release lo fuerzan a `false`.                    |
-| `CONTENT_SOURCE` | `fixture` o `api`                                           | Elige fixtures (desarrollo, pruebas, CI sin Docker) o la API pública (release). `api` nunca degrada en silencio a fixtures. |
+| Variable         | Valores aceptados                                           | Efecto en el build y la vista previa                                                                                                                                                                                                                             |
+| ---------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BASE_URL`       | URL absoluta `http(s)` sin credenciales, query ni fragmento | Fija las URLs absolutas de canonical y Open Graph, `sitemap.xml` y `robots.txt`. Por defecto `http://localhost:4200/`.                                                                                                                                           |
+| `INCLUDE_DRAFTS` | `true` o `false`                                            | Añade la guía local `borrador` cuando vale `true`. Los builds público y de release lo fuerzan a `false`.                                                                                                                                                         |
+| `CONTENT_SOURCE` | `fixture` o `api`                                           | Elige fixtures (desarrollo, pruebas, CI sin Docker) o la API pública (release). `api` nunca degrada en silencio a fixtures.                                                                                                                                      |
+| `ASSET_SOURCE`   | `own` o `game`                                              | Arte de maestrías en `/maestrias` e iconos de habilidad (árbol y guía): propios (por defecto) o el arte del juego (6 botones, 164 iconos de habilidad). El release lo exige explícito (sin valor por defecto); CI fija `game`; un valor inválido rompe el build. |
 
 Un `BASE_URL` inválido hace fallar la generación del sitemap y de robots con un
 mensaje fijo que no repite credenciales. `INCLUDE_DRAFTS` solo acepta `true` o
@@ -157,11 +178,13 @@ mensaje fijo que no repite credenciales. `INCLUDE_DRAFTS` solo acepta `true` o
 y `CONTENT_SOURCE=api` lo rechaza con `La API pública no admite INCLUDE_DRAFTS.`.
 Exportar `INCLUDE_DRAFTS=true` antes de `pnpm build` renderiza la guía
 `borrador` con el banner «Borrador · no público» y `noindex`, así que la ruta
-queda fuera del sitemap y nunca forma parte de un build público ni de release.
+queda fuera del sitemap y nunca forma parte de un build público ni de release. `ASSET_SOURCE` solo acepta `own` o
+`game`; `build:release` lo exige explícito (sin valor por defecto) y cualquier otro valor falla
+con `public-build: invalid-environment`; con `ASSET_SOURCE=own` no se publican retratos del juego.
 
 ### Flujo editorial
 
-`content/` contiene los fixtures de desarrollo y el material de importación. La
+`fixtures/content/` contiene los fixtures de desarrollo y el material de importación. La
 CLI editorial edita documentos canónicos con el rol PostgreSQL `editor`, sin
 cuentas ni endpoints de escritura:
 
@@ -190,7 +213,7 @@ explícita.
 apps/api/         API Fastify + Drizzle (solo lectura pública)
 packages/domain/  Esquema Zod, tipos y reglas puras compartidas
 src/              Aplicación Angular (web)
-content/          Fixtures de desarrollo y material de importación
+fixtures/content/          Fixtures de desarrollo y material de importación
 infra/docker/     Compose, secretos locales y aprovisionamiento de roles
 scripts/          Validadores, generadores y puertas de verificación
 e2e/              Pruebas Playwright
@@ -252,4 +275,4 @@ Angular para que ambas configuraciones permanezcan completas.
 
 El código se distribuye sin licencia declarada por ahora: todos los derechos
 reservados hasta que el mantenedor elija una. El contenido editorial de terceros
-se rige por sus propias licencias y permisos registrados en `content/sources/`.
+se rige por sus propias licencias y permisos registrados en `fixtures/content/sources/`.

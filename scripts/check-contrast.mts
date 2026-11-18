@@ -29,12 +29,21 @@ export function checkTokenContrast(css: string) {
     if (!result) throw new Error('Falta un token de color requerido.');
     return result;
   };
-  return ['bone', 'ash', 'storm', 'ember'].flatMap((foreground) =>
+  const text = ['bone', 'ash', 'storm', 'ember'].flatMap((foreground) =>
     ['soot', 'panel', 'panel-2'].map((background) => {
       const ratio = contrastRatio(color(`--color-${foreground}`), color(`--color-${background}`));
       return { foreground, background, ratio, pass: ratio >= 4.5 };
     }),
   );
+  // spec005 T030 (F-12): the borders that carry the status of the content (the "Unverified",
+  // "Published" and placeholder badges and the card status shape) are non-text UI: 3:1 (WCAG 1.4.11).
+  const borders = ['ash', 'storm', 'ember'].flatMap((foreground) =>
+    ['panel', 'panel-2'].map((background) => {
+      const ratio = contrastRatio(color(`--color-${foreground}`), color(`--color-${background}`));
+      return { foreground: `${foreground} (borde)`, background, ratio, pass: ratio >= 3 };
+    }),
+  );
+  return [...text, ...borders];
 }
 
 async function main(argv: string[]): Promise<number> {
@@ -48,7 +57,9 @@ async function main(argv: string[]): Promise<number> {
         `${check.foreground}/${check.background}: ${check.ratio.toFixed(3)}:1 ${check.pass ? 'OK' : 'FALLÓ'}`,
       );
     if (checks.some((check) => !check.pass)) return 1;
-    console.log(`check:contrast OK (${checks.length} pares, mínimo 4.5:1 sin redondear)`);
+    console.log(
+      `check:contrast OK (${checks.length} pares, texto ≥ 4.5:1 y bordes de estado ≥ 3:1 sin redondear)`,
+    );
     return 0;
   } catch {
     console.error('check:contrast FALLÓ: revisa argumentos y tokens de color.');

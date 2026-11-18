@@ -17,7 +17,7 @@ export class AboutPage {
     const seo = inject(SeoService);
     seo.setPage({
       title: $localize`:@@about.title:About the project`,
-      description: $localize`:@@about.description:Editorial criteria, attribution and content statuses for Grim Dawn Builds.`,
+      description: $localize`:@@about.description:Editorial criteria, attribution and content statuses for Grim Builds.`,
       path: '/acerca',
       structuredData: [
         {

@@ -34,7 +34,7 @@ reutilizable, y el permiso de un autor no cubre a otro.
 
 ## Flujo de solicitud
 
-1. Registrar la fuente en `content/sources/` con estado `pending` y la URL exacta.
+1. Registrar la fuente en `fixtures/content/sources/` con estado `pending` y la URL exacta.
 2. Evaluar términos de uso y `robots.txt`. Si prohíben el uso, la fuente pasa a
    `prohibida` y se detiene aquí.
 3. Enviar la solicitud con la plantilla
@@ -66,7 +66,7 @@ Sin los pasos 4 y 5, la fuente sigue en `evaluando` y no se publica nada derivad
 
 La guía `chaman-demoledor-golpe-primigenio` es **contenido propio del sitio**,
 no una adaptación de una guía ajena ni una publicación de foro. La generó
-Claude Code para Grim Dawn Builds el 2026-11-12 y no tiene autor ni URL
+Claude Code para Grim Builds el 2026-11-12 y no tiene autor ni URL
 externos que atribuir, ni permiso de terceros que afirmar.
 
 - **Qué se transcribe**: solo datos factuales del build (maestrías, habilidades
@@ -75,10 +75,10 @@ externos que atribuir, ni permiso de terceros que afirmar.
   de terceros. Los campos editoriales de la ficha son texto propio y neutral.
 - **Registro de procedencia**: la fuente `guia-original` se reutiliza solo como
   identificador interno de la tier list; su `kind` es `original`, su `url` es
-  nula y su `author_name` es «Grim Dawn Builds». No es una fuente externa.
+  nula y su `author_name` es «Grim Builds». No es una fuente externa.
 - **Derechos**: `rights_status=own_original`, confirmado por el titular del
   sitio (Paco) el 2026-11-12, con `permission_ref` nulo. La ficha publica con
-  `content_status=sin_verificar`: los datos no se han comprobado todavía contra
+  el estado interno `sin_verificar` (etiqueta visible «Sin verificar»): los datos no se han comprobado todavía contra
   el juego y la propia página lo declara.
 
 Los datos del juego (nombres de habilidades, maestrías y constelaciones) son
@@ -90,7 +90,7 @@ solo aplica a fuentes externas reales; aquí no existe ninguna.
 
 `pnpm check:scope` falla si el código de la aplicación o de la ingesta contiene
 una llamada HTTP automatizada a un host que no sea el propio del proyecto
-(`external-source-access`), y si un registro de `content/sources/` figura
+(`external-source-access`), y si un registro de `fixtures/content/sources/` figura
 `habilitada` o `limitada` sin evidencia completa (`source-rights-gate`). Un
 registro sin `status` se trata como `pending` y no se marca.
 

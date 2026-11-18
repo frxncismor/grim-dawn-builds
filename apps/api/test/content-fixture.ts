@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import pg from 'pg';
@@ -77,7 +84,19 @@ export function prepareContractContent(
     masteries: [...masteries.values()],
     tierLists: collections?.tierLists ?? [],
     assets: [],
+    // Guide nodes may reference the mastery catalog (`skill_node_id`, T031): load the real one then.
+    catalog: docs.some((doc) => doc.skill_nodes.some((node) => node.skill_node_id))
+      ? realCatalog()
+      : [],
   });
+}
+
+function realCatalog(): unknown[] {
+  const dir = join(import.meta.dirname, '../../../fixtures/content/mastery-trees');
+  return readdirSync(dir)
+    .filter((file) => file.endsWith('.json'))
+    .sort()
+    .map((file) => JSON.parse(readFileSync(join(dir, file), 'utf8')) as unknown);
 }
 
 /** Test-owned Docker resources only. Never uses the project's persistent volume. */

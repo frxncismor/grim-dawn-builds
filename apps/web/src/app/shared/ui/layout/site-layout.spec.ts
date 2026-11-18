@@ -43,15 +43,25 @@ describe('SiteLayout', () => {
     const fixture = TestBed.createComponent(HostFixture);
     await fixture.whenStable();
     const root: HTMLElement = fixture.nativeElement;
-    expect(root.querySelector('footer')?.textContent).toContain(
-      'Not affiliated with Crate Entertainment',
+    const notice = root.querySelectorAll('footer p');
+    expect(notice).toHaveLength(1);
+    expect(notice[0]!.textContent).toContain(
+      'Not affiliated with or endorsed by Crate Entertainment or Grim Dawn',
+    );
+    expect(root.querySelector('header .brand')?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      'Grim Builds',
     );
     const hrefs = [...root.querySelectorAll('a')].map((link) => link.getAttribute('href'));
     for (const href of ['/', '/tier-list', '/acerca', '/legal']) expect(hrefs).toContain(href);
     expect(root.querySelector('nav')?.getAttribute('aria-label')).toBe('Main navigation');
-    expect(root.querySelector('.header-inner > .lang-switch')?.textContent).toContain('English');
+    expect(root.querySelector('.header-inner > details > summary')?.textContent).toContain('Menu');
+    expect(root.querySelector('.header-inner details > .lang-switch')?.textContent).toContain(
+      'English',
+    );
     expect(
-      root.querySelector('.header-inner > .lang-switch a[hreflang="es"]')?.getAttribute('href'),
+      root
+        .querySelector('.header-inner details > .lang-switch a[hreflang="es"]')
+        ?.getAttribute('href'),
     ).toBe('/es/');
   });
   it('keeps the configured application base in the native skip target', async () => {

@@ -1,0 +1,45 @@
+@if (tree; as page) {
+  <article class="mastery">
+    <header class="mastery__header">
+      <h1>{{ name }}</h1>
+      <p class="mastery__summary" i18n="@@mastery.summary">
+        {{ nodeCount }} skills across nine tiers. Each skill shows its tier, the mastery bar points
+        it needs, its ranks and the skill it requires.
+      </p>
+      <p class="mastery__version">
+        <span i18n="@@mastery.version">Game version:</span> {{ page.game_version }}
+      </p>
+    </header>
+    @if (switcher.length > 1) {
+      <nav
+        class="mastery__switcher"
+        data-mastery-switcher
+        aria-label="Switch mastery"
+        i18n-aria-label="@@mastery.switcher"
+      >
+        <ul>
+          @for (item of switcher; track item.slug) {
+            <li>
+              @if (item.linked) {
+                <a
+                  [routerLink]="['/maestrias', item.slug]"
+                  [attr.aria-current]="item.current ? 'page' : null"
+                  [attr.data-current]="item.current ? '' : null"
+                  >{{ item.name }}</a
+                >
+              } @else {
+                <span class="mastery__switcher-muted">{{ item.name }}</span>
+              }
+            </li>
+          }
+        </ul>
+      </nav>
+    }
+    <gd-skill-tree [treeId]="'mastery-' + page.mastery.slug" [catalogTree]="page" />
+    <p>
+      <a routerLink="/tier-list" i18n="@@mastery.backToCatalog">Browse the build catalog</a>
+    </p>
+  </article>
+} @else {
+  <gd-not-found-page />
+}

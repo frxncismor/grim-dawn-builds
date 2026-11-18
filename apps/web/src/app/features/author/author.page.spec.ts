@@ -30,7 +30,7 @@ describe('author profile page', () => {
     });
     await f.whenStable();
     expect(f.nativeElement.querySelector('h1').textContent).toBe('Proyecto');
-    expect(document.title).toBe('Profile of Proyecto · Grim Dawn Builds');
+    expect(document.title).toBe('Profile of Proyecto · Grim Builds');
     expect(f.nativeElement.textContent).toContain('<img src=x onerror=fail()>');
     expect(f.nativeElement.querySelector('img')).toBeNull();
     expect(f.nativeElement.textContent).toContain('does not have any published guides yet');

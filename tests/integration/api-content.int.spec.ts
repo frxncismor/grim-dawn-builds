@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe } from 'vitest';
 import { runContentRepositoryContract } from '@gd/domain/testing';
-import { ApiContentRepository } from '../../src/app/core/content/api.repository';
+import { ApiContentRepository } from '../../apps/web/src/app/core/content/api.repository';
 import { ContainerContentFixture } from '../../apps/api/test/content-fixture';
 
 // Integration orchestration only: application zones retain their production boundaries.

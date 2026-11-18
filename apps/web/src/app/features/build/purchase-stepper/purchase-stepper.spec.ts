@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import draftFixture from '../../../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
+import draftFixture from '../../../../../../../fixtures/content/builds/chaman-demoledor-golpe-primigenio.json';
 import { progressKey, progressRevision } from './progress';
 import { PurchaseStepper, type PurchaseStepperContent } from './purchase-stepper';
 
@@ -443,5 +443,91 @@ describe('gd-purchase-stepper', () => {
     } finally {
       restoreStorage();
     }
+  });
+
+  describe('step announcement and keyboard (spec004 T022)', () => {
+    const announcement = (root: HTMLElement) =>
+      root.querySelector<HTMLElement>('[data-step-announcement]');
+    const buttons = (root: HTMLElement) =>
+      Array.from(root.querySelectorAll<HTMLButtonElement>('[data-select-step]'));
+
+    it('has a polite, atomic status region from the first render, empty until a step is chosen', async () => {
+      const fixture = await render();
+      const region = announcement(fixture.nativeElement)!;
+      expect(region).not.toBeNull();
+      expect(region.getAttribute('role')).toBe('status');
+      expect(region.getAttribute('aria-live')).toBe('polite');
+      expect(region.getAttribute('aria-atomic')).toBe('true');
+      expect(region.textContent?.trim()).toBe('');
+      // Server markup keeps it too, so assistive technology finds it before the first change.
+      expect(region.closest('#orden')).not.toBeNull();
+    });
+
+    it('announces the chosen step with its title and how many skills the trees highlight', async () => {
+      const fixture = await render();
+      const root = fixture.nativeElement as HTMLElement;
+      buttons(root)[0].click();
+      fixture.detectChanges();
+      const text = announcement(root)!.textContent!;
+      expect(text).toContain('Step 1');
+      expect(text).toContain(content.purchase_steps[0].title);
+      expect(text).toContain('2 skills');
+      buttons(root)[1].click();
+      fixture.detectChanges();
+      expect(announcement(root)!.textContent).toContain('Step 2');
+      expect(announcement(root)!.textContent).toContain('1 skill');
+      expect(announcement(root)!.textContent).not.toContain('1 skills');
+    });
+
+    it('says so when none of the step skills is drawn in the trees', async () => {
+      const modified = {
+        ...content,
+        purchase_steps: content.purchase_steps.map((step, index) =>
+          index === 0
+            ? { ...step, highlights: [{ skill_node_slug: 'no-existe', points: 1 }] }
+            : step,
+        ),
+      } as PurchaseStepperContent;
+      const fixture = await render(modified);
+      const root = fixture.nativeElement as HTMLElement;
+      buttons(root)[0].click();
+      fixture.detectChanges();
+      expect(announcement(root)!.textContent).toContain('no skills');
+    });
+
+    it('lets the chosen step be turned off again, clearing the highlight and announcing it', async () => {
+      const fixture = await render();
+      const root = fixture.nativeElement as HTMLElement;
+      const emitted: unknown[] = [];
+      fixture.componentInstance.selectionChange.subscribe((value) => emitted.push(value));
+      buttons(root)[0].click();
+      fixture.detectChanges();
+      buttons(root)[0].click();
+      fixture.detectChanges();
+      expect(buttons(root)[0].getAttribute('aria-pressed')).toBe('false');
+      expect(emitted.at(-1)).toEqual({ position: null, activeIds: [] });
+      expect(announcement(root)!.textContent).toContain('cleared');
+    });
+
+    it('keeps every step control a native, focusable button so Tab, Enter and Space work', async () => {
+      const fixture = await render();
+      const all = buttons(fixture.nativeElement);
+      expect(all).toHaveLength(content.purchase_steps.length);
+      for (const button of all) {
+        expect(button.tagName).toBe('BUTTON');
+        expect(button.type).toBe('button');
+        expect(button.tabIndex).toBe(0);
+        expect(button.disabled).toBe(false);
+      }
+    });
+
+    it('does not announce anything when the controls are disabled by inconsistent data', async () => {
+      const duplicated = {
+        ...content,
+        purchase_steps: content.purchase_steps.map((step) => ({ ...step, position: 1 })),
+      } as PurchaseStepperContent;
+      const fixture = await render(duplicated);
+      expect(announcement(fixture.nativeElement)?.textContent?.trim() ?? '').toBe('');
+    });
   });
 });

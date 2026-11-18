@@ -43,7 +43,9 @@ const golden = JSON.parse(
   footer: string;
 };
 const slug = 'chaman-demoledor-golpe-primigenio';
-const local = createFixtureRepository(resolve(root, 'content'), { INCLUDE_DRAFTS: 'true' });
+const local = createFixtureRepository(resolve(root, 'fixtures/content'), {
+  INCLUDE_DRAFTS: 'true',
+});
 const guide = BuildSchema.parse(await local.findBuild(slug));
 const guideJson = JSON.stringify(guide);
 
@@ -242,12 +244,12 @@ test('guide is published as own content with internal provenance and no third-pa
   assert.equal(source.slug, 'guia-original');
   assert.equal(source.kind, 'original');
   assert.equal(source.url, null);
-  assert.equal(source.author_name, 'Grim Dawn Builds');
+  assert.equal(source.author_name, 'Grim Builds');
   assert.equal(source.permission_ref, null);
   assert.match(source.notes, /Claude Code/);
   assert.equal(BuildSchema.safeParse({ ...guide, rights_status: 'pending' }).success, false);
 
-  const publicRepo = createFixtureRepository(resolve(root, 'content'), {});
+  const publicRepo = createFixtureRepository(resolve(root, 'fixtures/content'), {});
   const publicGuide = await publicRepo.findBuild(slug);
   assert.ok(publicGuide);
   assert.ok((await publicRepo.listSlugs()).includes(slug));

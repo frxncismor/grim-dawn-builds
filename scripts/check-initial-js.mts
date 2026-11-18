@@ -15,6 +15,41 @@ export const INITIAL_JS_LIMIT = 90000;
  * plan §17.51 together with this one; T-144 remains open to recover real headroom
  * and lower the ceiling again. */
 export const CATALOG_JS_LIMIT = 112000;
+/**
+ * `/maestrias/:slug` (spec 003, T013). Plan §6 already approves 150 kB gzip of initial JS for a
+ * page that draws a skill tree (`/builds/:slug`); the mastery page is the same class, so it uses
+ * that approved figure. No existing limit changes.
+ */
+export const MASTERY_JS_LIMIT = 150000;
+/** Pages of the mastery route that are measured (largest tree and a mid-size one), per locale. */
+export const MASTERY_BUDGET_SLUGS = ['demolition', 'soldier'] as const;
+/**
+ * `/builds/:slug` (spec004 T020): plan §6 approves 150 kB gzip of initial JS for the guide (deferred
+ * trees and devotion map apart). The guide was not under any automatic gate until now; it is
+ * measured on the reference guide, per locale.
+ */
+export const BUILD_JS_LIMIT = 150000;
+export const BUILD_BUDGET_SLUGS = ['chaman-demoledor-golpe-primigenio'] as const;
+/**
+ * `/maestrias` (spec 003, T027): an interactive listing that draws no tree, so it is the same class
+ * as `/tier-list` and reuses its approved limit (`CATALOG_JS_LIMIT`); the home budget cannot apply
+ * because the home ships no JS at all. No existing limit changes.
+ */
+type InitialRoute = 'home' | 'tier-list' | 'mastery' | 'mastery-index' | 'build';
+const ROUTE_ENTRY: Record<InitialRoute, string> = {
+  home: 'src/app/features/home/home.page.ts',
+  'tier-list': 'src/app/features/tier-list/tier-list.page.ts',
+  mastery: 'src/app/features/masteries/mastery.page.ts',
+  'mastery-index': 'src/app/features/masteries/index.page.ts',
+  build: 'src/app/features/build/build-route.page.ts',
+};
+const ROUTE_LIMIT: Record<InitialRoute, number> = {
+  home: INITIAL_JS_LIMIT,
+  'tier-list': CATALOG_JS_LIMIT,
+  mastery: MASTERY_JS_LIMIT,
+  'mastery-index': CATALOG_JS_LIMIT,
+  build: BUILD_JS_LIMIT,
+};
 interface Output {
   entryPoint?: string;
   imports: { path: string; kind: string; external?: boolean }[];
@@ -24,7 +59,7 @@ interface Output {
 export function collectInitialJs(
   metadata: unknown,
   html: string,
-  route: 'home' | 'tier-list' = 'home',
+  route: InitialRoute = 'home',
 ): string[] {
   if (
     !metadata ||
@@ -76,13 +111,7 @@ export function collectInitialJs(
     entries.push(basename(url.pathname));
   }
   if (!entries.length) throw new Error('No hay scripts iniciales.');
-  const home = [...outputs].filter(([, output]) =>
-    output.entryPoint?.endsWith(
-      route === 'home'
-        ? 'src/app/features/home/home.page.ts'
-        : 'src/app/features/tier-list/tier-list.page.ts',
-    ),
-  );
+  const home = [...outputs].filter(([, output]) => output.entryPoint?.endsWith(ROUTE_ENTRY[route]));
   if (home.length !== 1) throw new Error('Entrada Home ausente o ambigua.');
   entries.push(home[0]![0]);
   const visited = new Set<string>();
@@ -103,15 +132,24 @@ export function collectInitialJs(
 
 export async function measureInitialJs(
   root: string,
-  route: 'home' | 'tier-list' = 'home',
+  route: InitialRoute = 'home',
   segments: readonly string[] = [],
+  slug?: string,
 ) {
+  const page =
+    route === 'home'
+      ? 'index.html'
+      : route === 'tier-list'
+        ? 'tier-list/index.html'
+        : route === 'mastery-index'
+          ? 'maestrias/index.html'
+          : route === 'build'
+            ? `builds/${slug ?? ''}/index.html`
+            : `maestrias/${slug ?? ''}/index.html`;
+  if ((route === 'mastery' || route === 'build') && !slug) throw new Error('Falta el slug.');
   const [stats, html] = await Promise.all([
     readFile(join(root, 'stats.json'), 'utf8'),
-    readFile(
-      join(root, 'browser', ...segments, route === 'home' ? 'index.html' : 'tier-list/index.html'),
-      'utf8',
-    ),
+    readFile(join(root, 'browser', ...segments, page), 'utf8'),
   ]);
   const paths = collectInitialJs(JSON.parse(stats) as unknown, html, route);
   const files = await Promise.all(
@@ -131,7 +169,7 @@ export async function measureInitialJs(
   return {
     files,
     totalGzipBytes: files.reduce((sum, file) => sum + file.gzipBytes, 0),
-    limitBytes: route === 'home' ? INITIAL_JS_LIMIT : CATALOG_JS_LIMIT,
+    limitBytes: ROUTE_LIMIT[route],
   };
 }
 
@@ -143,9 +181,14 @@ export async function measureInitialRoutes(
   const stats = JSON.parse(await readFile(join(root, 'stats.json'), 'utf8')) as {
     outputs: Record<string, { entryPoint?: string }>;
   };
-  const hasTier = Object.values(stats.outputs).some((o) =>
-    o.entryPoint?.replaceAll('\\', '/').endsWith('src/app/features/tier-list/tier-list.page.ts'),
-  );
+  const hasEntry = (route: InitialRoute) =>
+    Object.values(stats.outputs).some((o) =>
+      o.entryPoint?.replaceAll('\\', '/').endsWith(ROUTE_ENTRY[route]),
+    );
+  const hasTier = hasEntry('tier-list');
+  const hasMastery = hasEntry('mastery');
+  const hasMasteryIndex = hasEntry('mastery-index');
+  const hasBuild = hasEntry('build');
   const results = [];
   for (const segments of locales) {
     const prefix = segments.length === 0 ? '' : `/${segments.join('/')}`;
@@ -164,6 +207,25 @@ export async function measureInitialRoutes(
       results.push({
         route: `${prefix}/tier-list`,
         ...(await measureInitialJs(root, 'tier-list', segments)),
+      });
+    // Strict: once the build ships the mastery page, every budgeted page must exist.
+    if (hasMastery)
+      for (const slug of MASTERY_BUDGET_SLUGS)
+        results.push({
+          route: `${prefix}/maestrias/${slug}`,
+          ...(await measureInitialJs(root, 'mastery', segments, slug)),
+        });
+    // Strict as well: once the build ships the guide route, the reference guide must exist.
+    if (hasBuild)
+      for (const slug of BUILD_BUDGET_SLUGS)
+        results.push({
+          route: `${prefix}/builds/${slug}`,
+          ...(await measureInitialJs(root, 'build', segments, slug)),
+        });
+    if (hasMasteryIndex)
+      results.push({
+        route: `${prefix}/maestrias`,
+        ...(await measureInitialJs(root, 'mastery-index', segments)),
       });
   }
   return results;

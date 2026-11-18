@@ -15,7 +15,7 @@ test('verify validates the real fixture content and the generated catalog before
   const catalogIndex = names.indexOf('catalog:check');
   assert.notEqual(contentIndex, -1, 'content:validate step missing');
   assert.notEqual(catalogIndex, -1, 'catalog:check step missing');
-  assert.equal(commands[contentIndex], 'pnpm run content:validate -- --dir content');
+  assert.equal(commands[contentIndex], 'pnpm run content:validate -- --dir fixtures/content');
   assert.equal(commands[catalogIndex], 'pnpm run catalog:check');
   const domainBuild = commands.indexOf('pnpm --filter @gd/domain build');
   const webBuild = commands.indexOf('pnpm build');
@@ -25,6 +25,15 @@ test('verify validates the real fixture content and the generated catalog before
   assert.ok(domainBuild < catalogIndex, 'catalog:check must run after the domain build');
   assert.ok(catalogIndex < webBuild, 'catalog:check must run before the web build');
   assert.equal(names.at(-1), 'performance', 'performance must remain the last step');
+});
+
+test('verify validates the mastery-tree catalog after catalog:check and before the web build (spec 003 T007)', () => {
+  const names = VERIFY_STEPS.map((step) => step.name);
+  const index = names.indexOf('catalog:nodes');
+  assert.notEqual(index, -1, 'catalog:nodes step missing');
+  assert.equal(VERIFY_STEPS[index].command, 'pnpm run catalog:nodes');
+  assert.ok(names.indexOf('catalog:check') < index, 'catalog:nodes goes after catalog:check');
+  assert.ok(index < names.indexOf('build'), 'catalog:nodes must run before the web build');
 });
 
 test('verify runs the performance gate last, after build and public-build (T-145)', () => {
@@ -64,6 +73,15 @@ test('verify runs the API typecheck, lint and tests (T-053)', () => {
   assert.ok(commands.includes('pnpm --filter @gd/api typecheck'), 'api typecheck missing');
   assert.ok(commands.includes('pnpm --filter @gd/api lint'), 'api lint missing');
   assert.ok(commands.includes('pnpm --filter @gd/api test'), 'api test missing');
+});
+
+test('verify type-checks the e2e sources before the slow steps (spec 004 T001)', () => {
+  const names = VERIFY_STEPS.map((step) => step.name);
+  const index = names.indexOf('typecheck:e2e');
+  assert.notEqual(index, -1, 'typecheck:e2e step missing');
+  assert.equal(VERIFY_STEPS[index].command, 'pnpm typecheck:e2e');
+  assert.ok(index < names.indexOf('build'), 'typecheck:e2e must run before build');
+  assert.ok(index < names.indexOf('performance'), 'typecheck:e2e must run before performance');
 });
 
 test('verify builds @gd/domain before any consumer (T-071 blocker 2)', () => {
@@ -134,4 +152,13 @@ test('stops at the first failing step and reports it', async () => {
   assert.equal(result.ok, false);
   assert.equal(result.failedStep, 'lint');
   assert.equal(result.exitCode, 1);
+});
+
+test('every path listed in test:scripts exists on disk (a missing space glued two paths together)', async () => {
+  const { readFileSync, existsSync } = await import('node:fs');
+  const script = JSON.parse(readFileSync('package.json', 'utf8')).scripts['test:scripts'];
+  const paths = script.split(/\s+/).filter((token) => /\.(mts|mjs|ts|js)$/.test(token));
+  assert.ok(paths.length > 10, 'test:scripts should list its test files');
+  const missing = paths.filter((path) => !existsSync(path));
+  assert.deepEqual(missing, []);
 });

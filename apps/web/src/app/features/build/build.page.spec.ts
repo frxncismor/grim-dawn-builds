@@ -2,9 +2,10 @@ import { PLATFORM_ID } from '@angular/core';
 import { DeferBlockBehavior, DeferBlockState, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { afterEach, describe, expect, it } from 'vitest';
-import draftFixture from '../../../../../../content/builds/chaman-demoledor-golpe-primigenio.json';
+import draftFixture from '../../../../../../fixtures/content/builds/chaman-demoledor-golpe-primigenio.json';
 import { sampleAdaptation } from './source-attribution/source-attribution.fixture';
 import { SITE_BASE_URL } from '../../core/seo/site-url';
+import { MASTERY_TREE_ASSETS } from '../../core/content/mastery-tree-assets';
 import { BuildPage, type BuildPageContent } from './build.page';
 
 const draftContent = draftFixture as unknown as BuildPageContent;
@@ -96,6 +97,15 @@ async function createFixture(value: BuildPageContent, options: RenderOptions = {
       provideRouter([]),
       { provide: PLATFORM_ID, useValue: options.platform ?? 'browser' },
       { provide: SITE_BASE_URL, useValue: 'https://example.test/' },
+      // The canonical trees are covered by build-skills.spec.ts; here the guide mode stays in force.
+      {
+        provide: MASTERY_TREE_ASSETS,
+        useValue: {
+          load: async () => {
+            throw new Error('mastery-trees');
+          },
+        },
+      },
     ],
     deferBlockBehavior: DeferBlockBehavior.Manual,
   });
@@ -113,7 +123,14 @@ async function renderDeferred(
   state: DeferBlockState,
 ) {
   const blocks = await fixture.getDeferBlocks();
-  for (const block of blocks) await block.render(state);
+  for (const block of blocks) {
+    try {
+      await block.render(state);
+    } catch (error) {
+      // The index's observer block (T021) has no placeholder or loading state by design.
+      if (!/no @(placeholder|loading) block/.test(String(error))) throw error;
+    }
+  }
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
@@ -156,6 +173,37 @@ describe('gd-build-page', () => {
       .map((element) => element.id)
       .filter((id) => canonicalSections.includes(id));
     expect(rendered).toEqual(canonicalSections);
+  });
+
+  it('puts the build summary right after the hero and before the first content block (spec004 T020)', async () => {
+    const { root } = await render();
+    const summary = root.querySelector('[data-build-summary]')!;
+    expect(summary).not.toBeNull();
+    const hero = root.querySelector('#resumen')!;
+    const priorities = root.querySelector('#prioridades')!;
+    const before = Node.DOCUMENT_POSITION_FOLLOWING;
+    expect(hero.compareDocumentPosition(summary) & before).toBeTruthy();
+    expect(summary.compareDocumentPosition(priorities) & before).toBeTruthy();
+    expect(root.querySelectorAll('[data-build-summary]')).toHaveLength(1);
+    const text = summary.textContent!;
+    expect(text).toContain('Ana la Forjadora');
+    // The fixture keeps the unconfirmed version as Spanish text; the summary speaks the UI language.
+    expect(text).toContain(
+      publicContent.game_version === 'Sin confirmar'
+        ? 'Version unconfirmed'
+        : publicContent.game_version,
+    );
+    for (const mastery of publicContent.masteries) expect(text).toContain(mastery.name_es);
+  });
+
+  it('replaces the old facts list of the attribution block: version and states live in the summary only', async () => {
+    const { root } = await render();
+    expect(root.querySelector('#fuentes [data-meta]')).toBeNull();
+    expect(root.querySelectorAll('[data-game-version]')).toHaveLength(1);
+    expect(root.querySelectorAll('[data-review-state]')).toHaveLength(1);
+    expect(root.querySelectorAll('[data-content-status]')).toHaveLength(1);
+    expect(root.querySelector('#fuentes [data-author]')).not.toBeNull();
+    expect(root.querySelector('#fuentes [data-sources]')).not.toBeNull();
   });
 
   it('renders one skill tree per mastery with only that mastery nodes', async () => {
@@ -372,7 +420,7 @@ describe('gd-build-page', () => {
   it('escapes hostile editorial strings instead of injecting markup', async () => {
     const hostile = '<img src=x onerror=alert(1)>';
     const { root } = await render({ ...publicContent, title: hostile });
-    expect(root.querySelector('img')).toBeNull();
+    expect(root.querySelector('img[src="x"], [onerror]')).toBeNull();
     expect(root.textContent).toContain(hostile);
   });
 
@@ -387,7 +435,8 @@ describe('gd-build-page', () => {
     const fixture = await createFixture(publicContent);
     const root = fixture.nativeElement as HTMLElement;
     const blocks = await renderDeferred(fixture, DeferBlockState.Placeholder);
-    expect(blocks).toHaveLength(2);
+    // The index's observer (T021), then the skill trees and the devotion map.
+    expect(blocks).toHaveLength(3);
 
     expect(root.querySelector('#habilidades')).not.toBeNull();
     expect(root.textContent).toContain('Golpe Primigenio');
@@ -397,18 +446,46 @@ describe('gd-build-page', () => {
     expect(root.textContent).toContain('Chamán');
     expect(root.textContent).toContain('Shaman');
 
-    await blocks[0].render(DeferBlockState.Loading);
+    await blocks[1].render(DeferBlockState.Loading);
     fixture.detectChanges();
     expect(root.querySelector('#habilidades')).not.toBeNull();
-    expect(root.querySelector('.build-skeleton')?.getAttribute('aria-hidden')).toBe('true');
+    // T025: no empty bordered skeleton bars; the textual fallback is the only loading content.
+    expect(root.querySelector('.build-skeleton')).toBeNull();
     expect(root.textContent).toContain('Golpe Primigenio');
+  });
+
+  it('says the guide is only in Spanish on the English page and marks the body lang="es" (T023, FR-038)', async () => {
+    const { root } = await render();
+    expect(root.querySelector('[data-lang-notice]')?.textContent).toContain(
+      'This guide is only available in Spanish',
+    );
+    expect(root.querySelector('.build-content')?.getAttribute('lang')).toBe('es');
+  });
+
+  it('links the textual skill fallback to the mastery catalog, so it reads without JavaScript (T017)', async () => {
+    const fixture = await createFixture(publicContent);
+    const root = fixture.nativeElement as HTMLElement;
+    await renderDeferred(fixture, DeferBlockState.Placeholder);
+    const link = root.querySelector<HTMLAnchorElement>('#habilidades a[data-masteries-link]');
+    expect(link).not.toBeNull();
+    expect(link!.getAttribute('href')).toBe('/maestrias');
+    expect(root.querySelectorAll('#habilidades [data-fallback-node]')).toHaveLength(14);
+  });
+
+  it('numbers each devotion step once in the placeholder: the list marker, not a typed number (T028)', async () => {
+    const fixture = await createFixture(publicContent);
+    const root = fixture.nativeElement as HTMLElement;
+    const blocks = await renderDeferred(fixture, DeferBlockState.Placeholder);
+    await blocks[2].render(DeferBlockState.Placeholder);
+    const first = root.querySelector('[data-fallback-devotion-step] strong')?.textContent?.trim();
+    expect(first).not.toMatch(/^\d+\./);
   });
 
   it('keeps every devotion step, including the ones without a constellation, in the placeholder', async () => {
     const fixture = await createFixture(publicContent);
     const root = fixture.nativeElement as HTMLElement;
     const blocks = await renderDeferred(fixture, DeferBlockState.Placeholder);
-    await blocks[1].render(DeferBlockState.Placeholder);
+    await blocks[2].render(DeferBlockState.Placeholder);
     fixture.detectChanges();
 
     const section = root.querySelector('#devociones');
@@ -429,6 +506,10 @@ describe('gd-build-page', () => {
         provideRouter([]),
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: SITE_BASE_URL, useValue: 'https://example.test/' },
+        {
+          provide: MASTERY_TREE_ASSETS,
+          useValue: { load: async () => Promise.reject(new Error('x')) },
+        },
       ],
       deferBlockBehavior: DeferBlockBehavior.Manual,
     });

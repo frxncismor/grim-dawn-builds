@@ -3,8 +3,8 @@
     Grim Dawn guides,<span>with the status in plain sight.</span>
   </h1>
   <p i18n="@@home.intro">
-    Browse mastery combinations and see what is verified, what still needs review and what is still
-    awaiting a guide.
+    Survive Cairn with a build you can trust: see which combinations are verified, which still need
+    review and which are still waiting for a guide.
   </p>
   <div class="hero-links">
     <a class="primary-link" routerLink="/tier-list" i18n="@@home.catalog">Browse the catalog</a>
@@ -13,21 +13,18 @@
 </section>
 
 <section class="publication" aria-labelledby="publication-title">
-  @if (featured; as guide) {
+  @if (featuredCard; as card) {
     <h2 id="publication-title" i18n="@@home.latest">Latest publication</h2>
-    <div>
-      <h3>
-        <a [routerLink]="['/builds', guide.slug]">{{ guide.title }}</a>
-      </h3>
-      <p><span i18n="@@home.version">Game version:</span> {{ guide.gameVersion }}</p>
-      <p>
-        <span i18n="@@home.publishedOn">Published on</span>
-        <time [attr.datetime]="guide.publishedAt">{{ guide.publishedAt }}</time>
+    <gd-build-card [data]="card" />
+    @if (featuredDate; as date) {
+      <p class="publication__meta">
+        <span i18n="@@home.publishedOn">Published on</span>{{ ' '
+        }}<time [attr.datetime]="date">{{ featuredDateLabel }}</time>
       </p>
-      <p i18n="@@home.guideAttribution">
-        See the guide and its attribution. The publication date is not a power ranking.
-      </p>
-    </div>
+    }
+    <p i18n="@@home.guideAttribution">
+      See the guide and its attribution. The publication date is not a power ranking.
+    </p>
   } @else {
     <h2 id="publication-title" i18n="@@home.noPublicGuides">No guides published yet</h2>
     <p i18n="@@home.catalogAvailable">
@@ -36,6 +33,47 @@
     </p>
   }
 </section>
+
+@if (otherCards.length) {
+  <section class="builds" aria-labelledby="builds-title">
+    <h2 id="builds-title" i18n="@@home.moreBuilds">More builds</h2>
+    <ul class="builds__list">
+      @for (card of otherCards; track card.href) {
+        <li><gd-build-card [data]="card" /></li>
+      }
+    </ul>
+  </section>
+}
+
+<section class="masteries" aria-labelledby="masteries-title">
+  <h2 id="masteries-title" i18n="@@home.masteriesTitle">Start from your mastery</h2>
+  <ul class="masteries__list">
+    @for (mastery of masteries; track mastery.slug) {
+      <li>
+        @if (mastery.hasTree) {
+          <a routerLink="/tier-list" [queryParams]="mastery.query">{{ mastery.name }}</a>
+        } @else {
+          <span class="masteries__no-tree" [attr.data-no-tree]="mastery.slug"
+            >{{ mastery.name
+            }}<span class="masteries__no-tree-note" i18n="@@mastery.treeUnavailable"
+              >Skill tree not available</span
+            ></span
+          >
+        }
+      </li>
+    }
+  </ul>
+  <p class="masteries__count" i18n="@@home.withoutGuideCount">
+    {{ withoutGuide }} of {{ total }} combinations are still waiting for a guide.
+  </p>
+</section>
+
+@if (showsGameArt) {
+  <p class="credit" data-credit i18n="@@masteryIndex.credit">
+    Mastery buttons from Grim Dawn, © Crate Entertainment. This project is not affiliated with or
+    endorsed by Crate Entertainment.
+  </p>
+}
 
 <section id="criterios" class="criteria" aria-labelledby="criteria-title">
   <h2 id="criteria-title" i18n="@@home.criteriaTitle">What to expect from the content</h2>

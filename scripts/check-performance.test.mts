@@ -6,7 +6,12 @@ import { tmpdir } from 'node:os';
 import { isAbsolute, join, resolve, sep } from 'node:path';
 import { test } from 'node:test';
 import { gzipSync } from 'node:zlib';
-import { CATALOG_JS_LIMIT, INITIAL_JS_LIMIT, measureInitialRoutes } from './check-initial-js.mts';
+import {
+  CATALOG_JS_LIMIT,
+  INITIAL_JS_LIMIT,
+  MASTERY_JS_LIMIT,
+  measureInitialRoutes,
+} from './check-initial-js.mts';
 import {
   BACKEND_BUDGETS,
   BUDGETS,
@@ -786,4 +791,87 @@ test('T-128: el comando backend publica la tabla y decide con exit code', async 
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('la ruta de árbol de maestría (T013) entra en presupuestos JS y en las URLs de Lighthouse sin tocar los límites existentes', async () => {
+  assert.equal(BUDGETS.jsBytes.mastery, MASTERY_JS_LIMIT);
+  assert.equal(BUDGETS.jsBytes.home, 90000);
+  assert.equal(BUDGETS.jsBytes.tierList, 112000);
+  const ok = evaluateJsBudgets([
+    { route: '/maestrias/soldier', totalGzipBytes: MASTERY_JS_LIMIT, limitBytes: MASTERY_JS_LIMIT },
+    { route: '/es/maestrias/demolition', totalGzipBytes: 1, limitBytes: MASTERY_JS_LIMIT },
+  ]);
+  assert.ok(ok.every((result) => result.pass));
+  assert.equal(
+    evaluateJsBudgets([
+      {
+        route: '/maestrias/soldier',
+        totalGzipBytes: MASTERY_JS_LIMIT + 1,
+        limitBytes: MASTERY_JS_LIMIT,
+      },
+    ])[0]?.pass,
+    false,
+  );
+  assert.throws(() =>
+    evaluateJsBudgets([
+      { route: '/maestrias/soldier', totalGzipBytes: 1, limitBytes: CATALOG_JS_LIMIT },
+    ]),
+  );
+  const config = JSON.parse(
+    await readFile(join(import.meta.dirname, '..', 'lighthouserc.json'), 'utf8'),
+  );
+  const urls: string[] = config.ci.collect.url;
+  for (const slug of ['soldier', 'demolition'])
+    for (const prefix of ['', 'es/'])
+      assert.ok(
+        urls.includes(`http://localhost/${prefix}maestrias/${slug}/index.html`),
+        `${prefix}${slug}`,
+      );
+});
+
+test('el índice de maestrías (T027) usa el límite JS del catálogo y entra en las URLs de Lighthouse', async () => {
+  assert.equal(BUDGETS.jsBytes.masteryIndex, CATALOG_JS_LIMIT);
+  for (const route of ['/maestrias', '/es/maestrias']) {
+    assert.equal(
+      evaluateJsBudgets([
+        { route, totalGzipBytes: CATALOG_JS_LIMIT, limitBytes: CATALOG_JS_LIMIT },
+      ])[0]?.pass,
+      true,
+    );
+    assert.equal(
+      evaluateJsBudgets([
+        { route, totalGzipBytes: CATALOG_JS_LIMIT + 1, limitBytes: CATALOG_JS_LIMIT },
+      ])[0]?.pass,
+      false,
+    );
+    assert.throws(() =>
+      evaluateJsBudgets([{ route, totalGzipBytes: 1, limitBytes: MASTERY_JS_LIMIT }]),
+    );
+  }
+  const config = JSON.parse(
+    await readFile(join(import.meta.dirname, '..', 'lighthouserc.json'), 'utf8'),
+  );
+  const urls: string[] = config.ci.collect.url;
+  for (const prefix of ['', 'es/'])
+    assert.ok(urls.includes(`http://localhost/${prefix}maestrias/index.html`), prefix);
+});
+
+test('la guía (T041) entra en Lighthouse y en el presupuesto de HTML de 120 000 B sin ampliarlo', async () => {
+  assert.equal(BUDGETS.htmlBytes, 120000, 'el presupuesto de HTML no se amplía');
+  const route = '/builds/chaman-demoledor-golpe-primigenio';
+  for (const prefix of ['', '/es'])
+    assert.equal(measureHtml('x'.repeat(BUDGETS.htmlBytes), `${prefix}${route}`).pass, true);
+  for (const prefix of ['', '/es'])
+    assert.equal(measureHtml('x'.repeat(BUDGETS.htmlBytes + 1), `${prefix}${route}`).pass, false);
+  const config = JSON.parse(
+    await readFile(join(import.meta.dirname, '..', 'lighthouserc.json'), 'utf8'),
+  );
+  const urls: string[] = config.ci.collect.url;
+  for (const prefix of ['', 'es/'])
+    assert.ok(
+      urls.includes(
+        `http://localhost/${prefix}builds/chaman-demoledor-golpe-primigenio/index.html`,
+      ),
+      `guía ${prefix || 'EN'} en lighthouserc.json`,
+    );
 });

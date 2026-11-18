@@ -72,7 +72,7 @@ como obligación legal.
 - [ ] Contenido despublicado (no solo oculto en la UI).
 - [ ] Ruta eliminada del build público y del sitemap.
 - [ ] JSON-LD y metadatos sociales sin el contenido.
-- [ ] `content/sources/` actualizado al estado correspondiente.
+- [ ] `fixtures/content/sources/` actualizado al estado correspondiente.
 - [ ] Respuesta enviada al solicitante.
 - [ ] Cierre registrado y contenido no retirado en ningún artefacto.
 

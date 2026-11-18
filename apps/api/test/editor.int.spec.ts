@@ -29,7 +29,11 @@ function docker(args: string[]): string {
   return result.stdout.trim();
 }
 
-suite('editor with real PostgreSQL and restricted roles after bootstrap (T-129)', () => {
+// T055: cases shell out to docker exec/psql or spawn the API against a real PostgreSQL; under CPU
+// load they can exceed vitest's default 5 s testTimeout, so the suite carries its own timeout.
+const SUITE_OPTIONS = { timeout: 30_000 };
+const SUITE_TITLE = 'editor with real PostgreSQL and restricted roles after bootstrap (T-129)';
+suite(SUITE_TITLE, SUITE_OPTIONS, () => {
   beforeAll(async () => {
     if (!image || !/@sha256:[a-f0-9]{64}$/.test(image))
       throw new Error('Pinned PostgreSQL image required');
@@ -111,7 +115,7 @@ suite('editor with real PostgreSQL and restricted roles after bootstrap (T-129)'
       connectionTimeoutMillis: 5000,
     });
     await importer.connect();
-    data = await readSeedFixtures(join(root, 'content'));
+    data = await readSeedFixtures(join(root, 'fixtures/content'));
     await seedData(importer!, data);
     const synthetic = contractDoc('editor-public', {
       review_state: 'publicado',

@@ -1,6 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
+import { seedCompleteLine } from '@gd/domain';
 import { contractDoc } from '@gd/domain/testing';
-import { prepareSeed, runSeeder, seedData, SeedError, type SeedInput } from './seed.mjs';
+import {
+  prepareSeed,
+  readSeedFixtures,
+  runSeeder,
+  seedContentRoot,
+  seedCatalog,
+  seedData,
+  SeedError,
+  type SeedInput,
+} from './seed.mjs';
 
 const raw = (): SeedInput => ({
   builds: [contractDoc('seed-guide')],
@@ -113,5 +123,182 @@ describe('local fixture seeder', () => {
       expect(String(error)).not.toContain('PRIVATE-DATABASE-CANARY');
     }
     expect(commands.at(-1)).toBe('ROLLBACK');
+  });
+});
+
+describe('mastery catalog seed (spec 003 T024)', () => {
+  const tree = (slug = 'soldier', id = 'class01') => ({
+    mastery: { id, slug, name: { en: 'Soldier', es: 'Soldado' } },
+    game_version: '1.2.1.0',
+    source: { game_version: '1.2.1.0', sha256: ['a'.repeat(64)] },
+    nodes: [
+      {
+        id: `${id}/root`,
+        name: { en: 'Root', es: 'Raíz' },
+        kind: 'active',
+        circular: false,
+        tier: 1,
+        bar_required: 1,
+        max_points: 5,
+        grid: { col: 1, row: 0 },
+        parent_id: null,
+      },
+    ],
+  });
+
+  it('validates the catalog and fails closed on an invalid tree', () => {
+    const ok = prepareSeed({ ...raw(), catalog: [tree()] });
+    expect(ok.catalog).toHaveLength(1);
+    expect(prepareSeed(raw()).catalog).toEqual([]);
+    const bad = { ...tree(), nodes: [] };
+    expect(() => prepareSeed({ ...raw(), catalog: [bad] })).toThrow('invalid-content');
+    expect(() => prepareSeed({ ...raw(), catalog: [tree(), tree()] })).toThrow('duplicate');
+  });
+
+  it('reads and validates mastery-trees from a fixtures root', async () => {
+    const { mkdtemp, mkdir, writeFile, cp } = await import('node:fs/promises');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const { fileURLToPath } = await import('node:url');
+    const real = fileURLToPath(new URL('../../../../fixtures/content/', import.meta.url));
+    const dir = await mkdtemp(join(tmpdir(), 'gd-seed-'));
+    await cp(real, dir, { recursive: true });
+    const data = await readSeedFixtures(dir);
+    expect(data.catalog).toHaveLength(6);
+    expect(data.catalog.reduce((n, t) => n + t.nodes.length, 0)).toBe(186);
+    await mkdir(join(dir, 'mastery-trees'), { recursive: true });
+    await writeFile(join(dir, 'mastery-trees', 'broken.json'), '{"mastery":1}');
+    await expect(readSeedFixtures(dir)).rejects.toThrow('invalid-content');
+  });
+
+  it('writes the catalog in one transaction, stale nodes removed, parents first', async () => {
+    const commands: string[] = [];
+    const client = {
+      query: async (sql: string) => {
+        commands.push(sql);
+        if (sql.includes('current_user'))
+          return { rows: [{ role: 'importer', privileged: false }] };
+        if (sql.includes('EXISTS')) return { rows: [{ bootstrapped: false }] };
+        return { rows: [] };
+      },
+    };
+    await seedCatalog(client, prepareSeed({ ...raw(), catalog: [tree()] }).catalog);
+    expect(commands[0]).toBe('BEGIN');
+    expect(commands.at(-1)).toBe('COMMIT');
+    expect(commands.some((s) => s.includes('INSERT INTO mastery_trees'))).toBe(true);
+    expect(commands.some((s) => s.includes('DELETE FROM catalog_skill_nodes'))).toBe(true);
+  });
+
+  it('retires masteries absent from the catalog and names the one a guide still uses (T007)', async () => {
+    const commands: string[] = [];
+    const make = (fkViolation: boolean) => ({
+      query: async (sql: string, values?: unknown[]) => {
+        commands.push(sql);
+        if (sql.includes('current_user'))
+          return { rows: [{ role: 'importer', privileged: false }] };
+        if (sql.includes('FROM mastery_trees WHERE id <> ALL'))
+          return { rows: [{ id: 'class09' }] };
+        if (fkViolation && sql.startsWith('DELETE FROM mastery_trees'))
+          throw Object.assign(new Error('violates foreign key constraint secret_name'), {
+            code: '23503',
+          });
+        void values;
+        return { rows: [] };
+      },
+    });
+    const catalog = prepareSeed({ ...raw(), catalog: [tree()] }).catalog;
+    await seedCatalog(make(false), catalog);
+    const nodes = commands.findIndex((s) =>
+      s.startsWith('DELETE FROM catalog_skill_nodes WHERE mastery_id = $1'),
+    );
+    const row = commands.findIndex((s) => s.startsWith('DELETE FROM mastery_trees'));
+    expect(nodes).toBeGreaterThan(0);
+    expect(row).toBeGreaterThan(nodes);
+    commands.length = 0;
+    const failure = await seedCatalog(make(true), catalog).catch((error: unknown) => error);
+    expect(failure).toMatchObject({ name: 'SeedError', code: 'reference' });
+    expect((failure as Error).message).toContain('class09');
+    expect((failure as Error).message).not.toContain('secret_name');
+    expect(commands.at(-1)).toBe('ROLLBACK');
+    expect(commands).not.toContain('COMMIT');
+  });
+});
+
+describe('skill_node_id reaches the database (spec 003 T031)', () => {
+  const catalog = {
+    mastery: { id: 'class06', slug: 'shaman', name: { en: 'Shaman', es: 'Chamán' } },
+    game_version: '1.2.1.0',
+    source: { game_version: '1.2.1.0', sha256: ['a'.repeat(64)] },
+    nodes: [
+      {
+        id: 'class06/root',
+        name: { en: 'Root', es: 'Raíz' },
+        kind: 'active',
+        circular: false,
+        tier: 1,
+        bar_required: 1,
+        max_points: 5,
+        grid: { col: 1, row: 0 },
+        parent_id: null,
+      },
+    ],
+  };
+  const run = async (skillNodeId?: string) => {
+    const guide = contractDoc('seed-guide');
+    if (skillNodeId) guide.skill_nodes[0]!.skill_node_id = skillNodeId;
+    const queries: { sql: string; values: unknown[] }[] = [];
+    const client = {
+      query: async (sql: string, values: unknown[] = []) => {
+        queries.push({ sql, values });
+        if (sql.includes('current_user'))
+          return { rows: [{ role: 'importer', privileged: false }] };
+        if (sql.includes('bootstrapped')) return { rows: [{ bootstrapped: false }] };
+        if (sql.includes('RETURNING id')) return { rows: [{ id: crypto.randomUUID() }] };
+        return { rows: [] };
+      },
+    };
+    await seedData(client, prepareSeed({ ...raw(), builds: [guide], catalog: [catalog] }));
+    return queries;
+  };
+
+  it('loads the catalog before the guides so the node reference can resolve', async () => {
+    const queries = await run('class06/root');
+    const catalogAt = queries.findIndex((q) => q.sql.includes('INSERT INTO catalog_skill_nodes'));
+    const nodeAt = queries.findIndex((q) => q.sql.includes('INSERT INTO "build_skill_nodes"'));
+    expect(catalogAt).toBeGreaterThan(-1);
+    expect(nodeAt).toBeGreaterThan(catalogAt);
+  });
+
+  it('writes skill_node_id, and NULL when the guide node has no reference', async () => {
+    const withRef = (await run('class06/root')).find((q) =>
+      q.sql.includes('INSERT INTO "build_skill_nodes"'),
+    )!;
+    expect(withRef.sql).toContain('"skill_node_id"');
+    expect(withRef.values).toContain('class06/root');
+    const without = (await run()).find((q) => q.sql.includes('INSERT INTO "build_skill_nodes"'))!;
+    expect(without.sql).toContain('"skill_node_id"');
+    expect(without.values).toContain(null);
+  });
+});
+
+describe('fixtures root (F-001)', () => {
+  it('uses SEED_CONTENT_ROOT when the container launcher sets it, else the checkout', () => {
+    expect(seedContentRoot({ SEED_CONTENT_ROOT: '/content' })).toBe('/content');
+    expect(seedContentRoot({}).replaceAll('\\', '/')).toMatch(/\/fixtures\/content\/?$/);
+  });
+
+  it('runSeeder reads the fixtures from SEED_CONTENT_ROOT, not the bundle-relative path', async () => {
+    const err = vi.fn();
+    await runSeeder(
+      { APP_ENV: 'test', SEED_CONTENT_ROOT: '/nonexistent-gd-root' },
+      { write: { out: vi.fn(), err } },
+    );
+    expect(err).toHaveBeenCalledWith('seed failed: fixture-read');
+  });
+
+  it('prints the exact line the launcher pattern accepts', () => {
+    expect(seedCompleteLine({ builds: 1, tierLists: 2, masteries: 6, nodes: 186 })).toBe(
+      'seed complete: 1 builds, 2 tier lists, 6 masteries, 186 nodes',
+    );
   });
 });

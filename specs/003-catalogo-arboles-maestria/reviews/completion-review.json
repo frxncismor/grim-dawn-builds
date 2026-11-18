@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "feature": "specs/003-catalogo-arboles-maestria",
+  "snapshot": "a5a33731e905d087031bbc09879b0098217feea4a44d8f2c04bd8dc961a80adf",
+  "createdAt": "2026-11-15T22:20:38Z",
+  "implementationActor": "agentes implementadores de la corrida de orquestación 11111619 (OpenCode/Claude Code)",
+  "delegationAvailable": true,
+  "reviews": [
+    {
+      "specialty": "code",
+      "reviewer": "11111619-revisor-cierre-code-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "git diff d7eb827..e40120c (huella spec003, HEAD e40120c, snapshot a5a33731e905d087031bbc09879b0098217feea4a44d8f2c04bd8dc961a80adf)",
+        "T039: apps/api/src/db/{seed,bootstrap}.mts (seedContentRoot, SEED_CONTENT_ROOT, seedCompleteLine, bootstrapCompleteLine), scripts/seed-content.mts (CONTENT_MOUNT, successPattern, montaje fixtures/content -> /content), scripts/seed-content.test.mts, .dockerignore",
+        "T040: apps/api/test/skill-node-id.int.spec.ts (revalidación diferida: COMMIT en ambos órdenes, caso inválido 23514, trigger de catalog_skill_nodes fijado vía pg_trigger)",
+        "T041: apps/web/src/app/core/content/masteries.ts (tipado PublicMasteryTree), scripts/build-e2e-drafts{,.test}.mts, apps/web/tools/** (emit-static-assets, emit-mastery-trees, emit-portraits, emit-deferred-styles), tsconfig.e2e.json, package.json",
+        "apps/api/drizzle/0009..0013 (catálogo, skill_node_id, withdrawn, índice único parcial y triggers diferidos, vista sin icon)",
+        "apps/api/src/db/write-content.mts (writeCatalogRows, skill_node_id, provenance), apps/api/src/catalog/{map-mastery,mastery-repository}.ts, apps/api/src/routes/masteries.ts, apps/api/src/{app,server}.ts, apps/api/src/content/repository.ts",
+        "packages/domain/src/{mastery-tree,skill-node-refs,asset,schema}.ts",
+        "apps/web/src/app/core/content/{masteries.server,mastery.guard,mastery.resolver,mastery-index.resolver,mastery-tree-assets,portraits,portraits.server,public-site.guard}.ts, core/styles/deferred-styles.ts",
+        "apps/web/src/app/{app.routes,app.routes.server,app.config.server}.ts, features/masteries/{index,mastery}.page.ts, features/build/{build.page.*,skills/build-skills.*}, shared/svg/skill-tree/skill-tree.ts",
+        "scripts/{validate-content,check-mastery-catalog,check-assets,public-build-env,build-release}.mts; scripts/extract-mastery-trees.mts (lectura superficial de límites del parser)",
+        "specs/003-catalogo-arboles-maestria/tasks.md (T021, T035-T041 y aplazamientos de rondas 1 y 2)"
+      ],
+      "checks": [
+        "node scripts/spec-review.mjs prepare --feature specs/003-catalogo-arboles-maestria -> status ready, snapshot a5a33731e905d087031bbc09879b0098217feea4a44d8f2c04bd8dc961a80adf (coincide con el encargo), pendingTasks [], reasons []",
+        "node --import tsx --test scripts/seed-content.test.mts scripts/validate-content.test.mts scripts/check-mastery-catalog.test.mts scripts/build-e2e-drafts.test.mts apps/web/tools/emit-mastery-trees.test.mts apps/web/tools/emit-portraits.test.mts apps/web/src/app/core/content/masteries.server.test.mts apps/web/src/app/core/content/portraits.server.test.mts scripts/migrate-skill-node-ids.test.mts -> 70 tests, 70 pass, 0 fail",
+        "apps/api: npx vitest run src -> 20 archivos, 210 passed",
+        "packages/domain: npx vitest run -> 13 archivos, 281 passed + 2 expected fail",
+        "git status --short tras las comprobaciones -> árbol limpio (ningún archivo versionado modificado)"
+      ],
+      "limitations": [
+        "No se ejecutaron las pruebas de integración con PostgreSQL real (apps/api/test/*.int.spec.ts, Docker), pnpm db:seed/db:bootstrap en contenedor, pnpm verify, ng test, e2e ni check:performance: revisor de solo lectura en un árbol compartido con otros revisores. La conducta de T039 en contenedor y de T040 se evaluó leyendo código y pruebas; su ejecución real consta en tasks.md/quickstart.md, no la he repetido.",
+        "Snapshots drizzle (meta/*.json), fixtures de contenido y los extractores locales del juego (extract-mastery-trees, extract-textures) no se revisaron línea a línea; se priorizó el código que corre en verify, API y web.",
+        "Aplazamientos aprobados (A-01, A-03, C-003 de la ronda 1; A-01/B-008 y C-001/F-003 de la ronda 2) no se vuelven a registrar: no se detectó un defecto nuevo sobre ellos."
+      ],
+      "findings": [
+        {
+          "id": "C-001",
+          "severity": "LOW",
+          "path": "scripts/seed-content.mts",
+          "line": 172,
+          "evidence": "El lanzador solo reconoce los códigos invalid-content|role|already|not-empty|migration|credentials|database-failed|bootstrapped en la stderr del contenedor; runSeeder también emite 'seed failed: fixture-read' (seed.mts:192-206, que ahora incluye la colección mastery-trees de spec003), 'duplicate' (catálogo, seed.mts:156) y 'reference', que caen en 'seed failed: local-container'.",
+          "impact": "Un fallo de lectura de fixtures o un catálogo duplicado se presenta como un problema de Docker. Es justo el síntoma que ocultó F-001 de la ronda 2 (raíz de fixtures mal montada). No corrompe datos: falla cerrado con exit 1. La lista de códigos es anterior a spec003, pero spec003 añadió nuevas rutas que la usan.",
+          "recommendation": "Derivar la lista de códigos aceptados de los SeedError/BootstrapError reales (o añadir fixture-read, duplicate, reference y los demás) y fijarla con una prueba en scripts/seed-content.test.mts que alimente 'seed failed: fixture-read' por stderr y espere ese código.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado por decisión del principal (2026-11-15, opción A): solo afecta a la precisión del código de error que el lanzador local reenvía; el fallo del seed se sigue detectando (exit distinto de 0 y \"seed failed: local-container\"). Seguimiento registrado como T042 (lista de códigos derivada de SeedError/BootstrapError y regex con flag m, con prueba)."
+        }
+      ]
+    },
+    {
+      "specialty": "architecture",
+      "reviewer": "11111619-revisor-cierre-architecture-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "Huella completa de spec003 git diff d7eb827..e40120c (226 archivos) ubicada con --stat; delta de la ronda c030f73..e40120c (28 archivos, T039-T041) revisado línea a línea",
+        "apps/api/src/db/{seed,bootstrap}.mts y seed.spec.ts (seedContentRoot, SEED_CONTENT_ROOT, seedCompleteLine/bootstrapCompleteLine); apps/api/Dockerfile (WORKDIR /app, dist sin fixtures) para el montaje /content",
+        "scripts/seed-content{,.test}.mts (CONTENT_MOUNT, successPattern, contentContainerArguments, launchContentImport)",
+        "apps/api/test/skill-node-id.int.spec.ts (T040: COMMIT en ambos órdenes, trigger de catalog_skill_nodes fijado por pg_trigger) frente a apps/api/drizzle/0012_skill_node_id_unique_and_revalidation.sql",
+        "apps/web/src/app/{app.routes.ts,core/content/{masteries,masteries.server,mastery-tree-assets,mastery.resolver}.ts,features/**,shared/svg/skill-tree/skill-tree.ts} (A-02 r2: PublicMasteryTree en la web)",
+        "scripts/build-e2e-drafts{,.test}.mts (emit-static-assets lanzado como proceso hijo, no importado), package.json (format/test:scripts), apps/web/angular.json (lint de tools), tsconfig.e2e.json, .env.example",
+        "scripts/check-boundaries.mts (ZONES/ALLOWED_EDGES: scripts solo -> domain)",
+        "specs/003-catalogo-arboles-maestria/{plan,tasks,quickstart}.md (decisiones 5, 10 y 11; T039-T041; aplazamientos rondas 1 y 2), specs/002-spec-completion-reviews/{data-model.md,contracts/review-gate.md}, AGENTS.md, .specify/memory/constitution.md"
+      ],
+      "checks": [
+        "node scripts/spec-review.mjs prepare --feature specs/003-catalogo-arboles-maestria -> status ready, snapshot a5a33731e905d087031bbc09879b0098217feea4a44d8f2c04bd8dc961a80adf (coincide con el encargo), pendingTasks [], exit 0",
+        "npx tsx scripts/check-boundaries.mts -> check:boundaries OK (334 archivos revisados)",
+        "node --import tsx --test scripts/seed-content.test.mts scripts/build-e2e-drafts.test.mts -> tests 9, pass 9, fail 0",
+        "pnpm --filter @gd/api exec vitest run src/db/seed.spec.ts src/db/bootstrap.spec.ts -> 2 archivos, 26 tests passed",
+        "pnpm -s typecheck:e2e (tsc -p tsconfig.e2e.json, incluye apps/web/tools/**) -> exit 0",
+        "npx tsc -p apps/web/tsconfig.app.json --noEmit -> exit 0, sin errores (A-02 r2: la web compila tipada con PublicMasteryTree)",
+        "grep de imports de apps/api/src desde scripts/ -> solo check-boundaries.test.mts y check-scope.test.mts (fixtures en cadenas) y seed-content.test.mts:128-129 (import real en un proceso hijo)"
+      ],
+      "limitations": [
+        "No ejecuté pnpm verify completo, el build de Angular, build:release, e2e/axe, Lighthouse ni pruebas con PostgreSQL real o Docker (db:seed/db:bootstrap en contenedor, skill-node-id.int.spec.ts): el árbol se comparte con otros revisores. Para el comportamiento en contenedor y los triggers diferidos me apoyo en el código, el Dockerfile y la evidencia registrada en tasks.md (T039, T040) y quickstart.md.",
+        "Los fixtures JSON generados, los snapshots de Drizzle (meta/*.json), .xlf, CSS y el parser de los extractores solo los ubiqué; sin cambios en esta ronda.",
+        "Los aplazamientos con motivo de tasks.md (ronda 1: A-01, A-03, C-003; ronda 2: A-01/B-008, C-001/F-003) siguen igual en el código; no los vuelvo a registrar."
+      ],
+      "findings": [
+        {
+          "id": "A-01",
+          "severity": "LOW",
+          "path": "scripts/seed-content.test.mts",
+          "line": 128,
+          "evidence": "T039 deja un contrato entre dos zonas (el lanzador en scripts/ y el seeder en apps/api) con dos piezas: la línea de éxito (successPattern en scripts/seed-content.mts:23 frente a seedCompleteLine/bootstrapCompleteLine en apps/api/src/db/seed.mts:179 y bootstrap.mts:59) y el nombre de la variable SEED_CONTENT_ROOT (literal en scripts/seed-content.mts:69 y en apps/api/src/db/seed.mts:175). Para atar la primera, la prueba importa módulos internos de la API, './apps/api/src/db/seed.mts' y './apps/api/src/db/bootstrap.mts' (líneas 128-129), dentro de una cadena que se evalúa con `node -e` en un proceso hijo. check-boundaries.mts prohíbe la arista scripts->api (ALLOWED_EDGES.scripts = ['domain']) y es la única importación real de apps/api/src desde scripts/. Como va dentro de una cadena, check:boundaries no la ve (sigue en OK, 334 archivos). La segunda pieza no la ata ninguna prueba: seed-content.test.mts comprueba que los argumentos incluyan 'SEED_CONTENT_ROOT=/content', y seed.spec.ts usa su propio literal 'SEED_CONTENT_ROOT'.",
+          "impact": "La puerta de límites tiene ahora un hueco que no detecta, y sienta un precedente para sortearla en pruebas. Si alguien renombra la variable en apps/api y actualiza seed.spec.ts, todas las pruebas sin Docker siguen en verde. En el contenedor el seeder volvería en silencio a la ruta relativa al bundle (/fixtures/content, que no existe) y fallaría con fixture-read: el mismo tipo de regresión que F-001 en la ronda 2, que solo detecta una ejecución real con Docker.",
+          "recommendation": "Llevar el contrato de importación de contenido a packages/domain (o a un módulo compartido permitido para ambas zonas): el nombre de la variable, la ruta de montaje y los formateadores o patrones de la línea de éxito. Que seed.mts, bootstrap.mts y seed-content.mts lo importen de ahí y que la prueba compare contra ese módulo, sin importar apps/api desde scripts/. Otra opción, si se aplaza, es dejar la excepción registrada en check-boundaries o en tasks.md con su motivo.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado por decisión del principal (2026-11-15, opción A): refactor entre zonas sin defecto funcional; el contrato lanzador-seeder pasará a un módulo compartido permitido para scripts y apps/api, sin importar apps/api desde scripts. Seguimiento registrado como T043."
+        }
+      ]
+    },
+    {
+      "specialty": "security",
+      "reviewer": "11111619-revisor-cierre-security-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "git diff d7eb827..e40120c (HEAD e40120c, rama orq/11111619; snapshot spec-review a5a33731e905d087031bbc09879b0098217feea4a44d8f2c04bd8dc961a80adf), con foco en el delta de la ronda 3 c030f73..e40120c (28 archivos)",
+        "apps/api/src/db/seed.mts (seedContentRoot/SEED_CONTENT_ROOT, seedCompleteLine, guardas APP_ENV, Config zod, carga de secretos por archivo)",
+        "apps/api/src/db/bootstrap.mts (bootstrapCompleteLine, raíz de fixtures, exigencia de DB_PASSWORD_IMPORTER_FILE y rechazo de la variable en claro)",
+        "scripts/seed-content.mts (CONTENT_MOUNT, successPattern, argumentos de docker run: --read-only, --cap-drop ALL, no-new-privileges, montajes readonly, validación de red/BD/APP_ENV, salida de error por lista cerrada de códigos)",
+        "scripts/build-e2e-drafts.mts (runner inyectado, spawn sin shell, emit-static-assets sobre dist/e2e-drafts)",
+        "apps/api/test/skill-node-id.int.spec.ts y apps/api/src/db/seed.spec.ts, scripts/{seed-content,build-e2e-drafts}.test.mts (pruebas de T039/T040)",
+        "apps/web/src/app/** (cambio de tipos MasteryTree→PublicMasteryTree / CatalogSkillNode→PublicSkillNode en resolver, TransferState, catálogo y skill-tree), apps/web/angular.json, tsconfig.e2e.json, package.json (lint/format/test:scripts), .env.example (ASSET_SOURCE)",
+        ".github/workflows/ci.yml (ASSET_SOURCE, build de e2e-drafts sin subida de artefactos)",
+        "Huella completa ya revisada en la ronda 2 y sin cambios desde c030f73: migraciones 0009–0013, rutas y repositorio de maestrías, emisores de retratos/árboles, build-release/public-build-env/check-assets, extractores .arz/.arc/.tex, esquemas de dominio; re-comprobados por búsqueda de sumideros y pruebas",
+        "specs/003-catalogo-arboles-maestria/tasks.md (T035–T041 y aplazamientos A-01, A-03, C-003, A-01/B-008, C-001/F-003)"
+      ],
+      "checks": [
+        "node --import tsx --test scripts/seed-content.test.mts scripts/build-e2e-drafts.test.mts scripts/bootstrap-content.test.mts scripts/build-release.test.mts scripts/check-assets.test.mts scripts/check-secrets.test.mts scripts/secret-scan.test.mts apps/web/tools/emit-portraits.test.mts apps/web/src/app/core/content/masteries.server.test.mts apps/web/src/app/core/content/portraits.server.test.mts scripts/check-public-build.test.mts -> 110 tests, 110 pass, 0 fail",
+        "apps/api: pnpm exec vitest run src/db/seed.spec.ts src/db/bootstrap.spec.ts src/routes/masteries.spec.ts -> 3 files passed, 31 tests passed",
+        "pnpm run -s check:secrets -> exit 0, 'check:secrets OK (649 archivos rastreados revisados)'",
+        "pnpm run -s check:ci-secrets -> exit 0, 'check-ci-secrets OK (2 workflow(s) revisados)'",
+        "pnpm run -s check:scope -> exit 0, 'check:scope OK (246 archivos revisados)'",
+        "pnpm run -s assets:check -> exit 0, 'assets:check OK (6 entradas)'",
+        "pnpm run -s catalog:nodes -> exit 0, 'catalog:nodes OK'",
+        "grep de innerHTML|bypassSecurityTrust|eval(|new Function en apps/web/src y apps/web/tools (excluyendo pruebas) -> sin coincidencias",
+        "git diff --name-only d7eb827..e40120c filtrado por .arc/.arz/.dbr/.tex/.env/secret -> solo scripts/check-secrets{,.test}.mts y scripts/secret-scan.test.mts (código del escáner, sin activos del juego ni archivos de secretos)",
+        "grep de SEED_CONTENT_ROOT en el repo -> solo lo fija scripts/seed-content.mts (=/content) y lo leen seed.mts/bootstrap.mts; grep de upload-artifact/e2e-drafts en .github/workflows -> dist/e2e-drafts no se publica"
+      ],
+      "limitations": [
+        "No se ejecutó DAST (ZAP) ni escaneo dinámico del sitio o la API.",
+        "No se ejecutó auditoría de dependencias (pnpm audit) ni gitleaks; la revisión de secretos se limita a check:secrets, check:ci-secrets y lectura del diff.",
+        "Docker no estaba en marcha en esta sesión: no se reejecutaron las pruebas de integración con PostgreSQL real (skill-node-id.int.spec.ts de T040, mastery-*.int.spec.ts) ni pnpm db:seed/db:bootstrap en contenedor; se apoya en la lectura del código y en la evidencia registrada en tasks.md/quickstart.md (T039/T040), no verificada aquí.",
+        "No se ejecutó build nuevo (ng build, build:release own/game, build:e2e-drafts) para no interferir con revisores en paralelo.",
+        "No se reejecutó pnpm verify completo; el exit 0 citado en quickstart.md no se verificó en esta pasada.",
+        "No se ejecutaron los extractores contra una copia real del juego; su robustez ante entradas manipuladas se evaluó solo por lectura (ronda 2, sin cambios desde entonces).",
+        "La valoración de derechos (§VII) es técnica-documental; no es asesoramiento legal."
+      ],
+      "findings": []
+    },
+    {
+      "specialty": "best-practices",
+      "reviewer": "11111619-revisor-cierre-best-practices-r3 (claude-opus, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "git diff d7eb827..e40120c (huella completa de spec003; priorizado código ejecutable)",
+        "T039: apps/api/src/db/seed.mts, apps/api/src/db/bootstrap.mts, apps/api/src/db/seed.spec.ts, scripts/seed-content.mts, scripts/seed-content.test.mts",
+        "T040: apps/api/test/skill-node-id.int.spec.ts (revalidación diferida con COMMIT en ambos órdenes, trigger fijado por pg_trigger)",
+        "T041: package.json (format/format:check, test:scripts), tsconfig.e2e.json, apps/web/angular.json (lintFilePatterns), apps/web/eslint.config.js, scripts/build-e2e-drafts.mts y su prueba, apps/web/src/app/core/content/masteries.ts y tipos PublicMasteryTree, .env.example, README.md/README.es.md, CONTRIBUTING.md/CONTRIBUTING.es.md, specs/002-spec-completion-reviews/contracts/review-gate.md",
+        "Puertas: scripts/verify-local.mjs (VERIFY_STEPS), .github/workflows/ci.yml",
+        "SDD y trazabilidad: specs/003-catalogo-arboles-maestria/tasks.md (T021, T035-T041 y aplazamientos), quickstart.md (verify final en bab5e34), plan.md",
+        "i18n EN/ES: paridad de catálogos (check:locale-parity) y de CONTRIBUTING/README EN/ES",
+        "Seguimiento de los hallazgos B-001..B-008 de la ronda 2 de best-practices"
+      ],
+      "checks": [
+        "node scripts/spec-review.mjs prepare --feature specs/003-catalogo-arboles-maestria -> status ready, snapshot a5a33731e905d087031bbc09879b0098217feea4a44d8f2c04bd8dc961a80adf (coincide con el encargo), pendingTasks [], excludedTasks []",
+        "node --import tsx --test scripts/seed-content.test.mts scripts/build-e2e-drafts.test.mts scripts/spec-review.test.mjs -> 31 tests, 31 pass, 0 fail",
+        "apps/api: pnpm exec vitest run src/db/seed.spec.ts src/db/bootstrap.spec.ts -> 2 archivos, 26 tests passed",
+        "pnpm typecheck:e2e -> exit 0",
+        "pnpm format:check -> exit 0",
+        "pnpm lint:md -> 86 archivos, 0 issues",
+        "pnpm check:locale-parity -> OK, 324 unidades en paridad, 0 fallos",
+        "apps/web: pnpm exec eslint tools/emit-portraits.mts -> exit 0 sin salida (la config cubre **/*.{ts,mts})",
+        "grep de typecheck:e2e en scripts/verify-local.mjs y .github/workflows/*.yml -> sin coincidencias"
+      ],
+      "limitations": [
+        "No ejecuté pnpm verify completo, build, e2e, Lighthouse ni las pruebas de integración con PostgreSQL/Docker (skill-node-id.int.spec.ts, db:seed/db:bootstrap en contenedor): árbol compartido con otros revisores. Para ellas me apoyo en la lectura del código y en la evidencia registrada en tasks.md (T039/T040) y quickstart.md (verify exit 0 en bab5e34; e40120c solo cambia tasks.md).",
+        "Los snapshots JSON de Drizzle (meta/00xx_snapshot.json) y los fixtures de mastery-trees se revisaron por muestreo, no línea a línea.",
+        "Los aplazamientos aprobados (A-01, A-03, C-003 de la ronda 1; A-01/B-008 y C-001/F-003 de la ronda 2) no se vuelven a registrar: no encontré cambios que alteren su motivo."
+      ],
+      "findings": [
+        {
+          "id": "B-001",
+          "severity": "LOW",
+          "path": "package.json",
+          "line": 51,
+          "evidence": "T041 da por corregido B-004 de la ronda 2 incluyendo apps/web/tools/**/*.mts en tsconfig.e2e.json, pero el único script que lo comprueba es typecheck:e2e (package.json:51), que no figura en VERIFY_STEPS (scripts/verify-local.mjs:23-55) ni en .github/workflows/ci.yml. apps/web/tsconfig.app.json solo incluye src/**/*.ts. Formato y lint sí quedan cubiertos (format:check y lintFilePatterns tools/**/*.mts, que se ejecutan en verify).",
+          "impact": "Un error de tipos en apps/web/tools (emit-static-assets, emit-portraits, emit-mastery-trees, emit-deferred-styles, en la ruta de build y release) no lo detecta ninguna puerta: tsx los ejecuta sin comprobar tipos. La corrección de B-004 queda a medias en la parte de typecheck, aunque la evidencia de T041 la presenta como completa.",
+          "recommendation": "Añadir 'pnpm typecheck:e2e' a VERIFY_STEPS (y al job de CI, junto a los demás typecheck) con su prueba en verify-local.test.mjs y la línea correspondiente en CONTRIBUTING EN/ES; o, si no se quiere ampliar la puerta, anotar en tasks.md que el typecheck de apps/web/tools es solo manual.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado por decisión del principal (2026-11-15, opción A): ampliar la puerta de verify/CI con typecheck:e2e es un cambio de alcance de la puerta; typecheck:e2e se ejecutó en verde en esta ronda (tsc web y e2e exit 0, revisión de arquitectura). Seguimiento registrado como T042."
+        }
+      ]
+    }
+  ]
+}

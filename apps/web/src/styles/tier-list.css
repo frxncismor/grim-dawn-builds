@@ -1,0 +1,148 @@
+/*
+ * spec004 T052: styles of the `/tier-list` page, global (not component CSS) so they do not ship inside
+ * the initial JS of that route (same reason as `build-card.css`). Every rule is scoped to the page tag.
+ */
+
+gd-tier-list-page {
+  display: block;
+  padding-block: var(--space-6) var(--space-8);
+}
+
+gd-tier-list-page .catalog-intro {
+  margin-block: 0 var(--space-6);
+  padding: var(--space-5);
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel);
+}
+
+gd-tier-list-page .catalog-intro h1 {
+  font-size: var(--text-heading);
+}
+
+gd-tier-list-page .filter-panel {
+  margin-block: var(--space-6);
+  border: var(--frame-border);
+  background: var(--color-panel);
+  box-shadow: var(--frame-bevel);
+}
+
+gd-tier-list-page summary {
+  cursor: pointer;
+  padding-block: var(--space-3);
+  min-block-size: var(--space-7);
+  font-weight: var(--weight-emphasis);
+}
+
+gd-tier-list-page .filter-panel > summary {
+  padding-inline: var(--space-4);
+  color: var(--color-storm);
+  background: var(--surface-sheen), var(--color-panel-2);
+}
+
+gd-tier-list-page summary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+gd-tier-list-page .filter-help {
+  margin-block: var(--space-3) var(--space-5);
+  padding-inline: var(--space-4);
+}
+
+gd-tier-list-page .filter-panel > summary[data-count]::after {
+  content: ' (' attr(data-count) ')';
+  font-family: var(--font-mono);
+}
+
+/*
+ * spec005 T026 (F-07), T037 (B-01): the panel is folded by default so the counter and the first card
+ * stay near the top on a phone. From 48.0625rem up, where the browser can force the folded content
+ * visible (`::details-content`), it is shown by CSS alone and the `<summary>` (which would be announced
+ * "collapsed" and do nothing) leaves the tab order and the accessibility tree (`display: none`); the
+ * plain `.filter-title` heading takes its place with the same look. Without that support nothing
+ * changes: the summary stays a working control.
+ */
+gd-tier-list-page .filter-title {
+  display: none;
+}
+
+@media (min-width: 48.0625rem) {
+  @supports selector(::details-content) {
+    gd-tier-list-page .filter-panel::details-content {
+      content-visibility: visible;
+      display: block;
+    }
+
+    gd-tier-list-page .filter-panel > summary {
+      display: none;
+    }
+
+    gd-tier-list-page .filter-panel > .filter-title {
+      display: block;
+      margin: 0;
+      /* A `<p>` inherits the reading measure from base.css; the strip spans the whole panel (B-06). */
+      max-inline-size: none;
+      padding: var(--space-3) var(--space-4);
+      min-block-size: var(--space-7);
+      font-weight: var(--weight-emphasis);
+      color: var(--color-storm);
+      background: var(--surface-sheen), var(--color-panel-2);
+    }
+
+    gd-tier-list-page .filter-panel > .filter-title[data-count]::after {
+      content: ' (' attr(data-count) ')';
+      font-family: var(--font-mono);
+    }
+  }
+}
+
+gd-tier-list-page .result-count {
+  margin-block: var(--space-5) var(--space-4);
+  max-inline-size: none;
+  padding-block-end: var(--space-2);
+  border-block-end: var(--frame-border);
+  color: var(--color-storm);
+  font-family: var(--font-mono);
+}
+
+gd-tier-list-page gd-tier-row {
+  margin-block-end: var(--space-6);
+}
+
+gd-tier-list-page .unguided {
+  margin-block: var(--space-6);
+  border: var(--frame-border);
+  background: var(--color-panel);
+}
+
+gd-tier-list-page .unguided > summary {
+  padding-inline: var(--space-4);
+  color: var(--color-ash);
+  background: var(--surface-sheen), var(--color-panel-2);
+}
+
+gd-tier-list-page .unguided .catalog-grid {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+@media (min-width: 48rem) {
+  gd-tier-list-page .unguided .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 80rem) {
+  gd-tier-list-page .unguided .catalog-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+gd-tier-list-page .credit {
+  max-width: var(--reading-measure);
+  margin: var(--space-6, 1.5rem) 0 0;
+  color: var(--color-ash);
+  font-size: var(--text-base);
+}

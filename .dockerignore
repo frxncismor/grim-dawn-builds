@@ -19,7 +19,7 @@
 **/coverage
 
 # Editorial fixtures are not runtime inputs of the API.
-content
+fixtures/content
 
 # Logs and editor/OS noise.
 **/*.log

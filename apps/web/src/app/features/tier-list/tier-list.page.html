@@ -1,15 +1,23 @@
 <header class="catalog-intro">
-  <h1 [attr.lang]="catalog.contentLocale !== catalog.locale ? catalog.contentLocale : null">
-    {{ catalog.title }}
-  </h1>
+  <h1>{{ title }}</h1>
   <p i18n="@@catalog.intro">
     All combinations, with their status in view. A slot without a guide is a placeholder: it is not
     a recommendation or a power ranking.
   </p>
   <p><span i18n="@@catalog.version">Game version:</span> {{ catalog.gameVersion }}</p>
 </header>
-<details class="filter-panel" open>
-  <summary i18n="@@catalog.filterHeading">Filter catalog</summary>
+<details class="filter-panel">
+  <summary i18n="@@catalog.filterHeading" [attr.data-count]="activeFilters() || null">
+    Filter catalog
+  </summary>
+  <!-- From 48.0625rem the panel is always shown: this heading replaces the inert summary (B-01). -->
+  <p
+    class="filter-title"
+    i18n="@@catalog.filterHeading"
+    [attr.data-count]="activeFilters() || null"
+  >
+    Filter catalog
+  </p>
   <gd-filter-bar [value]="filter()" [groups]="groups" (valueChange)="updateFilter($event)" />
   <p class="filter-help" i18n="@@catalog.filterHelp">
     Filter groups are combined. Within each group, one match is enough. Entries without damage or
@@ -28,17 +36,31 @@
 @for (row of rows(); track row.tier) {
   <gd-tier-row [label]="row.label">
     @for (card of row.cards; track card.id) {
-      <gd-tier-card
-        [entry]="card.entry"
-        [combinationName]="card.combinationName"
-        [guide]="card.guide"
-        [source]="card.source"
-        [gameVersion]="card.gameVersion"
-      />
+      <gd-build-card [data]="card.data" />
     }
   </gd-tier-row>
-} @empty {
+}
+@if (unguided().length) {
+  <details class="unguided">
+    <summary>
+      <span i18n="@@catalog.unguidedSummary">Combinations still without a guide</span>
+      ({{ unguided().length }})
+    </summary>
+    <div class="catalog-grid">
+      @for (card of unguided(); track card.id) {
+        <gd-build-card [data]="card.data" />
+      }
+    </div>
+  </details>
+}
+@if (!rows().length && !unguided().length) {
   <gd-empty-state (filtersReset)="clear()" />
+}
+@if (showsGameArt) {
+  <p class="credit" data-credit i18n="@@masteryIndex.credit">
+    Mastery buttons from Grim Dawn, © Crate Entertainment. This project is not affiliated with or
+    endorsed by Crate Entertainment.
+  </p>
 }
 <p i18n="@@catalog.noScript">
   The full catalog can be read without JavaScript. Filters require JavaScript.

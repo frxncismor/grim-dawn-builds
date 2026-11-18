@@ -2,7 +2,7 @@
 
 **English** · [Español](CONTRIBUTING.es.md)
 
-This guide describes how to propose changes to Grim Dawn Builds: branches, local
+This guide describes how to propose changes to Grim Builds: branches, local
 environment, verification commands, content rules and a checklist for pull
 requests. It applies to people and to implementation agents.
 
@@ -190,29 +190,34 @@ section only adds what changes on a different machine.
 ## Verification commands
 
 `pnpm verify` runs the local checks in this order and stops at the first one that
-fails: `check:scope`, `check:boundaries`, `check:secrets`, typecheck, lint and
-tests of the `@gd/domain` package, `lint`, `lint:md`, `format:check`, `test`,
-`test:scripts`, `assets:check` and `build`.
+fails (the list is `VERIFY_STEPS` in `scripts/verify-local.mjs`): `check:scope`,
+`check:boundaries`, `check:secrets`, `check:ci-secrets`, build, typecheck, lint and
+tests of the `@gd/domain` package, typecheck, lint and tests of `@gd/api`,
+`test:rotation`, `lint`, `typecheck:e2e`, `lint:md`, `format:check`, `test`, `test:scripts`,
+`content:validate`, `catalog:check`, `catalog:nodes`, `check:locale-parity`,
+`assets:check`, `check:contrast`, `build`, `check:public-build` and
+`check:performance` (last, on the artifact of `build`).
 
-| Command                                    | What it checks                                                                                          |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `pnpm verify`                              | All the local checks above. Run it before opening a PR.                                                 |
-| `pnpm test`                                | Unit tests of the web (Angular).                                                                        |
-| `pnpm test:scripts`                        | Tests of the verification scripts.                                                                      |
-| `pnpm --filter @gd/domain test`            | Tests of the `packages/domain` domain package.                                                          |
-| `pnpm --filter @gd/domain typecheck`       | Types of the domain package.                                                                            |
-| `pnpm --filter @gd/domain lint`            | Lint of the domain package.                                                                             |
-| `pnpm lint`                                | ESLint of the web application.                                                                          |
-| `pnpm lint:md`                             | markdownlint over all tracked Markdown. Check only.                                                     |
-| `pnpm lint:md:fix`                         | Applies markdownlint's safe automatic fixes. Review `git diff` afterwards and run `pnpm lint:md` again. |
-| `pnpm format:check`                        | Prettier over the files included in the script.                                                         |
-| `pnpm format`                              | Prettier with writes. Review the diff before committing.                                                |
-| `pnpm content:validate -- --dir <carpeta>` | Validates a set of content with the domain schema.                                                      |
-| `pnpm assets:check`                        | Validates the official assets manifest.                                                                 |
-| `pnpm check:scope`                         | Scope prohibitions (e.g. Redis, queues, external auth, storage).                                        |
-| `pnpm check:boundaries`                    | Boundaries between web, API and domain.                                                                 |
-| `pnpm check:secrets`                       | Secrets and credential patterns in files tracked by git.                                                |
-| `pnpm build`                               | Build of the web.                                                                                       |
+| Command                                    | What it checks                                                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `pnpm verify`                              | All the local checks above. Run it before opening a PR.                                                            |
+| `pnpm test`                                | Unit tests of the web (Angular).                                                                                   |
+| `pnpm test:scripts`                        | Tests of the verification scripts. They import the built `@gd/domain`: run `pnpm --filter @gd/domain build` first. |
+| `pnpm --filter @gd/domain test`            | Tests of the `packages/domain` domain package.                                                                     |
+| `pnpm --filter @gd/domain typecheck`       | Types of the domain package.                                                                                       |
+| `pnpm --filter @gd/domain lint`            | Lint of the domain package.                                                                                        |
+| `pnpm lint`                                | ESLint of the web application.                                                                                     |
+| `pnpm typecheck:e2e`                       | Types of the e2e sources (`tsconfig.e2e.json`). Part of `verify` and of the PR CI.                                 |
+| `pnpm lint:md`                             | markdownlint over all tracked Markdown. Check only.                                                                |
+| `pnpm lint:md:fix`                         | Applies markdownlint's safe automatic fixes. Review `git diff` afterwards and run `pnpm lint:md` again.            |
+| `pnpm format:check`                        | Prettier over the files included in the script.                                                                    |
+| `pnpm format`                              | Prettier with writes. Review the diff before committing.                                                           |
+| `pnpm content:validate -- --dir <carpeta>` | Validates a set of content with the domain schema.                                                                 |
+| `pnpm assets:check`                        | Validates the official assets manifest.                                                                            |
+| `pnpm check:scope`                         | Scope prohibitions (e.g. Redis, queues, external auth, storage).                                                   |
+| `pnpm check:boundaries`                    | Boundaries between web, API and domain.                                                                            |
+| `pnpm check:secrets`                       | Secrets and credential patterns in files tracked by git.                                                           |
+| `pnpm build`                               | Build of the web.                                                                                                  |
 
 During development, run the narrowest command that covers your change (for
 example, `pnpm test` or `pnpm lint:md`) and leave `pnpm verify` for before the
@@ -220,10 +225,52 @@ pull request.
 
 The pull request CI runs the same checks, except `pnpm verify` itself. It also
 runs `pnpm content:validate -- --dir scripts/fixtures/content-valid`, which
-validates only the fixture, because `content/builds` does not have content yet
+validates only the fixture, because `fixtures/content/builds` does not have content yet
 (T-014). CI runs `lint:md` only in check mode; it never applies `--fix`.
 
 Gate matrix and language policy: see [docs/quality-gates.md](docs/quality-gates.md).
+
+## Visual regression references
+
+The `visual-regression` job of the PR CI compares 30 full-page screenshots (5 routes × 375/768/1280 ×
+EN/ES) with the references in `e2e/visual-baselines/`, named `<route>-<language>-<width>.png`. The job
+builds its own `ASSET_SOURCE=own` artifact, so no game image takes part. When it fails it uploads the
+expected, actual and diff images as the `visual-regression-report` artifact.
+
+The references are generated **only on Linux**, never with a native Windows or macOS browser. There are
+two equivalent ways, both on Ubuntu 24.04 with the Playwright version of `package.json` (`1.65.0`):
+
+### A. Manual GitHub workflow
+
+1. Push the branch with the intended visual change.
+2. In GitHub, open Actions, pick `Visual baselines (Linux)`, choose the branch and run it
+   (`workflow_dispatch`). It builds the `own` artifact and runs `pnpm e2e:visual:update`.
+3. Download the `visual-baselines` artifact of that run and replace the PNG files in
+   `e2e/visual-baselines/` with its contents.
+4. Review the PNG differences in the pull request and commit them. The workflow never pushes.
+
+### B. Local Docker (same image family, same Node as the CI)
+
+Use the official image `mcr.microsoft.com/playwright:v1.65.0-noble` (keep the tag equal to the
+`@playwright/test` version). The script installs Node 22.23.5 and pnpm inside the container, copies the
+repository without `node_modules`, `dist`, `.angular`, `.git`, `test-results`, `playwright-report`, `.env`, `.env.*` (except the
+versioned `.env.example`) and `infra/docker/secrets/`, and builds with `ASSET_SOURCE=own`, so neither local
+secrets nor results of earlier runs enter the container. The Node download is checked against a pinned
+SHA-256 and the script aborts on a mismatch. The Playwright image is identified by tag, not by digest. From
+the repository root:
+
+```sh
+mkdir -p test-results/visual-out
+docker run --rm --ipc=host   -v "$PWD:/src:ro" -v "$PWD/test-results/visual-out:/out"   -v "$PWD/scripts/visual-baselines-docker.sh:/run.sh:ro"   mcr.microsoft.com/playwright:v1.65.0-noble sh /run.sh update
+cp test-results/visual-out/*.png e2e/visual-baselines/
+```
+
+Check them the same way with `sh /run.sh check` (no `/out` mount needed). On Windows use Git Bash with
+`MSYS_NO_PATHCONV=1`. `test-results/` is ignored by git.
+
+`pnpm e2e:visual` needs a built `dist/` (`pnpm build`). Run it on the host only to see the comparison work:
+a reference generated on another platform fails, and `pnpm e2e:visual:update` on a host browser must not be
+used to commit references.
 
 ## PostgreSQL logs in Docker
 
@@ -290,7 +337,7 @@ docker compose -f infra/docker/compose.yaml up -d --no-deps db
 Principle XII of the constitution and plan §13.
 
 - **Never** commit secrets: not in code, Dockerfiles, image `ARG`/`ENV`,
-  `package.json` scripts, `content/` fixtures, `.env.example`, frontend builds,
+  `package.json` scripts, `fixtures/content/` fixtures, `.env.example`, frontend builds,
   logs or CI artifacts.
 - Local `.env` files (except `.env.example`) and `secrets/` folders are ignored
   by git. Do not force them with `git add -f`.
@@ -333,13 +380,13 @@ FR-31 of the specification.
   metadata is possible.
 - The project is not affiliated with Crate Entertainment or GrimTools. Keep the
   non-affiliation notice.
-- The files in `content/` are development fixtures and import material, not a
+- The files in `fixtures/content/` are development fixtures and import material, not a
   production source (principle VI).
 
 ## Official Grim Dawn assets
 
 - Icons, textures and official art are only included if the assets manifest
-  (`content/assets/manifest.json`) records their exact origin, owner, license or
+  (`fixtures/content/assets/manifest.json`) records their exact origin, owner, license or
   permission and proof, with `approved` status.
 - As long as that entry does not exist, own or generic art is used: the fallback
   SVG glyphs.

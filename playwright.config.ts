@@ -52,6 +52,20 @@ const webServers = [
   },
 ];
 
+/** T-167: vista previa sintética de la fachada de video, servida bajo la misma CSP. */
+const VIDEO_PREVIEW_PORT = Number(process.env['E2E_VIDEO_PREVIEW_PORT'] ?? 4323);
+const VIDEO_PREVIEW_ROOT = process.env['E2E_VIDEO_PREVIEW_ARTIFACT_DIR']
+  ? resolve(process.env['E2E_VIDEO_PREVIEW_ARTIFACT_DIR'])
+  : join(process.cwd(), 'dist', 'video-facade-preview', 'browser');
+if (existsSync(join(VIDEO_PREVIEW_ROOT, 'index.html'))) {
+  webServers.push({
+    command: `node --import tsx "${SERVER_SCRIPT}" "${VIDEO_PREVIEW_ROOT}" ${VIDEO_PREVIEW_PORT}`,
+    url: `http://127.0.0.1:${VIDEO_PREVIEW_PORT}/`,
+    reuseExistingServer: false,
+    timeout: 20000,
+  });
+}
+
 if (DRAFTS_AVAILABLE) {
   webServers.push({
     command: `node --import tsx "${SERVER_SCRIPT}" "${DRAFTS_ARTIFACT_ROOT}" ${DRAFTS_PORT}`,
@@ -65,7 +79,15 @@ export default defineConfig({
   testDir: './e2e',
   // Solo estas specs: `playwright.svg.config.ts` conserva su propio runner y
   // `svg-responsive.spec.ts` pertenece a otro artefacto.
-  testMatch: ['a11y.spec.ts', 'journeys.spec.ts'],
+  testMatch: [
+    'a11y.spec.ts',
+    'journeys.spec.ts',
+    'skill-tooltip.spec.ts',
+    'skill-icons.spec.ts',
+    'skill-tree-fit.spec.ts',
+    'masteries-fit.spec.ts',
+    'skill-tree-list.spec.ts',
+  ],
   workers: 1,
   fullyParallel: false,
   retries: 0,

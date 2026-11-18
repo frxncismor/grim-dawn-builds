@@ -12,6 +12,8 @@ on:
 
 jobs:
   claude-review:
+    # T-176: los PRs de forks no reciben secretos; solo se revisan los PRs del propio repositorio.
+    if: github.event.pull_request.head.repo.full_name == github.repository
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||

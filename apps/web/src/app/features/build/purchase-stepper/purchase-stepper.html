@@ -84,6 +84,16 @@
         }
       </ol>
 
+      <p
+        class="visually-hidden"
+        data-step-announcement
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {{ announcement() }}
+      </p>
+
       <div class="progress-controls" aria-labelledby="progress-controls-title">
         <h3 id="progress-controls-title" i18n="@@purchaseStepper.progressTitle">
           Progress checklist

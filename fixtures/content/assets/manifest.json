@@ -1,0 +1,3064 @@
+{
+  "assets": [
+    {
+      "slug": "mastery-arcanist",
+      "status": "approved",
+      "file_path": "public/assets/portraits/arcanist.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-arcanista.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class05trainingbuttonup.tex",
+        "sha256": "f0f85f505d5ccca667309270a30d7831d805aac8b31cd6d11c5e37c40b71e6f5",
+        "width": 197,
+        "height": 41
+      }
+    },
+    {
+      "slug": "mastery-demolition",
+      "status": "approved",
+      "file_path": "public/assets/portraits/demolition.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-demoledor.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class02trainingbuttonup.tex",
+        "sha256": "f2e05f48678f13ccea213a861990661aec2133f81bd88fcb3983c28daf9b4055",
+        "width": 197,
+        "height": 41
+      }
+    },
+    {
+      "slug": "mastery-nightblade",
+      "status": "approved",
+      "file_path": "public/assets/portraits/nightblade.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-filo-nocturno.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class04trainingbuttonup.tex",
+        "sha256": "5e6f7cbb1239db4d48c9b1c13e92227293ae1ec9ad4341a1f1fb1fc99abbeacd",
+        "width": 197,
+        "height": 41
+      }
+    },
+    {
+      "slug": "mastery-occult",
+      "status": "approved",
+      "file_path": "public/assets/portraits/occult.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-ocultista.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class03trainingbuttonup.tex",
+        "sha256": "9471de7a62a348ca254e5312da1d8f159cc6fc5b35cda3c7f1c417ae9eb1f85f",
+        "width": 197,
+        "height": 41
+      }
+    },
+    {
+      "slug": "mastery-shaman",
+      "status": "approved",
+      "file_path": "public/assets/portraits/shaman.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-chaman.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class06trainingbuttonup.tex",
+        "sha256": "a6c79f4dd9ec0052c60a7162a0d015edb8fd985414d4518614ea0b12ba1fbefc",
+        "width": 197,
+        "height": 41
+      }
+    },
+    {
+      "slug": "mastery-soldier",
+      "status": "approved",
+      "file_path": "public/assets/portraits/soldier.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/003-catalogo-arboles-maestria/research.md#t029",
+      "recorded_on": "2026-11-13",
+      "fallback_svg": "src/assets/icons/mastery-soldado.svg",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/skillallocation/skills_class01trainingbuttonup.tex",
+        "sha256": "a815846d753d2a37240f75ef749d26886f80ee9a3ed162f3f60af19fd2494e01",
+        "width": 197,
+        "height": 41
+      }
+    },
+    {
+      "slug": "ic-007017f1e483b771",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-007017f1e483b771.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_weaponpool2up.tex",
+        "sha256": "ed6bfa0a89a3c62fa1e5f351fceb14cfc8575e3629e2b7b868dd482241f5c458",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-00cee7c991c4a30b",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-00cee7c991c4a30b.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_counterstrike1up.tex",
+        "sha256": "f3d4cf71b7cd07d953d3fc8efcb6cb1b83b7d621ff219494445fb4b5064f745c",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-0121505ebd13bd6a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-0121505ebd13bd6a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_passive03up.tex",
+        "sha256": "6d8f7ee7d568f3f24bf2d622ac76af0293185be8fc7cd0e4735cabff91443414",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-03a3ce1bd21c1176",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-03a3ce1bd21c1176.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_flaremine1_up.tex",
+        "sha256": "f1e421ace905062af90ab88f23a11536ec746469fe6000d3b5846556a1c32b24",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-068a4e16255aa707",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-068a4e16255aa707.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_grenado2_up.tex",
+        "sha256": "a997fd0b24240dddd2906d3362cfa38d0a54c486b93cfc5f817d45764f656e47",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-08b336088d9f9f6e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-08b336088d9f9f6e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_devouringswarm1up.tex",
+        "sha256": "c1ce881c3b2eb5a1cb0508bd72fe9cb85886ff4c6ce2c21ec5cd96bd62077837",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-08f7abeea2ee16c3",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-08f7abeea2ee16c3.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_veilofshadows2up.tex",
+        "sha256": "759ac604b43663400385953f9aed14825eee91d2d10f2dc78fde758dcb12f9d8",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-094d7c9ee6ace22f",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-094d7c9ee6ace22f.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_evileye4up.tex",
+        "sha256": "8bcd27e1d797b828d663d84ff09481677e6854ba2b38eb84ffcad613af3758ff",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-09ce81c3517444b5",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-09ce81c3517444b5.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_possession1up.tex",
+        "sha256": "c2ccb426554be19a26559b2d92313b93b135990aef98b931375744e3aa7e8f48",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-0b3794da9322031a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-0b3794da9322031a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_elementalinfusion3up.tex",
+        "sha256": "4ff35d319a4f9c3cb01097cbc57dc924f52aca59fca65387af5b7f95c2fc860f",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-0d1fcca44e47d307",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-0d1fcca44e47d307.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_phantomblades2up.tex",
+        "sha256": "77a17ca579f21343bde05d4d89b057c6df3f715ba1bdea1e0893306aa68afbd6",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-10d84f635dc4f7fa",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-10d84f635dc4f7fa.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_arcaneshield1up.tex",
+        "sha256": "b280f6b899e0eaa60235db61be3679ced62eb69390913d3967545d3ed1e44ddc",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-11324a7a62272ccd",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-11324a7a62272ccd.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_arcanetempest2up.tex",
+        "sha256": "52a853e3e633d2d8ac4629ca91135203b4b5fa8d83fc85d4745eb05caf1e04d8",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-1975898a739a2e76",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-1975898a739a2e76.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_shieldhammer1up.tex",
+        "sha256": "7c16ceb7987b88cb7a469820b8c5ab0190b80f95d24c05cdc861afb6d99c156b",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-199bb8a9da8bab47",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-199bb8a9da8bab47.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_thornedhorrorsummon3up.tex",
+        "sha256": "fc01514eedada4efca1fbcd5b16fe9a31d5a43f6add80639e6723c4c55e2a841",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-19d48d78fb4bbb0a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-19d48d78fb4bbb0a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_doombolt1up.tex",
+        "sha256": "3634c96a4bfda3ac575a7928478d85fda8bbc0cd4800d8e719482011c5e1f503",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-1d6f9e45eb698a12",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-1d6f9e45eb698a12.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_bloodofdreeg1up.tex",
+        "sha256": "304445ccc7567b4ea486f392b6ac14e21358306728247af7d828e742c3ce811a",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-1e40516210d0a947",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-1e40516210d0a947.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_cadence3_up.tex",
+        "sha256": "627cd2a81aef43f5157eb33378b01e4393d422fa36deb2963697cfbd3a0c69ef",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-1f81e87747e45bd3",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-1f81e87747e45bd3.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_dualblades6up.tex",
+        "sha256": "8357d213f5da04ec3e508f8fde0fac6c35e10263f219c5731317027dcb4b4799",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-209d9c986ecfe5d8",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-209d9c986ecfe5d8.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_flametouched1_up.tex",
+        "sha256": "3e0982480b066148ad2396d3d7301866104b81573e83d9f9d8203bd78dbe9c14",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-21fa7409afd3e55c",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-21fa7409afd3e55c.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_skyshard2up.tex",
+        "sha256": "07b3ae488d947ab6807799656f4ca7541af0bae490f6925b93574dbbcc57ac05",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-2426857687d69b8f",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-2426857687d69b8f.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_militaryconditioning1_up.tex",
+        "sha256": "39fb53cbdb5978060e845c7be2e3f2c017086ea601832664d9e6ff74800e70dd",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-26da9893ce90b957",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-26da9893ce90b957.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_battlefury_up.tex",
+        "sha256": "17b5bb1576ad7ff39cb113902e36d0588e1f83b77759d47acb5afe18db5be403",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-273857fc3c60859e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-273857fc3c60859e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_graspingvines1up.tex",
+        "sha256": "eb97daba2376ba70382953ee6040e9dee06f8ce82c5c7c4202a6c9dc2489251d",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-28a282d629b1d76e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-28a282d629b1d76e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_mortartrap3_up.tex",
+        "sha256": "d4b0be4228f5c2b049145de213e63edca09c84afd6e11c08aed4e7af184d350d",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-2a5b43104b65de32",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-2a5b43104b65de32.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_flametouched2_up.tex",
+        "sha256": "d3ffc4ca2494b6c53756ca5d0108b568ec8d01299b9d155385826f570954316f",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-2e44bb057553fabf",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-2e44bb057553fabf.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_savagery1up.tex",
+        "sha256": "df6f5bafee2315e542238a0c0414c4c7a07819d26ac6fc6d5ab80576a5ab2dfb",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-31990d0005b65129",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-31990d0005b65129.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_aetherray1up.tex",
+        "sha256": "60d266daa78ee5ca8743a4618e949d714d9f242ef63ace055e5745bed8e3b7af",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-3444a94ecbfc13ff",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-3444a94ecbfc13ff.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_passive2up.tex",
+        "sha256": "1ca1ad41b81ba781cd4fffb422fcf834f187da57aa2f98829903a9cca031c570",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-37ef608f438c6e46",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-37ef608f438c6e46.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_wildstrike2up.tex",
+        "sha256": "373d833f2323c2611029d553b841bccec4fc5316de857c255646ebd3b184b98b",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-3876214553b9624c",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-3876214553b9624c.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_molotov2_up.tex",
+        "sha256": "79ff6561e26c0d02ec014814fd78e9c7aa56156ee2f2b88dc9345c8c6194d902",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-39440b645363e53f",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-39440b645363e53f.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_totem2up.tex",
+        "sha256": "8095752c46e483ecfa3a0c313c30a647a5d361b06d4e3ed633c5c3a9c3e053c4",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-397bedfb753482a6",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-397bedfb753482a6.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_flashbang2_up.tex",
+        "sha256": "05708bb060bf0c7f723753ca964ffd7c4c947ef315988bca4f2c603e44477fdb",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-3bfff140b367cc8e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-3bfff140b367cc8e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_graspingvines2up.tex",
+        "sha256": "70805c63c4e4418292b24bd1c31b29da5c82462ca673bd713b0749443eadf8a5",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-3cd26d82ecf5796e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-3cd26d82ecf5796e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_aetherray2up.tex",
+        "sha256": "c48a291a4562f40c1d4e120711a5d65eb5a959f827c3f2638fa4f5ce69d7608e",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-3f81e10cc5a8a0aa",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-3f81e10cc5a8a0aa.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_evileye3up.tex",
+        "sha256": "90f661f683812d66a864ea7483cad39ad3ba3671d679c5fafe50db531f76c0d5",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-41e9aefa297dcbfe",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-41e9aefa297dcbfe.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_chillingsurge_up.tex",
+        "sha256": "d16401d1e1891e1e3d22d69de015ff8960ba41f9ddb95b381e79b5734ca27e0d",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-4295f1aea200a17b",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-4295f1aea200a17b.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_chillingsurge2up.tex",
+        "sha256": "3a40b75df41ee44789937e8b52cd154ba536791292123a15171f26f7a646ab19",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-4419105056f104a2",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-4419105056f104a2.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_pyrotechnics1_up.tex",
+        "sha256": "7ebe38d45ec016f3459a1fc9e68be284deb7f16a9f12f6fa3a728d582abd0262",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-462b10a1aa09b67e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-462b10a1aa09b67e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_lethalgambit1up.tex",
+        "sha256": "b516dd86fd7121a984636809910f7b0744da339b1abf57c7dd136fcc1a95a2eb",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-4be4fbd603c69971",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-4be4fbd603c69971.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_stormcloud3up.tex",
+        "sha256": "a1309205d61e3f00aa69d4e2db1de064c66bc9d7c09dfdf54e2a2a19acc86564",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-4ddc9e37c7efa6d0",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-4ddc9e37c7efa6d0.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_fieldcommand2up.tex",
+        "sha256": "78c41efe76f9e4bd5a7fc0f87b15a98ba83f6425c7277c26483c46de95b35d30",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-4eae345718f6b44a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-4eae345718f6b44a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_wildstrike3up.tex",
+        "sha256": "ec18f3272a2082e855896dc954f23ae7416125770bc2524346bd0d6b8909a05f",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-4f38a0e86097dabb",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-4f38a0e86097dabb.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_mindovermatter2up.tex",
+        "sha256": "2010fa98903c1d2631df1e8c665c0bb4143b02cbaafdabb7a4704832a1c2cecd",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-4fe7b554eb3c5d20",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-4fe7b554eb3c5d20.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_passive3up.tex",
+        "sha256": "1fcb37a0cbc838e21f7947b87869862cdeda2a429261b3995dcc83c18960db59",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-511c183b86c58aaa",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-511c183b86c58aaa.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_weaponpool1up.tex",
+        "sha256": "cf7e56bd802d1bb95f5e3d5fee15457a9d67532b4ddb5e79f390e7d1a5c0882a",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-515fe2bde60c1db0",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-515fe2bde60c1db0.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_phantomblades3up.tex",
+        "sha256": "22b0aabae96bac016c48d4bebee8ee0275669c87dd64f235bf0fefc1220f0c7b",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-51abc4e672214ff8",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-51abc4e672214ff8.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_bladetrap1up.tex",
+        "sha256": "d86570dc126d536b93f681405617d7a3a6fa670a61339c56b76c43dd966932dc",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-5202095888228efe",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-5202095888228efe.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_skyshard1up.tex",
+        "sha256": "c83946d2090b15786e3fcb68ccc1941a9198b7cf6d35696c6b509910d1099193",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-5618a0eedcc2ec8a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-5618a0eedcc2ec8a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_dualblades4up.tex",
+        "sha256": "2f88addda31a0c5ffab2f73e00c85d2b6ac436b0e03c4d56beace4be507bd5b3",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-5622f82dd07921ac",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-5622f82dd07921ac.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_ravensummon2up.tex",
+        "sha256": "a04b22333843992a2b6234bcaa25185b4bbb3cc59ae0f8dde160c77506fc5fb0",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-5840ebdae83c5226",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-5840ebdae83c5226.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_pox3up.tex",
+        "sha256": "9e83be25728881dbcd7841ff506593020f47ca09db2d9235361369feda81961c",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-588acf8037c67463",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-588acf8037c67463.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_stancedefensive1up.tex",
+        "sha256": "31cbbdc4182fc6f954651806e54c723f0ec707abf81d564a72e8eb4088bb22a6",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-58e7ed3777a7392c",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-58e7ed3777a7392c.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_grenado3orange_up.tex",
+        "sha256": "b88ea13686b310dbf09a6fc0a9178f1a795977e7b651b220580433b5f4102f85",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-59680f77dce513be",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-59680f77dce513be.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_hellhoundsummon3up.tex",
+        "sha256": "7676c835101713f8c7396cfe7068b3ff0a14feb151511ebe529075f6450cba93",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-5c3080269b821c12",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-5c3080269b821c12.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_firestrike1_up.tex",
+        "sha256": "7bf4f04d27a65cc5aba2b37c2c73e149ab8d348e806808f898825ae4581a3429",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-5e8c63c641d3b903",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-5e8c63c641d3b903.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_nightbladeenchant3up.tex",
+        "sha256": "1f3d0f85bdacf12ba5f315e055ae324b6f9fd2c1b3a29d5009a0f8e1bb41696e",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-60fe1b198a6657c8",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-60fe1b198a6657c8.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_firestrike4_up.tex",
+        "sha256": "b99f84ad8abd9be50d99a35a58f32b1c7d6474c45acc94c0a80c15a3d13e1b61",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-6177ebedd141adaa",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-6177ebedd141adaa.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_bladespirit1up.tex",
+        "sha256": "f3ebde8200d8d74987d310140ce03dd737fe7407271dbb53b61acc0d1071d6a1",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-61fd255f1c06914f",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-61fd255f1c06914f.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_shieldhammer3up.tex",
+        "sha256": "e7dc4db5680f974c7a9ed94c6f70da7f2ae6f9af5fe20b6cf53d092a3dfc8d78",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-63834cb02f68c029",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-63834cb02f68c029.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_canisterbomb1_up.tex",
+        "sha256": "0d8398187dc3e7e3bfbc7462362cd6cebc42a3626d6fbbf196e378fabb1457ad",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-63852f0698b236b3",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-63852f0698b236b3.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_stunjacks1_up.tex",
+        "sha256": "a03810ec2fc77d6394935ddcb27be0e3bb4c7004ecc8463124d4c5cd09617fc1",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-64b9063543d7f7f7",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-64b9063543d7f7f7.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_stormcloud2up.tex",
+        "sha256": "d6275a9b6db8d450fdc22f1774daceab5310356cec71e1b434d563197eb84356",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-64e21962560767cf",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-64e21962560767cf.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_witchfireenchantment1up.tex",
+        "sha256": "9681f2ad8161954c9a2b7ce67d510bbcd425356e228a9d679a40c59e33237652",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-65088053a061f846",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-65088053a061f846.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_stanceoffensive1up.tex",
+        "sha256": "6309021af2010454f9b945b3a92c5897b20692f85a335057da2f86d12dc1e9ec",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-6544b6a01d1bb586",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-6544b6a01d1bb586.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_natureblessing1up.tex",
+        "sha256": "5ba7173942dfe0c9e94b21a1027591986c903a489775aef2caa71a6c46157828",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-67e9bc81f9fcb3c8",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-67e9bc81f9fcb3c8.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_bondsofbysmiel2up.tex",
+        "sha256": "a811f429c8c243be0afe21c9d04ddf379206a7017b52ed1089ecd82dc45dd3dd",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-6a9378a3e22247c1",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-6a9378a3e22247c1.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_blastshield2up.tex",
+        "sha256": "20eede4fd208112b44cfb1f0c8a527470309e99f71e5f17c7aa80ec8db465b65",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-6b1cb57e3edba173",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-6b1cb57e3edba173.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_hellhoundsummon4up.tex",
+        "sha256": "da63145fcbf6cb0a2b443ae5f97a306da5fc294ca617846900e6630f8cc9c638",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-6b77643174374b31",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-6b77643174374b31.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_molotov1_up.tex",
+        "sha256": "a191c6eafc25307f851b6130e3c13586c3c4694cdd596cb8ca07ecd53ea54646",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-6df08d8664c9bc74",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-6df08d8664c9bc74.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_passive01up.tex",
+        "sha256": "2c457e9e93d5471400bbb84084e8f001c524e7a2b8b6985f53fb6d4635a3d901",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-6e2c64e748078fe3",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-6e2c64e748078fe3.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_bladetrap2up.tex",
+        "sha256": "7efc0f169f84a73b3c54d80261848e5c8f41b21628cc98782969f1424567a3d4",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-6fca3082447e2b2a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-6fca3082447e2b2a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_sigilofdestruction2up.tex",
+        "sha256": "ac82ed817a7b13d469bd3539dada7d9f026fa1c76174d5af80abe68289d866fd",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-703bcecda2a2976f",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-703bcecda2a2976f.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_mortartrap1_up.tex",
+        "sha256": "cf5d9fb5245977780b03d6277b7db6485095a04c5236590f00b562b8cb5f79f6",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-7088f83c01221d6f",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-7088f83c01221d6f.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_savagery2up.tex",
+        "sha256": "2cb9530908662f793c8abc047b65416758c0abe3a4a1689a4ea9650bc884e8b5",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-7109d811f90e410d",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-7109d811f90e410d.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_evileye1up.tex",
+        "sha256": "063baefdf5a56b5e0916926820726ab02c6497f3a3d6f06de88ad42e78221a83",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-71d9e7c6406054f6",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-71d9e7c6406054f6.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_mortartrap2_up.tex",
+        "sha256": "09690a4253371b63434b69e8bd105980139b48ec1b4d5de2f05e99e5d82f56c5",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-74489e721fea6c90",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-74489e721fea6c90.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_manticoresummon1up.tex",
+        "sha256": "f325bc46f31c3562315e6b802fbce1273b43b25b2437d432ec1310f1fbcde700",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-74a48d689b418b42",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-74a48d689b418b42.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_bondsofbysmiel1up.tex",
+        "sha256": "8c3a9990b95be6c1a54784ae6743a2f62c8eed0571842462fcabcb7ba72dd8b2",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-799a6d66786ff4ac",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-799a6d66786ff4ac.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_skyshard3up.tex",
+        "sha256": "be5f1784ccf1126b8c3c9510a5d3b42268167ff784c87f4f640a5aaf7c618492",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-79f5eeda9849a3b5",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-79f5eeda9849a3b5.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_grenado1_up.tex",
+        "sha256": "4130961a82934653c903dbd819c7a8cec6cc2463873a77bf2b4687f10d53a012",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-7a7d46077ee5b8a8",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-7a7d46077ee5b8a8.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_primalbond01up.tex",
+        "sha256": "6d4c91b225df1b8ddacf0d8fb716e86cae053acb730cbcd804530e5f7ccacb4f",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-7ba4effebe95826a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-7ba4effebe95826a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_ravensummon4up.tex",
+        "sha256": "7cc147f98146f352723a44525e5bd7571856e2c7e9d624af63e5de0f14c8c53b",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-7ca08a06ebc52e6e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-7ca08a06ebc52e6e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_flaremine2_up.tex",
+        "sha256": "d80ded09688374029076c7e629ee7e4da4f7058ddea8fa38d376b1d5bf19a1f9",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-7d8a76e0b91f448b",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-7d8a76e0b91f448b.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_elementalinfusion2up.tex",
+        "sha256": "4d5e5ff23c6bfe148e758c5ce25602bf3d133220ac15b2c4e852574b74cd7b2a",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-7e5d7fee6fc1e665",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-7e5d7fee6fc1e665.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_arcanetempest1up.tex",
+        "sha256": "6692f10a1fbe46ed26fae1c59a64b90b6428743357284c9b9b953a0e40857f34",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-7f130e6fc695a1b1",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-7f130e6fc695a1b1.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_blitz2_up.tex",
+        "sha256": "29367b609a1ce8e49b268dc70a60c4dd7551ac874bcfacaca845cf0e31db273a",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-7f5d5bfd02b8b40a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-7f5d5bfd02b8b40a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_vindictiveflame2_up.tex",
+        "sha256": "751092668b736360153edb263d962ed5ab0cca4d9a8b3883b7fa60431416bee3",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-865f36a501b2e00c",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-865f36a501b2e00c.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_passiveshield1up.tex",
+        "sha256": "86603c6d0c3049bb20b13009390b4245e50729a6b9cdf8638d96da0c03b73781",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-8b9065e2f5866896",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-8b9065e2f5866896.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_stormcaller1up.tex",
+        "sha256": "52aadbcf9a7fed2d01721566a2a9c16cee1416043ed3c0599689fb526adb4a35",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-8dc977f5a7b7117f",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-8dc977f5a7b7117f.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_arcanemissile4up.tex",
+        "sha256": "6edf5be89ec388ea7b5021b4de9198ac5854e70c130b85530ce6261bcad41075",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-8f00a58a9e6f359e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-8f00a58a9e6f359e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_devastation1up.tex",
+        "sha256": "fd29ba66203ec71e08ab2544d3d8521359b4941849379c6734b38ecaa3a63188",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9043e864202db97c",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9043e864202db97c.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_canisterbomb2_up.tex",
+        "sha256": "1b6ade93b63ef7e53dc946e7e6679e7eb969db7435721b4765c2520a1356e0b2",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9128b268542e3d19",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9128b268542e3d19.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_sigilofdestruction1up.tex",
+        "sha256": "7762dc961378db51b215b63d412636678adabe2ab6eaf65978570942448c475d",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9480257a34856f3e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9480257a34856f3e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_cadence1_up.tex",
+        "sha256": "49546248f8d8113269ba03c4287becc40adb3cc7d8ee79ee00dbdd22a05f9fc8",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-953187ab7e4248c5",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-953187ab7e4248c5.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_thornedhorrorsummon1up.tex",
+        "sha256": "f80d18b68de23e33ff08eeb5ee30f414ba0c7efbb69c165cd2aed018cde9b69f",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-95713eccf3f0471d",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-95713eccf3f0471d.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_decoratedsoldier1_up.tex",
+        "sha256": "42223165b0c645dcd64e0364f43c32e14641af2bbfe9ccba033af7ed7414944f",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-95cc60ef5cec4068",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-95cc60ef5cec4068.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_passive01up.tex",
+        "sha256": "a0574edac4a9e21ec4be8a28827b6513f1ae7550716fda37c411d841dc800172",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-961d6c5db18ea922",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-961d6c5db18ea922.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_battlefury2_up.tex",
+        "sha256": "b41958d087fd3aaf024dc9e7cd094c186d5276b090ed70c6039a36171255fb9e",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-962d60cb6c269363",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-962d60cb6c269363.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_witchfireenchantment2up.tex",
+        "sha256": "89eb6bf300f43a22057d28db03ad455aedf15c319c396e12278d91555e209b0f",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9688e2e435876104",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9688e2e435876104.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_veilofshadows1up.tex",
+        "sha256": "67ce87a3cce0621e99f3b9ec8342147fc4366e0864f926aa8a57da4699b28a24",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-979836f35e5adc41",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-979836f35e5adc41.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_stormcloud1up.tex",
+        "sha256": "518ba9e3dc03d973ef7ec648a55de3df7deea7691dd82055bb0114113c04a214",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9843c12abf866eef",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9843c12abf866eef.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_nightbladeenchant1up.tex",
+        "sha256": "1b8a498248dfedfe0581e2272efa24f6ee5a3ba2ccfc1f58bdbb4261b603f940",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9988cb12e7b692a4",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9988cb12e7b692a4.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_passive02up.tex",
+        "sha256": "0c9a9a1dbc2d496ba2b85c741371fee4947351a581aa9b8806d477d443baa247",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-99a7ecf1eea8c87e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-99a7ecf1eea8c87e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_scarsofbattle1_up.tex",
+        "sha256": "b5ce77be77d259e076a13d5659b3339e7e08b2a1db144511ef1ec3e366c541bb",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9a22e21ef5177f9c",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9a22e21ef5177f9c.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_weaponpool1up.tex",
+        "sha256": "57759bf1724fda4fc19f97e48d7f5c766342cd8343ce8c382184332f91b8260a",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9b0e826826aef0c6",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9b0e826826aef0c6.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_flashbang1_up.tex",
+        "sha256": "c9f5a2502f48fe8766a2674a785d698a3f72b0e691af1a14e73efa4e3960e44b",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9b22d228fcd492ed",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9b22d228fcd492ed.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_dualblades1up.tex",
+        "sha256": "9495192c8c4afcc59845ea861a05451be357192b85905cd72e9e9ce3321271e7",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9c2f9b54c6184656",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9c2f9b54c6184656.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-transmuter",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/skillicon_transmuter01up.tex",
+        "sha256": "00b2b0f3b21148e158809415284f032a92e47c815b2dacc3f3e83009c900aa39",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9d0497a14cbafb46",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9d0497a14cbafb46.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_sphereofprotection1up.tex",
+        "sha256": "d472d11ba7cedbd4800f5cfd10ce09219bb8c89479822d1777a3c7091da23297",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9d4d0ed81d602f0a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9d4d0ed81d602f0a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_dualblades2up.tex",
+        "sha256": "bc9160b1e72c6c9b84ee30e34aa89a3b41678d0ce45df245920e992e0ecf02fc",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-9ee4a7877ae2c654",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-9ee4a7877ae2c654.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_totem1up.tex",
+        "sha256": "869c9027192aa9e6c8688d93a804531974ac18e3beb43a68c873de9225005086",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-a0f01bbe7afca7bc",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-a0f01bbe7afca7bc.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_arcanemissile3up.tex",
+        "sha256": "e417ed18edc344d841bddba14092d1272d6bf45b09a02b5adf0863eb7dd6d161",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-a23f37b40fb15e4e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-a23f37b40fb15e4e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_ravensummon3up.tex",
+        "sha256": "37306af88dad2fc0f5efd9f742352d4a87a34cb46aa4d48989748f7aefebcd59",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-a3cad7ea88fac03c",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-a3cad7ea88fac03c.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_vindictiveflame1_up.tex",
+        "sha256": "2da2cca14e9e473c18f264526afb7b0d775fa1ae1a8f39fab1e64d5b21f076d1",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-a5d80341f4127b18",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-a5d80341f4127b18.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_natureblessing2up.tex",
+        "sha256": "c467cdcde6efcc8800c24ee9b8dcf60bdb5323728b3517f4884d7bd343456058",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-aa0a92fc81399c3a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-aa0a92fc81399c3a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_bladebarrier1up.tex",
+        "sha256": "bb06ac9a82be910d8e5bd408dfb3ae3ef44b0fc6e11aa92deeeb1edafd72b7da",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-af0bf1b020ffa27f",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-af0bf1b020ffa27f.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_firestrike3_up.tex",
+        "sha256": "8321114743acaf4078099513a4c06ef22c2659589ece13b8f12d584166f79a3e",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-afc31074474c5735",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-afc31074474c5735.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_shieldhammer2up.tex",
+        "sha256": "c3ce65900f2ad17e24bc50612e9ebda90f78dd153ab9a01608f29ff3d7d4e798",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-b05ca80be7938288",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-b05ca80be7938288.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_fieldcommand1_up.tex",
+        "sha256": "5c9c9ab3c85443daa6e922cb90a95932f42e68c77cc6b7848e5a6f9f37c977e4",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-b0a811d2200c6340",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-b0a811d2200c6340.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_savagery3up.tex",
+        "sha256": "736a2fbc7f473c0bc952fbc5b9896dd7a1d7bd2d366f6df095074f78e5417c42",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-b22a2c06b74a5ad2",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-b22a2c06b74a5ad2.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_passive1up.tex",
+        "sha256": "7ad55ae3fc940033a8edb2467c003a68dfb015d45e560f0df022b0fdca807e63",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-b269ac964ee9ab97",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-b269ac964ee9ab97.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_evileye2up.tex",
+        "sha256": "d56ba26a1ac56971d987aededebc9e3307dd3c25509e9e88de7a51dc4c409142",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-b3112ee878901beb",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-b3112ee878901beb.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_curse2up.tex",
+        "sha256": "42eb2f140596a7fdfd9a598681ccaa217d90d39e77b20df840312d155f5d021e",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-b51690c3ec206b63",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-b51690c3ec206b63.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_pox1up.tex",
+        "sha256": "fc4542dd349341c19de2e04d9e3848a2be6e182ccb9bccd4d72ecfb35aa987f6",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-b6d123edf393fba2",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-b6d123edf393fba2.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_thornedhorrorsummon4up.tex",
+        "sha256": "78bd688a4efff1d9e96a8603f97fbd1827660aac3a22b301456416d83e1f297e",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-b6e843875fd38c43",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-b6e843875fd38c43.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_bladearc1up.tex",
+        "sha256": "a5d02566da8aba7d9ba2c46baee9f19d5790e3585126c9d1b1422f65128c4652",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-b8223b5bf6fff74d",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-b8223b5bf6fff74d.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_lethalgambit2up.tex",
+        "sha256": "ca1a566c2347861e194c10c8bb1fa754e2db7a598406700b6ac60adf8c229d77",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-b96f21431bccb83a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-b96f21431bccb83a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_shadowstrike2up.tex",
+        "sha256": "6b6704d8ca5fc7af0217a5edfda48a3738c8775c90215cda23f2d63144c4ac09",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-b9e521ab22729acf",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-b9e521ab22729acf.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_arcanemissile1_up.tex",
+        "sha256": "a845e888bb6450a3469ad8a1a4cd43eb373975bf620c288d4e600895eaeef082",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-be24b6b4e5f4b990",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-be24b6b4e5f4b990.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_arcanemissile2up.tex",
+        "sha256": "c5bec6977265d54c2302994116f157a3e2f7b43d52f1acf53a3a10f87b1e5d8a",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-c216d34502f4454e",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-c216d34502f4454e.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_fightingspirit1_up.tex",
+        "sha256": "660bbe2e2ae9a788066fa12bd0d0263c88420f550563eca5540d373209bc774e",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-c28c2641bbfdd699",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-c28c2641bbfdd699.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_firestrike2_up.tex",
+        "sha256": "8b18ae31e39349e0794064495d2fbc1ee00ac923cef0e36191d3dfd5f0ee9ebe",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-c54ce471a16ecd9a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-c54ce471a16ecd9a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_cadence2_up.tex",
+        "sha256": "35d9f86e216e7092ec3ff1f0b32eb91b9cd508adce4e147837e626aab8838a70",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-c553e0cab25b1787",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-c553e0cab25b1787.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_ravensummon1up.tex",
+        "sha256": "9907393cc6ea7c27a4a871301714dc7d3b3a329fd28f4ce9d292b21e66e2f249",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-c5799381dd316b2a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-c5799381dd316b2a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_natureblessing3up.tex",
+        "sha256": "efb76c87067836ad2e8ecbad06ab0592b41ea9e9239c287199d0f61c23f047bc",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-c66eac6d185bdfed",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-c66eac6d185bdfed.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_bloodofdreeg2up.tex",
+        "sha256": "cbbad77c7a518a4071f003757d3d0fe17cff5cb93de6edb240e2e48e623cd29c",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-c680c059c2047a12",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-c680c059c2047a12.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_weaponpool2up.tex",
+        "sha256": "deb33d5fa4681169cf1a516b223a4b8ea4491c7964d15a7769db537f0ced790c",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-c6deb5e13a8434f5",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-c6deb5e13a8434f5.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_veterancy1_up.tex",
+        "sha256": "d10288fb9f5b5ec0f83ea7a895e29d1f7ddd9e13e7e97cae97abd70306a73247",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-cd239889aa4aada7",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-cd239889aa4aada7.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_passive04up.tex",
+        "sha256": "0d2b5ac9fe086f43c2d7cbd05024baf5e5e9cff1055a389901a6f1dcb60034ec",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-cd671a3946c82fd0",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-cd671a3946c82fd0.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_nullification1up.tex",
+        "sha256": "3fab11e564b1439d47c0f1e20841836346e094779b0e19ed3f8fa5419b76ac0a",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-cf5c1dc199a28f18",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-cf5c1dc199a28f18.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_wildstrike1_up.tex",
+        "sha256": "532109ee6075cb41a51077a26a16f863ea5295f9c921114c96b04877c1b4cd72",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-d1a219a3ac711468",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-d1a219a3ac711468.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_sphereofprotection2up.tex",
+        "sha256": "351e7545f05363640b52cadd2af1bd9cffddce9a800b75d88055765ea004457c",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-d32f08ce020107c5",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-d32f08ce020107c5.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_dualblades5up.tex",
+        "sha256": "3b16a725951db407024a8d9169ba052088cd4a12aed0cd0b28a6bce6b859ac59",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-d40afdb17e0f2388",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-d40afdb17e0f2388.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_nightbladeenchant2up.tex",
+        "sha256": "e8bca900f125efe09a59589db86a7ec5925be16a1cc485d3e4f28dc7accfef20",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-db042895e31395ce",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-db042895e31395ce.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_overguard1_up.tex",
+        "sha256": "b6351283fe1b4b4add7fa197c131a2a505dab1c6aa761eb656e71f732b9d4b56",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-de27abc2b6726608",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-de27abc2b6726608.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_phantomblades1up.tex",
+        "sha256": "18d1b5201c4fed0c1194a7f1b0996c77d5d81b83e4a5480afc0e814b6efe36e6",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-de3b34c7283a9fe7",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-de3b34c7283a9fe7.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_bladearc2up.tex",
+        "sha256": "3939db47c0563f50fb214087c11c36b2170dbf69367e66006a90d6faacc172fc",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-e12c6766d95cf2e5",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-e12c6766d95cf2e5.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class06/skillicon_stormtotem1up.tex",
+        "sha256": "24629465a30bf2e71aea55b52b149db9de595f203ce8edb304c757895dd105c1",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-e36983ce20ec17e3",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-e36983ce20ec17e3.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_curse1up.tex",
+        "sha256": "afe45a2a3f1c5760f85b96fa0543b76945278c77e7ecaba7c586477fdf77c6fb",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-e3cf944e24550a22",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-e3cf944e24550a22.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_hellhoundsummon2up.tex",
+        "sha256": "5193603c4020eaaa081531e333db1a15ba5b85ab3d24a630cd525dc9cbe258cd",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-e8e05998d586561d",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-e8e05998d586561d.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_hellhoundsummon1up.tex",
+        "sha256": "093cffb25abd39f66d8c1f4cc8a3c5f2675ee3606f0d2d6e0a93ce131ec07da1",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-ebe124d178b062fb",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-ebe124d178b062fb.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_ringofsteel2up.tex",
+        "sha256": "c1a026ca4213c3a129f019f5ef76fe751c2cee2d182daac543412fa640dc6f4d",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-ec2367b93365755b",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-ec2367b93365755b.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_mindovermatter1up.tex",
+        "sha256": "6f802d4a7bae3c027b8c80783183b7119bbe38fddaa99a48330ee643c7941554",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-ecb716f795501965",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-ecb716f795501965.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_stunjacks2_up.tex",
+        "sha256": "9d29988a98114f9b85a7bbfadc25cf992a6259df5ea1fd533de20217ad89bf8e",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-eefa8113d7628f78",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-eefa8113d7628f78.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_blitz1_up.tex",
+        "sha256": "ede70c2262be46b9fefabec4f82ee78e6e98aeda262d065a5922d38224bd5340",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-f1eed3080d42d8b7",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-f1eed3080d42d8b7.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class03/skillicon_pox2up.tex",
+        "sha256": "b84ae468c513de72465e96e241ead7f6c90adbfc666bb21abdb44481c23062dc",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-f310ad8dfa43d37a",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-f310ad8dfa43d37a.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_shadowstrike1up.tex",
+        "sha256": "1fe95677b1fe326c2374d5fc8bf9393c93875aa6dc473a4f450b37f92fa8d85d",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-f66b9d3ad5b7a13c",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-f66b9d3ad5b7a13c.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_ringofsteel1up.tex",
+        "sha256": "66d0472cdd3d62afb5dcf6908e84141b1d120e97252e557e4095064a65d91072",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-f6b63125fa7b7af7",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-f6b63125fa7b7af7.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_shadowstrike3up.tex",
+        "sha256": "1563d2fa74c0b7007f881e62fb1b8c11b8ae52499cfcd3bc14cb4f76bfe5189a",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-fae47ec5d18d1ce6",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-fae47ec5d18d1ce6.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-modifier",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class02/skillicon_molotov3_up.tex",
+        "sha256": "346423263a361b981f238ffbd7e59c13af01a5f166f3721b7ce783111f22fa4c",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-faeb8abc5b3d44dd",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-faeb8abc5b3d44dd.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class05/skillicon_elementalinfusion1up.tex",
+        "sha256": "a336c2cc7441b1ad1f8382da0528d9659d89ad6e1ffc3423e88364879dd2a945",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-fecf79ccfb903a68",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-fecf79ccfb903a68.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-active",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class04/skillicon_dualblades3up.tex",
+        "sha256": "f700ea4bdbb09c279663088ac37eb011c9787ac4a255df8638cafe954a1865de",
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "slug": "ic-ff731543a81b7b02",
+      "status": "approved",
+      "file_path": "public/assets/skill-icons/ic-ff731543a81b7b02.png",
+      "origin_url": "https://store.steampowered.com/app/219990/Grim_Dawn/",
+      "rights_holder": "Crate Entertainment",
+      "license_or_permission": "tolerancia_de_facto_sin_permiso",
+      "proof_ref": "specs/004-rediseno-ui-grim-dawn/research.md#r10",
+      "recorded_on": "2026-11-15",
+      "fallback_svg": "public/assets/ui/skill-icons.svg#skill-passive",
+      "provenance": {
+        "game_version": "steam-build-25813250",
+        "source_path": "ui/skills/icons/class01/skillicon_willtolive1_up.tex",
+        "sha256": "809a48e70312bf96f1f3f24b1f8ef0b45684a292ff0fe594463d391fe12afcc3",
+        "width": 32,
+        "height": 32
+      }
+    }
+  ]
+}

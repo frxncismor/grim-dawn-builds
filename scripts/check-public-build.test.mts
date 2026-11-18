@@ -31,7 +31,7 @@ test('public modes reject executable/private overrides and preserve only public 
   assert.ok(sensitiveValues(env).includes(privateValue));
   assert.ok(sensitiveValues(env).includes('/private/local/file'));
   for (const mode of ['fixture', 'release'] as const) {
-    const child = createPublicBuildEnv(env, mode);
+    const child = createPublicBuildEnv({ ...env, ASSET_SOURCE: 'own' }, mode);
     assert.equal(child['CONTENT_SOURCE'], mode === 'fixture' ? 'fixture' : 'api');
     assert.equal(child['BUILD_MODE'], mode === 'fixture' ? 'local' : 'release');
     assert.equal(child['INCLUDE_DRAFTS'], 'false');
@@ -43,6 +43,12 @@ test('public modes reject executable/private overrides and preserve only public 
       }
     assert.equal(child['NODE_OPTIONS'], undefined);
   }
+  // S-003: release does not guess `ASSET_SOURCE`; a missing or invalid one fails closed.
+  assert.throws(() => createPublicBuildEnv(env, 'release'), /invalid-environment/);
+  assert.throws(
+    () => createPublicBuildEnv({ ...env, ASSET_SOURCE: '' }, 'release'),
+    /invalid-environment/,
+  );
   assert.throws(() => createPublicBuildEnv({ BASE_URL: 'file:///private' }, 'fixture'));
 });
 
@@ -163,6 +169,49 @@ test('public canary workflow uses isolated output and removes it after success o
         },
       ),
       /sensitive-value/,
+    );
+  } finally {
+    await clean(root);
+  }
+});
+
+test('C-004: the brand gate inspects the fresh build output, not a previous dist/', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'gd-public-brand-'));
+  const pages = async (output: string, home: string) => {
+    await mkdir(join(output, 'browser'), { recursive: true });
+    for (const n of ['a', 'b', 'c', 'd', 'e', 'f'])
+      await writeFile(join(output, 'browser', `${n}.html`), '<p>Público</p>');
+    await writeFile(join(output, 'browser', 'index.html'), home);
+  };
+  try {
+    // A stale, clean artifact left in dist/ by an earlier `pnpm build` must not hide a bad fresh build.
+    await mkdir(join(root, 'dist/grim-dawn-builds/browser'), { recursive: true });
+    for (const n of ['a', 'b', 'c', 'd', 'e', 'f', 'index'])
+      await writeFile(join(root, 'dist/grim-dawn-builds/browser', `${n}.html`), '<p>Limpio</p>');
+    const brand = async (dir: string) =>
+      (await import('./check-legacy-brand.mts')).assertNoLegacyBrand(dir);
+    await assert.rejects(
+      runPublicBuildCheck(
+        root,
+        {},
+        { build: (output) => pages(output, '<h1>Grim Dawn Builds</h1>'), brand },
+      ),
+      /unsafe-artifact/,
+    );
+    const ok = await runPublicBuildCheck(
+      root,
+      {},
+      { build: (output) => pages(output, '<h1>Otra marca</h1>'), brand },
+    );
+    assert.equal(ok.pages, 7);
+    // The gate fails, never skips, when the fresh build has no prerendered pages.
+    await assert.rejects(
+      runPublicBuildCheck(
+        root,
+        {},
+        { build: (output) => writeFile(join(output, 'index.html'), '<p>x</p>'), brand },
+      ),
+      /unsafe-artifact/,
     );
   } finally {
     await clean(root);

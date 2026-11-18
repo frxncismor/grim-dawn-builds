@@ -17,11 +17,15 @@ import {
   AdaptationPublicationSchema,
   AssetSchema,
   BuildSchema,
+  CatalogSkillNodeSchema,
+  PublicSkillNodeSchema,
+  BuildDocumentSchema,
   CONTENT_STATUSES,
   EVIDENCE_STATUSES,
   EVIDENCE_TYPES,
   PERMISSION_REQUEST_STATUSES,
   PermissionRequestSchema,
+  SKILL_KINDS,
   SOURCE_CHANGE_OUTCOMES,
   SOURCE_CHANGE_TYPES,
   SourceChangeEventSchema,
@@ -30,6 +34,7 @@ import {
   TakedownEventSchema,
   TIERS,
   TierEntrySchema,
+  TIER_BAR_REQUIRED,
   type BuildAdaptation,
   type SourceRightsEvidence,
 } from '@gd/domain';
@@ -48,6 +53,38 @@ const adaptationsSql = readFileSync(
 // T-169 custom SQL: the public asset view stops publishing provenance (LOW-2).
 const assetViewSql = readFileSync(
   fileURLToPath(new URL('../drizzle/0008_public_asset_view.sql', import.meta.url)),
+  'utf8',
+);
+
+// T031 (spec 003) migration: build_skill_nodes.skill_node_id, same-mastery trigger and public view.
+const skillNodeIdSql = readFileSync(
+  fileURLToPath(new URL('../drizzle/0010_skill_node_id.sql', import.meta.url)),
+  'utf8',
+);
+
+// T035 (spec 003) migration: unique skill_node_id per guide and same-mastery revalidation.
+const skillNodeIdUniqueSql = readFileSync(
+  fileURLToPath(
+    new URL('../drizzle/0012_skill_node_id_unique_and_revalidation.sql', import.meta.url),
+  ),
+  'utf8',
+);
+
+// T008 (spec 003) custom SQL: mastery catalog tables, CHECKs and public views.
+const masteryCatalogSql = readFileSync(
+  fileURLToPath(new URL('../drizzle/0009_mastery_catalog.sql', import.meta.url)),
+  'utf8',
+);
+
+// spec004 T025 (S-004): `icon_id`, the public icon handle, joins the public node view.
+const publicIconIdSql = readFileSync(
+  fileURLToPath(new URL('../drizzle/0014_public_skill_icon_id.sql', import.meta.url)),
+  'utf8',
+);
+
+// T036 (S-004) custom SQL: the public node view is recreated without `icon`.
+const publicNodesSql = readFileSync(
+  fileURLToPath(new URL('../drizzle/0013_public_skill_nodes_without_icon.sql', import.meta.url)),
   'utf8',
 );
 
@@ -147,6 +184,11 @@ describe('parity: enums (Drizzle pgEnum ↔ domain Zod options)', () => {
     {
       column: [db.sourceChangeEvents, 'outcome'],
       domain: [SOURCE_CHANGE_OUTCOMES],
+    },
+    // T008 (spec 003): mastery catalog node kind.
+    {
+      column: [db.catalogSkillNodes, 'kind'],
+      domain: [SKILL_KINDS, CatalogSkillNodeSchema.shape.kind.options],
     },
   ];
 
@@ -699,5 +741,250 @@ describe('parity: adaptation publication gate (0007 SQL ↔ AdaptationPublicatio
       expect(adaptationsSql, constraint).toMatch(sqlTerm);
       expect(adaptationsSql, constraint).toContain(`CONSTRAINT ${constraint}`);
     }
+  });
+});
+
+describe('parity: mastery catalog (0009 SQL + Drizzle ↔ CatalogSkillNodeSchema, T008)', () => {
+  const nodeCols = configOf(db.catalogSkillNodes).columns.map((c) => c.name);
+  const sqlOfView = (name: string): string => {
+    const start = masteryCatalogSql.indexOf(`CREATE VIEW ${name}`);
+    const end = masteryCatalogSql.indexOf(';', start);
+    return start > -1 && end > start ? masteryCatalogSql.slice(start, end) : '';
+  };
+
+  it('models the contract columns with the domain nullability', () => {
+    expect(configOf(db.masteryTrees).columns.map((c) => c.name)).toEqual(
+      expect.arrayContaining(['id', 'slug', 'name_en', 'name_es', 'game_version', 'source_sha256']),
+    );
+    expect(nodeCols).toEqual(
+      expect.arrayContaining([
+        'id',
+        'mastery_id',
+        'name_en',
+        'name_es',
+        'kind',
+        'circular',
+        'tier',
+        'bar_required',
+        'grid_col',
+        'grid_row',
+        'max_points',
+        'ultimate_points',
+        'parent_id',
+        'icon',
+        'icon_id',
+      ]),
+    );
+    const shape = CatalogSkillNodeSchema.shape;
+    expect(columnOf(db.catalogSkillNodes, 'ultimate_points').notNull).toBe(
+      !shape.ultimate_points.safeParse(undefined).success,
+    );
+    expect(columnOf(db.catalogSkillNodes, 'icon').notNull).toBe(
+      !shape.icon.safeParse(undefined).success,
+    );
+    expect(columnOf(db.catalogSkillNodes, 'icon_id').notNull).toBe(
+      !shape.icon_id.safeParse(undefined).success,
+    );
+    expect(columnOf(db.catalogSkillNodes, 'parent_id').notNull).toBe(
+      !nullableInZod(shape.parent_id),
+    );
+    for (const required of ['kind', 'circular', 'tier', 'bar_required', 'max_points', 'name_en']) {
+      expect(columnOf(db.catalogSkillNodes, required).notNull, required).toBe(true);
+    }
+    expect(columnOf(db.masteryTrees, 'slug').isUnique).toBe(true);
+  });
+
+  it('declares the SQL CHECKs that mirror the domain refinements', () => {
+    const checks = configOf(db.catalogSkillNodes).checks.map((c) => c.name);
+    expect(checks.sort()).toEqual(
+      [
+        'catalog_skill_nodes_bar_required_ck',
+        'catalog_skill_nodes_grid_col_ck',
+        'catalog_skill_nodes_grid_row_ck',
+        'catalog_skill_nodes_icon_id_ck',
+        'catalog_skill_nodes_id_ck',
+        'catalog_skill_nodes_max_points_ck',
+        'catalog_skill_nodes_no_self_parent_ck',
+        'catalog_skill_nodes_tier_ck',
+        'catalog_skill_nodes_ultimate_ck',
+      ].sort(),
+    );
+    for (const ck of checks) {
+      expect(masteryCatalogSql + publicIconIdSql, ck).toContain(`CONSTRAINT "${ck}" CHECK`);
+    }
+    expect(masteryCatalogSql).toMatch(/CONSTRAINT "mastery_trees_id_ck" CHECK/);
+    expect(masteryCatalogSql).toMatch(/CONSTRAINT "catalog_skill_nodes_grid_cell_uq" UNIQUE/);
+  });
+
+  it('keeps the SQL tier → bar_required table equal to TIER_BAR_REQUIRED', () => {
+    const barCk = masteryCatalogSql.slice(
+      masteryCatalogSql.indexOf('catalog_skill_nodes_bar_required_ck'),
+    );
+    for (const [i, bar] of TIER_BAR_REQUIRED.entries()) {
+      expect(barCk, `tier ${i + 1}`).toMatch(
+        new RegExp(`"tier" = ${i + 1} AND "bar_required" = ${bar}`),
+      );
+    }
+  });
+
+  it('rejects in the domain what the SQL rejects (tier, ultimate, self parent)', () => {
+    const node = {
+      id: 'class01/a',
+      name: { en: 'A', es: 'A' },
+      kind: 'active',
+      circular: false,
+      tier: 1,
+      bar_required: 1,
+      max_points: 5,
+      grid: { col: 1, row: 0 },
+      parent_id: null,
+    };
+    expect(CatalogSkillNodeSchema.safeParse(node).success).toBe(true);
+    expect(CatalogSkillNodeSchema.safeParse({ ...node, tier: 10 }).success).toBe(false);
+    expect(CatalogSkillNodeSchema.safeParse({ ...node, ultimate_points: 4 }).success).toBe(false);
+    expect(CatalogSkillNodeSchema.safeParse({ ...node, parent_id: node.id }).success).toBe(false);
+  });
+
+  it('publishes read-only views without audit timestamps', () => {
+    const trees = sqlOfView('v_public_mastery_trees');
+    const nodes = publicNodesSql.slice(
+      publicNodesSql.indexOf('CREATE VIEW v_public_skill_nodes'),
+      publicNodesSql.lastIndexOf('GRANT'),
+    );
+    expect(trees).toContain('FROM mastery_trees');
+    expect(nodes).toContain('FROM catalog_skill_nodes');
+    for (const field of ['created_at', 'updated_at']) {
+      expect(trees, field).not.toContain(field);
+      expect(nodes, field).not.toContain(field);
+    }
+    expect(masteryCatalogSql).toMatch(
+      /GRANT SELECT ON v_public_mastery_trees, v_public_skill_nodes TO api_ro;/,
+    );
+  });
+
+  it('keeps the game texture path out of the public node view (S-004)', () => {
+    const nodes = publicNodesSql.slice(
+      publicNodesSql.indexOf('CREATE VIEW v_public_skill_nodes'),
+      publicNodesSql.lastIndexOf('GRANT'),
+    );
+    expect(nodes).not.toMatch(/icon/);
+    const columns = nodes
+      .slice(nodes.indexOf('SELECT') + 'SELECT'.length, nodes.indexOf('FROM'))
+      .split(',')
+      .map((c) => c.trim());
+    // Every public column is a column of the base table and of the public contract; icon stays private.
+    expect(columns).toEqual(
+      expect.arrayContaining(['id', 'mastery_id', 'name_en', 'tier', 'grid_col', 'parent_id']),
+    );
+    expect(columns.every((c) => nodeCols.includes(c))).toBe(true);
+    expect(nodeCols).toContain('icon');
+    expect(PublicSkillNodeSchema.safeParse({ icon: 'x' }).success).toBe(false);
+    expect(publicNodesSql).toMatch(/DROP VIEW v_public_skill_nodes;/);
+    expect(publicNodesSql).toMatch(/GRANT SELECT ON v_public_skill_nodes TO api_ro;/);
+    expect(publicNodesSql).not.toMatch(/GRANT [^;]* ON catalog_skill_nodes/);
+  });
+
+  it('publishes icon_id (never icon) in the public node view and checks its shape (spec004 T025)', () => {
+    const nodes = publicIconIdSql.slice(
+      publicIconIdSql.indexOf('CREATE VIEW v_public_skill_nodes'),
+      publicIconIdSql.lastIndexOf('GRANT'),
+    );
+    const columns = nodes
+      .slice(nodes.indexOf('SELECT') + 'SELECT'.length, nodes.indexOf('FROM'))
+      .split(',')
+      .map((c) => c.trim());
+    expect(columns).toContain('icon_id');
+    expect(columns).not.toContain('icon');
+    expect(columns.every((c) => nodeCols.includes(c))).toBe(true);
+    expect(nodeCols).toContain('icon_id');
+    expect(publicIconIdSql).toMatch(/DROP VIEW v_public_skill_nodes;/);
+    expect(publicIconIdSql).toMatch(/GRANT SELECT ON v_public_skill_nodes TO api_ro;/);
+    expect(publicIconIdSql).not.toMatch(/GRANT [^;]* ON catalog_skill_nodes/);
+    expect(publicIconIdSql).toContain("'^ic-[0-9a-f]{16}$'");
+    const sample = { id: 'class01/x', icon_id: 'ic-0123456789abcdef' };
+    expect(sample.icon_id).toMatch(/^ic-[0-9a-f]{16}$/);
+  });
+
+  it('never grants the base tables to api_ro or any write on the views', () => {
+    expect(masteryCatalogSql).not.toMatch(
+      /GRANT [^;]* ON (mastery_trees|catalog_skill_nodes)[^;]* TO api_ro/,
+    );
+    expect(masteryCatalogSql).not.toMatch(/GRANT (INSERT|UPDATE|DELETE|ALL)[^;]* TO api_ro/);
+  });
+
+  it('grants DML on the base tables to importer only; editor gets nothing (derived data)', () => {
+    expect(masteryCatalogSql).toMatch(
+      /GRANT SELECT, INSERT, UPDATE, DELETE ON mastery_trees, catalog_skill_nodes TO importer;/,
+    );
+    expect(masteryCatalogSql).not.toMatch(/ TO editor/);
+  });
+});
+
+describe('parity: guide skill_node_id (0010 SQL + Drizzle ↔ SkillNodeSchema, T031)', () => {
+  const cols = getTableConfig(db.buildSkillNodes);
+
+  it('has a nullable text column, optional in the domain schema too', () => {
+    const column = cols.columns.find((c) => c.name === 'skill_node_id');
+    expect(column?.notNull).toBe(false);
+    expect(column?.getSQLType()).toBe('text');
+    const doc = contractDoc('skill-node-id-parity');
+    expect(BuildDocumentSchema.safeParse(doc).success).toBe(true);
+    doc.skill_nodes[0]!.skill_node_id = 'class06/savagestrike1';
+    expect(BuildDocumentSchema.safeParse(doc).success).toBe(true);
+  });
+
+  it('references the catalog node with ON DELETE RESTRICT (a stale catalog node fails closed)', () => {
+    const fk = cols.foreignKeys.find((f) => f.reference().columns[0]?.name === 'skill_node_id');
+    expect(getTableConfig(fk!.reference().foreignTable).name).toBe('catalog_skill_nodes');
+    expect(fk!.onDelete).toBe('restrict');
+    expect(skillNodeIdSql).toMatch(/ADD COLUMN "skill_node_id" text;/);
+    expect(skillNodeIdSql).toMatch(/ON DELETE restrict/);
+  });
+
+  it('checks the mastery in the database and serves the field in the public view', () => {
+    expect(skillNodeIdSql).toMatch(
+      /CREATE TRIGGER build_skill_nodes_catalog_mastery BEFORE INSERT OR UPDATE/,
+    );
+    expect(skillNodeIdSql).toMatch(/SECURITY DEFINER SET search_path = pg_catalog, public/);
+    expect(skillNodeIdSql).toMatch(/CREATE OR REPLACE VIEW v_public_build_documents/);
+    expect(skillNodeIdSql).toMatch(/jsonb_build_object\('skill_node_id', n\.skill_node_id\)/);
+  });
+
+  it('adds no new grants: importer/editor already hold DML on build_skill_nodes, api_ro sees views only', () => {
+    expect(skillNodeIdSql).not.toMatch(/GRANT /);
+  });
+});
+
+describe('parity: unique skill_node_id per guide and mastery revalidation (0012 SQL + Drizzle, T035)', () => {
+  const cols = getTableConfig(db.buildSkillNodes);
+
+  it('declares the partial unique index in Drizzle and in the migration', () => {
+    const index = cols.indexes.find(
+      (i) => i.config.name === 'build_skill_nodes_build_skill_node_uq',
+    );
+    expect(index?.config.unique).toBe(true);
+    expect(index?.config.columns.map((c) => (c as { name: string }).name)).toEqual([
+      'build_id',
+      'skill_node_id',
+    ]);
+    expect(index?.config.where).toBeDefined();
+    expect(skillNodeIdUniqueSql).toMatch(
+      /CREATE UNIQUE INDEX "build_skill_nodes_build_skill_node_uq" ON "build_skill_nodes" USING btree \("build_id","skill_node_id"\) WHERE .*"skill_node_id" IS NOT NULL;/,
+    );
+  });
+
+  it('revalidates the mastery rule from deferred constraint triggers on both sides', () => {
+    expect(skillNodeIdUniqueSql).toMatch(/SECURITY DEFINER SET search_path = pg_catalog, public/);
+    expect(skillNodeIdUniqueSql).toMatch(/ERRCODE = 'check_violation'/);
+    for (const [table, columns] of [
+      ['masteries', 'slug, name_en'],
+      ['mastery_trees', 'slug, name_en'],
+      ['catalog_skill_nodes', 'mastery_id'],
+      ['skills', 'mastery_id'],
+    ] as const)
+      expect(skillNodeIdUniqueSql).toContain(
+        `AFTER UPDATE OF ${columns} ON ${table} DEFERRABLE INITIALLY DEFERRED FOR EACH ROW`,
+      );
+    expect(skillNodeIdUniqueSql).not.toMatch(/GRANT /);
   });
 });

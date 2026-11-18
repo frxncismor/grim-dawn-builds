@@ -1,4 +1,4 @@
-# Grim Dawn Builds
+# Grim Builds
 
 **English** · [Español](README.es.md)
 
@@ -110,9 +110,29 @@ Focused commands during development:
 Release build (requires the API running and `CONTENT_SOURCE=api`):
 
 ```bash
-pnpm build:release
+ASSET_SOURCE=game pnpm build:release   # PowerShell: $env:ASSET_SOURCE = 'game'
 pnpm check:release
 ```
+
+`build:release` needs an explicit `ASSET_SOURCE` (`game` or `own`) and fails with a clear
+error when it is missing: the default of §VII is `own`, so release never guesses. It and
+the CI jobs that build the measured artifact use
+`ASSET_SOURCE=game`: the six mastery buttons of Grim Dawn (© Crate Entertainment,
+no written permission; see `fixtures/content/assets/NOTICE.md`) are served on
+`/maestrias`. The release fails closed before building if the asset manifest does not
+approve all six. With `game` the skill icons of the six base masteries are served too:
+164 unmodified 32×32 PNG (spec004 T027/T028, constitution §VII 1.11.0), one `approved`
+manifest entry per icon with `proof_ref` `specs/004-rediseno-ui-grim-dawn/research.md#r10`,
+shown with a visible credit to Crate in the mastery tree and in the guide
+(`apps/web/tools/emit-skill-icons.mts`). With `own` they use the project's own icons. The
+default local build stays on `ASSET_SOURCE=own`. The six PNGs of `apps/web/public/assets/portraits/` are
+not in the Angular asset glob: `pnpm build` copies them to the artifact only with
+`ASSET_SOURCE=game` (`apps/web/tools/emit-portraits.mts`), and release rejects an `own`
+artifact that carries any. The 164 skill icons
+(`apps/web/public/assets/skill-icons/`) follow the same rule. To withdraw the art (portraits
+and icons), as `fixtures/content/assets/NOTICE.md` documents: set the manifest entries to
+`status: withdrawn`, delete the PNG files, record it in `handoff.md` and release with
+`ASSET_SOURCE=own` in the same change.
 
 ## Static artifact preview and editorial flow
 
@@ -141,11 +161,12 @@ command. [`.env.example`](.env.example) lists the public names and safe defaults
 as a reference; real secrets live in git-ignored files only, as documented in
 [secret management](docs/security/secrets.md).
 
-| Variable         | Accepted values                                               | Effect on the build and the preview                                                                                              |
-| ---------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `BASE_URL`       | absolute `http(s)` URL without credentials, query or fragment | Fixes the absolute canonical and Open Graph URLs, `sitemap.xml` and `robots.txt`. Defaults to `http://localhost:4200/`.          |
-| `INCLUDE_DRAFTS` | `true` or `false`                                             | Adds the local `borrador` guide when `true`. Public and release builds force it to `false`.                                      |
-| `CONTENT_SOURCE` | `fixture` or `api`                                            | Selects fixtures (development, tests, CI without Docker) or the public API (release). `api` never degrades silently to fixtures. |
+| Variable         | Accepted values                                               | Effect on the build and the preview                                                                                                                                                                                         |
+| ---------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BASE_URL`       | absolute `http(s)` URL without credentials, query or fragment | Fixes the absolute canonical and Open Graph URLs, `sitemap.xml` and `robots.txt`. Defaults to `http://localhost:4200/`.                                                                                                     |
+| `INCLUDE_DRAFTS` | `true` or `false`                                             | Adds the local `borrador` guide when `true`. Public and release builds force it to `false`.                                                                                                                                 |
+| `CONTENT_SOURCE` | `fixture` or `api`                                            | Selects fixtures (development, tests, CI without Docker) or the public API (release). `api` never degrades silently to fixtures.                                                                                            |
+| `ASSET_SOURCE`   | `own` or `game`                                               | Mastery art on `/maestrias` and skill icons (tree and guide): own icons (default) or the game's art (6 buttons, 164 skill icons). Release requires it explicit (no default); CI sets `game`; invalid values fail the build. |
 
 An invalid `BASE_URL` fails the sitemap and robots generation with a fixed
 message that does not echo credentials. `INCLUDE_DRAFTS` only accepts `true` or
@@ -153,11 +174,13 @@ message that does not echo credentials. `INCLUDE_DRAFTS` only accepts `true` or
 `CONTENT_SOURCE=api` rejects it with `La API pública no admite INCLUDE_DRAFTS.`.
 Exporting `INCLUDE_DRAFTS=true` before `pnpm build` renders the `borrador` guide
 with the "Borrador · no público" banner and `noindex`, so the route stays out of
-the sitemap and is never part of a public or release build.
+the sitemap and is never part of a public or release build. `ASSET_SOURCE` only accepts
+`own` or `game`; `build:release` requires it explicit (no default) and any other value fails
+with `public-build: invalid-environment`; `ASSET_SOURCE=own` ships no game portraits.
 
 ### Editorial flow
 
-`content/` holds development fixtures and import material. The editorial CLI
+`fixtures/content/` holds development fixtures and import material. The editorial CLI
 edits canonical documents through the PostgreSQL `editor` role, with no accounts
 or write endpoints:
 
@@ -185,7 +208,7 @@ unconfigured until the maintainer makes an explicit decision.
 apps/api/         Fastify + Drizzle API (public read-only)
 packages/domain/  Zod schema, types and shared pure rules
 src/              Angular application (web)
-content/          Development fixtures and import material
+fixtures/content/          Development fixtures and import material
 infra/docker/     Compose, local secrets and role provisioning
 scripts/          Validators, generators and verification gates
 e2e/              Playwright tests
@@ -244,4 +267,4 @@ strings go through Angular i18n so both locales stay complete.
 
 The code currently ships without a declared license: all rights reserved until the
 maintainer chooses one. Third-party editorial content is governed by its own
-licenses and permissions recorded in `content/sources/`.
+licenses and permissions recorded in `fixtures/content/sources/`.

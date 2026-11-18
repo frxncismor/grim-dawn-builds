@@ -6,11 +6,13 @@
 
 ## 0. Decisiones fijas del usuario (2026-11-12)
 
-| Clave                                           | Decisión (texto del usuario, resumido)                                                                                  | Efecto             |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `game_copy=legal`                               | Tiene copia legal del juego; **se pueden leer los `.dbr`** de su instalación.                                           | US1, FR-002–FR-006 |
-| `wiki_license=respetar_la_declarada`            | Se respeta la licencia que declare la wiki **hoy**; verificarla y citarla antes de planificar.                          | FR-007, SC-006     |
-| `third_party_content=datos_sin_texto_ni_imagen` | De las guías del foro se transcriben **solo datos del build**, nunca su texto ni sus imágenes, con **enlace al autor**. | FR-011–FR-014      |
+| Clave                                           | Decisión (texto del usuario, resumido)                                                                                            | Efecto             |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `game_copy=legal`                               | Tiene copia legal del juego; **se pueden leer los `.dbr`** de su instalación.                                                     | US1, FR-002–FR-006 |
+| `wiki_license=respetar_la_declarada`            | Se respeta la licencia que declare la wiki **hoy**; verificarla y citarla antes de planificar.                                    | FR-007, SC-006     |
+| `third_party_content=datos_sin_texto_ni_imagen` | De las guías del foro se transcriben **solo datos del build**, nunca su texto ni sus imágenes, con **enlace al autor**.           | FR-011–FR-014      |
+| `wiki_license=cc_by_sa_4_0`                     | Licencia de la wiki = **CC BY-SA 4.0** (decisión de Paco, 2026-11-13); sustituye la decisión provisional 3.0.                     | §0.1, FR-007, Q1   |
+| `scope_v1=6_maestrias_base`                     | v1 acotada a las **6 maestrías base** `class01`–`class06`; expansiones (AoM, FG, FoA) fuera de v1 (decisión de Paco, 2026-11-13). | US2, SC-001, Q2    |
 
 ### 0.1 Verificación de la licencia de la wiki (hecha hoy, **contradictoria**)
 
@@ -21,18 +23,20 @@ Attribution-ShareAlike **3.0** Unported (CC BY-SA 3.0)», mientras que el **pie 
 wiki dice «Content is available under Creative Commons Attribution-ShareAlike **4.0**
 International (CC BY-SA 4.0) unless otherwise noted» y muestra la insignia de 4.0.
 
-**Resolución propuesta** (requiere tu confirmación escrita, ver pregunta Q1): aplicar la
-licencia **más restrictiva y más explícita para el contenido**, que es la de la página de
-derechos (**CC BY-SA 3.0**), y **no copiar** de la wiki ningún contenido hasta que exista
-esa confirmación. Las obras derivadas de la wiki quedarían bajo CC BY-SA 3.0 con atribución
-y compartición bajo la misma licencia; el catálogo generado solo desde los `.dbr` no
-hereda esa obligación.
+**Resolución decidida** (decisión de Paco, 2026-11-13): se aplica **CC BY-SA 4.0**. Las
+obras derivadas de la wiki irán bajo CC BY-SA 4.0 con atribución y compartición bajo la misma
+licencia (share-alike); el catálogo generado solo desde los `.dbr` no hereda esa obligación.
+La contradicción 3.0/4.0 anterior se conserva como constancia histórica. La wiki **sigue sin
+ser fuente por defecto** (plan §6 / Constitución II): la licencia queda resuelta, pero no
+autoriza scraping.
 
 > **Constancia de derechos**: el arte del juego (iconos, retratos, fondos) es de Crate
-> Entertainment y **no** está incluido en esta spec salvo lo que decida la enmienda 1.10.0
-> (§VII) sobre iconos de habilidad y retratos de maestría, que el usuario ha pedido
-> extender a los retratos en su último mensaje. Lo que sea dato factual del juego (nombre,
-> tier, fila, padre, puntos máximos) se usa como hecho con atribución; **no** se versionan
+> Entertainment. Esta spec solo admite lo que la enmienda 1.10.0 (§VII, aprobada por Paco,
+> 2026-11-13; ratificada en 1.10.1, 2026-11-14: el botón de entrenamiento de `UI.arc` cuenta como retrato) permite: **retratos de maestría** derivados, versionados y servidos por el
+> sitio, y los iconos de habilidad (solo uso local por ahora). **No existe permiso escrito
+> de Crate**: la base es tolerancia de facto asumida como riesgo por el dueño, y la
+> atribución no sustituye al permiso. Lo que sea dato factual del juego (nombre, tier,
+> fila, padre, puntos máximos) se usa como hecho con atribución; **no** se versionan
 > `.dbr`, `.arc` ni traducciones del juego.
 
 ## 1. Resumen y valor
@@ -54,7 +58,7 @@ compatibilidad.
 
 ### US1 (P1) — Ver el árbol completo de una maestría
 
-Como jugador, abro `/maestrias/soldado` y veo el árbol entero del Soldado con todas sus
+Como jugador, abro `/maestrias/soldier` y veo el árbol entero del Soldado con todas sus
 habilidades, en la rejilla del juego, con su tier y su rango máximo, sin depender de una
 guía concreta, también sin JavaScript.
 
@@ -68,7 +72,7 @@ nodos sin ejecutar JavaScript.
 
 **Escenarios**:
 
-1. **Dado** que abro `/maestrias/soldado` con JS y sin JS, **cuando** carga, **entonces** veo
+1. **Dado** que abro `/maestrias/soldier` con JS y sin JS, **cuando** carga, **entonces** veo
    el árbol completo de la maestría con sus nodos posicionados en la rejilla y navego con
    teclado por todos ellos.
 2. **Dado** un nodo, **cuando** lo enfoco o lo leo con lector de pantalla, **entonces**
@@ -76,19 +80,25 @@ nodos sin ejecutar JavaScript.
 
 ### US2 (P2) — Explorar catálogo entre maestrías
 
-Como jugador, navego `/maestrias` y veo las diez maestrías con su retrato, número de
-habilidades y enlace a su árbol, y cambio de una a otra sin recargar la página completa.
+Como jugador, navego `/maestrias` y veo las seis maestrías base (v1) con su retrato, número de
+habilidades y enlace a su árbol, y cambio de una maestría a otra con un clic. Cada maestría es
+una página prerenderizada (plan, decisión 9; T026): el cambio es una navegación por documento,
+sin carga de datos en el cliente. La fluidez tipo Maxroll (cambio sin recarga completa) se revisa
+en spec004.
 
-**Prueba independiente**: la página índice lista las diez maestrías desde el catálogo (no
+**Prueba independiente**: la página índice lista las seis maestrías base (v1) desde el catálogo (no
 desde una lista escrita a mano) y detecta una maestría añadida o quitada con solo cambiar
 el dato.
 
 **Escenarios**:
 
-1. **Dado** el catálogo de diez maestrías, **cuando** abro `/maestrias`, **entonces** veo
-   diez tarjetas con retrato y conteo real de habilidades.
+1. **Dado** el catálogo de seis maestrías base (v1), **cuando** abro `/maestrias`, **entonces** veo
+   seis tarjetas con retrato y conteo real de habilidades.
 2. **Dado** que una maestría no tiene árbol válido, **cuando** abro el índice, **entonces**
    aparece marcada como «sin datos» y no rompe la página.
+3. **Dado** el índice `/maestrias`, **cuando** hago clic en la tarjeta de una maestría,
+   **entonces** llego con un solo clic a `/maestrias/<slug>` con su árbol completo ya en el HTML
+   prerenderizado (navegación por documento, también sin JavaScript).
 
 ### US3 (P3) — La guía se dibuja sobre el árbol canónico
 
@@ -120,6 +130,8 @@ editorial.
 - Versión del juego distinta a la del catálogo: se declara en la página y la guía avisa.
 - Nombres ES/EN ausentes: se muestra el idioma disponible con `lang` explícito y no se
   inventa traducción.
+- Expansiones (AoM, FG, FoA) fuera de v1 (decisión de Paco, 2026-11-13): el esquema no debe
+  impedir añadirlas después.
 
 ## 3. Requisitos
 
@@ -144,7 +156,7 @@ editorial.
   `points_label`) **NO** se derivan del juego: se editan a mano y viven en el documento de
   guía, no en el catálogo.
 - **FR-007** Si se usa la wiki como contraste, **DEBE** registrarse la licencia aplicada
-  (CC BY-SA 3.0/4.0 según Q1), la URL de la revisión y la atribución; cualquier obra
+  (CC BY-SA 4.0, Q1 resuelta), la URL de la revisión y la atribución; cualquier obra
   derivada **DEBE** compartirse bajo la misma licencia. Sin confirmación de la licencia, la
   wiki **NO** se copia.
 - **FR-008** El render **DEBE** ser SVG propio, con un componente que reciba el árbol y la
@@ -162,8 +174,13 @@ editorial.
   transcripción; sin permiso queda como tarjeta _link-only_ con metadatos factuales.
 - **FR-013** **NO** se copia ni se consume la base de datos de Grim Tools (sus términos lo
   prohíben); solo se enlaza.
-- **FR-014** **NO** se versionan `.dbr`, `.arc`, textos de localización ni iconos del juego
-  en el repositorio; solo el JSON derivado y los hashes de procedencia.
+- **FR-014** **NO** se versionan `.dbr`, `.arc`, textos de localización, iconos de habilidad
+  ni fondos del juego en el repositorio; solo el JSON derivado y los hashes de procedencia.
+  **Única excepción** (enmienda 1.10.0, Q3): **retratos de maestría derivados** (PNG/WebP)
+  versionados y servidos por el sitio, solo con entrada `approved` en el manifiesto
+  (`license_or_permission = tolerancia_de_facto_sin_permiso`), atribución visible a Crate,
+  aviso de no afiliación, fallback propio (`ASSET_SOURCE=own|game`) y retirada inmediata si
+  Crate lo pide.
 - **FR-015** La migración **DEBE** mantener compatibles las guías existentes: los
   `skill_nodes` conservan sus campos y ganan una referencia opcional al nodo del catálogo;
   ninguna guía publicada cambia de contenido al migrar.
@@ -174,7 +191,7 @@ editorial.
 
 ### Entidades clave
 
-- **MasteryTree**: maestría con `slug`, nombres EN/ES, retrato (según enmienda §VII),
+- **MasteryTree**: maestría con `slug`, nombres EN/ES, retrato opcional (activo del manifiesto, §VII 1.10.0; sin él, glifo propio),
   `game_version`, y su lista de nodos.
 - **SkillNode** (catálogo): `id` estable, `name_en`, `name_es`, `tier`, `grid {col,row}`,
   `max_points`, `parent_id`, `kind` (habilidad/modificador/transmuter/circular).
@@ -183,7 +200,7 @@ editorial.
 
 ## 4. Criterios de éxito medibles
 
-- **SC-001** Las **diez** maestrías del catálogo validan sin errores y sin nodos huérfanos.
+- **SC-001** Las **seis** maestrías base de v1 del catálogo validan sin errores y sin nodos huérfanos.
 - **SC-002** El script de extracción produce el **mismo JSON** en dos ejecuciones seguidas
   sobre la misma instalación (diff vacío).
 - **SC-003** `/maestrias/<slug>` responde **200** en `/` y `/es` y su HTML prerenderizado
@@ -203,19 +220,25 @@ editorial.
 - El usuario tiene el juego instalado y puede ejecutar el script de extracción en local.
 - La API/PostgreSQL siguen siendo la fuente de verdad de producción; el catálogo se sirve
   por la misma vía que el resto del contenido (vistas públicas), no por un camino paralelo.
-- Lo que decida la enmienda §VII sobre iconos/retratos aplica a la presentación; **si la
-  enmienda no se aprueba**, el catálogo se publica con iconografía propia y sigue siendo
-  válido (el fallback es requisito).
+- La enmienda §VII 1.10.0 (aprobada, 2026-11-13) aplica a la presentación; el catálogo es
+  válido con iconografía propia (`ASSET_SOURCE=own`, por defecto) y el fallback es requisito.
 
 ## 6. Preguntas abiertas (bloquean solo lo que indican)
 
-- **Q1** Licencia de la wiki: el cuerpo dice **CC BY-SA 3.0**, el pie de página **CC BY-SA
-  4.0**. ¿Aplicamos la 3.0 (la del cuerpo, más restrictiva y explícita) y no copiamos nada
-  hasta confirmarlo? Bloquea FR-007 y la copia de coordenadas desde la wiki; **no** bloquea
-  derivar desde los `.dbr`.
-- **Q2** ¿El catálogo incluye solo las diez maestrías del juego base y DLC actual, o también
-  maestrías de mods (que no tendrían posición oficial)? Propuesta: solo el juego oficial en
-  v1, con hueco declarado para mods.
-- **Q3** ¿Se permiten retratos de maestría como arte del juego (lo pediste en tu último
-  mensaje) bajo la enmienda §VII, o esperamos a aprobarla? Bloquea la presentación del
-  índice, no los datos.
+- **Q1** — **Resuelta** (decisión de Paco, 2026-11-13): licencia de la wiki = **CC BY-SA 4.0**
+  (el cuerpo decía 3.0 y el pie 4.0). Desbloquea FR-007; la wiki no pasa a ser fuente por
+  defecto. **Cita verificada** (2026-11-13): cuerpo CC BY-SA 3.0 y pie CC BY-SA 4.0 en
+  `https://grimdawn.miraheze.org/wiki/Project:Copyrights?oldid=82` (revisión de 2020-05-21,
+  `Rostiger Bot`); detalle en `research.md` §T004.
+- **Q2** — **Resuelta** (decisión de Paco, 2026-11-13): solo el juego oficial; v1 = **6
+  maestrías base** (`class01`–`class06`). Expansiones (AoM, FG, FoA) y mods fuera de v1.
+- **Q3** — **Resuelta** (decisión de Paco, 2026-11-13, opción B): los retratos de maestría
+  se **versionan y publican** por el sitio bajo la enmienda §VII 1.10.0 (T029), con
+  manifiesto, atribución, fallback y retirada. Desbloquea T015; riesgo asumido sin permiso
+  escrito de Crate. Análisis en `research.md` §T029.
+  **Aclaración (Paco, 2026-11-13, T015)**: en el juego no hay retrato de maestría (T028);
+  «retrato» = el **botón de maestría del juego** (`skillUpBitmapName`, 197×41), publicado
+  tal cual como cabecera de cada entrada del índice, en PNG.
+
+> Nota (2026-11-13): slug del catálogo en inglés en ambos idiomas (decisión de Paco, 2026-11-13):
+> `/maestrias/soldier` y `/es/maestrias/soldier`; el ejemplo anterior `soldado` queda corregido.

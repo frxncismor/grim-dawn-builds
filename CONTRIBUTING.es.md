@@ -2,7 +2,7 @@
 
 [English](CONTRIBUTING.md) · **Español**
 
-Esta guía describe cómo proponer cambios en Grim Dawn Builds: ramas, entorno
+Esta guía describe cómo proponer cambios en Grim Builds: ramas, entorno
 local, comandos de verificación, reglas de contenido y lista de comprobación
 para pull requests. Aplica a personas y a agentes de implementación.
 
@@ -188,19 +188,24 @@ sección solo añade lo que cambia en otra máquina.
 ## Comandos de verificación
 
 `pnpm verify` ejecuta las comprobaciones locales en este orden y se detiene en la
-primera que falla: `check:scope`, `check:boundaries`, `check:secrets`, typecheck,
-lint y tests del paquete `@gd/domain`, `lint`, `lint:md`, `format:check`, `test`,
-`test:scripts`, `assets:check` y `build`.
+primera que falla (la lista es `VERIFY_STEPS` en `scripts/verify-local.mjs`):
+`check:scope`, `check:boundaries`, `check:secrets`, `check:ci-secrets`, build,
+typecheck, lint y tests del paquete `@gd/domain`, typecheck, lint y tests de
+`@gd/api`, `test:rotation`, `lint`, `typecheck:e2e`, `lint:md`, `format:check`, `test`, `test:scripts`,
+`content:validate`, `catalog:check`, `catalog:nodes`, `check:locale-parity`,
+`assets:check`, `check:contrast`, `build`, `check:public-build` y `check:performance`
+(el último, sobre el artefacto de `build`).
 
 | Comando                                    | Qué comprueba                                                                                                              |
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm verify`                              | Todas las comprobaciones locales anteriores. Ejecútalo antes de abrir un PR.                                               |
 | `pnpm test`                                | Pruebas unitarias de la web (Angular).                                                                                     |
-| `pnpm test:scripts`                        | Pruebas de los scripts de verificación.                                                                                    |
+| `pnpm test:scripts`                        | Pruebas de los scripts de verificación. Importan `@gd/domain` compilado: ejecuta antes `pnpm --filter @gd/domain build`.   |
 | `pnpm --filter @gd/domain test`            | Pruebas del paquete de dominio `packages/domain`.                                                                          |
 | `pnpm --filter @gd/domain typecheck`       | Tipos del paquete de dominio.                                                                                              |
 | `pnpm --filter @gd/domain lint`            | Lint del paquete de dominio.                                                                                               |
 | `pnpm lint`                                | ESLint de la aplicación web.                                                                                               |
+| `pnpm typecheck:e2e`                       | Tipos de los fuentes e2e (`tsconfig.e2e.json`). Forma parte de `verify` y del CI de PR.                                    |
 | `pnpm lint:md`                             | markdownlint sobre todo el Markdown rastreado. Solo comprueba.                                                             |
 | `pnpm lint:md:fix`                         | Aplica las correcciones automáticas seguras de markdownlint. Revisa `git diff` después y vuelve a ejecutar `pnpm lint:md`. |
 | `pnpm format:check`                        | Prettier sobre los archivos incluidos en el script.                                                                        |
@@ -218,10 +223,53 @@ request.
 
 El CI de pull request ejecuta los mismos controles, excepto `pnpm verify` en sí. Además
 ejecuta `pnpm content:validate -- --dir scripts/fixtures/content-valid`, que valida
-solo el fixture, porque `content/builds` aún no tiene contenido (T-014). El CI
+solo el fixture, porque `fixtures/content/builds` aún no tiene contenido (T-014). El CI
 ejecuta `lint:md` solo en modo comprobación; nunca aplica `--fix`.
 
 Gate matrix and language policy: see [docs/quality-gates.md](docs/quality-gates.md).
+
+## Referencias de la regresión visual
+
+El trabajo `visual-regression` del CI de pull request compara 30 capturas de página completa (5 rutas ×
+375/768/1280 × EN/ES) con las referencias de `e2e/visual-baselines/`, con nombre
+`<ruta>-<idioma>-<ancho>.png`. El trabajo construye su propio artefacto con `ASSET_SOURCE=own`, así que no
+interviene ninguna imagen del juego. Cuando falla, sube las imágenes esperada, obtenida y de diferencia como el
+artefacto `visual-regression-report`.
+
+Las referencias se generan **solo en Linux**, nunca con un navegador nativo de Windows o macOS. Hay dos vías
+equivalentes, ambas en Ubuntu 24.04 con la versión de Playwright de `package.json` (`1.65.0`):
+
+### A. Flujo manual de GitHub
+
+1. Sube la rama con el cambio visual previsto.
+2. En GitHub, abre Actions, elige `Visual baselines (Linux)`, escoge la rama y ejecútalo
+   (`workflow_dispatch`). Construye el artefacto `own` y ejecuta `pnpm e2e:visual:update`.
+3. Descarga el artefacto `visual-baselines` de esa ejecución y sustituye los PNG de
+   `e2e/visual-baselines/` por su contenido.
+4. Revisa las diferencias de los PNG en la pull request y haz commit. El flujo nunca hace push.
+
+### B. Docker local (misma familia de imagen, mismo Node que el CI)
+
+Usa la imagen oficial `mcr.microsoft.com/playwright:v1.65.0-noble` (mantén la etiqueta igual a la versión de
+`@playwright/test`). El script instala Node 22.23.5 y pnpm dentro del contenedor, copia el repositorio
+(de `/src` a `/work`) sin `node_modules`, `dist`, `.angular`, `.git`, `test-results`, `playwright-report`, `.env`,
+`.env.*` (salvo `.env.example`, que está versionado) ni `infra/docker/secrets/`, y construye con
+`ASSET_SOURCE=own`, de modo que no entran en el contenedor ni los secretos locales ni los resultados de
+ejecuciones anteriores. La descarga de Node se verifica con un SHA-256 fijado y el script aborta si no coincide.
+La imagen de Playwright se identifica por etiqueta, no por digest. Desde la raíz del repositorio:
+
+```sh
+mkdir -p test-results/visual-out
+docker run --rm --ipc=host   -v "$PWD:/src:ro" -v "$PWD/test-results/visual-out:/out"   -v "$PWD/scripts/visual-baselines-docker.sh:/run.sh:ro"   mcr.microsoft.com/playwright:v1.65.0-noble sh /run.sh update
+cp test-results/visual-out/*.png e2e/visual-baselines/
+```
+
+Compruébalas igual con `sh /run.sh check` (sin montar `/out`). En Windows usa Git Bash con
+`MSYS_NO_PATHCONV=1`. `test-results/` está ignorado por git.
+
+`pnpm e2e:visual` necesita un `dist/` construido (`pnpm build`). Ejecútalo en el host solo para ver
+cómo funciona la comparación: una referencia generada en otra plataforma falla, y
+`pnpm e2e:visual:update` con un navegador del host no debe usarse para hacer commit de referencias.
 
 ## Logs de PostgreSQL en Docker
 
@@ -287,7 +335,7 @@ docker compose -f infra/docker/compose.yaml up -d --no-deps db
 Principio XII de la constitución y plan §13.
 
 - **Nunca** commitees secretos: ni en código, Dockerfiles, `ARG`/`ENV` de imagen,
-  scripts de `package.json`, fixtures de `content/`, `.env.example`, builds del
+  scripts de `package.json`, fixtures de `fixtures/content/`, `.env.example`, builds del
   frontend, logs ni artefactos de CI.
 - Los archivos `.env` locales (salvo `.env.example`) y las carpetas `secrets/` están
   ignorados por git. No los fuerces con `git add -f`.
@@ -329,13 +377,13 @@ especificación.
   una tarjeta de enlace (_link-only_) con metadatos factuales propios.
 - El proyecto no está afiliado con Crate Entertainment ni con GrimTools. Mantén el
   aviso de no afiliación.
-- Los archivos de `content/` son fixtures de desarrollo y material de importación, no
+- Los archivos de `fixtures/content/` son fixtures de desarrollo y material de importación, no
   una fuente de producción (principio VI).
 
 ## Activos oficiales de Grim Dawn
 
 - Iconos, texturas y arte oficial solo se incluyen si el manifiesto de activos
-  (`content/assets/manifest.json`) registra su origen exacto, titular, licencia o permiso
+  (`fixtures/content/assets/manifest.json`) registra su origen exacto, titular, licencia o permiso
   y prueba, con estado `approved`.
 - Mientras no exista esa entrada, se usa arte propio o genérico: los glifos SVG de
   respaldo.

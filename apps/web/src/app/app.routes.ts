@@ -1,7 +1,9 @@
 import { inject, Injector, runInInjectionContext } from '@angular/core';
-import { Routes, type ActivatedRouteSnapshot } from '@angular/router';
+import { Routes, type ActivatedRouteSnapshot, type CanActivateFn } from '@angular/router';
 import { resolveCatalog } from './core/content/catalog.resolver';
 import type { AuthorPageData } from './features/author/author.state';
+import type { PublicMasteryTree } from '@gd/domain';
+import type { MasterySummary } from './core/content/masteries';
 import type { BuildPageContent } from './features/build/build.page';
 
 /**
@@ -20,16 +22,45 @@ function lazyResolver<Result>(
   };
 }
 
+/** Same lazy loading for a guard: the snapshot loader is not part of the initial bundle. */
+const ensurePublicSite: CanActivateFn = (route, state) => {
+  const injector = inject(Injector);
+  return import('./core/content/public-site.guard').then((module) =>
+    runInInjectionContext(injector, () => module.ensurePublicSite(route, state)),
+  );
+};
+
+/** Guards of the mastery pages: a SPA navigation without their snapshot loads the document. */
+const ensureMasteryTreePage: CanActivateFn = (route, state) => {
+  const injector = inject(Injector);
+  return import('./core/content/mastery.guard').then((module) =>
+    runInInjectionContext(injector, () => module.ensureMasteryTree(route, state)),
+  );
+};
+const ensureMasteryIndexPage: CanActivateFn = (route, state) => {
+  const injector = inject(Injector);
+  return import('./core/content/mastery.guard').then((module) =>
+    runInInjectionContext(injector, () => module.ensureMasteryIndex(route, state)),
+  );
+};
+
 const resolveBuildPage = lazyResolver<BuildPageContent | null>(() =>
   import('./core/content/content.resolvers').then((module) => module.resolveBuildPage),
 );
 const resolveAuthor = lazyResolver<AuthorPageData | null>(() =>
   import('./features/author/author.state').then((module) => module.resolveAuthor),
 );
+const resolveMasteryTree = lazyResolver<PublicMasteryTree | null>(() =>
+  import('./core/content/mastery.resolver').then((module) => module.resolveMastery),
+);
+const resolveMasteryIndexPage = lazyResolver<readonly MasterySummary[]>(() =>
+  import('./core/content/mastery-index.resolver').then((module) => module.resolveMasteryIndex),
+);
 
 export const routes: Routes = [
   {
     path: 'acerca',
+    canActivate: [ensurePublicSite],
     loadComponent: () => import('./features/static-pages/about.page').then((m) => m.AboutPage),
   },
   {
@@ -38,11 +69,13 @@ export const routes: Routes = [
   },
   {
     path: 'autores/:slug',
+    canActivate: [ensurePublicSite],
     loadComponent: () => import('./features/author/author.page').then((m) => m.AuthorPage),
     resolve: { author: resolveAuthor },
   },
   {
     path: 'tier-list',
+    canActivate: [ensurePublicSite],
     loadComponent: () => import('./features/tier-list/tier-list.page').then((m) => m.TierListPage),
     resolve: { catalog: resolveCatalog },
   },
@@ -52,7 +85,20 @@ export const routes: Routes = [
     resolve: { content: resolveBuildPage },
   },
   {
+    path: 'maestrias',
+    canActivate: [ensureMasteryIndexPage],
+    loadComponent: () => import('./features/masteries/index.page').then((m) => m.MasteryIndexPage),
+    resolve: { masteries: resolveMasteryIndexPage },
+  },
+  {
+    path: 'maestrias/:slug',
+    canActivate: [ensureMasteryTreePage],
+    loadComponent: () => import('./features/masteries/mastery.page').then((m) => m.MasteryPage),
+    resolve: { mastery: resolveMasteryTree },
+  },
+  {
     path: '',
+    canActivate: [ensurePublicSite],
     loadComponent: () => import('./features/home/home.page').then((m) => m.HomePage),
   },
   {

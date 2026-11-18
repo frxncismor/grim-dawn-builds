@@ -1,4 +1,29 @@
-# Relevo: T-138 cerrada; spec001 sigue abierta
+# Relevo: T-167 cerrada; T-043 lista para firma; spec001 sigue abierta
+
+## Estado actual (2026-11-13)
+
+Corrida de orquestación `11121451` (principal: sesión de Paco; áreas: implementación y
+accesibilidad).
+
+- **Hecha**: T-167 (fachada de video con `lite-youtube-embed`, `frame-src` en la CSP,
+  fallback con timeout, e2e bajo CSP). Evidencia en `tasks.md`.
+- **Preparada, sin firmar**: T-043. `checklists/a11y.md` (77 ítems, EN/ES, incluye la
+  fachada) está lista; falta la revisión manual con teclado y NVDA y la firma de Paco.
+- **Abiertas**: T-043 (firma); T-075 (opcional, no seleccionada); T-092..T-100 (ingesta,
+  requiere spec propio); T-114..T-122 (identidad y comunidad, requiere spec propio);
+  T-144 y T-146 (ver relevo anterior); puerta de cierre spec002 con las cuatro
+  revisiones. Las 6 pruebas `@journeys` de `#devociones` y sin JS requieren construir
+  el artefacto de borradores (`dist/e2e-drafts`) y las 6 de la fachada de video, el de
+  `dist/video-facade-preview`.
+- **Orden local de artefactos (T-171)**: `pnpm --filter @gd/domain build` →
+  `pnpm build` → `pnpm e2e:drafts:build` → `pnpm e2e:video:build` → `pnpm e2e:journeys`
+  y `pnpm e2e:a11y`. La CI construye ambos artefactos antes de journeys.
+
+Sin PR. Las ramas de esta corrida están en el remoto.
+
+---
+
+## Relevo anterior: T-138 cerrada; spec001 sigue abierta
 
 ## Estado actual (2026-11-11, 12:30)
 
@@ -762,8 +787,7 @@ artefacto de borradores (con recarga del enlace compartido); el mismo recorrido 
 ancla con `javaScriptEnabled: false`; y 404 real de la guía pendiente en el
 público.
 
-**Artefacto de borradores**: `$env:INCLUDE_DRAFTS='true'; npx ng build
---output-path dist/e2e-drafts` (aislado, no sobrescribe `dist/grim-dawn-builds`;
+**Artefacto de borradores**: `pnpm e2e:drafts:build` (aislado, no sobrescribe `dist/grim-dawn-builds`;
 7 rutas prerenderizadas). El servidor lo sirve en `E2E_DRAFTS_PORT` (4322) solo si
 existe; si falta, los casos de guía fallan con el comando exacto.
 

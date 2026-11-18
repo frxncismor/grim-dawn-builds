@@ -8,7 +8,13 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PublicAuthorSchema, PublicBuildSchema, PublicSourceSchema } from '@gd/domain';
 import { contractDoc } from '@gd/domain/testing';
-import { prepareSeed, readSeedFixtures, seedData, type SeedData } from '../src/db/seed.mjs';
+import {
+  prepareSeed,
+  readSeedFixtures,
+  seedCatalog,
+  seedData,
+  type SeedData,
+} from '../src/db/seed.mjs';
 
 const root = join(import.meta.dirname, '../../..');
 const image = /^\s+image:\s+(postgres:[^\s]+)$/m.exec(
@@ -26,7 +32,10 @@ function docker(args: string[]): string {
   return result.stdout.trim();
 }
 
-suite('fixture import with a real restricted PostgreSQL role (T-059)', () => {
+// T055: cases shell out to docker exec/psql or spawn the API against a real PostgreSQL; under CPU
+// load they can exceed vitest's default 5 s testTimeout, so the suite carries its own timeout.
+const SUITE_OPTIONS = { timeout: 30_000 };
+suite('fixture import with a real restricted PostgreSQL role (T-059)', SUITE_OPTIONS, () => {
   beforeAll(async () => {
     if (!image || !/@sha256:[a-f0-9]{64}$/.test(image))
       throw new Error('Pinned PostgreSQL image required');
@@ -108,7 +117,7 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', () => {
       connectionTimeoutMillis: 5000,
     });
     await importer.connect();
-    data = await readSeedFixtures(join(root, 'content'));
+    data = await readSeedFixtures(join(root, 'fixtures/content'));
   }, 90000);
   afterAll(async () => {
     await importer?.end().catch(() => undefined);
@@ -117,7 +126,7 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', () => {
   });
 
   it('loads real fixtures twice without duplicating roots or child collections', async () => {
-    const expected = { builds: 1, tierLists: 1 };
+    const expected = { builds: 1, tierLists: 1, masteries: 6, nodes: 186 };
     expect(await seedData(importer!, data)).toEqual(expected);
     const counts = async () =>
       (
@@ -234,6 +243,65 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', () => {
     ).toEqual({ display_name: 'Editor-owned', origin: 'editor' });
   });
 
+  it('seeds a guide that stops using a mastery together with the catalog that retires it (T036, C-003)', async () => {
+    await seedData(importer!, data);
+    const used = (
+      await admin!.query(
+        `SELECT DISTINCT c.mastery_id FROM build_skill_nodes b
+         JOIN catalog_skill_nodes c ON c.id = b.skill_node_id ORDER BY 1`,
+      )
+    ).rows.map((r) => r.mastery_id as string);
+    const retired = used[0]!;
+    const build = data.builds[0]!;
+    const kept = build.skill_nodes.filter((n) => !n.skill_node_id?.startsWith(`${retired}/`));
+    const keptSlugs = new Set(kept.map((n) => n.slug));
+    const rewritten: SeedData = {
+      ...data,
+      catalog: data.catalog.filter((t) => t.mastery.id !== retired),
+      builds: [
+        {
+          ...build,
+          skill_nodes: kept,
+          priorities: build.priorities.map((p) => ({
+            ...p,
+            skill_node_slugs: p.skill_node_slugs.filter((slug) => keptSlugs.has(slug)),
+          })),
+        },
+      ],
+    };
+    expect(rewritten.builds[0]!.skill_nodes.length).toBeLessThan(build.skill_nodes.length);
+    try {
+      await seedData(importer!, rewritten);
+      expect(
+        (await admin!.query('SELECT 1 FROM mastery_trees WHERE id = $1', [retired])).rowCount,
+      ).toBe(0);
+    } finally {
+      await seedData(importer!, data);
+    }
+  });
+
+  it('seeds a retired mastery and a new one with the same slug in a single full seed (T041, C-101/F-001)', async () => {
+    await seedData(importer!, data);
+    const base = data.catalog[0]!;
+    const reused = (id: string): SeedData['catalog'][number] => ({
+      ...base,
+      mastery: { ...base.mastery, id, slug: 'reused-slug' },
+      nodes: [{ ...base.nodes[0]!, id: `${id}/root`, parent_id: null }],
+    });
+    try {
+      await seedData(importer!, { ...data, catalog: [...data.catalog, reused('class98')] });
+      await seedData(importer!, { ...data, catalog: [...data.catalog, reused('class99')] });
+      expect(
+        (await admin!.query("SELECT id FROM mastery_trees WHERE slug='reused-slug'")).rows,
+      ).toEqual([{ id: 'class99' }]);
+      expect((await admin!.query("SELECT 1 FROM mastery_trees WHERE id='class98'")).rowCount).toBe(
+        0,
+      );
+    } finally {
+      await seedData(importer!, data);
+    }
+  });
+
   it('refuses bootstrap and editor-owned records without changing stored content', async () => {
     const slug = data.authors[0]!.slug;
     await admin!.query("UPDATE authors SET origin='editor' WHERE slug=$1", [slug]);
@@ -244,5 +312,197 @@ suite('fixture import with a real restricted PostgreSQL role (T-059)', () => {
     );
     await expect(seedData(importer!, data)).rejects.toThrow('bootstrapped');
     expect((await admin!.query('SELECT count(*)::int AS count FROM builds')).rows[0].count).toBe(2);
+  });
+
+  describe('mastery catalog (spec 003 T024)', () => {
+    const snapshot = async () =>
+      (
+        await admin!.query(`SELECT
+        (SELECT json_agg(t ORDER BY id) FROM (SELECT id, slug, name_en, name_es, game_version, source_sha256, created_at FROM mastery_trees) t) AS trees,
+        (SELECT json_agg(n ORDER BY id) FROM (SELECT id, mastery_id, name_en, name_es, kind, circular, tier, bar_required, grid_col, grid_row, max_points, ultimate_points, parent_id, icon, created_at FROM catalog_skill_nodes) n) AS nodes`)
+      ).rows[0];
+    const asApiRo = async (sql: string) => {
+      await admin!.query('SET ROLE api_ro');
+      try {
+        return (await admin!.query(sql)).rows[0];
+      } finally {
+        await admin!.query('RESET ROLE');
+      }
+    };
+
+    it('api_ro sees 6 masteries and 186 nodes after seeding, and a second run keeps the same state', async () => {
+      await seedCatalog(importer!, data.catalog);
+      expect(
+        await asApiRo(
+          'SELECT (SELECT count(*) FROM v_public_mastery_trees)::int AS m, (SELECT count(*) FROM v_public_skill_nodes)::int AS n',
+        ),
+      ).toEqual({ m: 6, n: 186 });
+      const first = await snapshot();
+      await seedCatalog(importer!, data.catalog);
+      expect(await snapshot()).toEqual(first);
+    });
+
+    it('reflects a fixture regenerated with one node fewer (stale node and re-pointed child)', async () => {
+      const modified = structuredClone(data);
+      const tree = modified.catalog[0]!;
+      const victim = tree.nodes.find((n) => n.parent_id !== null && n.tier >= 3)!;
+      const kids = tree.nodes.filter((n) => n.parent_id === victim.id);
+      for (const k of kids) k.parent_id = victim.parent_id; // keep schema-valid parent chain
+      tree.nodes = tree.nodes.filter((n) => n.id !== victim.id);
+      await seedCatalog(importer!, modified.catalog);
+      const rows = await admin!.query('SELECT count(*)::int AS n FROM catalog_skill_nodes');
+      expect(rows.rows[0].n).toBe(185);
+      expect(
+        (await admin!.query('SELECT 1 FROM catalog_skill_nodes WHERE id=$1', [victim.id])).rowCount,
+      ).toBe(0);
+      await seedCatalog(importer!, data.catalog);
+      expect(
+        (await admin!.query('SELECT count(*)::int AS n FROM catalog_skill_nodes')).rows[0].n,
+      ).toBe(186);
+    });
+
+    const retiredTree = (): SeedData['catalog'][number] => ({
+      mastery: { id: 'class09', slug: 'retired-test', name: { en: 'Retired', es: 'Retirada' } },
+      game_version: data.catalog[0]!.game_version,
+      source: { game_version: data.catalog[0]!.game_version, sha256: ['b'.repeat(64)] },
+      nodes: [
+        {
+          id: 'class09/root',
+          name: { en: 'Root', es: 'Raíz' },
+          kind: 'active',
+          circular: false,
+          tier: 1,
+          bar_required: 1,
+          max_points: 5,
+          grid: { col: 1, row: 0 },
+          parent_id: null,
+        },
+      ],
+    });
+
+    it('retires a mastery absent from the catalog together with its nodes when no guide uses it (T007)', async () => {
+      await seedCatalog(importer!, [...data.catalog, retiredTree()]);
+      expect(
+        (await admin!.query("SELECT count(*)::int AS n FROM mastery_trees WHERE id='class09'"))
+          .rows[0].n,
+      ).toBe(1);
+      await expect(seedCatalog(importer!, data.catalog)).resolves.toEqual({
+        masteries: 6,
+        nodes: 186,
+      });
+      expect((await admin!.query('SELECT count(*)::int AS n FROM mastery_trees')).rows[0].n).toBe(
+        6,
+      );
+      expect(
+        (
+          await admin!.query(
+            "SELECT count(*)::int AS n FROM catalog_skill_nodes WHERE mastery_id='class09'",
+          )
+        ).rows[0].n,
+      ).toBe(0);
+    });
+
+    it('retires a mastery and creates another with the same slug in a single seed (T041, C-101/F-001)', async () => {
+      const reused = (id: string): SeedData['catalog'][number] => {
+        const tree = retiredTree();
+        return {
+          ...tree,
+          mastery: { ...tree.mastery, id, slug: 'reused-slug' },
+          nodes: tree.nodes.map((n) => ({ ...n, id: `${id}/root` })),
+        };
+      };
+      await seedCatalog(importer!, [...data.catalog, reused('class09')]);
+      // class09 disappears and class10 takes its slug: one seed, no UNIQUE(slug) clash.
+      await expect(seedCatalog(importer!, [...data.catalog, reused('class10')])).resolves.toEqual({
+        masteries: 7,
+        nodes: 187,
+      });
+      expect(
+        (await admin!.query("SELECT id FROM mastery_trees WHERE slug='reused-slug'")).rows,
+      ).toEqual([{ id: 'class10' }]);
+      expect(
+        (await admin!.query("SELECT count(*)::int AS n FROM mastery_trees WHERE id='class09'"))
+          .rows[0].n,
+      ).toBe(0);
+      await seedCatalog(importer!, data.catalog);
+    });
+
+    it('swaps the slugs of two kept masteries in a single seed (T041)', async () => {
+      const swapped = structuredClone(data.catalog);
+      const [a, b] = [swapped[0]!.mastery, swapped[1]!.mastery];
+      [a.slug, b.slug] = [b.slug, a.slug];
+      await seedCatalog(importer!, swapped);
+      expect(
+        (
+          await admin!.query('SELECT id, slug FROM mastery_trees WHERE id = ANY($1) ORDER BY id', [
+            [a.id, b.id],
+          ])
+        ).rows,
+      ).toEqual(
+        [a, b].sort((x, y) => x.id.localeCompare(y.id)).map(({ id, slug }) => ({ id, slug })),
+      );
+      await seedCatalog(importer!, data.catalog);
+    });
+
+    it('still names the mastery when a retired one frees a slug but a guide uses it (T041, FR-012)', async () => {
+      const used = (
+        await admin!.query(
+          `SELECT DISTINCT c.mastery_id FROM build_skill_nodes b
+           JOIN catalog_skill_nodes c ON c.id = b.skill_node_id ORDER BY 1`,
+        )
+      ).rows.map((r) => r.mastery_id as string);
+      const retired = used[0]!;
+      const retiredSlug = data.catalog.find((t) => t.mastery.id === retired)!.mastery.slug;
+      const before = await snapshot();
+      const modified = structuredClone(data.catalog).filter((t) => t.mastery.id !== retired);
+      const fresh = retiredTree();
+      fresh.mastery.slug = retiredSlug;
+      modified.push(fresh);
+      await expect(seedCatalog(importer!, modified)).rejects.toMatchObject({
+        code: 'reference',
+        detail: retired,
+      });
+      expect(await snapshot()).toEqual(before);
+    });
+
+    it('aborts without partial changes and names the mastery when a guide uses a retired one (T007)', async () => {
+      const used = (
+        await admin!.query(
+          `SELECT DISTINCT c.mastery_id FROM build_skill_nodes b
+           JOIN catalog_skill_nodes c ON c.id = b.skill_node_id ORDER BY 1`,
+        )
+      ).rows.map((r) => r.mastery_id as string);
+      expect(used.length).toBeGreaterThan(0);
+      const retired = used[0]!;
+      const before = await snapshot();
+      const modified = structuredClone(data.catalog).filter((t) => t.mastery.id !== retired);
+      modified[0]!.mastery.name.en = 'Must not persist';
+      const failure = await seedCatalog(importer!, modified).then(
+        () => undefined,
+        (error: unknown) => error,
+      );
+      expect(failure).toMatchObject({ name: 'SeedError', code: 'reference' });
+      expect((failure as Error).message).toContain(retired);
+      expect(failure).toMatchObject({ detail: retired });
+      expect((failure as Error).message).not.toMatch(/DELETE|violates|catalog_skill_nodes/i);
+      expect(await snapshot()).toEqual(before);
+    });
+
+    it('does not retire anything when the catalog still lists every mastery (T007)', async () => {
+      const before = await snapshot();
+      await seedCatalog(importer!, data.catalog);
+      await seedCatalog(importer!, data.catalog);
+      expect(await snapshot()).toEqual(before);
+    });
+
+    it('rolls the whole catalog back if one tree cannot be written', async () => {
+      const before = await snapshot();
+      const modified = structuredClone(data.catalog);
+      modified[5]!.nodes[0]!.name.en = 'Must roll back';
+      modified[5]!.nodes[1]!.grid.row = modified[5]!.nodes[2]!.grid.row;
+      modified[5]!.nodes[1]!.grid.col = modified[5]!.nodes[2]!.grid.col;
+      await expect(seedCatalog(importer!, modified)).rejects.toThrow('database-failed');
+      expect(await snapshot()).toEqual(before);
+    });
   });
 });

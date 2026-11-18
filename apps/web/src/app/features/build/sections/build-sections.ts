@@ -54,6 +54,28 @@ export class BuildSections {
   });
 
   readonly orderedPriorities = computed(() => this.content().priorities);
+
+  /**
+   * T028 (F-10): the ranked rows repeat the same transcription phrase ("Dato transcrito: barra N,
+   * nodo del árbol de X."). The shared lead clause is said once above the list and the tail that only
+   * repeats the group label is dropped, so each row is a single line; unranked rows keep their note.
+   */
+  readonly priorityLead = computed(() => {
+    const ranked = this.orderedPriorities().filter((row) => row.rank !== null);
+    const leads = ranked.map((row) => /^([^:]+):\s/.exec(row.note)?.[1] ?? null);
+    const first = leads[0];
+    return ranked.length > 1 && first && leads.every((lead) => lead === first) ? first : null;
+  });
+  readonly priorityRows = computed(() => {
+    const lead = this.priorityLead();
+    return this.orderedPriorities().map((row) => {
+      if (!lead || row.rank === null) return { ...row, detail: row.note };
+      const body = row.note.slice(lead.length + 1).trim();
+      const comma = body.lastIndexOf(',');
+      const repeatsGroup = comma >= 0 && body.slice(comma).includes(row.group_label);
+      return { ...row, detail: (repeatsGroup ? body.slice(0, comma) : body).replace(/\.$/u, '') };
+    });
+  });
   readonly orderedNotes = computed(() =>
     [...this.content().notes].sort((a, b) => a.position - b.position),
   );

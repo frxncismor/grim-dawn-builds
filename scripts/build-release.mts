@@ -1,3 +1,10 @@
+import {
+  assertAssetStatusParity,
+  assertGameAssets,
+  assertNoGamePortraits,
+  assertPortraitCredit,
+  assertSkillIconCredit,
+} from './check-assets.mts';
 import { createPublicBuildEnv } from './public-build-env.mts';
 import { assertPublicBuild, sensitiveValues } from './check-public-build.mts';
 import { spawn } from 'node:child_process';
@@ -23,6 +30,33 @@ export function publicBuildEnv(input: Environment): Record<string, string> {
 interface BuildDependencies {
   request?: typeof fetch;
   build?: (output: string, env: Record<string, string>) => Promise<void>;
+  /**
+   * Emits the site's own static files (mastery trees `assets/mastery-trees/*.json` of T017 and the deferred styles `assets/deferred.css` of T033) into the staging with the release
+   * environment (API source, no fallback). It runs in a child process: `scripts/` may not import
+   * the web zone. Any failure fails the release.
+   */
+  emitTrees?: (output: string, env: Record<string, string>) => Promise<void>;
+}
+
+/** Slugs the API publishes from `v_public_assets` (approved rows only); anything unreadable fails the release. */
+async function fetchPublicAssets(base: string, request: typeof fetch): Promise<{ slug: string }[]> {
+  try {
+    const response = await request(new URL('api/v1/assets', base), {
+      redirect: 'error',
+      credentials: 'omit',
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.status !== 200) throw new Error();
+    const body: unknown = await response.json();
+    if (!Array.isArray(body)) throw new Error();
+    return body.map((item: unknown) => {
+      const slug = (item as { slug?: unknown } | null)?.slug;
+      if (typeof slug !== 'string') throw new Error();
+      return { slug };
+    });
+  } catch {
+    throw new Error('Release no pudo leer el estado de los activos de la API (/api/v1/assets).');
+  }
 }
 
 export async function runRelease(
@@ -46,6 +80,12 @@ export async function runRelease(
   const staging = await mkdtemp(join(dist, '.release-'));
   try {
     const childEnv = publicBuildEnv({ ...env, API_BASE_URL: base });
+    // Fail closed before building: game art needs a valid manifest and every portrait approved.
+    if (childEnv['ASSET_SOURCE'] === 'game') {
+      assertGameAssets(root);
+      // A-03: the repository manifest decides; the table must agree (only `game` ships assets by status).
+      assertAssetStatusParity(root, await fetchPublicAssets(base, dependencies.request ?? fetch));
+    }
     const webRoot = join(root, 'apps', 'web');
     const build =
       dependencies.build ??
@@ -68,6 +108,35 @@ export async function runRelease(
         });
       });
     await build(staging, childEnv);
+    const emitTrees =
+      dependencies.emitTrees ??
+      (async (output: string, environment: Record<string, string>) => {
+        await new Promise<void>((resolveEmit, reject) => {
+          const child = spawn(
+            process.execPath,
+            [
+              '--import',
+              'tsx',
+              join(root, 'apps', 'web', 'tools', 'emit-static-assets.mts'),
+              '--dir',
+              output,
+            ],
+            { cwd: root, env: environment, stdio: 'inherit', windowsHide: true, shell: false },
+          );
+          child.once('error', () => reject(new Error('Emisión de árboles falló.')));
+          child.once('exit', (code) =>
+            code === 0 ? resolveEmit() : reject(new Error('Emisión de árboles falló.')),
+          );
+        });
+      });
+    // Before the public-build scan and the fingerprint, so the trees are verified and hashed.
+    await emitTrees(staging, childEnv);
+    // S-001: an `own` artifact never carries the game's portraits, whatever the build copied.
+    assertNoGamePortraits(staging, childEnv['ASSET_SOURCE'] ?? '');
+    // T047: the credit to Crate goes with the game's portraits on every page, and only with them.
+    assertPortraitCredit(staging, childEnv['ASSET_SOURCE'] ?? '');
+    // T053 (A-01/S-001): the same for the skill icons and their `[data-game-art-credit]`.
+    assertSkillIconCredit(staging, childEnv['ASSET_SOURCE'] ?? '');
     await assertPublicBuild(staging, sensitiveValues(env));
     await finalizeStaticHome(staging);
     const budgets = await measureInitialRoutes(staging);

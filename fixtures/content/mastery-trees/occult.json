@@ -1,0 +1,621 @@
+{
+  "mastery": {
+    "id": "class03",
+    "slug": "occult",
+    "name": {
+      "en": "Occultist",
+      "es": "Ocultista"
+    }
+  },
+  "game_version": "steam-build-25813250",
+  "source": {
+    "game_version": "steam-build-25813250",
+    "sha256": [
+      "9e3532250cdb611a4cc989997c8f97fcec2d6c422063a845e6c43cd538c30603",
+      "82defd8a0fddf71e8491b7494fada51b034b1af14ffc0a6cf9c8aabdf8700c25",
+      "e6f785d155d0791b3100092762111f59a06faa9e1a86d91898ec98317e395752"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "class03/evileye1",
+      "name": {
+        "en": "Dreeg's Evil Eye",
+        "es": "El Ojo Malvado de Dreeg"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_evileye1up.tex",
+      "icon_id": "ic-7109d811f90e410d"
+    },
+    {
+      "id": "class03/curse1",
+      "name": {
+        "en": "Curse of Frailty",
+        "es": "Maldición de Debilidad"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 319
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_curse1up.tex",
+      "icon_id": "ic-e36983ce20ec17e3"
+    },
+    {
+      "id": "class03/summon_raven1",
+      "name": {
+        "en": "Summon Familiar",
+        "es": "Invocar Familiar"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 1,
+      "bar_required": 1,
+      "grid": {
+        "col": 1,
+        "row": 389
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon1up.tex",
+      "icon_id": "ic-c553e0cab25b1787"
+    },
+    {
+      "id": "class03/witchfire1",
+      "name": {
+        "en": "Solael's Witchfire",
+        "es": "Fuego de Brujas de Solael"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_witchfireenchantment1up.tex",
+      "icon_id": "ic-64e21962560767cf"
+    },
+    {
+      "id": "class03/evileye2",
+      "name": {
+        "en": "Blood Burst",
+        "es": "Explosión de Sangre"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/evileye1",
+      "icon": "ui/skills/icons/class03/skillicon_evileye2up.tex",
+      "icon_id": "ic-b269ac964ee9ab97"
+    },
+    {
+      "id": "class03/pox1",
+      "name": {
+        "en": "Bloody Pox",
+        "es": "Plaga Sangrienta"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_pox1up.tex",
+      "icon_id": "ic-b51690c3ec206b63"
+    },
+    {
+      "id": "class03/summon_raven2_petmodifier",
+      "name": {
+        "en": "Mend Flesh",
+        "es": "Aliviar Carne"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 2,
+      "bar_required": 5,
+      "grid": {
+        "col": 2,
+        "row": 389
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": "class03/summon_raven1",
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon2up.tex",
+      "icon_id": "ic-5622f82dd07921ac"
+    },
+    {
+      "id": "class03/sigilofdestruction1",
+      "name": {
+        "en": "Sigil of Consumption",
+        "es": "Sello de Consumo"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_sigilofdestruction1up.tex",
+      "icon_id": "ic-9128b268542e3d19"
+    },
+    {
+      "id": "class03/evileye1b",
+      "name": {
+        "en": "Focused Gaze",
+        "es": "Mirada Concentrada"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 211
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class03/evileye1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
+    },
+    {
+      "id": "class03/curse2",
+      "name": {
+        "en": "Vulnerability",
+        "es": "Vulnerabilidad"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 319
+      },
+      "max_points": 10,
+      "ultimate_points": 20,
+      "parent_id": "class03/curse1",
+      "icon": "ui/skills/icons/class03/skillicon_curse2up.tex",
+      "icon_id": "ic-b3112ee878901beb"
+    },
+    {
+      "id": "class03/summon_hellhound1",
+      "name": {
+        "en": "Summon Hellhound",
+        "es": "Invocar Sabueso Infernal"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 3,
+      "bar_required": 10,
+      "grid": {
+        "col": 3,
+        "row": 459
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon1up.tex",
+      "icon_id": "ic-e8e05998d586561d"
+    },
+    {
+      "id": "class03/witchfire1b",
+      "name": {
+        "en": "Consecrated Blade",
+        "es": "Hoja Consagrada"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 71
+      },
+      "max_points": 3,
+      "ultimate_points": 3,
+      "parent_id": "class03/witchfire1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
+    },
+    {
+      "id": "class03/pox1b",
+      "name": {
+        "en": "Fevered Rage",
+        "es": "Furia Febril"
+      },
+      "kind": "transmuter",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 211
+      },
+      "max_points": 1,
+      "ultimate_points": 1,
+      "parent_id": "class03/pox1",
+      "icon": "ui/skills/icons/skillicon_transmuter01up.tex",
+      "icon_id": "ic-9c2f9b54c6184656"
+    },
+    {
+      "id": "class03/bloodofdreeg1",
+      "name": {
+        "en": "Blood of Dreeg",
+        "es": "Sangre de Dreeg"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 319
+      },
+      "max_points": 16,
+      "ultimate_points": 26,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_bloodofdreeg1up.tex",
+      "icon_id": "ic-1d6f9e45eb698a12"
+    },
+    {
+      "id": "class03/summon_raven3_petmodifier",
+      "name": {
+        "en": "Storm Spirit",
+        "es": "Tormenta Espiritual"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 4,
+      "bar_required": 15,
+      "grid": {
+        "col": 4,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/summon_raven1",
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon3up.tex",
+      "icon_id": "ic-a23f37b40fb15e4e"
+    },
+    {
+      "id": "class03/evileye3",
+      "name": {
+        "en": "Terrifying Gaze",
+        "es": "Mirada Aterradora"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/evileye1",
+      "icon": "ui/skills/icons/class03/skillicon_evileye3up.tex",
+      "icon_id": "ic-3f81e10cc5a8a0aa"
+    },
+    {
+      "id": "class03/pox2",
+      "name": {
+        "en": "Wasting",
+        "es": "Debilitación"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/pox1",
+      "icon": "ui/skills/icons/class03/skillicon_pox2up.tex",
+      "icon_id": "ic-f1eed3080d42d8b7"
+    },
+    {
+      "id": "class03/summon_hellhound2_petmodifier",
+      "name": {
+        "en": "Ember Claw",
+        "es": "Garra de Ascuas"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 5,
+      "bar_required": 20,
+      "grid": {
+        "col": 5,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/summon_hellhound1",
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon2up.tex",
+      "icon_id": "ic-e3cf944e24550a22"
+    },
+    {
+      "id": "class03/sigilofdestruction2",
+      "name": {
+        "en": "Destruction",
+        "es": "Destrucción"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/sigilofdestruction1",
+      "icon": "ui/skills/icons/class03/skillicon_sigilofdestruction2up.tex",
+      "icon_id": "ic-6fca3082447e2b2a"
+    },
+    {
+      "id": "class03/witchfire2",
+      "name": {
+        "en": "Second Rite",
+        "es": "Segundo Rito"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/witchfire1",
+      "icon": "ui/skills/icons/class03/skillicon_witchfireenchantment2up.tex",
+      "icon_id": "ic-962d60cb6c269363"
+    },
+    {
+      "id": "class03/summon_raven4_petmodifier",
+      "name": {
+        "en": "Lightning Strike",
+        "es": "Golpe de Relámpagos"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 6,
+      "bar_required": 25,
+      "grid": {
+        "col": 6,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/summon_raven1",
+      "icon": "ui/skills/icons/class03/skillicon_ravensummon4up.tex",
+      "icon_id": "ic-7ba4effebe95826a"
+    },
+    {
+      "id": "class03/bloodofdreeg2",
+      "name": {
+        "en": "Aspect of the Guardian",
+        "es": "Aspecto del Guardián"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 319
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/bloodofdreeg1",
+      "icon": "ui/skills/icons/class03/skillicon_bloodofdreeg2up.tex",
+      "icon_id": "ic-c66eac6d185bdfed"
+    },
+    {
+      "id": "class03/bondsofbysmiel1",
+      "name": {
+        "en": "Bonds of Bysmiel",
+        "es": "Grilletes de Bysmiel"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_bondsofbysmiel1up.tex",
+      "icon_id": "ic-74a48d689b418b42"
+    },
+    {
+      "id": "class03/summon_hellhound3_petmodifier",
+      "name": {
+        "en": "Hellfire",
+        "es": "Fuego Infernal"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 7,
+      "bar_required": 32,
+      "grid": {
+        "col": 7,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/summon_hellhound1",
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon3up.tex",
+      "icon_id": "ic-59680f77dce513be"
+    },
+    {
+      "id": "class03/doombolt1",
+      "name": {
+        "en": "Doom Bolt",
+        "es": "Rayo de la Muerte"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 39
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_doombolt1up.tex",
+      "icon_id": "ic-19d48d78fb4bbb0a"
+    },
+    {
+      "id": "class03/evileye4",
+      "name": {
+        "en": "Vile Eruption",
+        "es": "Erupción Vil"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 179
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/evileye1",
+      "icon": "ui/skills/icons/class03/skillicon_evileye4up.tex",
+      "icon_id": "ic-094d7c9ee6ace22f"
+    },
+    {
+      "id": "class03/pox3",
+      "name": {
+        "en": "Black Death",
+        "es": "Muerte Negra"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 8,
+      "bar_required": 40,
+      "grid": {
+        "col": 8,
+        "row": 249
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/pox1",
+      "icon": "ui/skills/icons/class03/skillicon_pox3up.tex",
+      "icon_id": "ic-5840ebdae83c5226"
+    },
+    {
+      "id": "class03/possession1",
+      "name": {
+        "en": "Possession",
+        "es": "Posesión"
+      },
+      "kind": "active",
+      "circular": false,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 109
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": null,
+      "icon": "ui/skills/icons/class03/skillicon_possession1up.tex",
+      "icon_id": "ic-09ce81c3517444b5"
+    },
+    {
+      "id": "class03/bondsofbysmiel2",
+      "name": {
+        "en": "Manipulation",
+        "es": "Manipulación"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 389
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/bondsofbysmiel1",
+      "icon": "ui/skills/icons/class03/skillicon_bondsofbysmiel2up.tex",
+      "icon_id": "ic-67e9bc81f9fcb3c8"
+    },
+    {
+      "id": "class03/summon_hellhound4_petmodifier",
+      "name": {
+        "en": "Infernal Breath",
+        "es": "Aliento Infernal"
+      },
+      "kind": "modifier",
+      "circular": true,
+      "tier": 9,
+      "bar_required": 50,
+      "grid": {
+        "col": 9,
+        "row": 459
+      },
+      "max_points": 12,
+      "ultimate_points": 22,
+      "parent_id": "class03/summon_hellhound1",
+      "icon": "ui/skills/icons/class03/skillicon_hellhoundsummon4up.tex",
+      "icon_id": "ic-6b1cb57e3edba173"
+    }
+  ]
+}

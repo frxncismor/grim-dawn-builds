@@ -1,0 +1,142 @@
+.masteries {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+.masteries__header {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--reading-measure);
+}
+.masteries__header h1,
+.masteries__header p {
+  margin: 0;
+}
+.masteries__header p {
+  color: var(--color-ash);
+}
+.masteries__list {
+  display: grid;
+  max-width: 44rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: var(--frame-border);
+  background: var(--surface-sheen), var(--color-panel);
+  box-shadow: var(--frame-bevel);
+}
+.mastery-row {
+  position: relative;
+  gap: var(--space-4);
+  padding-inline: var(--space-5);
+}
+.mastery-row + .mastery-row {
+  border-block-start: var(--frame-border);
+}
+.mastery-row:has(a:hover) {
+  background: var(--color-panel-2);
+}
+.mastery-row__name {
+  min-width: 0;
+  color: var(--color-bone);
+  font-family: var(--font-display);
+  font-size: var(--text-heading);
+  font-weight: var(--weight-display);
+  line-height: var(--line-heading);
+  text-decoration: none;
+}
+/* The whole row is the click target; the name carries the accessible link. */
+a.mastery-row__name::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+a.mastery-row__name:hover {
+  color: var(--color-storm);
+}
+a.mastery-row__name:focus-visible {
+  outline: none;
+}
+.mastery-row:has(a:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: calc(var(--focus-offset) * -1);
+}
+.mastery-row__name--muted {
+  color: var(--color-ash);
+}
+.mastery-row__meta {
+  display: inline-flex;
+  flex: none;
+  align-items: baseline;
+  gap: var(--space-2);
+  color: var(--color-ash);
+}
+.mastery-row__number {
+  color: var(--color-bone);
+  font-size: var(--text-large);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-emphasis);
+}
+.mastery-row__meta--empty {
+  color: var(--color-ember);
+  font-weight: var(--weight-emphasis);
+}
+
+/*
+ * Row art. The game button is 197x41 and is shown at that size: width/height come from the
+ * manifest, so the box is reserved before the PNG arrives and never stretched or cropped. The
+ * button already carries its own frame, so it gets no border, radius or shadow of ours. The
+ * project's own icon (32x32) sits in the same first column.
+ */
+.mastery-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'art name meta';
+  align-items: center;
+  padding-block: var(--space-3);
+}
+.mastery-row__art {
+  display: block;
+  grid-area: art;
+  max-inline-size: 100%;
+  block-size: auto;
+}
+.mastery-row__name {
+  grid-area: name;
+}
+.mastery-row__meta {
+  grid-area: meta;
+}
+/*
+ * On a phone the count drops under the name so the name keeps the whole line (F-03): beside it the
+ * name was left with about 95px and broke inside the word. The 197px game button takes its own line.
+ */
+@media (max-width: 35.99rem) {
+  .mastery-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'art name'
+      'art meta';
+    row-gap: var(--space-1);
+    align-items: center;
+  }
+  .mastery-row--game {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'art'
+      'name'
+      'meta';
+    row-gap: var(--space-2);
+  }
+  /* The longest name (Demolitionist) is 249px at the heading size and 229px is all a 375px row leaves. */
+  .mastery-row__name {
+    font-size: calc(var(--text-heading) * 0.8);
+    overflow-wrap: normal;
+  }
+}
+.masteries__credit {
+  max-width: var(--reading-measure);
+  margin: 0;
+  color: var(--color-ash);
+  font-size: var(--text-base);
+}

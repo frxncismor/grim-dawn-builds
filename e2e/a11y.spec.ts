@@ -30,6 +30,12 @@ const ROUTES = [
   { name: 'guía es', path: '/es/builds/chaman-demoledor-golpe-primigenio' },
   { name: 'acerca es', path: '/es/acerca' },
   { name: 'legal es', path: '/es/legal' },
+  { name: 'índice de maestrías', path: '/maestrias' },
+  { name: 'índice de maestrías es', path: '/es/maestrias' },
+  { name: 'árbol soldier', path: '/maestrias/soldier' },
+  { name: 'árbol demolition', path: '/maestrias/demolition' },
+  { name: 'árbol soldier es', path: '/es/maestrias/soldier' },
+  { name: 'árbol demolition es', path: '/es/maestrias/demolition' },
 ] as const;
 type RouteDefinition = (typeof ROUTES)[number];
 
@@ -288,3 +294,338 @@ test.describe('@a11y prueba negativa del detector', () => {
     expect(() => expectGate('fixture sin alt', result)).toThrow(/image-alt/);
   });
 });
+
+/** Luminancia relativa y razón de contraste WCAG 2.x entre dos colores `rgb()/rgba()`. */
+function channels(color: string): [number, number, number] {
+  const match = color.match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+  if (!match) throw new Error(`Color no interpretable: ${color}`);
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+function luminance(color: string): number {
+  const [r, g, b] = channels(color).map((value) => {
+    const c = value / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  }) as [number, number, number];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function contrast(a: string, b: string): number {
+  const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
+  return (light + 0.05) / (dark + 0.05);
+}
+
+/** T013 (spec 003, SC-004): teclado, foco visible y axe con un nodo del árbol enfocado. */
+const TREE_ROUTES = ROUTES.filter((route) => route.path.includes('/maestrias/demolition'));
+for (const route of TREE_ROUTES) {
+  test.describe(`@a11y árbol de maestría con teclado (${route.path})`, () => {
+    const activeNode = (page: Page) =>
+      page.evaluate(() => {
+        const element = document.activeElement;
+        return {
+          id: element?.getAttribute('data-skill-id') ?? null,
+          tag: element?.tagName.toLowerCase() ?? null,
+          canvas: element?.classList.contains('skill-tree__canvas') ?? false,
+        };
+      });
+
+    async function focusFirstNode(page: Page): Promise<void> {
+      await openRoute(page, route);
+      await expectAppBundles(page, route.path);
+      await settle(page);
+      await page
+        .locator('h1')
+        .focus({ timeout: 100 })
+        .catch(() => undefined);
+      await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      // Tab hasta el contenedor desplazable del diagrama y una más hasta el nodo itinerante.
+      let reachedCanvas = false;
+      for (let presses = 0; presses < 60 && !reachedCanvas; presses++) {
+        await page.keyboard.press('Tab');
+        reachedCanvas = (await activeNode(page)).canvas;
+      }
+      expect(reachedCanvas, 'Tab debe alcanzar el diagrama del árbol').toBe(true);
+      await page.keyboard.press('Tab');
+      const node = await activeNode(page);
+      expect(node.id, 'el siguiente Tab debe caer en un nodo del árbol').not.toBeNull();
+    }
+
+    test('Tab llega al árbol y el indicador de foco del nodo tiene contraste ≥ 3:1', async ({
+      page,
+    }) => {
+      await focusFirstNode(page);
+      const focus = await page.evaluate(() => {
+        const element = document.activeElement as Element;
+        const style = getComputedStyle(element);
+        const canvas = document.querySelector('.skill-tree__canvas') as Element;
+        return {
+          outlineStyle: style.outlineStyle,
+          outlineWidth: Number.parseFloat(style.outlineWidth),
+          outlineColor: style.outlineColor,
+          background: getComputedStyle(canvas).backgroundColor,
+        };
+      });
+      expect(focus.outlineStyle, 'el nodo enfocado debe dibujar un contorno').not.toBe('none');
+      expect(focus.outlineWidth).toBeGreaterThanOrEqual(2);
+      expect(
+        contrast(focus.outlineColor, focus.background),
+        `contraste del indicador de foco (${focus.outlineColor} sobre ${focus.background})`,
+      ).toBeGreaterThanOrEqual(3);
+    });
+
+    test('axe sin violaciones critical/serious con un nodo enfocado', async ({ page }) => {
+      await focusFirstNode(page);
+      expectGate(`${route.path} · nodo enfocado`, await audit(page));
+    });
+
+    test('flechas mueven el foco, Enter abre el detalle y Escape lo cierra devolviendo el foco', async ({
+      page,
+    }) => {
+      await focusFirstNode(page);
+      const first = (await activeNode(page)).id!;
+      await page.keyboard.press('End');
+      const last = (await activeNode(page)).id!;
+      expect(last, 'End debe mover el foco al último nodo').not.toBe(first);
+      await page.keyboard.press('Home');
+      expect((await activeNode(page)).id, 'Home vuelve al primer nodo').toBe(first);
+      let moved = false;
+      for (const key of ['ArrowRight', 'ArrowDown']) {
+        await page.keyboard.press(key);
+        if ((await activeNode(page)).id !== first) {
+          moved = true;
+          break;
+        }
+      }
+      expect(moved, 'alguna flecha debe mover el foco a otro nodo').toBe(true);
+      await page.keyboard.press('Home');
+
+      const close = page.locator('[data-close-detail]');
+      await expect(close).toHaveCount(0);
+      await page.keyboard.press('Enter');
+      await expect(close, 'Enter abre el detalle con su botón de cierre').toHaveCount(1);
+      await expect(page.locator('[role="tooltip"] .skill-tree__tooltip-name')).not.toHaveText('');
+      await page.keyboard.press('Escape');
+      await expect(close, 'Escape cierra el detalle').toHaveCount(0);
+      expect((await activeNode(page)).id, 'el foco vuelve al nodo').toBe(first);
+    });
+  });
+}
+
+/**
+ * T027 (spec 003, US2): el índice `/maestrias` se recorre con teclado. Tab pasa por las seis
+ * filas (un enlace por maestría) con un indicador de foco visible de contraste ≥ 3:1 y Enter
+ * abre la maestría.
+ */
+const INDEX_ROUTES = ROUTES.filter((route) => /^(\/es)?\/maestrias$/.test(route.path));
+for (const route of INDEX_ROUTES) {
+  test.describe(`@a11y índice de maestrías con teclado (${route.path})`, () => {
+    const focused = (page: Page) =>
+      page.evaluate(() => {
+        const link = document.activeElement?.closest('a');
+        const row = document.activeElement?.closest('[data-mastery]');
+        const target = (row ?? document.activeElement) as Element;
+        const style = getComputedStyle(target);
+        return {
+          slug: row?.getAttribute('data-mastery') ?? null,
+          href: link?.getAttribute('href') ?? null,
+          outlineStyle: style.outlineStyle,
+          outlineWidth: Number.parseFloat(style.outlineWidth),
+          outlineColor: style.outlineColor,
+          background: getComputedStyle(row ?? document.body).backgroundColor,
+        };
+      });
+
+    test('Tab recorre las seis filas con foco visible y contraste ≥ 3:1', async ({ page }) => {
+      await openRoute(page, route);
+      await expectAppBundles(page, route.path);
+      await settle(page);
+      await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      const visited: string[] = [];
+      for (let presses = 0; presses < 40 && visited.length < 6; presses++) {
+        await page.keyboard.press('Tab');
+        const state = await focused(page);
+        if (!state.slug) continue;
+        visited.push(state.slug);
+        expect(
+          state.outlineStyle,
+          `${state.slug}: la fila enfocada debe dibujar contorno`,
+        ).not.toBe('none');
+        expect(state.outlineWidth).toBeGreaterThanOrEqual(2);
+        expect(
+          contrast(state.outlineColor, state.background),
+          `contraste del foco de ${state.slug} (${state.outlineColor} sobre ${state.background})`,
+        ).toBeGreaterThanOrEqual(3);
+      }
+      expect(visited, 'Tab debe pasar por las seis maestrías en orden').toEqual([
+        'arcanist',
+        'demolition',
+        'nightblade',
+        'occult',
+        'shaman',
+        'soldier',
+      ]);
+    });
+
+    test('Enter sobre una fila abre la maestría', async ({ page }) => {
+      await openRoute(page, route);
+      await expectAppBundles(page, route.path);
+      await settle(page);
+      const prefix = route.path.startsWith('/es') ? '/es' : '';
+      await page.locator('[data-mastery="demolition"] a').focus();
+      await page.keyboard.press('Enter');
+      await page.waitForURL(`**${prefix}/maestrias/demolition`);
+      await expect(page.locator('h1')).toHaveCount(1);
+    });
+  });
+}
+
+/** T017 (spec 003, US3): la guía con los árboles canónicos cargados (modo asignación), EN y ES. */
+for (const route of [
+  { name: 'guía con árboles canónicos', path: '/builds/chaman-demoledor-golpe-primigenio' },
+  { name: 'guía con árboles canónicos es', path: '/es/builds/chaman-demoledor-golpe-primigenio' },
+]) {
+  test.describe(`@a11y ${route.name} (${route.path})`, () => {
+    test('axe sin violaciones critical/serious y 14 nodos asignados', async ({ page }) => {
+      await page.goto(`${BASE_URL}${route.path}`, { waitUntil: 'networkidle' });
+      await page.locator('#habilidades').scrollIntoViewIfNeeded();
+      await expect(page.locator('#habilidades [data-skill-id][data-assigned="true"]')).toHaveCount(
+        14,
+      );
+      await settle(page);
+      expectGate(`${route.path} · modo asignación`, await audit(page));
+    });
+
+    test('Tab llega a un nodo asignado y su indicador de foco tiene contraste ≥ 3:1', async ({
+      page,
+    }) => {
+      await page.goto(`${BASE_URL}${route.path}`, { waitUntil: 'networkidle' });
+      await page.locator('#habilidades').scrollIntoViewIfNeeded();
+      await expect(page.locator('#habilidades [data-skill-id][data-assigned="true"]')).toHaveCount(
+        14,
+      );
+      await page.locator('#habilidades [data-skill-id][data-assigned="true"]').first().focus();
+      const focus = await page.evaluate(() => {
+        const element = document.activeElement as Element;
+        const style = getComputedStyle(element);
+        const canvas = element.closest('.skill-tree__canvas') as Element;
+        return {
+          assigned: element.getAttribute('data-assigned'),
+          outlineStyle: style.outlineStyle,
+          outlineWidth: Number.parseFloat(style.outlineWidth),
+          outlineColor: style.outlineColor,
+          background: getComputedStyle(canvas).backgroundColor,
+        };
+      });
+      expect(focus.assigned).toBe('true');
+      expect(focus.outlineStyle).not.toBe('none');
+      expect(focus.outlineWidth).toBeGreaterThanOrEqual(2);
+      expect(contrast(focus.outlineColor, focus.background)).toBeGreaterThanOrEqual(3);
+    });
+  });
+}
+
+/**
+ * spec004 T018: portada y catálogo con tarjetas. Las rutas base ya pasan axe en ROUTES; aquí se
+ * audita lo que ese pase no ve: la sección «sin guía» desplegada, el catálogo filtrado por una
+ * maestría y el teclado sobre la tarjeta destacada (un único enlace con foco visible).
+ */
+const T018_CATALOGS = [
+  { name: 'catálogo', path: '/tier-list' },
+  { name: 'catálogo es', path: '/es/tier-list' },
+  { name: 'catálogo filtrado', path: '/tier-list?m=arcanista' },
+  { name: 'catálogo filtrado es', path: '/es/tier-list?m=arcanista' },
+] as const;
+
+for (const route of T018_CATALOGS) {
+  test.describe(`@a11y T018 ${route.name} (${route.path})`, () => {
+    test('sección sin guía desplegada con teclado: axe sin violaciones critical/serious', async ({
+      page,
+    }) => {
+      const response = await page.goto(`${BASE_URL}${route.path}`, { waitUntil: 'networkidle' });
+      expect(response?.status(), `${route.path} debe existir en el artefacto`).toBe(200);
+      await settle(page);
+      const summary = page.locator('details.unguided > summary');
+      await expect(summary).toHaveCount(1);
+      // Teclado: Tab hasta el resumen y Enter lo despliega (sin ratón).
+      await summary.focus();
+      await expect(summary).toBeFocused();
+      await page.keyboard.press('Enter');
+      await expect(page.locator('details.unguided')).toHaveJSProperty('open', true);
+      expectGate(`${route.path} · sin guía desplegada`, await audit(page));
+    });
+  });
+}
+
+for (const catalog of [
+  { path: '/tier-list', name: /^Shaman \+ Demolitionist\s*\. Unverified/i },
+  { path: '/es/tier-list', name: /Chamán \+ Demoledor.*\. Sin verificar/i },
+] as const) {
+  test.describe(`@a11y T052 tarjeta del catálogo (${catalog.path})`, () => {
+    test('el enlace de la guía no mezcla idiomas y nombra combinación y estado', async ({
+      page,
+    }) => {
+      await page.goto(`${BASE_URL}${catalog.path}`, { waitUntil: 'networkidle' });
+      await settle(page);
+      const link = page.locator('gd-build-card a[href*="/builds/"]').first();
+      await expect(link).not.toHaveAttribute('aria-label', /.*/);
+      await expect(link).not.toHaveAttribute('lang', /.*/);
+      await expect(link).toHaveAccessibleName(catalog.name);
+    });
+  });
+}
+
+for (const home of [
+  { name: 'portada', path: '/' },
+  { name: 'portada es', path: '/es' },
+] as const) {
+  test.describe(`@a11y T018 ${home.name} (${home.path})`, () => {
+    test('la tarjeta destacada es un único destino con nombre completo y foco visible', async ({
+      page,
+    }) => {
+      const response = await page.goto(`${BASE_URL}${home.path}`, { waitUntil: 'networkidle' });
+      expect(response?.status()).toBe(200);
+      await settle(page);
+      const link = page.locator('gd-build-card [data-variant="featured"] a');
+      await expect(link, 'un solo enlace por tarjeta').toHaveCount(1);
+      await expect(link, 'sin aria-label ni lang que mezclen idiomas').not.toHaveAttribute(
+        'aria-label',
+        /.*/,
+      );
+      await expect(link).not.toHaveAttribute('lang', /.*/);
+      // EN (T023, FR-038): nombre con las maestrías en inglés y el título editorial en español aparte;
+      // ES: título editorial + combinación y estado en el idioma de la interfaz (FR-003/FR-004).
+      await expect(
+        link,
+        'el nombre accesible incluye la combinación y el estado',
+      ).toHaveAccessibleName(
+        home.path === '/'
+          ? /^Shaman \+ Demolitionist\s*\. (Unverified|Verified)/i
+          : /Chamán \+ Demoledor.*\. (Sin verificar|Verificado)/i,
+      );
+      if (home.path === '/')
+        await expect(page.locator('[data-variant="featured"] .build-card__combination')).toHaveText(
+          /Chamán \+ Demoledor/,
+        );
+      if (home.path === '/')
+        await expect(
+          page.locator('[data-variant="featured"] .build-card__combination'),
+          'el título en español lleva lang="es"',
+        ).toHaveAttribute('lang', 'es');
+      await expect(link.locator('[lang]'), 'sin lang dentro del enlace').toHaveCount(0);
+      await link.focus();
+      const focus = await page.evaluate(() => {
+        const card = document.querySelector('[data-variant="featured"]') as HTMLElement;
+        const style = getComputedStyle(card);
+        return {
+          outlineStyle: style.outlineStyle,
+          outlineWidth: Number.parseFloat(style.outlineWidth),
+          outlineColor: style.outlineColor,
+          background: getComputedStyle(document.body).backgroundColor,
+          size: card.getBoundingClientRect().height,
+        };
+      });
+      expect(focus.outlineStyle, 'la tarjeta enfocada dibuja contorno').not.toBe('none');
+      expect(focus.outlineWidth).toBeGreaterThanOrEqual(2);
+      expect(contrast(focus.outlineColor, focus.background)).toBeGreaterThanOrEqual(3);
+      expect(focus.size, 'área clicable ≥ 44 px').toBeGreaterThanOrEqual(44);
+    });
+  });
+}

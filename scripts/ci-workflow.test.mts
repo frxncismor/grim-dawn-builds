@@ -36,6 +36,8 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm --filter @gd/api lint',
   'pnpm --filter @gd/api test',
   'pnpm run lint',
+  // Spec 004 T001: the e2e sources are type-checked in PR verification (debt B-001).
+  'pnpm run typecheck:e2e',
   'pnpm run lint:md',
   'pnpm run format:check',
   'pnpm run test',
@@ -43,16 +45,25 @@ export const REQUIRED_RUN_COMMANDS = [
   'pnpm run content:validate -- --dir scripts/fixtures/content-valid',
   'pnpm run assets:check',
   'pnpm run build',
+  // T035: brand gate and secret scan of the public build.
+  'pnpm run check:public-build',
   // T-126: real fixture content, catalog freshness and the quality gates.
-  'pnpm run content:validate -- --dir content',
+  'pnpm run content:validate -- --dir fixtures/content',
   'pnpm run catalog:check',
+  // Spec 003 T007: mastery-tree catalog validator.
+  'pnpm run catalog:nodes',
   // T-150: the en/es catalogs must match in PR verification too.
   'pnpm run check:locale-parity',
-  'pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
+  // T-177: ng build plus emit-static-assets (portraits, skill icons, trees, deferred.css).
+  'pnpm run e2e:drafts:build',
+  // T-171: the video facade preview artifact must exist before the journeys run.
+  'pnpm run e2e:video:build',
   'pnpm exec playwright install --with-deps chromium',
   'pnpm run e2e:journeys',
   'pnpm run e2e:a11y',
   'pnpm run check:performance',
+  // spec005 T017: visual regression job (own artifact, Linux baselines).
+  'pnpm run e2e:visual',
   // T-128: backend budgets consume the report produced by the API integration tests.
   'pnpm exec tsx scripts/check-performance.mts --backend',
   // T-066b: static container rules and the Trivy image-scan gate.
@@ -351,7 +362,41 @@ export function validateCiWorkflow(source: string): string[] {
   return problems;
 }
 
+// T035: first `pnpm run build` and `pnpm run check:public-build` in the verify job.
+function publicCheckAfterBuild(yaml: string): boolean {
+  const lines = yaml.split('\n');
+  const build = lines.indexOf('        run: pnpm run build');
+  const check = lines.indexOf('        run: pnpm run check:public-build');
+  return build !== -1 && check !== -1 && build < check;
+}
+
 describe('PR verification workflow (T-064)', () => {
+  it('every job that builds the web artifact fixes ASSET_SOURCE explicitly (T036, S-001/S-003)', () => {
+    const text = readFileSync(WORKFLOW_URL, 'utf8').replace(/\r\n/g, '\n');
+    const lines = text.split('\n');
+    const jobs = lines
+      .map((line, index) => ({ line, index }))
+      .filter(({ line }) => /^ {2}[a-z][\w-]*:\s*$/.test(line));
+    let checked = 0;
+    jobs.forEach(({ line, index }, k) => {
+      const end = jobs[k + 1]?.index ?? lines.length;
+      const block = lines.slice(index, end);
+      if (!block.some((entry) => /^\s+run: pnpm run build\s*$/.test(entry))) return;
+      checked += 1;
+      const envLines = block.filter((entry) => /^ {6}ASSET_SOURCE:/.test(entry));
+      // spec005 T017: the visual-regression job is the one `own` build (no game PNG in the repo).
+      const expected = /^ {2}visual-regression:/.test(line)
+        ? 'ASSET_SOURCE: own'
+        : 'ASSET_SOURCE: game';
+      assert.deepEqual(
+        envLines.map((entry) => entry.trim()),
+        [expected],
+        `${line.trim()} must set ${expected} at job level`,
+      );
+    });
+    assert.ok(checked >= 3, 'the verify, dast and visual-regression jobs build the artifact');
+  });
+
   // Normalise CRLF so the line-based mutations match on Windows checkouts too.
   const real = readFileSync(WORKFLOW_URL, 'utf8').replace(/\r\n/g, '\n');
 
@@ -367,6 +412,17 @@ describe('PR verification workflow (T-064)', () => {
     assert.deepEqual(validateCiWorkflow(withValidator), []);
   });
 
+  it('rejects the public build check before the web build or missing (T035)', () => {
+    // Swap the two commands: the check then runs before the build.
+    const moved = real
+      .replace('        run: pnpm run build\n', '        run: @@\n')
+      .replace('        run: pnpm run check:public-build\n', '        run: pnpm run build\n')
+      .replace('        run: @@\n', '        run: pnpm run check:public-build\n');
+    assert.notEqual(moved, real, 'the swap must change the workflow');
+    assert.equal(publicCheckAfterBuild(moved), false);
+    assert.equal(publicCheckAfterBuild(real.replace('pnpm run check:public-build', 'true')), false);
+  });
+
   it('runs content, drafts build, e2e/axe and performance in order, with performance last (T-126)', () => {
     const lines = real.split('\n');
     const runLine = (command: string): number => lines.indexOf(`        run: ${command}`);
@@ -379,11 +435,11 @@ describe('PR verification workflow (T-064)', () => {
     const fixtureContent = indexOf(
       'pnpm run content:validate -- --dir scripts/fixtures/content-valid',
     );
-    const realContent = indexOf('pnpm run content:validate -- --dir content');
+    const realContent = indexOf('pnpm run content:validate -- --dir fixtures/content');
     const catalog = indexOf('pnpm run catalog:check');
-    const draftsBuild = indexOf(
-      'pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
-    );
+    const publicBuildCheck = indexOf('pnpm run check:public-build');
+    const draftsBuild = indexOf('pnpm run e2e:drafts:build');
+    const videoBuild = indexOf('pnpm run e2e:video:build');
     const journeys = indexOf('pnpm run e2e:journeys');
     const a11y = indexOf('pnpm run e2e:a11y');
     const apiTests = indexOf('pnpm --filter @gd/api test');
@@ -393,7 +449,16 @@ describe('PR verification workflow (T-064)', () => {
     assert.ok(fixtureContent < realContent, 'real content validation goes after the fixture one');
     assert.ok(realContent < catalog, 'catalog:check goes after the content validation');
     assert.ok(catalog < draftsBuild, 'the drafts build needs the validated content');
+    assert.ok(
+      publicCheckAfterBuild(real),
+      'the public build check runs after the web build (T035)',
+    );
+    assert.ok(
+      publicBuildCheck < journeys,
+      'the public build check runs before the journeys (T035)',
+    );
     assert.ok(draftsBuild < journeys, 'journeys need the drafts artifact');
+    assert.ok(videoBuild < journeys, 'journeys need the video facade preview artifact (T-171)');
     assert.ok(draftsBuild < a11y, 'axe runs on the built artifact');
     assert.ok(journeys < performance, 'performance measures the built artifact and runs last');
     assert.ok(a11y < performance, 'performance measures the built artifact and runs last');
@@ -478,7 +543,7 @@ describe('PR verification workflow (T-064)', () => {
     assert.ok(zapWeb < evaluate && zapApi < evaluate, 'check-dast decides after both scans');
 
     // The raw ZAP reports are never uploaded: only the redacted checker output is.
-    const dastBlock = lines.slice(jobIndex).join('\n');
+    const dastBlock = blockAfter(lines, jobIndex).join('\n');
     assert.doesNotMatch(dastBlock, /upload-artifact/);
   });
 
@@ -559,7 +624,7 @@ describe('PR verification workflow (T-064)', () => {
       'playwright install removed',
       () =>
         mutate(
-          /\n {6}- name: Install Playwright[^\n]*\n {8}run: pnpm exec playwright install --with-deps chromium\n/,
+          /\n {6}- name: Install Playwright[^\n]*\n {8}run: pnpm exec playwright install --with-deps chromium\n/g,
           '\n',
         ),
     ],
@@ -567,14 +632,34 @@ describe('PR verification workflow (T-064)', () => {
       'real content validation removed',
       () =>
         mutate(
-          /\n {6}- name: Content validation \(real fixture content\)\n {8}run: pnpm run content:validate -- --dir content\n/,
+          /\n {6}- name: Content validation \(real fixture content\)\n {8}run: pnpm run content:validate -- --dir fixtures\/content\n/,
           '\n',
         ),
     ],
     [
-      'drafts build overwrites the public artifact',
+      // T-177: a bare ng build skips emit-static-assets, so the artifact has no game art.
+      'drafts build is a bare ng build without emit-static-assets (T-177)',
       () =>
-        mutate('--output-path ../../dist/e2e-drafts', '--output-path ../../dist/grim-dawn-builds'),
+        mutate(
+          'run: pnpm run e2e:drafts:build',
+          'run: pnpm --filter @gd/web exec ng build --output-path ../../dist/e2e-drafts',
+        ),
+    ],
+    [
+      'video facade preview build removed (T-171)',
+      () =>
+        mutate(
+          /\n {6}- name: Build video facade preview artifact\n {8}run: pnpm run e2e:video:build\n/,
+          '\n',
+        ),
+    ],
+    [
+      'public build check removed (T035)',
+      () =>
+        mutate(
+          /\n {6}- name: Public build check[^\n]*\n {8}run: pnpm run check:public-build\n/,
+          '\n',
+        ),
     ],
     [
       'drafts build without INCLUDE_DRAFTS',
@@ -684,4 +769,65 @@ describe('PR verification workflow (T-064)', () => {
       assert.notDeepEqual(validateCiWorkflow(build()), []);
     });
   }
+});
+
+describe('visual regression (spec005 T017, FR-033 a FR-036)', () => {
+  const real = readFileSync(WORKFLOW_URL, 'utf8').replace(/\r\n/g, '\n');
+  const BASELINES_URL = new URL('../.github/workflows/visual-baselines.yml', import.meta.url);
+  const jobBlock = (text: string, name: string): string[] => {
+    const lines = text.split('\n');
+    const index = lines.findIndex((line) => line === `  ${name}:`);
+    assert.notEqual(index, -1, `missing job ${name}`);
+    return blockAfter(lines, index);
+  };
+  const stepIndex = (block: readonly string[], run: string): number =>
+    block.findIndex((line) => line.trim() === `run: ${run}`);
+
+  it('ci.yml has a visual-regression job with its own own-source build, minimal permissions and a failure report', () => {
+    const block = jobBlock(real, 'visual-regression');
+    // Comments are documentation: only configuration is checked.
+    const text = block.filter((line) => !/^\s*#/.test(line)).join('\n');
+    assert.match(text, /runs-on: ubuntu-24\.04/);
+    assert.match(text, /^ {6}ASSET_SOURCE: own$/m);
+    assert.match(text, /^ {6}CONTENT_SOURCE: fixture$/m);
+    assert.match(text, /timeout-minutes: \d+/);
+    assert.match(text, /permissions:\n {6}contents: read/);
+    const build = stepIndex(block, 'pnpm run build');
+    const browser = stepIndex(block, 'pnpm exec playwright install --with-deps chromium');
+    const visual = stepIndex(block, 'pnpm run e2e:visual');
+    assert.ok(build !== -1 && browser !== -1 && visual !== -1, 'build, browser and e2e:visual');
+    assert.ok(build < visual && browser < visual, 'the comparison runs after build and browser');
+    assert.doesNotMatch(
+      text,
+      /e2e:visual:update|--update-snapshots/,
+      'CI never updates references',
+    );
+    assert.match(text, /if: failure\(\)/);
+    assert.match(text, /actions\/upload-artifact@[0-9a-f]{40} # v\d+\.\d+\.\d+/);
+    assert.match(text, /playwright-report\/visual|test-results\/visual/);
+  });
+
+  it('visual-regression runs in parallel with verify (no needs)', () => {
+    assert.doesNotMatch(jobBlock(real, 'visual-regression').join('\n'), /^ {4}needs:/m);
+  });
+
+  it('visual-baselines.yml is manual, builds own, updates on Linux, uploads and never pushes', () => {
+    const text = readFileSync(BASELINES_URL, 'utf8').replace(/\r\n/g, '\n');
+    const code = text
+      .split('\n')
+      .filter((line) => !/^\s*#/.test(line))
+      .join('\n');
+    assert.match(code, /^on:\n {2}workflow_dispatch:/m);
+    assert.doesNotMatch(code, /pull_request|push:|schedule:/);
+    assert.match(code, /runs-on: ubuntu-24\.04/);
+    assert.match(code, /ASSET_SOURCE: own/);
+    assert.match(code, /CONTENT_SOURCE: fixture/);
+    assert.match(code, /run: pnpm run build/);
+    assert.match(code, /run: pnpm run e2e:visual:update/);
+    assert.match(code, /actions\/upload-artifact@[0-9a-f]{40} # v\d+\.\d+\.\d+/);
+    assert.match(code, /e2e\/visual-baselines/);
+    assert.match(code, /permissions:\n {2}contents: read/);
+    assert.doesNotMatch(code, /git (push|commit)|contents: write|secrets\./);
+    assert.doesNotMatch(code, /\t/);
+  });
 });

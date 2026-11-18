@@ -215,6 +215,7 @@ export async function editData(
       assets: [...input.dependencies.assets],
       builds: input.kind === 'build' ? [input.document as BuildDocument] : [],
       tierLists: input.kind === 'tier-list' ? [input.document as TierList] : [],
+      catalog: [],
     };
     const references: NonNullable<ContentWritePolicy['references']> = {
       authors: new Map(),

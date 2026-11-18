@@ -25,13 +25,13 @@ a ninguno de los dos archivos, que siguen siendo la fuente de verdad.
 | Comprobación de formato                                  | `pnpm format:check`                                                                               | yes                   | yes     | yes        | T-002           |
 | Pruebas unitarias de la web                              | `pnpm test`                                                                                       | yes                   | yes     | yes        | T-002           |
 | Pruebas de scripts                                       | `pnpm test:scripts`                                                                               | yes                   | yes     | yes        | T-004           |
-| Validación de contenido (contenido del repositorio)      | `pnpm run content:validate -- --dir content`                                                      | yes                   | yes     | yes        | T-009           |
+| Validación de contenido (contenido del repositorio)      | `pnpm run content:validate -- --dir fixtures/content`                                             | yes                   | yes     | yes        | T-009           |
 | Comprobación del catálogo                                | `pnpm run catalog:check`                                                                          | yes                   | yes     | yes        | T-016           |
 | Paridad de locales                                       | `pnpm run check:locale-parity`                                                                    | yes                   | yes     | yes        | T-138           |
 | Manifiesto de activos                                    | `pnpm assets:check`                                                                               | yes                   | yes     | yes        | T-047           |
 | Contraste                                                | `pnpm check:contrast`                                                                             | yes                   | no      | no         | T-135           |
 | Build de la web                                          | `pnpm build`                                                                                      | yes                   | yes     | yes        | T-001           |
-| Guardia del artefacto público                            | `pnpm check:public-build`                                                                         | yes                   | no      | no         | T-084           |
+| Guardia del artefacto público                            | `pnpm check:public-build`                                                                         | yes                   | yes     | yes        | T-084           |
 | Presupuestos de rendimiento                              | `pnpm check:performance`                                                                          | yes                   | yes     | yes        | T-042           |
 | Instalación de dependencias (lockfile congelado)         | `pnpm install --frozen-lockfile`                                                                  | no                    | yes     | yes        | T-064           |
 | Secretos del flujo de trabajo de CI (comando de CI)      | `pnpm exec tsx scripts/check-ci-secrets.mts`                                                      | no                    | yes     | yes        | T-086           |
@@ -42,15 +42,17 @@ a ninguno de los dos archivos, que siguen siendo la fuente de verdad.
 | Build de la imagen de la API (sin push)                  | `docker build --file apps/api/Dockerfile --tag gd-api:ci .`                                       | no                    | yes     | yes        | T-065           |
 | La imagen de la API se ejecuta sin ser root              | `test "$(docker run --rm gd-api:ci id -u)" != "0"`                                                | no                    | yes     | yes        | T-065           |
 | Validación de contenido (fixture)                        | `pnpm run content:validate -- --dir scripts/fixtures/content-valid`                               | no                    | yes     | yes        | T-064           |
-| Build del artefacto de borradores (aislado)              | `pnpm exec ng build --output-path dist/e2e-drafts`                                                | no                    | yes     | yes        | T-126           |
+| Build del artefacto de borradores (aislado)              | `pnpm e2e:drafts:build`                                                                           | no                    | yes     | yes        | T-126           |
+| Build de la vista previa de la fachada de video          | `pnpm e2e:video:build`                                                                            | no                    | yes     | yes        | T-171           |
 | Instalación de Chromium de Playwright                    | `pnpm exec playwright install --with-deps chromium`                                               | no                    | yes     | yes        | T-126           |
 | Recorridos E2E                                           | `pnpm run e2e:journeys`                                                                           | no                    | yes     | yes        | T-040           |
 | Puerta de accesibilidad (axe)                            | `pnpm run e2e:a11y`                                                                               | no                    | yes     | yes        | T-041           |
+| Regresión visual (referencias de Linux)                  | `pnpm run e2e:visual`                                                                             | no                    | yes     | yes        | T017            |
 | Informe de origen del artefacto                          | `test ! -f dist/build-info.json; echo "CONTENT_SOURCE=…"`                                         | no                    | yes     | yes        | T-126           |
 
 `pnpm verify` ejecuta 25 pasos en orden y se detiene en el primer fallo, así que los
 pasos posteriores no informan mientras una puerta anterior está en rojo. El job
-`verify` de CI ejecuta 35 comandos `run:`: los mismos 21 controles que la ejecución
+`verify` de CI ejecuta 36 comandos `run:`: los mismos 22 controles que la ejecución
 local, salvo `pnpm verify` en sí, más 14 comandos que solo existen en el flujo de
 trabajo (instalación de dependencias, la cadena de herramientas de gitleaks, la
 imagen de PostgreSQL fijada, las comprobaciones de contenedores, la validación del
@@ -58,6 +60,14 @@ fixture, el artefacto de borradores, la instalación de Playwright, las suites E
 axe y el informe de origen del artefacto). La comprobación de secretos del flujo de
 trabajo de CI aparece dos veces porque ambos runners invocan el mismo script
 mediante comandos distintos.
+
+La puerta de regresión visual es el job de CI independiente `visual-regression`,
+paralelo a `verify`, así que no es uno de los 36 comandos `run:` anteriores ni se
+ejecuta en `pnpm verify`. Compara 30 capturas con las referencias de
+`e2e/visual-baselines/`, que solo son válidas si se generan en Linux (el flujo manual
+`Visual baselines (Linux)` o la imagen de Docker); con un navegador nativo de Windows
+o macOS falla por diseño. El procedimiento está en
+[CONTRIBUTING.es.md](../CONTRIBUTING.es.md#referencias-de-la-regresión-visual).
 
 ## Cabeceras de seguridad del artefacto (T-166)
 
@@ -93,9 +103,9 @@ declarada del hosting divergen.
 - **Regla.** Los documentos públicos son en inglés primario, con una contraparte en
   español llamada `*.es.md`.
 - **Cobertura actual.** `README.md`, `CONTRIBUTING.md`, `docs/quality-gates.md` y
-  todos los documentos bajo `docs/orchestration/` se entregan en ambos idiomas. Los
-  documentos bajo `docs/content/` siguen solo en español y quedan fuera del alcance
-  de T-158.
+  todos los documentos bajo `docs/orchestration/` se entregan en ambos idiomas. Bajo
+  `docs/content/`, `mastery-catalog.md` se entrega en ambos idiomas (spec 003,
+  T019/T020); el resto sigue solo en español y queda fuera del alcance de T-158.
 - **Artefactos internos de SDD** (`specs/**`, `handoff.md`, `plan.md`, `tasks.md`):
   solo en español, como permite la constitución; no se exige paridad.
 - **Qué comprueba la automatización.** `pnpm check:locale-parity` compara los
@@ -104,3 +114,5 @@ declarada del hosting divergen.
 - **Deuda de traducción.** Llevar los documentos públicos estables a ambos idiomas
   está registrado en T-158 (sin fecha). Mientras tanto, un documento público nuevo o
   se entrega en ambos idiomas o registra la deuda en su tarea.
+
+**Guardia del artefacto público (T034).** `pnpm check:public-build` corre después de `pnpm build` y comprueba primero el artefacto `dist/grim-dawn-builds/browser`: falla (nunca salta) si falta, si tiene 5 páginas o menos o si alguna página prerrenderizada conserva la marca antigua «Grim Dawn Builds». El mismo detector vive en `scripts/check-legacy-brand.mts` y, copiado (una prueba comprueba que coinciden), en `apps/web/src/brand.test.mts`, que revisa las fuentes; `pnpm test:scripts` no lee `dist/`. El job `verify` de CI la ejecuta justo después del build web (T035).

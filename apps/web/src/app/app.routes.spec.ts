@@ -10,6 +10,7 @@ import { serverRoutes } from './app.routes.server';
 import { CONTENT_REPOSITORY, type ContentRepository } from './core/content/repository';
 import { SITE_BASE_URL } from './core/seo/site-url';
 import { BuildRoutePage } from './features/build/build-route.page';
+import { MasteryIndexPage } from './features/masteries/index.page';
 import { NotFoundPage } from './features/static-pages/not-found.page';
 
 function stubRepository(slugs: readonly string[]): ContentRepository {
@@ -54,6 +55,21 @@ describe('application routes', () => {
     const wildcard = routes[routes.length - 1];
     expect(wildcard?.path).toBe('**');
     expect(await load(wildcard!)).toBe(NotFoundPage);
+  });
+
+  it('serves the mastery index at /maestrias, lazy, with its resolver, prerendered (T014)', async () => {
+    const index = routes.find((route) => route.path === 'maestrias');
+    expect(index).toBeDefined();
+    expect(typeof index?.resolve?.['masteries']).toBe('function');
+    expect(await load(index!)).toBe(MasteryIndexPage);
+    const server = serverRoutes.find((serverRoute) => serverRoute.path === 'maestrias');
+    expect(server?.renderMode).toBe(RenderMode.Prerender);
+    // The detail route stays parametrized and listed by the catalog.
+    const detail = routes.find((route) => route.path === 'maestrias/:slug');
+    expect(detail).toBeDefined();
+    // Both read a snapshot of the prerendered document, so both are guarded.
+    expect(index?.canActivate).toHaveLength(1);
+    expect(detail?.canActivate).toHaveLength(1);
   });
 
   it('prerenders only the slugs exposed by the repository', async () => {
