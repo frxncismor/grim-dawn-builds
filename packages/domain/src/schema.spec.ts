@@ -50,6 +50,13 @@ const draftBuild = () => ({
   video_url: null,
   footer_disclaimer: 'Cantidades orientativas.',
   hero_callout_title: 'Lee esto primero',
+  intro: 'Introducción propia de la guía.',
+  stage: 'ambas',
+  changelog: [],
+  pros: [],
+  cons: [],
+  hotbar: [],
+  key_devotions: [],
   hero_callout_body: ['La barra de maestría no son puntos invertidos.', 'Ajusta al nivel.'],
   masteries: [
     { slug: 'chaman', name_es: 'Chamán', name_en: 'Shaman', role_text: 'Daño principal' },
@@ -1863,4 +1870,181 @@ describe('skill_node_id opcional en los nodos de la guía (spec 003, T016)', () 
         ).toBe(true);
     },
   );
+});
+
+describe('campos editoriales de la guía (spec 009, T005)', () => {
+  const base = () => ({ ...publishableBuild(), published_at: '2026-11-08' });
+  const rich = () => ({
+    ...base(),
+    intro: 'Resumen propio de la guía.',
+    stage: 'final',
+    changelog: [
+      { date: '2026-11-15', text: 'Ajuste de devociones.' },
+      { date: '2026-11-08', text: 'Primera publicación.' },
+    ],
+    pros: ['Limpia grupos rápido'],
+    cons: ['Exige equipo concreto'],
+    hotbar: ['golpe-primigenio'],
+    key_devotions: ['tempest'],
+  });
+  const issuePaths = (value: unknown) => {
+    const result = BuildSchema.safeParse(value);
+    return result.success ? [] : result.error.issues.map((i) => i.path.join('.'));
+  };
+
+  it('acepta una guía con los siete campos rellenos', () => {
+    expect(BuildSchema.safeParse(rich()).success).toBe(true);
+  });
+
+  it('acepta intro null y listas vacías', () => {
+    expect(BuildSchema.safeParse({ ...base(), intro: null }).success).toBe(true);
+  });
+
+  it.each(['intro', 'stage', 'changelog', 'pros', 'cons', 'hotbar', 'key_devotions'])(
+    'exige el campo %s (contrato estricto)',
+    (field) => {
+      const { [field]: _omitted, ...rest } = base() as Record<string, unknown>;
+      expect(BuildSchema.safeParse(rest).success).toBe(false);
+    },
+  );
+
+  it('rechaza una intro de más de 400 caracteres y acepta 400', () => {
+    expect(BuildSchema.safeParse({ ...base(), intro: 'a'.repeat(400) }).success).toBe(true);
+    expect(issuePaths({ ...base(), intro: 'a'.repeat(401) })).toContain('intro');
+    expect(issuePaths({ ...base(), intro: '' })).toContain('intro');
+  });
+
+  it('limita stage a subida, final o ambas', () => {
+    for (const ok of ['subida', 'final', 'ambas'])
+      expect(BuildSchema.safeParse({ ...base(), stage: ok }).success).toBe(true);
+    expect(issuePaths({ ...base(), stage: 'mitad' })).toContain('stage');
+  });
+
+  it('limita pros y cons a 5 textos de 120 caracteres', () => {
+    for (const field of ['pros', 'cons'] as const) {
+      expect(BuildSchema.safeParse({ ...base(), [field]: ['a', 'b', 'c', 'd', 'e'] }).success).toBe(
+        true,
+      );
+      expect(issuePaths({ ...base(), [field]: ['a', 'b', 'c', 'd', 'e', 'f'] })).toContain(field);
+      expect(BuildSchema.safeParse({ ...base(), [field]: ['a'.repeat(120)] }).success).toBe(true);
+      expect(issuePaths({ ...base(), [field]: ['a'.repeat(121)] })).toContain(`${field}.0`);
+      expect(issuePaths({ ...base(), [field]: [''] })).toContain(`${field}.0`);
+    }
+  });
+
+  it('limita el texto del changelog a 200 caracteres y exige fecha ISO', () => {
+    const entry = (over: Record<string, unknown>) => ({
+      ...base(),
+      changelog: [{ date: '2026-11-15', text: 'ok', ...over }],
+    });
+    expect(BuildSchema.safeParse(entry({ text: 'a'.repeat(200) })).success).toBe(true);
+    expect(issuePaths(entry({ text: 'a'.repeat(201) }))).toContain('changelog.0.text');
+    expect(issuePaths(entry({ date: '15/11/2026' }))).toContain('changelog.0.date');
+    expect(issuePaths(entry({ extra: 1 }))).toContain('changelog.0');
+  });
+
+  it('rechaza fechas de changelog repetidas', () => {
+    const changelog = [
+      { date: '2026-11-15', text: 'a' },
+      { date: '2026-11-15', text: 'b' },
+    ];
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...base(), changelog }),
+      ['changelog'],
+      'fechas de changelog repetidas',
+    );
+  });
+
+  it('rechaza un changelog que no está en orden descendente', () => {
+    const changelog = [
+      { date: '2026-11-08', text: 'a' },
+      { date: '2026-11-15', text: 'b' },
+    ];
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...base(), changelog }),
+      ['changelog'],
+      'changelog debe ir en orden descendente',
+    );
+  });
+
+  it('rechaza una entrada de changelog anterior a published_at', () => {
+    const changelog = [{ date: '2026-11-07', text: 'previa' }];
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...base(), changelog }),
+      ['changelog', 0, 'date'],
+      'changelog anterior a published_at',
+    );
+  });
+
+  it('con published_at null no compara fechas de changelog', () => {
+    const draft = { ...draftBuild(), changelog: [{ date: '2020-01-01', text: 'x' }] };
+    expect(BuildSchema.safeParse(draft).success).toBe(true);
+  });
+
+  it('limita hotbar a 10 slugs únicos de skill_nodes', () => {
+    expect(BuildSchema.safeParse({ ...base(), hotbar: ['golpe-primigenio'] }).success).toBe(true);
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...base(), hotbar: ['no-existe'] }),
+      ['hotbar', 0],
+      'nodo de guía desconocido',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...base(), hotbar: ['golpe-primigenio', 'golpe-primigenio'] }),
+      ['hotbar'],
+      'hotbar con slugs repetidos',
+    );
+    const eleven = Array.from({ length: 11 }, (_, i) => `n${i}`);
+    expect(issuePaths({ ...base(), hotbar: eleven })).toContain('hotbar');
+  });
+
+  it('limita key_devotions a 6 slugs únicos de constellations', () => {
+    expect(BuildSchema.safeParse({ ...base(), key_devotions: ['tempest'] }).success).toBe(true);
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...base(), key_devotions: ['no-existe'] }),
+      ['key_devotions', 0],
+      'constelación desconocida',
+    );
+    expectDiagnostic(
+      BuildSchema.safeParse({ ...base(), key_devotions: ['tempest', 'tempest'] }),
+      ['key_devotions'],
+      'key_devotions con slugs repetidos',
+    );
+    const seven = Array.from({ length: 7 }, (_, i) => `c${i}`);
+    expect(issuePaths({ ...base(), key_devotions: seven })).toContain('key_devotions');
+  });
+
+  it('sections_meta admite build-final y changelog', () => {
+    const sections_meta = [
+      { section_key: 'build-final', position: 1, visible: true },
+      { section_key: 'changelog', position: 2, visible: false },
+    ];
+    expect(BuildSchema.safeParse({ ...base(), sections_meta }).success).toBe(true);
+  });
+
+  it('PublicBuildSchema expone y valida los siete campos', () => {
+    const editorial = {
+      intro: 'Resumen propio de la guía.',
+      stage: 'final',
+      changelog: [{ date: '2026-11-08', text: 'Primera publicación.' }],
+      pros: ['Limpia grupos rápido'],
+      cons: ['Exige equipo concreto'],
+      hotbar: ['golpe-primigenio'],
+      key_devotions: ['tempest'],
+    };
+    const parsed = DomainSchema.PublicBuildSchema.safeParse({ ...publicBuild(), ...editorial });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.hotbar).toEqual(['golpe-primigenio']);
+      expect(parsed.data.changelog).toHaveLength(1);
+    }
+    expectDiagnostic(
+      DomainSchema.PublicBuildSchema.safeParse({
+        ...publicBuild(),
+        ...editorial,
+        hotbar: ['no-existe'],
+      }),
+      ['hotbar', 0],
+      'nodo de guía desconocido',
+    );
+  });
 });

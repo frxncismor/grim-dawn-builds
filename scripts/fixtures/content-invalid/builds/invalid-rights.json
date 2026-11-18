@@ -65,6 +65,13 @@
   "footer_disclaimer": "Ejemplo sintético de desarrollo.",
   "hero_callout_title": "Prueba local",
   "hero_callout_body": ["No es una guía publicada."],
+  "intro": null,
+  "stage": "ambas",
+  "changelog": [],
+  "pros": [],
+  "cons": [],
+  "hotbar": [],
+  "key_devotions": [],
   "masteries": [
     {
       "slug": "chaman",

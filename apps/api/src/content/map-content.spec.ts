@@ -32,6 +32,32 @@ describe('public database mappers', () => {
       expect(mapBuild({ ...input, ...patch })).toBeNull();
     }
   });
+  it('spec009: serves the seven editorial fields and rejects values outside their rules', () => {
+    const base = publicDoc();
+    const node = base.skill_nodes[0]!.slug;
+    const editorial = {
+      intro: 'Resumen propio.',
+      stage: 'final',
+      changelog: [{ date: '2026-11-10', text: 'Ajuste.' }],
+      pros: ['Rápida'],
+      cons: ['Cara'],
+      hotbar: [node],
+      key_devotions: [],
+    };
+    const output = mapBuild({ ...base, ...editorial });
+    expect(pick(Object.keys(editorial), output!)).toEqual(editorial);
+    for (const patch of [
+      { stage: 'otra' },
+      { intro: 'a'.repeat(401) },
+      { hotbar: ['no-existe'] },
+      { changelog: [{ date: '2026-11-01', text: 'anterior a la publicación' }] },
+      { pros: ['a', 'b', 'c', 'd', 'e', 'f'] },
+    ]) {
+      expect(() => mapBuild({ ...base, ...editorial, ...patch })).toThrow('invalid_content');
+    }
+    const { intro: _intro, ...missing } = { ...base, ...editorial };
+    expect(() => mapBuild(missing)).toThrow('invalid_content');
+  });
   it('rejects private fields and malformed visible content without retaining the document', () => {
     for (const input of [
       { ...publicDoc(), reviewed_by: 'PRIVATE-CANARY' },
