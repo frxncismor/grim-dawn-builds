@@ -1,22 +1,103 @@
 import { lstatSync, readdirSync } from 'node:fs';
 import { basename, join, relative, sep } from 'node:path';
 
+/** One entry of an artifact walk: `rel` is POSIX and relative to the walked root. */
+export interface ArtifactEntry {
+  readonly rel: string;
+  readonly path: string;
+  readonly isFile: boolean;
+  /** A real file or folder; a symlink (folder, file or junction) or anything else is not. */
+  readonly regular: boolean;
+}
+
+declare const rawBrand: unique symbol;
+declare const validatedBrand: unique symbol;
+
+/** What `readArtifactEntries` returns: unchecked, so no derived function accepts it (spec008 T005, A-001). */
+export type RawEntries = readonly ArtifactEntry[] & { readonly [rawBrand]: true };
+
+/** What only `assertRegularArtifact` returns: entries proven regular, the one type `htmlPagesOf` takes. */
+export type ValidatedEntries = readonly ArtifactEntry[] & { readonly [validatedBrand]: true };
+
+/**
+ * The single read of an artifact (spec008 T002, S-003 = A-002, FR-001): the only
+ * `readdirSync(dir, { recursive: true, withFileTypes: true })` of this module. Every check of a gate
+ * derives from the entries it returns, so no gate reads the directory twice nor examines what it
+ * did not validate.
+ */
+export function readArtifactEntries(dir: string): RawEntries {
+  const entries = readdirSync(dir, { recursive: true, withFileTypes: true }).map((entry) => {
+    const path = join(entry.parentPath, entry.name);
+    return {
+      rel: relative(dir, path).split(sep).join('/'),
+      path,
+      isFile: entry.isFile() && !entry.isSymbolicLink(),
+      regular: !entry.isSymbolicLink() && (entry.isFile() || entry.isDirectory()),
+    };
+  });
+  return entries as unknown as RawEntries;
+}
+
+/** The entries under `prefix/` (a folder of the walked root), with `rel` relative to that folder. */
+export function entriesUnder(entries: RawEntries, prefix: string): RawEntries {
+  return entries
+    .filter((entry) => entry.rel.startsWith(`${prefix}/`))
+    .map((entry) => ({
+      ...entry,
+      rel: entry.rel.slice(prefix.length + 1),
+    })) as unknown as RawEntries;
+}
+
 /**
  * The single criterion of "valid artifact walk" (spec007 T001, S-001, FR-001/FR-002): no entry under
  * `dir` may be a symlink (folder, file or junction) or anything other than a regular file or folder,
  * because a walk that skips them in silence lets a gate pass on content it never saw. Throws
  * `«<gate>: el artefacto es inválido (enlace o entrada no regular: <dir>/<ruta>)»` on the first one.
+ * The message is built here and nowhere else. Returns the entries as `ValidatedEntries`: the only way
+ * to get the type the derived functions consume (spec008 T005, A-001, FR-001).
  */
-export function assertRegularEntries(dir: string, gate: string): void {
-  const entries = readdirSync(dir, { recursive: true, withFileTypes: true });
-  for (const entry of entries) {
-    if (entry.isSymbolicLink() || !(entry.isFile() || entry.isDirectory())) {
-      const rel = relative(dir, join(entry.parentPath, entry.name)).split(sep).join('/');
-      throw new Error(
-        `${gate}: el artefacto es inválido (enlace o entrada no regular: ${basename(dir)}/${rel}).`,
-      );
-    }
+export function assertRegularArtifact(
+  entries: RawEntries,
+  dir: string,
+  gate: string,
+): ValidatedEntries {
+  const bad = entries.find((entry) => !entry.regular);
+  if (bad)
+    throw new Error(
+      `${gate}: el artefacto es inválido (enlace o entrada no regular: ${basename(dir)}/${bad.rel}).`,
+    );
+  return entries as unknown as ValidatedEntries;
+}
+
+/** Checks `browser/` exists and is a real directory (not a file or a symlink); fails closed (spec006). */
+export function assertBrowserDir(browserDir: string, gate: string): void {
+  let stats;
+  try {
+    stats = lstatSync(browserDir);
+  } catch {
+    throw new Error(`${gate}: el artefacto está vacío (sin carpeta browser/ en ${browserDir}).`);
   }
+  if (!stats.isDirectory())
+    throw new Error(`${gate}: el artefacto está vacío (carpeta browser/ inválida: ${browserDir}).`);
+}
+
+/** The `.html` pages of a walk, in a stable order, failing closed below `minPages` (default 1). */
+export function htmlPagesOf(
+  entries: ValidatedEntries,
+  options: { readonly gate: string; readonly minPages?: number },
+): string[] {
+  const { gate, minPages = 1 } = options;
+  const pages = entries
+    .filter((entry) => entry.isFile && entry.rel.endsWith('.html'))
+    .map((entry) => entry.path)
+    .sort();
+  if (pages.length < minPages)
+    throw new Error(
+      pages.length === 0
+        ? `${gate}: el artefacto está vacío (ninguna página .html en browser/).`
+        : `${gate}: el artefacto está vacío (${pages.length} páginas .html en browser/; se esperan al menos ${minPages}).`,
+    );
+  return pages;
 }
 
 /**
@@ -32,25 +113,8 @@ export function prerenderedPages(
   browserDir: string,
   options: { readonly gate: string; readonly minPages?: number },
 ): string[] {
-  const { gate, minPages = 1 } = options;
-  let stats;
-  try {
-    stats = lstatSync(browserDir);
-  } catch {
-    throw new Error(`${gate}: el artefacto está vacío (sin carpeta browser/ en ${browserDir}).`);
-  }
-  if (!stats.isDirectory())
-    throw new Error(`${gate}: el artefacto está vacío (carpeta browser/ inválida: ${browserDir}).`);
-  assertRegularEntries(browserDir, gate);
-  const pages = readdirSync(browserDir, { recursive: true, withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.html'))
-    .map((entry) => join(entry.parentPath, entry.name))
-    .sort();
-  if (pages.length < minPages)
-    throw new Error(
-      pages.length === 0
-        ? `${gate}: el artefacto está vacío (ninguna página .html en browser/).`
-        : `${gate}: el artefacto está vacío (${pages.length} páginas .html en browser/; se esperan al menos ${minPages}).`,
-    );
-  return pages;
+  const { gate } = options;
+  assertBrowserDir(browserDir, gate);
+  const entries = assertRegularArtifact(readArtifactEntries(browserDir), browserDir, gate);
+  return htmlPagesOf(entries, options);
 }

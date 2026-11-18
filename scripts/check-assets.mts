@@ -3,7 +3,14 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { checkAssetManifest, classifySkillIconEntry, type AssetIssue } from '@gd/domain';
-import { assertRegularEntries, prerenderedPages } from './artifact-pages.mts';
+import {
+  assertBrowserDir,
+  assertRegularArtifact,
+  entriesUnder,
+  htmlPagesOf,
+  prerenderedPages,
+  readArtifactEntries,
+} from './artifact-pages.mts';
 
 const WEB_PUBLIC_DIR = 'apps/web/public';
 const OFFICIAL_SUBDIR = 'assets';
@@ -157,12 +164,17 @@ export function assertNoGamePortraits(artifact: string, source: string): void {
   if (source !== 'own') return;
   // Fails closed (spec006 FR-003): no artifact or no page cannot vouch for "no game art".
   const gate = 'ASSET_SOURCE=own: retratos e iconos del juego en el artefacto';
-  prerenderedPages(join(artifact, 'browser'), { gate });
+  const browser = join(artifact, 'browser');
+  assertBrowserDir(browser, gate);
+  // One read of the artifact (spec008 T003, S-003 = A-002, FR-002): every check below derives from it,
+  // in the order of the gates it replaces: `browser/` links, page count, links elsewhere, game art.
+  const entries = readArtifactEntries(artifact);
+  const inBrowser = entriesUnder(entries, 'browser');
+  htmlPagesOf(assertRegularArtifact(inBrowser, browser, gate), { gate });
   // The whole-artifact walk uses the same criterion: a linked folder must not dodge the scan (spec007 FR-002).
-  assertRegularEntries(artifact, gate);
-  const found = readdirSync(artifact, { recursive: true, withFileTypes: true })
-    .filter((entry) => entry.isFile())
-    .map((entry) => join(entry.parentPath, entry.name).split('\\').join('/'))
+  const found = assertRegularArtifact(entries, artifact, gate)
+    .filter((entry) => entry.isFile)
+    .map((entry) => entry.path.split('\\').join('/'))
     .filter((path) => /\/assets\/(?:portraits|skill-icons)\//.test(path));
   if (found.length > 0)
     throw new Error(

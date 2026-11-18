@@ -1,0 +1,374 @@
+{
+  "schemaVersion": 1,
+  "feature": "specs/008-deuda-spec007",
+  "snapshot": "a68e6bc979334aa379e6fc044d3225503be9db9cddf09e8d6c78c90238c8c7c5",
+  "createdAt": "2026-11-18T14:28:35Z",
+  "implementationActor": "agentes implementadores de la corrida de orquestación 11111619 (OpenCode/Claude Code)",
+  "delegationAvailable": true,
+  "reviews": [
+    {
+      "specialty": "code",
+      "reviewer": "11111619-revisor-cierre-s8-code-r2 (claude-opus-5-5, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "git diff 1375dda..48f4eec (17 archivos; prioridad al código ejecutable)",
+        "git diff 2de418f..48f4eec (corrección T005 de A-001)",
+        "scripts/artifact-pages.mts (RawEntries, ValidatedEntries, readArtifactEntries, entriesUnder, assertRegularArtifact, assertBrowserDir, htmlPagesOf, prerenderedPages)",
+        "scripts/artifact-pages.test.mts (espía de lecturas, caracterización de mensajes, prueba de tipos @ts-expect-error)",
+        "scripts/check-assets.mts (assertNoGamePortraits y consumidor de prerenderedPages en :207)",
+        "scripts/check-assets.test.mts (espía own/game/vacío, precedencia de mensajes)",
+        "scripts/check-legacy-brand.mts (consumidor de prerenderedPages, sin cambios)",
+        "tsconfig.e2e.json, package.json (typecheck:e2e, test:scripts), scripts/verify-local.mjs (:38 typecheck:e2e en verify), eslint.config.js",
+        "specs/007-deuda-revisiones-3/reviews/deuda.md (C-001 r1), specs/008-deuda-spec007/{tasks.md T005, reviews/deuda.md}, specs/README.md:69",
+        "Reportes de ronda 1: code y architecture (A-001)"
+      ],
+      "checks": [
+        {
+          "name": "node --import tsx --test scripts/artifact-pages.test.mts scripts/check-assets.test.mts scripts/check-legacy-brand.test.mts",
+          "result": "tests 37, pass 36, fail 0, skipped 1 (enlace de archivo sin privilegios en Windows)"
+        },
+        {
+          "name": "pnpm typecheck:e2e (tsc -p tsconfig.e2e.json)",
+          "result": "exit 0, sin errores (el @ts-expect-error de artifact-pages.test.mts se consume)"
+        },
+        {
+          "name": "tsc con un tsconfig temporal en el scratchpad (extends tsconfig.e2e.json, include solo scripts/check-assets.mts)",
+          "result": "exit 0: check-assets.mts tipa bien, pero no está en ningún include versionado"
+        },
+        {
+          "name": "grep de tsconfig*.json y eslint.config.js (proyecto con tipos)",
+          "result": "único tsconfig raíz es tsconfig.e2e.json; no incluye check-assets.mts ni check-legacy-brand.mts; eslint sin typed linting"
+        },
+        {
+          "name": "grep -n 'Cerrada por spec008' / lectura de specs/007-deuda-revisiones-3/reviews/deuda.md",
+          "result": "S-003 = A-002 (entrada 1, ronda 1) y entrada 3 de la ronda 2 ya dicen «Cerrada por spec008 T002–T003» con enlace: C-001 r1 corregido"
+        },
+        {
+          "name": "grep -n 'en curso' specs/README.md",
+          "result": ":69 sigue diciendo «S-003 = A-002, en curso en spec008»: C-002 r1, aplazado en specs/008-deuda-spec007/reviews/deuda.md entrada 2"
+        }
+      ],
+      "limitations": [
+        "No se ejecutaron pnpm verify, builds, check:performance ni e2e por instrucción; se toman quickstart.md (T004) y el registro del orquestador (pnpm verify sobre 48f4eec).",
+        "No se reprodujo el rojo TS2578 de T005; se acepta la evidencia de tasks.md T005.",
+        "No se ejecutó spec-review.mjs prepare para no escribir en reviews/; snapshot tomado del encargo (HEAD 48f4eec confirmado).",
+        "Plataforma Windows: el caso de enlace simbólico de archivo se omitió (1 skipped); los casos con junction sí corrieron."
+      ],
+      "findings": [
+        {
+          "id": "C-101",
+          "severity": "LOW",
+          "path": "tsconfig.e2e.json",
+          "line": 14,
+          "evidence": "T005 añade al typecheck solo scripts/artifact-pages.mts y su prueba. Los consumidores reales de la API marcada (scripts/check-assets.mts:171-175, scripts/check-legacy-brand.mts:33) se ejecutan con tsx, que descarta los tipos, y no están en ningún include de tsconfig ni en un eslint con tipos. Con un tsconfig temporal, check-assets.mts tipa bien hoy (exit 0), pero nada en verify lo comprueba.",
+          "impact": "La garantía de A-001 («una puerta nueva no puede listar páginas sin validar») solo la impone el compilador dentro de artifact-pages.mts y su prueba. Una puerta nueva o un cambio en check-assets.mts que pase RawEntries a htmlPagesOf (o filtre isFile sobre la lectura cruda) no fallaría en pnpm verify. Hoy no hay defecto: las dos puertas validan antes de derivar y la aceptación de T005 se cumple tal como está escrita.",
+          "recommendation": "Incluir scripts/check-assets.mts y scripts/check-legacy-brand.mts (o scripts/**/*.mts que consuman artifact-pages) en tsconfig.e2e.json o en un tsconfig.scripts.json que corra en verify. Al ser LOW nuevo, aplazable con motivo en specs/008-deuda-spec007/reviews/deuda.md (T004).",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por la regla del principal para spec008 (ronda 2 de la puerta T004); seguimiento en reviews/deuda.md"
+        },
+        {
+          "id": "C-102",
+          "severity": "LOW",
+          "path": "scripts/artifact-pages.mts",
+          "line": 44,
+          "evidence": "Reaparece C-003 de la ronda 1: entriesUnder filtra con rel.startsWith(`${prefix}/`) y distingue mayúsculas, mientras lstat en assertBrowserDir no las distingue en Windows.",
+          "impact": "Con una carpeta 'Browser' en Windows, assertNoGamePortraits falla cerrado con «ninguna página .html en browser/»; el build siempre emite 'browser'.",
+          "recommendation": "Ya aplazado; comparar sin distinguir mayúsculas en la próxima spec de deuda que toque artifact-pages.mts.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en specs/008-deuda-spec007/reviews/deuda.md entrada 1 (T004): el artefacto lo genera el propio build con browser/ en minúsculas; no es entrada externa."
+        },
+        {
+          "id": "C-103",
+          "severity": "LOW",
+          "path": "specs/README.md",
+          "line": 69,
+          "evidence": "Reaparece C-002 de la ronda 1: la sección de spec007 sigue diciendo «S-003 = A-002, en curso en spec008», en contradicción con la fila de spec008 y con deuda.md de spec007, que ya la dan por cerrada.",
+          "impact": "Registro contradictorio en el mismo archivo; sin efecto en el código.",
+          "recommendation": "Ya aplazado; actualizar fuera del snapshot en la próxima tarea SDD que toque specs/README.md.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en specs/008-deuda-spec007/reviews/deuda.md entrada 2 (T004): corregirlo cambia el snapshot de la puerta."
+        }
+      ]
+    },
+    {
+      "specialty": "architecture",
+      "reviewer": "11111619-revisor-cierre-s8-architecture-r2 (claude-opus-5-5, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "Huella git diff 1375dda..48f4eec (HEAD 48f4eec, rama orq/11111619), con foco en la corrección de la ronda 1: git diff 2de418f..48f4eec (T005)",
+        "scripts/artifact-pages.mts completo: ArtifactEntry, RawEntries/ValidatedEntries (marcas unique symbol), readArtifactEntries, entriesUnder, assertRegularArtifact, assertBrowserDir, htmlPagesOf, prerenderedPages",
+        "scripts/check-assets.mts: assertNoGamePortraits (:163-183) y assertCredit (:203-209, consumidor de prerenderedPages)",
+        "scripts/check-legacy-brand.mts: consumidor de prerenderedPages, sin cambios en la huella",
+        "scripts/artifact-pages.test.mts (prueba de tipos @ts-expect-error de T005) y scripts/check-assets.test.mts",
+        "tsconfig.e2e.json y el alcance real del typecheck sobre scripts/ (CI .github/workflows/ci.yml:152-153, scripts/verify-local.mjs:38)",
+        "specs/008-deuda-spec007/{spec,plan,tasks}.md (T005 y su aceptación), reviews/deuda.md, specs/README.md (:66-74) y specs/007-deuda-revisiones-3/reviews/deuda.md (cierres de C-001)",
+        "Reporte de la ronda 1 de architecture (11111619-revisor-cierre-s8-architecture-reporte.md): A-001, A-002, A-003",
+        "specs/002-spec-completion-reviews/data-model.md y contracts/review-gate.md (esquema Review/Finding)"
+      ],
+      "checks": [
+        {
+          "name": "git diff --stat 1375dda..48f4eec y git diff 2de418f..48f4eec",
+          "result": "17 archivos en la huella; T005 toca solo scripts/artifact-pages.{mts,test.mts}, scripts/check-assets.mts (imports y llamadas), tsconfig.e2e.json y docs de spec008/README"
+        },
+        {
+          "name": "node --import tsx --test scripts/artifact-pages.test.mts scripts/check-assets.test.mts scripts/check-legacy-brand.test.mts (Windows, sin HTTP(S)_PROXY)",
+          "result": "37 pruebas: 36 pass, 0 fail, 1 skip"
+        },
+        {
+          "name": "pnpm typecheck:e2e",
+          "result": "sin errores (tsc -p tsconfig.e2e.json); la directiva @ts-expect-error de artifact-pages.test.mts se consume"
+        },
+        {
+          "name": "Sondeo fuera del repo (scratchpad): tsconfig que extiende tsconfig.e2e.json e incluye solo un .mts con htmlPagesOf(readArtifactEntries('x'))",
+          "result": "exit 2: TS2345 «Argument of type 'RawEntries' is not assignable to parameter of type 'ValidatedEntries'»; la marca funciona cuando tsc ve el archivo"
+        },
+        {
+          "name": "Sondeo fuera del repo: tsconfig que extiende tsconfig.e2e.json e incluye scripts/check-assets.mts, scripts/check-legacy-brand.mts y scripts/check-assets.test.mts",
+          "result": "exit 0: los consumidores tipan limpios, pero no están en el include de tsconfig.e2e.json ni en ningún otro tsconfig del repo"
+        },
+        {
+          "name": "grep de consumidores de artifact-pages.mts en scripts/, apps/ y packages/",
+          "result": "solo scripts/check-assets.mts, scripts/check-legacy-brand.mts y scripts/artifact-pages.test.mts"
+        },
+        {
+          "name": "Lectura de specs/README.md:66-70 y specs/007-deuda-revisiones-3/reviews/deuda.md",
+          "result": "README:69 sigue con «en curso en spec008 T002–T003» (aplazado, entrada 2 de deuda.md de spec008); entradas 1, 3 y siguientes de deuda.md de spec007 ya dicen «Cerrada por spec008» (C-001, 2de418f)"
+        }
+      ],
+      "limitations": [
+        "No ejecuté pnpm verify, builds, e2e, check:performance, pnpm test:scripts completo, lint ni la puerta de spec002 (por encargo; evidencia en quickstart.md y en el registro del orquestador).",
+        "El skip es una prueba de enlace que la plataforma no permite crear (EPERM en Windows); no lo verifiqué en Linux.",
+        "Los sondeos de tipos usan tsconfig temporales en el scratchpad con typeRoots apuntando al node_modules del worktree; no modifiqué archivos versionados."
+      ],
+      "findings": [
+        {
+          "id": "A-101",
+          "severity": "LOW",
+          "path": "tsconfig.e2e.json",
+          "line": 14,
+          "evidence": "T005 hace que htmlPagesOf solo acepte ValidatedEntries y lo prueba con @ts-expect-error, y el include de tsconfig.e2e.json:14-15 añade solo scripts/artifact-pages.mts y su prueba. Los consumidores reales de las funciones derivadas (scripts/check-assets.mts, scripts/check-legacy-brand.mts) y cualquier puerta nueva en scripts/*.mts no entran en ningún tsconfig, y tsx borra los tipos sin comprobarlos. Sondeo: un archivo con htmlPagesOf(readArtifactEntries(x)) da TS2345 si tsc lo incluye; fuera del include no lo detecta nada en CI ni en pnpm verify. check-assets.mts y check-legacy-brand.mts ya tipan limpios bajo esa configuración (exit 0).",
+          "impact": "La aceptación de T005 («una puerta nueva no puede listar páginas sin validar») vale para el contrato del módulo, pero no se aplica donde viven las puertas: una puerta nueva en scripts/ que salte assertRegularArtifact solo la avisaría el editor. Las puertas actuales validan en tiempo de ejecución y sus caracterizaciones las cubren, así que hoy no hay ningún bug.",
+          "recommendation": "Añadir scripts/check-assets.mts y scripts/check-legacy-brand.mts (o un glob de scripts/check-*.mts que tipe limpio) al include de tsconfig.e2e.json, para que la marca proteja a sus consumidores en typecheck:e2e.",
+          "disposition": "deferred",
+          "deferReason": "LOW nuevo aplazado por decisión del principal para la puerta de cierre de spec008 (T004): los hallazgos por debajo de MEDIUM se aplazan con motivo. Las puertas actuales validan en tiempo de ejecución, el contrato del módulo está tipado y probado y la extensión del typecheck es un cambio de configuración para la próxima spec de deuda que toque scripts/. Tarea de referencia: T004."
+        },
+        {
+          "id": "A-002",
+          "severity": "LOW",
+          "path": "scripts/check-assets.mts",
+          "line": 172,
+          "evidence": "Sigue igual que en la ronda 1: assertBrowserDir comprueba join(artifact, 'browser') con lstat y entriesUnder(entries, 'browser') compara el rel textual sensible a mayúsculas; en Windows una carpeta 'Browser' pasa el lstat y no aporta páginas.",
+          "impact": "Caso límite que falla cerrado; el build siempre emite 'browser' en minúsculas.",
+          "recommendation": "Comparar sin distinguir mayúsculas o derivar el prefijo de la entrada real, como dice el plan de la entrada 1 de specs/008-deuda-spec007/reviews/deuda.md.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en specs/008-deuda-spec007/reviews/deuda.md, entrada 1 (C-003 = A-002 = F-002): el artefacto lo genera el propio build con browser/ en minúsculas; no es entrada externa. Se corrige en la próxima spec de deuda que toque scripts/artifact-pages.mts. Tarea de referencia: T004."
+        },
+        {
+          "id": "A-003",
+          "severity": "LOW",
+          "path": "specs/README.md",
+          "line": 69,
+          "evidence": "La sección de spec007 sigue diciendo que S-003 = A-002 está «en curso en spec008 T002–T003», mientras la fila y la sección de spec008 (:74) la dan por cerrada. Las entradas de specs/007-deuda-revisiones-3/reviews/deuda.md ya quedaron cerradas en 2de418f (C-001).",
+          "impact": "Solo documentación: contradicción interna de specs/README.md.",
+          "recommendation": "Cambiar «en curso» por «cerrada por spec008 T002–T003 y T005» en la próxima tarea SDD que toque specs/README.md.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en specs/008-deuda-spec007/reviews/deuda.md, entrada 2 (C-002 = A-003 = B-001): corregirlo cambia el snapshot de la puerta; se actualiza fuera del snapshot en la próxima tarea SDD que toque specs/README.md. Tarea de referencia: T004."
+        }
+      ]
+    },
+    {
+      "specialty": "security",
+      "reviewer": "11111619-revisor-cierre-s8-security-r2 (claude-opus-5-5, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "git diff 1375dda..48f4eec (HEAD 48f4eec, rama orq/11111619): 17 archivos, código ejecutable priorizado",
+        "git diff 2de418f..48f4eec (T005, corrección de A-001/S-001/F-001): scripts/artifact-pages.mts, scripts/artifact-pages.test.mts, scripts/check-assets.mts, tsconfig.e2e.json",
+        "scripts/artifact-pages.mts completo (RawEntries, ValidatedEntries, readArtifactEntries, entriesUnder, assertRegularArtifact, assertBrowserDir, htmlPagesOf, prerenderedPages)",
+        "scripts/check-assets.mts:163-184 (assertNoGamePortraits) y consumidores de prerenderedPages sin cambios",
+        "Cobertura del typecheck: tsconfig*.json versionados y scripts typecheck* de package.json, scripts/verify-local.mjs:38, .github/workflows/ci.yml:153",
+        "Cadena de build y CI: git diff --stat 1375dda..48f4eec -- .github package.json pnpm-lock.yaml .npmrc vacío",
+        "Secretos: diff completo filtrado por patrones de clave, token, contraseña y clave privada",
+        "specs/008-deuda-spec007/{spec,tasks}.md, specs/008-deuda-spec007/reviews/deuda.md, specs/README.md, informe de security ronda 1, specs/002-spec-completion-reviews/{data-model.md,contracts/review-gate.md}"
+      ],
+      "checks": [
+        {
+          "name": "node --import tsx --test scripts/artifact-pages.test.mts scripts/check-assets.test.mts scripts/check-legacy-brand.test.mts (Windows, sin HTTP(S)_PROXY)",
+          "result": "37 tests, 36 pass, 0 fail, 1 skipped (enlace simbólico de archivo de spec007, EPERM en Windows)"
+        },
+        {
+          "name": "pnpm typecheck:e2e",
+          "result": "tsc -p tsconfig.e2e.json sin errores (salida 0); la directiva @ts-expect-error de artifact-pages.test.mts se consume"
+        },
+        {
+          "name": "tsc -p <scratchpad>/tsc-ca.json (extiende tsconfig.e2e.json, include solo scripts/check-assets.mts)",
+          "result": "sin errores: el check-assets.mts actual respeta los tipos marcados"
+        },
+        {
+          "name": "mutación en una copia en el scratchpad de check-assets.mts: htmlPagesOf(inBrowser, { gate }) sin assertRegularArtifact, compilada con tsc",
+          "result": "error TS2345 'RawEntries' is not assignable to 'ValidatedEntries': la barrera funciona cuando el archivo se compila, pero check-assets.mts no está en ningún proyecto tsc versionado (ver S-101)"
+        },
+        {
+          "name": "git ls-files '*tsconfig*.json' | xargs grep -l scripts; grep typecheck/tsc en package.json",
+          "result": "solo tsconfig.e2e.json incluye scripts/, y de spec008 solo artifact-pages.mts y su prueba; no hay otro typecheck que cubra scripts/check-assets.mts"
+        },
+        {
+          "name": "git diff --stat 1375dda..48f4eec -- .github package.json pnpm-lock.yaml .npmrc",
+          "result": "sin cambios"
+        },
+        {
+          "name": "git diff 1375dda..48f4eec | grep -niE 'api[_-]?key|secret|token|password|BEGIN .*PRIVATE' (líneas añadidas)",
+          "result": "solo menciones textuales al escaneo de secretos en plan/spec/research/analyze; ningún valor sensible"
+        },
+        {
+          "name": "lectura del fallo cerrado tras T005",
+          "result": "comportamiento en ejecución idéntico al de la ronda 1 (los tipos se borran con tsx): artefacto ausente, browser/ como archivo o enlace, sin .html, enlaces o junctions bajo browser/ y fuera de él siguen fallando cerrados y en el mismo orden; una sola lectura"
+        }
+      ],
+      "limitations": [
+        "No se ejecutó DAST, auditoría de dependencias (pnpm audit), gitleaks ni análisis estático de seguridad: fuera del encargo y sin cambios de dependencias en el diff",
+        "No se ejecutaron pnpm verify, builds, e2e ni check:performance (por encargo); se confía en quickstart.md «Evidencia de cierre (T004)», reviews/analyze.md y el registro del orquestador sobre 48f4eec",
+        "En Windows el caso de enlace simbólico de archivo se omite con EPERM; solo corrieron los casos con junction. La salida de CI en ubuntu no se comprobó aquí",
+        "No se ejecutó node scripts/spec-review.mjs prepare/check; el snapshot a68e6bc9… lo da el encargo",
+        "Los tsconfig de comprobación y la copia mutada se crearon en el scratchpad de la sesión, fuera del repo; durante la preparación se creó por error un archivo temporal sin versionar en scripts/ que se borró de inmediato sin ejecutarse (git status limpio después)"
+      ],
+      "findings": [
+        {
+          "id": "S-001",
+          "severity": "LOW",
+          "path": "scripts/artifact-pages.mts",
+          "line": 88,
+          "evidence": "Ronda 1: la validación era una llamada aparte y htmlPagesOf aceptaba entradas sin validar. Tras T005, readArtifactEntries (línea 28) devuelve RawEntries, solo assertRegularArtifact (línea 60) devuelve ValidatedEntries y htmlPagesOf (línea 88) solo acepta ValidatedEntries; la prueba @ts-expect-error de scripts/artifact-pages.test.mts lo fija y pnpm typecheck:e2e pasa.",
+          "impact": "Omitir la validación antes de listar páginas es ahora un error de tipos dentro del alcance del typecheck.",
+          "recommendation": "Ninguna adicional para este hallazgo; ver S-101 sobre el alcance del typecheck.",
+          "disposition": "resolved",
+          "resolution": "Corregido en T005 (commit 3cc28b6, merge 48f4eec): tipos marcados RawEntries/ValidatedEntries; verificado con pnpm typecheck:e2e (0 errores), con la mutación compilada (TS2345) y con 37 tests, 0 fail."
+        },
+        {
+          "id": "S-002",
+          "severity": "LOW",
+          "path": "scripts/check-assets.mts",
+          "line": 211,
+          "evidence": "Igual que en la ronda 1: las páginas validadas se leen después con readFileSync/readFile, que siguen enlaces; T005 no cambia esa ventana.",
+          "impact": "TOCTOU residual entre la lectura validada del directorio y la lectura del contenido; requiere escritura concurrente en el artefacto local. Teórico.",
+          "recommendation": "Si llega a ser necesario: abrir con O_NOFOLLOW o comparar lstat/fstat (dev/ino) antes y después de leer.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado con motivo en specs/008-deuda-spec007/reviews/deuda.md, entrada 3 (T004): aceptado en research R4; el artefacto es local y no cambia mientras corren las puertas. Riesgo residual teórico."
+        },
+        {
+          "id": "S-101",
+          "severity": "LOW",
+          "path": "tsconfig.e2e.json",
+          "line": 14,
+          "evidence": "T005 añade a tsconfig.e2e.json solo scripts/artifact-pages.mts y su prueba (líneas 14-15). scripts/check-assets.mts, el único consumidor que compone readArtifactEntries + entriesUnder + assertRegularArtifact + htmlPagesOf (líneas 171-176), no está en ningún proyecto tsc versionado y se ejecuta con tsx, que borra los tipos. En una copia en el scratchpad, quitar assertRegularArtifact de la línea 173 da TS2345 al compilarla, pero ni pnpm typecheck:e2e ni CI la compilan. Además, la búsqueda de arte (líneas 175-178) usa métodos de Array, que aceptan también RawEntries, así que si se reescribe como entries.filter(...) compila sin validar.",
+          "impact": "La garantía 'ninguna puerta nueva puede listar páginas sin validar' (A-001/S-001, FR-001) solo se cumple en artifact-pages.mts. Fuera de él, una regresión que quite la validación en assertNoGamePortraits o en una puerta futura de scripts/ no la detectaría ningún typecheck: un enlace .html quedaría descartado en silencio y la puerta de derechos con 'own' pasaría sin haber visto ese contenido. Hoy el código es correcto (verificado), así que es un endurecimiento.",
+          "recommendation": "Incluir scripts/check-assets.mts (y las demás puertas que importen artifact-pages.mts, como check-legacy-brand.mts) en tsconfig.e2e.json o en un tsconfig.scripts.json enlazado a verify y CI. Para que la búsqueda de arte dependa también del tipo, moverla a una función de artifact-pages.mts que exija ValidatedEntries.",
+          "disposition": "deferred",
+          "deferReason": "Hallazgo nuevo LOW; por decisión del principal en la puerta de cierre de spec008 (T004), lo que no sea MEDIUM o superior se aplaza con motivo. El código actual valida en el orden correcto (comprobado con tsc sobre check-assets.mts y 37 tests, 0 fail) y el artefacto es local y lo genera el propio build. Ampliar el typecheck a otras puertas de scripts/ va más allá del alcance cerrado de T005. Registrar en specs/008-deuda-spec007/reviews/deuda.md. Tarea de referencia: T004."
+        }
+      ]
+    },
+    {
+      "specialty": "best-practices",
+      "reviewer": "11111619-revisor-cierre-s8-best-practices-r2 (claude-opus-5-5, Claude Code)",
+      "mode": "independent",
+      "status": "completed",
+      "coverage": [
+        "git diff 1375dda..48f4eec (17 archivos), con foco en T005 (git diff 2de418f..48f4eec)",
+        "scripts/artifact-pages.mts (RawEntries/ValidatedEntries, readArtifactEntries, entriesUnder, assertRegularArtifact, assertBrowserDir, htmlPagesOf, prerenderedPages)",
+        "scripts/artifact-pages.test.mts (espía de lecturas, caracterización de mensajes, prueba de tipos @ts-expect-error)",
+        "scripts/check-assets.mts (assertNoGamePortraits y consumidor de prerenderedPages)",
+        "scripts/check-assets.test.mts (espía own/game/vacío, precedencia y rutas de mensajes)",
+        "tsconfig.e2e.json, package.json (typecheck:e2e, test:scripts), scripts/verify-local.mjs (:38)",
+        "specs/008-deuda-spec007/{spec,plan,tasks,research,quickstart,data-model,erratum}.md y reviews/{analyze,deuda}.md",
+        "specs/README.md y specs/007-deuda-revisiones-3/reviews/deuda.md (C-001 en 2de418f)",
+        "Trazabilidad tareas-cambios T001-T005 y FR-007/FR-010 (spec001-spec007 fuera de reviews/ sin tocar)",
+        "Seguimiento de B-001 y B-002 de la ronda 1 de best-practices"
+      ],
+      "checks": [
+        {
+          "name": "node --import tsx --test scripts/artifact-pages.test.mts scripts/check-assets.test.mts scripts/check-legacy-brand.test.mts",
+          "result": "tests 37, pass 36, fail 0, skipped 1"
+        },
+        {
+          "name": "pnpm typecheck:e2e",
+          "result": "exit 0, sin errores (la directiva @ts-expect-error de T005 se consume)"
+        },
+        {
+          "name": "pnpm lint:md",
+          "result": "Linting: 141 files; Summary: 0 issues in 0 files"
+        },
+        {
+          "name": "pnpm check:scope",
+          "result": "check:scope OK (271 archivos revisados)"
+        },
+        {
+          "name": "node scripts/spec-review.mjs prepare --feature specs/008-deuda-spec007 (HEAD 48f4eec)",
+          "result": "status ready, snapshot a68e6bc9…c7c5 (igual al del encargo), pendingTasks []"
+        },
+        {
+          "name": "git diff --stat 1375dda..48f4eec -- specs/00[1-6]* specs/007-deuda-revisiones-3",
+          "result": "solo specs/007-deuda-revisiones-3/reviews/deuda.md (4 inserciones)"
+        },
+        {
+          "name": "grep -n 'en curso' specs/README.md; grep -n 'countDirReads(run' scripts/*.test.mts",
+          "result": "README.md:69 sigue con «en curso»; countDirReads en artifact-pages.test.mts:127 y check-assets.test.mts:409 (ambos ya aplazados)"
+        }
+      ],
+      "limitations": [
+        "No ejecuté pnpm verify, pnpm test:scripts completo, builds, e2e ni check:performance (fuera del encargo; T004 en quickstart.md y verify sobre 48f4eec en el registro del orquestador, que no leí).",
+        "El rojo de la prueba de tipos (TS2578) y de los espías no lo reproduje: lo tomo de la evidencia de T005 en tasks.md y de los reportes de implementación.",
+        "El caso omitido (skipped 1) depende de la plataforma (enlaces en Windows); no lo comprobé en Linux.",
+        "Que el typecheck solo cubra artifact-pages.mts y su prueba (no a sus consumidores) ya lo registran A-101 y C-101 de la ronda 2 como LOW aplazado; no lo duplico."
+      ],
+      "findings": [
+        {
+          "id": "B-101",
+          "severity": "LOW",
+          "path": "specs/008-deuda-spec007/tasks.md",
+          "line": 13,
+          "evidence": "La nota «Estado (2026-11-18)» dice «T001–T004 hechas (T004 con la puerta spec002 en curso, ronda 1 hecha) y T005 abierta», pero T005 está marcada [x] con su evidencia (Fase 4), y specs/README.md (fila y sección de spec008) da 5 de 5.",
+          "impact": "El tasks.md, que specs/README.md declara fuente de verdad, se contradice a sí mismo sobre el estado de T005. Es el mismo tipo de desfase que B-001 (README:69). Corregirlo cambia el snapshot.",
+          "recommendation": "Actualizar la nota de estado («T001–T005 hechas») en la próxima tarea SDD que toque este tasks.md, o antes de cerrar aceptando repetir prepare.",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por la regla del principal para spec008 (ronda 2 de la puerta T004); seguimiento en reviews/deuda.md"
+        },
+        {
+          "id": "B-102",
+          "severity": "LOW",
+          "path": "specs/008-deuda-spec007/quickstart.md",
+          "line": 48,
+          "evidence": "«Evidencia de cierre (T004)» toma como base 9252955 (T001–T003) y test:scripts 830. La verificación de integración tras T005 (pnpm verify sobre 48f4eec) solo consta en el registro del orquestador; en el repo, T005 solo cita comprobaciones parciales (typecheck:e2e, test:scripts 831, lint, assets:check, boundaries, scope).",
+          "impact": "La trazabilidad SDD del cierre no recoge en el repo la verificación completa del HEAD que se cierra. El riesgo es bajo: T005 no toca apps/ y sus comprobaciones parciales cubren lo cambiado.",
+          "recommendation": "Añadir a quickstart.md una fila o nota con pnpm verify sobre 48f4eec (exit y extracto) en la próxima tarea SDD que toque spec008, o citarlo en completion-review.json.",
+          "disposition": "deferred",
+          "deferReason": "LOW aplazado por la regla del principal para spec008 (ronda 2 de la puerta T004); seguimiento en reviews/deuda.md"
+        },
+        {
+          "id": "B-001",
+          "severity": "LOW",
+          "path": "specs/README.md",
+          "line": 69,
+          "evidence": "Sigue igual que en la ronda 1: la sección de spec007 dice «S-003 = A-002, en curso en spec008 T002–T003», aunque spec008 figura cerrada.",
+          "impact": "El registro SDD se contradice; no tiene efecto funcional.",
+          "recommendation": "Ya aplazado: corregirlo fuera del snapshot en la próxima tarea SDD que toque specs/README.md.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en specs/008-deuda-spec007/reviews/deuda.md, entrada 2 (C-002 = A-003 = B-001): corregirlo cambia el snapshot de la puerta; se actualiza fuera del snapshot en la próxima tarea SDD que toque specs/README.md. Tarea de referencia: T004."
+        },
+        {
+          "id": "B-002",
+          "severity": "LOW",
+          "path": "scripts/check-assets.test.mts",
+          "line": 409,
+          "evidence": "Sigue igual que en la ronda 1: countDirReads aparece duplicado tal cual en scripts/artifact-pages.test.mts:127 y scripts/check-assets.test.mts:409.",
+          "impact": "Un cambio en una copia del ayudante puede no llegar a la otra.",
+          "recommendation": "Ya aplazado: extraerlo a un ayudante común de pruebas.",
+          "disposition": "deferred",
+          "deferReason": "Aplazado en specs/008-deuda-spec007/reviews/deuda.md, entrada 4 (B-002): duplicación de pruebas sin efecto funcional; se extrae a un ayudante común en la próxima spec de deuda que toque esas suites. Tarea de referencia: T004."
+        }
+      ]
+    }
+  ]
+}

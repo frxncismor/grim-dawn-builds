@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import fs, { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
-import { test } from 'node:test';
+import { basename, dirname, join } from 'node:path';
+import { mock, test } from 'node:test';
 import {
   assertAssetStatusParity,
   assertGameAssets,
@@ -399,6 +400,75 @@ test('assertNoGamePortraits: with own a linked folder outside browser/ fails too
       /el artefacto es inv[aá]lido \(enlace o entrada no regular: .*server\/linked\)/,
     );
     assert.doesNotThrow(() => assertNoGamePortraits(root, 'game'));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+/** Counts the `readdirSync` calls `run` makes (spec008 T003, FR-002, SC-001); restores the module on exit. */
+function countDirReads(run: () => void): number {
+  const spy = mock.method(fs, 'readdirSync');
+  syncBuiltinESMExports();
+  try {
+    run();
+    return spy.mock.callCount();
+  } finally {
+    spy.mock.restore();
+    syncBuiltinESMExports();
+  }
+}
+
+test('assertNoGamePortraits: reads the artifact once with own and never with game (spec008 T003, FR-002, SC-001)', () => {
+  const root = mkdtempSync(join(tmpdir(), 'gd-portraits-reads-'));
+  try {
+    mkdirSync(join(root, 'browser'), { recursive: true });
+    writeFileSync(join(root, 'browser', 'index.html'), '<html></html>');
+    assert.equal(
+      countDirReads(() => assertNoGamePortraits(root, 'own')),
+      1,
+    );
+    assert.equal(
+      countDirReads(() => assertNoGamePortraits(root, 'game')),
+      0,
+    );
+    assert.equal(
+      countDirReads(() => assertNoGamePortraits(root, '')),
+      0,
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+const GATE = 'ASSET_SOURCE=own: retratos e iconos del juego en el artefacto';
+
+test('assertNoGamePortraits: exact messages for linked folders and the precedence of the empty artifact (spec008 T003, FR-003)', (t) => {
+  const root = mkdtempSync(join(tmpdir(), 'gd-portraits-exact-'));
+  try {
+    mkdirSync(join(root, 'real'));
+    writeFileSync(join(root, 'real', 'soldier.png'), PNG);
+    mkdirSync(join(root, 'browser', 'assets'), { recursive: true });
+    mkdirSync(join(root, 'server'), { recursive: true });
+    try {
+      symlinkSync(join(root, 'real'), join(root, 'server', 'linked'), 'junction');
+    } catch (error) {
+      if (skipIfLinksRefused(t, error)) return;
+      throw error;
+    }
+    // `browser/` without pages and a link in `server/`: the empty-artifact message goes first.
+    assert.throws(() => assertNoGamePortraits(root, 'own'), {
+      message: `${GATE}: el artefacto está vacío (ninguna página .html en browser/).`,
+    });
+    // With a page, the link outside `browser/` is reported with the artifact's name.
+    writeFileSync(join(root, 'browser', 'index.html'), '<html></html>');
+    assert.throws(() => assertNoGamePortraits(root, 'own'), {
+      message: `${GATE}: el artefacto es inválido (enlace o entrada no regular: ${basename(root)}/server/linked).`,
+    });
+    // A linked `assets/portraits` under `browser/` is reported with `browser/`, before the one in `server/`.
+    symlinkSync(join(root, 'real'), join(root, 'browser', 'assets', 'portraits'), 'junction');
+    assert.throws(() => assertNoGamePortraits(root, 'own'), {
+      message: `${GATE}: el artefacto es inválido (enlace o entrada no regular: browser/assets/portraits).`,
+    });
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
