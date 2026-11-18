@@ -52,9 +52,9 @@ Diseño recomendado (plan): un módulo `scripts/artifact-pages.mts` con `prerend
 
 `apps/web/src/app/shared/ui/build-card/build-card.ts:5` (`let nextCardId = 0;`) y `:81` (`` descriptionId = `build-card-combination-${nextCardId++}` ``); docstring «it has no state» en `:8`. Usos de la tarjeta: `home.page.html:18,42`, `tier-list.page.html:39,51`, `tier-preview.component.ts:21-26`.
 
-Claves estables disponibles: en el catálogo, `card.id` = `${combination.slug}:${entry.entry_kind}:${entry.build_slug ?? index}` (`apps/web/src/app/features/tier-list/catalog.model.ts:104`), ya usada como `track`; en la portada, `href` (ya `track` en `home.page.html:41`) y la guía destacada no se repite en `otherCards` (`home.page.ts:28,33`). El id debe sanear `:` y `/` para ser un `id` HTML sencillo.
+Claves estables disponibles: en el catálogo, `card.id` = `${combination.slug}:${entry.entry_kind}:${entry.build_slug ?? index}` (`apps/web/src/app/features/tier-list/catalog.model.ts:104`), ya usada como `track`; en la portada, `href` (ya `track` en `home.page.html:41`) y la guía destacada no se repite en `otherCards` (`home.page.ts:28,33`). Las claves llevan `:` pero no espacios, así que son IDREF válidos sin saneado (decisión final en D2); los e2e las seleccionan con `[id="…"]`, no con `#id`.
 
-Alternativas valoradas: (a) clave del contenido en `BuildCardData` (recomendada; es lo que pide Paco); (b) contador por render inyectado (`providedIn: 'root'` reinicia por petición de prerender): determinista por página pero sigue dependiendo del orden; (c) `APP_ID`: constante por aplicación, no distingue tarjetas. Coste en bytes: (a) añade un campo y una función de saneado; medir `/tier-list` (margen 597 B).
+Alternativas valoradas: (a) clave del contenido en `BuildCardData` (recomendada; es lo que pide Paco); (b) contador por render inyectado (`providedIn: 'root'` reinicia por petición de prerender): determinista por página pero sigue dependiendo del orden; (c) `APP_ID`: constante por aplicación, no distingue tarjetas. Coste en bytes: (a) añade un campo, sin función de saneado (D2); medir `/tier-list` (margen 597 B).
 
 ## R9. L2 (C-201 = A-102 y parte de B-12), comentarios y rama muerta: **aplica**
 
