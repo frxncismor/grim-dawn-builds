@@ -1,7 +1,7 @@
 # Estado de las specs
 
 Registro vivo del avance por spec (fuente de verdad: el `tasks.md` de cada una).
-Actualizado el 2026-11-18 (T004 de spec008).
+Actualizado el 2026-11-18 (T005 de spec008).
 
 | Spec                                                                    | Estado                                                                          | Tareas hechas | Pendientes |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------- | ---------- |
@@ -12,7 +12,7 @@ Actualizado el 2026-11-18 (T004 de spec008).
 | [005-deuda-revisiones](005-deuda-revisiones/tasks.md)                   | Cerrada (puerta spec002 passed, `cc553c3`)                                      | 41 de 41      | 0          |
 | [006-deuda-revisiones-2](006-deuda-revisiones-2/tasks.md)               | Cerrada (puerta spec002 passed, `c626f26`)                                      | 10 de 10      | 0          |
 | [007-deuda-revisiones-3](007-deuda-revisiones-3/tasks.md)               | Cerrada (puerta spec002 passed, `95f18de`)                                      | 7 de 7        | 0          |
-| [008-deuda-spec007](008-deuda-spec007/tasks.md)                         | Cerrada (puerta spec002 + T-136; evidencia en `reviews/completion-review.json`) | 4 de 4        | 0          |
+| [008-deuda-spec007](008-deuda-spec007/tasks.md)                         | Cerrada (puerta spec002 + T-136; evidencia en `reviews/completion-review.json`) | 5 de 5        | 0          |
 
 ## 001-mvp-guias-builds
 
@@ -71,4 +71,4 @@ T002–T003 (`007-deuda-revisiones-3/reviews/deuda.md`).
 
 ## 008-deuda-spec007
 
-Cerrada (puerta spec002 + T-136; evidencia en `008-deuda-spec007/reviews/completion-review.json`). T001-T004 hechas (4 de 4): erratum DV1/DV2 y registro de spec007 (T001), lectura única del artefacto en `prerenderedPages` y `assertNoGamePortraits` (T002, T003) y verificación de integración con la puerta de cierre (T004). Cierra S-003 = A-002 de la deuda de [spec007](007-deuda-revisiones-3/tasks.md).
+Cerrada (puerta spec002 + T-136; evidencia en `008-deuda-spec007/reviews/completion-review.json`). T001-T005 hechas (5 de 5): erratum DV1/DV2 y registro de spec007 (T001), lectura única del artefacto en `prerenderedPages` y `assertNoGamePortraits` (T002, T003) y verificación de integración con la puerta de cierre (T004) y las correcciones de la ronda 1 de la puerta (T005: entradas validadas por tipo). Cierra S-003 = A-002 de la deuda de [spec007](007-deuda-revisiones-3/tasks.md).

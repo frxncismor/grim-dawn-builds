@@ -2,9 +2,15 @@ import assert from 'node:assert/strict';
 import fs, { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { syncBuiltinESMExports } from 'node:module';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 import { mock, test } from 'node:test';
-import { prerenderedPages } from './artifact-pages.mts';
+import {
+  assertRegularArtifact,
+  entriesUnder,
+  htmlPagesOf,
+  prerenderedPages,
+  readArtifactEntries,
+} from './artifact-pages.mts';
 
 function withDir(run: (dir: string) => void): void {
   const dir = mkdtempSync(join(tmpdir(), 'gd-pages-'));
@@ -160,4 +166,25 @@ test('prerenderedPages: exact messages for a linked folder and an empty browser/
     assert.throws(() => prerenderedPages(join(dir, 'browser'), { gate: 'puerta-x' }), {
       message: 'puerta-x: el artefacto es inválido (enlace o entrada no regular: browser/es).',
     });
+  }));
+
+test('only the validation yields entries the derived functions accept (spec008 T005, A-001, FR-001)', () =>
+  withDir((dir) => {
+    page(join(dir, 'browser'), 'index.html');
+    const raw = readArtifactEntries(dir);
+    // Type-level: a raw read cannot be listed or searched without validating it first.
+    // @ts-expect-error htmlPagesOf only accepts the entries `assertRegularArtifact` returns.
+    const unchecked = (): string[] => htmlPagesOf(raw, { gate: 'g' });
+    assert.equal(typeof unchecked, 'function');
+    const validated = assertRegularArtifact(
+      entriesUnder(raw, 'browser'),
+      join(dir, 'browser'),
+      'g',
+    );
+    assert.deepEqual(
+      htmlPagesOf(validated, { gate: 'g' }).map((file) =>
+        file.slice(dir.length + 1).replaceAll(sep, '/'),
+      ),
+      ['browser/index.html'],
+    );
   }));

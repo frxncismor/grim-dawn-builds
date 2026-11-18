@@ -170,11 +170,9 @@ export function assertNoGamePortraits(artifact: string, source: string): void {
   // in the order of the gates it replaces: `browser/` links, page count, links elsewhere, game art.
   const entries = readArtifactEntries(artifact);
   const inBrowser = entriesUnder(entries, 'browser');
-  assertRegularArtifact(inBrowser, browser, gate);
-  htmlPagesOf(inBrowser, { gate });
+  htmlPagesOf(assertRegularArtifact(inBrowser, browser, gate), { gate });
   // The whole-artifact walk uses the same criterion: a linked folder must not dodge the scan (spec007 FR-002).
-  assertRegularArtifact(entries, artifact, gate);
-  const found = entries
+  const found = assertRegularArtifact(entries, artifact, gate)
     .filter((entry) => entry.isFile)
     .map((entry) => entry.path.split('\\').join('/'))
     .filter((path) => /\/assets\/(?:portraits|skill-icons)\//.test(path));
