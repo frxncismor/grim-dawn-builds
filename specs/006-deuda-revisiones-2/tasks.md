@@ -10,7 +10,7 @@ description: 'Tareas de la segunda tanda de deuda de las revisiones de spec004 y
 
 **Formato**: `[ID] [P?] [US?] [Área] descripción` — `[P]` = archivos disjuntos. Cada tarea declara archivos, aceptación y evidencia. **Ninguna casilla `[x]` sin salida real citable** (comando y resultado). Áreas: **IMPL** = implementación (`apps/api`, `packages/*`, `scripts/`, CI); **UI** = `apps/web` y `e2e/`; **DOCS** = solo artefactos SDD, de UI.
 
-> **Estado (2026-11-17)**: 10 tareas (T001–T010): T001–T008 hechas (T008 marcada con la puerta spec002 en curso); T009 abierta y T010 hecha, correcciones de la ronda 1 de la puerta (decisión de Paco P35 = A). Sin fase de setup: dependencias, `packages/domain` y gitleaks ya están listos en los worktrees de la corrida. Sin fase fundacional: T001 va primera por decisión de Paco, no porque bloquee a las demás.
+> **Estado (2026-11-17)**: 10 tareas (T001–T010): T001–T010 hechas (T009–T010: correcciones de la ronda 1 de la puerta, decisión de Paco P35 = A); puerta spec002 ronda 2 en curso. Sin fase de setup: dependencias, `packages/domain` y gitleaks ya están listos en los worktrees de la corrida. Sin fase fundacional: T001 va primera por decisión de Paco, no porque bloquee a las demás.
 
 ---
 
