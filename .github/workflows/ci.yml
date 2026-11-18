@@ -484,7 +484,9 @@ jobs:
 
   # spec005 T017 (US8, FR-033 a FR-036): visual regression of the five public routes at 375/768/1280
   # in EN and ES (30 full-page screenshots), in parallel with `verify`. It builds its OWN `own`
-  # artifact on its own runner (no game PNG is versioned, so `own` is the only deterministic one) and
+  # artifact on its own runner (the references are generated with `own` by the manual
+  # visual-baselines workflow, and `own` is the default and the withdrawal path of constitution
+  # section VII, so no game art is pinned in the screenshots) and
   # never touches the artifact that Lighthouse and axe measure in `verify`. The references live in
   # e2e/visual-baselines/ and are generated only by the manual visual-baselines workflow on Linux.
   visual-regression:

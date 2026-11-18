@@ -73,3 +73,38 @@ test('prerenderedPages: returns every .html, nested, in a stable order', () =>
       ['a/b/index.html', 'es/index.html', 'index.html'],
     );
   }));
+
+test('prerenderedPages: a linked folder under browser/ is invalid, junction included (spec007 T001, FR-001)', () =>
+  withDir((dir) => {
+    mkdirSync(join(dir, 'real'));
+    page(join(dir, 'real'), 'index.html');
+    page(join(dir, 'browser'), 'index.html');
+    try {
+      symlinkSync(join(dir, 'real'), join(dir, 'browser', 'es'), 'junction');
+    } catch {
+      return; // the platform refuses links: nothing to prove here
+    }
+    assert.throws(
+      () => prerenderedPages(join(dir, 'browser'), { gate: 'puerta-x' }),
+      /puerta-x: el artefacto es inválido \(enlace o entrada no regular: browser\/es\)/,
+    );
+  }));
+
+test('prerenderedPages: a linked .html page under browser/ is invalid (spec007 T001, FR-001)', (t) =>
+  withDir((dir) => {
+    page(join(dir, 'real'), 'x.html');
+    page(join(dir, 'browser'), 'index.html');
+    try {
+      symlinkSync(join(dir, 'real', 'x.html'), join(dir, 'browser', 'linked.html'), 'file');
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'EPERM') {
+        t.skip('la plataforma no permite enlaces simbólicos de archivo (EPERM)');
+        return;
+      }
+      throw error;
+    }
+    assert.throws(
+      () => prerenderedPages(join(dir, 'browser'), { gate: 'puerta-x' }),
+      /puerta-x: el artefacto es inválido \(enlace o entrada no regular: browser\/linked\.html\)/,
+    );
+  }));
