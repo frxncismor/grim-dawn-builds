@@ -10,14 +10,23 @@ export interface ArtifactEntry {
   readonly regular: boolean;
 }
 
+declare const rawBrand: unique symbol;
+declare const validatedBrand: unique symbol;
+
+/** What `readArtifactEntries` returns: unchecked, so no derived function accepts it (spec008 T005, A-001). */
+export type RawEntries = readonly ArtifactEntry[] & { readonly [rawBrand]: true };
+
+/** What only `assertRegularArtifact` returns: entries proven regular, the one type `htmlPagesOf` takes. */
+export type ValidatedEntries = readonly ArtifactEntry[] & { readonly [validatedBrand]: true };
+
 /**
  * The single read of an artifact (spec008 T002, S-003 = A-002, FR-001): the only
  * `readdirSync(dir, { recursive: true, withFileTypes: true })` of this module. Every check of a gate
  * derives from the entries it returns, so no gate reads the directory twice nor examines what it
  * did not validate.
  */
-export function readArtifactEntries(dir: string): ArtifactEntry[] {
-  return readdirSync(dir, { recursive: true, withFileTypes: true }).map((entry) => {
+export function readArtifactEntries(dir: string): RawEntries {
+  const entries = readdirSync(dir, { recursive: true, withFileTypes: true }).map((entry) => {
     const path = join(entry.parentPath, entry.name);
     return {
       rel: relative(dir, path).split(sep).join('/'),
@@ -26,13 +35,17 @@ export function readArtifactEntries(dir: string): ArtifactEntry[] {
       regular: !entry.isSymbolicLink() && (entry.isFile() || entry.isDirectory()),
     };
   });
+  return entries as unknown as RawEntries;
 }
 
 /** The entries under `prefix/` (a folder of the walked root), with `rel` relative to that folder. */
-export function entriesUnder(entries: readonly ArtifactEntry[], prefix: string): ArtifactEntry[] {
+export function entriesUnder(entries: RawEntries, prefix: string): RawEntries {
   return entries
     .filter((entry) => entry.rel.startsWith(`${prefix}/`))
-    .map((entry) => ({ ...entry, rel: entry.rel.slice(prefix.length + 1) }));
+    .map((entry) => ({
+      ...entry,
+      rel: entry.rel.slice(prefix.length + 1),
+    })) as unknown as RawEntries;
 }
 
 /**
@@ -40,18 +53,20 @@ export function entriesUnder(entries: readonly ArtifactEntry[], prefix: string):
  * `dir` may be a symlink (folder, file or junction) or anything other than a regular file or folder,
  * because a walk that skips them in silence lets a gate pass on content it never saw. Throws
  * `«<gate>: el artefacto es inválido (enlace o entrada no regular: <dir>/<ruta>)»` on the first one.
- * The message is built here and nowhere else.
+ * The message is built here and nowhere else. Returns the entries as `ValidatedEntries`: the only way
+ * to get the type the derived functions consume (spec008 T005, A-001, FR-001).
  */
 export function assertRegularArtifact(
-  entries: readonly ArtifactEntry[],
+  entries: RawEntries,
   dir: string,
   gate: string,
-): void {
+): ValidatedEntries {
   const bad = entries.find((entry) => !entry.regular);
   if (bad)
     throw new Error(
       `${gate}: el artefacto es inválido (enlace o entrada no regular: ${basename(dir)}/${bad.rel}).`,
     );
+  return entries as unknown as ValidatedEntries;
 }
 
 /** Checks `browser/` exists and is a real directory (not a file or a symlink); fails closed (spec006). */
@@ -68,7 +83,7 @@ export function assertBrowserDir(browserDir: string, gate: string): void {
 
 /** The `.html` pages of a walk, in a stable order, failing closed below `minPages` (default 1). */
 export function htmlPagesOf(
-  entries: readonly ArtifactEntry[],
+  entries: ValidatedEntries,
   options: { readonly gate: string; readonly minPages?: number },
 ): string[] {
   const { gate, minPages = 1 } = options;
@@ -100,7 +115,6 @@ export function prerenderedPages(
 ): string[] {
   const { gate } = options;
   assertBrowserDir(browserDir, gate);
-  const entries = readArtifactEntries(browserDir);
-  assertRegularArtifact(entries, browserDir, gate);
+  const entries = assertRegularArtifact(readArtifactEntries(browserDir), browserDir, gate);
   return htmlPagesOf(entries, options);
 }

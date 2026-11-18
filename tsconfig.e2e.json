@@ -11,6 +11,8 @@
     "playwright.svg.config.ts",
     "playwright.fidelity.config.ts",
     "playwright.visual.config.ts",
+    "scripts/artifact-pages.mts",
+    "scripts/artifact-pages.test.mts",
     "scripts/run-svg-e2e.mts",
     "scripts/serve-svg-preview.mts",
     "scripts/svg-preview.test.mts",

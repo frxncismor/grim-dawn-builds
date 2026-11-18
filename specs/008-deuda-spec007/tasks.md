@@ -10,7 +10,7 @@ description: 'Tareas de la deuda de spec007: erratum DV1/DV2, registro y recorri
 
 **Formato**: `[ID] [P?] [US?] [Área] descripción` — `[P]` = archivos disjuntos. Cada tarea declara archivos, aceptación y evidencia. **Ninguna casilla `[x]` sin salida real citable** (comando y resultado). Áreas: **IMPL** = implementación (`scripts/`); **DOCS** = solo artefactos SDD, de UI.
 
-> **Estado (2026-11-18)**: 4 tareas (T001–T004), todas hechas (T004 con la puerta spec002 en curso). Sin fase de setup: dependencias, `packages/domain` y gitleaks ya están listos en los worktrees de la corrida. Sin fase fundacional: T001 y T002 son independientes; T003 depende de T002 y T004 (cierre) de todas.
+> **Estado (2026-11-18)**: 5 tareas (T001–T005): T001–T004 hechas (T004 con la puerta spec002 en curso, ronda 1 hecha) y T005 abierta (corrección de A-001 de la ronda 1). Sin fase de setup: dependencias, `packages/domain` y gitleaks ya están listos en los worktrees de la corrida. Sin fase fundacional: T001 y T002 son independientes; T003 depende de T002 y T004 (cierre) de todas.
 
 ---
 
@@ -41,11 +41,21 @@ description: 'Tareas de la deuda de spec007: erratum DV1/DV2, registro y recorri
 
 ---
 
+## Fase 4 — Correcciones de la ronda 1 de la puerta (T004)
+
+**Objetivo**: corregir los hallazgos MEDIUM o superiores de la ronda 1 de la puerta; el resto se aplaza en `reviews/deuda.md`. No reabre T001–T004.
+
+- [x] **T005** [US1] [IMPL] Entradas validadas por tipo (A-001 MEDIUM, architecture r1; S-001 y F-001 LOW, mismo tema; FR-001–FR-003) — `scripts/artifact-pages.mts`, `scripts/check-assets.mts` (solo imports y llamadas), `scripts/artifact-pages.test.mts`, `tsconfig.e2e.json` (incluir `scripts/artifact-pages.mts` y su prueba en el typecheck) — Aceptación: `readArtifactEntries` devuelve un tipo marcado `RawEntries` que ninguna función derivada acepta; `assertRegularArtifact` valida y **devuelve** `ValidatedEntries`, y `htmlPagesOf` solo acepta ese tipo, de modo que una puerta nueva no puede listar páginas sin validar; `entriesUnder` recorta entradas crudas y devuelve crudas; mismos mensajes, rutas y orden de comprobaciones (FR-003: enlaces bajo `browser/`, páginas, enlaces en el resto, arte) y una sola lectura (los espías de T002/T003 siguen en 1). Pruebas primero: prueba de tipos con `// @ts-expect-error` (htmlPagesOf sobre lectura sin validar) que hoy falla con TS2578 en `pnpm typecheck:e2e`; las caracterizaciones de mensajes de T002/T003 siguen verdes sin tocarlas. Evidencia: salida de `pnpm typecheck:e2e` en rojo y en verde, `node --import tsx --test scripts/artifact-pages.test.mts scripts/check-assets.test.mts scripts/check-legacy-brand.test.mts`, `pnpm test:scripts` (recuento), `pnpm assets:check`, `pnpm check:boundaries`, `pnpm lint`, `pnpm format:check`, `pnpm lint:md`, `pnpm check:scope`, `node scripts/spec-review.mjs prepare --feature specs/008-deuda-spec007`. Depende de: T002, T003. **Evidencia (T005)**: rojo antes de implementar: `pnpm typecheck:e2e` → `scripts/artifact-pages.test.mts(176,5): error TS2578: Unused '@ts-expect-error' directive.` (más TS2345 por el retorno `void`); verde después: `pnpm typecheck:e2e` sin salida de error; `node --import tsx --test scripts/artifact-pages.test.mts scripts/check-assets.test.mts scripts/check-legacy-brand.test.mts` 37 tests, 36 pass, 0 fail, 1 skipped; `pnpm test:scripts` 830 → 831 tests, 828 pass, 0 fail (3 skipped como antes); `pnpm assets:check` OK (170 entradas), `pnpm check:boundaries` OK (382 archivos), `pnpm lint` y `pnpm format:check` limpios, `pnpm check:scope` OK (269 archivos). Los espías de lectura única (T002/T003) y las caracterizaciones de mensajes siguen verdes sin tocarlas.
+
+**Checkpoint F4**: solo la validación produce el tipo que consumen las derivadas. Aplazados con motivo: `reviews/deuda.md`.
+
+---
+
 ## Dependencias y orden
 
 ```text
 UI:   T001                 ─┐
-IMPL: T002 ── T003         ─┴── T004 (IMPL, cierre)
+IMPL: T002 ── T003         ─┴── T004 (IMPL, cierre) ── T005 (correcciones de la ronda 1)
 ```
 
 - T001 y T002 son independientes y de áreas distintas (marca `P`); T003 espera a T002 (mismo agente de implementación, en serie); T004 espera a las tres.
@@ -66,9 +76,9 @@ IMPL: T002 ── T003         ─┴── T004 (IMPL, cierre)
 
 | Requisito      | Tareas                                                |
 | -------------- | ----------------------------------------------------- |
-| FR-001         | T002                                                  |
+| FR-001         | T002, T005                                            |
 | FR-002         | T003                                                  |
-| FR-003, FR-004 | T002, T003                                            |
+| FR-003, FR-004 | T002, T003, T005                                      |
 | FR-005, FR-006 | T003                                                  |
 | FR-007         | T001                                                  |
 | FR-008         | T001 (ronda 2, entradas 1–2), T004 (S-003, entrada 3) |
