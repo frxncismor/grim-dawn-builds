@@ -73,7 +73,8 @@ export interface BuildCardData {
    * Set when the combination is in the content language (`combinationLang`) and the card is a link.
    * It is never drawn: it only tells the link to point `aria-describedby` at the visible
    * `.build-card__combination` line, which carries its own `lang`, so AT reads it as the link's
-   * description without it entering the accessible name (spec005 T040; a card with no link never has one).
+   * description without it entering the accessible name (spec005 T040). `buildCardData` enforces that
+   * a card with no link never has one (spec007 T002): its line is then exposed with its `lang`.
    */
   readonly srCombination?: string | null;
   readonly facts: readonly string[];
