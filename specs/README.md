@@ -11,6 +11,7 @@ Actualizado el 2026-11-17 (T010 de spec006).
 | [004-rediseno-ui-grim-dawn](004-rediseno-ui-grim-dawn/tasks.md)         | Cerrada (puerta spec002 passed, `f41d844`) | 54 de 54      | 0          |
 | [005-deuda-revisiones](005-deuda-revisiones/tasks.md)                   | Cerrada (puerta spec002 passed, `cc553c3`) | 41 de 41      | 0          |
 | [006-deuda-revisiones-2](006-deuda-revisiones-2/tasks.md)               | Implementada; puerta spec002 en curso      | 8 de 10       | 2          |
+| [007-deuda-revisiones-3](007-deuda-revisiones-3/tasks.md)               | Planificada (2026-11-18)                   | 0 de 6        | 6          |
 
 ## 001-mvp-guias-builds
 
