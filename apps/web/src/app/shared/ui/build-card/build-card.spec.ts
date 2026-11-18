@@ -347,3 +347,60 @@ describe('spec006 T003 (L2): a content-language combination only exists on a lin
     }
   });
 });
+
+describe('spec007 T002 (B-002): buildCardData imposes srCombination only on linked cards', () => {
+  afterEach(() => TestBed.resetTestingModule());
+  const withCombination: BuildCardData = {
+    ...guide,
+    title: 'Chamán + Demoledor',
+    combination: 'Guía editorial en español',
+    combinationLang: 'es',
+  };
+
+  it('a card with no link and a combinationLang has no srCombination and exposes the line with its lang', async () => {
+    const input: BuildCardData = { ...withCombination, href: null, external: null };
+    const data = buildCardData(input);
+    expect(data.srCombination ?? null).toBeNull();
+    expect(data.srText).not.toContain('Guía editorial');
+    const el = await render(input);
+    const line = el.querySelector('.build-card__combination')!;
+    expect(line.hasAttribute('aria-hidden')).toBe(false);
+    expect(line.getAttribute('lang')).toBe('es');
+    expect(line.textContent).toContain('Guía editorial en español');
+  });
+
+  it('an external card with a URL keeps srCombination and hides the line it describes', async () => {
+    const input: BuildCardData = {
+      ...withCombination,
+      href: null,
+      external: { url: 'https://example.invalid/guia', author: null, note: null },
+    };
+    expect(buildCardData(input).srCombination).toBe('. Guía editorial en español');
+    const el = await render(input);
+    const line = el.querySelector('.build-card__combination')!;
+    expect(line.getAttribute('aria-hidden')).toBe('true');
+    expect(el.querySelector('a')!.getAttribute('aria-describedby')).toBe(line.id);
+  });
+
+  it('an external card with url null behaves like a card with no link', async () => {
+    const input: BuildCardData = {
+      ...withCombination,
+      href: null,
+      external: { url: null, author: null, note: null },
+    };
+    expect(buildCardData(input).srCombination ?? null).toBeNull();
+    const el = await render(input);
+    expect(el.querySelector('.build-card__combination')!.hasAttribute('aria-hidden')).toBe(false);
+  });
+
+  it('a linked card keeps its srCombination and its hidden line', async () => {
+    expect(buildCardData(withCombination).srCombination).toBe('. Guía editorial en español');
+    const el = await render(withCombination);
+    expect(el.querySelector('.build-card__combination')!.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('a combination in the UI language keeps its hidden line (it is in srText)', async () => {
+    const el = await render({ ...guide, combination: 'Shaman + Demolitionist' });
+    expect(el.querySelector('.build-card__combination')!.getAttribute('aria-hidden')).toBe('true');
+  });
+});
