@@ -17,3 +17,17 @@ Decisión del principal (2026-11-18): de la ronda 1 de la puerta se corrige A-00
    - **Plan**: extraer a un ayudante común de pruebas en la próxima spec de deuda que toque esas suites.
 
 Resueltos por T005 (no son deuda): S-001 y F-001 (mismo tema que A-001).
+
+## Ronda 2 de la puerta T004
+
+La ronda 2 dio 0 CRITICAL, 0 HIGH y 0 MEDIUM. Por la regla del principal para spec008, los LOW abiertos se aplazan con motivo y la puerta se cierra como `passed`. Tarea de referencia: T004. Por prioridad:
+
+1. **C-101 = A-101 = F-101 = S-101** (LOW): `scripts/check-assets.mts` y `scripts/check-legacy-brand.mts` no entran en ningún `tsc` (solo `artifact-pages.mts` y su prueba están en `tsconfig.e2e.json`), así que la barrera `RawEntries`/`ValidatedEntries` no se comprueba en el consumidor.
+   - **Motivo del aplazamiento**: hoy el código es correcto; security r2 lo comprobó con `tsc` y una mutación que da TS2345. El artefacto es local y lo genera el propio build.
+   - **Plan**: añadirlos al typecheck en la próxima tarea que toque `scripts/`.
+2. **B-101** (LOW): `specs/008-deuda-spec007/tasks.md:13` dice «T005 abierta» aunque T005 está `[x]`.
+   - **Motivo del aplazamiento**: corregirlo cambia el snapshot de la puerta.
+   - **Plan**: se corrige fuera del snapshot en la próxima tarea SDD.
+3. **B-102** (LOW): `quickstart.md` no recoge el verify posterior a T005.
+   - **Motivo del aplazamiento**: editar `quickstart.md` cambia el snapshot de la puerta; la evidencia se registra aquí.
+   - **Evidencia** (ejecutada por el orquestador sobre `48f4eec`): `pnpm verify` con exit 0 y `verify OK (local)`; `check:performance OK (141/141 comprobaciones)`; `/tier-list` 111 422 / 112 000 B.
