@@ -454,6 +454,21 @@ describe('gd-build-page', () => {
     expect(root.textContent).toContain('Golpe Primigenio');
   });
 
+  it('warns in the skill-tree placeholder that the interactive tree requires JavaScript, as the devotion one does (spec009 T001)', async () => {
+    const server = await createFixture(publicContent, { platform: 'server' });
+    await renderDeferred(server, DeferBlockState.Placeholder);
+    const notice = (server.nativeElement as HTMLElement).querySelector(
+      '#habilidades [data-no-script]',
+    );
+    expect(notice?.textContent).toContain('requires JavaScript');
+    // With JavaScript running the notice is not needed and is not shown.
+    const browser = await createFixture(publicContent);
+    await renderDeferred(browser, DeferBlockState.Placeholder);
+    expect(
+      (browser.nativeElement as HTMLElement).querySelector('#habilidades [data-no-script]'),
+    ).toBeNull();
+  });
+
   it('says the guide is only in Spanish on the English page and marks the body lang="es" (T023, FR-038)', async () => {
     const { root } = await render();
     expect(root.querySelector('[data-lang-notice]')?.textContent).toContain(

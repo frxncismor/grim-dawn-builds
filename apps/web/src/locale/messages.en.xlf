@@ -346,6 +346,13 @@
           <context context-type="linenumber">43,45</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="buildPage.skillsJavascriptRequired" datatype="html">
+        <source>The interactive skill tree requires JavaScript; the skills of each mastery are listed below.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/build/build.page.html</context>
+          <context context-type="linenumber">34,37</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="buildPage.devotions" datatype="html">
         <source>Devotion path</source>
         <context-group purpose="location">
