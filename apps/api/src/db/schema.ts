@@ -324,12 +324,45 @@ export const builds = pgTable(
     footer_disclaimer: text('footer_disclaimer').notNull(),
     hero_callout_title: text('hero_callout_title').notNull(),
     hero_callout_body: text('hero_callout_body').array().notNull(),
+    // Spec 009 editorial fields (data-model.md). Shape CHECKs mirror `BuildContentSchema`; the
+    // referential rules (hotbar/key_devotions inside the guide) stay in the domain and the write path.
+    intro: text('intro'),
+    stage: text('stage').notNull().default('ambas'),
+    changelog: jsonb('changelog')
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    pros: text('pros')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    cons: text('cons')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    hotbar: text('hotbar')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    key_devotions: text('key_devotions')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     origin: originEnum('origin').notNull(),
     ...timestamps(),
   },
   (t) => [
     index('builds_damage_types_gin').using('gin', t.damage_types),
     index('builds_content_tags_gin').using('gin', t.content_tags),
+    check('builds_intro_ck', sql`${t.intro} IS NULL OR char_length(${t.intro}) BETWEEN 1 AND 400`),
+    check('builds_stage_ck', sql`${t.stage} IN ('subida', 'final', 'ambas')`),
+    check(
+      'builds_changelog_ck',
+      sql`build_changelog_valid(${t.changelog}, to_char(${t.published_at}, 'YYYY-MM-DD'))`,
+    ),
+    check('builds_pros_ck', sql`build_texts_valid(${t.pros}, 5, 120)`),
+    check('builds_cons_ck', sql`build_texts_valid(${t.cons}, 5, 120)`),
+    check('builds_hotbar_ck', sql`build_slugs_valid(${t.hotbar}, 10)`),
+    check('builds_key_devotions_ck', sql`build_slugs_valid(${t.key_devotions}, 6)`),
   ],
 );
 

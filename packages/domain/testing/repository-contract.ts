@@ -97,6 +97,13 @@ export function contractDoc(slug: string, overrides: Partial<BuildInput> = {}): 
     video_url: null,
     footer_disclaimer: 'Contenido sintético; no es una recomendación de juego.',
     hero_callout_title: 'Fixture de contrato',
+    intro: 'Introducción propia de la guía.',
+    stage: 'ambas',
+    changelog: [],
+    pros: [],
+    cons: [],
+    hotbar: [],
+    key_devotions: [],
     hero_callout_body: ['Solo utilizado por pruebas locales.'],
     masteries: [{ slug: 'chaman', name_es: 'Chamán', name_en: 'Shaman', role_text: 'Daño' }],
     skill_nodes: [
@@ -320,6 +327,13 @@ export function runContentRepositoryContract<R extends ContentRepositoryPort>(
           'sections_meta',
           'masteries',
           'hero_callout_body',
+          'intro',
+          'stage',
+          'changelog',
+          'pros',
+          'cons',
+          'hotbar',
+          'key_devotions',
         ] as const) {
           expect(build?.[field], field).toEqual(original[field]);
         }

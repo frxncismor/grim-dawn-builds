@@ -21,6 +21,13 @@
   "footer_disclaimer": "Contenido sintetico; no publicar.",
   "hero_callout_title": "No publicar",
   "hero_callout_body": ["Fixture adversarial sintetico."],
+  "intro": null,
+  "stage": "ambas",
+  "changelog": [],
+  "pros": [],
+  "cons": [],
+  "hotbar": [],
+  "key_devotions": [],
   "masteries": [
     {
       "slug": "maestria-0",

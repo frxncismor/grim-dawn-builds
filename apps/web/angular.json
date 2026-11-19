@@ -84,6 +84,10 @@
                   "glob": "*.svg",
                   "input": "src/assets/icons",
                   "output": "assets/icons"
+                },
+                {
+                  "glob": "**/*",
+                  "input": ".dev-assets/browser"
                 }
               ],
               "optimization": false,

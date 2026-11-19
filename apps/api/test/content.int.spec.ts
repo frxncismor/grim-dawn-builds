@@ -1,6 +1,14 @@
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import pg from 'pg';
@@ -229,6 +237,196 @@ suite('HTTP content contract on real PostgreSQL public views (T-060)', SUITE_OPT
     expect(JSON.stringify(tier)).not.toMatch(
       /permission_ref|rights_confirmed|is_placeholder|rights_notes|reviewed_by/,
     );
+  });
+
+  const EDITORIAL = [
+    'intro',
+    'stage',
+    'changelog',
+    'pros',
+    'cons',
+    'hotbar',
+    'key_devotions',
+  ] as const;
+
+  it('spec009 T006: the seven editorial fields round-trip identically through seed, view and API', async () => {
+    const input = await readSeedFixtures(join(root, 'fixtures/content'));
+    const source = input.builds[0]!;
+    expect(source.changelog.length).toBeGreaterThan(0);
+    const repo = await factory(
+      input.builds,
+      { includeDrafts: false },
+      { authors: input.authors, tierLists: input.tierLists },
+    );
+    const served = (await repo.findBuild(source.slug))!;
+    for (const field of EDITORIAL) expect(served[field], field).toEqual(source[field]);
+    const listed = (await repo.listBuilds()).find((build) => build.slug === source.slug)!;
+    for (const field of EDITORIAL) expect(listed[field], field).toEqual(source[field]);
+  });
+
+  it('spec009 T006: the database rejects editorial values outside the data-model ranges', async () => {
+    const document = contractDoc('editorial-ranges', {
+      review_state: 'publicado',
+      rights_status: 'own_original',
+      rights_confirmed_by: 'Fixture',
+      rights_confirmed_on: '2026-11-09',
+      reviewed_by: 'Fixture',
+      published_at: '2026-11-09',
+    });
+    await factory([document], { includeDrafts: false });
+    const current = resources.at(-1)!;
+    const writer = new pg.Client({
+      host: '127.0.0.1',
+      port,
+      user: 'postgres',
+      database: current.database,
+    });
+    await writer.connect();
+    try {
+      const rejected: [string, string, unknown][] = [
+        ['builds_intro_ck', 'intro', 'a'.repeat(401)],
+        ['builds_intro_ck', 'intro', ''],
+        ['builds_stage_ck', 'stage', 'mitad'],
+        ['builds_pros_ck', 'pros', ['a', 'b', 'c', 'd', 'e', 'f']],
+        ['builds_pros_ck', 'pros', ['a'.repeat(121)]],
+        ['builds_cons_ck', 'cons', ['']],
+        ['builds_hotbar_ck', 'hotbar', Array.from({ length: 11 }, (_, i) => `n${i}`)],
+        ['builds_hotbar_ck', 'hotbar', ['a', 'a']],
+        ['builds_hotbar_ck', 'hotbar', ['No Slug']],
+        ['builds_key_devotions_ck', 'key_devotions', Array.from({ length: 7 }, (_, i) => `c${i}`)],
+        ['builds_changelog_ck', 'changelog', JSON.stringify({ date: '2026-11-10', text: 'x' })],
+        ['builds_changelog_ck', 'changelog', JSON.stringify([{ date: '2026-11-10', text: '' }])],
+        [
+          'builds_changelog_ck',
+          'changelog',
+          JSON.stringify([{ date: '2026-11-10', text: 'a'.repeat(201) }]),
+        ],
+        [
+          'builds_changelog_ck',
+          'changelog',
+          JSON.stringify([{ date: '10/11/2026', text: 'fecha mal formada' }]),
+        ],
+        [
+          'builds_changelog_ck',
+          'changelog',
+          JSON.stringify([{ date: '2026-11-10', text: 'x', extra: 1 }]),
+        ],
+        [
+          'builds_changelog_ck',
+          'changelog',
+          JSON.stringify([
+            { date: '2026-11-10', text: 'repetida' },
+            { date: '2026-11-10', text: 'repetida' },
+          ]),
+        ],
+        [
+          'builds_changelog_ck',
+          'changelog',
+          JSON.stringify([
+            { date: '2026-11-10', text: 'ascendente' },
+            { date: '2026-11-11', text: 'ascendente' },
+          ]),
+        ],
+        [
+          'builds_changelog_ck',
+          'changelog',
+          JSON.stringify([{ date: '2026-11-08', text: 'anterior a published_at' }]),
+        ],
+      ];
+      for (const [constraint, column, value] of rejected) {
+        await expect(
+          writer.query(`UPDATE builds SET ${column}=$1 WHERE slug=$2`, [value, document.slug]),
+          `${column} ${JSON.stringify(value).slice(0, 40)}`,
+        ).rejects.toMatchObject({ constraint });
+      }
+      await writer.query(
+        'UPDATE builds SET intro=$1, stage=$2, changelog=$3, pros=$4, cons=$5, hotbar=$6, key_devotions=$7 WHERE slug=$8',
+        [
+          'a'.repeat(400),
+          'subida',
+          JSON.stringify([
+            { date: '2026-11-12', text: 'b'.repeat(200) },
+            { date: '2026-11-09', text: 'límite: igual a published_at' },
+          ]),
+          ['a', 'b', 'c', 'd', 'e'],
+          ['x'.repeat(120)],
+          Array.from({ length: 10 }, (_, i) => `n${i}`),
+          Array.from({ length: 6 }, (_, i) => `c${i}`),
+          document.slug,
+        ],
+      );
+    } finally {
+      await writer.end();
+    }
+  });
+
+  it('spec009 T006: 0015 applies over the previous database and gives existing rows neutral values', async () => {
+    const migrations = join(root, 'apps/api/drizzle');
+    const journal = JSON.parse(readFileSync(join(migrations, 'meta/_journal.json'), 'utf8')) as {
+      entries: { idx: number; tag: string }[];
+    };
+    const target = journal.entries.find((entry) => entry.tag.startsWith('0015_'))!;
+    const previous = mkdtempSync(join(work!, 'previous-'));
+    mkdirSync(join(previous, 'meta'));
+    for (const entry of journal.entries.filter((e) => e.idx < target.idx))
+      copyFileSync(join(migrations, `${entry.tag}.sql`), join(previous, `${entry.tag}.sql`));
+    writeFileSync(
+      join(previous, 'meta/_journal.json'),
+      JSON.stringify({ ...journal, entries: journal.entries.filter((e) => e.idx < target.idx) }),
+    );
+    const database = `gd_content_prev_${++serial}`;
+    await admin!.query(`CREATE DATABASE ${database}`);
+    const client = new pg.Client({ host: '127.0.0.1', port, user: 'postgres', database });
+    await client.connect();
+    try {
+      await client.query(`GRANT CREATE ON DATABASE ${database} TO migrator;
+        GRANT USAGE, CREATE ON SCHEMA public TO migrator; SET ROLE migrator;`);
+      await migrate(drizzle(client), { migrationsFolder: previous });
+      await client.query('RESET ROLE');
+      await client.query(`
+        INSERT INTO authors (slug, display_name, is_placeholder, origin) VALUES ('autor-previo', 'Autor previo', false, 'fixture');
+        INSERT INTO masteries (slug, name_es, name_en, accent_token, fallback_icon)
+          VALUES ('chaman-previo', 'Chamán', 'Shaman', 'storm', 'x.svg');
+        INSERT INTO builds (slug, title, title_a_mastery_id, eyebrow, subtitle, summary, damage_types,
+          playstyle, content_tags, game_version, author_id, review_state, rights_status,
+          rights_confirmed_by, rights_confirmed_on, reviewed_by, published_at, footer_disclaimer,
+          hero_callout_title, hero_callout_body, origin)
+        SELECT 'guia-previa', 'Guía previa', m.id, 'E', 'S', 'R', ARRAY['fisico']::damage_type[], 'melee',
+          ARRAY['campana']::content_tag[], '1.2', a.id, 'borrador', 'own_original', 'F', CURRENT_DATE,
+          'R', CURRENT_DATE, 'A', 'L', ARRAY['D'], 'fixture'
+        FROM masteries m, authors a WHERE m.slug='chaman-previo' AND a.slug='autor-previo';
+        INSERT INTO sources (slug, kind, title, author_name, license_note, retrieved_on, notes, origin)
+        VALUES ('fuente-previa', 'original', 'Fuente previa', 'Autor previo', 'Prueba', CURRENT_DATE, '', 'fixture');
+        INSERT INTO build_sources (build_id, source_id, role)
+        SELECT b.id, s.id, 'principal' FROM builds b, sources s WHERE b.slug='guia-previa' AND s.slug='fuente-previa';
+        UPDATE builds SET review_state='publicado' WHERE slug='guia-previa'`);
+      await client.query('SET ROLE migrator');
+      await migrate(drizzle(client), { migrationsFolder: migrations });
+      await client.query('RESET ROLE');
+      const row = await client.query(
+        `SELECT intro, stage, changelog, pros, cons, hotbar, key_devotions FROM builds WHERE slug='guia-previa'`,
+      );
+      expect(row.rows[0]).toEqual({
+        intro: null,
+        stage: 'ambas',
+        changelog: [],
+        pros: [],
+        cons: [],
+        hotbar: [],
+        key_devotions: [],
+      });
+      const view = await client.query(
+        `SELECT document FROM v_public_build_documents WHERE slug='guia-previa'`,
+      );
+      const document = view.rows[0].document as Record<string, unknown>;
+      expect(document['intro']).toBeNull();
+      expect(document['stage']).toBe('ambas');
+      for (const field of ['changelog', 'pros', 'cons', 'hotbar', 'key_devotions'])
+        expect(document[field], field).toEqual([]);
+    } finally {
+      await client.end();
+      await admin!.query(`DROP DATABASE ${database} WITH (FORCE)`);
+    }
   });
 
   it('FR-16: serves approved asset descriptors and never pending art or private evidence', async () => {

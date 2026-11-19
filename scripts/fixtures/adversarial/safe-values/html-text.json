@@ -21,6 +21,13 @@
   "footer_disclaimer": "<svg onload=alert(1)>",
   "hero_callout_title": "No publicar",
   "hero_callout_body": ["&lt;script&gt;", "javascript:alert(1)"],
+  "intro": null,
+  "stage": "ambas",
+  "changelog": [],
+  "pros": [],
+  "cons": [],
+  "hotbar": [],
+  "key_devotions": [],
   "masteries": [
     {
       "slug": "chaman",

@@ -253,6 +253,8 @@ const DevotionStepSchema = z
     }
   });
 
+const ChangelogEntrySchema = z.object({ date: isoDate, text: text.max(200) }).strict();
+
 const BuildContentSchema = z
   .object({
     slug,
@@ -291,6 +293,13 @@ const BuildContentSchema = z
     footer_disclaimer: text,
     hero_callout_title: text,
     hero_callout_body: z.array(text),
+    intro: text.max(400).nullable(),
+    stage: z.enum(['subida', 'final', 'ambas']),
+    changelog: z.array(ChangelogEntrySchema),
+    pros: z.array(text.max(120)).max(5),
+    cons: z.array(text.max(120)).max(5),
+    hotbar: z.array(slug).max(10),
+    key_devotions: z.array(slug).max(6),
     masteries: z.array(BuildMasterySchema).min(1).max(2),
     priorities: z.array(PrioritySchema),
     skill_nodes: z.array(SkillNodeSchema),
@@ -310,6 +319,37 @@ type GuideReferences = z.infer<typeof BuildContentSchema> & {
   author: Pick<z.infer<typeof AuthorSchema>, 'slug'>;
   sources: Pick<z.infer<typeof SourceSchema>, 'slug'>[];
 };
+
+/** Editorial fields of spec 009 (data-model.md): changelog order and hotbar/key_devotions references. */
+function validateEditorial(
+  build: GuideReferences,
+  nodeSlugs: ReadonlySet<string>,
+  constellations: ReadonlySet<string>,
+  ctx: Ctx,
+): void {
+  const dates = build.changelog.map((entry) => entry.date);
+  if (new Set(dates).size !== dates.length)
+    fail(ctx, ['changelog'], 'fechas de changelog repetidas');
+  else if (dates.some((date, index) => index > 0 && date > dates[index - 1]!))
+    fail(ctx, ['changelog'], 'changelog debe ir en orden descendente');
+  if (build.published_at) {
+    const published = build.published_at;
+    build.changelog.forEach((entry, index) => {
+      if (entry.date < published)
+        fail(ctx, ['changelog', index, 'date'], 'changelog anterior a published_at');
+    });
+  }
+  if (new Set(build.hotbar).size !== build.hotbar.length)
+    fail(ctx, ['hotbar'], 'hotbar con slugs repetidos');
+  build.hotbar.forEach((value, index) => {
+    if (!nodeSlugs.has(value)) fail(ctx, ['hotbar', index], 'nodo de guía desconocido');
+  });
+  if (new Set(build.key_devotions).size !== build.key_devotions.length)
+    fail(ctx, ['key_devotions'], 'key_devotions con slugs repetidos');
+  build.key_devotions.forEach((value, index) => {
+    if (!constellations.has(value)) fail(ctx, ['key_devotions', index], 'constelación desconocida');
+  });
+}
 
 function validateGuide(build: GuideReferences, ctx: Ctx): void {
   for (const field of ['masteries', 'skill_nodes', 'constellations', 'sources'] as const) {
@@ -357,6 +397,7 @@ function validateGuide(build: GuideReferences, ctx: Ctx): void {
     );
   });
   const constellations = new Set(build.constellations.map((constellation) => constellation.slug));
+  validateEditorial(build, nodeSlugs, constellations, ctx);
   build.devotion_steps.forEach((step, index) => {
     if (step.constellation_slug && !constellations.has(step.constellation_slug))
       fail(ctx, ['devotion_steps', index, 'constellation_slug'], 'constelación desconocida');

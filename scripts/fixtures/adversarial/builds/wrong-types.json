@@ -21,6 +21,13 @@
   "footer_disclaimer": "Contenido sintetico; no publicar.",
   "hero_callout_title": "No publicar",
   "hero_callout_body": "texto",
+  "intro": null,
+  "stage": "ambas",
+  "changelog": [],
+  "pros": [],
+  "cons": [],
+  "hotbar": [],
+  "key_devotions": [],
   "masteries": [
     {
       "slug": "chaman",

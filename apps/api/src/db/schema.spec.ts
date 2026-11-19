@@ -208,6 +208,19 @@ describe('database schema: nullability and defaults', () => {
     expect(column('builds', 'locale').default).toBe('es');
   });
 
+  it('spec009: declares the editorial columns with neutral defaults for existing rows', () => {
+    expect(column('builds', 'intro').notNull).toBe(false);
+    expect(column('builds', 'stage').notNull).toBe(true);
+    expect(column('builds', 'stage').default).toBe('ambas');
+    for (const col of ['changelog', 'pros', 'cons', 'hotbar', 'key_devotions']) {
+      expect(column('builds', col).notNull, col).toBe(true);
+      expect(column('builds', col).hasDefault, col).toBe(true);
+    }
+    expect(column('builds', 'changelog').columnType).toBe('PgJsonb');
+    for (const col of ['pros', 'cons', 'hotbar', 'key_devotions'])
+      expect(column('builds', col).columnType, col).toBe('PgArray');
+  });
+
   it('keeps review and publication metadata nullable until review', () => {
     for (const col of [
       'rights_notes',
@@ -451,16 +464,33 @@ describe('database schema: indexes', () => {
   });
 });
 
+const EDITORIAL_CHECKS = [
+  'builds_intro_ck',
+  'builds_stage_ck',
+  'builds_changelog_ck',
+  'builds_pros_ck',
+  'builds_cons_ck',
+  'builds_hotbar_ck',
+  'builds_key_devotions_ck',
+];
+
 describe('database schema: scope boundaries', () => {
   it('declares no publication, asset or tier-entry CHECK gates (those are T-055)', () => {
     // The mastery catalog (spec 003, T008) declares its structural CHECKs; see schema-parity.spec.ts.
     const CATALOG_TABLES = ['mastery_combinations', 'mastery_trees', 'catalog_skill_nodes'];
     for (const name of EXPECTED_TABLES.filter((n) => !CATALOG_TABLES.includes(n))) {
       expect(
-        configOf(name).checks.map((c) => c.name),
+        configOf(name)
+          .checks.map((c) => c.name)
+          // Spec 009 T006: `builds` carries only the shape CHECKs of its editorial fields.
+          .filter((check) => !(name === 'builds' && EDITORIAL_CHECKS.includes(check))),
         name,
       ).toEqual([]);
     }
+  });
+
+  it('declares exactly the shape CHECKs of the spec 009 editorial fields on builds', () => {
+    expect(configOf('builds').checks.map((c) => c.name)).toEqual(EDITORIAL_CHECKS);
   });
 
   it('declares only the structural CHECK that orders each mastery pair', () => {
