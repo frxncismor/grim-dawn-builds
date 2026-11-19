@@ -26,6 +26,12 @@
     <ng-template #skillsFallback>
       <section class="build-block" id="habilidades" aria-labelledby="habilidades-title">
         <h2 id="habilidades-title" i18n="@@buildPage.skills">Skills</h2>
+        @if (!browserReady()) {
+          <p class="fallback-role" data-no-script i18n="@@buildPage.skillsJavascriptRequired">
+            The interactive skill tree requires JavaScript; the skills of each mastery are listed
+            below.
+          </p>
+        }
         @for (slot of treeSlots(); track slot.treeId) {
           <section class="fallback-tree" [attr.aria-labelledby]="slot.treeId + '-fallback-title'">
             <h3 [id]="slot.treeId + '-fallback-title'">

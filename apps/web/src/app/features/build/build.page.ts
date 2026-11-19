@@ -7,9 +7,11 @@ import {
   input,
   linkedSignal,
   LOCALE_ID,
+  PLATFORM_ID,
+  afterNextRender,
   signal,
 } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
+import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import type { LinkOnlyMetadata, PublicBuild } from '@gd/domain';
 import { SeoService, type JsonLdRecord } from '../../core/seo/seo.service';
@@ -127,7 +129,13 @@ export class BuildPage {
   );
   readonly hasVideo = computed(() => (this.content().video_url ?? '').trim().length > 0);
 
+  /** False in the prerendered HTML and until the browser has rendered: the no-JS notices rely on it. */
+  readonly browserReady = signal(false);
+
   constructor() {
+    if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      afterNextRender(() => this.browserReady.set(true));
+    }
     inject(DeferredStyles).ensure();
     effect(() => {
       const content = this.content();
